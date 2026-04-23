@@ -47,11 +47,12 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
     [ cls "min-h-screen bg-[#0a0a0a] text-white font-mono relative" ]
-    [ -- Background vortex
-      HH.div [ cls "vortex fixed top-[-200px] right-[-200px] opacity-50" ] []
-    , HH.div [ cls "vortex fixed bottom-[-400px] left-[-400px] opacity-30" ] []
+    [ -- Background vortex (hidden on mobile)
+      HH.div [ cls "vortex fixed top-[-200px] right-[-200px] opacity-50 hidden md:block" ] []
+    , HH.div [ cls "vortex fixed bottom-[-400px] left-[-400px] opacity-30 hidden md:block" ] []
     , nav
     , hero state
+    , diagnostic
     , socialProof
     , logos
     , problem
@@ -86,14 +87,15 @@ render state =
 nav :: forall m. H.ComponentHTML Action () m
 nav =
   HH.nav
-    [ cls "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 py-5 border-b border-white/[0.08] bg-[#0a0a0a]/90 backdrop-blur-sm" ]
+    [ cls "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-10 py-4 md:py-5 border-b border-white/[0.08] bg-[#0a0a0a]/90 backdrop-blur-sm" ]
     [ HH.a
         [ HP.href "#"
-        , cls "text-[13px] font-medium tracking-[2px] hover:text-white/80 transition-colors glitch-rare"
+        , cls "text-[12px] md:text-[13px] font-medium tracking-[2px] hover:text-white/80 transition-colors glitch-rare"
         ]
         [ HH.text "REINIT // DX" ]
+    -- Desktop nav links
     , HH.div
-        [ cls "flex items-center gap-8" ]
+        [ cls "hidden md:flex items-center gap-8" ]
         [ navLink "#problem" "PROBLEM"
         , navLink "#services" "SERVICES"
         , navLink "#pricing" "PRICING"
@@ -108,6 +110,12 @@ nav =
             ]
             [ HH.text "SUBMIT PROJECT" ]
         ]
+    -- Mobile: just CTA button
+    , HH.a
+        [ HP.href "#submit"
+        , cls "md:hidden px-3 py-2 rounded text-[10px] tracking-[1px] bg-white text-[#0a0a0a]"
+        ]
+        [ HH.text "SUBMIT" ]
     ]
 
 navLink :: forall w i. String -> String -> HH.HTML w i
@@ -125,27 +133,27 @@ navLink href label =
 hero :: forall m. State -> H.ComponentHTML Action () m
 hero state =
   HH.section
-    [ cls "pt-32 pb-24 px-10" ]
+    [ cls "pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-10" ]
     [ HH.div
         [ cls "max-w-4xl" ]
         [ HH.p
-            [ cls "text-[11px] tracking-[4px] text-white/30 mb-6" ]
+            [ cls "text-[10px] md:text-[11px] tracking-[3px] md:tracking-[4px] text-white/30 mb-4 md:mb-6" ]
             [ HH.text "/// AI-GENERATED CODE CLEANUP" ]
         , HH.h1
-            [ cls "text-[48px] md:text-[64px] font-normal leading-[1.1] mb-6" ]
+            [ cls "text-[32px] md:text-[64px] font-normal leading-[1.1] mb-4 md:mb-6" ]
             [ HH.span [ cls "glow-1" ] [ HH.text "Your AI broke it." ]
             , HH.br_
             , HH.span [ cls "text-white/40 glow-2" ] [ HH.text "We fix it." ]
             ]
         , HH.p
-            [ cls "text-[18px] text-white/40 max-w-xl mb-8 leading-relaxed" ]
+            [ cls "text-[15px] md:text-[18px] text-white/40 max-w-xl mb-6 md:mb-8 leading-relaxed" ]
             [ HH.text "Vibe-coded apps cleaned up by engineers who understand what the AI was "
             , HH.span [ cls "italic" ] [ HH.text "trying" ]
             , HH.text " to do. Same-day turnaround. Flat rate."
             ]
-        -- CTA input right in hero
+        -- CTA input - stacked on mobile
         , HH.form
-            [ cls "flex gap-3 max-w-lg mb-4"
+            [ cls "flex flex-col md:flex-row gap-3 max-w-lg mb-4"
             , HE.onSubmit Submit
             ]
             [ HH.input
@@ -162,17 +170,151 @@ hero state =
                 [ HH.text "GET QUOTE" ]
             ]
         , HH.p
-            [ cls "text-[11px] text-white/20 mb-10" ]
+            [ cls "text-[10px] md:text-[11px] text-white/20 mb-8 md:mb-10" ]
             [ HH.text "quoted in < 1 hour · fixed in < 24 hours · flat rate" ]
         , HH.div
             [ cls "flex gap-4" ]
             [ HH.a
                 [ HP.href "#services"
-                , cls "px-5 py-2 rounded text-[11px] tracking-[1px] border border-white/15 text-white/50 hover:border-white/30 hover:text-white/80 transition-all"
+                , cls "px-4 md:px-5 py-2 rounded text-[10px] md:text-[11px] tracking-[1px] border border-white/15 text-white/50 hover:border-white/30 hover:text-white/80 transition-all"
                 ]
                 [ HH.text "SEE HOW IT WORKS" ]
             ]
         ]
+    ]
+
+-- ============================================================
+-- DIAGNOSTIC DEMO
+-- ============================================================
+
+diagnostic :: forall w i. HH.HTML w i
+diagnostic =
+  HH.section
+    [ HP.id "diagnostic"
+    , cls "py-12 md:py-20 px-4 md:px-10 border-t border-white/[0.08] bg-white/[0.02]"
+    ]
+    [ HH.div
+        [ cls "max-w-5xl mx-auto" ]
+        [ -- Pre-scan hero state
+          HH.div
+            [ HP.id "diag-hero"
+            , cls ""
+            ]
+            [ HH.p
+                [ cls "text-[10px] md:text-[11px] tracking-[3px] md:tracking-[4px] text-white/30 mb-4" ]
+                [ HH.text "/// LIVE DIAGNOSTIC" ]
+            , HH.h2
+                [ cls "text-[24px] md:text-[32px] font-normal mb-3" ]
+                [ HH.text "Watch us diagnose it. In real time." ]
+            , HH.p
+                [ cls "text-[13px] md:text-[14px] text-white/40 mb-6" ]
+                [ HH.text "Paste any repo. See what we find." ]
+            , HH.div
+                [ cls "flex flex-col md:flex-row gap-3 max-w-lg" ]
+                [ HH.input
+                    [ HP.type_ HP.InputText
+                    , HP.id "diag-repo-input"
+                    , HP.value "github.com/acme/vibe-coded-saas"
+                    , cls "flex-1 px-4 py-3 rounded text-[12px] md:text-[13px] bg-white/5 border border-white/15 focus:border-white/30 focus:outline-none"
+                    ]
+                , HH.button
+                    [ HP.type_ HP.ButtonButton
+                    , HP.id "diag-go-btn"
+                    , cls "px-6 py-3 rounded text-[11px] md:text-[12px] tracking-[1px] font-medium bg-white text-[#0a0a0a] hover:bg-white/90 transition-all"
+                    ]
+                    [ HH.text "ANALYZE" ]
+                ]
+            ]
+        -- Post-scan state (hidden by default, shown by JS)
+        , HH.div
+            [ HP.id "diag-scan"
+            , cls ""
+            ]
+            [ -- Stats row
+              HH.div
+                [ cls "grid grid-cols-4 gap-2 md:gap-4 mb-4" ]
+                [ diagStat "diag-sf" "FILES" "0"
+                , diagStat "diag-sl" "LINES" "0"
+                , diagStatColored "diag-si" "ISSUES" "0" "#E24B4A"
+                , diagStatColored "diag-ss" "SEVERITY" "--" "rgba(255,255,255,0.2)"
+                ]
+            -- Terminal + findings columns
+            , HH.div
+                [ cls "flex flex-col md:flex-row gap-4" ]
+                [ -- Terminal
+                  HH.div
+                    [ cls "flex-1 md:flex-[5]" ]
+                    [ HH.div
+                        [ cls "flex items-center gap-2 mb-2" ]
+                        [ HH.div [ HP.id "diag-dot", cls "w-2 h-2 rounded-full bg-[#5DCAA5] diag-blink" ] []
+                        , HH.span [ HP.id "diag-stxt", cls "text-[11px] text-[#5DCAA5]" ] [ HH.text "Ready" ]
+                        ]
+                    , HH.div
+                        [ HP.id "diag-term"
+                        , cls "diag-terminal bg-[#111] border border-white/10 rounded p-4 text-[11px] leading-relaxed"
+                        ]
+                        []
+                    ]
+                -- Findings panel
+                , HH.div
+                    [ HP.id "diag-findings-panel"
+                    , cls "flex-1 md:flex-[4]"
+                    ]
+                    [ HH.p
+                        [ cls "text-[10px] tracking-[2px] text-white/20 mb-2" ]
+                        [ HH.text "/// FINDINGS" ]
+                    , HH.div
+                        [ HP.id "diag-findings-list"
+                        , cls "diag-findings-list flex flex-col gap-2"
+                        ]
+                        []
+                    ]
+                ]
+            -- Quote (hidden until scan complete)
+            , HH.div
+                [ HP.id "diag-quote"
+                , cls "pt-6 mt-4 border-t border-white/10"
+                ]
+                [ HH.div
+                    [ cls "flex flex-col md:flex-row justify-between items-start md:items-center gap-4" ]
+                    [ HH.div_
+                        [ HH.p [ cls "text-[10px] tracking-[1px] text-white/25 mb-1" ] [ HH.text "ESTIMATED FIX" ]
+                        , HH.span [ cls "text-[28px] md:text-[32px] text-white price" ] [ HH.text "$149" ]
+                        , HH.span [ cls "text-[11px] md:text-[12px] text-white/20 ml-3" ] [ HH.text "47 issues · flat rate · < 24h" ]
+                        ]
+                    , HH.div
+                        [ cls "flex gap-2" ]
+                        [ HH.a
+                            [ HP.href "#submit"
+                            , cls "px-5 py-3 rounded text-[11px] tracking-[1px] bg-white text-[#0a0a0a] hover:bg-white/90 transition-all"
+                            ]
+                            [ HH.text "FIX IT" ]
+                        , HH.a
+                            [ HP.href "#services"
+                            , cls "px-5 py-3 rounded text-[11px] tracking-[1px] border border-white/20 text-white/40 hover:border-white/40 hover:text-white/60 transition-all"
+                            ]
+                            [ HH.text "REINIT IT" ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+
+diagStat :: forall w i. String -> String -> String -> HH.HTML w i
+diagStat statId label value =
+  HH.div
+    [ cls "bg-white/[0.03] rounded p-3 md:p-4" ]
+    [ HH.p [ cls "text-[9px] md:text-[10px] text-white/25 tracking-[1px] mb-1" ] [ HH.text label ]
+    , HH.p [ HP.id statId, cls "text-[16px] md:text-[20px] text-white" ] [ HH.text value ]
+    ]
+
+diagStatColored :: forall w i. String -> String -> String -> String -> HH.HTML w i
+diagStatColored statId label value color =
+  HH.div
+    [ cls "bg-white/[0.03] rounded p-3 md:p-4" ]
+    [ HH.p [ cls "text-[9px] md:text-[10px] text-white/25 tracking-[1px] mb-1" ] [ HH.text label ]
+    , HH.p [ HP.id statId, HP.style ("color:" <> color), cls "text-[16px] md:text-[20px]" ] [ HH.text value ]
     ]
 
 -- ============================================================
@@ -182,31 +324,25 @@ hero state =
 socialProof :: forall w i. HH.HTML w i
 socialProof =
   HH.section
-    [ cls "border-t border-white/[0.06] py-12 px-10" ]
-    [ HH.div [ cls "rail-shimmer max-w-5xl mx-auto mb-8" ] []
+    [ cls "border-t border-white/[0.06] py-8 md:py-12 px-4 md:px-10" ]
+    [ HH.div [ cls "rail-shimmer max-w-5xl mx-auto mb-6 md:mb-8" ] []
     , HH.div
-        [ cls "flex items-center justify-between max-w-5xl mx-auto" ]
+        [ cls "grid grid-cols-2 gap-6 md:flex md:items-center md:justify-between max-w-5xl mx-auto" ]
         [ proofStat "847" "repos fixed"
-        , divider
         , proofStat "< 4h" "avg turnaround"
-        , divider
         , proofStat "$127" "avg cost"
-        , divider
         , proofStat "100%" "satisfaction"
         ]
-    , HH.div [ cls "rail-shimmer max-w-5xl mx-auto mt-8" ] []
+    , HH.div [ cls "rail-shimmer max-w-5xl mx-auto mt-6 md:mt-8" ] []
     ]
 
 proofStat :: forall w i. String -> String -> HH.HTML w i
 proofStat value label =
   HH.div
-    [ cls "text-center" ]
-    [ HH.p [ cls "text-[32px] font-medium glow-4" ] [ HH.text value ]
-    , HH.p [ cls "text-[11px] tracking-[1px] text-white/30 mt-1" ] [ HH.text label ]
+    [ cls "text-center shimmer-reveal" ]
+    [ HH.p [ cls "text-[24px] md:text-[32px] font-medium glow-4" ] [ HH.text value ]
+    , HH.p [ cls "text-[10px] md:text-[11px] tracking-[1px] text-white/30 mt-1" ] [ HH.text label ]
     ]
-
-divider :: forall w i. HH.HTML w i
-divider = HH.div [ cls "w-px h-12 bg-white/10" ] []
 
 railDivider :: forall w i. HH.HTML w i
 railDivider = HH.div [ cls "rail-shimmer my-2" ] []
@@ -218,12 +354,12 @@ railDivider = HH.div [ cls "rail-shimmer my-2" ] []
 logos :: forall w i. HH.HTML w i
 logos =
   HH.section
-    [ cls "py-8 px-10 border-t border-white/[0.04]" ]
+    [ cls "py-6 md:py-8 px-4 md:px-10 border-t border-white/[0.04]" ]
     [ HH.p
-        [ cls "text-[10px] tracking-[3px] text-white/15 text-center mb-6" ]
+        [ cls "text-[9px] md:text-[10px] tracking-[2px] md:tracking-[3px] text-white/15 text-center mb-4 md:mb-6" ]
         [ HH.text "TRUSTED BY ENGINEERS AT" ]
     , HH.div
-        [ cls "flex justify-center items-center gap-12 text-white/20 text-[13px]" ]
+        [ cls "flex flex-wrap justify-center items-center gap-4 md:gap-12 text-white/20 text-[11px] md:text-[13px]" ]
         [ HH.text "Vercel"
         , HH.text "Stripe"
         , HH.text "Linear"
@@ -241,7 +377,7 @@ problem :: forall w i. HH.HTML w i
 problem =
   HH.section
     [ HP.id "problem"
-    , cls "py-24 px-10 border-t border-white/[0.08]"
+    , cls "py-24 px-4 md:px-10 border-t border-white/[0.08]"
     ]
     [ HH.div
         [ cls "max-w-4xl mx-auto" ]
@@ -256,13 +392,13 @@ problem =
             ]
         , HH.div
             [ cls "grid md:grid-cols-2 gap-8 mt-12" ]
-            [ problemCard "Cursor" 
+            [ problemCard 1 "Cursor" 
                 "Generated 200 files. 47 have circular imports. 12 reference modules that don't exist."
-            , problemCard "Claude" 
+            , problemCard 2 "Claude" 
                 "Refactored your auth. Now login works but logout doesn't. Nobody knows why."
-            , problemCard "Copilot" 
+            , problemCard 3 "Copilot" 
                 "Added a feature. Also added 3 security vulnerabilities and broke the build."
-            , problemCard "ChatGPT" 
+            , problemCard 4 "ChatGPT" 
                 "Wrote tests that pass. They don't test what you asked for, but they pass."
             ]
         , HH.p
@@ -273,11 +409,11 @@ problem =
         ]
     ]
 
-problemCard :: forall w i. String -> String -> HH.HTML w i
-problemCard tool desc = HH.div
-    [ cls "p-6 border border-white/10 rounded bg-white/[0.02] card-corners border-trace" ]
+problemCard :: forall w i. Int -> String -> String -> HH.HTML w i
+problemCard idx tool desc = HH.div
+    [ cls $ "p-6 border border-white/10 rounded bg-white/[0.02] card-corners border-trace shimmer-reveal shimmer-" <> show idx ]
     [ HH.p
-        [ cls "text-[12px] text-red-400/80 mb-2 font-medium" ]
+        [ cls "text-[12px] text-[#E24B4A]/80 mb-2 font-medium" ]
         [ HH.text $ "// " <> tool ]
     , HH.p
         [ cls "text-[13px] text-white/50 leading-relaxed" ]
@@ -291,7 +427,7 @@ problemCard tool desc = HH.div
 whyNotDiy :: forall w i. HH.HTML w i
 whyNotDiy =
   HH.section
-    [ cls "py-16 px-10 border-t border-white/[0.06] bg-white/[0.01]" ]
+    [ cls "py-16 px-4 md:px-10 border-t border-white/[0.06] bg-white/[0.01]" ]
     [ HH.div
         [ cls "max-w-4xl mx-auto" ]
         [ HH.p
@@ -321,16 +457,16 @@ services :: forall w i. HH.HTML w i
 services =
   HH.section
     [ HP.id "services"
-    , cls "py-24 px-10 border-t border-white/[0.08]"
+    , cls "py-16 md:py-24 px-4 md:px-10 border-t border-white/[0.08]"
     ]
     [ HH.p
-        [ cls "text-[11px] tracking-[4px] text-white/30 mb-6" ]
+        [ cls "text-[10px] md:text-[11px] tracking-[3px] md:tracking-[4px] text-white/30 mb-4 md:mb-6" ]
         [ HH.text "/// SERVICES" ]
     , HH.h2
-        [ cls "text-[36px] font-normal mb-12" ]
+        [ cls "text-[28px] md:text-[36px] font-normal mb-8 md:mb-12" ]
         [ HH.text "Three ways to fix it." ]
     , HH.div
-        [ cls "grid md:grid-cols-3 gap-0 max-w-6xl" ]
+        [ cls "grid gap-8 md:gap-0 md:grid-cols-3 max-w-6xl" ]
         [ serviceCard "Fix" "[01]" false "$49-299"
             "Your vibe-coded app, debugged and deployed. We work in your existing stack. Same day."
             [ "Debug & fix errors"
@@ -361,11 +497,11 @@ services =
 serviceCard :: forall w i. String -> String -> Boolean -> String -> String -> Array String -> String -> HH.HTML w i
 serviceCard title num hasBorder price desc features best =
   HH.div
-    [ cls $ "p-8 card-corners " <> if hasBorder then "border-l border-white/[0.08]" else "" ]
+    [ cls $ "p-6 md:p-8 card-corners border border-white/[0.08] md:border-0 rounded md:rounded-none " <> if hasBorder then "md:border-l md:border-white/[0.08]" else "" ]
     [ HH.div
         [ cls "flex justify-between items-baseline mb-2" ]
-        [ HH.h3 [ cls "text-[24px] glow-3" ] [ HH.text title ]
-        , HH.span [ cls "text-[11px] text-white/20" ] [ HH.text num ]
+        [ HH.h3 [ cls "text-[20px] md:text-[24px] glow-3" ] [ HH.text title ]
+        , HH.span [ cls "text-[10px] md:text-[11px] text-white/20" ] [ HH.text num ]
         ]
     , HH.p
         [ cls "text-[28px] text-[#5DCAA5] mb-4 price" ]
@@ -399,15 +535,15 @@ serviceCard title num hasBorder price desc features best =
 process :: forall w i. HH.HTML w i
 process =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-16 md:py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.p
-        [ cls "text-[11px] tracking-[4px] text-white/30 mb-6 text-center" ]
+        [ cls "text-[10px] md:text-[11px] tracking-[3px] md:tracking-[4px] text-white/30 mb-4 md:mb-6 text-center" ]
         [ HH.text "/// PROCESS" ]
     , HH.h2
-        [ cls "text-[36px] font-normal mb-12 text-center" ]
+        [ cls "text-[28px] md:text-[36px] font-normal mb-8 md:mb-12 text-center" ]
         [ HH.text "Four steps. That's it." ]
     , HH.div
-        [ cls "grid md:grid-cols-4 gap-8 max-w-5xl mx-auto" ]
+        [ cls "grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-5xl mx-auto" ]
         [ processStep "01" "Submit" "Paste your repo URL. Add a description if you want."
         , processStep "02" "Quote" "We review and reply with a flat-rate quote in < 1 hour."
         , processStep "03" "Fix" "Accept the quote. We ship the fix same-day."
@@ -419,9 +555,9 @@ processStep :: forall w i. String -> String -> String -> HH.HTML w i
 processStep num title desc =
   HH.div
     [ cls "text-center card-corners" ]
-    [ HH.p [ cls "text-[32px] text-white/10 mb-2 glow-5" ] [ HH.text num ]
-    , HH.p [ cls "text-[16px] text-white/80 mb-2" ] [ HH.text title ]
-    , HH.p [ cls "text-[12px] text-white/30 leading-relaxed" ] [ HH.text desc ]
+    [ HH.p [ cls "text-[24px] md:text-[32px] text-white/10 mb-2 glow-5" ] [ HH.text num ]
+    , HH.p [ cls "text-[14px] md:text-[16px] text-white/80 mb-2" ] [ HH.text title ]
+    , HH.p [ cls "text-[11px] md:text-[12px] text-white/30 leading-relaxed" ] [ HH.text desc ]
     ]
 
 -- ============================================================
@@ -431,7 +567,7 @@ processStep num title desc =
 beforeAfter :: forall w i. HH.HTML w i
 beforeAfter =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08] bg-white/[0.01]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08] bg-white/[0.01]" ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-6" ]
         [ HH.text "/// BEFORE / AFTER" ]
@@ -441,8 +577,8 @@ beforeAfter =
     , HH.div
         [ cls "grid md:grid-cols-2 gap-8 max-w-5xl" ]
         [ HH.div
-            [ cls "bg-[#111] border border-red-500/20 rounded p-6" ]
-            [ HH.p [ cls "text-[11px] text-red-400/60 mb-4" ] [ HH.text "// BEFORE: React + useState soup" ]
+            [ cls "bg-[#111] border border-[#E24B4A]/20 rounded p-6" ]
+            [ HH.p [ cls "text-[11px] text-[#E24B4A]/60 mb-4" ] [ HH.text "// BEFORE: React + useState soup" ]
             , HH.pre [ cls "text-[12px] text-white/40 leading-relaxed overflow-x-auto" ]
                 [ HH.text "const [open, setOpen] = useState(false)\nconst [data, setData] = useState(null)\nconst [loading, setLoading] = useState(true)\nconst [error, setError] = useState(null)\n\nuseEffect(() => {\n  // stale closure bug here\n  fetchData().then(setData)\n}, []) // missing dependency" ]
             ]
@@ -463,7 +599,7 @@ terminal :: forall w i. HH.HTML w i
 terminal =
   HH.section
     [ HP.id "proof"
-    , cls "py-24 px-10 border-t border-white/[0.08]"
+    , cls "py-24 px-4 md:px-10 border-t border-white/[0.08]"
     ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-6" ]
@@ -542,7 +678,7 @@ dot = HH.div [ cls "w-2 h-2 rounded-full bg-white/[0.08] status-dot" ] []
 stackComparison :: forall w i. HH.HTML w i
 stackComparison =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-6 text-center" ]
         [ HH.text "/// STACK COMPARISON" ]
@@ -552,7 +688,7 @@ stackComparison =
     , HH.div
         [ cls "grid md:grid-cols-2 gap-12 max-w-5xl mx-auto" ]
         [ HH.div_
-            [ HH.p [ cls "text-[14px] text-red-400/60 mb-4" ] [ HH.text "// YOUR REACT APP" ]
+            [ HH.p [ cls "text-[14px] text-[#E24B4A]/60 mb-4" ] [ HH.text "// YOUR REACT APP" ]
             , comparisonItem false "useState" "manual state, stale closures"
             , comparisonItem false "useEffect" "missing deps, race conditions"
             , comparisonItem false "Context" "unnecessary re-renders"
@@ -574,7 +710,7 @@ comparisonItem :: forall w i. Boolean -> String -> String -> HH.HTML w i
 comparisonItem good name desc =
   HH.div
     [ cls "flex items-start gap-3 mb-3" ]
-    [ HH.span [ cls if good then "text-[#5DCAA5]" else "text-red-400/60" ] 
+    [ HH.span [ cls if good then "text-[#5DCAA5]" else "text-[#E24B4A]/60" ] 
         [ HH.text if good then "✓" else "✕" ]
     , HH.div_
         [ HH.span [ cls "text-[13px] text-white/60" ] [ HH.text name ]
@@ -589,7 +725,7 @@ comparisonItem good name desc =
 techStack :: forall w i. HH.HTML w i
 techStack =
   HH.section
-    [ cls "py-16 px-10 border-t border-white/[0.06] bg-white/[0.01]" ]
+    [ cls "py-16 px-4 md:px-10 border-t border-white/[0.06] bg-white/[0.01]" ]
     [ HH.div
         [ cls "max-w-4xl mx-auto text-center" ]
         [ HH.p
@@ -619,7 +755,7 @@ techPill name =
 liveActivity :: forall w i. HH.HTML w i
 liveActivity =
   HH.section
-    [ cls "py-8 px-10 border-t border-white/[0.04]" ]
+    [ cls "py-8 px-4 md:px-10 border-t border-white/[0.04]" ]
     [ HH.div
         [ cls "max-w-4xl mx-auto" ]
         [ HH.p
@@ -641,7 +777,7 @@ activityItem time desc status cost =
     [ cls "flex items-center gap-4 text-white/30 border-trace" ]
     [ HH.span [ cls "w-20 text-white/20" ] [ HH.text time ]
     , HH.span [ cls "flex-1" ] [ HH.text desc ]
-    , HH.span [ cls $ "w-20 " <> if status == "In progress" then "text-yellow-400/60" else "text-[#5DCAA5]/60" ] 
+    , HH.span [ cls $ "w-20 " <> if status == "In progress" then "text-[#EF9F27]/60" else "text-[#5DCAA5]/60" ] 
         [ HH.text status ]
     , HH.span [ cls "w-16 text-right text-white/40 price" ] [ HH.text cost ]
     ]
@@ -653,7 +789,7 @@ activityItem time desc status cost =
 testimonials :: forall w i. HH.HTML w i
 testimonials =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-12 text-center" ]
         [ HH.text "/// WHAT THEY SAID" ]
@@ -671,7 +807,7 @@ testimonials =
 testimonial :: forall w i. String -> String -> String -> HH.HTML w i
 testimonial quote author tag =
   HH.div
-    [ cls "p-6 border border-white/10 rounded bg-white/[0.02] card-corners" ]
+    [ cls "p-6 border border-white/10 rounded bg-white/[0.02] card-corners shimmer-reveal" ]
     [ HH.p [ cls "text-[14px] text-white/60 leading-relaxed mb-4 italic" ] 
         [ HH.text $ "\"" <> quote <> "\"" ]
     , HH.div [ cls "flex justify-between items-center" ]
@@ -689,7 +825,7 @@ pricing :: forall w i. HH.HTML w i
 pricing =
   HH.section
     [ HP.id "pricing"
-    , cls "py-24 px-10 border-t border-white/[0.08]"
+    , cls "py-24 px-4 md:px-10 border-t border-white/[0.08]"
     ]
     [ HH.div
         [ cls "max-w-4xl mx-auto text-center" ]
@@ -714,7 +850,7 @@ pricing =
 pricingCard :: forall w i. String -> String -> String -> String -> HH.HTML w i
 pricingCard name low high desc =
   HH.div
-    [ cls "p-6 border border-white/10 rounded text-left card-corners border-trace" ]
+    [ cls "p-6 border border-white/10 rounded text-left card-corners border-trace shimmer-reveal" ]
     [ HH.p [ cls "text-[14px] text-white/60 mb-2" ] [ HH.text name ]
     , HH.p [ cls "text-[24px] mb-1 price" ]
         [ HH.text low
@@ -731,7 +867,7 @@ pricingCard name low high desc =
 faq :: forall w i. HH.HTML w i
 faq =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.div
         [ cls "max-w-3xl mx-auto" ]
         [ HH.p
@@ -767,7 +903,7 @@ faqItem q a =
 antiTestimonials :: forall w i. HH.HTML w i
 antiTestimonials =
   HH.section
-    [ cls "py-16 px-10 border-t border-white/[0.06] bg-white/[0.01]" ]
+    [ cls "py-16 px-4 md:px-10 border-t border-white/[0.06] bg-white/[0.01]" ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-8 text-center" ]
         [ HH.text "/// WHAT WE HEAR" ]
@@ -797,7 +933,7 @@ antiQuote txt =
 caseStudies :: forall w i. HH.HTML w i
 caseStudies =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-6" ]
         [ HH.text "/// CASE STUDIES" ]
@@ -818,15 +954,15 @@ caseStudies =
 caseStudy :: forall w i. String -> String -> String -> String -> String -> HH.HTML w i
 caseStudy name tier time cost desc =
   HH.div
-    [ cls "p-6 border border-white/10 rounded flex gap-8 card-corners border-trace" ]
+    [ cls "p-4 md:p-6 border border-white/10 rounded flex flex-col md:flex-row gap-4 md:gap-8 card-corners border-trace shimmer-reveal" ]
     [ HH.div [ cls "flex-1" ]
-        [ HH.p [ cls "text-[16px] text-white/80 mb-2" ] [ HH.text name ]
-        , HH.p [ cls "text-[13px] text-white/40 leading-relaxed" ] [ HH.text desc ]
+        [ HH.p [ cls "text-[14px] md:text-[16px] text-white/80 mb-2" ] [ HH.text name ]
+        , HH.p [ cls "text-[12px] md:text-[13px] text-white/40 leading-relaxed" ] [ HH.text desc ]
         ]
-    , HH.div [ cls "text-right flex-shrink-0" ]
-        [ HH.p [ cls "text-[12px] text-[#5DCAA5] mb-1" ] [ HH.text tier ]
-        , HH.p [ cls "text-[20px] text-white/80 price" ] [ HH.text cost ]
-        , HH.p [ cls "text-[11px] text-white/30" ] [ HH.text time ]
+    , HH.div [ cls "md:text-right flex-shrink-0 flex md:block items-center gap-4 md:gap-0" ]
+        [ HH.p [ cls "text-[11px] md:text-[12px] text-[#5DCAA5] md:mb-1" ] [ HH.text tier ]
+        , HH.p [ cls "text-[18px] md:text-[20px] text-white/80 price" ] [ HH.text cost ]
+        , HH.p [ cls "text-[10px] md:text-[11px] text-white/30" ] [ HH.text time ]
         ]
     ]
 
@@ -837,7 +973,7 @@ caseStudy name tier time cost desc =
 whatWeDont :: forall w i. HH.HTML w i
 whatWeDont =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.div
         [ cls "max-w-3xl mx-auto" ]
         [ HH.p
@@ -861,7 +997,7 @@ dontItem :: forall w i. String -> String -> HH.HTML w i
 dontItem title desc =
   HH.div
     [ cls "flex gap-4" ]
-    [ HH.span [ cls "text-red-400/60" ] [ HH.text "✕" ]
+    [ HH.span [ cls "text-[#E24B4A]/60" ] [ HH.text "✕" ]
     , HH.div_
         [ HH.span [ cls "text-[14px] text-white/60" ] [ HH.text title ]
         , HH.span [ cls "text-[14px] text-white/30" ] [ HH.text $ " — " <> desc ]
@@ -875,7 +1011,7 @@ dontItem title desc =
 guarantee :: forall w i. HH.HTML w i
 guarantee =
   HH.section
-    [ cls "py-16 px-10 border-t border-white/[0.06]" ]
+    [ cls "py-16 px-4 md:px-10 border-t border-white/[0.06]" ]
     [ HH.div
         [ cls "max-w-3xl mx-auto text-center" ]
         [ HH.p [ cls "text-[48px] mb-4 glow-1" ] [ HH.text "100%" ]
@@ -892,7 +1028,7 @@ guarantee =
 founderNote :: forall w i. HH.HTML w i
 founderNote =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08] bg-white/[0.01]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08] bg-white/[0.01]" ]
     [ HH.div
         [ cls "max-w-2xl mx-auto" ]
         [ HH.p
@@ -921,7 +1057,7 @@ founderNote =
 urgency :: forall w i. HH.HTML w i
 urgency =
   HH.section
-    [ cls "py-20 px-10 border-t border-white/[0.08] bg-gradient-to-b from-white/[0.02] to-transparent" ]
+    [ cls "py-20 px-4 md:px-10 border-t border-white/[0.08] bg-gradient-to-b from-white/[0.02] to-transparent" ]
     [ HH.div
         [ cls "max-w-3xl mx-auto text-center" ]
         [ HH.p
@@ -946,7 +1082,7 @@ urgency =
 metrics :: forall w i. HH.HTML w i
 metrics =
   HH.section
-    [ cls "py-24 px-10 border-t border-white/[0.08]" ]
+    [ cls "py-24 px-4 md:px-10 border-t border-white/[0.08]" ]
     [ HH.p
         [ cls "text-[11px] tracking-[4px] text-white/30 mb-6 text-center" ]
         [ HH.text "/// BY THE NUMBERS" ]
@@ -962,7 +1098,7 @@ metrics =
 metricCard :: forall w i. String -> String -> String -> HH.HTML w i
 metricCard value label sub =
   HH.div
-    [ cls "card-corners" ]
+    [ cls "card-corners shimmer-reveal" ]
     [ HH.p [ cls "text-[40px] font-medium text-white/90 glow-2" ] [ HH.text value ]
     , HH.p [ cls "text-[13px] text-white/50 mt-1" ] [ HH.text label ]
     , HH.p [ cls "text-[11px] text-white/25" ] [ HH.text sub ]
@@ -976,7 +1112,7 @@ submit :: forall m. State -> H.ComponentHTML Action () m
 submit state =
   HH.section
     [ HP.id "submit"
-    , cls "py-24 px-10 border-t border-white/[0.08] bg-white/[0.02]"
+    , cls "py-24 px-4 md:px-10 border-t border-white/[0.08] bg-white/[0.02]"
     ]
     [ HH.div
         [ cls "max-w-2xl mx-auto text-center" ]
@@ -1020,7 +1156,7 @@ nerdDive :: forall w i. HH.HTML w i
 nerdDive =
   HH.section
     [ HP.id "nerd"
-    , cls "py-24 px-10 border-t border-white/[0.08] bg-[#080808]"
+    , cls "py-24 px-4 md:px-10 border-t border-white/[0.08] bg-[#080808]"
     ]
     [ HH.div
         [ cls "max-w-4xl mx-auto" ]
@@ -1130,22 +1266,22 @@ stackItem name desc =
 footer :: forall w i. HH.HTML w i
 footer =
   HH.footer
-    [ cls "border-t border-white/[0.05] py-8 px-10" ]
+    [ cls "border-t border-white/[0.05] py-6 md:py-8 px-4 md:px-10 pb-20 md:pb-8" ]
     [ HH.div
-        [ cls "max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4" ]
+        [ cls "max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left" ]
         [ HH.div
-            [ cls "flex items-center gap-6" ]
-            [ HH.span [ cls "text-[11px] tracking-[1px] text-white/20" ] [ HH.text "STRAYLIGHT SOFTWARE" ]
-            , HH.span [ cls "text-white/10" ] [ HH.text "×" ]
-            , HH.span [ cls "text-[11px] tracking-[1px] text-white/20" ] [ HH.text "HYPERMODERN LLC" ]
+            [ cls "flex flex-col md:flex-row items-center gap-2 md:gap-6" ]
+            [ HH.span [ cls "text-[10px] md:text-[11px] tracking-[1px] text-white/20" ] [ HH.text "STRAYLIGHT SOFTWARE" ]
+            , HH.span [ cls "text-white/10 hidden md:inline" ] [ HH.text "×" ]
+            , HH.span [ cls "text-[10px] md:text-[11px] tracking-[1px] text-white/20" ] [ HH.text "HYPERMODERN LLC" ]
             ]
         , HH.div
-            [ cls "flex items-center gap-6 text-[11px] text-white/30" ]
+            [ cls "flex items-center gap-4 md:gap-6 text-[10px] md:text-[11px] text-white/30" ]
             [ HH.a [ HP.href "#", cls "hover:text-white/60 transition-colors" ] [ HH.text "GitHub" ]
             , HH.a [ HP.href "#", cls "hover:text-white/60 transition-colors" ] [ HH.text "Twitter" ]
             , HH.a [ HP.href "#", cls "hover:text-white/60 transition-colors" ] [ HH.text "Discord" ]
             ]
-        , HH.span [ cls "text-[11px] text-white/20" ] [ HH.text "PR · 2026" ]
+        , HH.span [ cls "text-[10px] md:text-[11px] text-white/20" ] [ HH.text "PR · 2026" ]
         ]
     ]
 
@@ -1156,20 +1292,21 @@ footer =
 altCta :: forall w i. HH.HTML w i
 altCta =
   HH.div
-    [ cls "fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/95 backdrop-blur-sm border-t border-white/10 py-4 px-10 flex items-center justify-between z-40" ]
+    [ cls "fixed bottom-0 left-0 right-0 bg-[#0a0a0a]/95 backdrop-blur-sm border-t border-white/10 py-3 md:py-4 px-4 md:px-10 flex items-center justify-between z-40" ]
     [ HH.div
-        [ cls "flex items-center gap-4" ]
+        [ cls "flex items-center gap-2 md:gap-4" ]
         [ HH.span [ cls "status-dot" ] []
-        , HH.span [ cls "text-[12px] text-white/50" ] [ HH.text "3 engineers available now" ]
+        , HH.span [ cls "text-[10px] md:text-[12px] text-white/50 hidden md:inline" ] [ HH.text "3 engineers available now" ]
+        , HH.span [ cls "text-[10px] text-white/50 md:hidden" ] [ HH.text "Available now" ]
         ]
     , HH.div
-        [ cls "flex items-center gap-6" ]
-        [ HH.span [ cls "text-[12px] text-white/30" ] [ HH.text "quoted in < 1 hour" ]
+        [ cls "flex items-center gap-3 md:gap-6" ]
+        [ HH.span [ cls "text-[10px] md:text-[12px] text-white/30 hidden md:inline" ] [ HH.text "quoted in < 1 hour" ]
         , HH.a
             [ HP.href "#submit"
-            , cls "px-6 py-2 rounded text-[11px] tracking-[1px] bg-white text-[#0a0a0a] hover:bg-white/90 transition-all font-medium"
+            , cls "px-4 md:px-6 py-2 rounded text-[10px] md:text-[11px] tracking-[1px] bg-white text-[#0a0a0a] hover:bg-white/90 transition-all font-medium"
             ]
-            [ HH.text "SUBMIT REPO →" ]
+            [ HH.text "SUBMIT →" ]
         ]
     ]
 

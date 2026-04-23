@@ -31,6 +31,12 @@
         font-family: "JetBrains Mono", monospace;
       }
 
+      /* Prevent horizontal scroll from vortex overflow */
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
       /* Smooth transitions */
       a,
       button {
@@ -616,6 +622,64 @@
       }
 
       /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Periodic shimmer sweep
+         Fires every 10s across all cards. Diagnostic pulse, not loading state.
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes shimmer-sweep {
+        0%,
+        85% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      .shimmer-reveal {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shimmer-reveal::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.04) 50%,
+          transparent 100%
+        );
+        transform: translateX(-100%);
+        animation: shimmer-sweep 10s ease-out infinite;
+        pointer-events: none;
+      }
+
+      /* Staggered delays for cascade effect */
+      .shimmer-reveal.shimmer-1::after {
+        animation-delay: 0s;
+      }
+      .shimmer-reveal.shimmer-2::after {
+        animation-delay: 0.1s;
+      }
+      .shimmer-reveal.shimmer-3::after {
+        animation-delay: 0.2s;
+      }
+      .shimmer-reveal.shimmer-4::after {
+        animation-delay: 0.3s;
+      }
+      .shimmer-reveal.shimmer-5::after {
+        animation-delay: 0.4s;
+      }
+      .shimmer-reveal.shimmer-6::after {
+        animation-delay: 0.6s;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
          GOD MODE: Link hover glow
          ═══════════════════════════════════════════════════════════════════════ */
 
@@ -645,10 +709,455 @@
         );
         pointer-events: none;
       }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         DIAGNOSTIC DEMO: Live scan animation
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes diag-blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes diag-fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .diag-blink {
+        animation: diag-blink 1s infinite;
+      }
+
+      .diag-finding {
+        opacity: 0;
+      }
+
+      .diag-finding.show {
+        animation: diag-fadeUp 0.3s ease-out forwards;
+      }
+
+      #diag-scan {
+        display: none;
+      }
+
+      #diag-scan.active {
+        display: block;
+      }
+
+      #diag-hero.hidden {
+        display: none;
+      }
+
+      .diag-terminal {
+        height: 320px;
+        overflow-y: auto;
+      }
+
+      .diag-terminal::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .diag-terminal::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+      }
+
+      .diag-findings-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .diag-findings-list::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .diag-findings-list::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 2px;
+      }
+
+      #diag-quote {
+        display: none;
+      }
+
+      #diag-quote.show {
+        display: block;
+        animation: diag-fadeUp 0.4s ease-out;
+      }
+
+      #diag-findings-panel {
+        display: none;
+      }
+
+      #diag-findings-panel.show {
+        display: block;
+      }
     </style>
   </head>
   <body>
     <div id="app"></div>
     <script src="/reinit.js"></script>
+    <script>
+      // ═══════════════════════════════════════════════════════════════════════
+      // DIAGNOSTIC DEMO: Live scan simulation
+      // ═══════════════════════════════════════════════════════════════════════
+
+      const diagFindings = [
+        {
+          sev: "CRITICAL",
+          col: "#E24B4A",
+          loc: "src/hooks/useAuth.js:47",
+          msg: "Stale closure in useEffect — auth token captured at mount, refresh silently fails after first expiry",
+        },
+        {
+          sev: "CRITICAL",
+          col: "#E24B4A",
+          loc: "src/api/client.ts:12",
+          msg: "Loading/error/data as independent booleans — 5 of 8 states are impossible but reachable",
+        },
+        {
+          sev: "CRITICAL",
+          col: "#E24B4A",
+          loc: "src/store/cart.js:88",
+          msg: "Race condition in checkout flow — double-submit possible when network is slow",
+        },
+        {
+          sev: "WARNING",
+          col: "#EF9F27",
+          loc: "src/pages/Dashboard.tsx:89",
+          msg: "useEffect missing 3 deps — 340 re-renders/sec on idle. Visible jank on mobile.",
+        },
+        {
+          sev: "WARNING",
+          col: "#EF9F27",
+          loc: "src/components/Modal.jsx:23",
+          msg: "No focus trap, no scroll lock, no aria-modal — inaccessible to screen readers",
+        },
+        {
+          sev: "WARNING",
+          col: "#EF9F27",
+          loc: "src/routes/index.ts:4",
+          msg: "15 routes as string literals — typo on line 31 ('/dashbaord') returns silent 404",
+        },
+        {
+          sev: "INFO",
+          col: "rgba(255,255,255,0.35)",
+          loc: "package.json",
+          msg: "47 direct deps, 12 known CVEs. react-scripts pinned to 4.x (EOL). No lockfile integrity.",
+        },
+        {
+          sev: "INFO",
+          col: "rgba(255,255,255,0.35)",
+          loc: ".env",
+          msg: "STRIPE_SECRET_KEY committed to repo. Rotate immediately.",
+        },
+      ];
+
+      const diagSteps = [
+        {
+          t: "$ git clone github.com/acme/vibe-coded-saas",
+          c: "#e0e0e0",
+          d: 300,
+          s: "Cloning repository...",
+        },
+        {
+          t: "Cloning into 'vibe-coded-saas'...",
+          c: "rgba(255,255,255,0.25)",
+          d: 700,
+        },
+        { t: "done.", c: "#5DCAA5", d: 300 },
+        { t: "", d: 150 },
+        {
+          t: "$ reinit scan --deep",
+          c: "#e0e0e0",
+          d: 400,
+          s: "Scanning files...",
+        },
+        {
+          t: "src/ .............. 189 files",
+          c: "rgba(255,255,255,0.2)",
+          d: 100,
+        },
+        {
+          t: "components/ ....... 43 files",
+          c: "rgba(255,255,255,0.2)",
+          d: 80,
+        },
+        {
+          t: "hooks/ ............ 12 files",
+          c: "rgba(255,255,255,0.2)",
+          d: 80,
+        },
+        {
+          t: "pages/ ............ 8 files",
+          c: "rgba(255,255,255,0.2)",
+          d: 80,
+          af: () => diagAnimNum("diag-sf", 247, 600),
+        },
+        { t: "", d: 80 },
+        {
+          t: "Counting lines...",
+          c: "rgba(255,255,255,0.25)",
+          d: 200,
+          s: "Counting lines...",
+          af: () => diagAnimNum("diag-sl", 18420, 900),
+        },
+        {
+          t: "18,420 lines across 247 files",
+          c: "rgba(255,255,255,0.2)",
+          d: 350,
+        },
+        { t: "", d: 80 },
+        {
+          t: "Analyzing dependencies...",
+          c: "rgba(255,255,255,0.25)",
+          d: 400,
+          s: "Analyzing dependencies...",
+        },
+        {
+          t: "47 direct deps, 1,247 transitive",
+          c: "rgba(255,255,255,0.2)",
+          d: 200,
+        },
+        { t: "12 CVEs in dependency tree", c: "#E24B4A", d: 300 },
+        { t: "", d: 80 },
+        {
+          t: "Scanning for secrets...",
+          c: "rgba(255,255,255,0.25)",
+          d: 300,
+          s: "Scanning for secrets...",
+        },
+        {
+          t: "STRIPE_SECRET_KEY found in .env (committed)",
+          c: "#E24B4A",
+          d: 400,
+          af: () => diagShowFinding(7),
+        },
+        { t: "", d: 80 },
+        {
+          t: "Detecting impossible states...",
+          c: "rgba(255,255,255,0.25)",
+          d: 500,
+          s: "Detecting impossible states...",
+        },
+        {
+          t: "useState soup detected in 14 files",
+          c: "#EF9F27",
+          d: 200,
+          af: () => diagShowFinding(1),
+        },
+        {
+          t: "5 components with unreachable state combos",
+          c: "#E24B4A",
+          d: 250,
+        },
+        {
+          t: "race condition in checkout flow",
+          c: "#E24B4A",
+          d: 250,
+          af: () => diagShowFinding(2),
+        },
+        { t: "", d: 80 },
+        {
+          t: "Checking hook discipline...",
+          c: "rgba(255,255,255,0.25)",
+          d: 400,
+          s: "Checking hooks...",
+        },
+        {
+          t: "8 stale closures in useEffect",
+          c: "#E24B4A",
+          d: 200,
+          af: () => diagShowFinding(0),
+        },
+        {
+          t: "3 missing dependency arrays",
+          c: "#EF9F27",
+          d: 200,
+          af: () => diagShowFinding(3),
+        },
+        { t: "14 conditional hook calls", c: "#EF9F27", d: 200 },
+        { t: "", d: 80 },
+        {
+          t: "Auditing accessibility...",
+          c: "rgba(255,255,255,0.25)",
+          d: 300,
+          s: "Auditing a11y...",
+        },
+        {
+          t: "0 focus traps on 4 modal components",
+          c: "#E24B4A",
+          d: 200,
+          af: () => diagShowFinding(4),
+        },
+        { t: "0 aria-labels on 23 interactive elements", c: "#EF9F27", d: 200 },
+        { t: "", d: 80 },
+        {
+          t: "Checking routes...",
+          c: "rgba(255,255,255,0.25)",
+          d: 250,
+          s: "Checking routes...",
+        },
+        {
+          t: "15 string-literal routes, 1 typo detected",
+          c: "#EF9F27",
+          d: 250,
+          af: () => diagShowFinding(5),
+        },
+        { t: "", d: 80 },
+        {
+          t: "Reviewing package health...",
+          c: "rgba(255,255,255,0.25)",
+          d: 300,
+          s: "Reviewing packages...",
+        },
+        {
+          t: "react-scripts@4.0.3 — end of life",
+          c: "#EF9F27",
+          d: 200,
+          af: () => diagShowFinding(6),
+        },
+        {
+          t: "no lockfile integrity check",
+          c: "rgba(255,255,255,0.3)",
+          d: 200,
+        },
+        { t: "", d: 150 },
+        {
+          t: "────────────────────────────────────────",
+          c: "rgba(255,255,255,0.08)",
+          d: 200,
+        },
+        {
+          t: "scan complete. 47 issues found.",
+          c: "#5DCAA5",
+          d: 0,
+          s: "Analysis complete",
+          af: () => {
+            diagAnimNum("diag-si", 47, 500);
+            const ss = document.getElementById("diag-ss");
+            if (ss) {
+              ss.textContent = "HIGH";
+              ss.style.color = "#E24B4A";
+            }
+            const dot = document.getElementById("diag-dot");
+            if (dot) {
+              dot.classList.remove("diag-blink");
+              dot.style.background = "#5DCAA5";
+            }
+            setTimeout(() => {
+              const quote = document.getElementById("diag-quote");
+              if (quote) quote.classList.add("show");
+            }, 800);
+          },
+        },
+      ];
+
+      function diagAnimNum(id, target, dur) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const start = parseInt(el.textContent.replace(/,/g, "")) || 0;
+        const range = target - start;
+        let t0 = null;
+        function frame(ts) {
+          if (!t0) t0 = ts;
+          const p = Math.min((ts - t0) / dur, 1);
+          el.textContent = Math.round(start + range * p).toLocaleString();
+          if (p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+
+      function diagShowFinding(i) {
+        if (i >= diagFindings.length) return;
+        const fp = document.getElementById("diag-findings-panel");
+        if (fp) fp.classList.add("show");
+        const f = diagFindings[i];
+        const card = document.createElement("div");
+        card.className = "diag-finding p-3 border border-white/10 rounded mb-2";
+        card.style.borderLeftWidth = "3px";
+        card.style.borderLeftColor = f.col;
+        card.innerHTML = `
+          <div class="flex justify-between mb-1">
+            <span class="text-[10px] tracking-wider" style="color:${f.col}">${f.sev}</span>
+            <span class="text-[10px] text-white/20">${f.loc}</span>
+          </div>
+          <div class="text-[11px] text-white/50 leading-relaxed">${f.msg}</div>
+        `;
+        const list = document.getElementById("diag-findings-list");
+        if (list) {
+          list.appendChild(card);
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              card.classList.add("show");
+            });
+          });
+          list.scrollTop = list.scrollHeight;
+        }
+      }
+
+      function diagAddTermLine(text, color) {
+        const term = document.getElementById("diag-term");
+        if (!term) return;
+        if (!text) {
+          term.appendChild(document.createElement("br"));
+          return;
+        }
+        const div = document.createElement("div");
+        div.style.color = color;
+        div.textContent = text;
+        term.appendChild(div);
+        term.scrollTop = term.scrollHeight;
+      }
+
+      function diagRunScan() {
+        const hero = document.getElementById("diag-hero");
+        const scan = document.getElementById("diag-scan");
+        if (hero) hero.classList.add("hidden");
+        if (scan) scan.classList.add("active");
+
+        let i = 0;
+        function next() {
+          if (i >= diagSteps.length) return;
+          const step = diagSteps[i];
+          diagAddTermLine(step.t, step.c);
+          const stxt = document.getElementById("diag-stxt");
+          if (step.s && stxt) stxt.textContent = step.s;
+          if (step.af) step.af();
+          i++;
+          setTimeout(next, step.d);
+        }
+        next();
+      }
+
+      // Use event delegation since PureScript mounts after DOMContentLoaded
+      document.addEventListener("click", (e) => {
+        if (e.target && e.target.id === "diag-go-btn") {
+          diagRunScan();
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Enter" &&
+          e.target &&
+          e.target.id === "diag-repo-input"
+        ) {
+          diagRunScan();
+        }
+      });
+    </script>
   </body>
 </html>
