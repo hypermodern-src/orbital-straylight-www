@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>REINIT // DX</title>
+    <meta
+      name="description"
+      content="Your AI broke it. We fix it. Or we make it unbreakable."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              mono: ["JetBrains Mono", "SF Mono", "Consolas", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      * {
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      /* Smooth transitions */
+      a,
+      button {
+        transition: all 0.15s ease-out;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0a0a0a;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      /* Selection */
+      ::selection {
+        background: rgba(93, 202, 165, 0.3);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Ambient background effects
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      /* Very subtle scanline - barely perceptible */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.03) 2px,
+          rgba(0, 0, 0, 0.03) 4px
+        );
+      }
+
+      /* Slow-moving gradient overlay - wintermute presence */
+      body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9998;
+        background: radial-gradient(
+          ellipse 80% 50% at 50% 0%,
+          rgba(93, 202, 165, 0.03) 0%,
+          transparent 50%
+        );
+        animation: ambient-drift 20s ease-in-out infinite;
+      }
+
+      @keyframes ambient-drift {
+        0%,
+        100% {
+          opacity: 0.5;
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(5vh) scale(1.1);
+        }
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Hero pulse ring - the main event
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes hero-pulse {
+        0% {
+          box-shadow:
+            0 0 0 0 rgba(93, 202, 165, 0.4),
+            0 0 0 0 rgba(93, 202, 165, 0.2),
+            0 0 0 0 rgba(93, 202, 165, 0.1);
+        }
+        100% {
+          box-shadow:
+            0 0 0 20px rgba(93, 202, 165, 0),
+            0 0 0 40px rgba(93, 202, 165, 0),
+            0 0 0 60px rgba(93, 202, 165, 0);
+        }
+      }
+
+      /* Apply to the CTA input - will target via attribute selector */
+      input[type="text"]:focus,
+      input[type="url"]:focus {
+        animation: hero-pulse 2s ease-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Card hover states - geometric corner markers
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      .card-corners {
+        position: relative;
+      }
+
+      .card-corners::before,
+      .card-corners::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border: 1px solid rgba(93, 202, 165, 0.5);
+        opacity: 0;
+        transition: all 0.3s ease-out;
+        pointer-events: none;
+      }
+
+      .card-corners::before {
+        top: -1px;
+        left: -1px;
+        border-right: none;
+        border-bottom: none;
+      }
+
+      .card-corners::after {
+        bottom: -1px;
+        right: -1px;
+        border-left: none;
+        border-top: none;
+      }
+
+      .card-corners:hover::before,
+      .card-corners:hover::after {
+        width: 12px;
+        height: 12px;
+        opacity: 1;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Glow text - staggered keyword highlighting
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes text-glow {
+        0%,
+        85%,
+        100% {
+          text-shadow: none;
+        }
+        90%,
+        95% {
+          text-shadow:
+            0 0 20px rgba(93, 202, 165, 0.8),
+            0 0 40px rgba(93, 202, 165, 0.4),
+            0 0 60px rgba(93, 202, 165, 0.2);
+        }
+      }
+
+      .glow-1 {
+        animation: text-glow 12s ease-in-out infinite;
+        animation-delay: 0s;
+      }
+      .glow-2 {
+        animation: text-glow 12s ease-in-out infinite;
+        animation-delay: 2s;
+      }
+      .glow-3 {
+        animation: text-glow 12s ease-in-out infinite;
+        animation-delay: 4s;
+      }
+      .glow-4 {
+        animation: text-glow 12s ease-in-out infinite;
+        animation-delay: 6s;
+      }
+      .glow-5 {
+        animation: text-glow 12s ease-in-out infinite;
+        animation-delay: 8s;
+      }
+      .glow-6 {
+        animation: text-glow 12s ease-in-out infinite;
+        animation-delay: 10s;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Border trace - cards that feel alive
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes border-flow {
+        0% {
+          background-position: 0% 0%;
+        }
+        100% {
+          background-position: 200% 0%;
+        }
+      }
+
+      .border-trace {
+        position: relative;
+      }
+
+      .border-trace::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(
+          180deg,
+          transparent 0%,
+          rgba(93, 202, 165, 0.8) 50%,
+          transparent 100%
+        );
+        background-size: 100% 200%;
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+      }
+
+      .border-trace:hover::after {
+        opacity: 1;
+        animation: border-flow 2s linear infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Terminal cursor - blinking presence
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes cursor-blink {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .terminal-cursor::after {
+        content: "█";
+        color: rgba(93, 202, 165, 0.8);
+        animation: cursor-blink 1s step-end infinite;
+        margin-left: 2px;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Status indicator - breathing dot
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes status-breathe {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(93, 202, 165, 0.4);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2);
+          box-shadow: 0 0 10px 2px rgba(93, 202, 165, 0.3);
+        }
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #5dcaa5;
+        border-radius: 50%;
+        animation: status-breathe 3s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Section dividers - animated rails
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes rail-shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      .rail-shimmer {
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(93, 202, 165, 0.1) 25%,
+          rgba(93, 202, 165, 0.5) 50%,
+          rgba(93, 202, 165, 0.1) 75%,
+          transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: rail-shimmer 8s linear infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Button hover - power surge
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes power-surge {
+        0% {
+          box-shadow: 0 0 5px rgba(93, 202, 165, 0.5);
+        }
+        50% {
+          box-shadow:
+            0 0 20px rgba(93, 202, 165, 0.8),
+            0 0 40px rgba(93, 202, 165, 0.4),
+            inset 0 0 10px rgba(93, 202, 165, 0.1);
+        }
+        100% {
+          box-shadow: 0 0 5px rgba(93, 202, 165, 0.5);
+        }
+      }
+
+      button:hover,
+      [role="button"]:hover {
+        animation: power-surge 1.5s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Nav link underline trace
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      nav a {
+        position: relative;
+      }
+
+      nav a::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: linear-gradient(90deg, #5dcaa5, transparent);
+        transition: width 0.3s ease-out;
+      }
+
+      nav a:hover::after {
+        width: 100%;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Code block glow
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      pre,
+      code {
+        position: relative;
+      }
+
+      pre::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(93, 202, 165, 0.3) 50%,
+          transparent 100%
+        );
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Floating labels - subtle lift
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes float-subtle {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-3px);
+        }
+      }
+
+      .float-label {
+        animation: float-subtle 6s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Testimonial quote breathe
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes quote-breathe {
+        0%,
+        100% {
+          border-left-color: rgba(93, 202, 165, 0.3);
+        }
+        50% {
+          border-left-color: rgba(93, 202, 165, 0.8);
+        }
+      }
+
+      blockquote {
+        animation: quote-breathe 6s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Ticker tape - continuous flow
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes ticker-scroll {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+
+      .ticker-tape {
+        animation: ticker-scroll 30s linear infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Price tag glow - money energy
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes price-pulse {
+        0%,
+        100% {
+          text-shadow: 0 0 10px rgba(93, 202, 165, 0.3);
+        }
+        50% {
+          text-shadow:
+            0 0 20px rgba(93, 202, 165, 0.6),
+            0 0 40px rgba(93, 202, 165, 0.3);
+        }
+      }
+
+      .price {
+        animation: price-pulse 4s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Matrix rain characters (decorative)
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes matrix-fall {
+        0% {
+          transform: translateY(-100%);
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh);
+          opacity: 0;
+        }
+      }
+
+      .matrix-char {
+        position: fixed;
+        color: rgba(93, 202, 165, 0.15);
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 1;
+        animation: matrix-fall linear infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Wormhole vortex - background accent
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes vortex-spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .vortex {
+        position: fixed;
+        width: 800px;
+        height: 800px;
+        border-radius: 50%;
+        background: conic-gradient(
+          from 0deg,
+          transparent 0deg,
+          rgba(93, 202, 165, 0.02) 10deg,
+          transparent 20deg,
+          rgba(93, 202, 165, 0.015) 30deg,
+          transparent 40deg
+        );
+        animation: vortex-spin 60s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Glitch effect - rare flicker
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes glitch-rare {
+        0%,
+        99%,
+        100% {
+          transform: translateX(0);
+          filter: none;
+        }
+        99.5% {
+          transform: translateX(-2px);
+          filter: hue-rotate(90deg);
+        }
+      }
+
+      .glitch-rare {
+        animation: glitch-rare 30s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Section headers - subtle flicker
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes section-flicker {
+        0%,
+        92%,
+        94%,
+        96%,
+        100% {
+          opacity: 1;
+        }
+        93%,
+        95% {
+          opacity: 0.8;
+        }
+      }
+
+      h2,
+      h3 {
+        animation: section-flicker 15s ease-in-out infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Input focus ring - cyberpunk glow
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      input:focus {
+        outline: none;
+        border-color: rgba(93, 202, 165, 0.8) !important;
+        box-shadow:
+          0 0 0 1px rgba(93, 202, 165, 0.3),
+          0 0 20px rgba(93, 202, 165, 0.2),
+          inset 0 0 10px rgba(93, 202, 165, 0.05);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Scroll reveal fade
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      @keyframes reveal-up {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      section {
+        animation: reveal-up 0.6s ease-out both;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Link hover glow
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      a:hover {
+        text-shadow: 0 0 10px rgba(93, 202, 165, 0.5);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════════════
+         GOD MODE: Deep dive section - special treatment
+         ═══════════════════════════════════════════════════════════════════════ */
+
+      #nerd {
+        position: relative;
+      }
+
+      #nerd::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(
+          ellipse 100% 100% at 50% 0%,
+          rgba(93, 202, 165, 0.05) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="/reinit.js"></script>
+  </body>
+</html>

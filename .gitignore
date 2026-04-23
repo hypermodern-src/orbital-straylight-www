@@ -1,0 +1,7 @@
+.spago/
+output/
+node_modules/
+.psci_modules/
+.psc-ide-port
+*.lock
+public/reinit.js
