@@ -1,0 +1,171 @@
+-- | Static Site Generation for REINIT // DX
+-- |
+-- | Renders the landing page to static HTML for:
+-- | - Faster first contentful paint
+-- | - SEO (crawlers see content immediately)  
+-- | - Progressive enhancement (works without JS)
+-- |
+-- | Usage:
+-- | ```
+-- | bun script/ssg.ts
+-- | ```
+module Reinit.SSG
+  ( renderStatic
+  , staticPage
+  ) where
+
+import Prelude
+
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import Hydrogen.HTML.Renderer as Renderer
+import Reinit.Page as Page
+
+-- | Render the landing page to a static HTML string
+-- | This is the #app contents - the shell (head, scripts) is in index.html
+renderStatic :: String
+renderStatic = Renderer.render staticPage
+
+-- | The complete landing page as static HTML
+-- | Uses static versions of hero/submit (no event handlers)
+staticPage :: forall w i. HH.HTML w i
+staticPage =
+  HH.div
+    [ Page.cls "min-h-screen bg-[#0a0a0a] text-white font-mono relative" ]
+    [ -- Background vortex (hidden on mobile)
+      HH.div [ Page.cls "vortex fixed top-[-200px] right-[-200px] opacity-50 hidden md:block" ] []
+    , HH.div [ Page.cls "vortex fixed bottom-[-400px] left-[-400px] opacity-30 hidden md:block" ] []
+    , Page.nav
+    , staticHero
+    , Page.diagnostic
+    , Page.socialProof
+    , Page.logos
+    , Page.problem
+    , Page.whyNotDiy
+    , Page.services
+    , Page.process
+    , Page.beforeAfter
+    , Page.terminal
+    , Page.stackComparison
+    , Page.techStack
+    , Page.liveActivity
+    , Page.testimonials
+    , Page.pricing
+    , Page.faq
+    , Page.antiTestimonials
+    , Page.caseStudies
+    , Page.whatWeDont
+    , Page.guarantee
+    , Page.founderNote
+    , Page.urgency
+    , Page.metrics
+    , staticSubmit
+    , Page.altCta
+    , Page.nerdDive
+    , Page.footer
+    ]
+
+-- ============================================================
+-- STATIC HERO (no event handlers)
+-- ============================================================
+
+staticHero :: forall w i. HH.HTML w i
+staticHero =
+  HH.section
+    [ Page.cls "relative min-h-screen flex items-center justify-center px-4 md:px-10 pt-24 pb-32" ]
+    [ HH.div
+        [ Page.cls "max-w-4xl mx-auto text-center" ]
+        [ HH.div
+            [ Page.cls "mb-6 md:mb-8" ]
+            [ HH.span
+                [ Page.cls "inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 text-[10px] md:text-[11px] tracking-[1.5px] text-white/40" ]
+                [ HH.span [ Page.cls "status-dot" ] []
+                , HH.text "ACCEPTING NEW PATIENTS"
+                ]
+            ]
+        , HH.h1
+            [ Page.cls "text-[32px] md:text-[56px] font-normal leading-[1.1] mb-4 md:mb-6 tracking-[-1px]" ]
+            [ HH.span [ Page.cls "glow-1" ] [ HH.text "Your AI " ]
+            , HH.span [ Page.cls "text-[#E24B4A] glow-2" ] [ HH.text "broke" ]
+            , HH.span [ Page.cls "glow-3" ] [ HH.text " it." ]
+            , HH.br_
+            , HH.span [ Page.cls "glow-4" ] [ HH.text "We " ]
+            , HH.span [ Page.cls "text-[#5DCAA5] glow-5" ] [ HH.text "fix" ]
+            , HH.span [ Page.cls "glow-6" ] [ HH.text " it." ]
+            ]
+        , HH.p
+            [ Page.cls "text-[14px] md:text-[16px] text-white/40 max-w-xl mx-auto mb-8 md:mb-12 leading-relaxed" ]
+            [ HH.text "Professional cleanup for vibe-coded apps. We debug in your stack, rewrite in PureScript, or formally verify critical paths with Lean4." ]
+        -- CTA Form (static - JS enhances)
+        , HH.div
+            [ HP.id "diag-hero"
+            , Page.cls "max-w-lg mx-auto"
+            ]
+            [ HH.div
+                [ Page.cls "flex flex-col md:flex-row gap-3" ]
+                [ HH.input
+                    [ HP.type_ HP.InputText
+                    , HP.id "diag-repo-input"
+                    , HP.placeholder "github.com/your/repo"
+                    , Page.cls "flex-1 px-4 py-3 md:py-4 rounded bg-white/5 border border-white/10 text-[13px] md:text-[14px] placeholder:text-white/20 focus:outline-none focus:border-[#5DCAA5]/50 transition-all"
+                    ]
+                , HH.button
+                    [ HP.type_ HP.ButtonButton
+                    , HP.id "diag-go-btn"
+                    , Page.cls "px-6 md:px-8 py-3 md:py-4 rounded bg-[#5DCAA5] text-[#0a0a0a] text-[12px] md:text-[13px] tracking-[1px] font-medium hover:bg-[#5DCAA5]/90 transition-all"
+                    ]
+                    [ HH.text "ANALYZE →" ]
+                ]
+            , HH.p
+                [ Page.cls "text-[10px] md:text-[11px] text-white/20 mt-3 md:mt-4" ]
+                [ HH.text "Free diagnostic. No commitment. Results in under 60 seconds." ]
+            ]
+        ]
+    ]
+
+-- ============================================================
+-- STATIC SUBMIT (no event handlers)
+-- ============================================================
+
+staticSubmit :: forall w i. HH.HTML w i
+staticSubmit =
+  HH.section
+    [ HP.id "submit"
+    , Page.cls "py-20 md:py-32 px-4 md:px-10 bg-gradient-to-b from-transparent to-[#5DCAA5]/5 relative"
+    ]
+    [ HH.div
+        [ Page.cls "absolute inset-0 bg-gradient-to-t from-[#5DCAA5]/10 to-transparent opacity-50" ] []
+    , HH.div
+        [ Page.cls "max-w-lg mx-auto text-center relative z-10" ]
+        [ HH.span
+            [ Page.cls "text-[10px] md:text-[11px] tracking-[2px] text-[#5DCAA5]/60 block mb-4" ]
+            [ HH.text "/// READY?" ]
+        , HH.h2
+            [ Page.cls "text-[28px] md:text-[36px] font-normal mb-4 md:mb-6" ]
+            [ HH.text "Submit your repo." ]
+        , HH.p
+            [ Page.cls "text-[13px] md:text-[14px] text-white/40 mb-8 md:mb-10" ]
+            [ HH.text "We'll diagnose it, quote it, and have it back to you before you can hire a contractor." ]
+        , HH.div
+            [ Page.cls "space-y-3 md:space-y-4" ]
+            [ HH.input
+                [ HP.type_ HP.InputText
+                , HP.placeholder "github.com/your/repo"
+                , Page.cls "w-full px-4 py-3 md:py-4 rounded bg-white/5 border border-white/10 text-[13px] md:text-[14px] placeholder:text-white/20 focus:outline-none focus:border-[#5DCAA5]/50 transition-all"
+                ]
+            , HH.input
+                [ HP.type_ HP.InputText
+                , HP.placeholder "your@email.com"
+                , Page.cls "w-full px-4 py-3 md:py-4 rounded bg-white/5 border border-white/10 text-[13px] md:text-[14px] placeholder:text-white/20 focus:outline-none focus:border-[#5DCAA5]/50 transition-all"
+                ]
+            , HH.button
+                [ HP.type_ HP.ButtonSubmit
+                , Page.cls "w-full px-6 py-3 md:py-4 rounded bg-[#5DCAA5] text-[#0a0a0a] text-[12px] md:text-[13px] tracking-[1px] font-medium hover:bg-[#5DCAA5]/90 transition-all"
+                ]
+                [ HH.text "GET DIAGNOSIS →" ]
+            ]
+        , HH.p
+            [ Page.cls "text-[10px] text-white/20 mt-4 md:mt-6" ]
+            [ HH.text "Diagnosis is free. Quote delivered in under 1 hour." ]
+        ]
+    ]
