@@ -1,13 +1,118 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>REINIT // DX</title>
+
+    <!-- Primary Meta Tags -->
+    <title>
+      REINIT // DX — Vibe-Coded App Cleanup | Your AI Broke It. We Fix It.
+    </title>
+    <meta
+      name="title"
+      content="REINIT // DX — Vibe-Coded App Cleanup | Your AI Broke It. We Fix It."
+    />
     <meta
       name="description"
-      content="Your AI broke it. We fix it. Or we make it unbreakable."
+      content="Professional cleanup for AI-generated codebases. Fix bugs in your stack, or let us rewrite it in PureScript. Formally verified components available via Lean4. Debug → Reinit → Verify."
     />
+    <meta
+      name="keywords"
+      content="AI code cleanup, vibe coding fix, AI generated code repair, PureScript rewrite, code audit, formal verification, Lean4, debugging service, code quality, technical debt, React bugs, stale closures, impossible states"
+    />
+    <meta name="author" content="REINIT // DX" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#5DCAA5" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://reinit.dev/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="REINIT // DX" />
+    <meta property="og:url" content="https://reinit.dev/" />
+    <meta
+      property="og:title"
+      content="REINIT // DX — Your AI Broke It. We Fix It."
+    />
+    <meta
+      property="og:description"
+      content="Professional cleanup for AI-generated codebases. Fix bugs in your stack, rewrite in PureScript, or formally verify critical paths with Lean4."
+    />
+    <meta property="og:image" content="https://reinit.dev/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="REINIT // DX - Terminal interface showing code analysis"
+    />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://reinit.dev/" />
+    <meta
+      name="twitter:title"
+      content="REINIT // DX — Your AI Broke It. We Fix It."
+    />
+    <meta
+      name="twitter:description"
+      content="Professional cleanup for AI-generated codebases. Debug → Reinit → Verify."
+    />
+    <meta name="twitter:image" content="https://reinit.dev/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="REINIT // DX - Vibe-Coded App Cleanup"
+    />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "REINIT // DX",
+        "alternateName": "REINIT DX",
+        "description": "Professional cleanup service for AI-generated codebases. Debugging, PureScript rewrites, and formal verification.",
+        "url": "https://reinit.dev/",
+        "logo": "https://reinit.dev/logo.png",
+        "priceRange": "$149 - $14,900",
+        "serviceType": [
+          "Software Debugging",
+          "Code Rewriting",
+          "Formal Verification"
+        ],
+        "areaServed": "Worldwide",
+        "availableChannel": {
+          "@type": "ServiceChannel",
+          "serviceUrl": "https://reinit.dev/",
+          "serviceType": "Online"
+        },
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "FIX",
+            "description": "Debug in your existing stack",
+            "price": "149",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "Offer",
+            "name": "REINIT",
+            "description": "Rewrite critical paths in PureScript",
+            "price": "1490",
+            "priceCurrency": "USD"
+          },
+          {
+            "@type": "Offer",
+            "name": "VERIFY",
+            "description": "Formal verification via Lean4",
+            "price": "14900",
+            "priceCurrency": "USD"
+          }
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -812,7 +917,8 @@
     <script>
       // ═══════════════════════════════════════════════════════════════════════
       // DIAGNOSTIC DEMO: Live scan simulation
-      // TODO: Real syntax highlighting (prism.js or shiki) - currently faking it with inline spans
+      // Terminal output uses SYN color object for highlighting (see below)
+      // Code blocks use Shiki (see initHighlighting at bottom of file)
       // ═══════════════════════════════════════════════════════════════════════
 
       const diagFindings = [
@@ -1167,6 +1273,64 @@
           diagRunScan();
         }
       });
+
+      // ═══════════════════════════════════════════════════════════════════════
+      // SYNTAX HIGHLIGHTING: Shiki for code blocks
+      // Highlights the before/after and deep dive code
+      // ═══════════════════════════════════════════════════════════════════════
+
+      async function initHighlighting() {
+        // Import shiki from CDN
+        const { codeToHtml } = await import(
+          "https://esm.sh/shiki@1.1.7/bundle/web"
+        );
+
+        // Find all pre > code elements and highlight them
+        // Wait for PureScript to mount first
+        await new Promise((r) => setTimeout(r, 100));
+
+        const codeBlocks = document.querySelectorAll("pre code");
+        for (const block of codeBlocks) {
+          const code = block.textContent || "";
+          // Detect language from content
+          const lang =
+            code.includes("useState") || code.includes("useEffect")
+              ? "jsx"
+              : code.includes("::") || code.includes("handleAction")
+                ? "haskell"
+                : "typescript";
+
+          try {
+            const html = await codeToHtml(code, {
+              lang,
+              theme: "github-dark-default",
+            });
+            // Replace the code element content
+            const pre = block.parentElement;
+            if (pre) {
+              // Extract just the code part from shiki output
+              const temp = document.createElement("div");
+              temp.innerHTML = html;
+              const shikiCode = temp.querySelector("code");
+              if (shikiCode) {
+                block.innerHTML = shikiCode.innerHTML;
+                // Add shiki styles
+                block.style.background = "transparent";
+              }
+            }
+          } catch (e) {
+            // Silently fail - code will remain unhighlighted
+            console.debug("Shiki highlighting failed for block:", e);
+          }
+        }
+      }
+
+      // Run after page loads
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initHighlighting);
+      } else {
+        initHighlighting();
+      }
     </script>
   </body>
 </html>
