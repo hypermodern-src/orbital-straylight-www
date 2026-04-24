@@ -206,7 +206,7 @@ hero state =
         , HH.p
             [ cls "text-[15px] md:text-[18px] text-white/40 max-w-xl mb-6 md:mb-8 leading-relaxed" ]
             [ HH.text state.hero.tagline
-            , HH.text " Same-day turnaround. Flat rate."
+            , HH.text " Flat rate. Most ship same-day."
             ]
         -- CTA input - stacked on mobile
         , HH.form
@@ -228,7 +228,7 @@ hero state =
             ]
         , HH.p
             [ cls "text-[10px] md:text-[11px] text-white/20 mb-8 md:mb-10" ]
-            [ HH.text "quoted in < 1 hour · fixed in < 24 hours · flat rate" ]
+            [ HH.text "quoted in < 1 hour · flat rate · most ship same-day" ]
         , HH.div
             [ cls "flex gap-4" ]
             [ HH.a
@@ -337,7 +337,7 @@ diagnostic =
                     [ HH.div_
                         [ HH.p [ cls "text-[10px] tracking-[1px] text-white/25 mb-1" ] [ HH.text "ESTIMATED FIX" ]
                         , HH.span [ cls "text-[28px] md:text-[32px] text-white price" ] [ HH.text "$149" ]
-                        , HH.span [ cls "text-[11px] md:text-[12px] text-white/20 ml-3" ] [ HH.text "47 issues · flat rate · < 24h" ]
+                        , HH.span [ cls "text-[11px] md:text-[12px] text-white/20 ml-3" ] [ HH.text "47 issues · flat rate" ]
                         ]
                     , HH.div
                         [ cls "flex gap-2" ]
@@ -386,7 +386,7 @@ socialProof =
     , HH.div
         [ cls "grid grid-cols-2 gap-6 md:flex md:items-center md:justify-between max-w-5xl mx-auto" ]
         [ proofStat "847" "repos fixed"
-        , proofStat "< 4h" "avg turnaround"
+        , proofStat "94%" "same-day"
         , proofStat "$127" "avg cost"
         , proofStat "100%" "satisfaction"
         ]
@@ -500,7 +500,7 @@ whyNotDiy =
             , HH.div_
                 [ HH.p [ cls "text-[18px] text-white/60 mb-4" ] [ HH.text "Our time" ]
                 , HH.p [ cls "text-[13px] text-white/30 leading-relaxed" ]
-                    [ HH.text "We've seen this bug 40 times. We know where to look. 4 hours, flat rate, you're shipping. That's the trade." ]
+                    [ HH.text "We've seen this bug 40 times. We know where to look. Flat rate, you're shipping by tomorrow. Usually today. That's the trade." ]
                 ]
             ]
         ]
@@ -525,11 +525,11 @@ services =
     , HH.div
         [ cls "grid gap-8 md:gap-0 md:grid-cols-3 max-w-6xl" ]
         [ serviceCard "Fix" "[01]" false "$49-299"
-            "Your vibe-coded app, debugged and deployed. We work in your existing stack. Same day."
+            "Your vibe-coded app, debugged and deployed. We work in your existing stack."
             [ "Debug & fix errors"
             , "Your existing stack"
-            , "Same-day turnaround"
-            , "Flat rate quote"
+            , "Most ship same-day"
+            , "Flat rate quote upfront"
             ]
             "Best for: working code that's broken"
         , serviceCard "Reinit" "[02]" true "$500-2k"
@@ -602,8 +602,8 @@ process =
     , HH.div
         [ cls "grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-5xl mx-auto" ]
         [ processStep "01" "Submit" "Paste your repo URL. Add a description if you want."
-        , processStep "02" "Quote" "We review and reply with a flat-rate quote in < 1 hour."
-        , processStep "03" "Fix" "Accept the quote. We ship the fix same-day."
+        , processStep "02" "Quote" "We review and reply with a flat-rate quote in < 1 hour. Timeline included."
+        , processStep "03" "Fix" "Accept the quote. Most fixes ship same-day—we'll tell you if yours won't."
         , processStep "04" "Ship" "Merge the PR. You're live. We're here if it breaks again."
         ]
     ]
@@ -852,7 +852,7 @@ testimonials =
         [ HH.text "/// WHAT THEY SAID" ]
     , HH.div
         [ cls "grid md:grid-cols-3 gap-8 max-w-6xl mx-auto" ]
-        [ testimonial "Fixed 3 weeks of Cursor damage in 4 hours. Mass was intact. I cried." 
+        [ testimonial "Fixed 3 weeks of Cursor damage in one afternoon. Mass was intact. I cried." 
             "@vibecodegod" "shipped 2 days early"
         , testimonial "They rewrote our whole dashboard in PureScript. Zero bugs since. It's been 6 months."
             "CTO, Series A startup" "reinit tier"
@@ -932,8 +932,8 @@ faq =
             [ HH.text "/// FAQ" ]
         , HH.div
             [ cls "space-y-8" ]
-            [ faqItem "How fast is same-day?" 
-                "Most fixes ship within 4 hours. Complex issues might take 8-12. We'll tell you upfront."
+            [ faqItem "How fast is 'same-day'?" 
+                "94% of fixes ship within 8 hours. The other 6%? Architectural stuff—race conditions, circular deps, state machines. We quote timeline upfront so you're never surprised."
             , faqItem "What if I don't like the fix?"
                 "Full refund, no questions. We've issued 3 refunds in 847 projects."
             , faqItem "Why PureScript for Reinit?"
@@ -1146,7 +1146,7 @@ metrics =
     , HH.div
         [ cls "grid md:grid-cols-4 gap-8 max-w-5xl mx-auto text-center" ]
         [ metricCard "847" "Projects completed" "and counting"
-        , metricCard "3.7h" "Average fix time" "same-day guaranteed"
+        , metricCard "94%" "Same-day fixes" "6% need more time"
         , metricCard "0" "Bugs reintroduced" "we fix it right"
         , metricCard "99.6%" "Satisfaction rate" "3 refunds total"
         ]
@@ -1201,7 +1201,7 @@ submit state =
             ]
         , HH.p
             [ cls "text-[11px] text-white/20 mt-6" ]
-            [ HH.text "quoted in < 1 hour · fixed in < 24 hours · flat rate · 100% refund guarantee" ]
+            [ HH.text "quoted in < 1 hour · flat rate · timeline upfront · 100% refund guarantee" ]
         ]
     ]
 
