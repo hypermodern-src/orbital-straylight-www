@@ -36,21 +36,29 @@ module Reinit.Page
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Web.Event.Event (Event, preventDefault)
 
+import Reinit.Statsig as Statsig
+
 -- ============================================================
 -- TYPES
 -- ============================================================
 
-type State = { repo :: String }
+type State =
+  { repo :: String
+  , hero :: Statsig.HeroVariant
+  }
 
 data Action
-  = SetRepo String
+  = Initialize
+  | SetRepo String
   | Submit Event
 
 -- ============================================================
@@ -59,16 +67,32 @@ data Action
 
 component :: forall q i o m. MonadAff m => H.Component q i o m
 component = H.mkComponent
-  { initialState: const { repo: "" }
+  { initialState: const
+      { repo: ""
+      , hero:
+          { variant: "control"
+          , headline: "Your AI broke it."
+          , subhead: "We fix it."
+          , tagline: "Vibe-coded apps cleaned up by engineers who understand what the AI was trying to do."
+          , cta: "GET QUOTE"
+          }
+      }
   , render
-  , eval: H.mkEval H.defaultEval { handleAction = handleAction }
+  , eval: H.mkEval H.defaultEval
+      { handleAction = handleAction
+      , initialize = Just Initialize
+      }
   }
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
+  Initialize -> do
+    variant <- liftEffect Statsig.getHeroVariant
+    H.modify_ _ { hero = variant }
   SetRepo s -> H.modify_ _ { repo = s }
   Submit e -> do
-    H.liftEffect $ preventDefault e
+    liftEffect $ preventDefault e
+    liftEffect $ Statsig.logSubmit "hero"
     pure unit
 
 -- ============================================================
@@ -165,7 +189,9 @@ navLink href label =
 hero :: forall m. State -> H.ComponentHTML Action () m
 hero state =
   HH.section
-    [ cls "pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-10" ]
+    [ cls "pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-10"
+    , HP.attr (HH.AttrName "data-variant") state.hero.variant
+    ]
     [ HH.div
         [ cls "max-w-4xl" ]
         [ HH.p
@@ -173,15 +199,14 @@ hero state =
             [ HH.text "/// AI-GENERATED CODE CLEANUP" ]
         , HH.h1
             [ cls "text-[32px] md:text-[64px] font-normal leading-[1.1] mb-4 md:mb-6" ]
-            [ HH.span [ cls "glow-1" ] [ HH.text "Your AI broke it." ]
+            [ HH.span [ cls "glow-1" ] [ HH.text state.hero.headline ]
             , HH.br_
-            , HH.span [ cls "text-white/40 glow-2" ] [ HH.text "We fix it." ]
+            , HH.span [ cls "text-white/40 glow-2" ] [ HH.text state.hero.subhead ]
             ]
         , HH.p
             [ cls "text-[15px] md:text-[18px] text-white/40 max-w-xl mb-6 md:mb-8 leading-relaxed" ]
-            [ HH.text "Vibe-coded apps cleaned up by engineers who understand what the AI was "
-            , HH.span [ cls "italic" ] [ HH.text "trying" ]
-            , HH.text " to do. Same-day turnaround. Flat rate."
+            [ HH.text state.hero.tagline
+            , HH.text " Same-day turnaround. Flat rate."
             ]
         -- CTA input - stacked on mobile
         , HH.form
@@ -199,7 +224,7 @@ hero state =
                 [ HP.type_ HP.ButtonSubmit
                 , cls "px-6 py-3 rounded text-[12px] tracking-[1px] font-medium bg-white text-[#0a0a0a] hover:bg-white/90 hover:translate-y-[-1px] transition-all"
                 ]
-                [ HH.text "GET QUOTE" ]
+                [ HH.text state.hero.cta ]
             ]
         , HH.p
             [ cls "text-[10px] md:text-[11px] text-white/20 mb-8 md:mb-10" ]

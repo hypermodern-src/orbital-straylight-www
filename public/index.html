@@ -1380,5 +1380,125 @@ handleAction = case _ of
         initHighlighting();
       }
     </script>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         STATSIG: Epsilon-greedy bandit for hero variants
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <script type="module">
+      import { StatsigClient } from "https://esm.sh/@statsig/js-client@3";
+
+      // Get or create stable device ID
+      function getStableId() {
+        const key = "reinit_stable_id";
+        let id = localStorage.getItem(key);
+        if (!id) {
+          id = crypto.randomUUID();
+          localStorage.setItem(key, id);
+        }
+        return id;
+      }
+
+      // Initialize Statsig
+      const statsig = new StatsigClient(
+        "client-PLACEHOLDER", // TODO: Replace with real client key
+        { customIDs: { stableID: getStableId() } },
+        { environment: { tier: "production" } },
+      );
+
+      // Non-blocking init - use cached values until network resolves
+      statsig.initializeAsync().catch((e) => {
+        console.debug("Statsig init failed, using defaults:", e);
+      });
+
+      // Expose to window for PureScript FFI and debugging
+      window.statsig = {
+        // Get hero experiment variant
+        // Returns: { variant: "control" | "direct" | "pain" | "social", params: {...} }
+        getHeroVariant: () => {
+          const exp = statsig.getExperiment("hero_copy");
+          return {
+            variant: exp.get("variant", "control"),
+            headline: exp.get("headline", "Your AI broke it."),
+            subhead: exp.get("subhead", "We fix it."),
+            cta: exp.get("cta", "GET QUOTE"),
+            tagline: exp.get(
+              "tagline",
+              "Vibe-coded apps cleaned up by engineers who understand what the AI was trying to do.",
+            ),
+          };
+        },
+
+        // Log conversion events
+        logEvent: (name, value, metadata) => {
+          statsig.logEvent({ eventName: name, value, metadata });
+        },
+
+        // Convenience: log CTA click
+        logCtaClick: (location) => {
+          statsig.logEvent({
+            eventName: "cta_click",
+            value: location,
+            metadata: { variant: window.statsig.getHeroVariant().variant },
+          });
+        },
+
+        // Convenience: log form submission
+        logSubmit: (type) => {
+          statsig.logEvent({
+            eventName: "form_submit",
+            value: type,
+            metadata: { variant: window.statsig.getHeroVariant().variant },
+          });
+        },
+
+        // Convenience: log scroll depth
+        logScrollDepth: (depth) => {
+          statsig.logEvent({
+            eventName: "scroll_depth",
+            value: depth,
+            metadata: { variant: window.statsig.getHeroVariant().variant },
+          });
+        },
+
+        // Raw client access for debugging
+        _client: statsig,
+      };
+
+      // Track scroll depth (25%, 50%, 75%, 100%)
+      const scrollMilestones = new Set();
+      window.addEventListener(
+        "scroll",
+        () => {
+          const scrollPct = Math.round(
+            (window.scrollY /
+              (document.documentElement.scrollHeight - window.innerHeight)) *
+              100,
+          );
+          [25, 50, 75, 100].forEach((milestone) => {
+            if (scrollPct >= milestone && !scrollMilestones.has(milestone)) {
+              scrollMilestones.add(milestone);
+              window.statsig.logScrollDepth(milestone);
+            }
+          });
+        },
+        { passive: true },
+      );
+
+      // Track CTA clicks via delegation
+      document.addEventListener("click", (e) => {
+        const target = e.target.closest(
+          'a[href="#submit"], button[type="submit"]',
+        );
+        if (target) {
+          const location = target.closest("section")?.id || "hero";
+          window.statsig.logCtaClick(location);
+        }
+      });
+
+      console.debug(
+        "Statsig initialized, variant:",
+        window.statsig.getHeroVariant().variant,
+      );
+    </script>
   </body>
 </html>
