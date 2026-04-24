@@ -45,30 +45,47 @@ async function build() {
   // Read current index.html
   const html = await Bun.file(indexPath).text();
 
-  // Check if already has pre-rendered content
-  const appDivPattern = /<div id="app">([\s\S]*?)<\/div>\s*<script/;
-  const appDiv = html.match(appDivPattern);
-  if (!appDiv) {
-    throw new Error("Could not find #app div in index.html");
+  // Find the app div boundaries more precisely
+  // Look for: <div id="app">...</div> followed by newline and <script
+  const appStart = html.indexOf('<div id="app">');
+  if (appStart === -1) {
+    throw new Error("Could not find #app div start");
   }
 
-  const currentContent = appDiv[1].trim();
-  const hasContent = currentContent.length > 0;
-
-  if (hasContent) {
-    console.log("  Replacing existing pre-rendered content");
-  } else {
-    console.log("  Injecting pre-rendered content");
+  // Find the </div> that precedes <script src="/reinit.js">
+  const scriptTag = '<script src="/reinit.js">';
+  const scriptStart = html.indexOf(scriptTag);
+  if (scriptStart === -1) {
+    throw new Error("Could not find reinit.js script tag");
   }
 
-  // Inject/replace the pre-rendered HTML
-  const replacePattern = /<div id="app">([\s\S]*?)<\/div>(\s*<script)/;
-  const updated = html.replace(
-    replacePattern,
-    `<div id="app">${rendered}</div>$2`,
-  );
+  // The </div> we want is right before the script tag (with possible whitespace)
+  // Work backwards from scriptStart to find </div>
+  const beforeScript = html.slice(0, scriptStart);
+  const lastDivClose = beforeScript.lastIndexOf("</div>");
+  if (lastDivClose === -1) {
+    throw new Error("Could not find closing </div> before script");
+  }
+
+  // The content between <div id="app"> and that </div>
+  const appOpenEnd = appStart + '<div id="app">'.length;
+
+  // Build the new HTML
+  const before = html.slice(0, appOpenEnd);
+  const after = html.slice(lastDivClose);
+
+  const updated = before + rendered + after;
+
+  // Sanity check - the new file shouldn't be drastically larger
+  const sizeDiff = updated.length - html.length;
+  if (sizeDiff > 100000) {
+    throw new Error(
+      `Output seems too large (${sizeDiff} bytes larger). Aborting.`,
+    );
+  }
 
   await Bun.write(indexPath, updated);
+  console.log(`  Wrote ${updated.length} bytes`);
 
   // Clean up SSG bundle
   await $`rm -f ${ssgBundlePath}`.quiet();

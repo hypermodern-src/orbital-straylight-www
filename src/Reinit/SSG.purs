@@ -66,59 +66,56 @@ staticPage =
     ]
 
 -- ============================================================
--- STATIC HERO (no event handlers)
+-- STATIC HERO (matches Page.hero without event handlers)
 -- ============================================================
 
 staticHero :: forall w i. HH.HTML w i
 staticHero =
   HH.section
-    [ Page.cls "relative min-h-screen flex items-center justify-center px-4 md:px-10 pt-24 pb-32" ]
+    [ Page.cls "pt-24 md:pt-32 pb-16 md:pb-24 px-4 md:px-10" ]
     [ HH.div
-        [ Page.cls "max-w-4xl mx-auto text-center" ]
-        [ HH.div
-            [ Page.cls "mb-6 md:mb-8" ]
-            [ HH.span
-                [ Page.cls "inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 text-[10px] md:text-[11px] tracking-[1.5px] text-white/40" ]
-                [ HH.span [ Page.cls "status-dot" ] []
-                , HH.text "ACCEPTING NEW PATIENTS"
-                ]
-            ]
+        [ Page.cls "max-w-4xl" ]
+        [ HH.p
+            [ Page.cls "text-[10px] md:text-[11px] tracking-[3px] md:tracking-[4px] text-white/30 mb-4 md:mb-6" ]
+            [ HH.text "/// AI-GENERATED CODE CLEANUP" ]
         , HH.h1
-            [ Page.cls "text-[32px] md:text-[56px] font-normal leading-[1.1] mb-4 md:mb-6 tracking-[-1px]" ]
-            [ HH.span [ Page.cls "glow-1" ] [ HH.text "Your AI " ]
-            , HH.span [ Page.cls "text-[#E24B4A] glow-2" ] [ HH.text "broke" ]
-            , HH.span [ Page.cls "glow-3" ] [ HH.text " it." ]
+            [ Page.cls "text-[32px] md:text-[64px] font-normal leading-[1.1] mb-4 md:mb-6" ]
+            [ HH.span [ Page.cls "glow-1" ] [ HH.text "Your AI broke it." ]
             , HH.br_
-            , HH.span [ Page.cls "glow-4" ] [ HH.text "We " ]
-            , HH.span [ Page.cls "text-[#5DCAA5] glow-5" ] [ HH.text "fix" ]
-            , HH.span [ Page.cls "glow-6" ] [ HH.text " it." ]
+            , HH.span [ Page.cls "text-white/40 glow-2" ] [ HH.text "We fix it." ]
             ]
         , HH.p
-            [ Page.cls "text-[14px] md:text-[16px] text-white/40 max-w-xl mx-auto mb-8 md:mb-12 leading-relaxed" ]
-            [ HH.text "Professional cleanup for vibe-coded apps. We debug in your stack, rewrite in PureScript, or formally verify critical paths with Lean4." ]
-        -- CTA Form (static - JS enhances)
-        , HH.div
-            [ HP.id "diag-hero"
-            , Page.cls "max-w-lg mx-auto"
+            [ Page.cls "text-[15px] md:text-[18px] text-white/40 max-w-xl mb-6 md:mb-8 leading-relaxed" ]
+            [ HH.text "Vibe-coded apps cleaned up by engineers who understand what the AI was "
+            , HH.span [ Page.cls "italic" ] [ HH.text "trying" ]
+            , HH.text " to do. Same-day turnaround. Flat rate."
             ]
-            [ HH.div
-                [ Page.cls "flex flex-col md:flex-row gap-3" ]
-                [ HH.input
-                    [ HP.type_ HP.InputText
-                    , HP.id "diag-repo-input"
-                    , HP.placeholder "github.com/your/repo"
-                    , Page.cls "flex-1 px-4 py-3 md:py-4 rounded bg-white/5 border border-white/10 text-[13px] md:text-[14px] placeholder:text-white/20 focus:outline-none focus:border-[#5DCAA5]/50 transition-all"
-                    ]
-                , HH.button
-                    [ HP.type_ HP.ButtonButton
-                    , HP.id "diag-go-btn"
-                    , Page.cls "px-6 md:px-8 py-3 md:py-4 rounded bg-[#5DCAA5] text-[#0a0a0a] text-[12px] md:text-[13px] tracking-[1px] font-medium hover:bg-[#5DCAA5]/90 transition-all"
-                    ]
-                    [ HH.text "ANALYZE →" ]
+        -- CTA form (static version - no onSubmit handler)
+        , HH.form
+            [ Page.cls "flex flex-col md:flex-row gap-3 max-w-lg mb-4"
+            , HP.attr (HH.AttrName "action") "#submit"
+            ]
+            [ HH.input
+                [ HP.type_ HP.InputText
+                , HP.placeholder "github.com/you/broken-app"
+                , Page.cls "flex-1 px-4 py-3 rounded text-[13px] bg-white/5 border border-white/20 focus:border-white/40 focus:outline-none placeholder:text-white/25"
                 ]
-            , HH.p
-                [ Page.cls "text-[10px] md:text-[11px] text-white/20 mt-3 md:mt-4" ]
-                [ HH.text "Free diagnostic. No commitment. Results in under 60 seconds." ]
+            , HH.button
+                [ HP.type_ HP.ButtonSubmit
+                , Page.cls "px-6 py-3 rounded text-[12px] tracking-[1px] font-medium bg-white text-[#0a0a0a] hover:bg-white/90 hover:translate-y-[-1px] transition-all"
+                ]
+                [ HH.text "GET QUOTE" ]
+            ]
+        , HH.p
+            [ Page.cls "text-[10px] md:text-[11px] text-white/20 mb-8 md:mb-10" ]
+            [ HH.text "quoted in < 1 hour · fixed in < 24 hours · flat rate" ]
+        , HH.div
+            [ Page.cls "flex gap-4" ]
+            [ HH.a
+                [ HP.href "#services"
+                , Page.cls "px-4 md:px-5 py-2 rounded text-[10px] md:text-[11px] tracking-[1px] border border-white/15 text-white/50 hover:border-white/30 hover:text-white/80 transition-all"
+                ]
+                [ HH.text "SEE HOW IT WORKS" ]
             ]
         ]
     ]
