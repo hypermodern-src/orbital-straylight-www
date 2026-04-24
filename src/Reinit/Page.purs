@@ -1165,7 +1165,7 @@ nerdDive =
             [ HH.text "/// TECHNICAL DEEP DIVE" ]
         , HH.h2
             [ cls "text-[36px] font-normal mb-4" ]
-            [ HH.text "For the mass-brained among us." ]
+            [ HH.text "For the shape rotators among us." ]
         , HH.p
             [ cls "text-[14px] text-white/40 mb-16" ]
             [ HH.text "You want to know how the sausage is made. We respect that." ]

@@ -812,6 +812,7 @@
     <script>
       // ═══════════════════════════════════════════════════════════════════════
       // DIAGNOSTIC DEMO: Live scan simulation
+      // TODO: Real syntax highlighting (prism.js or shiki) - currently faking it with inline spans
       // ═══════════════════════════════════════════════════════════════════════
 
       const diagFindings = [
@@ -865,173 +866,178 @@
         },
       ];
 
+      // Syntax highlight colors
+      const SYN = {
+        cmd: "#5DCAA5", // commands
+        flag: "#EF9F27", // flags
+        path: "#54AEFF", // paths/files
+        str: "#F0997B", // strings
+        num: "#AFA9EC", // numbers
+        ok: "#5DCAA5", // success
+        err: "#E24B4A", // errors
+        warn: "#EF9F27", // warnings
+        dim: "rgba(255,255,255,0.25)",
+        muted: "rgba(255,255,255,0.4)",
+      };
+
       const diagSteps = [
         {
-          t: "$ git clone github.com/acme/vibe-coded-saas",
-          c: "#e0e0e0",
+          h: `<span style="color:${SYN.muted}">$</span> <span style="color:${SYN.cmd}">git clone</span> <span style="color:${SYN.path}">github.com/acme/vibe-coded-saas</span>`,
           d: 300,
           s: "Cloning repository...",
         },
         {
           t: "Cloning into 'vibe-coded-saas'...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 700,
         },
-        { t: "done.", c: "#5DCAA5", d: 300 },
+        { t: "done.", c: SYN.ok, d: 300 },
         { t: "", d: 150 },
         {
-          t: "$ reinit scan --deep",
-          c: "#e0e0e0",
+          h: `<span style="color:${SYN.muted}">$</span> <span style="color:${SYN.cmd}">reinit scan</span> <span style="color:${SYN.flag}">--deep</span>`,
           d: 400,
           s: "Scanning files...",
         },
         {
-          t: "src/ .............. 189 files",
-          c: "rgba(255,255,255,0.2)",
+          h: `<span style="color:${SYN.path}">src/</span> <span style="color:${SYN.dim}">....................</span> <span style="color:${SYN.num}">189</span> <span style="color:${SYN.dim}">files</span>`,
           d: 100,
         },
         {
-          t: "components/ ....... 43 files",
-          c: "rgba(255,255,255,0.2)",
+          h: `<span style="color:${SYN.path}">components/</span> <span style="color:${SYN.dim}">...........</span> <span style="color:${SYN.num}">43</span> <span style="color:${SYN.dim}">files</span>`,
           d: 80,
         },
         {
-          t: "hooks/ ............ 12 files",
-          c: "rgba(255,255,255,0.2)",
+          h: `<span style="color:${SYN.path}">hooks/</span> <span style="color:${SYN.dim}">................</span> <span style="color:${SYN.num}">12</span> <span style="color:${SYN.dim}">files</span>`,
           d: 80,
         },
         {
-          t: "pages/ ............ 8 files",
-          c: "rgba(255,255,255,0.2)",
+          h: `<span style="color:${SYN.path}">pages/</span> <span style="color:${SYN.dim}">................</span> <span style="color:${SYN.num}">8</span> <span style="color:${SYN.dim}">files</span>`,
           d: 80,
           af: () => diagAnimNum("diag-sf", 247, 600),
         },
         { t: "", d: 80 },
         {
           t: "Counting lines...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 200,
           s: "Counting lines...",
           af: () => diagAnimNum("diag-sl", 18420, 900),
         },
         {
-          t: "18,420 lines across 247 files",
-          c: "rgba(255,255,255,0.2)",
+          h: `<span style="color:${SYN.num}">18,420</span> <span style="color:${SYN.dim}">lines across</span> <span style="color:${SYN.num}">247</span> <span style="color:${SYN.dim}">files</span>`,
           d: 350,
         },
         { t: "", d: 80 },
         {
           t: "Analyzing dependencies...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 400,
           s: "Analyzing dependencies...",
         },
         {
-          t: "47 direct deps, 1,247 transitive",
-          c: "rgba(255,255,255,0.2)",
+          h: `<span style="color:${SYN.num}">47</span> <span style="color:${SYN.dim}">direct deps,</span> <span style="color:${SYN.num}">1,247</span> <span style="color:${SYN.dim}">transitive</span>`,
           d: 200,
         },
-        { t: "12 CVEs in dependency tree", c: "#E24B4A", d: 300 },
+        {
+          h: `<span style="color:${SYN.err}">✗</span> <span style="color:${SYN.num}">12</span> <span style="color:${SYN.err}">CVEs in dependency tree</span>`,
+          d: 300,
+        },
         { t: "", d: 80 },
         {
           t: "Scanning for secrets...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 300,
           s: "Scanning for secrets...",
         },
         {
-          t: "STRIPE_SECRET_KEY found in .env (committed)",
-          c: "#E24B4A",
+          h: `<span style="color:${SYN.err}">✗</span> <span style="color:${SYN.str}">STRIPE_SECRET_KEY</span> <span style="color:${SYN.err}">found in</span> <span style="color:${SYN.path}">.env</span> <span style="color:${SYN.dim}">(committed)</span>`,
           d: 400,
           af: () => diagShowFinding(7),
         },
         { t: "", d: 80 },
         {
           t: "Detecting impossible states...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 500,
           s: "Detecting impossible states...",
         },
         {
-          t: "useState soup detected in 14 files",
-          c: "#EF9F27",
+          h: `<span style="color:${SYN.warn}">⚠</span> <span style="color:${SYN.cmd}">useState</span> <span style="color:${SYN.warn}">soup detected in</span> <span style="color:${SYN.num}">14</span> <span style="color:${SYN.warn}">files</span>`,
           d: 200,
           af: () => diagShowFinding(1),
         },
         {
-          t: "5 components with unreachable state combos",
-          c: "#E24B4A",
+          h: `<span style="color:${SYN.err}">✗</span> <span style="color:${SYN.num}">5</span> <span style="color:${SYN.err}">components with unreachable state combos</span>`,
           d: 250,
         },
         {
-          t: "race condition in checkout flow",
-          c: "#E24B4A",
+          h: `<span style="color:${SYN.err}">✗</span> <span style="color:${SYN.err}">race condition in checkout flow</span>`,
           d: 250,
           af: () => diagShowFinding(2),
         },
         { t: "", d: 80 },
         {
           t: "Checking hook discipline...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 400,
           s: "Checking hooks...",
         },
         {
-          t: "8 stale closures in useEffect",
-          c: "#E24B4A",
+          h: `<span style="color:${SYN.err}">✗</span> <span style="color:${SYN.num}">8</span> <span style="color:${SYN.err}">stale closures in</span> <span style="color:${SYN.cmd}">useEffect</span>`,
           d: 200,
           af: () => diagShowFinding(0),
         },
         {
-          t: "3 missing dependency arrays",
-          c: "#EF9F27",
+          h: `<span style="color:${SYN.warn}">⚠</span> <span style="color:${SYN.num}">3</span> <span style="color:${SYN.warn}">missing dependency arrays</span>`,
           d: 200,
           af: () => diagShowFinding(3),
         },
-        { t: "14 conditional hook calls", c: "#EF9F27", d: 200 },
+        {
+          h: `<span style="color:${SYN.warn}">⚠</span> <span style="color:${SYN.num}">14</span> <span style="color:${SYN.warn}">conditional hook calls</span>`,
+          d: 200,
+        },
         { t: "", d: 80 },
         {
           t: "Auditing accessibility...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 300,
           s: "Auditing a11y...",
         },
         {
-          t: "0 focus traps on 4 modal components",
-          c: "#E24B4A",
+          h: `<span style="color:${SYN.err}">✗</span> <span style="color:${SYN.num}">0</span> <span style="color:${SYN.err}">focus traps on</span> <span style="color:${SYN.num}">4</span> <span style="color:${SYN.err}">modal components</span>`,
           d: 200,
           af: () => diagShowFinding(4),
         },
-        { t: "0 aria-labels on 23 interactive elements", c: "#EF9F27", d: 200 },
+        {
+          h: `<span style="color:${SYN.warn}">⚠</span> <span style="color:${SYN.num}">0</span> <span style="color:${SYN.warn}">aria-labels on</span> <span style="color:${SYN.num}">23</span> <span style="color:${SYN.warn}">interactive elements</span>`,
+          d: 200,
+        },
         { t: "", d: 80 },
         {
           t: "Checking routes...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 250,
           s: "Checking routes...",
         },
         {
-          t: "15 string-literal routes, 1 typo detected",
-          c: "#EF9F27",
+          h: `<span style="color:${SYN.warn}">⚠</span> <span style="color:${SYN.num}">15</span> <span style="color:${SYN.warn}">string-literal routes,</span> <span style="color:${SYN.num}">1</span> <span style="color:${SYN.warn}">typo detected</span>`,
           d: 250,
           af: () => diagShowFinding(5),
         },
         { t: "", d: 80 },
         {
           t: "Reviewing package health...",
-          c: "rgba(255,255,255,0.25)",
+          c: SYN.dim,
           d: 300,
           s: "Reviewing packages...",
         },
         {
-          t: "react-scripts@4.0.3 — end of life",
-          c: "#EF9F27",
+          h: `<span style="color:${SYN.warn}">⚠</span> <span style="color:${SYN.str}">react-scripts@4.0.3</span> <span style="color:${SYN.warn}">— end of life</span>`,
           d: 200,
           af: () => diagShowFinding(6),
         },
         {
-          t: "no lockfile integrity check",
-          c: "rgba(255,255,255,0.3)",
+          h: `<span style="color:${SYN.muted}">⚠</span> <span style="color:${SYN.muted}">no lockfile integrity check</span>`,
           d: 200,
         },
         { t: "", d: 150 },
@@ -1041,8 +1047,7 @@
           d: 200,
         },
         {
-          t: "scan complete. 47 issues found.",
-          c: "#5DCAA5",
+          h: `<span style="color:${SYN.ok}">✓ scan complete.</span> <span style="color:${SYN.num}">47</span> <span style="color:${SYN.ok}">issues found.</span>`,
           d: 0,
           s: "Analysis complete",
           af: () => {
@@ -1050,12 +1055,12 @@
             const ss = document.getElementById("diag-ss");
             if (ss) {
               ss.textContent = "HIGH";
-              ss.style.color = "#E24B4A";
+              ss.style.color = SYN.err;
             }
             const dot = document.getElementById("diag-dot");
             if (dot) {
               dot.classList.remove("diag-blink");
-              dot.style.background = "#5DCAA5";
+              dot.style.background = SYN.ok;
             }
             setTimeout(() => {
               const quote = document.getElementById("diag-quote");
@@ -1108,16 +1113,20 @@
         }
       }
 
-      function diagAddTermLine(text, color) {
+      function diagAddTermLine(text, color, html) {
         const term = document.getElementById("diag-term");
         if (!term) return;
-        if (!text) {
+        if (!text && !html) {
           term.appendChild(document.createElement("br"));
           return;
         }
         const div = document.createElement("div");
         div.style.color = color;
-        div.textContent = text;
+        if (html) {
+          div.innerHTML = html;
+        } else {
+          div.textContent = text;
+        }
         term.appendChild(div);
         term.scrollTop = term.scrollHeight;
       }
@@ -1132,7 +1141,7 @@
         function next() {
           if (i >= diagSteps.length) return;
           const step = diagSteps[i];
-          diagAddTermLine(step.t, step.c);
+          diagAddTermLine(step.t, step.c, step.h);
           const stxt = document.getElementById("diag-stxt");
           if (step.s && stxt) stxt.textContent = step.s;
           if (step.af) step.af();
