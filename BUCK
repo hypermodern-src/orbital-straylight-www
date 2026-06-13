@@ -1,0 +1,118 @@
+# reinit-dx — the reference hydrogen app, migrated to the canonical buck2 build
+# (straylight-prelude STR-241). No spago: the closure below is reinit's spago.lock
+# solved offline (ps-resolve-lock.py), hydrogen rides in as the `hydrogen//` cell
+# (purescript_library), and the FFI shim (Reinit.Statsig) is self-contained — no
+# npm/bun2nix. PACKAGES is the registry closure MINUS hydrogen (a git dep,
+# supplied by the cell); compiled in one `purs compile` over closure + hydrogen
+# src + reinit src.
+
+# 83 packages — resolved offline from spago.lock (ps-resolve-lock.py: integrity → sha256).
+PACKAGES = [
+        {"name": "aff", "version": "8.0.0", "sha256": "f41448ad2751a18c9b7e252606a80a27ae9c3eac581dbdbbedb55640c9fff6c8"},
+        {"name": "aff-promise", "version": "4.0.0", "sha256": "260a77cbe356bae026c33d95dcb956a17f80bf1a9f560958efb379cd3c3cc672"},
+        {"name": "affjax", "version": "13.0.0", "sha256": "769395f042cda94541c3113a78a15d9c5932fac2f03c500dac553323141a6e59"},
+        {"name": "affjax-web", "version": "1.0.0", "sha256": "b0783e1b9d0b0e86581ba507bd4887d592d3fd41c85da105e4350168f5f1b713"},
+        {"name": "argonaut", "version": "9.0.0", "sha256": "33f11412286446ee7128629eed47e4af26c68f9e920d32b3d446a9a443a25a00"},
+        {"name": "argonaut-codecs", "version": "9.1.0", "sha256": "2bdd74481ae661a965112b26f29c4961386cee58a0ea1c57dcce0f5b7dc281ec"},
+        {"name": "argonaut-core", "version": "7.0.0", "sha256": "81866286d0482ad855b975e888fa61328a2449ff0ce5a1f215891c216aa5c533"},
+        {"name": "argonaut-traversals", "version": "10.0.0", "sha256": "82e4c20700e23840ab57d0af1c5d9c1fad706b4c4c3646f0dbfce097d7344159"},
+        {"name": "arraybuffer-types", "version": "3.0.2", "sha256": "a74e5c2674a4c9ea01ed51f333273611bd51c14681ecd974b104aa106344503f"},
+        {"name": "arrays", "version": "7.3.0", "sha256": "183e33ecb0a2f70ce2ec5090a9b5a1becf296a850af4d3be1f081767e28ff119"},
+        {"name": "bifunctors", "version": "6.1.0", "sha256": "0af6516fcb88ef978a22a8989ed47e934e5693ab4a94c4b9c3cb020360059dad"},
+        {"name": "catenable-lists", "version": "7.0.0", "sha256": "efe8bf30704b21187ad38882353e0435645613fc2e1c8a2d111e24a5d5fd55ed"},
+        {"name": "console", "version": "6.1.0", "sha256": "dd3e4f3f3d660136665740b81b39029292e509ae711bbbbc64d8272ebaeb2354"},
+        {"name": "const", "version": "6.0.0", "sha256": "4be9b4950b319e38b4cf55d1526927fb7445b962790975ae22bd6ede2f017e87"},
+        {"name": "contravariant", "version": "6.0.0", "sha256": "9ee724116a8bf3435a3e647f97d014cab7f270d875f1772f95957d3c06a6c2a7"},
+        {"name": "control", "version": "6.0.0", "sha256": "d2fc72621e452fe8a5c602e8f79e30d4ba82502d114888af34d95bf4268d5108"},
+        {"name": "datetime", "version": "6.1.0", "sha256": "b5bbfa7835f2e90383ed84a49f16126ec0c5df6382d89acd6d2069cccb3b0e87"},
+        {"name": "distributive", "version": "6.0.0", "sha256": "9deb7224ae01df63c36070f4b45d807a72a0a37babcdb23bef4c9c334a40ac0a"},
+        {"name": "dom-indexed", "version": "13.0.0", "sha256": "4ebf6e0d076628de13506320d7fe0acec56ee733daf0ea8a07837afd2d9af2f5"},
+        {"name": "effect", "version": "4.0.0", "sha256": "0dda94ddb9dc4538e03153cf46502e18755e6a348f11c45a46136e8a8ee27fab"},
+        {"name": "either", "version": "6.1.0", "sha256": "b411f1dcf82d1f8199380a5908391c33bb334536098a7ad4ad51966b34025148"},
+        {"name": "enums", "version": "6.0.1", "sha256": "b1d64e98b5f9fb9a40486a6f5724f4bd20f90416108d989aca35795e23eeb6ca"},
+        {"name": "exceptions", "version": "6.1.0", "sha256": "9d1aebf8dd309344d414e58b47b7b59f5a31717a3f5f7e396d052da18f655ba0"},
+        {"name": "exists", "version": "6.0.0", "sha256": "bed2dbad635a23ea73c7fd9fc360109c2a2fa0bb5ca2c0a52218cedba40a921f"},
+        {"name": "foldable-traversable", "version": "6.0.0", "sha256": "346196c828a8ff18dc7ba7cf3fbcb7c3083b0a17aa965203e9a26e743c5b5a10"},
+        {"name": "foreign", "version": "7.0.0", "sha256": "8e20d131541fa2f1ac6db03f1736f361fea25a4f62d9be6036b223cfe8057ec2"},
+        {"name": "foreign-object", "version": "4.1.0", "sha256": "c7f43bafcd33fef98744abcfc216261cffc39c97223edb3219f4533336b22885"},
+        {"name": "fork", "version": "6.0.0", "sha256": "d2478155e659835782644cbf127d42a21556f36f60414a8ab6a04d2116bddff0"},
+        {"name": "form-urlencoded", "version": "7.0.0", "sha256": "fbc1744bab6148bb02d467d0893753b7a8f24ccba1b2028b722054cdd7bd6855"},
+        {"name": "free", "version": "7.1.0", "sha256": "b540489df529450130e2ef781967185bb11876649d0c74919fcf1af82d1e96d5"},
+        {"name": "freeap", "version": "7.0.0", "sha256": "7bb4a257dae0fab54046c53d73103fd36b29b3bb9ba20bd5818c23f275a8b17e"},
+        {"name": "functions", "version": "6.0.0", "sha256": "d2382d3abf9214ee1449c29ce34a00ffd55d71fdab2e7de1def66563429fa95a"},
+        {"name": "functors", "version": "5.0.0", "sha256": "5b5a3fe30729e92ddc8687582fcba2c655cada67ebd4bf92cccd51fb086a51ca"},
+        {"name": "gen", "version": "4.0.0", "sha256": "93239ab5e78eb506b4eef7d3318792b8229d7a580a13547ae5fc0a919d74c2c6"},
+        {"name": "halogen", "version": "7.0.0", "sha256": "62b526dbb404884d43c8668627930d2d58381ff3f78275ff355bf5811b568c1e"},
+        {"name": "halogen-subscriptions", "version": "2.0.0", "sha256": "d5e06d55910d806b4ab8e63d1f48ae603ddd3b5092aa6388ca161ee0e872a4e5"},
+        {"name": "halogen-vdom", "version": "8.0.0", "sha256": "8e4e9a8ffb47eb7d2c905564ea607943ed20db36fcf7b297ef64faddf2612766"},
+        {"name": "http-methods", "version": "6.0.0", "sha256": "4b4523ac94a0c09c44b051ccfe95fbedd33c5781dfbef0ea7473dc910aedc4cb"},
+        {"name": "identity", "version": "6.0.0", "sha256": "458fe25cfa71a6abca1d87c978554d235274ea4a2107dadbb5662e85af2dd0b1"},
+        {"name": "integers", "version": "6.0.0", "sha256": "63cca8cc2d6e1d12dcaeea1b132bf9fdb30acc4d41a0a27fa251efea8f9b826f"},
+        {"name": "invariant", "version": "6.0.0", "sha256": "1f2a13d48e6a20746af114998e2eb3643bea9e95632f0ef8f2eb6b2b066daacc"},
+        {"name": "js-date", "version": "8.0.0", "sha256": "0cd42ba78c5873ca3cd23b71a3468e9147971a2ea1d1789d924d9943c6389796"},
+        {"name": "js-promise", "version": "1.0.0", "sha256": "bbeebea1f2304f95e14f67db32ee1d4a1c24c9619f3d1b7deb8d829f3c3f5af9"},
+        {"name": "js-uri", "version": "3.1.0", "sha256": "ef068739cb407ea861c39e3414d27b0bf62c0cc416f53980f92a4785db87e94c"},
+        {"name": "lazy", "version": "6.0.0", "sha256": "307442fb53dcf808e8aed069e1bfded5ee8aa44a6c0f068904d041ed338bfb52"},
+        {"name": "lists", "version": "7.0.0", "sha256": "fe619def02e853ec2c4dcaa28bb492501cb1b2fc2f8e7bb63e3c000f8ef261be"},
+        {"name": "maybe", "version": "6.0.0", "sha256": "f17e97120b59e65a9f904b9cd6158ea1f9cbea6c2193c812253c70bdb47f49b6"},
+        {"name": "media-types", "version": "6.0.0", "sha256": "dd6caafaf7ea2454e6cb593a0c65675d2b71b59c602badf5c2eb033f39455718"},
+        {"name": "newtype", "version": "5.0.0", "sha256": "76deb0d1cb72e0e4be3e3b7d7ec877894ea8b6da9253cde674066468412fa3a7"},
+        {"name": "nonempty", "version": "7.0.0", "sha256": "0ad92af3ff8a886a82139dd8fcbbe26c0fdca32edebfd1ed45953e1984bbc9f4"},
+        {"name": "now", "version": "6.0.0", "sha256": "993c86e2cf2da6cdd721fd238d5fe5304dbf425c0cceb425cb6c2a7d2494337a"},
+        {"name": "nullable", "version": "6.0.0", "sha256": "08301993e2fd49cd060854e413c9fea9da7862cf1abef9e453e9b685500bb7b3"},
+        {"name": "numbers", "version": "9.0.1", "sha256": "6727587248304409d16850bba6ee9f0038737705fe52a1d9adf2727adeb8ce5b"},
+        {"name": "ordered-collections", "version": "3.2.0", "sha256": "35a117736733ffb9497f13d61236b85e565b1b1b91a89c05290263b097f9d644"},
+        {"name": "orders", "version": "6.0.0", "sha256": "9d233164aef0c720d42e48d9aaf33207bd66568e9bd00c8b2c7a2c0d56efd573"},
+        {"name": "parallel", "version": "7.0.0", "sha256": "6c01a9561ac5cf62321e4038311efeb44ff5f4567b7736017583e02b9b2f92ac"},
+        {"name": "partial", "version": "4.0.0", "sha256": "99dae524102014c87bf613515b7f6ebfb73e0709e768eac0326761efe561121b"},
+        {"name": "prelude", "version": "6.0.2", "sha256": "22aca4ac346ab86503fcb45269def2ef9859bf76d4b0643892773cb5d7b3f10c"},
+        {"name": "profunctor", "version": "6.0.1", "sha256": "3b0d26242f8f20846afdade6cc2598e6fc6e4e047f7be11eebcfa659e4919d66"},
+        {"name": "profunctor-lenses", "version": "8.0.0", "sha256": "995218477904307c8eda6f9589c25e65e5720c9e0882f90ccc3965dc976744de"},
+        {"name": "record", "version": "4.0.0", "sha256": "590f1faa9e17d704c0ef4278a9470f5b867b0c2c31e9ee4a2674ff12e4dd5927"},
+        {"name": "refs", "version": "6.0.0", "sha256": "28a0f91bd751d926aeb831942d426cc63a833848b526a9bed92ab9536998f185"},
+        {"name": "safe-coerce", "version": "2.0.0", "sha256": "109af1b4ab79c42ed3623059ad204efc9ec0c370e6b629588ede289690175957"},
+        {"name": "st", "version": "6.2.0", "sha256": "588e0c12493051de299f0650dc6f15296817e6dd5148d265b9d9b97bd6e8691a"},
+        {"name": "strings", "version": "6.0.1", "sha256": "14db68da1a0d5b90dae96e9cac893bed85cc6a006f3861d913590eede675bcb3"},
+        {"name": "tailrec", "version": "6.1.0", "sha256": "c6ba2b09f3f4c55d70b9bb36ee275008742a76f494baa9a62ff6a6ec98b5c155"},
+        {"name": "transformers", "version": "6.1.0", "sha256": "4099a0353ff2ee58cf1d2b17696e33c45ffdf36045890f7428d2f583f36d10e4"},
+        {"name": "tuples", "version": "7.0.0", "sha256": "04acbb11f2bc4b529e4c2c325aac96d70c1ca52010ba1dc8b1ccd25604ba7f36"},
+        {"name": "type-equality", "version": "4.0.1", "sha256": "041a983929c02a66b246f4799ad66809fe12958b368a96ad0fffb99d0c7bddac"},
+        {"name": "typelevel-prelude", "version": "7.0.0", "sha256": "fa91e2d78ff8d264e3ffe966096a8bd13ee25c85c3d7e35283f288b72ca80740"},
+        {"name": "unfoldable", "version": "6.0.0", "sha256": "04affa072d6c2a9ff3b64fbd085deae37495d100d32d576c1aa15eaca1d299b8"},
+        {"name": "unsafe-coerce", "version": "6.0.0", "sha256": "d0bd50b1a636d0e20b8df5394d5ef677753fb528e198bf61277d96329f39ecb9"},
+        {"name": "unsafe-reference", "version": "5.0.0", "sha256": "b6d4894d05272bc00ad9e18eb1f4712d42440cf2faa67984c636e23aa7f00ba2"},
+        {"name": "web-clipboard", "version": "6.0.0", "sha256": "dc2574b71c0a75d2e88fca81ad18d459b897d0cf3eae73a98b5880a6be4f11bd"},
+        {"name": "web-dom", "version": "6.0.0", "sha256": "ad57aa9310a1923aa2b03bceba3cbd04c1201aa264c17dedea0db56d77e21b9a"},
+        {"name": "web-events", "version": "4.0.0", "sha256": "c1935e95d1b4394fbca86c9c509f5eeafc5fd7f182e04a783a544c86f8ecf4b0"},
+        {"name": "web-file", "version": "4.0.0", "sha256": "b71b1d91e581294ffee6ff66e5cea4cac8094120f2575afb30769e4f8493a634"},
+        {"name": "web-html", "version": "4.1.1", "sha256": "c8eb9924653116b8af1caa68fe32ae2b31596aae8f3cf13ae1fb52cac5c5b2c9"},
+        {"name": "web-pointerevents", "version": "2.0.0", "sha256": "9906e6d55dfabb722dd967583005edccb049977b910213780637994f0dcb58df"},
+        {"name": "web-storage", "version": "5.0.0", "sha256": "6097e8b39e6878ab414ad35fa167de7e54b2f23fb8203ca6e5e699b4863b60ce"},
+        {"name": "web-touchevents", "version": "4.0.0", "sha256": "1f4d9ce770499470e5020a208ffc7c6ccecf6a026384c32b30f632f48ed17f4b"},
+        {"name": "web-uievents", "version": "5.0.0", "sha256": "ca1f6e54b206bbcc04d7e8f02de86d7ec45f4757b289286120c32104fa8ac9b1"},
+        {"name": "web-xhr", "version": "5.0.1", "sha256": "831420786c2f17f37219dc34149f48cd723782a20c35bf2840ef17fa9e630f2c"},
+]
+
+# The deployable static site (STR-235 purs_site, via the ssg_main param):
+#   - client hydration bundle: esbuild Main -> reinit.js
+#   - SSG prerender: node runs Reinit.SSG.main, which reads the shell
+#     (public/index.html), injects the prerendered #app, and prints the full
+#     page -> index.html. Route policy lives in Reinit.SSG (here: one static
+#     page); the rule is pure mechanism.
+# `buck2 build //:site` emits the deploy dir; the Vercel deploy convention ships
+# it verbatim (projects.reinit-dx.deploy.site.target = "//:site").
+#
+# .purs only in srcs: purs compile takes module sources; the adjacent FFI .js
+# (Reinit.Statsig.js, Reinit.SSG.js) is found by purs next to its .purs and must
+# NOT be a compile argument (registry deps work the same way).
+purescript_app(
+    name = "site",
+    srcs = glob(["src/**/*.purs"]),
+    main = "Main",
+    ssg_main = "Reinit.SSG",
+    deps = ["hydrogen//:lib"],
+    index_html = "public/index.html",
+    bundle_name = "reinit.js",
+    packages = PACKAGES,
+)
+
