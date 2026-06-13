@@ -24,6 +24,7 @@ import Web.HTML.Window (document)
 import Web.Event.Event (preventDefault)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 
+import Straylight.Auth as Auth
 import Straylight.UI (cls, scanlineOverlay)
 import Straylight.Router (Route(..), Product(..), ProductPage(..), parseRoute, routeToPath, pushState, getPathname, onPopState, interceptLinks)
 import Straylight.Layout.Header as Header
@@ -132,6 +133,9 @@ import Straylight.Pages.Discord as Discord
 main :: Effect Unit
 main = launchAff_ do
   HA.awaitLoad
+  -- Bring up the Supabase client (real SDK, bundled via the transitive paved
+  -- path from hydrogen//integrations/supabase:lib — STR-239).
+  _ <- liftEffect Auth.initSupabase
   doc <- liftEffect $ window >>= document
   let parent = HTMLDocument.toParentNode doc
   mbContainer <- liftEffect $ querySelector (QuerySelector "#straylight-app") parent

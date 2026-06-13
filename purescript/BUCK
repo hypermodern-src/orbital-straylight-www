@@ -13,7 +13,12 @@ purescript_app(
     main = "Main",
     browser_bundle = True,
     bundle_name = "straylight.js",
-    deps = ["hydrogen//:lib"],
+    deps = [
+        "hydrogen//:lib",
+        # Real SDK on the transitive paved path: Supabase rides in via PursLibInfo
+        # (no npm_packages here) and bundles into straylight.js (STR-239).
+        "hydrogen//integrations/supabase:lib",
+    ],
     packages = [
         {"name": "aff", "version": "8.0.0", "sha256": "f41448ad2751a18c9b7e252606a80a27ae9c3eac581dbdbbedb55640c9fff6c8"},
         {"name": "affjax", "version": "13.0.0", "sha256": "769395f042cda94541c3113a78a15d9c5932fac2f03c500dac553323141a6e59"},

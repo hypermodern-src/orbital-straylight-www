@@ -306,17 +306,17 @@
     "hydrogen": {
       "flake": false,
       "locked": {
-        "lastModified": 1781348541,
-        "narHash": "sha256-iri3gx618Ff0gpo2zeuiSDVnMUmupAjaI+SK8J/Meoo=",
+        "lastModified": 1781378156,
+        "narHash": "sha256-SoCijOXGxME+kv4ZZ6bIqdWMWRo5RiUDTW3nIfT3ZWA=",
         "ref": "main",
-        "rev": "9f02b5b7db6f5dc3f5363996526ba6ac93cf8f26",
-        "revCount": 8,
+        "rev": "e91113f117241a99951d8e4f0b287888bb2ee3e4",
+        "revCount": 9,
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/hydrogen"
       },
       "original": {
         "ref": "main",
-        "rev": "9f02b5b7db6f5dc3f5363996526ba6ac93cf8f26",
+        "rev": "e91113f117241a99951d8e4f0b287888bb2ee3e4",
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/hydrogen"
       }
@@ -610,11 +610,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1781374234,
-        "narHash": "sha256-lcVTIiO4OEGiNhw4oknSVnPyWZ3id69Z7pyl+vOUCvM=",
+        "lastModified": 1781377951,
+        "narHash": "sha256-torp41ya4USsVCzxE10qs/3tq5Wncohqxn5HoeZ3r9o=",
         "ref": "refs/heads/main",
-        "rev": "5aa8e134aa66ad926993c00abdd5f38f938b2819",
-        "revCount": 122,
+        "rev": "1939a549dc20e5092855e2307e97d125ed06c340",
+        "revCount": 124,
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/straylight-prelude"
       },
