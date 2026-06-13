@@ -1,0 +1,21 @@
+# buck2 + straylight-prelude generated/symlinked artifacts (machine-specific)
+.buckconfig.local
+buck-out/
+nix/
+
+# IDE integration symlinked in by the project mechanism (abs paths)
+.clang-format
+.clang-tidy
+.clangd
+.rustfmt.toml
+.stylua.toml
+compile_commands.json
+rust-project.json
+hie.yaml
+
+# spago/purs outputs, in case the legacy toolchain is run alongside
+.spago/
+output/
+.psci_modules/
+.psc-ide-port
+node_modules/
