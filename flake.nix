@@ -8,10 +8,13 @@
       url = "github:nix-community/bun2nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    purescript-overlay = {
-      url = "github:thomashoneyman/purescript-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+
+    # The PureScript app on the canonical buck2 build (no spago). Its
+    # `…-artifact-straylight-js` package materializes the browser bundle
+    # (purs_browser_bundle, STR-242) as a store path we copy into public/ — the
+    # buck2 product feeding the Next/MDX shell (STR-236/237). bun2nix still owns
+    # the Next/node side; buck2 owns PureScript.
+    straylight-web-ps.url = "path:./purescript";
   };
 
   nixConfig = {
@@ -31,14 +34,20 @@
       nixpkgs,
       flake-utils,
       bun2nix,
-      purescript-overlay,
+      straylight-web-ps,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        overlays = [ purescript-overlay.overlays.default ];
-        pkgs = import nixpkgs { inherit system overlays; };
+        pkgs = import nixpkgs { inherit system; };
         bun2nixPkg = bun2nix.packages.${system}.default;
+
+        # The buck2-built browser bundle (straylight.js) as a store path. The PS
+        # sub-flake builds it hermetically (purs + esbuild, no spago); we just copy
+        # it into public/ before `next build`. This is the spago-kill: PureScript
+        # is a buck2 artifact, the root flake never runs purs/spago.
+        straylightJs =
+          straylight-web-ps.packages.${system}.straylight-prelude-straylight-web-ps-artifact-straylight-js;
 
         # Hermetic bun dependencies (generate with: bun2nix)
         bunDeps = bun2nixPkg.fetchBunDeps {
@@ -59,10 +68,6 @@
             bun2nixPkg.hook
             pkgs.bun
             pkgs.nodejs_22
-            pkgs.purs
-            pkgs.spago-unstable
-            pkgs.purs-backend-es
-            pkgs.esbuild
           ];
 
           inherit bunDeps;
@@ -74,11 +79,11 @@
 
             export PATH="$PWD/node_modules/.bin:$PATH"
 
-            # Build PureScript
-            echo "Building PureScript..."
-            cd purescript
-            spago bundle --bundle-type app --platform browser --minify --outfile ../public/straylight.js
-            cd ..
+            # PureScript bundle: copy the buck2-built straylight.js into public/.
+            # No purs/spago here — the bundle is a hermetic store path built by the
+            # straylight-web-ps sub-flake (purs_browser_bundle, STR-242/236).
+            echo "Staging buck2 straylight.js..."
+            install -D -m644 ${straylightJs}/straylight.js public/straylight.js
 
             # Build Next.js
             echo "Building Next.js..."
@@ -118,47 +123,9 @@
         # Checks run by `nix flake check`
         checks = {
           build = straylight-web;
-
-          # PureScript property tests
-          purescript-tests = pkgs.stdenv.mkDerivation {
-            pname = "straylight-purescript-tests";
-            version = "0.1.0";
-
-            src = ./.;
-
-            nativeBuildInputs = [
-              pkgs.purs
-              pkgs.spago-unstable
-              pkgs.esbuild
-              pkgs.nodejs_22
-            ];
-
-            buildPhase = ''
-              runHook preBuild
-
-              echo "Building and running PureScript tests..."
-              cd purescript
-
-              # Build tests
-              spago build
-
-              # Run test bundle if it exists
-              if [ -f "test/dist/test.cjs" ]; then
-                ${pkgs.nodejs_22}/bin/node test/dist/test.cjs
-                echo "All property tests passed!"
-              else
-                echo "Skipping tests - test bundle not found"
-                echo "To build: cd purescript && spago test"
-              fi
-
-              runHook postBuild
-            '';
-
-            installPhase = ''
-              mkdir -p $out
-              echo "Tests passed" > $out/result.txt
-            '';
-          };
+          # PureScript: the buck2 bundle build IS the typecheck (one purs compile
+          # over Main + hydrogen + the closure). Gates the spago-free PS path.
+          purescript = straylightJs;
         };
 
         apps.default = {
@@ -166,13 +133,14 @@
           program = "${straylight-web}/bin/straylight-web";
         };
 
-        # Dev runner - runs in current directory
+        # Dev runner - runs in current directory. PureScript is built by buck2 in
+        # the sub-project's devshell (reflects live edits via `--out`); no spago.
         apps.dev = {
           type = "app";
           program = toString (
             pkgs.writeShellScript "straylight-dev" ''
               set -e
-              export PATH="${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:${pkgs.purs}/bin:${pkgs.spago-unstable}/bin:${pkgs.purs-backend-es}/bin:${pkgs.esbuild}/bin:$PWD/node_modules/.bin:$PATH"
+              export PATH="${pkgs.bun}/bin:${pkgs.nodejs_22}/bin:$PWD/node_modules/.bin:$PATH"
 
               if [ ! -d "node_modules" ]; then
                 echo "Installing dependencies..."
@@ -182,8 +150,8 @@
               echo ""
               echo "// straylight // dev //"
               echo ""
-              echo "Building PureScript..."
-              cd purescript && spago bundle --bundle-type app --platform browser --outfile ../public/straylight.js && cd ..
+              echo "Building PureScript (buck2)..."
+              nix develop ./purescript -c buck2 build //:web --out public/straylight.js
 
               echo ""
               echo "Starting dev server at http://localhost:3000"
@@ -192,36 +160,32 @@
           );
         };
 
-        # PureScript watch mode
+        # PureScript bundle (buck2, no spago): one `purs compile` + esbuild over
+        # Main + hydrogen + the closure, written straight to public/straylight.js.
         apps.purs = {
           type = "app";
           program = toString (
             pkgs.writeShellScript "straylight-purs" ''
               set -e
-              export PATH="${pkgs.purs}/bin:${pkgs.spago-unstable}/bin:${pkgs.purs-backend-es}/bin:${pkgs.esbuild}/bin:$PATH"
-
-              cd purescript
-              echo "Building PureScript bundle..."
-              spago bundle --bundle-type app --platform browser --outfile ../public/straylight.js
+              echo "Building PureScript bundle (buck2)..."
+              nix develop ./purescript -c buck2 build //:web --out public/straylight.js
               echo ""
               echo "Bundle written to public/straylight.js"
-              ls -lh ../public/straylight.js
+              ls -lh public/straylight.js
             ''
           );
         };
 
+        # Root devshell = the Next/node/Haskell side. PureScript has its own
+        # buck2 devshell in ./purescript (`nix develop ./purescript`) — no purs or
+        # spago here; the bundle is a buck2 product.
         devShells.default = pkgs.mkShell {
           buildInputs = [
             pkgs.nodejs_22
             pkgs.bun
-            pkgs.purs
-            pkgs.purs-tidy
-            pkgs.purs-backend-es
-            pkgs.spago-unstable
-            pkgs.esbuild
             pkgs.git
             bun2nixPkg
-            # Haskell
+            # Haskell (API server)
             pkgs.ghc
             pkgs.cabal-install
             pkgs.haskell-language-server
@@ -236,13 +200,12 @@
             echo "Commands:"
             echo "  bun install           - Install JS dependencies"
             echo "  bun run dev           - Start Next.js dev server"
-            echo "  nix run .#purs        - Build PureScript bundle"
+            echo "  nix run .#purs        - Build PureScript bundle (buck2)"
             echo "  nix run .#dev         - Build + dev (one command)"
             echo "  nix build             - Hermetic production build"
             echo "  nix flake check       - Run all checks"
+            echo "  nix develop ./purescript  - PureScript (buck2) devshell"
             echo ""
-            echo "PureScript: $(purs --version)"
-            echo "Spago: $(spago --version 2>/dev/null || echo 'available')"
             echo "Node: $(node --version)"
             echo "Bun: $(bun --version)"
             echo ""

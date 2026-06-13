@@ -32,6 +32,13 @@
               cxx.enable = false;
               purescript.enable = true;
             };
+            # Materialize the browser bundle as a store path the root Next/bun2nix
+            # flake copies into public/ before `next build` (STR-236/237). Build:
+            #   nix build .#straylight-prelude-straylight-web-ps-artifact-straylight-js
+            artifacts.straylight-js = {
+              target = "//:web";
+              out = "straylight.js";
+            };
           };
         };
     };

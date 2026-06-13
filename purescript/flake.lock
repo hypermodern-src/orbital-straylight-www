@@ -610,11 +610,11 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1781371297,
-        "narHash": "sha256-f6ILLo+QHPhOegSRYzfeT3ksEqJD/k8WEIiKaB3T6Sk=",
+        "lastModified": 1781374234,
+        "narHash": "sha256-lcVTIiO4OEGiNhw4oknSVnPyWZ3id69Z7pyl+vOUCvM=",
         "ref": "refs/heads/main",
-        "rev": "7bdfcff8265fc3146e74e5b3afbf79c3adc3f941",
-        "revCount": 121,
+        "rev": "5aa8e134aa66ad926993c00abdd5f38f938b2819",
+        "revCount": 122,
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/straylight-prelude"
       },
