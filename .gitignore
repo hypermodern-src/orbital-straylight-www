@@ -37,3 +37,6 @@ next-env.d.ts
 .direnv
 .devshell
 result
+
+# buck2-built browser bundle (staged into public/ at build time, STR-242/236)
+public/straylight.js

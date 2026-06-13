@@ -2,6 +2,9 @@ import createMDX from '@next/mdx'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Self-contained server (.next/standalone/server.js) — the nix installPhase
+  // copies this tree and the apps.default runner execs its server.js.
+  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },

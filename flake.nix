@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     bun2nix = {
-      url = "github:nix-community/bun2nix";
+      url = "github:nix-community/bun2nix?ref=2.1.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
