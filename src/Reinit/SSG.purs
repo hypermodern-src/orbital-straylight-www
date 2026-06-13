@@ -12,14 +12,58 @@
 module Reinit.SSG
   ( renderStatic
   , staticPage
+  , main
   ) where
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
+import Data.String.CodeUnits as CU
+import Data.String.Pattern (Pattern(..))
+import Effect (Effect)
+import Effect.Console (log)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Hydrogen.HTML.Renderer as Renderer
 import Reinit.Page as Page
+
+-- | SSG entrypoint (node), run by the prelude's purs_site rule (STR-235). The
+-- | rule is pure mechanism: it hands us the shell path on argv and captures our
+-- | stdout as index.html. ALL policy lives here — reinit is a single static page,
+-- | so we prerender it unconditionally; a multi-route app would consult
+-- | Hydrogen.Router's RouteMetadata (isStaticRoute) and any late/CMS config to
+-- | decide per route. "Served to googlebot as SSG" is just: prerender it.
+main :: Effect Unit
+main = do
+  shellPath <- argv1
+  shell <- readFileUtf8 shellPath
+  log (injectApp shell renderStatic)
+
+-- | Inject prerendered content into the shell's `<div id="app">…</div>` — the
+-- | `</div>` immediately before the client `reinit.js` script tag (the same
+-- | boundaries the legacy script/ssg.ts used). App-specific by design.
+injectApp :: String -> String -> String
+injectApp shell content =
+  case CU.indexOf (Pattern appOpen) shell, CU.indexOf (Pattern scriptTag) shell of
+    Just openIdx, Just scriptIdx ->
+      let
+        openEnd = openIdx + CU.length appOpen
+        beforeScript = CU.take scriptIdx shell
+      in
+        case CU.lastIndexOf (Pattern "</div>") beforeScript of
+          Just closeIdx -> CU.take openEnd shell <> content <> CU.drop closeIdx shell
+          Nothing -> shell
+    _, _ -> shell
+  where
+  appOpen = "<div id=\"app\">"
+  scriptTag = "<script src=\"/reinit.js\">"
+
+-- | argv[1] under `node -e`: the shell HTML path the purs_site rule passes.
+foreign import argv1 :: Effect String
+
+-- | Read a UTF-8 file (node fs). Used only at SSG time (node), never in the
+-- | browser bundle.
+foreign import readFileUtf8 :: String -> Effect String
 
 -- | Render the landing page to a static HTML string
 -- | This is the #app contents - the shell (head, scripts) is in index.html
