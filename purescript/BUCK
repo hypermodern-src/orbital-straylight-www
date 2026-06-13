@@ -2,12 +2,17 @@
 # build (paved path: STR-234 cell + STR-235/238 + transitive composition). No
 # spago: the 82-package registry closure is solved offline from spago.lock; hydrogen
 # rides in as the hydrogen// cell; self-contained FFI (no npm). Compiles Main +
-# hydrogen + closure in one purs compile. The browser bundle for the Next shell is
-# the next step (STR-242/236).
+# hydrogen + closure in one purs compile, then esbuilds a SINGLE minified
+# straylight.js (browser_bundle, STR-242) — the exact `spago bundle --bundle-type
+# app --minify --outfile public/straylight.js` the old build produced. Main mounts
+# Halogen into #straylight-app; the Next/MDX shell injects this via <Script>.
+#   buck2 build //:web  ->  straylight.js
 purescript_app(
     name = "web",
     srcs = glob(["src/**/*.purs"]),
     main = "Main",
+    browser_bundle = True,
+    bundle_name = "straylight.js",
     deps = ["hydrogen//:lib"],
     packages = [
         {"name": "aff", "version": "8.0.0", "sha256": "f41448ad2751a18c9b7e252606a80a27ae9c3eac581dbdbbedb55640c9fff6c8"},
