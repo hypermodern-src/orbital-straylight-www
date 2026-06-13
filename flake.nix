@@ -10,11 +10,10 @@
     nixpkgs.follows = "straylight-prelude/nixpkgs";
     systems.follows = "straylight-prelude/systems";
 
-    # hydrogen as a first-class library cell — pinned source. Its BUCK is overlaid
-    # below (cells.hydrogen) until the BUCK lands in hydrogen itself; this is just
-    # the source tree, not a flake.
+    # hydrogen as a first-class library cell — pinned source whose BUCK exposes
+    # purescript_library (STR-234). Just the source tree, not a flake.
     hydrogen = {
-      url = "git+ssh://git@github.com/straylight-software/hydrogen?ref=main&rev=26f5f4e99217ead6bdd582d23c8d50dcc2eac462";
+      url = "git+ssh://git@github.com/sensenet-ai/hydrogen?ref=main&rev=9f02b5b7db6f5dc3f5363996526ba6ac93cf8f26";
       flake = false;
     };
   };
@@ -30,22 +29,16 @@
       ];
 
       perSystem =
-        { pkgs, ... }:
+        { ... }:
         {
           straylight-prelude.projects.reinit-dx = {
             src = ./.;
             # hydrogen rides in as a buck2 cell (STR-234): consumed as
             # `deps = ["hydrogen//:lib"]` in ./BUCK; the [cells] entry is in
             # .buckconfig; the symlink is materialized by the project mechanism.
-            #
-            # TEMPORARY: overlay the library BUCK onto the pinned hydrogen source,
-            # because hydrogen's own BUCK is not merged yet (READ-only access). Once
-            # it is, this becomes `cells.hydrogen = inputs.hydrogen;`.
-            cells.hydrogen = pkgs.runCommandLocal "hydrogen-cell" { } ''
-              cp -r ${inputs.hydrogen} "$out"
-              chmod -R u+w "$out"
-              cp ${./nix/hydrogen.BUCK} "$out/BUCK"
-            '';
+            # hydrogen carries its own purescript_library BUCK, so the pinned
+            # input is the cell directly.
+            cells.hydrogen = inputs.hydrogen;
             targets = [ "//:site" ];
             toolchain = {
               # Pure PureScript — no C++ toolchain / clang-tidy gate.
