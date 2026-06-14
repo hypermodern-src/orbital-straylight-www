@@ -1,0 +1,55 @@
+/* Base + story CSS ported from radix-ui/primitives apps/storybook (MIT, (c)
+   WorkOS) — replicates the Storybook preview environment EXACTLY so the gallery
+   diffs pixel-perfect against the captured golden:
+     * box-sizing: border-box   (preview.css — without it the 30×30 box is 40px)
+     * body margin:0 + the -apple-system font stack
+     * UA defaults for h1/p/label/input (preview.css overrides none)
+   Class names kept (.root/.indicator) so a Halogen `Style` record maps 1:1. */
+
+* {
+  box-sizing: border-box;
+}
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+[hidden] {
+  display: none;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* ── Checkbox (checkbox.stories.module.css) ─────────────────────────────────── */
+.root {
+  /* no background set — the <button> keeps its default UA ButtonFace fill, as in
+     radix's checkbox.stories.module.css (do NOT add background: transparent). */
+  vertical-align: middle;
+  border: 1px solid var(--gray-4);
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+}
+.root:focus {
+  outline: none;
+  border-color: var(--red-9);
+  box-shadow: 0 0 0 1px var(--red-9);
+}
+.root[data-disabled] {
+  opacity: 0.3;
+}
+
+.indicator {
+  background-color: var(--red-9);
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.indicator[data-state="checked"],
+.indicator[data-state="unchecked"] {
+  height: 30px;
+}

@@ -25,6 +25,7 @@ module Hydrogen.HTML.Renderer
 
 import Prelude
 
+import Affjax.RequestBody (RequestBody(..))
 import Data.Array as Array
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))
@@ -38,9 +39,9 @@ import Halogen.VDom.Types (ElemName(..), Namespace(..), VDom(..), runGraft)
 type RenderOptions =
   { -- | Whether to render self-closing tags (e.g., <br/> vs <br></br>)
     selfClosingTags :: Boolean
-    -- | Whether to pretty-print with indentation
+  -- | Whether to pretty-print with indentation
   , prettyPrint :: Boolean
-    -- | Indentation string (only used if prettyPrint is true)
+  -- | Indentation string (only used if prettyPrint is true)
   , indent :: String
   }
 
@@ -72,19 +73,19 @@ renderVDom opts = case _ of
     renderElement opts ns name props children
   Keyed ns (ElemName name) props keyedChildren ->
     renderElement opts ns name props (map snd keyedChildren)
-  Widget _ -> 
+  Widget _ ->
     -- Widgets (component slots) cannot be rendered statically
     -- They will be hydrated client-side
     ""
   Grafted g -> renderVDom opts (runGraft g)
 
-renderElement 
+renderElement
   :: forall a w
-   . RenderOptions 
-  -> Maybe Namespace 
-  -> String 
+   . RenderOptions
+  -> Maybe Namespace
+  -> String
   -> a
-  -> Array (VDom a w) 
+  -> Array (VDom a w)
   -> String
 renderElement opts maybeNs name props children =
   let
@@ -94,15 +95,16 @@ renderElement opts maybeNs name props children =
     nsAttr = case maybeNs of
       Just (Namespace ns) -> " xmlns=\"" <> escapeAttr ns <> "\""
       Nothing -> ""
-    attrsStr = if String.null propsStr && String.null nsAttr
-               then ""
-               else nsAttr <> (if String.null propsStr then "" else " " <> propsStr)
+    attrsStr =
+      if String.null propsStr && String.null nsAttr then ""
+      else nsAttr <> (if String.null propsStr then "" else " " <> propsStr)
   in
-    if Array.null children && isSelfClosing name && opts.selfClosingTags
-    then "<" <> name <> attrsStr <> "/>"
-    else "<" <> name <> attrsStr <> ">" 
-         <> foldMap (renderVDom opts) children 
-         <> "</" <> name <> ">"
+    if Array.null children && isSelfClosing name && opts.selfClosingTags then "<" <> name <> attrsStr <> "/>"
+    else "<" <> name <> attrsStr <> ">"
+      <> foldMap (renderVDom opts) children
+      <> "</"
+      <> name
+      <> ">"
 
 -- | Self-closing (void) elements in HTML5
 isSelfClosing :: String -> Boolean
@@ -136,18 +138,20 @@ renderPropArray = Array.mapMaybe renderProp >>> String.joinWith " "
 renderProp :: Prop Void -> Maybe String
 renderProp = case _ of
   Attribute maybeNs name value ->
-    let prefix = case maybeNs of
-          Just (Namespace ns) -> ns <> ":"
-          Nothing -> ""
-    in Just $ prefix <> name <> "=\"" <> escapeAttr value <> "\""
-  
+    let
+      prefix = case maybeNs of
+        Just (Namespace ns) -> ns <> ":"
+        Nothing -> ""
+    in
+      Just $ prefix <> name <> "=\"" <> escapeAttr value <> "\""
+
   Property name value ->
     renderPropertyToAttr name value
-  
+
   Handler _ _ ->
     -- Event handlers cannot be rendered to static HTML
     Nothing
-  
+
   Ref _ ->
     -- Element refs cannot be rendered to static HTML
     Nothing
@@ -157,29 +161,30 @@ renderPropertyToAttr :: String -> PropValue -> Maybe String
 renderPropertyToAttr name value =
   let
     strVal = propValueToString value
-  in case name of
-    -- className -> class
-    "className" -> Just $ "class=\"" <> escapeAttr strVal <> "\""
-    -- htmlFor -> for
-    "htmlFor" -> Just $ "for=\"" <> escapeAttr strVal <> "\""
-    -- Boolean properties
-    "disabled" -> if strVal == "true" then Just "disabled" else Nothing
-    "checked" -> if strVal == "true" then Just "checked" else Nothing
-    "readonly" -> if strVal == "true" then Just "readonly" else Nothing
-    "required" -> if strVal == "true" then Just "required" else Nothing
-    "autofocus" -> if strVal == "true" then Just "autofocus" else Nothing
-    "autoplay" -> if strVal == "true" then Just "autoplay" else Nothing
-    "controls" -> if strVal == "true" then Just "controls" else Nothing
-    "loop" -> if strVal == "true" then Just "loop" else Nothing
-    "muted" -> if strVal == "true" then Just "muted" else Nothing
-    "hidden" -> if strVal == "true" then Just "hidden" else Nothing
-    "selected" -> if strVal == "true" then Just "selected" else Nothing
-    "multiple" -> if strVal == "true" then Just "multiple" else Nothing
-    "open" -> if strVal == "true" then Just "open" else Nothing
-    -- Skip internal/event properties
-    _ | String.take 2 name == "on" -> Nothing
-    -- Standard properties become attributes
-    _ -> Just $ name <> "=\"" <> escapeAttr strVal <> "\""
+  in
+    case name of
+      -- className -> class
+      "className" -> Just $ "class=\"" <> escapeAttr strVal <> "\""
+      -- htmlFor -> for
+      "htmlFor" -> Just $ "for=\"" <> escapeAttr strVal <> "\""
+      -- Boolean properties
+      "disabled" -> if strVal == "true" then Just "disabled" else Nothing
+      "checked" -> if strVal == "true" then Just "checked" else Nothing
+      "readonly" -> if strVal == "true" then Just "readonly" else Nothing
+      "required" -> if strVal == "true" then Just "required" else Nothing
+      "autofocus" -> if strVal == "true" then Just "autofocus" else Nothing
+      "autoplay" -> if strVal == "true" then Just "autoplay" else Nothing
+      "controls" -> if strVal == "true" then Just "controls" else Nothing
+      "loop" -> if strVal == "true" then Just "loop" else Nothing
+      "muted" -> if strVal == "true" then Just "muted" else Nothing
+      "hidden" -> if strVal == "true" then Just "hidden" else Nothing
+      "selected" -> if strVal == "true" then Just "selected" else Nothing
+      "multiple" -> if strVal == "true" then Just "multiple" else Nothing
+      "open" -> if strVal == "true" then Just "open" else Nothing
+      -- Skip internal/event properties
+      _ | String.take 2 name == "on" -> Nothing
+      -- Standard properties become attributes
+      _ -> Just $ name <> "=\"" <> escapeAttr strVal <> "\""
 
 foreign import propValueToString :: PropValue -> String
 

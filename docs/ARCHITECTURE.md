@@ -7,6 +7,70 @@ is sacred — the point is to argue it into shape before we overbuild.
 
 ---
 
+## Round update — 2026-06-13: the component library is a radix-ui port, in hydrogen
+
+**[D] Stop the infinite regress.** `purescript-radix` (Lean behavior-algebra →
+components) and `verified-purescript` (proof-carrying extraction) are **filed as
+research oddities** — interesting, real, but *not load-bearing*. We chased the
+"run out the verified generator to 48 themeable components" bet to its source and
+it doesn't hold: the behavior-algebra compiler was archived in the radix
+reconciliation (`archive/behavior-algebra-compiler`), only ever had real specs for
+~3 components with stubbed composition proofs; and `verified-purescript` is a
+pure-algebraic-law prover (`rfl`-grade) that structurally cannot reach interactive
+UI behavior (you can't prove "Escape closes the dialog" by reflexivity). Reviving
+it is a months-long bet on the least-leveraged 40%. We pass.
+
+**[D] The component library is a hand-written PureScript/Halogen port of
+`radix-ui/primitives`, living *inside* hydrogen.** We vendor radix-ui as a
+**read-only reference** (`~/src/vendor/primitives`, the React monorepo — 59
+packages, ~23.6k LOC TS) and port behavior primitive-by-primitive into our own PS
+modules. **We never import a radix npm package** — no marriage to the monolith.
+Brute-forced with subagents (one component per agent) over a shared set of ported
+behaviors. The two good things radix-pure already produced (Dialog, Tabs + the
+FocusScope/AriaHider/Id FFI) are the seed.
+
+**[D] Get the flake-juggling down.** Filing radix + verified-purescript as
+oddities removes two flakes/cells from the active set. The components do **not**
+get their own repo/flake — they live in the `hydrogen//` cell. Active flake set is
+now: `straylight-prelude` · `hydrogen` (framework **+ component library**) ·
+`halogen-orbital` (ORBITAL look, → presets) · the apps. (`purescript-radix`,
+`verified-purescript` parked.)
+
+**[D] The styling amenity is the preset/token contract, not codegen.** A component
+is written once; a **preset** (`StyleConfig`: which classes land on
+root/trigger/overlay/content/item/…) themes it. `semantic | tailwind | shadcn |
+daisy | **orbital**`. ORBITAL and the *new* designs become presets — that is the
+"styling amenities for days," and it needs none of the Lean machinery. The preset
+record threads as component input. See §5 tree + §6.
+
+**[D] Ground-up, artisanal — no FFI in the core.** Port fresh from radix-ui
+source; do **not** borrow radix-pure's modules (parked, potentially hinky). The
+component library is **100% PureScript, zero external-JS dependency** — positioning
+math (floating-ui) is **ported native**, not FFI'd to `@floating-ui/dom`. Platform
+access (focus, `getComputedStyle`, `getBoundingClientRect`) goes through
+`purescript-web-*`, with thin DOM shims only where those bindings don't reach —
+never a dependency on a JS library. **This is precedent-setting**: FFI to external
+JS is allowed only at the *integration/test* edges (Playwright, maybe
+Supabase/Clerk), never in the radix core. The bar: reproduce *any* radix-based
+outcome — shadcn, daisy, **ORBITAL // DESIGN** — as a preset over one native engine.
+
+**[D] Also taking from the radix-ui org (we're here once):** `colors` (30 hues ×
+12 steps × light/dark/alpha/P3 — the accessible token foundation) →
+`Hydrogen.Radix.Color`; `icons` (332 SVGs) → a vendored asset set; `themes` →
+**reference only** (study its variant/size/color/radius prop API to inform
+`Style.purs`; we replace its look with ORBITAL+presets). Skip website /
+design-system / auth / radix-legacy as code. **Port reference** stays the read-only
+`~/src/vendor/{primitives,colors,icons,themes}` clones — never npm deps.
+
+**[D] buck = namespace = disk, 1:1.** The component library is just
+`hydrogen/src/Hydrogen/Radix/`, already covered by the existing `hydrogen//:lib`
+glob (`src/**`). No `ui/` dir, no separate `//ui:lib` (that was a confusing
+mismatch). Disk `src/Hydrogen/Radix/` ↔ module `Hydrogen.Radix.*` ↔ cell
+`hydrogen//`. We split into disk-matching sub-targets (a BUCK *inside*
+`src/Hydrogen/Radix/`) only if compile cost later demands it.
+
+---
+
 ## 0. Thesis
 
 We are building, bottom to top:
@@ -55,8 +119,10 @@ into the frame. That agnosticism is load-bearing: it's what lets a second
 | Repo                                  | Role                                                | Layer      | Canonical           | State / debt                                                                                                 |
 | ------------------------------------- | --------------------------------------------------- | ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `straylight-prelude`                  | polyglot build/pkg tool (Dhall→Starlark→buck2)      | build      | sensenet-ai         | live; npm placement-tree, `npm_build`, deploy axis, artifacts all landed                                     |
-| `purescript-radix`                    | Lean behavior-algebra → accessible PS components    | components | sensenet-ai         | **[?] split**: real work is on the straylight-software remote (`ea2b5cf`); sensenet-ai is behind — reconcile |
-| `hydrogen`                            | the framework + frame + integrations + ui + test    | framework  | sensenet-ai         | becoming a **monorepo**; Frame/Surface/integrations landed; Playwright on a branch                           |
+| `hydrogen`                            | framework + frame + integrations + **component library** + test | framework + components | sensenet-ai | the **monorepo**; Frame/Surface/integrations landed; component library = radix-ui port (§5/§6) lands here    |
+| `~/src/vendor/primitives`             | **radix-ui/primitives — read-only port reference**  | (vendor)   | upstream            | 59 pkgs / ~23.6k LOC TS; the source we hand-port from. **Not a dependency**; never imported as npm           |
+| `purescript-radix`                    | ~~Lean behavior-algebra → components~~              | (parked)   | sensenet-ai         | **filed as research oddity.** Seeded Dialog/Tabs + FocusScope/AriaHider/Id FFI; generator archived           |
+| `verified-purescript`                 | ~~proof-carrying PS extraction~~                    | (parked)   | sensenet-ai         | **filed as research oddity.** Real `rfl`-grade pure-law prover; can't reach interactive UI behavior          |
 | `halogen-orbital`                     | ORBITAL design system (HTML/CSS/JS + a PWA ref)     | design     | straylight-software | needs porting → Halogen; holds `looking-local/` (multi-screen PWA), `orbital.css/js`, component galleries    |
 | `straylight-web`                      | medium-complexity reactive site (the testbed)       | app        | sensenet-ai         | on the axes now; reflow + Supabase placeholder; "can afford to fuck up"                                      |
 | `reinit-dx` (+ `-website`)            | reference app; **breaks overfit** to straylight-web | app        | sensenet-ai         | buck2 PS project + Next wrap; the second testbed                                                             |
@@ -134,43 +200,62 @@ the framework **core**; the **axes** (Auth, Surface, Deploy, Test); **Integratio
 and **Component**. The last three are first-order, not incidental: an app is
 components drawn from a component library, styled by a design system.
 
-**[D] Concrete tree** (flag anything that looks like trouble):
+**[D] Concrete tree** (updated 2026-06-13 — the component library is the radix-ui
+port; everything lives in the one `hydrogen//` cell to keep flake-juggling down).
+Flag anything that looks like trouble:
 
 ```
-hydrogen/                       ONE buck2 cell (hydrogen//). Incubate here; split on
-                                durable orthogonality.
+hydrogen/                       ONE buck2 cell (hydrogen//), ONE flake. No sub-flakes.
   defs.bzl                      frame macros: hydrogen_app · hydrogen_integration · hydrogen_test
-  BUCK                          //:lib — the framework CORE
-  src/Hydrogen/
+  BUCK                          targets below — all in this cell
+  flake.nix                     the single dev/build flake (framework + components)
+
+  src/Hydrogen/                 //:lib — the framework CORE (unchanged)
     Router.purs                 routing + RouteMetadata
     Frame.purs                  axes: AuthProvider · FrameworkContext · Session · guardRoute
     Surface.purs                axis: Host × SurfaceClass · SurfaceView · reflow
-    Query.purs  RemoteData.purs  data/state
+    Query.purs  Data/RemoteData.purs  data/state
     HTML/Renderer.purs          Halogen → string (SSG/prerender)
 
-  design/                       DESIGN SYSTEM (first-order)  → //design/orbital:lib
-    orbital/
-      src/Hydrogen/Design/Orbital/   Tokens.purs (CSS-var contract) · Theme.purs
-      orbital.css               the ORBITAL stylesheet, owned here (ported in)
-
-  components/                   COMPONENT LIBRARY (first-order)  → //components:lib
-    src/Hydrogen/Component/     each a COMPONENT (first-order): Button · Field · Dialog ·
-                                Tabs · … — a SurfaceView, behavior-backed, design-styled
-
-  behaviors/                    radix behaviors, incubated  → //behaviors:lib  (split → purescript-radix)
-    src/Hydrogen/Behavior/      Disclosure · FocusTrap · Selection · Navigation · …
+    Radix/                      THE COMPONENT LIBRARY (radix-ui port), namespace
+                                Hydrogen.Radix.*. Covered by //:lib's src/** glob —
+                                disk = namespace = cell, 1:1. No separate target.
+      Color.purs                radix `colors` ported: 30 hues × 12 steps × light/dark/
+                                alpha/P3, + CSS-var emitter. The token foundation.
+      Style.purs                THE STYLING AMENITY: StyleConfig + Preset
+                                (Semantic|Tailwind|Shadcn|Daisy|Orbital), threaded as
+                                component input. ORBITAL + new designs = presets.
+      Behavior/                 the positioning-independent substrate (port FIRST —
+                                ground-up, native PS, no external FFI):
+        ControllableState · Presence · DismissableLayer · FocusScope · RovingFocus
+        Collection · Portal · Direction · Id · VisuallyHidden · Announce
+      Float/                    the NATIVE floating-ui port (positioning engine):
+        Compute.purs (offset/flip/shift/arrow middleware) · Popper.purs
+      <Component>.purs          one module per radix primitive, FLAT under Radix
+                                (radix-ui style), subagent unit, ~31:
+        Dialog · AlertDialog · Popover · Tooltip · HoverCard · Collapsible · Accordion
+        DropdownMenu · ContextMenu · Menubar · NavigationMenu · Toolbar · Tabs · Select
+        Checkbox · Switch · RadioGroup · Slider · Toggle · ToggleGroup · Toast · Form
+        Label · Separator · AspectRatio · Avatar · Progress · …
+        (presentational ORBITAL vocab — Card/Badge/Hero/Nav/Status — lands here too,
+         same Style contract, once the look ports)
 
   integrations/                 plugin INSTANCES (each //integrations/<x>:lib)
-    supabase/  clerk/           AuthProvider
+    supabase/  clerk/           AuthProvider                 (FFI allowed — edge)
     next/                       build-contributor (npm_build)            [later]
 
-  test/                         //test:lib + the hydrogen_test rule — Playwright FFI, incubated
-    src/Hydrogen/Test/Playwright.purs
+  test/                         //test:lib + the hydrogen_test rule — Playwright FFI
+    src/Hydrogen/Test/Playwright.purs                        (FFI allowed — edge)
 ```
 
-**[?]** The `behaviors/` vs separate-`purescript-radix` boundary is exactly the
-kind of thing decided *on the spot* when the orthogonality is durable — for now it
-incubates. Likewise `design/` vs a reborn `halogen-orbital` PS lib.
+**[D]** No `design/` / `components/` / `behaviors/` / `ui/` as separate buck cells
+or directories — over-structured and name-mismatched. The library is plain
+`src/Hydrogen/Radix/` under the single `hydrogen//:lib`, organized by namespace:
+`Color` · `Style` · `Behavior/` (substrate) · `Float/` (native positioning) ·
+flat `<Component>.purs`. ORBITAL is a **preset** in `Style.purs`, not a
+design-system cell; `halogen-orbital` stays the *source of the look* we translate
+into the orbital preset + the presentational primitives. **Port reference** is the
+read-only `~/src/vendor/{primitives,colors,icons,themes}` — never npm deps.
 
 The frame contract an integration implements (separate small classes, not one
 god-`Integration` — that cut has been right so far):

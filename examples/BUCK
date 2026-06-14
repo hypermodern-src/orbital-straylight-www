@@ -1,0 +1,17 @@
+# Hydrogen.Radix gallery — reproductions of radix-ui's Storybook (MIT, (c) WorkOS)
+# rendered with the ported Halogen primitives, bundled to a browser app for
+# pixel-perfect Playwright comparison. Depends on //:lib (the components) + the
+# registry closure (//:registry.bzl, shared with check/ — 73.2.0). SEPARATE
+# package so the root //:lib straylight-web consumes stays free of `packages`.
+#   nix develop -c buck2 build //examples:gallery   ->  dist (app.js + index.html + style.css)
+load("//:registry.bzl", "PURS_REGISTRY")
+
+purescript_app(
+    name = "gallery",
+    srcs = glob(["src/**/*.purs"]),
+    main = "Gallery.Main",
+    deps = ["//:lib"],
+    index_html = "index.html",
+    style_css = "gallery.css",
+    packages = PURS_REGISTRY,
+)

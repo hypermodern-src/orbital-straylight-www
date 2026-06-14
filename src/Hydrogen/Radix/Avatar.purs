@@ -1,0 +1,189 @@
+-- | Hydrogen.Radix.Avatar — an image with a fallback (radix `Avatar`).
+-- |
+-- | A small STATEFUL primitive whose state is NOT a controlled value but a
+-- | local lifecycle: the image's load status. radix tracks
+-- | `"idle" | "loading" | "loaded" | "error"`; we mirror it as `Status`
+-- | (`Idle | Loading | Loaded | Errored`). The `<img>` is rendered only while it
+-- | has actually `Loaded`, and the `fallback` content is shown while it has not —
+-- | so the consumer always sees *something* (initials, an icon) until/unless the
+-- | image resolves.
+-- |
+-- | Unlike `Toggle`, there is no `Behavior.ControllableState` here: load status is
+-- | driven by the browser via `HE.onLoad`/`HE.onError`, not by a parent prop. On
+-- | `Receive`, a *changed* `src` resets the status back to `Loading` so a new image
+-- | re-runs the load lifecycle.
+-- |
+-- | Parts (each a `ClassNames` in `Style`): `root` (a `span`), `image` (the `img`),
+-- | `fallback` (a `span`). The stable behavioral attribute is
+-- | `data-state="idle|loading|loaded|error"` on the `img`, matching radix.
+-- |
+-- | NOTE: radix's `AvatarFallback` supports a `delayMs` (delay before the fallback
+-- | appears, to avoid a flash on fast loads). Skipped in v1 — the fallback shows
+-- | immediately whenever `status /= Loaded`.
+module Hydrogen.Radix.Avatar
+  ( component
+  , Input
+  , Output(..)
+  , Query(..)
+  , Slot
+  , Status(..)
+  , statusName
+  , Style
+  , defaultStyle
+  , defaultInput
+  ) where
+
+import Prelude
+
+import Data.Maybe (Maybe(..))
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
+import Hydrogen.Radix.Style (ClassNames, cn, classes, dataState)
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Public surface
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- | The image's load lifecycle (radix `ImageLoadingStatus`).
+data Status = Idle | Loading | Loaded | Errored
+
+derive instance eqStatus :: Eq Status
+
+-- | The stable `data-state` realization CSS targets.
+statusName :: Status -> String
+statusName = case _ of
+  Idle -> "idle"
+  Loading -> "loading"
+  Loaded -> "loaded"
+  Errored -> "error"
+
+-- | Per-part class lists: the `span` root, the `img`, and the fallback `span`.
+type Style =
+  { root :: ClassNames
+  , image :: ClassNames
+  , fallback :: ClassNames
+  }
+
+-- | Semantic default — a preset supplies an alternative `Style`.
+defaultStyle :: Style
+defaultStyle =
+  { root: cn "rdx-avatar"
+  , image: cn "rdx-avatar-image"
+  , fallback: cn "rdx-avatar-fallback"
+  }
+
+type Input =
+  { src :: String                      -- image source ("" = no image, fallback only)
+  , alt :: String                      -- alt text for the image
+  , fallback :: Array HH.PlainHTML      -- shown until/unless the image has loaded
+  , style :: Style
+  }
+
+defaultInput :: Input
+defaultInput =
+  { src: ""
+  , alt: ""
+  , fallback: []
+  , style: defaultStyle
+  }
+
+-- | Emitted whenever the load status changes.
+data Output = StatusChanged Status
+
+-- | External inspection.
+data Query a = GetStatus (Status -> a)
+
+type Slot id = H.Slot Query Output id
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Implementation
+-- ─────────────────────────────────────────────────────────────────────────────
+
+type State =
+  { status :: Status
+  , src :: String
+  , alt :: String
+  , fallback :: Array HH.PlainHTML
+  , style :: Style
+  }
+
+data Action
+  = Receive Input
+  | StatusChanged' Status
+
+component :: forall m. H.Component Query Input Output m
+component =
+  H.mkComponent
+    { initialState
+    , render
+    , eval: H.mkEval H.defaultEval
+        { handleAction = handleAction
+        , handleQuery = handleQuery
+        , receive = Just <<< Receive
+        }
+    }
+
+initialState :: Input -> State
+initialState input =
+  { status: if input.src == "" then Idle else Loading
+  , src: input.src
+  , alt: input.alt
+  , fallback: input.fallback
+  , style: input.style
+  }
+
+render :: forall m. State -> H.ComponentHTML Action () m
+render st =
+  HH.span
+    [ classes st.style.root ]
+    ( (if st.src == "" then [] else [ renderImage st ])
+        <> (if st.status == Loaded then [] else [ renderFallback st ])
+    )
+
+renderImage :: forall m. State -> H.ComponentHTML Action () m
+renderImage st =
+  HH.img
+    [ HP.src st.src
+    , HP.alt st.alt
+    , classes st.style.image
+    , dataState (statusName st.status)
+    , HE.onLoad \_ -> StatusChanged' Loaded
+    , HE.onError \_ -> StatusChanged' Errored
+    ]
+
+renderFallback :: forall m. State -> H.ComponentHTML Action () m
+renderFallback st =
+  HH.span
+    [ classes st.style.fallback ]
+    (map HH.fromPlainHTML st.fallback)
+
+handleAction :: forall m. Action -> H.HalogenM State Action () Output m Unit
+handleAction = case _ of
+  StatusChanged' next -> do
+    st <- H.get
+    when (st.status /= next) do
+      H.modify_ _ { status = next }
+      H.raise (StatusChanged next)
+  Receive input -> do
+    st <- H.get
+    let
+      -- A changed src restarts the load lifecycle; otherwise keep current status.
+      next
+        | input.src /= st.src = if input.src == "" then Idle else Loading
+        | otherwise = st.status
+    H.modify_ _
+      { status = next
+      , src = input.src
+      , alt = input.alt
+      , fallback = input.fallback
+      , style = input.style
+      }
+    when (next /= st.status) (H.raise (StatusChanged next))
+
+handleQuery :: forall m a. Query a -> H.HalogenM State Action () Output m (Maybe a)
+handleQuery = case _ of
+  GetStatus reply -> do
+    st <- H.get
+    pure (Just (reply st.status))
