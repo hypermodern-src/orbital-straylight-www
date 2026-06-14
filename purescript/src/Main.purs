@@ -24,6 +24,8 @@ import Web.HTML.Window (document)
 import Web.Event.Event (preventDefault)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 
+import Effect.Console as Console
+import Hydrogen.Surface as Surface
 import Straylight.Auth as Auth
 import Straylight.UI (cls, scanlineOverlay)
 import Straylight.Router (Route(..), Product(..), ProductPage(..), parseRoute, routeToPath, pushState, getPathname, onPopState, interceptLinks)
@@ -136,6 +138,9 @@ main = launchAff_ do
   -- Bring up the framework auth session (Supabase-backed via hydrogen's
   -- AuthProvider frame; SDK bundled transitively — STR-239).
   _ <- liftEffect Auth.initAuth
+  -- Surface axis: classify the live rendering target (reflow wiring to follow).
+  surf <- liftEffect Surface.currentSurface
+  liftEffect $ Console.log ("straylight: surface " <> show surf.class_)
   doc <- liftEffect $ window >>= document
   let parent = HTMLDocument.toParentNode doc
   mbContainer <- liftEffect $ querySelector (QuerySelector "#straylight-app") parent
