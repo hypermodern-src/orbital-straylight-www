@@ -1,27 +1,26 @@
--- | Supabase integration (STR-239) — a typed PureScript surface over
--- | @supabase/supabase-js, packaged as a first-class hydrogen library cell. The
--- | SDK's 9-package npm closure rides up to any consuming app via PursLibInfo:
--- | an app adds `deps = ["hydrogen//integrations/supabase:lib"]` and the SDK
--- | lands on esbuild's NODE_PATH automatically — no npm_packages of its own.
+-- | Supabase integration (STR-239) — a typed surface over @supabase/supabase-js,
+-- | bundled via the transitive paved path (the SDK's flat 9-pkg closure rides up
+-- | through PursLibInfo). Implements hydrogen's `AuthProvider` frame hook, so it's
+-- | interchangeable with Clerk behind `Hydrogen.Frame` (the app's routing logic
+-- | names neither).
 -- |
--- | Async methods are continuation-passing (error + success callbacks; the JS
--- | does `.then(onOk).catch(onErr)`) so this library's closure is `effect`-only.
--- | Apps wrap them in Aff/Promise at their boundary.
+-- | Async methods are continuation-passing (`.then(onOk).catch(onErr)`), so this
+-- | library's closure stays `effect`-only; apps wrap in Aff at their boundary.
 module Hydrogen.Integration.Supabase
   ( Client
   , Session
   , Credentials
   , createClient
   , signInWithPassword
-  , signOut
   , getSession
   , onAuthStateChange
   ) where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
 import Effect (Effect)
+import Hydrogen.Frame (class AuthProvider, AuthStatus(..))
 
 -- | An opaque @supabase/supabase-js client (the result of `createClient`).
 foreign import data Client :: Type
@@ -52,8 +51,7 @@ signInWithPassword
   -> Effect Unit
 signInWithPassword = signInWithPasswordImpl
 
--- | `auth.signOut()`.
-foreign import signOut :: Client -> (String -> Effect Unit) -> Effect Unit -> Effect Unit
+foreign import signOutImpl :: Client -> (String -> Effect Unit) -> Effect Unit -> Effect Unit
 
 foreign import getSessionImpl
   :: Client
@@ -78,3 +76,11 @@ foreign import onAuthStateChangeImpl
 -- | on sign-out) whenever auth state changes. Returns the unsubscribe effect.
 onAuthStateChange :: Client -> (Maybe Session -> Effect Unit) -> Effect (Effect Unit)
 onAuthStateChange client k = onAuthStateChangeImpl client Just Nothing k
+
+-- | Supabase is an `AuthProvider`: subscribe maps the session stream to
+-- | AuthStatus; signOut delegates to the SDK (errors swallowed at the frame
+-- | level — surface them through the typed API if you need them).
+instance authProviderClient :: AuthProvider Client where
+  subscribeAuth client cb =
+    onAuthStateChange client \ms -> cb (maybe Anonymous (const SignedIn) ms)
+  signOut client = signOutImpl client (\_ -> pure unit) (pure unit)

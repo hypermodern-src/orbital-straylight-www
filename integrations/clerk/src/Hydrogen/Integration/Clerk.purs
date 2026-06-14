@@ -1,27 +1,19 @@
--- | Clerk integration (STR-240) — a typed PureScript surface over @clerk/clerk-js,
--- | bundled hermetically. Clerk's closure is the case a flat node_modules can't
--- | hold (562 placements, nesting depth 5, peers external); straylight-prelude's
--- | npm placement-tree model images bun's solve and esbuild bundles it through the
--- | real nested tree. Apps add `deps = ["hydrogen//integrations/clerk:lib"]` and
--- | inherit the whole closure transitively via PursLibInfo.
--- |
--- | `guardRoute` is the Hydrogen.Router wiring: combine a route's `isProtected`
--- | (the `RouteMetadata` typeclass) with Clerk's signed-in state to gate
--- | navigation — call it from the app's navigation handler with
--- | `isProtected route` for the target.
+-- | Clerk integration (STR-240) — a typed surface over @clerk/clerk-js, bundled
+-- | hermetically via straylight-prelude's npm placement-tree model (562 placements,
+-- | depth-5 nesting, peers external). Implements hydrogen's `AuthProvider` frame
+-- | hook, so an app gates routes with the generic `Hydrogen.Frame.guardRoute` and
+-- | never names Clerk in its routing logic.
 module Hydrogen.Integration.Clerk
   ( Clerk
   , load
   , isSignedIn
   , openSignIn
-  , signOut
-  , addListener
-  , guardRoute
   ) where
 
 import Prelude
 
 import Effect (Effect)
+import Hydrogen.Frame (class AuthProvider, AuthStatus(..))
 
 -- | A loaded Clerk instance (`new Clerk(publishableKey)` + `await clerk.load()`).
 foreign import data Clerk :: Type
@@ -36,25 +28,18 @@ load = loadImpl
 -- | Whether a user is currently signed in (`!!clerk.user`).
 foreign import isSignedIn :: Clerk -> Effect Boolean
 
--- | Open Clerk's hosted sign-in modal/redirect.
+-- | Open Clerk's hosted sign-in modal/redirect (a Clerk-specific capability
+-- | beyond the AuthProvider frame interface).
 foreign import openSignIn :: Clerk -> Effect Unit
 
--- | Sign the current user out.
-foreign import signOut :: Clerk -> Effect Unit
+foreign import clerkSignOut :: Clerk -> Effect Unit
 
--- | Subscribe to auth-state changes; the callback receives the new signed-in
--- | state. Returns the unsubscribe effect.
-foreign import addListener :: Clerk -> (Boolean -> Effect Unit) -> Effect (Effect Unit)
+foreign import addListenerImpl
+  :: Clerk -> (Boolean -> Effect Unit) -> Effect (Effect Unit)
 
--- | Router integration (`Router.isProtected` wiring): if the target route is
--- | protected and no user is signed in, open sign-in and report `false`
--- | (withhold navigation); otherwise report `true` (allow).
-guardRoute :: Clerk -> Boolean -> Effect Boolean
-guardRoute clerk protected =
-  if protected then do
-    signed <- isSignedIn clerk
-    if signed then pure true
-    else do
-      openSignIn clerk
-      pure false
-  else pure true
+-- | Clerk is an `AuthProvider`: subscribe maps Clerk's listener to AuthStatus;
+-- | signOut delegates to the SDK.
+instance authProviderClerk :: AuthProvider Clerk where
+  subscribeAuth clerk cb =
+    addListenerImpl clerk \signed -> cb (if signed then SignedIn else Anonymous)
+  signOut = clerkSignOut

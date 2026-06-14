@@ -17,7 +17,7 @@ export const signInWithPasswordImpl =
       .catch((e) => onError(String(e && e.message ? e.message : e))());
   };
 
-export const signOut = (client) => (onError) => (onSuccess) => () => {
+export const signOutImpl = (client) => (onError) => (onSuccess) => () => {
   client.auth
     .signOut()
     .then(({ error }) => {

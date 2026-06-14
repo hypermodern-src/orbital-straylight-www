@@ -6,6 +6,7 @@
 purescript_library(
     name = "lib",
     srcs = glob(["src/**/*.purs", "src/**/*.js"]),
+    deps = ["//:lib"],  # hydrogen core, for Hydrogen.Frame (AuthProvider)
     npm_packages = [
         {"name": "@supabase/auth-js", "version": "2.108.1", "sha512": "2e57b9aca53c7fd2c5dcae5d0ddf0eafc9a4906fa9b7345965628f54c9bd07d52ea2f1fae52b36fa216742a46c0aa686a2ebc911c4d6ca5d1c8f6ae236bac32d", "path": ["@supabase/auth-js"]},
         {"name": "@supabase/functions-js", "version": "2.108.1", "sha512": "7f10515bf038206ec00d0ced56dd0d684cb9cac88ed56276a5b95db2705c86b907bb27a95f42ab7a4f6a03d4f88144015554c213d11ae2976c33985f9f79dce0", "path": ["@supabase/functions-js"]},

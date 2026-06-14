@@ -14,11 +14,11 @@ export const openSignIn = (clerk) => () => {
   clerk.openSignIn();
 };
 
-export const signOut = (clerk) => () => {
+export const clerkSignOut = (clerk) => () => {
   clerk.signOut();
 };
 
-export const addListener = (clerk) => (cb) => () => {
+export const addListenerImpl = (clerk) => (cb) => () => {
   const unsub = clerk.addListener((resources) => {
     cb(!!resources.user)();
   });
