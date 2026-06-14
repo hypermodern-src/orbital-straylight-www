@@ -12,6 +12,7 @@ purescript_app(
         "src/Gallery/Main.purs",
         "src/Gallery/Story.purs",
         "src/Gallery/Story/Checkbox.purs",
+        "src/Gallery/Story/Separator.purs",
     ],
     main = "Gallery.Main",
     deps = ["//:lib"],

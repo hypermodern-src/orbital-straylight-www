@@ -22,6 +22,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Gallery.Story (GallerySlots, Story, _story)
 import Gallery.Story.Checkbox as Checkbox
+import Gallery.Story.Separator as Separator
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -38,6 +39,7 @@ import Web.HTML.Window as Window
 stories :: Array Story
 stories =
   [ Checkbox.story
+  , Separator.story
   ]
 
 -- ─────────────────────────────────────────────────────────────────────────────

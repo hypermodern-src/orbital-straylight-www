@@ -1494,13 +1494,22 @@
   --orange-a11: #ffa057;
   --orange-a12: #ffe0c2;
 }
-/* Base + story CSS ported from radix-ui/primitives apps/storybook (MIT, (c)
-   WorkOS) — replicates the Storybook preview environment EXACTLY so the gallery
-   diffs pixel-perfect against the captured golden:
-     * box-sizing: border-box   (preview.css — without it the 30×30 box is 40px)
-     * body margin:0 + the -apple-system font stack
-     * UA defaults for h1/p/label/input (preview.css overrides none)
-   Class names kept (.root/.indicator) so a Halogen `Style` record maps 1:1. */
+/* The gallery's non-color CSS. Two parts, concatenated after colors.css into
+   gallery.css (the buck2 style_css):
+
+   1. PREVIEW SUBSTRATE — radix-ui/primitives' apps/storybook/.storybook/preview.css
+      (MIT, (c) WorkOS), ported verbatim: the box-sizing reset, the demo `--color-*`
+      variables every *.stories.module.css references, and the -apple-system font
+      stack. Plus `body { margin: 0 }` — the Storybook iframe env our goldens were
+      captured in. EVERY story depends on this; never special-case it per story.
+
+   2. PER-STORY MODULES — each radix `<component>.stories.module.css`, with its flat
+      `.root`/`.indicator`/… classes NAMESPACED to `<component>-<class>` (the gallery
+      CSS is one flat namespace, unlike radix's hashed CSS modules — so checkbox's
+      `.root` and separator's `.root` must not collide). A story passes the namespaced
+      names to the primitive via its `Style`/`class_`. */
+
+/* ── 1. preview substrate ──────────────────────────────────────────────────── */
 
 * {
   box-sizing: border-box;
@@ -1513,6 +1522,15 @@
   display: none;
 }
 
+:root {
+  --color-white: #fff;
+  --color-gray100: #ccc;
+  --color-gray300: #aaa;
+  --color-black: #111;
+  --color-red: crimson;
+  --color-green: green;
+}
+
 body {
   margin: 0;
   font-family:
@@ -1520,8 +1538,9 @@ body {
     sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-/* ── Checkbox (checkbox.stories.module.css) ─────────────────────────────────── */
-.root {
+/* ── 2. checkbox (checkbox.stories.module.css) ─────────────────────────────── */
+
+.checkbox-root {
   /* no background set — the <button> keeps its default UA ButtonFace fill, as in
      radix's checkbox.stories.module.css (do NOT add background: transparent). */
   vertical-align: middle;
@@ -1530,22 +1549,39 @@ body {
   height: 30px;
   padding: 4px;
 }
-.root:focus {
+.checkbox-root:focus {
   outline: none;
   border-color: var(--red-9);
   box-shadow: 0 0 0 1px var(--red-9);
 }
-.root[data-disabled] {
+.checkbox-root[data-disabled] {
   opacity: 0.3;
 }
 
-.indicator {
+.checkbox-indicator {
   background-color: var(--red-9);
   display: block;
   width: 30px;
   height: 30px;
 }
-.indicator[data-state="checked"],
-.indicator[data-state="unchecked"] {
+.checkbox-indicator[data-state="checked"],
+.checkbox-indicator[data-state="unchecked"] {
   height: 30px;
+}
+
+/* ── separator (separator.stories.module.css) ──────────────────────────────── */
+
+.separator-root {
+  border: none;
+  background-color: var(--color-red);
+}
+.separator-root[data-orientation="horizontal"] {
+  height: 1px;
+  width: 100%;
+  margin: 20px 0;
+}
+.separator-root[data-orientation="vertical"] {
+  height: 100px;
+  width: 1px;
+  margin: 0 20px;
 }

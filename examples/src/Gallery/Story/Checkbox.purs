@@ -62,4 +62,4 @@ view =
 
 styledInput :: Checkbox.Input
 styledInput = Checkbox.defaultInput
-  { style = { root: cn "root", indicator: cn "indicator" } }
+  { style = { root: cn "checkbox-root", indicator: cn "checkbox-indicator" } }

@@ -23,6 +23,7 @@ const PORT = 6199;
 // golden id → storybook story id
 const STORIES = [
   { id: "checkbox", story: "components-checkbox--styled" },
+  { id: "separator", story: "components-separator--styled" },
   // … one per reproduced story
 ];
 
