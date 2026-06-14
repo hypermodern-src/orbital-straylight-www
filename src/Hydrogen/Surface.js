@@ -8,13 +8,17 @@ const safeMatch = (q) =>
 
 export const readMetrics = () => {
   if (typeof window === "undefined") {
-    return { width: 1280, height: 800, touch: false, standalone: false };
+    return { width: 1280, height: 800, touch: false, standalone: false, native: false };
   }
+  // iOS Safari uses navigator.standalone; everyone else display-mode: standalone.
+  const standalone =
+    safeMatch("(display-mode: standalone)") || window.navigator?.standalone === true;
   return {
     width: window.innerWidth,
     height: window.innerHeight,
     touch: safeMatch("(pointer: coarse)"),
-    standalone: safeMatch("(display-mode: standalone)"),
+    standalone,
+    native: window.__hydrogen_native__ === true,
   };
 };
 

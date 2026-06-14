@@ -17,7 +17,8 @@
 -- | surface-specific — reflows uniformly. `Surface` is the notion ORBITAL's
 -- | components will be written against; for now it's the vocabulary.
 module Hydrogen.Surface
-  ( SurfaceClass(..)
+  ( Host(..)
+  , SurfaceClass(..)
   , SurfaceContext
   , classify
   , readMetrics
@@ -26,6 +27,7 @@ module Hydrogen.Surface
   , SurfaceView
   , reactive
   , bySurface
+  , byHost
   , atLeast
   ) where
 
@@ -33,6 +35,21 @@ import Prelude
 
 import Effect (Effect)
 import Halogen.HTML as HH
+
+-- | The HOST a hydrogen app renders into — the target/shell axis (orthogonal to
+-- | size). A component can target a host, not only a width: `Browser` (a normal
+-- | web tab), `InstalledPWA` (added to home screen / standalone display-mode), or
+-- | `Native` (a future native shell, which sets `window.__hydrogen_native__`).
+-- | The same bundle distinguishes Browser vs InstalledPWA at runtime; Native is a
+-- | separate build target whose shell flags itself.
+data Host = Browser | InstalledPWA | Native
+
+derive instance eqHost :: Eq Host
+
+instance showHost :: Show Host where
+  show Browser = "Browser"
+  show InstalledPWA = "InstalledPWA"
+  show Native = "Native"
 
 -- | The coarse surface classes a design system reflows between. Ordered, so
 -- | `atLeast` can express "Cozy or wider".
@@ -46,15 +63,15 @@ instance showSurfaceClass :: Show SurfaceClass where
   show Cozy = "Cozy"
   show Roomy = "Roomy"
 
--- | The live surface: its class plus the raw metrics reactive components use for
--- | fluid layout, and the capabilities surface-specific components branch on
--- | (coarse pointer = touch; standalone = installed PWA).
+-- | The live surface: its host (target shell) and size class, plus the raw
+-- | metrics reactive components use for fluid layout and the touch capability
+-- | surface-specific components branch on.
 type SurfaceContext =
-  { class_ :: SurfaceClass
+  { host :: Host
+  , class_ :: SurfaceClass
   , width :: Int
   , height :: Int
   , touch :: Boolean
-  , standalone :: Boolean
   }
 
 -- | Width → class. Breakpoints: Compact < 640 ≤ Cozy < 1024 ≤ Roomy.
@@ -64,20 +81,26 @@ classify w
   | w < 1024 = Cozy
   | otherwise = Roomy
 
--- | Raw viewport metrics from the host (window). FFI.
+-- | Raw viewport metrics + host flags from the window. FFI.
 foreign import readMetrics
-  :: Effect { width :: Int, height :: Int, touch :: Boolean, standalone :: Boolean }
+  :: Effect
+       { width :: Int
+       , height :: Int
+       , touch :: Boolean
+       , standalone :: Boolean
+       , native :: Boolean
+       }
 
--- | The current surface (metrics + derived class).
+-- | The current surface (metrics + derived host & class).
 currentSurface :: Effect SurfaceContext
 currentSurface = do
   m <- readMetrics
   pure
-    { class_: classify m.width
+    { host: if m.native then Native else if m.standalone then InstalledPWA else Browser
+    , class_: classify m.width
     , width: m.width
     , height: m.height
     , touch: m.touch
-    , standalone: m.standalone
     }
 
 foreign import onResize :: Effect Unit -> Effect (Effect Unit)
@@ -101,6 +124,11 @@ reactive = identity
 -- | as the surface reflows across a breakpoint.
 bySurface :: forall w i. (SurfaceClass -> HH.HTML w i) -> SurfaceView w i
 bySurface f ctx = f ctx.class_
+
+-- | A host-specific component: a distinct rendering per `Host` (e.g. a web nav
+-- | vs an installed-PWA bottom bar vs a native chrome).
+byHost :: forall w i. (Host -> HH.HTML w i) -> SurfaceView w i
+byHost f ctx = f ctx.host
 
 -- | Is the surface at least this wide? `atLeast Cozy ctx` — for "Cozy or Roomy".
 atLeast :: SurfaceClass -> SurfaceContext -> Boolean
