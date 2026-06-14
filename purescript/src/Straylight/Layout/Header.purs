@@ -13,6 +13,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 
+import Hydrogen.Surface as Surface
 import Straylight.UI (cls, svgNS)
 
 -- ============================================================
@@ -33,6 +34,7 @@ type State =
   , currentTheme :: String
   , themeLock :: Maybe String
   , currentPath :: String
+  , surface :: Surface.SurfaceContext
   }
 
 data Action
@@ -42,9 +44,10 @@ data Action
   | ToggleProductMenu
   | SelectProduct String String  -- path, theme
 
-type Input = 
+type Input =
   { currentPath :: String
   , themeLock :: Maybe String
+  , surface :: Surface.SurfaceContext
   }
 
 -- ============================================================
@@ -69,6 +72,7 @@ initialState input =
   , currentTheme: "ono-tuned"
   , themeLock: input.themeLock
   , currentPath: input.currentPath
+  , surface: input.surface
   }
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
@@ -85,7 +89,14 @@ handleAction = case _ of
         H.modify_ _ { currentTheme = theme }
 
   Receive input -> do
-    H.modify_ _ { themeLock = input.themeLock, currentPath = input.currentPath }
+    -- Reflow: when the surface widens out of Compact, drop the mobile menu.
+    let menuOpen = input.surface.class_ == Surface.Compact
+    H.modify_ \s -> s
+      { themeLock = input.themeLock
+      , currentPath = input.currentPath
+      , surface = input.surface
+      , mobileMenuOpen = s.mobileMenuOpen && menuOpen
+      }
     case input.themeLock of
       Just lockedTheme -> do
         liftEffect $ setThemeImpl lockedTheme
@@ -118,34 +129,38 @@ render state =
         [ cls [ "max-w-[1100px] mx-auto px-8 py-4" ] ]
         [ HH.div
             [ cls [ "flex justify-between items-center" ] ]
-            [ -- Product switcher
-              productSwitcher state
-              
-              -- Desktop Nav - show product sub-pages or global nav
-            , HH.nav
-                [ cls [ "hidden md:flex items-center gap-6" ] ]
-                (productNav state.currentPath)
-              
-              -- Status indicator
-            , HH.div
-                [ cls [ "hidden md:flex items-center gap-2 text-xs text-muted-foreground" ] ]
-                [ HH.span [ cls [ "w-2 h-2 bg-status inline-block status-pulse" ] ] []
-                , HH.text "NOMINAL"
-                ]
-              
-              -- Mobile menu button
-            , HH.button
-                [ cls [ "md:hidden p-2 cursor-pointer text-text" ]
-                , HE.onClick \_ -> ToggleMobileMenu
-                , HP.type_ HP.ButtonButton
-                ]
-                [ if state.mobileMenuOpen then closeIcon else menuIcon ]
-            ]
-          
-          -- Mobile menu
-        , if state.mobileMenuOpen then mobileMenu else HH.text ""
+            ( [ -- Product switcher (every surface)
+                productSwitcher state
+              ]
+                <>
+                  -- Surface-specific: Cozy/Roomy get the full nav + status;
+                  -- Compact gets the hamburger. Driven by the Surface TYPE
+                  -- (live reflow on resize), not CSS media queries.
+                  if compact then
+                    [ HH.button
+                        [ cls [ "p-2 cursor-pointer text-text" ]
+                        , HE.onClick \_ -> ToggleMobileMenu
+                        , HP.type_ HP.ButtonButton
+                        ]
+                        [ if state.mobileMenuOpen then closeIcon else menuIcon ]
+                    ]
+                  else
+                    [ HH.nav
+                        [ cls [ "flex items-center gap-6" ] ]
+                        (productNav state.currentPath)
+                    , HH.div
+                        [ cls [ "flex items-center gap-2 text-xs text-muted-foreground" ] ]
+                        [ HH.span [ cls [ "w-2 h-2 bg-status inline-block status-pulse" ] ] []
+                        , HH.text "NOMINAL"
+                        ]
+                    ]
+            )
+          -- Mobile menu (Compact only)
+        , if compact && state.mobileMenuOpen then mobileMenu else HH.text ""
         ]
     ]
+  where
+  compact = state.surface.class_ == Surface.Compact
 
 -- ============================================================
 -- PRODUCT SWITCHER

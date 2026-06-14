@@ -24,7 +24,6 @@ import Web.HTML.Window (document)
 import Web.Event.Event (preventDefault)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 
-import Effect.Console as Console
 import Hydrogen.Surface as Surface
 import Straylight.Auth as Auth
 import Straylight.UI (cls, scanlineOverlay)
@@ -138,9 +137,6 @@ main = launchAff_ do
   -- Bring up the framework auth session (Supabase-backed via hydrogen's
   -- AuthProvider frame; SDK bundled transitively — STR-239).
   _ <- liftEffect Auth.initAuth
-  -- Surface axis: classify the live rendering target (reflow wiring to follow).
-  surf <- liftEffect Surface.currentSurface
-  liftEffect $ Console.log ("straylight: surface " <> show surf.class_)
   doc <- liftEffect $ window >>= document
   let parent = HTMLDocument.toParentNode doc
   mbContainer <- liftEffect $ querySelector (QuerySelector "#straylight-app") parent
@@ -152,12 +148,17 @@ main = launchAff_ do
 -- APP COMPONENT
 -- ============================================================
 
-type AppState = { route :: Route, currentPath :: String }
+type AppState =
+  { route :: Route
+  , currentPath :: String
+  , surface :: Surface.SurfaceContext
+  }
 
 data AppAction
   = Initialize
   | Navigate Route MouseEvent
   | RouteChanged String
+  | SurfaceChanged Surface.SurfaceContext
 
 type AppSlots =
   ( header :: H.Slot (Const Void) Void Unit
@@ -176,7 +177,12 @@ _page = Proxy
 
 appComponent :: forall q i o m. MonadAff m => H.Component q i o m
 appComponent = H.mkComponent
-  { initialState: const { route: Home, currentPath: "/" }
+  { initialState: const
+      { route: Home
+      , currentPath: "/"
+      -- Roomy default (SSR-safe); Initialize reads the real surface immediately.
+      , surface: { host: Surface.Browser, class_: Surface.Roomy, width: 1280, height: 800, touch: false }
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -188,19 +194,25 @@ handleAction :: forall o m. MonadAff m => AppAction -> H.HalogenM AppState AppAc
 handleAction = case _ of
   Initialize -> do
     path <- liftEffect getPathname
-    H.modify_ _ { route = parseRoute path, currentPath = path }
+    surf <- liftEffect Surface.currentSurface
+    H.modify_ _ { route = parseRoute path, currentPath = path, surface = surf }
     { emitter, listener } <- liftEffect HS.create
     liftEffect $ onPopState (\p -> HS.notify listener (RouteChanged p))
     liftEffect $ interceptLinks (\p -> HS.notify listener (RouteChanged p))
+    -- Surface axis: reflow on resize/rotate.
+    _ <- liftEffect $ Surface.onSurfaceChange (\s -> HS.notify listener (SurfaceChanged s))
     void $ H.subscribe emitter
-  
+
   Navigate route event -> do
     liftEffect $ preventDefault (toEvent event)
     liftEffect $ pushState $ routeToPath route
     H.modify_ _ { route = route }
-  
+
   RouteChanged path -> do
     H.modify_ _ { route = parseRoute path, currentPath = path }
+
+  SurfaceChanged surf ->
+    H.modify_ _ { surface = surf }
 
 render :: forall m. MonadAff m => AppState -> H.ComponentHTML AppAction AppSlots m
 render state =
@@ -323,9 +335,10 @@ renderPage key = case _ of
 
 renderHeader :: forall m. MonadAff m => AppState -> H.ComponentHTML AppAction AppSlots m
 renderHeader state =
-  HH.slot_ _header unit Header.header 
+  HH.slot_ _header unit Header.header
     { currentPath: routeToPath state.route
     , themeLock: routeThemeLock state.route
+    , surface: state.surface
     }
 
 routeThemeLock :: Route -> Maybe String

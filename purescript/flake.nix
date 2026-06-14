@@ -8,7 +8,7 @@
     systems.follows = "straylight-prelude/systems";
 
     hydrogen = {
-      url = "git+ssh://git@github.com/sensenet-ai/hydrogen?ref=main&rev=886fd4e96dcded667f3f0ed65302e11bc267c0f7";
+      url = "git+ssh://git@github.com/sensenet-ai/hydrogen?ref=main&rev=a41434e71c5be49b357f1119bbb1089a60f9b0af";
       flake = false;
     };
   };
