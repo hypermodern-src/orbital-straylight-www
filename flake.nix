@@ -41,6 +41,11 @@
             # The gallery must also BUILD (purs compile + esbuild bundle), not just
             # typecheck — so `nix flake check` catches a broken app/bundle too.
             gates.gallery.target = "//examples:gallery";
+            # The unit suite (buck2 test) — `nix flake check` runs the assertions.
+            gates.tests = {
+              target = "//testing/suite:test";
+              mode = "test";
+            };
             toolchain = {
               cxx.enable = false;
               purescript.enable = true;

@@ -591,8 +591,8 @@
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
-        "lastModified": 1781466597,
-        "narHash": "sha256-BcR/rTf1v4AGnj02YS36Ndvm9LjSwheVYCqI+ofjjz4=",
+        "lastModified": 1781470635,
+        "narHash": "sha256-CJnJsJfo9f2hrQTBsdtGC1H3EkhpCX1sOIs7ig2HlUk=",
         "path": "/home/b7r6/src/straylight/straylight-prelude",
         "type": "path"
       },

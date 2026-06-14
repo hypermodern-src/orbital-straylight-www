@@ -1,0 +1,9 @@
+# Test support — the dependency-free assertion harness (Hydrogen.Test.Assert) that
+# the suites build on. (The Playwright PureScript support that also lives under
+# this directory is not yet a buck target — it lands with the purs_playwright_test
+# rule, STR-319.)
+purescript_library(
+    name = "assert",
+    srcs = ["Hydrogen/Test/Assert.purs"],
+    visibility = ["PUBLIC"],
+)

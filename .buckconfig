@@ -26,5 +26,8 @@ target_platform_detector_spec = target:root//...->prelude//platforms:default
 materializations = deferred
 digest_algorithms = BLAKE3
 
+[project]
+ignore = .direnv
+
 [build]
 execution_platforms = toolchains//:local
