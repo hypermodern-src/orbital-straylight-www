@@ -7,7 +7,7 @@
 -- |
 -- | Usage:
 -- | ```purescript
--- | import Hydrogen.HTML.Renderer as Renderer
+-- | import Hydrogen.Runtime.Renderer as Renderer
 -- | 
 -- | html :: HH.HTML Void Void
 -- | html = HH.div [ HP.class_ (ClassName "foo") ] [ HH.text "Hello" ]
@@ -16,7 +16,7 @@
 -- | rendered = Renderer.render html
 -- | -- => "<div class=\"foo\">Hello</div>"
 -- | ```
-module Hydrogen.HTML.Renderer
+module Hydrogen.Runtime.Renderer
   ( render
   , renderWith
   , RenderOptions

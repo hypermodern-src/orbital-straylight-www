@@ -1,0 +1,37 @@
+# Hydrogen.Radix — the 23 ported radix-ui primitives (unstyled, accessible),
+# composed from the Behavior substrate, the Float positioning engine, and the
+# Foundation (Dom/Style/Color). The top of the Radix layer.
+purescript_library(
+    name = "radix",
+    srcs = [
+        "AccessibleIcon.purs",
+        "Accordion.purs",
+        "AlertDialog.purs",
+        "AspectRatio.purs",
+        "Avatar.purs",
+        "Checkbox.purs",
+        "Collapsible.purs",
+        "ContextMenu.purs",
+        "Dialog.purs",
+        "DropdownMenu.purs",
+        "HoverCard.purs",
+        "Label.purs",
+        "Popover.purs",
+        "Progress.purs",
+        "RadioGroup.purs",
+        "Select.purs",
+        "Separator.purs",
+        "Switch.purs",
+        "Tabs.purs",
+        "Toggle.purs",
+        "ToggleGroup.purs",
+        "Tooltip.purs",
+        "VisuallyHidden.purs",
+    ],
+    deps = [
+        "//src/Hydrogen/Radix/Behavior:behavior",
+        "//src/Hydrogen/Radix/Float:float",
+        "//src/Hydrogen/Radix/Foundation:foundation",
+    ],
+    visibility = ["PUBLIC"],
+)

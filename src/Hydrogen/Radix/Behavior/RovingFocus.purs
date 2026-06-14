@@ -23,7 +23,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
-import Hydrogen.Radix.Style (Orientation(..))
+import Hydrogen.Radix.Foundation.Style (Orientation(..))
 
 -- | Where the user wants focus to go.
 data Intent = Prev | Next | First | Last

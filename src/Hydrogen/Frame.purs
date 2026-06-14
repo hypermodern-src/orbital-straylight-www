@@ -35,7 +35,7 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Ref as Ref
-import Hydrogen.Router (getPathname, pushState)
+import Hydrogen.Runtime.Router (getPathname, pushState)
 
 -- | Reactive auth state. Kept deliberately coarse (no user record) at the frame
 -- | level; an integration can expose richer detail through its own module.
@@ -98,7 +98,7 @@ guardRoute ctx session protected =
       navigateTo ctx "/sign-in"
       pure false
 
--- | A concrete `FrameworkContext` backed by Hydrogen.Router + a host-provided
+-- | A concrete `FrameworkContext` backed by Hydrogen.Runtime.Router + a host-provided
 -- | global config object (`window.__straylight__`). Apps can use this directly
 -- | or supply their own context type.
 data RouterContext = RouterContext

@@ -50,7 +50,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.FocusScope (Restore, captureFocus, tabLoop)
 import Hydrogen.Radix.Behavior.ScrollLock as ScrollLock
-import Hydrogen.Radix.Style (ClassNames, cn, classes, dataState)
+import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
 import Web.Event.Event as Event
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument

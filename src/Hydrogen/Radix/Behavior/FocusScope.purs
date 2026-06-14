@@ -7,7 +7,7 @@
 -- | `Restore` when it closes. All of it is pure PureScript over the typed web
 -- | bindings — querying, focusing, narrowing `Node → HTMLElement`, reference
 -- | identity (`unsafeRefEq`) — with the single foreign touch being the computed
--- | visibility read, through `Hydrogen.Radix.Dom`.
+-- | visibility read, through `Hydrogen.Radix.Foundation.Dom`.
 -- |
 -- | NOTE (deferred edges): radix also keeps a global stack of nested scopes (an
 -- | inner scope pauses an outer one) and a MutationObserver that re-focuses when
@@ -26,7 +26,7 @@ import Prelude
 import Data.Array as Array
 import Data.Maybe (Maybe(..), maybe)
 import Effect (Effect)
-import Hydrogen.Radix.Dom (computedStyle)
+import Hydrogen.Radix.Foundation.Dom (computedStyle)
 import Unsafe.Reference (unsafeRefEq)
 import Web.DOM.NodeList as NodeList
 import Web.DOM.ParentNode (QuerySelector(..), querySelectorAll) as PN

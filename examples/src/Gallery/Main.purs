@@ -25,7 +25,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Hydrogen.Radix.Checkbox as Checkbox
-import Hydrogen.Radix.Style (cn)
+import Hydrogen.Radix.Foundation.Style (cn)
 import Type.Proxy (Proxy(..))
 import Web.HTML as HTML
 import Web.HTML.Location as Location

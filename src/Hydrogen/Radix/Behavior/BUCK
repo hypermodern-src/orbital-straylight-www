@@ -1,0 +1,17 @@
+# Hydrogen.Radix.Behavior — the behavior substrate (focus scope, dismissable
+# layer, roving focus, presence, scroll lock, controllable state, direction).
+# Sits on Foundation (Dom/Style); the primitives compose these.
+purescript_library(
+    name = "behavior",
+    srcs = [
+        "ControllableState.purs",
+        "Direction.purs",
+        "DismissableLayer.purs",
+        "FocusScope.purs",
+        "Presence.purs",
+        "RovingFocus.purs",
+        "ScrollLock.purs",
+    ],
+    deps = ["//src/Hydrogen/Radix/Foundation:foundation"],
+    visibility = ["PUBLIC"],
+)

@@ -41,7 +41,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.FocusScope (Restore, captureFocus, tabLoop)
 import Hydrogen.Radix.Float.Popper as Popper
-import Hydrogen.Radix.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria)
 import Web.DOM.Node (Node)
 import Web.Event.Event (Event, EventType(..), preventDefault)
 import Web.HTML as HTML

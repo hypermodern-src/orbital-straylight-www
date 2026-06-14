@@ -10,13 +10,13 @@ import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Hydrogen.HTML.Renderer (render, renderWith, defaultOptions)
-import Hydrogen.HTML.Renderer as Renderer
+import Hydrogen.Runtime.Renderer (render, renderWith, defaultOptions)
+import Hydrogen.Runtime.Renderer as Renderer
 import Hydrogen.Data.Format as Format
 import Hydrogen.Data.RemoteData as RD
-import Hydrogen.Query as Q
-import Hydrogen.Router (normalizeTrailingSlash)
-import Hydrogen.SSG as SSG
+import Hydrogen.Data.Query as Q
+import Hydrogen.Runtime.Router (normalizeTrailingSlash)
+import Hydrogen.Runtime.SSG as SSG
 import Hydrogen.UI.Core as UI
 import Hydrogen.UI.Error as Error
 import Hydrogen.UI.Loading as Loading

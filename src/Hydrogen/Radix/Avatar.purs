@@ -40,7 +40,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Hydrogen.Radix.Style (ClassNames, cn, classes, dataState)
+import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface

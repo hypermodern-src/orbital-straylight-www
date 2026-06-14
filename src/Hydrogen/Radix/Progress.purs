@@ -11,7 +11,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..), maybe)
 import Halogen.HTML as HH
-import Hydrogen.Radix.Style (ClassNames, classes, dataState, dataAttr, role, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, classes, dataState, dataAttr, role, aria)
 
 progressState :: Maybe Number -> Number -> String
 progressState mv max = case mv of

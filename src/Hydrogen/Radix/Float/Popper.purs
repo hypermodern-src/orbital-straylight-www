@@ -9,7 +9,7 @@
 -- | Almost all of this is typed web bindings — `getBoundingClientRect` (measure),
 -- | `innerWidth`/`innerHeight` (viewport), `toEventTarget` (the window) — so the
 -- | only foreign touch is writing the solved `left`/`top`, through the one blessed
--- | style writer in `Hydrogen.Radix.Dom`.
+-- | style writer in `Hydrogen.Radix.Foundation.Dom`.
 -- |
 -- | NOTE: positioning mutates the floating element's `left`/`top` out-of-band, so
 -- | the component must keep its rendered inline `style` constant (e.g. just
@@ -27,9 +27,9 @@ import Prelude
 
 import Data.Int (toNumber)
 import Effect (Effect)
-import Hydrogen.Radix.Dom (setInlineStyle)
+import Hydrogen.Radix.Foundation.Dom (setInlineStyle)
 import Hydrogen.Radix.Float.Compute (Coords, Positioned, Rect, computePosition)
-import Hydrogen.Radix.Style (Align, Side)
+import Hydrogen.Radix.Foundation.Style (Align, Side)
 import Web.DOM.Element as Element
 import Web.Event.EventTarget (EventTarget)
 import Web.HTML as HTML

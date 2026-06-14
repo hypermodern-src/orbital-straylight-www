@@ -8,7 +8,7 @@
 -- | ## Usage
 -- |
 -- | ```purescript
--- | import Hydrogen.SSG as SSG
+-- | import Hydrogen.Runtime.SSG as SSG
 -- | import Halogen.HTML.Renderer as Renderer
 -- |
 -- | myPage :: PageMeta
@@ -22,7 +22,7 @@
 -- | html :: String
 -- | html = SSG.renderPage defaultDocConfig myPage pageContent
 -- | ```
-module Hydrogen.SSG
+module Hydrogen.Runtime.SSG
   ( -- * Document configuration
     DocConfig
   , defaultDocConfig
@@ -45,8 +45,8 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Hydrogen.HTML.Renderer as Renderer
-import Hydrogen.Router (class IsRoute, class RouteMetadata, routeToPath, routeTitle, routeDescription, routeOgImage)
+import Hydrogen.Runtime.Renderer as Renderer
+import Hydrogen.Runtime.Router (class IsRoute, class RouteMetadata, routeToPath, routeTitle, routeDescription, routeOgImage)
 
 -- ============================================================
 -- DOCUMENT CONFIGURATION
@@ -232,7 +232,7 @@ themeColorMeta config = case config.themeColor of
 -- | for both static generation and runtime rendering.
 -- |
 -- | ```purescript
--- | import Hydrogen.SSG as SSG
+-- | import Hydrogen.Runtime.SSG as SSG
 -- | import MyApp.Router (Route(..), homeRoute)
 -- |
 -- | -- Generate static page

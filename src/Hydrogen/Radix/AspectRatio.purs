@@ -9,7 +9,7 @@ import Prelude
 
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Hydrogen.Radix.Style (ClassNames, classes)
+import Hydrogen.Radix.Foundation.Style (ClassNames, classes)
 
 aspectRatio
   :: forall w i

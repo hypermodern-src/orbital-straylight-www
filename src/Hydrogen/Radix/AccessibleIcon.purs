@@ -8,7 +8,7 @@ module Hydrogen.Radix.AccessibleIcon
 import Prelude
 
 import Halogen.HTML as HH
-import Hydrogen.Radix.Style (aria)
+import Hydrogen.Radix.Foundation.Style (aria)
 import Hydrogen.Radix.VisuallyHidden (visuallyHidden_)
 
 accessibleIcon :: forall w i. { label :: String } -> Array HH.PlainHTML -> HH.HTML w i

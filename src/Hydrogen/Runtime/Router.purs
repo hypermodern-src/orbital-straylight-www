@@ -32,7 +32,7 @@
 -- |   let route = parseRoute path
 -- |   ...
 -- | ```
-module Hydrogen.Router
+module Hydrogen.Runtime.Router
   ( -- * Route typeclass
     class IsRoute
   , parseRoute

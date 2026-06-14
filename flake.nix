@@ -38,6 +38,9 @@
             src = ./.;
             targets = [ "//check:hydrogen_check" ];
             gates.typecheck.target = "//check:hydrogen_check";
+            # The gallery must also BUILD (purs compile + esbuild bundle), not just
+            # typecheck — so `nix flake check` catches a broken app/bundle too.
+            gates.gallery.target = "//examples:gallery";
             toolchain = {
               cxx.enable = false;
               purescript.enable = true;

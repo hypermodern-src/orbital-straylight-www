@@ -47,7 +47,7 @@ import Halogen.Query.Event (eventListener)
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Float.Popper as Popper
-import Hydrogen.Radix.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName)
 import Web.Event.Event (EventType(..))
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument

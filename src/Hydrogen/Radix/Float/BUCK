@@ -1,0 +1,13 @@
+# Hydrogen.Radix.Float — the native floating-ui positioning engine: a closed-form
+# placement solver (Compute) over the finite Side×Align lattice + the DOM-driven
+# popper (Popper). Sits on Foundation; the overlay primitives (Popover, Tooltip,
+# DropdownMenu, …) compose it.
+purescript_library(
+    name = "float",
+    srcs = [
+        "Compute.purs",
+        "Popper.purs",
+    ],
+    deps = ["//src/Hydrogen/Radix/Foundation:foundation"],
+    visibility = ["PUBLIC"],
+)

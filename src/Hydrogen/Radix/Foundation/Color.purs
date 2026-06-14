@@ -51,7 +51,7 @@
 -- |
 -- | Steps 1-2 backgrounds, 3-5 component fills, 6-8 borders, 9-10 solids,
 -- | 11-12 text.
-module Hydrogen.Radix.Color
+module Hydrogen.Radix.Foundation.Color
   ( Scale
   , Appearance(..)
   , Hue(..)

@@ -1,4 +1,4 @@
--- | Hydrogen.Radix.Style — the styling contract (the "amenity").
+-- | Hydrogen.Radix.Foundation.Style — the styling contract (the "amenity").
 -- |
 -- | Learned from radix-ui themes: theming is **data-attribute + CSS-variable
 -- | driven**, not class-string soup. A ported primitive emits:
@@ -16,12 +16,12 @@
 -- |   * `ClassNames` — a monoidal class list + its Halogen renderer.
 -- |   * the cross-cutting style axes (Variant / Size / Radius / Side / Orientation)
 -- |     and their string realizations, mirroring radix themes' prop vocabulary.
--- |   * `Accent` — reuses `Hydrogen.Radix.Color.Hue` (the accent color IS a hue).
+-- |   * `Accent` — reuses `Hydrogen.Radix.Foundation.Color.Hue` (the accent color IS a hue).
 -- |   * `data-*` attribute helpers.
 -- |
 -- | Each component defines its OWN `Style` record (a `ClassNames` per part) plus a
 -- | `defaultStyle` of semantic class names; presets supply alternative records.
-module Hydrogen.Radix.Style
+module Hydrogen.Radix.Foundation.Style
   ( ClassNames(..)
   , cn
   , unClassNames
@@ -56,7 +56,7 @@ import Data.Array (filter)
 import Data.String (Pattern(..), split, trim) as Str
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Hydrogen.Radix.Color (Hue, hueName)
+import Hydrogen.Radix.Foundation.Color (Hue, hueName)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- ClassNames — a monoidal class list

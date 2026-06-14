@@ -22,7 +22,7 @@
 -- | createUser :: User -> Aff (Either String User)
 -- | createUser user = post config "/users" user
 -- | ```
-module Hydrogen.API.Client
+module Hydrogen.Data.Client
   ( -- * Configuration
     ApiConfig
   , defaultConfig

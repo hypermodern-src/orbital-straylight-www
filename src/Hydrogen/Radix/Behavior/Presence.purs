@@ -32,7 +32,7 @@ import Prelude
 import Effect (Effect)
 import Halogen.Query.Event (eventListener)
 import Halogen.Subscription (Emitter)
-import Hydrogen.Radix.Dom (computedStyle)
+import Hydrogen.Radix.Foundation.Dom (computedStyle)
 import Web.Event.Event (EventType(..))
 import Web.Event.EventTarget (EventTarget)
 import Web.HTML.HTMLElement (HTMLElement)

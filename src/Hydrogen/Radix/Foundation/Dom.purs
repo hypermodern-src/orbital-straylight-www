@@ -1,4 +1,4 @@
--- | Hydrogen.Radix.Dom — the entire foreign-function surface of the radix port.
+-- | Hydrogen.Radix.Foundation.Dom — the entire foreign-function surface of the radix port.
 -- |
 -- | There is exactly one `.js` file in this tree, and it lives here. That is a
 -- | deliberate, load-bearing constraint: the FFI is the one place the type
@@ -28,7 +28,7 @@
 -- | Each is total, observing or mutating only the element handed to it, and
 -- | side-effecting solely through `Effect`. No element is retained, no listener
 -- | installed, no global touched.
-module Hydrogen.Radix.Dom
+module Hydrogen.Radix.Foundation.Dom
   ( computedStyle
   , inlineStyle
   , setInlineStyle

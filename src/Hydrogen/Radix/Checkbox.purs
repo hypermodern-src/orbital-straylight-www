@@ -44,7 +44,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties.ARIA as ARIA
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
-import Hydrogen.Radix.Style (ClassNames, cn, classes, dataState, dataAttr)
+import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState, dataAttr)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface

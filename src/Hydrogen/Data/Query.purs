@@ -23,7 +23,7 @@
 -- | ## Usage
 -- |
 -- | ```purescript
--- | import Hydrogen.Query as Q
+-- | import Hydrogen.Data.Query as Q
 -- | import Hydrogen.Data.RemoteData as RD
 -- | 
 -- | -- Create a query client (typically in your main)
@@ -76,7 +76,7 @@
 -- |       posts <- postsState.data
 -- |       pure $ renderUserWithPosts user posts
 -- | ```
-module Hydrogen.Query
+module Hydrogen.Data.Query
   ( -- * Client
     QueryClient
   , ClientOptions

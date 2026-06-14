@@ -9,7 +9,7 @@ import Prelude
 
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Hydrogen.Radix.Style (ClassNames, classes)
+import Hydrogen.Radix.Foundation.Style (ClassNames, classes)
 
 label :: forall w i. { for :: String, class_ :: ClassNames } -> Array HH.PlainHTML -> HH.HTML w i
 label opts children =

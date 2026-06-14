@@ -1,0 +1,21 @@
+# Hydrogen.UI — the opinionated component kit + UI utilities (Tailwind class
+# helpers, layout primitives, ids, loading/error states, and a few components).
+# Predates the Radix port; its overlap with Radix is being reconciled. Leaf layer.
+purescript_library(
+    name = "ui",
+    srcs = [
+        "AriaHider.js",
+        "AriaHider.purs",
+        "Core.purs",
+        "Dialog.js",
+        "Dialog.purs",
+        "Error.purs",
+        "FocusTrap.js",
+        "FocusTrap.purs",
+        "Id.purs",
+        "Loading.purs",
+        "Tabs.js",
+        "Tabs.purs",
+    ],
+    visibility = ["PUBLIC"],
+)

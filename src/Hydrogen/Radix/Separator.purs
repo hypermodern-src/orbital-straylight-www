@@ -9,7 +9,7 @@ module Hydrogen.Radix.Separator
 import Prelude
 
 import Halogen.HTML as HH
-import Hydrogen.Radix.Style (ClassNames, Orientation(..), classes, dataOrientation, orientationName, role, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), classes, dataOrientation, orientationName, role, aria)
 
 separator
   :: forall w i

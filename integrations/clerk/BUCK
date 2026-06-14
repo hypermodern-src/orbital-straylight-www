@@ -7,7 +7,10 @@
 # `deps = ["hydrogen//integrations/clerk:lib"]` and inherit it all via PursLibInfo.
 purescript_library(
     name = "lib",
-    srcs = glob(["src/**/*.purs", "src/**/*.js"]),
+    srcs = [
+        "src/Hydrogen/Integration/Clerk.js",
+        "src/Hydrogen/Integration/Clerk.purs",
+    ],
     deps = ["//:lib"],  # hydrogen core, for Hydrogen.Frame (AuthProvider)
     npm_packages = [
         {"name": "@adraffy/ens-normalize", "version": "1.11.1", "sha512": "9e1081577aae1207acb9fedceca61fa5eaea492d784fc6d8baf27c3dc2c9a7ace7919a4573402e5b8a81b6bf1e295c8f3deffc452afbb2094258f53979ac7029", "path": ["@adraffy/ens-normalize"]},

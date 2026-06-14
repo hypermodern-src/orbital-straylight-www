@@ -7,7 +7,7 @@
 -- | — the one piece of process-wide state the scroll lock fundamentally needs (the
 -- | body is shared) — held in `Ref`s created once at load. No foreign code: the
 -- | body is reached through typed `Web.HTML` bindings and its `overflow` read and
--- | written through the blessed `Hydrogen.Radix.Dom` accessors.
+-- | written through the blessed `Hydrogen.Radix.Foundation.Dom` accessors.
 module Hydrogen.Radix.Behavior.ScrollLock
   ( lock
   , unlock
@@ -20,7 +20,7 @@ import Effect (Effect)
 import Effect.Ref (Ref)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
-import Hydrogen.Radix.Dom (inlineStyle, setInlineStyle)
+import Hydrogen.Radix.Foundation.Dom (inlineStyle, setInlineStyle)
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement (HTMLElement)

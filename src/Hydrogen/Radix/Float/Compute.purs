@@ -29,7 +29,7 @@ import Prelude
 
 import Data.Array (find)
 import Data.Maybe (fromMaybe)
-import Hydrogen.Radix.Style (Side(..), Align(..))
+import Hydrogen.Radix.Foundation.Style (Side(..), Align(..))
 
 -- | A measured rectangle in viewport coordinates.
 type Rect = { x :: Number, y :: Number, width :: Number, height :: Number }

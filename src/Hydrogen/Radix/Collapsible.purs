@@ -41,7 +41,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
-import Hydrogen.Radix.Style (ClassNames, cn, classes, dataState, dataAttr, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState, dataAttr, aria)
 import Web.HTML.HTMLElement as HTMLElement
 
 -- ─────────────────────────────────────────────────────────────────────────────

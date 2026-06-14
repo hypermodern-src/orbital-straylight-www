@@ -5,7 +5,10 @@
 # SDK on NODE_PATH with no npm_packages of its own. Clean flat closure (9 pkgs).
 purescript_library(
     name = "lib",
-    srcs = glob(["src/**/*.purs", "src/**/*.js"]),
+    srcs = [
+        "src/Hydrogen/Integration/Supabase.js",
+        "src/Hydrogen/Integration/Supabase.purs",
+    ],
     deps = ["//:lib"],  # hydrogen core, for Hydrogen.Frame (AuthProvider)
     npm_packages = [
         {"name": "@supabase/auth-js", "version": "2.108.1", "sha512": "2e57b9aca53c7fd2c5dcae5d0ddf0eafc9a4906fa9b7345965628f54c9bd07d52ea2f1fae52b36fa216742a46c0aa686a2ebc911c4d6ca5d1c8f6ae236bac32d", "path": ["@supabase/auth-js"]},

@@ -1,0 +1,13 @@
+# Hydrogen.Runtime — the app runtime: type-safe routing (Router), static-site
+# generation (SSG), and the server/string HTML renderer (Renderer). Leaf layer.
+purescript_library(
+    name = "runtime",
+    srcs = [
+        "Renderer.js",
+        "Renderer.purs",
+        "Router.js",
+        "Router.purs",
+        "SSG.purs",
+    ],
+    visibility = ["PUBLIC"],
+)
