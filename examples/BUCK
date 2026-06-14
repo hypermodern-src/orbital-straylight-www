@@ -8,7 +8,11 @@ load("//:registry.bzl", "PURS_REGISTRY")
 
 purescript_app(
     name = "gallery",
-    srcs = ["src/Gallery/Main.purs"],
+    srcs = [
+        "src/Gallery/Main.purs",
+        "src/Gallery/Story.purs",
+        "src/Gallery/Story/Checkbox.purs",
+    ],
     main = "Gallery.Main",
     deps = ["//:lib"],
     index_html = "index.html",
