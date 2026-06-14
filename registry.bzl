@@ -95,3 +95,17 @@ PURS_REGISTRY = [
     {"name": "web-uievents", "version": "5.0.0", "sha256": "ca1f6e54b206bbcc04d7e8f02de86d7ec45f4757b289286120c32104fa8ac9b1"},
     {"name": "web-xhr", "version": "5.0.1", "sha256": "831420786c2f17f37219dc34149f48cd723782a20c35bf2840ef17fa9e630f2c"},
 ]
+
+# QuickCheck + its two transitive deps not already in the set above (lcg, random),
+# pinned in the SAME registry set (73.2.0). Property-based tests need these; the
+# gallery/check closures don't, so they're a separate list — only the test suite
+# compiles them.
+_QUICKCHECK = [
+    {"name": "lcg", "version": "4.0.0", "sha256": "6d46327d76268d39fbcd2a63da14e278fcb0cecb83f347c28e4a27b2ba5d18ec"},
+    {"name": "quickcheck", "version": "8.0.1", "sha256": "49f5be99a7ac0add239e71617eb8096463dc58b8fca057066dc0c85649667737"},
+    {"name": "random", "version": "6.0.0", "sha256": "eec651a3a3fd5088970d9f6cd902fd4fc877c252302dd42b478fa864a3a28d0c"},
+]
+
+# The closure for the test suite: the library's registry closure + QuickCheck.
+PURS_REGISTRY_TEST = PURS_REGISTRY + _QUICKCHECK
+

@@ -15,6 +15,11 @@ import Test.Color as Color
 import Test.Compute as Compute
 import Test.Format as Format
 import Test.RemoteData as RemoteData
+import Test.Prop.Compute as PropCompute
+import Test.Prop.Format as PropFormat
+import Test.Prop.RemoteData as PropRemoteData
+import Test.Prop.Router as PropRouter
+import Test.Prop.Style as PropStyle
 import Test.Router as Router
 import Test.Style as Style
 
@@ -26,3 +31,8 @@ main = runSuite "hydrogen" do
   Style.suite
   Router.suite
   Color.suite
+  PropRemoteData.suite
+  PropFormat.suite
+  PropCompute.suite
+  PropStyle.suite
+  PropRouter.suite

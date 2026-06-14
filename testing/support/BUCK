@@ -1,9 +1,18 @@
-# Test support — the dependency-free assertion harness (Hydrogen.Test.Assert) that
-# the suites build on. (The Playwright PureScript support that also lives under
-# this directory is not yet a buck target — it lands with the purs_playwright_test
-# rule, STR-319.)
+# Test support: the dependency-free assertion harness (Hydrogen.Test.Assert), the
+# QuickCheck generators for hydrogen's own types (Hydrogen.Test.Gen), and the
+# QuickCheck→tally bridge (Hydrogen.Test.Prop). Depends on //:lib because the
+# generators produce library types (RemoteData, Side/Align, Hue); the QuickCheck
+# imports resolve from the consuming test's closure (PURS_REGISTRY_TEST).
+#
+# (The Playwright PureScript support that also lives under this directory is not yet
+# a buck target — it lands with the purs_playwright_test rule, STR-319.)
 purescript_library(
-    name = "assert",
-    srcs = ["Hydrogen/Test/Assert.purs"],
+    name = "support",
+    srcs = [
+        "Hydrogen/Test/Assert.purs",
+        "Hydrogen/Test/Gen.purs",
+        "Hydrogen/Test/Prop.purs",
+    ],
+    deps = ["//:lib"],
     visibility = ["PUBLIC"],
 )

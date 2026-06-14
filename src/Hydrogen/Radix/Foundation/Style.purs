@@ -138,6 +138,13 @@ data Side = Top | Right | Bottom | Left
 derive instance eqSide :: Eq Side
 derive instance ordSide :: Ord Side
 
+instance showSide :: Show Side where
+  show = case _ of
+    Top -> "Top"
+    Right -> "Right"
+    Bottom -> "Bottom"
+    Left -> "Left"
+
 sideName :: Side -> String
 sideName = case _ of
   Top -> "top"
@@ -150,6 +157,12 @@ data Align = Start | Center | End
 
 derive instance eqAlign :: Eq Align
 derive instance ordAlign :: Ord Align
+
+instance showAlign :: Show Align where
+  show = case _ of
+    Start -> "Start"
+    Center -> "Center"
+    End -> "End"
 
 alignName :: Align -> String
 alignName = case _ of
