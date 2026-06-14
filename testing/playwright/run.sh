@@ -4,7 +4,7 @@
 #    @playwright/test in package.json (no system binary, no download, no drift).
 #  * deps (bun, node, python3) come from nix; nothing assumed on PATH.
 #  * the gallery is rebuilt from buck2 each run so the diff is never stale.
-# Usage: tests/playwright/run.sh [playwright args]   (e.g. --update-snapshots)
+# Usage: testing/playwright/run.sh [playwright args]   (e.g. --update-snapshots)
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -14,8 +14,9 @@ echo "ℵ building //examples:gallery → .gallery-dist"
 # wipe first: `buck2 build --out` over an EXISTING directory does not cleanly
 # replace it (stale files survive and get served → the diff silently passes).
 rm -rf "$HERE/.gallery-dist"
+# Absolute --out so the harness directory can move without breaking the path.
 ( cd "$HYDROGEN" && nix develop -c buck2 build //examples:gallery \
-    --out tests/playwright/.gallery-dist >/dev/null )
+    --out "$HERE/.gallery-dist" >/dev/null )
 
 # version-matched browser set (must match @playwright/test in package.json)
 PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
@@ -30,4 +31,11 @@ pkill -f "http.server 3940" 2>/dev/null || true
 sleep 0.5
 
 cd "$HERE"
+# Materialize the harness node_modules (gitignored; wiped by `git clean -x`). The
+# nix-provided Chromium is used (PLAYWRIGHT_BROWSERS_PATH), so skip Playwright's
+# own browser download during install.
+if [ ! -d node_modules ]; then
+  echo "ℵ installing harness deps (bun, frozen lockfile)"
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 nix shell nixpkgs#bun --command bun install --frozen-lockfile
+fi
 exec nix shell nixpkgs#bun nixpkgs#python3 --command bun run test "$@"
