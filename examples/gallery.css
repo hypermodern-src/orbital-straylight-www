@@ -1585,3 +1585,117 @@ body {
   width: 1px;
   margin: 0 20px;
 }
+
+/* ── label (label.stories.module.css) ──────────────────────────────────────── */
+
+.label-root {
+  display: inline-block;
+  vertical-align: middle;
+  cursor: default;
+  border: 1px solid var(--gray-5);
+  padding: 10px;
+}
+
+/* ── toggle (toggle.stories.module.css) ────────────────────────────────────── */
+
+.toggle-root {
+  padding: 6px;
+  line-height: 1;
+  border: none;
+  font-family: sans-serif;
+  font-weight: bold;
+}
+.toggle-root:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-black);
+}
+.toggle-root[data-disabled] {
+  opacity: 0.5;
+}
+.toggle-root[data-state="off"] {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+.toggle-root[data-state="on"] {
+  background-color: var(--color-green);
+  color: var(--color-white);
+}
+
+/* ── switch (switch.stories.module.css) ────────────────────────────────────── */
+
+:root {
+  --_switch-width: 50px;
+  --_switch-thumb-width: 20px;
+  --_switch-gap: 4px;
+}
+.switch-root {
+  vertical-align: middle;
+  text-align: left;
+  outline: none;
+  border: none;
+  width: var(--_switch-width);
+  padding: var(--_switch-gap);
+  border-radius: 9999px;
+  background-color: var(--color-gray300);
+  transition: background-color 166ms ease-out;
+}
+.switch-root:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-black);
+}
+.switch-root[data-state="checked"] {
+  background-color: var(--color-red);
+  border-color: var(--color-red);
+}
+.switch-root[data-disabled] {
+  opacity: 0.5;
+}
+.switch-thumb {
+  display: inline-block;
+  vertical-align: middle;
+  width: var(--_switch-thumb-width);
+  height: var(--_switch-thumb-width);
+  background-color: var(--color-white);
+  border-radius: 9999px;
+  transition: transform 166ms ease-out;
+}
+.switch-thumb[data-state="checked"] {
+  transform: translateX(
+    calc(var(--_switch-width) - var(--_switch-gap) * 2 - var(--_switch-thumb-width))
+  );
+}
+
+/* ── collapsible (collapsible.stories.module.css) ──────────────────────────── */
+
+.collapsible-root {
+  max-width: 20em;
+  font-family: sans-serif;
+}
+.collapsible-trigger {
+  width: 100%;
+  text-align: inherit;
+  appearance: none;
+  border: none;
+  padding: 10px;
+  background-color: var(--color-black);
+  color: white;
+  font-family: inherit;
+  font-size: 1.2em;
+  --shadow-color: crimson;
+}
+.collapsible-trigger:focus {
+  outline: none;
+  box-shadow: inset 0 -5px 0 0 var(--shadow-color);
+  color: var(--color-red);
+}
+.collapsible-trigger[data-disabled] {
+  color: var(--color-gray300);
+}
+.collapsible-trigger[data-state="open"] {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+.collapsible-content {
+  padding: 10px;
+  line-height: 1.5;
+}

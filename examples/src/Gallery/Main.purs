@@ -22,7 +22,11 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Gallery.Story (GallerySlots, Story, _story)
 import Gallery.Story.Checkbox as Checkbox
+import Gallery.Story.Collapsible as Collapsible
+import Gallery.Story.Label as Label
 import Gallery.Story.Separator as Separator
+import Gallery.Story.Switch as Switch
+import Gallery.Story.Toggle as Toggle
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -40,6 +44,10 @@ stories :: Array Story
 stories =
   [ Checkbox.story
   , Separator.story
+  , Label.story
+  , Toggle.story
+  , Switch.story
+  , Collapsible.story
   ]
 
 -- ─────────────────────────────────────────────────────────────────────────────

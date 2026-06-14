@@ -24,6 +24,10 @@ const PORT = 6199;
 const STORIES = [
   { id: "checkbox", story: "components-checkbox--styled" },
   { id: "separator", story: "components-separator--styled" },
+  { id: "label", story: "components-label--styled" },
+  { id: "toggle", story: "components-toggle--styled" },
+  { id: "switch", story: "components-switch--styled" },
+  { id: "collapsible", story: "components-collapsible--styled" },
   // … one per reproduced story
 ];
 
