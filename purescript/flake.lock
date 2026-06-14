@@ -306,17 +306,17 @@
     "hydrogen": {
       "flake": false,
       "locked": {
-        "lastModified": 1781378156,
-        "narHash": "sha256-SoCijOXGxME+kv4ZZ6bIqdWMWRo5RiUDTW3nIfT3ZWA=",
+        "lastModified": 1781395539,
+        "narHash": "sha256-ZGaq0ejKoivhJe6KSHxSTTb9Ovebi4HBWpVx8XCWxP8=",
         "ref": "main",
-        "rev": "e91113f117241a99951d8e4f0b287888bb2ee3e4",
-        "revCount": 9,
+        "rev": "8297896c13fe693cda841924729ae9b670eefe69",
+        "revCount": 10,
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/hydrogen"
       },
       "original": {
         "ref": "main",
-        "rev": "e91113f117241a99951d8e4f0b287888bb2ee3e4",
+        "rev": "8297896c13fe693cda841924729ae9b670eefe69",
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/hydrogen"
       }

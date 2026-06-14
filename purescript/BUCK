@@ -7,18 +7,19 @@
 # app --minify --outfile public/straylight.js` the old build produced. Main mounts
 # Halogen into #straylight-app; the Next/MDX shell injects this via <Script>.
 #   buck2 build //:web  ->  straylight.js
-purescript_app(
+load("@hydrogen//:defs.bzl", "hydrogen_app")
+
+# The flagship on hydrogen's frame: `hydrogen_app` wires the hydrogen core lib +
+# each declared integration (its npm SDK closure rides up via PursLibInfo, no
+# npm_packages here). Supabase is interchangeable with Clerk behind
+# Hydrogen.Frame (AuthProvider) — see src/Straylight/Auth.purs.
+hydrogen_app(
     name = "web",
     srcs = glob(["src/**/*.purs"]),
     main = "Main",
+    integrations = ["supabase"],
     browser_bundle = True,
     bundle_name = "straylight.js",
-    deps = [
-        "hydrogen//:lib",
-        # Real SDK on the transitive paved path: Supabase rides in via PursLibInfo
-        # (no npm_packages here) and bundles into straylight.js (STR-239).
-        "hydrogen//integrations/supabase:lib",
-    ],
     packages = [
         {"name": "aff", "version": "8.0.0", "sha256": "f41448ad2751a18c9b7e252606a80a27ae9c3eac581dbdbbedb55640c9fff6c8"},
         {"name": "affjax", "version": "13.0.0", "sha256": "769395f042cda94541c3113a78a15d9c5932fac2f03c500dac553323141a6e59"},

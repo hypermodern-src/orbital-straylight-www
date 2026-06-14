@@ -133,9 +133,9 @@ import Straylight.Pages.Discord as Discord
 main :: Effect Unit
 main = launchAff_ do
   HA.awaitLoad
-  -- Bring up the Supabase client (real SDK, bundled via the transitive paved
-  -- path from hydrogen//integrations/supabase:lib — STR-239).
-  _ <- liftEffect Auth.initSupabase
+  -- Bring up the framework auth session (Supabase-backed via hydrogen's
+  -- AuthProvider frame; SDK bundled transitively — STR-239).
+  _ <- liftEffect Auth.initAuth
   doc <- liftEffect $ window >>= document
   let parent = HTMLDocument.toParentNode doc
   mbContainer <- liftEffect $ querySelector (QuerySelector "#straylight-app") parent
