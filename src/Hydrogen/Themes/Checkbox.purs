@@ -18,8 +18,8 @@ import Halogen.HTML.Core (Namespace(..))
 import Halogen.HTML.Properties as HP
 import Hydrogen.Themes.Prop (Prop(..), el)
 
-checkbox :: forall w i. Boolean -> Array Prop -> HH.HTML w i
-checkbox checked props =
+checkbox :: forall w i. Boolean -> Boolean -> Array Prop -> HH.HTML w i
+checkbox checked isDisabled props =
   el "button" [ "rt-reset", "rt-BaseCheckboxRoot", "rt-CheckboxRoot" ]
     ( [ Size "2"
       , Variant "surface"
@@ -28,10 +28,13 @@ checkbox checked props =
       , RawAttr "aria-checked" (if checked then "true" else "false")
       , DataAttr "state" (if checked then "checked" else "unchecked")
       , RawAttr "value" "on"
-      ] <> props
+      ] <> disabledAttrs <> props
     )
     (if checked then [ indicator ] else [])
   where
+  -- both the Root and (when shown) the Indicator carry data-disabled when disabled.
+  disabledAttrs = if isDisabled then [ RawAttr "disabled" "disabled", DataAttr "disabled" "true" ] else []
+
   svgNS = Namespace "http://www.w3.org/2000/svg"
 
   -- The Indicator renders the icon via Slot, merging its classes onto the <svg>
@@ -42,7 +45,7 @@ checkbox checked props =
     -- be set via setAttribute (HP.attr "class"), not HP.class_ (which assigns the
     -- DOM property and throws on SVG).
     HH.elementNS svgNS (HH.ElemName "svg")
-      [ HP.attr (HH.AttrName "class") "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
+      ( [ HP.attr (HH.AttrName "class") "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
       , HP.attr (HH.AttrName "data-state") "checked"
       , HP.attr (HH.AttrName "width") "9"
       , HP.attr (HH.AttrName "height") "9"
@@ -50,7 +53,7 @@ checkbox checked props =
       , HP.attr (HH.AttrName "fill") "currentcolor"
       , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
       , HP.style "pointer-events: none;"
-      ]
+      ] <> (if isDisabled then [ HP.attr (HH.AttrName "data-disabled") "true" ] else []) )
       [ HH.elementNS svgNS (HH.ElemName "path")
           [ HP.attr (HH.AttrName "fill-rule") "evenodd"
           , HP.attr (HH.AttrName "clip-rule") "evenodd"

@@ -4,6 +4,7 @@
 -- | the left/right slots are deferred; this is the bare text input.
 module Hydrogen.Themes.TextField
   ( textField
+  , textFieldValue
   ) where
 
 import Prelude
@@ -21,5 +22,18 @@ textField placeholder props =
         [ HP.class_ (HH.ClassName "rt-reset rt-TextFieldInput")
         , HP.spellcheck false
         , HP.placeholder placeholder
+        ]
+    ]
+
+-- | As `textField`, but with an initial `value` (renders the input's value).
+textFieldValue :: forall w i. String -> String -> Array Prop -> HH.HTML w i
+textFieldValue placeholder value props =
+  HH.div
+    (attrs [ "rt-TextFieldRoot" ] ([ Size "2", Variant "surface" ] <> props))
+    [ HH.input
+        [ HP.class_ (HH.ClassName "rt-reset rt-TextFieldInput")
+        , HP.spellcheck false
+        , HP.placeholder placeholder
+        , HP.value value
         ]
     ]
