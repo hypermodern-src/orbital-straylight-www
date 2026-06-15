@@ -1,13 +1,12 @@
-// Authoritative render of Radix Themes 3 — the GOLDEN source. We render each
-// component (and a composed demo) in isolation, keyed by ?c=<id>, so Playwright
-// can screenshot one per page; the index (no ?c=) is the human-reviewable gallery.
-// This is upstream's real output — our Halogen port is diffed against it.
+// Authoritative render of Radix Themes 3 — the GOLDEN source. Each component (and
+// the composed Sign-in demo) renders in isolation keyed by ?c=<id>, so Playwright
+// screenshots one per page; the index (no ?c=) is the human-reviewable gallery.
+// This is upstream's real output — the Halogen port is pixel-diffed against it.
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "@radix-ui/themes/styles.css";
 // Bundle Inter (Radix Themes' intended typeface) so the render is deterministic —
-// headless Chromium has no system sans, so without this the golden falls back to
-// monospace. Self-hosted woff2 → identical pixels in CI and in our port's capture.
+// headless Chromium has no system sans; without this the golden falls back to mono.
 import "@fontsource-variable/inter";
 import {
   Theme,
@@ -15,9 +14,26 @@ import {
   Checkbox,
   Switch,
   TextField,
+  TextArea,
   Card,
   Separator,
   Badge,
+  Callout,
+  Avatar,
+  Spinner,
+  Progress,
+  Code,
+  Kbd,
+  Quote,
+  Blockquote,
+  Em,
+  Strong,
+  Link,
+  RadioGroup,
+  Slider,
+  Tabs,
+  Table,
+  DataList,
   Flex,
   Box,
   Text,
@@ -26,7 +42,6 @@ import {
 
 type Page = { id: string; label: string; node: React.ReactNode };
 
-// Each page is wrapped in <Theme> at mount; here we describe just the content.
 const PAGES: Page[] = [
   {
     id: "button",
@@ -96,6 +111,15 @@ const PAGES: Page[] = [
     ),
   },
   {
+    id: "textarea",
+    label: "TextArea",
+    node: (
+      <Box style={{ maxWidth: 320 }}>
+        <TextArea placeholder="Reply to comment…" />
+      </Box>
+    ),
+  },
+  {
     id: "badge",
     label: "Badge",
     node: (
@@ -105,6 +129,19 @@ const PAGES: Page[] = [
         <Badge color="red">Failed</Badge>
         <Badge variant="solid">Solid</Badge>
       </Flex>
+    ),
+  },
+  {
+    id: "callout",
+    label: "Callout",
+    node: (
+      <Box style={{ maxWidth: 420 }}>
+        <Callout.Root>
+          <Callout.Text>
+            You will need admin privileges to install and access this application.
+          </Callout.Text>
+        </Callout.Root>
+      </Box>
     ),
   },
   {
@@ -128,6 +165,40 @@ const PAGES: Page[] = [
     ),
   },
   {
+    id: "avatar",
+    label: "Avatar",
+    node: (
+      <Flex gap="3" align="center">
+        <Avatar fallback="A" />
+        <Avatar fallback="TG" color="indigo" />
+        <Avatar fallback="RT" variant="solid" />
+        <Avatar size="5" fallback="L" />
+      </Flex>
+    ),
+  },
+  {
+    id: "spinner",
+    label: "Spinner",
+    node: (
+      <Flex gap="4" align="center">
+        <Spinner size="1" />
+        <Spinner size="2" />
+        <Spinner size="3" />
+      </Flex>
+    ),
+  },
+  {
+    id: "progress",
+    label: "Progress",
+    node: (
+      <Flex direction="column" gap="4" style={{ maxWidth: 320 }}>
+        <Progress value={25} />
+        <Progress value={60} color="cyan" />
+        <Progress value={90} variant="soft" />
+      </Flex>
+    ),
+  },
+  {
     id: "separator",
     label: "Separator",
     node: (
@@ -136,6 +207,153 @@ const PAGES: Page[] = [
         <Separator size="4" />
         <Text size="2">Below</Text>
       </Flex>
+    ),
+  },
+  {
+    id: "code",
+    label: "Code",
+    node: (
+      <Text size="3">
+        Run <Code>npm install</Code> then <Code variant="solid">npm start</Code>.
+      </Text>
+    ),
+  },
+  {
+    id: "kbd",
+    label: "Kbd",
+    node: (
+      <Text size="3">
+        Press <Kbd>Shift + Tab</Kbd> to go back.
+      </Text>
+    ),
+  },
+  {
+    id: "quote",
+    label: "Quote",
+    node: (
+      <Text size="3">
+        <Quote>Design is not just what it looks like and feels like.</Quote>
+      </Text>
+    ),
+  },
+  {
+    id: "blockquote",
+    label: "Blockquote",
+    node: (
+      <Box style={{ maxWidth: 360 }}>
+        <Blockquote>
+          Perfect is the enemy of good. Ship the thing, then make it better.
+        </Blockquote>
+      </Box>
+    ),
+  },
+  {
+    id: "emstrong",
+    label: "Em / Strong",
+    node: (
+      <Text size="3">
+        The <Strong>quick</Strong> brown fox is <Em>remarkably</Em> fast.
+      </Text>
+    ),
+  },
+  {
+    id: "link",
+    label: "Link",
+    node: (
+      <Text size="3">
+        Read the <Link href="#">documentation</Link> for more.
+      </Text>
+    ),
+  },
+  {
+    id: "radiogroup",
+    label: "RadioGroup",
+    node: (
+      <RadioGroup.Root defaultValue="1">
+        <Flex direction="column" gap="2">
+          <Text as="label" size="2">
+            <Flex gap="2" align="center">
+              <RadioGroup.Item value="1" /> Default
+            </Flex>
+          </Text>
+          <Text as="label" size="2">
+            <Flex gap="2" align="center">
+              <RadioGroup.Item value="2" /> Comfortable
+            </Flex>
+          </Text>
+          <Text as="label" size="2">
+            <Flex gap="2" align="center">
+              <RadioGroup.Item value="3" /> Compact
+            </Flex>
+          </Text>
+        </Flex>
+      </RadioGroup.Root>
+    ),
+  },
+  {
+    id: "slider",
+    label: "Slider",
+    node: (
+      <Box style={{ maxWidth: 320 }}>
+        <Slider defaultValue={[40]} />
+      </Box>
+    ),
+  },
+  {
+    id: "tabs",
+    label: "Tabs",
+    node: (
+      <Tabs.Root defaultValue="account">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+      </Tabs.Root>
+    ),
+  },
+  {
+    id: "table",
+    label: "Table",
+    node: (
+      <Box style={{ maxWidth: 480 }}>
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Email</Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            <Table.Row>
+              <Table.RowHeaderCell>Danilo</Table.RowHeaderCell>
+              <Table.Cell>danilo@example.com</Table.Cell>
+            </Table.Row>
+            <Table.Row>
+              <Table.RowHeaderCell>Zahra</Table.RowHeaderCell>
+              <Table.Cell>zahra@example.com</Table.Cell>
+            </Table.Row>
+          </Table.Body>
+        </Table.Root>
+      </Box>
+    ),
+  },
+  {
+    id: "datalist",
+    label: "DataList",
+    node: (
+      <DataList.Root>
+        <DataList.Item>
+          <DataList.Label>Status</DataList.Label>
+          <DataList.Value>
+            <Badge color="jade">Authorized</Badge>
+          </DataList.Value>
+        </DataList.Item>
+        <DataList.Item>
+          <DataList.Label>Name</DataList.Label>
+          <DataList.Value>Vlad Moroz</DataList.Value>
+        </DataList.Item>
+      </DataList.Root>
     ),
   },
   // The composed demo — the "looks like a finished product" target.
@@ -200,7 +418,7 @@ function Index() {
         Radix Themes 3.3.0 — golden source
       </Heading>
       <Text as="p" color="gray" mb="5">
-        Upstream render. Each card is the authoritative target our Halogen port is
+        Upstream render. Each card is the authoritative target the Halogen port is
         pixel-diffed against. Click a title to see it isolated (the Playwright page).
       </Text>
       <Flex direction="column" gap="4">
