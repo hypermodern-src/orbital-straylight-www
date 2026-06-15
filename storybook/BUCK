@@ -7,7 +7,7 @@
 # Hydrogen.Themes components into their canvas.
 #   nix develop -c buck2 build //storybook:bundle
 load("//:registry.bzl", "PURS_REGISTRY")
-load(":storybook.bzl", "storybook_static")
+load(":storybook.bzl", "storybook_dev", "storybook_static")
 
 purescript_library(
     name = "mount_lib",
@@ -51,4 +51,12 @@ storybook_static(
     # staticDirs is ../dist relative to .storybook → stage the bundle + stylesheet
     # there, then build. node_modules/storybook/bin/index.cjs is the v8 CLI entry.
     cmd = "mkdir -p dist && cp hydrogen-stories.js dist/hydrogen-stories.js && cp themes.css dist/themes.css && node node_modules/storybook/bin/index.cjs build -o sb-out",
+)
+
+# Dev server: `nix develop -c buck2 run //storybook:dev` (HMR over the live stories
+# + preview, hermetic node_modules, the buck2-built bundle staged into dist/).
+storybook_dev(
+    name = "dev",
+    bundle = ":bundle",
+    bun2nix = "storybook",
 )
