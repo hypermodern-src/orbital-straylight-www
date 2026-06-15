@@ -4,5 +4,10 @@ node_modules/
 .dialog-dist/
 .alertdialog-dist/
 .popover-dist/
+.tooltip-dist/
+.hovercard-dist/
+.dropdownmenu-dist/
+.contextmenu-dist/
+.select-dist/
 test-results/
 playwright-report/

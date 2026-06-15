@@ -1,0 +1,15 @@
+# Live demo of Hydrogen.Themes.ContextMenu (Bucket B overlay).
+#   nix develop -c buck2 build //examples/contextmenu:app
+load("//:registry.bzl", "PURS_REGISTRY")
+
+purescript_app(
+    name = "app",
+    srcs = [
+        "src/ContextMenuExample/Main.purs",
+    ],
+    main = "ContextMenuExample.Main",
+    deps = ["//:lib"],
+    index_html = "index.html",
+    style_css = "themes.css",
+    packages = PURS_REGISTRY,
+)

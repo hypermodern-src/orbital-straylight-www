@@ -1,0 +1,15 @@
+# Live demo of Hydrogen.Themes.HoverCard (Bucket B overlay).
+#   nix develop -c buck2 build //examples/hovercard:app
+load("//:registry.bzl", "PURS_REGISTRY")
+
+purescript_app(
+    name = "app",
+    srcs = [
+        "src/HoverCardExample/Main.purs",
+    ],
+    main = "HoverCardExample.Main",
+    deps = ["//:lib"],
+    index_html = "index.html",
+    style_css = "themes.css",
+    packages = PURS_REGISTRY,
+)

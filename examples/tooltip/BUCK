@@ -1,0 +1,15 @@
+# Live demo of Hydrogen.Themes.Tooltip (Bucket B overlay).
+#   nix develop -c buck2 build //examples/tooltip:app
+load("//:registry.bzl", "PURS_REGISTRY")
+
+purescript_app(
+    name = "app",
+    srcs = [
+        "src/TooltipExample/Main.purs",
+    ],
+    main = "TooltipExample.Main",
+    deps = ["//:lib"],
+    index_html = "index.html",
+    style_css = "themes.css",
+    packages = PURS_REGISTRY,
+)
