@@ -9,7 +9,8 @@ echo "ℵ building golden dist (bun)"
 export PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 cd "$HERE"
-for id in button checkbox switch textfield textarea badge callout card avatar spinner progress separator code kbd quote blockquote emstrong link radiogroup slider tabs table datalist signin; do
+for id in button checkbox switch textfield textarea badge callout card avatar spinner progress separator code kbd quote blockquote emstrong link radiogroup slider tabs table datalist signin \
+          container grid section inset aspectratio iconbutton skeleton visuallyhidden accessibleicon tabnav segmentedcontrol checkboxgroup checkboxcards radiocards; do
   nix develop "$HY" -c node scripts/themes-shoot.mjs "$GD/dist" "/?c=$id" "$OUT/$id.png" >/dev/null
   echo "golden: $id"
 done

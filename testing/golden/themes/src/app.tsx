@@ -38,6 +38,20 @@ import {
   Box,
   Text,
   Heading,
+  AccessibleIcon,
+  AspectRatio,
+  CheckboxCards,
+  CheckboxGroup,
+  Container,
+  Grid,
+  IconButton,
+  Inset,
+  RadioCards,
+  Section,
+  SegmentedControl,
+  Skeleton,
+  TabNav,
+  VisuallyHidden,
 } from "@radix-ui/themes";
 
 type Page = { id: string; label: string; node: React.ReactNode };
@@ -354,6 +368,221 @@ const PAGES: Page[] = [
           <DataList.Value>Vlad Moroz</DataList.Value>
         </DataList.Item>
       </DataList.Root>
+    ),
+  },
+  {
+    id: "container",
+    label: "Container",
+    node: (
+      <Container size="1">
+        <Box p="4" style={{ border: '1px solid var(--gray-6)' }} className="rt-reset" data-radius="3">
+          <Text>Centered, max-width container content.</Text>
+        </Box>
+      </Container>
+    ),
+  },
+  {
+    id: "grid",
+    label: "Grid",
+    node: (
+      <Grid columns="3" gap="3">
+        <Box height="64px" style={{ backgroundColor: 'var(--accent-9)' }} />
+        <Box height="64px" style={{ backgroundColor: 'var(--accent-9)' }} />
+        <Box height="64px" style={{ backgroundColor: 'var(--accent-9)' }} />
+        <Box height="64px" style={{ backgroundColor: 'var(--accent-9)' }} />
+        <Box height="64px" style={{ backgroundColor: 'var(--accent-9)' }} />
+        <Box height="64px" style={{ backgroundColor: 'var(--accent-9)' }} />
+      </Grid>
+    ),
+  },
+  {
+    id: "section",
+    label: "Section",
+    node: (
+      <Box style={{ border: '1px solid #ccc', maxWidth: '400px' }}>
+        <Section>
+          <Text size="3">Section content with default vertical padding.</Text>
+        </Section>
+      </Box>
+    ),
+  },
+  {
+    id: "inset",
+    label: "Inset",
+    node: (
+      <Card>
+        <Inset side="top" pb="current">
+          <Box style={{ backgroundColor: "var(--gray-5)", height: "120px" }} />
+        </Inset>
+        <Text size="2">
+          Typography is the art and technique of arranging type to make written language legible, readable and appealing when displayed.
+        </Text>
+      </Card>
+    ),
+  },
+  {
+    id: "aspectratio",
+    label: "Aspect Ratio",
+    node: (
+      <Box width="300px">
+        <AspectRatio ratio={16 / 9}>
+          <Box
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "var(--indigo-9)",
+            }}
+          />
+        </AspectRatio>
+      </Box>
+    ),
+  },
+  {
+    id: "iconbutton",
+    label: "Icon Button",
+    node: (
+      <Flex gap="3" align="center">
+        {(() => {
+          const GearIcon = (
+            <svg
+              className="rt-IconButtonIcon"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M5.879.673a.5.5 0 0 1 .49-.402h1.262a.5.5 0 0 1 .49.402l.27 1.353a5.5 5.5 0 0 1 1.31.755l1.31-.45a.5.5 0 0 1 .596.21l.63 1.092a.5.5 0 0 1-.105.625l-1.04.902a5.6 5.6 0 0 1 0 1.51l1.04.902a.5.5 0 0 1 .106.625l-.631 1.093a.5.5 0 0 1-.596.21l-1.31-.451a5.5 5.5 0 0 1-1.31.755l-.27 1.353a.5.5 0 0 1-.49.402H6.369a.5.5 0 0 1-.49-.402l-.27-1.353a5.5 5.5 0 0 1-1.31-.755l-1.31.451a.5.5 0 0 1-.596-.21l-.631-1.093a.5.5 0 0 1 .106-.625l1.04-.902a5.6 5.6 0 0 1 0-1.51l-1.04-.902a.5.5 0 0 1-.106-.625l.631-1.093a.5.5 0 0 1 .596-.21l1.31.451a5.5 5.5 0 0 1 1.31-.755zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6"
+              />
+            </svg>
+          );
+          return (
+            <>
+              <IconButton variant="solid">{GearIcon}</IconButton>
+              <IconButton variant="soft">{GearIcon}</IconButton>
+              <IconButton variant="outline">{GearIcon}</IconButton>
+              <IconButton variant="ghost">{GearIcon}</IconButton>
+            </>
+          );
+        })()}
+      </Flex>
+    ),
+  },
+  {
+    id: "skeleton",
+    label: "Skeleton",
+    node: (
+      <Box style={{ maxWidth: 320 }}>
+        <Text as="p" size="3"><Skeleton>Lorem ipsum dolor sit amet, consectetur.</Skeleton></Text>
+        <Text as="p" size="3"><Skeleton>Adipiscing elit sed do eiusmod tempor.</Skeleton></Text>
+        <Text as="p" size="3"><Skeleton>Incididunt ut labore et dolore.</Skeleton></Text>
+        <Box mt="3">
+          <Skeleton style={{ width: 48, height: 48, borderRadius: '100%' }} />
+        </Box>
+      </Box>
+    ),
+  },
+  {
+    id: "visuallyhidden",
+    label: "Visually Hidden",
+    node: (
+      <label>
+        Email
+        <VisuallyHidden> (required)</VisuallyHidden>
+      </label>
+    ),
+  },
+  {
+    id: "accessibleicon",
+    label: "Accessible Icon",
+    node: (
+      <Flex align="center">
+        <AccessibleIcon label="Settings">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 15 15"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              fill="currentColor"
+              d="M7.07.65a1.5 1.5 0 0 0-1.14 0l-.69.29-.74-.18a1.5 1.5 0 0 0-1.07.2l-.6.43-.76.05a1.5 1.5 0 0 0-.98.55l-.42.6-.7.3a1.5 1.5 0 0 0-.78.78l-.3.7-.43.6a1.5 1.5 0 0 0-.2 1.07l.18.74-.29.69a1.5 1.5 0 0 0 0 1.14l.29.69-.18.74a1.5 1.5 0 0 0 .2 1.07l.43.6.3.7c.16.36.43.63.78.78l.7.3.42.6c.24.34.6.55.98.55l.76.05.6.43c.32.23.7.3 1.07.2l.74-.18.69.29c.36.15.78.15 1.14 0l.69-.29.74.18c.37.1.75.03 1.07-.2l.6-.43.76-.05c.38 0 .74-.21.98-.55l.42-.6.7-.3a1.5 1.5 0 0 0 .78-.78l.3-.7.43-.6c.23-.32.3-.7.2-1.07l-.18-.74.29-.69a1.5 1.5 0 0 0 0-1.14l-.29-.69.18-.74a1.5 1.5 0 0 0-.2-1.07l-.43-.6-.3-.7a1.5 1.5 0 0 0-.78-.78l-.7-.3-.42-.6a1.5 1.5 0 0 0-.98-.55l-.76-.05-.6-.43a1.5 1.5 0 0 0-1.07-.2l-.74.18L7.07.65ZM7.5 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+            />
+          </svg>
+        </AccessibleIcon>
+      </Flex>
+    ),
+  },
+  {
+    id: "tabnav",
+    label: "Tab Nav",
+    node: (
+      <TabNav.Root>
+        <TabNav.Link href="#account" active>
+          Account
+        </TabNav.Link>
+        <TabNav.Link href="#documents">Documents</TabNav.Link>
+        <TabNav.Link href="#settings">Settings</TabNav.Link>
+      </TabNav.Root>
+    ),
+  },
+  {
+    id: "segmentedcontrol",
+    label: "Segmented Control",
+    node: (
+      <SegmentedControl.Root defaultValue="inbox">
+        <SegmentedControl.Item value="inbox">Inbox</SegmentedControl.Item>
+        <SegmentedControl.Item value="drafts">Drafts</SegmentedControl.Item>
+        <SegmentedControl.Item value="sent">Sent</SegmentedControl.Item>
+      </SegmentedControl.Root>
+    ),
+  },
+  {
+    id: "checkboxgroup",
+    label: "Checkbox Group",
+    node: (
+      <CheckboxGroup.Root defaultValue={["1"]}>
+        <CheckboxGroup.Item value="1">Fun</CheckboxGroup.Item>
+        <CheckboxGroup.Item value="2">Serious</CheckboxGroup.Item>
+        <CheckboxGroup.Item value="3">Smart</CheckboxGroup.Item>
+      </CheckboxGroup.Root>
+    ),
+  },
+  {
+    id: "checkboxcards",
+    label: "Checkbox Cards",
+    node: (
+      <CheckboxCards.Root defaultValue={['terms']}>
+        <CheckboxCards.Item value="terms">
+          <Text>Agree to Terms and Conditions</Text>
+        </CheckboxCards.Item>
+        <CheckboxCards.Item value="newsletter">
+          <Text>Subscribe to newsletter</Text>
+        </CheckboxCards.Item>
+      </CheckboxCards.Root>
+    ),
+  },
+  {
+    id: "radiocards",
+    label: "Radio Cards",
+    node: (
+      <RadioCards.Root defaultValue="1">
+        <RadioCards.Item value="1">
+          <Text weight="bold">8-core CPU</Text>
+        </RadioCards.Item>
+        <RadioCards.Item value="2">
+          <Text weight="bold">6-core CPU</Text>
+        </RadioCards.Item>
+        <RadioCards.Item value="3">
+          <Text weight="bold">4-core CPU</Text>
+        </RadioCards.Item>
+      </RadioCards.Root>
     ),
   },
   // The composed demo — the "looks like a finished product" target.

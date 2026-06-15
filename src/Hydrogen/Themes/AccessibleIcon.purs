@@ -23,40 +23,22 @@
 -- | `<svg …>…</svg><span style="…">label</span>` as siblings — matches upstream.
 module Hydrogen.Themes.AccessibleIcon
   ( accessibleIcon
-  , visuallyHiddenStyle
   ) where
 
-import Prelude
-
 import Halogen.HTML as HH
-import Halogen.HTML.Properties as HP
-
--- | The frozen Bootstrap visually-hidden style block, byte-for-byte the order the
--- | primitive's `VISUALLY_HIDDEN_STYLES` object enumerates (React serializes a
--- | style object in insertion order; numeric values render as px). This is the
--- | only styling the VisuallyHidden span carries.
-visuallyHiddenStyle :: String
-visuallyHiddenStyle =
-  "position: absolute; "
-    <> "border: 0; "
-    <> "width: 1px; "
-    <> "height: 1px; "
-    <> "padding: 0; "
-    <> "margin: -1px; "
-    <> "overflow: hidden; "
-    <> "clip: rect(0, 0, 0, 0); "
-    <> "white-space: nowrap; "
-    <> "word-wrap: normal;"
+import Hydrogen.Themes.VisuallyHidden (visuallyHidden)
 
 -- | `accessibleIcon "Settings" gearSvg` → the icon followed by a visually-hidden
 -- | `<span>` announcing the label. The icon should already carry
 -- | `aria-hidden="true"` / `focusable="false"` (as upstream injects). Returns the
 -- | two siblings as an array — Halogen has no Fragment node, so the caller splices
 -- | this into a parent's children (the primitive's React Fragment adds no wrapper).
+-- |
+-- | The label span delegates to `Hydrogen.Themes.VisuallyHidden` so its sr-only
+-- | style goes through the engine's `HP.style` (the browser normalizes the cssText
+-- | — `0`→`0px`, `word-wrap`→`overflow-wrap`), matching upstream's serialized form.
 accessibleIcon :: forall w i. String -> HH.HTML w i -> Array (HH.HTML w i)
 accessibleIcon label icon =
   [ icon
-  , HH.span
-      [ HP.attr (HH.AttrName "style") visuallyHiddenStyle ]
-        [ HH.text label ]
-    ]
+  , visuallyHidden [] [ HH.text label ]
+  ]
