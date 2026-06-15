@@ -51,3 +51,14 @@ export const _isSelfTarget = function (event) {
     return event.target === event.currentTarget;
   };
 };
+
+// Run an effect after the next frame paints — a stable "Halogen has finished
+// patching the DOM" hook. Halogen re-parents matched children into the component
+// root on patch, so the body-mount is re-asserted here, after the render.
+export const _afterFrame = function (eff) {
+  return function () {
+    requestAnimationFrame(function () {
+      eff();
+    });
+  };
+};

@@ -14,6 +14,7 @@ module Hydrogen.Themes.Portal
   , setBodyOverflow
   , focus
   , isSelfTarget
+  , afterFrame
   ) where
 
 import Prelude
@@ -27,6 +28,7 @@ foreign import _adopt :: Element -> Element -> Effect Unit
 foreign import _setBodyOverflow :: String -> Effect String
 foreign import _focus :: Element -> Effect Unit
 foreign import _isSelfTarget :: Event -> Effect Boolean
+foreign import _afterFrame :: Effect Unit -> Effect Unit
 
 -- | Get (creating once) the shared body-level container with the given id.
 ensureContainer :: String -> Effect Element
@@ -47,3 +49,7 @@ focus = _focus
 -- | Did the event land on its `currentTarget` itself (the backdrop), not a child?
 isSelfTarget :: Event -> Effect Boolean
 isSelfTarget = _isSelfTarget
+
+-- | Run an effect after the next frame paints (after Halogen has patched the DOM).
+afterFrame :: Effect Unit -> Effect Unit
+afterFrame = _afterFrame

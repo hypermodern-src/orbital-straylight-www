@@ -30,9 +30,10 @@ const bodyOverflow = () => pg.evaluate(() => document.body.style.overflow);
 try {
   // 1. at rest: trigger present, no dialog, body scrollable.
   if (!(await trigger.count())) fail("trigger button missing");
-  if (await dialog.count()) fail("dialog present before open");
+  // the overlay is always mounted (portaled in body) but hidden until open.
+  if (await dialog.isVisible()) fail("dialog visible before open");
   if ((await bodyOverflow()) === "hidden") fail("body scroll locked before open");
-  console.log("✓ at rest: trigger present, no dialog, scroll unlocked");
+  console.log("✓ at rest: trigger present, dialog hidden, scroll unlocked");
 
   // 2. click trigger → dialog opens (role=dialog, data-state=open, title), scroll locked.
   await trigger.click();
@@ -42,9 +43,28 @@ try {
   if ((await bodyOverflow()) !== "hidden") fail("body scroll not locked on open");
   console.log("✓ open: dialog visible, data-state=open, title rendered, scroll locked");
 
+  // 2b. PORTAL: the overlay lives in a body-level container, NOT the app's theme root.
+  // (the body-mount is re-asserted on requestAnimationFrame after Halogen's render.)
+  await pg.waitForTimeout(120);
+  const portal = await pg.evaluate(() => {
+    const ov = document.querySelector(".rt-DialogOverlay");
+    const root = document.getElementById("hydrogen-portal-root");
+    return {
+      hasRoot: !!root,
+      rootOnBody: !!root && root.parentElement === document.body,
+      rootThemed: !!root && root.classList.contains("radix-themes"),
+      overlayInRoot: !!ov && !!root && root.contains(ov),
+    };
+  });
+  if (!portal.hasRoot) fail("no #hydrogen-portal-root container");
+  if (!portal.rootOnBody) fail("portal root is not a direct child of <body>");
+  if (!portal.rootThemed) fail("portal root is not .radix-themes (themed)");
+  if (!portal.overlayInRoot) fail("overlay was not adopted into the portal root");
+  console.log("✓ portal: overlay body-mounted in a themed #hydrogen-portal-root (escapes the app tree)");
+
   // 3. Escape closes (document-level keydown listener), scroll restored.
   await pg.keyboard.press("Escape");
-  await dialog.waitFor({ state: "detached", timeout: 2000 });
+  await dialog.waitFor({ state: "hidden", timeout: 2000 });
   if ((await bodyOverflow()) === "hidden") fail("body scroll still locked after Escape");
   console.log("✓ Escape closes + restores scroll");
 
@@ -52,7 +72,7 @@ try {
   await trigger.click();
   await dialog.waitFor({ state: "visible", timeout: 2000 });
   await pg.locator(".rt-DialogScrollPadding").click({ position: { x: 6, y: 6 } });
-  await dialog.waitFor({ state: "detached", timeout: 2000 });
+  await dialog.waitFor({ state: "hidden", timeout: 2000 });
   console.log("✓ backdrop click closes");
 
   // 5. reopen → a content click does NOT close (self-target guard).
@@ -60,12 +80,12 @@ try {
   await dialog.waitFor({ state: "visible", timeout: 2000 });
   await pg.locator(".rt-DialogContent h1").click();
   await pg.waitForTimeout(150);
-  if (!(await dialog.count())) fail("content click closed the dialog (self-target guard broken)");
+  if (!(await dialog.isVisible())) fail("content click closed the dialog (self-target guard broken)");
   console.log("✓ content click keeps dialog open");
 
   // 6. Save button closes.
   await pg.getByRole("button", { name: "Save" }).click();
-  await dialog.waitFor({ state: "detached", timeout: 2000 });
+  await dialog.waitFor({ state: "hidden", timeout: 2000 });
   console.log("✓ Save closes");
 
   console.log("\nℵ dialog-interaction: ALL PASS");

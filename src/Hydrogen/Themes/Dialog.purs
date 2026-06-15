@@ -19,10 +19,13 @@
 -- |     (`… rt-r-align-center`) → content `rt-BaseDialogContent rt-DialogContent
 -- |     rt-r-size-3` (`role=dialog`, `data-state`).
 -- |
--- | The overlay/content use `position: fixed`, so this renders inline (in the
--- | component's subtree) and still covers the viewport. `Portal.ensureContainer`/
--- | `adopt` are provided for the body-mount hardening (ancestor transform/overflow
--- | containing blocks) a production layer adds on top — see Portal.
+-- | The overlay is PORTALED: rendered unconditionally (a stable VDOM child, so
+-- | Halogen patches it in place by reference) and adopted into a body-level
+-- | `.radix-themes` container (`Portal.ensureContainer`/`adopt`) so its fixed
+-- | positioning escapes any ancestor stacking/overflow/transform containing block.
+-- | Halogen re-parents matched children back into the component root on each patch,
+-- | so the adopt is re-asserted on `Portal.afterFrame` (a requestAnimationFrame that
+-- | runs after the render). `display:none` hides it when closed.
 module Hydrogen.Themes.Dialog
   ( Input
   , component
@@ -73,6 +76,13 @@ data Action
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "dialog-content"
 
+overlayRef :: H.RefLabel
+overlayRef = H.RefLabel "dialog-overlay"
+
+-- | The shared body-level container every overlay portals into.
+portalRoot :: String
+portalRoot = "hydrogen-portal-root"
+
 component :: forall q o m. MonadEffect m => H.Component q Input o m
 component =
   H.mkComponent
@@ -93,12 +103,14 @@ handleAction = case _ of
         KET.keydown
         (HTMLDocument.toEventTarget doc)
         (\e -> KeyDown <$> KE.fromEvent e)
+    portalize
 
   OpenD -> do
     prev <- liftEffect (Portal.setBodyOverflow "hidden")
     H.modify_ _ { open = true, restoreOverflow = prev }
-    -- focus the content so the dialog is the a11y/keyboard root (the document
-    -- Escape listener catches the key regardless, but focus matches upstream).
+    -- re-assert the body-mount AFTER this render (Halogen re-parents matched
+    -- children into the component root on patch), then focus the content.
+    portalize
     H.getHTMLElementRef contentRef >>= case _ of
       Just he -> liftEffect (Portal.focus (HTMLElement.toElement he))
       Nothing -> pure unit
@@ -116,10 +128,22 @@ handleAction = case _ of
     self <- liftEffect (Portal.isSelfTarget (ME.toEvent me))
     when self (handleAction CloseD)
 
+-- | Body-mount the overlay into the shared portal container. Halogen re-parents
+-- | matched children back into the component root on every patch, so the actual
+-- | `adopt` is deferred to `afterFrame` — it runs AFTER Halogen's render, leaving
+-- | the overlay in the body container (the fixed-position layer thus escapes any
+-- | ancestor stacking/overflow/transform). Idempotent; called on init + each open.
+portalize :: forall o m. MonadEffect m => H.HalogenM State Action () o m Unit
+portalize = do
+  container <- liftEffect (Portal.ensureContainer portalRoot)
+  H.getHTMLElementRef overlayRef >>= case _ of
+    Just he -> liftEffect (Portal.afterFrame (Portal.adopt container (HTMLElement.toElement he)))
+    Nothing -> pure unit
+
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   HH.div_
-    ( [ trigger ] <> if st.open then [ overlay ] else [] )
+    [ trigger, overlay ]
   where
   dataState b = if b then "open" else "closed"
 
@@ -135,9 +159,14 @@ render st =
 
   overlay =
     HH.div
-      [ HP.class_ (HH.ClassName "rt-BaseDialogOverlay rt-DialogOverlay")
-      , HP.attr (HH.AttrName "data-state") (dataState st.open)
-      ]
+      ( [ HP.ref overlayRef
+        , HP.class_ (HH.ClassName "rt-BaseDialogOverlay rt-DialogOverlay")
+        , HP.attr (HH.AttrName "data-state") (dataState st.open)
+        ]
+          -- always mounted (so the adopted node is patched in place, never
+          -- re-inserted); `display:none` when closed hides it + kills pointer events.
+          <> (if st.open then [] else [ HP.style "display: none" ])
+      )
       [ HH.div
           [ HP.class_ (HH.ClassName "rt-BaseDialogScroll rt-DialogScroll") ]
           [ HH.div
