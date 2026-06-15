@@ -62,3 +62,25 @@ export const _afterFrame = function (eff) {
     });
   };
 };
+
+// The anchor's viewport rect (getBoundingClientRect) — the input to floating
+// placement for the anchored overlays (Popover, DropdownMenu, Tooltip, …). The
+// values are viewport-relative, so a `position: fixed` panel positions directly
+// from them.
+export const _anchorRect = function (el) {
+  return function () {
+    var r = el.getBoundingClientRect();
+    return { top: r.top, left: r.left, bottom: r.bottom, right: r.right, width: r.width, height: r.height };
+  };
+};
+
+// Does this node contain the event's target? — the inside/outside test that
+// keeps a non-modal overlay (Popover, Menu) open on an inside click and closes it
+// on an outside one.
+export const _containsTarget = function (node) {
+  return function (event) {
+    return function () {
+      return !!node && node.contains(event.target);
+    };
+  };
+};

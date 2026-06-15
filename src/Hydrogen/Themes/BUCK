@@ -7,6 +7,7 @@ purescript_library(
     name = "themes",
     srcs = [
         "AccessibleIcon.purs",
+        "AlertDialog.purs",
         "AspectRatio.purs",
         "Avatar.purs",
         "Badge.purs",
@@ -28,6 +29,7 @@ purescript_library(
         "Kbd.purs",
         "Layout.purs",
         "Link.purs",
+        "Popover.purs",
         "Portal.js",
         "Portal.purs",
         "Progress.purs",

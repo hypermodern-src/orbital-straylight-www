@@ -9,12 +9,15 @@
 -- | focus to the opened layer (a11y + so Escape is caught); `isSelfTarget` is the
 -- | click-outside test (the event landed on the backdrop, not its content).
 module Hydrogen.Themes.Portal
-  ( ensureContainer
+  ( Rect
+  , ensureContainer
   , adopt
   , setBodyOverflow
   , focus
   , isSelfTarget
   , afterFrame
+  , anchorRect
+  , containsTarget
   ) where
 
 import Prelude
@@ -23,12 +26,18 @@ import Effect (Effect)
 import Web.DOM (Element)
 import Web.Event.Event (Event)
 
+-- | A viewport rect (getBoundingClientRect) — the input to floating placement.
+type Rect =
+  { top :: Number, left :: Number, bottom :: Number, right :: Number, width :: Number, height :: Number }
+
 foreign import _ensureContainer :: String -> Effect Element
 foreign import _adopt :: Element -> Element -> Effect Unit
 foreign import _setBodyOverflow :: String -> Effect String
 foreign import _focus :: Element -> Effect Unit
 foreign import _isSelfTarget :: Event -> Effect Boolean
 foreign import _afterFrame :: Effect Unit -> Effect Unit
+foreign import _anchorRect :: Element -> Effect Rect
+foreign import _containsTarget :: Element -> Event -> Effect Boolean
 
 -- | Get (creating once) the shared body-level container with the given id.
 ensureContainer :: String -> Effect Element
@@ -53,3 +62,11 @@ isSelfTarget = _isSelfTarget
 -- | Run an effect after the next frame paints (after Halogen has patched the DOM).
 afterFrame :: Effect Unit -> Effect Unit
 afterFrame = _afterFrame
+
+-- | The anchor's viewport rect — position a `fixed` panel directly from it.
+anchorRect :: Element -> Effect Rect
+anchorRect = _anchorRect
+
+-- | Does `node` contain the event's target? (inside/outside click test).
+containsTarget :: Element -> Event -> Effect Boolean
+containsTarget = _containsTarget
