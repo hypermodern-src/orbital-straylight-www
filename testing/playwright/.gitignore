@@ -1,4 +1,5 @@
 node_modules/
 .gallery-dist/
+.themes-dist/
 test-results/
 playwright-report/

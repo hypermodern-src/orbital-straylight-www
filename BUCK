@@ -10,8 +10,9 @@
 # registry deps ride in via the app's resolved package closure. See
 # straylight-prelude STR-234.
 #
-# These three deps reach every layer: the umbrella pulls data/runtime/ui, frame
-# pulls runtime, and radix pulls behavior/float/foundation.
+# These deps reach every layer: the umbrella pulls data/runtime/ui, frame pulls
+# runtime, radix pulls behavior/float/foundation, and themes is the styled
+# Radix-Themes layer on top of radix.
 purescript_library(
     name = "lib",
     srcs = [],
@@ -19,6 +20,7 @@ purescript_library(
         "//src:hydrogen",
         "//src/Hydrogen:frame",
         "//src/Hydrogen/Radix:radix",
+        "//src/Hydrogen/Themes:themes",
     ],
     visibility = ["PUBLIC"],
 )

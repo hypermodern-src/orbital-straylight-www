@@ -1,0 +1,15 @@
+# Hydrogen.Themes — the Radix Themes (radix-ui/themes) STYLED system, ported to
+# Halogen on top of the unstyled Radix primitives. `Prop` is the shared prop→class
+# engine (a typed port of upstream's extractProps); Layout/Button/… emit the exact
+# `rt-*` class + `data-*` vocabulary, so radix's own compiled `styles.css` renders
+# them pixel-identically. Diffed against the golden source in testing/golden/themes.
+purescript_library(
+    name = "themes",
+    srcs = [
+        "Button.purs",
+        "Layout.purs",
+        "Prop.purs",
+        "Theme.purs",
+    ],
+    visibility = ["PUBLIC"],
+)
