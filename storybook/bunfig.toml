@@ -1,4 +1,0 @@
-[install]
-# node-standard (hoisted) layout so the buck2 npm build resolves with plain node
-# (bun2nix default is the isolated .bun symlink store, which node can't resolve).
-linker = "hoisted"

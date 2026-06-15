@@ -48,7 +48,13 @@
             };
             toolchain = {
               cxx.enable = false;
-              purescript.enable = true;
+              purescript = {
+                enable = true;
+                # Hermetic node_modules for the Storybook build (//storybook:static).
+                # Flake src, so only the git-tracked package.json/bun.lock/bun.nix +
+                # sources are used — node_modules/dist/storybook-static are excluded.
+                bun2nix.storybook = ./storybook;
+              };
             };
           };
         };

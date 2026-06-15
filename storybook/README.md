@@ -24,12 +24,15 @@ One FFI seam, everything else is the existing Halogen library:
 ## Run it
 
 ```sh
-bun install
-bun run bundle        # buck2 build //storybook:bundle → dist/hydrogen-stories.js
-bun run storybook     # dev server on :6006
-# or
-bun run build         # bundle + static storybook-static/
+# Hermetic, reproducible (nix-provided node_modules, no ambient bun install):
+nix develop -c buck2 build //storybook:static     # → storybook-static/
+
+# Dev inner loop (fast HMR):
+bun install && bun run storybook                   # dev server on :6006
 ```
+
+See `CONTAINMENT.md` for how `//storybook:static` works (bun2nix node_modules +
+the `storybook_static` rule).
 
 ## Visual-regression gate
 
@@ -45,9 +48,9 @@ golden gate, applied to Storybook.
 Build outputs (`dist/`, `storybook-static/`, `node_modules/`) are gitignored; the
 `__visual__/` baselines are committed.
 
-## Containment note
+## Containment
 
-Standalone bun/Vite today (matching the golden-factory + Playwright harnesses, which
-all consume buck2 outputs). Wrapping the Storybook build itself as a buck2 action
-(bun2nix node_modules + an `npm_build`-style rule) is a cross-cutting follow-up
-shared with those harnesses, not Storybook-specific.
+The Storybook build is buck2-contained — `//storybook:static` builds it
+hermetically over a bun2nix node_modules (`CONTAINMENT.md`). The same pattern
+(`storybook_static` / a future prelude `npm_build(npm_packages="bun2nix#…")`) can
+contain the golden factory + Playwright harness, which are still standalone bun.
