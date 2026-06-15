@@ -88,14 +88,44 @@ gallery selected =
 
 render :: String -> H.ComponentHTML Void GallerySlots Aff
 render selected = case find (\s -> s.id == selected) stories of
+  -- A single story, isolated (this is the page the pixel diff screenshots).
   Just s -> HH.slot_ _story s.id s.component unit
-  Nothing -> manifest
+  -- The index: a human-facing showcase (chrome scoped under .gallery-index, so the
+  -- isolated story pages above are untouched and stay pixel-identical).
+  Nothing -> index
 
--- | Machine-readable list of story ids the generic spec reads from the index.
+index :: H.ComponentHTML Void GallerySlots Aff
+index =
+  HH.div
+    [ HP.class_ (HH.ClassName "gallery-index") ]
+    [ HH.header_
+        [ HH.h1_ [ HH.text "Hydrogen.Radix" ]
+        , HH.p_
+            [ HH.text "Halogen reproductions of the radix-ui primitives — each pixel-checked against radix's own Storybook render." ]
+        ]
+    , manifest
+    , HH.main_ (map card stories)
+    ]
+  where
+  card s =
+    HH.section
+      [ HP.class_ (HH.ClassName "gallery-card") ]
+      [ HH.h2_ [ HH.a [ HP.href ("?story=" <> s.id) ] [ HH.text s.id ] ]
+      , HH.slot_ _story s.id s.component unit
+      ]
+
+-- | The story index — clickable nav AND the machine-readable manifest the generic
+-- | spec reads (`#gallery-manifest li[data-story]`); the `<a>` is just navigation.
 manifest :: H.ComponentHTML Void GallerySlots Aff
 manifest =
-  HH.ul [ HP.id "gallery-manifest" ]
-    (map (\s -> HH.li [ HP.attr (HH.AttrName "data-story") s.id ] [ HH.text s.id ]) stories)
+  HH.ul [ HP.id "gallery-manifest", HP.class_ (HH.ClassName "gallery-toc") ]
+    ( map
+        ( \s ->
+            HH.li [ HP.attr (HH.AttrName "data-story") s.id ]
+              [ HH.a [ HP.href ("?story=" <> s.id) ] [ HH.text s.id ] ]
+        )
+        stories
+    )
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Tiny pure string helpers (kept local; not worth a dependency)
