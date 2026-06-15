@@ -90,11 +90,13 @@ step a = case _ of
   Size v -> axis "size" ("rt-r-size-" <> v)
   Variant v -> axis "variant" ("rt-variant-" <> v)
   Weight v -> axis "weight" ("rt-r-weight-" <> v)
-  Trim v -> axis "trim" ("rt-r-trim-" <> v)
+  Trim v -> axis "trim" ("rt-r-lt-" <> v) -- `trim` → leading-trim class `rt-r-lt`
   Display v -> axis "display" ("rt-r-display-" <> v)
   Direction v -> axis "fd" ("rt-r-fd-" <> v)
   Align v -> axis "ai" ("rt-r-ai-" <> v)
-  Justify v -> axis "jc" ("rt-r-jc-" <> v)
+  -- justify carries a parseValue: the prop value "between" → class "space-between"
+  -- (start/center/end pass through, mapping to flex-start/center/flex-end in CSS).
+  Justify v -> axis "jc" ("rt-r-jc-" <> (if v == "between" then "space-between" else v))
   Wrap v -> axis "fw" ("rt-r-fw-" <> v)
   Gap v -> axis "gap" ("rt-r-gap-" <> v)
   Position v -> axis "position" ("rt-r-position-" <> v)

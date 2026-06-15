@@ -15,11 +15,16 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Hydrogen.Themes.Button (button, disabled)
+import Hydrogen.Themes.Card (card)
+import Hydrogen.Themes.Checkbox (checkbox)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
+import Hydrogen.Themes.TextField (textField)
 import Hydrogen.Themes.Theme (theme)
+import Hydrogen.Themes.Typography (headingAs, text, textAs)
 import Web.HTML as HTML
 import Web.HTML.Location as Location
 import Web.HTML.Window as Window
@@ -42,7 +47,43 @@ app c =
 page :: forall w i. String -> HH.HTML w i
 page = case _ of
   "button" -> buttonPage
+  "signin" -> signinPage
   _ -> HH.div_ [ HH.text "pick a ?c=<component>" ]
+
+-- Reproduces components-…--signin: the composed Sign-in card (the finished-product
+-- target). Mirrors the golden JSX node for node.
+signinPage :: forall w i. HH.HTML w i
+signinPage =
+  box [ Width "400px" ]
+    [ card [ Size "4" ]
+        [ headingAs "h3" [ Size "6", Trim "start", Mb "5" ] [ HH.text "Sign in" ]
+        , box [ Mb "5" ]
+            [ flex [ Direction "column", Gap "1" ]
+                [ textAs "label" [ Size "2", Weight "medium" ] [ HH.text "Email address" ]
+                , textField "you@example.com" []
+                ]
+            ]
+        , box [ Mb "5" ]
+            [ flex [ Direction "column", Gap "1" ]
+                [ flex [ Justify "between" ]
+                    [ textAs "label" [ Size "2", Weight "medium" ] [ HH.text "Password" ]
+                    , text [ Size "2" ] [ HH.a [ HP.href "#" ] [ HH.text "Forgot password?" ] ]
+                    ]
+                , textField "Enter your password" []
+                ]
+            ]
+        , flex [ Align "center", Gap "2", Mb "5" ]
+            [ textAs "label" [ Size "2" ]
+                [ flex [ Gap "2", Align "center" ]
+                    [ checkbox true [], HH.text " Remember me" ]
+                ]
+            ]
+        , flex [ Justify "end", Gap "3" ]
+            [ button [ Variant "soft", Color "gray" ] [ HH.text "Create account" ]
+            , button [] [ HH.text "Sign in" ]
+            ]
+        ]
+    ]
 
 -- Reproduces components-button page of the golden (variant row + size/disabled row).
 buttonPage :: forall w i. HH.HTML w i

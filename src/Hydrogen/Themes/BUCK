@@ -7,9 +7,13 @@ purescript_library(
     name = "themes",
     srcs = [
         "Button.purs",
+        "Card.purs",
+        "Checkbox.purs",
         "Layout.purs",
         "Prop.purs",
+        "TextField.purs",
         "Theme.purs",
+        "Typography.purs",
     ],
     visibility = ["PUBLIC"],
 )
