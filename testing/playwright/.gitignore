@@ -9,5 +9,6 @@ node_modules/
 .dropdownmenu-dist/
 .contextmenu-dist/
 .select-dist/
+.scrollarea-dist/
 test-results/
 playwright-report/

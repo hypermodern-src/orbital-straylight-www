@@ -40,6 +40,8 @@ purescript_library(
         "Quote.purs",
         "RadioCards.purs",
         "RadioGroup.purs",
+        "ScrollArea.js",
+        "ScrollArea.purs",
         "Section.purs",
         "SegmentedControl.purs",
         "Select.purs",
