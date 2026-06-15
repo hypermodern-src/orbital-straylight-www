@@ -8,12 +8,12 @@
 -- |   * trigger `mouseenter` FORKS a delayed-open fiber (~200ms). `mouseleave`
 -- |     KILLs that fiber (if it hasn't fired yet) AND closes — so a fleeting pass
 -- |     over the trigger never opens the tooltip.
--- |   * Anchored like Popover: on open we measure the trigger's viewport rect
--- |     (`Portal.anchorRect`) and place the panel BELOW it (top = trigger.bottom + 4,
--- |     left = trigger.left), data-side="bottom". (Upstream defaults side=top;
--- |     placing above would need the panel height pre-measured without an overlapping
--- |     placeholder — an off-screen pre-measure — deferred. Below is robust: the panel
--- |     never sits under the pointer, so it can't self-trigger a mouseleave→close.)
+-- |   * Anchored + collision-aware (`Hydrogen.Themes.Floating` + `Portal.solveAnchored`):
+-- |     on open we measure the trigger + the panel (visibility:hidden → real size) +
+-- |     the viewport, then place the tooltip BELOW the trigger, flipping above near
+-- |     the bottom edge. (Below, not upstream's side=top, because a panel just above a
+-- |     small trigger lands near the pointer and flickers enter/leave — radix avoids
+-- |     that with pointer-events handling on the content; deferred.)
 -- |   * Escape (document keydown) also closes; non-modal, no scroll-lock, no
 -- |     backdrop. Panel is PORTALED to the body container (afterFrame re-adopt),
 -- |     so the fixed position escapes ancestor containing blocks.
@@ -35,6 +35,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Hydrogen.Themes.Floating (measureSize, panelStyle)
 import Hydrogen.Themes.Prop (attrs)
 import Web.HTML (window)
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -56,7 +57,9 @@ type State =
   , open :: Boolean
   , top :: Number
   , left :: Number
-  , pending :: Maybe H.ForkId
+  , side :: String
+  , hovering :: Boolean -- pointer currently over the trigger
+  , timer :: Maybe H.ForkId -- the pending delayed-open fiber
   }
 
 data Action
@@ -80,6 +83,13 @@ portalRoot = "hydrogen-portal-root"
 sideOffset :: Number
 sideOffset = 4.0
 
+-- | Placed BELOW the trigger (collision-aware: flips above near the bottom edge,
+-- | shifts in near a side edge). Below — not upstream's side=top — because a panel
+-- | just above a small trigger lands near the pointer and flickers enter/leave;
+-- | radix avoids that with pointer-events management on the content (deferred).
+placement :: Portal.Anchored
+placement = { preferTop: false, align: "start", offset: sideOffset, pad: 8.0 }
+
 -- | Hover-intent open delay.
 openDelay :: Milliseconds
 openDelay = Milliseconds 200.0
@@ -87,7 +97,7 @@ openDelay = Milliseconds 200.0
 component :: forall q o m. MonadAff m => H.Component q Input o m
 component =
   H.mkComponent
-    { initialState: \input -> { input, open: false, top: 0.0, left: 0.0, pending: Nothing }
+    { initialState: \input -> { input, open: false, top: 0.0, left: 0.0, side: "bottom", hovering: false, timer: Nothing }
     , render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -103,38 +113,40 @@ handleAction = case _ of
     void $ H.subscribe $ eventListener KET.keydown target (\e -> KeyDown <$> KE.fromEvent e)
     portalize
 
-  -- mouseenter: fork a delayed open. Store the fiber so mouseleave can cancel it
-  -- before it fires (hover-intent — a fleeting pass never opens the tooltip).
+  -- mouseenter: on a GENUINE enter (not already hovering — the browser can emit a
+  -- burst of enters), mark hovering + fork a delayed open. The fork re-reads
+  -- `hovering` at fire time (flag-based hover-intent, like HoverCard); the guard
+  -- stops repeated enters from cancelling + re-forking (which never lets it fire).
   HoverEnter -> do
     st <- H.get
-    case st.pending of
-      Just _ -> pure unit
-      Nothing -> do
+    when (not st.hovering) do
+      H.modify_ _ { hovering = true }
+      when (not st.open) do
         fid <- H.fork do
           liftAffDelay openDelay
-          handleAction OpenNow
-        H.modify_ _ { pending = Just fid }
+          st' <- H.get
+          when st'.hovering (handleAction OpenNow)
+        H.modify_ _ { timer = Just fid }
 
-  -- mouseleave: cancel the pending open (if still pending) and close.
+  -- mouseleave: clear hovering (so a pending fork won't open) and close.
   HoverLeave -> do
-    st <- H.get
-    case st.pending of
-      Just fid -> H.kill fid
-      Nothing -> pure unit
-    H.modify_ _ { pending = Nothing }
+    H.modify_ _ { hovering = false }
+    cancelTimer
     handleAction CloseD
 
   OpenNow ->
     H.getHTMLElementRef triggerRef >>= case _ of
-      Nothing -> H.modify_ _ { pending = Nothing }
+      Nothing -> pure unit
       Just he -> do
-        r <- liftEffect (Portal.anchorRect (HTMLElement.toElement he))
-        -- Place the tooltip BELOW the trigger (side=bottom): the panel never sits
-        -- under the pointer (which is on the trigger), so it can't trigger a
-        -- mouseleave→close on open. (Upstream defaults side=top; placing above would
-        -- need the panel height measured WITHOUT an overlapping placeholder — an
-        -- off-screen pre-measure — deferred. Below is robust + a valid tooltip side.)
-        H.modify_ _ { open = true, pending = Nothing, left = r.left, top = r.bottom + sideOffset }
+        -- Measure the panel (visibility:hidden → real size) + the trigger + viewport,
+        -- then solve placement: side=top preferred, flipping below near the top edge.
+        -- The panel is invisible until placed, so there's no overlapping-placeholder
+        -- flicker (which used to self-trigger a mouseleave→close).
+        anchor <- liftEffect (Portal.anchorRect (HTMLElement.toElement he))
+        panel <- measureSize panelRef
+        vp <- liftEffect Portal.viewportSize
+        let p = Portal.solveAnchored placement anchor panel vp
+        H.modify_ _ { open = true, timer = Nothing, top = p.top, left = p.left, side = p.side }
         portalize
 
   CloseD ->
@@ -142,16 +154,22 @@ handleAction = case _ of
 
   KeyDown ke ->
     when (KE.key ke == "Escape") do
-      st <- H.get
-      case st.pending of
-        Just fid -> H.kill fid
-        Nothing -> pure unit
-      H.modify_ _ { pending = Nothing }
-      handleAction CloseD
+      cancelTimer
+      H.modify_ _ { hovering = false, open = false }
 
 -- | Run an Aff delay inside HalogenM.
 liftAffDelay :: forall o m. MonadAff m => Milliseconds -> H.HalogenM State Action () o m Unit
 liftAffDelay ms = H.liftAff (delay ms)
+
+-- | Cancel the pending delayed-open fiber, if any.
+cancelTimer :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
+cancelTimer = do
+  st <- H.get
+  case st.timer of
+    Just fid -> do
+      H.kill fid
+      H.modify_ _ { timer = Nothing }
+    Nothing -> pure unit
 
 portalize :: forall o m. MonadAff m => H.HalogenM State Action () o m Unit
 portalize = do
@@ -187,15 +205,11 @@ render st =
             [ HP.ref panelRef
             , HP.attr (HH.AttrName "role") "tooltip"
             , HP.attr (HH.AttrName "data-state") (dataState st.open)
-            , HP.attr (HH.AttrName "data-side") "bottom"
+            , HP.attr (HH.AttrName "data-side") st.side
             , HP.style (positionStyle st)
             ]
       )
       [ HH.span (attrs [ "rt-TooltipText" ] []) [ HH.text st.input.content ] ]
 
 positionStyle :: State -> String
-positionStyle st =
-  if st.open then
-    "position: fixed; max-width: 360px; top: " <> show st.top <> "px; left: " <> show st.left <> "px"
-  else
-    "display: none"
+positionStyle st = panelStyle st.open st.top st.left "360px"

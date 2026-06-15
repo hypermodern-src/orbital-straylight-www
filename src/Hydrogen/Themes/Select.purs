@@ -40,6 +40,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Hydrogen.Themes.Floating (measureSize, panelStyle)
 import Hydrogen.Themes.Prop (Prop(..), attrs)
 import Web.Event.Event as Event
 import Web.HTML (window)
@@ -71,6 +72,7 @@ type State =
   , highlighted :: Int
   , top :: Number
   , left :: Number
+  , side :: String
   }
 
 data Action
@@ -97,6 +99,10 @@ sideOffset = 4.0
 svgNS :: HH.Namespace
 svgNS = HH.Namespace "http://www.w3.org/2000/svg"
 
+-- | Prefer below the trigger, align start; flip up / shift in near a viewport edge.
+placement :: Portal.Anchored
+placement = { preferTop: false, align: "start", offset: sideOffset, pad: 8.0 }
+
 component :: forall q o m. MonadEffect m => H.Component q Input o m
 component =
   H.mkComponent
@@ -107,6 +113,7 @@ component =
         , highlighted: selectedIndex input.items input.selected
         , top: 0.0
         , left: 0.0
+        , side: "bottom"
         }
     , render
     , eval: H.mkEval H.defaultEval
@@ -147,12 +154,16 @@ handleAction = case _ of
     else H.getHTMLElementRef triggerRef >>= case _ of
       Nothing -> pure unit
       Just he -> do
-        r <- liftEffect (Portal.anchorRect (HTMLElement.toElement he))
+        anchor <- liftEffect (Portal.anchorRect (HTMLElement.toElement he))
+        panel <- measureSize panelRef
+        vp <- liftEffect Portal.viewportSize
+        let p = Portal.solveAnchored placement anchor panel vp
         -- opening starts the highlight on the currently-selected option.
         H.modify_ \s -> s
           { open = true
-          , top = r.bottom + sideOffset
-          , left = r.left
+          , top = p.top
+          , left = p.left
+          , side = p.side
           , highlighted = selectedIndex s.input.items s.selected
           }
         portalize
@@ -252,7 +263,7 @@ render st =
             [ HP.ref panelRef
             , HP.attr (HH.AttrName "role") "listbox"
             , HP.attr (HH.AttrName "data-state") (dataState st.open)
-            , HP.attr (HH.AttrName "data-side") "bottom"
+            , HP.attr (HH.AttrName "data-side") st.side
             , HP.attr (HH.AttrName "data-align") "start"
             , HP.style (positionStyle st)
             ]
@@ -321,8 +332,4 @@ checkIndicator =
     ]
 
 positionStyle :: State -> String
-positionStyle st =
-  if st.open then
-    "position: fixed; top: " <> show st.top <> "px; left: " <> show st.left <> "px"
-  else
-    "display: none"
+positionStyle st = panelStyle st.open st.top st.left ""

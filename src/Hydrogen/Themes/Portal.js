@@ -74,6 +74,11 @@ export const _anchorRect = function (el) {
   };
 };
 
+// The visual viewport size — the bound for collision-aware placement (flip/shift).
+export const _viewportSize = function () {
+  return { width: window.innerWidth, height: window.innerHeight };
+};
+
 // Does this node contain the event's target? — the inside/outside test that
 // keeps a non-modal overlay (Popover, Menu) open on an inside click and closes it
 // on an outside one.

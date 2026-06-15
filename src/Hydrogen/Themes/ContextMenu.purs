@@ -40,6 +40,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Hydrogen.Themes.Floating (measureSize, panelStyle)
 import Hydrogen.Themes.Prop (Prop(..), attrs)
 import Web.Event.Event (EventType(..))
 import Web.Event.Event as Event
@@ -65,6 +66,7 @@ type State =
   , open :: Boolean
   , top :: Number
   , left :: Number
+  , side :: String
   , highlight :: Int -- index of the currently keyboard-highlighted row (-1 = none)
   }
 
@@ -87,10 +89,15 @@ portalRoot = "hydrogen-portal-root"
 contextmenu :: EventType
 contextmenu = EventType "contextmenu"
 
+-- | Anchored at the cursor POINT (zero gap), align start; flips up / shifts in near
+-- | a viewport edge so a right-click near the bottom/right stays fully on-screen.
+placement :: Portal.Anchored
+placement = { preferTop: false, align: "start", offset: 0.0, pad: 8.0 }
+
 component :: forall q o m. MonadEffect m => H.Component q Input o m
 component =
   H.mkComponent
-    { initialState: \input -> { input, open: false, top: 0.0, left: 0.0, highlight: -1 }
+    { initialState: \input -> { input, open: false, top: 0.0, left: 0.0, side: "bottom", highlight: -1 }
     , render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -115,12 +122,14 @@ handleAction = case _ of
     case ME.fromEvent ev of
       Nothing -> pure unit
       Just me -> do
-        H.modify_ _
-          { open = true
-          , top = toNumber (ME.clientY me)
-          , left = toNumber (ME.clientX me)
-          , highlight = -1
-          }
+        let
+          cx = toNumber (ME.clientX me)
+          cy = toNumber (ME.clientY me)
+          anchor = { top: cy, bottom: cy, left: cx, right: cx, width: 0.0, height: 0.0 }
+        panel <- measureSize panelRef
+        vp <- liftEffect Portal.viewportSize
+        let p = Portal.solveAnchored placement anchor panel vp
+        H.modify_ _ { open = true, top = p.top, left = p.left, side = p.side, highlight = -1 }
         portalize
 
   CloseD ->
@@ -204,7 +213,7 @@ render st =
             [ HP.ref panelRef
             , HP.attr (HH.AttrName "role") "menu"
             , HP.attr (HH.AttrName "data-state") (dataState st.open)
-            , HP.attr (HH.AttrName "data-side") "right"
+            , HP.attr (HH.AttrName "data-side") st.side
             , HP.attr (HH.AttrName "data-align") "start"
             , HP.style (positionStyle st)
             ]
@@ -231,11 +240,7 @@ renderItem st i label =
     [ HH.text label ]
 
 positionStyle :: State -> String
-positionStyle st =
-  if st.open then
-    "position: fixed; top: " <> show st.top <> "px; left: " <> show st.left <> "px"
-  else
-    "display: none"
+positionStyle st = panelStyle st.open st.top st.left ""
 
 -- avoid unused-import warnings for helpers kept for parity with the menu family
 _unusedIndexFromMaybe :: Array String -> Int -> String

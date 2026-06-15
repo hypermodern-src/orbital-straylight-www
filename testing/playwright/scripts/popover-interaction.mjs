@@ -79,6 +79,19 @@ try {
   await panel.waitFor({ state: "hidden", timeout: 2000 });
   console.log("✓ trigger toggles closed");
 
+  // COLLISION FLIP: shrink the viewport so the (low) trigger has no room below — the
+  // panel must flip ABOVE (data-side=top) instead of overflowing off-screen.
+  await pg.setViewportSize({ width: 820, height: 320 });
+  await trigger.click();
+  await panel.waitFor({ state: "visible", timeout: 2000 });
+  await pg.waitForTimeout(120);
+  if ((await panel.getAttribute("data-side")) !== "top") fail("popover did not flip to side=top when there was no room below");
+  const tbf = await trigger.boundingBox();
+  const pbf = await panel.boundingBox();
+  if (!(pbf.y + pbf.height < tbf.y + 1)) fail(`flipped popover is not above the trigger (panel.bottom=${pbf.y + pbf.height}, trigger.top=${tbf.y})`);
+  if (!(pbf.y >= 4)) fail(`flipped popover overflows the top edge (panel.top=${pbf.y})`);
+  console.log("✓ collision flip: flips ABOVE (side=top), stays on-screen, when no room below");
+
   console.log("\nℵ popover-interaction: ALL PASS");
   await b.close(); srv.close();
   process.exit(0);

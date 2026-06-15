@@ -37,8 +37,12 @@ root =
   view :: H.ComponentHTML Void Slots Aff
   view =
     theme
+      -- a spacer pushes the trigger down, so there's room ABOVE it — the
+      -- collision-flip test shrinks the viewport to force a flip-up.
       [ box [ P "6" ]
-          [ HH.slot_ _popover unit Popover.component input ]
+          [ box [ StyleProp "height" "220px" ] []
+          , HH.slot_ _popover unit Popover.component input
+          ]
       ]
 
   input :: Popover.Input

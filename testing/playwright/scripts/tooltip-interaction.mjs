@@ -51,14 +51,15 @@ try {
   if (await panel.isVisible()) fail("fleeting hover opened the tooltip (hover-intent delay not honoured)");
   console.log("✓ fleeting hover does NOT open (hover-intent delay)");
 
-  // HOVER and stay → opens after the delay.
-  await trigger.hover();
-  await panel.waitFor({ state: "visible", timeout: 2000 });
+  // HOVER and stay → opens after the delay. (Move the OS pointer to the trigger
+  // centre explicitly — more reliable than .hover() right after a move-away.)
+  const tb = await trigger.boundingBox();
+  await pg.mouse.move(tb.x + tb.width / 2, tb.y + tb.height / 2);
+  await panel.waitFor({ state: "visible", timeout: 3000 });
   if ((await panel.getAttribute("data-state")) !== "delayed-open") fail("data-state not 'delayed-open'");
   if ((await panel.getAttribute("data-side")) !== "bottom") fail("data-side not 'bottom'");
   if ((await panel.getAttribute("role")) !== "tooltip") fail("role not 'tooltip'");
   if ((await bodyOverflow()) === "hidden") fail("tooltip wrongly scroll-locked the body (it is non-modal)");
-  // text present.
   if ((await text.count()) !== 1) fail("rt-TooltipText missing");
   const txt = (await text.innerText()).trim();
   if (!txt.length) fail("tooltip text is empty");
@@ -66,7 +67,6 @@ try {
 
   await pg.waitForTimeout(120);
   // portaled + placed BELOW the trigger (panel.top ≈ trigger.bottom + 4).
-  const tb = await trigger.boundingBox();
   const pb = await panel.boundingBox();
   const portaled = await pg.evaluate(() => {
     const p = document.querySelector(".rt-TooltipContent");

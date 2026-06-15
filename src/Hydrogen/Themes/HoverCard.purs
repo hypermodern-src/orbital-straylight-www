@@ -39,6 +39,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Hydrogen.Themes.Floating (measureSize, panelStyle)
 import Hydrogen.Themes.Prop (Prop(..), attrs)
 import Web.Event.Event as Event
 import Web.HTML (window)
@@ -62,6 +63,7 @@ type State =
   , open :: Boolean
   , top :: Number
   , left :: Number
+  , side :: String
   , hoverTrigger :: Boolean
   , hoverContent :: Boolean
   -- the pending open/close timer fiber, so a fresh enter/leave can cancel it.
@@ -96,6 +98,10 @@ openDelay = Milliseconds 200.0
 closeDelay :: Milliseconds
 closeDelay = Milliseconds 150.0
 
+-- | Prefer below, align start; flip up / shift in near a viewport edge.
+placement :: Portal.Anchored
+placement = { preferTop: false, align: "start", offset: sideOffset, pad: 8.0 }
+
 component :: forall q o m. MonadAff m => H.Component q Input o m
 component =
   H.mkComponent
@@ -104,6 +110,7 @@ component =
         , open: false
         , top: 0.0
         , left: 0.0
+        , side: "bottom"
         , hoverTrigger: false
         , hoverContent: false
         , timer: Nothing
@@ -163,8 +170,11 @@ handleAction = case _ of
     H.getHTMLElementRef triggerRef >>= case _ of
       Nothing -> pure unit
       Just he -> do
-        r <- liftEffect (Portal.anchorRect (HTMLElement.toElement he))
-        H.modify_ _ { open = true, top = r.bottom + sideOffset, left = r.left }
+        anchor <- liftEffect (Portal.anchorRect (HTMLElement.toElement he))
+        panel <- measureSize panelRef
+        vp <- liftEffect Portal.viewportSize
+        let p = Portal.solveAnchored placement anchor panel vp
+        H.modify_ _ { open = true, top = p.top, left = p.left, side = p.side }
         portalize
 
   CloseNow -> do
@@ -226,7 +236,7 @@ render st =
           <>
             [ HP.ref panelRef
             , HP.attr (HH.AttrName "data-state") (dataState st.open)
-            , HP.attr (HH.AttrName "data-side") "bottom"
+            , HP.attr (HH.AttrName "data-side") st.side
             , HP.attr (HH.AttrName "data-align") "start"
             , HP.attr (HH.AttrName "role") "dialog"
             , HP.style (positionStyle st)
@@ -239,8 +249,4 @@ render st =
       ]
 
 positionStyle :: State -> String
-positionStyle st =
-  if st.open then
-    "position: fixed; max-width: 480px; top: " <> show st.top <> "px; left: " <> show st.left <> "px"
-  else
-    "display: none"
+positionStyle st = panelStyle st.open st.top st.left "480px"
