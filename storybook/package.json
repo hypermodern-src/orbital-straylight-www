@@ -1,0 +1,17 @@
+{
+  "name": "hydrogen-storybook",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bundle": "bash build-bundle.sh",
+    "storybook": "storybook dev -p 6006 --no-open",
+    "build": "bash build-bundle.sh && storybook build"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/html": "^8.6.14",
+    "@storybook/html-vite": "^8.6.14",
+    "storybook": "^8.6.14",
+    "vite": "^5.4.11"
+  }
+}

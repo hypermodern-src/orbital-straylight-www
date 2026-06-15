@@ -1,0 +1,32 @@
+# Storybook FFI bundle. The mount module + its FFI `.js` live in a
+# purescript_library (which globs *.purs and stages the .js for FFI — an app's own
+# srcs are passed verbatim to `purs compile`, which would try to parse the .js).
+# The bundle is a srcs-less browser app whose `main` is the library's module; it
+# self-runs on load and publishes `window.hydrogenStorybook.mount(id, args, el)`,
+# which the (standalone, bun/Vite) Storybook stories call to render the Halogen
+# Hydrogen.Themes components into their canvas.
+#   nix develop -c buck2 build //storybook:bundle
+load("//:registry.bzl", "PURS_REGISTRY")
+
+purescript_library(
+    name = "mount_lib",
+    srcs = [
+        "src/Storybook/Mount.js",
+        "src/Storybook/Mount.purs",
+    ],
+    deps = ["//:lib"],
+    visibility = ["PUBLIC"],
+)
+
+purescript_app(
+    name = "bundle",
+    main = "Storybook.Mount",
+    deps = [
+        "//:lib",
+        ":mount_lib",
+    ],
+    packages = PURS_REGISTRY,
+    browser_bundle = True,
+    bundle_name = "hydrogen-stories.js",
+    minify = False,
+)
