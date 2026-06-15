@@ -1,6 +1,7 @@
 import { story } from "./mount";
 
 export default {
+  tags: ["autodocs"],
   title: "Themes/Checkbox",
   render: story("checkbox"),
   argTypes: {"checked": {"control": "boolean"}, "disabled": {"control": "boolean"}, "label": {"control": "text"}},

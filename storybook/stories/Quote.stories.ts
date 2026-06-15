@@ -1,6 +1,7 @@
 import { story } from "./mount";
 
 export default {
+  tags: ["autodocs"],
   title: "Themes/Quote",
   render: story("quote"),
   argTypes: {"text": {"control": "text"}},

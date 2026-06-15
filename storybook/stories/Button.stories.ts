@@ -1,6 +1,7 @@
 import { story } from "./mount";
 
 export default {
+  tags: ["autodocs"],
   title: "Themes/Button",
   render: story("button"),
   argTypes: {"variant": {"control": "select", "options": ["solid", "soft", "outline", "surface", "ghost"]}, "size": {"control": "inline-radio", "options": ["1", "2", "3"]}, "color": {"control": "select", "options": ["", "indigo", "red", "green", "gray", "crimson"]}, "label": {"control": "text"}},

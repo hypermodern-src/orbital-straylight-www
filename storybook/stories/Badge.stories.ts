@@ -1,6 +1,7 @@
 import { story } from "./mount";
 
 export default {
+  tags: ["autodocs"],
   title: "Themes/Badge",
   render: story("badge"),
   argTypes: {"variant": {"control": "select", "options": ["solid", "soft", "surface", "outline"]}, "color": {"control": "select", "options": ["", "indigo", "red", "green", "orange", "gray", "jade"]}, "label": {"control": "text"}},
