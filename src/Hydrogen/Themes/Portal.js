@@ -10,8 +10,22 @@ export const _ensureContainer = function (id) {
     if (!el) {
       el = document.createElement("div");
       el.id = id;
-      // carry the theme tokens so portaled content is themed like the app root.
       el.className = "radix-themes";
+      // Mirror the app's theme root onto the portal root (radix's <Theme asChild>):
+      // appearance class, the accent/gray/radius/scaling data-attrs, and the
+      // --default-font-family. Without this, portaled content renders with a
+      // different font/accent than in-app — and the font change re-wraps text, so a
+      // measured panel size won't match the shown size (breaking above-placement).
+      var src = document.querySelector(".radix-themes");
+      if (src) {
+        el.classList.add(src.classList.contains("dark") ? "dark" : "light");
+        ["data-accent-color", "data-gray-color", "data-radius", "data-scaling", "data-panel-background", "data-has-background"].forEach(function (a) {
+          var v = src.getAttribute(a);
+          if (v !== null) el.setAttribute(a, v);
+        });
+        var f = src.style.getPropertyValue("--default-font-family") || getComputedStyle(src).getPropertyValue("--default-font-family");
+        if (f) el.style.setProperty("--default-font-family", f.trim());
+      }
       document.body.appendChild(el);
     }
     return el;

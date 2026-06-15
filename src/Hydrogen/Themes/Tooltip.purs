@@ -10,10 +10,10 @@
 -- |     over the trigger never opens the tooltip.
 -- |   * Anchored + collision-aware (`Hydrogen.Themes.Floating` + `Portal.solveAnchored`):
 -- |     on open we measure the trigger + the panel (visibility:hidden → real size) +
--- |     the viewport, then place the tooltip BELOW the trigger, flipping above near
--- |     the bottom edge. (Below, not upstream's side=top, because a panel just above a
--- |     small trigger lands near the pointer and flickers enter/leave — radix avoids
--- |     that with pointer-events handling on the content; deferred.)
+-- |     the viewport, then place the tooltip ABOVE the trigger (upstream side=top),
+-- |     flipping below near the top edge. The content is `pointer-events: none`, so it
+-- |     can sit just above the trigger without the mouse landing on it (which would
+-- |     flicker the trigger's enter/leave).
 -- |   * Escape (document keydown) also closes; non-modal, no scroll-lock, no
 -- |     backdrop. Panel is PORTALED to the body container (afterFrame re-adopt),
 -- |     so the fixed position escapes ancestor containing blocks.
@@ -83,12 +83,11 @@ portalRoot = "hydrogen-portal-root"
 sideOffset :: Number
 sideOffset = 4.0
 
--- | Placed BELOW the trigger (collision-aware: flips above near the bottom edge,
--- | shifts in near a side edge). Below — not upstream's side=top — because a panel
--- | just above a small trigger lands near the pointer and flickers enter/leave;
--- | radix avoids that with pointer-events management on the content (deferred).
+-- | Upstream tooltips prefer side=top; flip below / shift in near a viewport edge.
+-- | Safe to sit just above the trigger because the content is `pointer-events: none`
+-- | (see positionStyle) — the mouse never lands on it.
 placement :: Portal.Anchored
-placement = { preferTop: false, align: "start", offset: sideOffset, pad: 8.0 }
+placement = { preferTop: true, align: "start", offset: sideOffset, pad: 8.0 }
 
 -- | Hover-intent open delay.
 openDelay :: Milliseconds
@@ -97,7 +96,7 @@ openDelay = Milliseconds 200.0
 component :: forall q o m. MonadAff m => H.Component q Input o m
 component =
   H.mkComponent
-    { initialState: \input -> { input, open: false, top: 0.0, left: 0.0, side: "bottom", hovering: false, timer: Nothing }
+    { initialState: \input -> { input, open: false, top: 0.0, left: 0.0, side: "top", hovering: false, timer: Nothing }
     , render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -211,5 +210,9 @@ render st =
       )
       [ HH.span (attrs [ "rt-TooltipText" ] []) [ HH.text st.input.content ] ]
 
+-- | `pointer-events: none` makes the content transparent to the mouse (a tooltip is
+-- | never interactive) — so it can sit just ABOVE a small trigger without the mouse
+-- | ever landing on it and flickering the trigger's enter/leave. Appended to the one
+-- | shared style string so there's still a single `style` attribute.
 positionStyle :: State -> String
-positionStyle st = panelStyle st.open st.top st.left "360px"
+positionStyle st = panelStyle st.open st.top st.left "360px" <> "; pointer-events: none"

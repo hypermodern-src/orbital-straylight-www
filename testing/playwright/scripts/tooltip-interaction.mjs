@@ -57,16 +57,18 @@ try {
   await pg.mouse.move(tb.x + tb.width / 2, tb.y + tb.height / 2);
   await panel.waitFor({ state: "visible", timeout: 3000 });
   if ((await panel.getAttribute("data-state")) !== "delayed-open") fail("data-state not 'delayed-open'");
-  if ((await panel.getAttribute("data-side")) !== "bottom") fail("data-side not 'bottom'");
+  if ((await panel.getAttribute("data-side")) !== "top") fail("data-side not 'top' (upstream tooltip prefers side=top)");
   if ((await panel.getAttribute("role")) !== "tooltip") fail("role not 'tooltip'");
   if ((await bodyOverflow()) === "hidden") fail("tooltip wrongly scroll-locked the body (it is non-modal)");
   if ((await text.count()) !== 1) fail("rt-TooltipText missing");
   const txt = (await text.innerText()).trim();
   if (!txt.length) fail("tooltip text is empty");
-  console.log(`✓ hover opens: data-state=delayed-open, side=bottom, role=tooltip, text="${txt}"`);
+  // pointer-events:none lets it sit above the trigger without flickering the hover.
+  if ((await panel.evaluate((el) => getComputedStyle(el).pointerEvents)) !== "none") fail("tooltip content is not pointer-events:none");
+  console.log(`✓ hover opens: data-state=delayed-open, side=top, pointer-events:none, role=tooltip, text="${txt}"`);
 
   await pg.waitForTimeout(120);
-  // portaled + placed BELOW the trigger (panel.top ≈ trigger.bottom + 4).
+  // portaled + placed ABOVE the trigger (panel.bottom ≈ trigger.top - 4).
   const pb = await panel.boundingBox();
   const portaled = await pg.evaluate(() => {
     const p = document.querySelector(".rt-TooltipContent");
@@ -74,10 +76,10 @@ try {
     return !!p && !!root && root.parentElement === document.body && root.contains(p);
   });
   if (!portaled) fail("panel not body-mounted in the portal root");
-  if (!(pb.y > tb.y + tb.height - 1)) fail(`panel not below trigger (panel.top=${pb.y}, trigger.bottom=${tb.y + tb.height})`);
-  if (Math.abs(pb.y - (tb.y + tb.height + 4)) > 3) fail(`sideOffset wrong (panel.top=${pb.y}, expected≈${tb.y + tb.height + 4})`);
+  if (!(pb.y + pb.height < tb.y + 1)) fail(`panel not above trigger (panel.bottom=${pb.y + pb.height}, trigger.top=${tb.y})`);
+  if (Math.abs((pb.y + pb.height) - (tb.y - 4)) > 3) fail(`sideOffset wrong (panel.bottom=${pb.y + pb.height}, expected≈${tb.y - 4})`);
   if (Math.abs(pb.x - tb.x) > 3) fail(`not align=start (panel.x=${pb.x}, trigger.x=${tb.x})`);
-  console.log("✓ portal + anchored: body-mounted, below trigger at sideOffset 4, align start");
+  console.log("✓ portal + anchored: body-mounted, ABOVE trigger at sideOffset 4, align start (upstream side=top)");
 
   // mouse-leave closes.
   await pg.mouse.move(700, 550);
