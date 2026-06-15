@@ -12,3 +12,13 @@ export const _metrics = function (el) {
     };
   };
 };
+
+// Scroll the viewport programmatically (dragging the thumb). Setting scrollTop fires
+// the native `scroll` event, so the thumb recomputes through the usual path.
+export const _setScrollTop = function (el) {
+  return function (v) {
+    return function () {
+      el.scrollTop = v;
+    };
+  };
+};

@@ -64,6 +64,19 @@ try {
   if (Math.abs(thBack.y - tb.y) > 6) fail(`thumb did not return to top (thumb.y=${thBack.y}, track.y=${tb.y})`);
   console.log("✓ thumb returns to top on scroll-to-top");
 
+  // 6. DRAGGING the thumb down scrolls the viewport.
+  const td = await thumb.boundingBox();
+  await pg.mouse.move(td.x + td.width / 2, td.y + td.height / 2);
+  await pg.mouse.down();
+  await pg.mouse.move(td.x + td.width / 2, td.y + td.height / 2 + 70, { steps: 6 });
+  await pg.mouse.up();
+  await pg.waitForTimeout(120);
+  const scrolled = await viewport.evaluate((el) => el.scrollTop);
+  if (!(scrolled > 20)) fail(`dragging the thumb did not scroll the viewport (scrollTop=${scrolled})`);
+  const thDragged = await thumb.boundingBox();
+  if (!(thDragged.y > td.y + 10)) fail(`thumb did not move down on drag (${td.y} -> ${thDragged.y})`);
+  console.log(`✓ thumb drag scrolls the viewport (scrollTop=${scrolled.toFixed(0)}, thumb ${td.y.toFixed(0)} -> ${thDragged.y.toFixed(0)})`);
+
   console.log("\nℵ scrollarea-interaction: ALL PASS");
   await b.close(); srv.close();
   process.exit(0);
