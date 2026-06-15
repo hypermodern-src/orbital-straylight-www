@@ -60,3 +60,19 @@ storybook_dev(
     bundle = ":bundle",
     bun2nix = "storybook",
 )
+
+# Warm Halogen dev loop (STR-327): `nix develop -c buck2 run //storybook:watch`.
+# Compiles the registry closure once, then recompiles the LIVE repo sources
+# (src + storybook/src) on every save (~1s incremental) straight into the bundle
+# the dev server serves (storybook/dist/hydrogen-stories.js) — Vite HMRs it.
+# Run alongside //storybook:dev: edit a Hydrogen.Themes module, save, see it.
+purs_watch(
+    name = "watch",
+    main = "Storybook.Mount",
+    packages = PURS_REGISTRY,
+    watch_dirs = [
+        "src",
+        "storybook/src",
+    ],
+    bundle_out = "storybook/dist/hydrogen-stories.js",
+)
