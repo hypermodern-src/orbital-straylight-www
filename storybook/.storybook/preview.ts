@@ -1,10 +1,35 @@
 import type { Preview } from "@storybook/html";
 
-// Every story renders inside the .radix-themes root (same config as the goldens),
-// so a story is pixel-equivalent to upstream Radix Themes.
-const THEME: Record<string, string> = {
+// Toolbar globals: preview every component under any appearance / accent — the
+// Radix stylesheet drives `.radix-themes.{light,dark}` + `[data-accent-color]`.
+export const globalTypes = {
+  appearance: {
+    description: "Theme appearance",
+    defaultValue: "light",
+    toolbar: {
+      title: "Appearance",
+      icon: "mirror",
+      items: [
+        { value: "light", title: "Light" },
+        { value: "dark", title: "Dark" },
+      ],
+      dynamicTitle: true,
+    },
+  },
+  accent: {
+    description: "Accent color",
+    defaultValue: "indigo",
+    toolbar: {
+      title: "Accent",
+      icon: "paintbrush",
+      items: ["indigo", "blue", "cyan", "green", "orange", "red", "crimson", "gray"].map((c) => ({ value: c, title: c })),
+      dynamicTitle: true,
+    },
+  },
+};
+
+const BASE_THEME: Record<string, string> = {
   "data-is-root-theme": "true",
-  "data-accent-color": "indigo",
   "data-gray-color": "slate",
   "data-has-background": "true",
   "data-panel-background": "translucent",
@@ -15,10 +40,14 @@ const THEME: Record<string, string> = {
 const preview: Preview = {
   parameters: { layout: "centered", controls: { expanded: true } },
   decorators: [
-    (story) => {
+    (story, context) => {
+      const { appearance = "light", accent = "indigo" } = context.globals;
       const wrap = document.createElement("div");
-      wrap.className = "radix-themes light";
-      Object.entries(THEME).forEach(([k, v]) => wrap.setAttribute(k, v));
+      // .radix-themes.{light,dark} + data-has-background gives the wrapper the
+      // theme's own background, so dark mode reads correctly behind the story.
+      wrap.className = `radix-themes ${appearance}`;
+      Object.entries(BASE_THEME).forEach(([k, v]) => wrap.setAttribute(k, v));
+      wrap.setAttribute("data-accent-color", String(accent));
       wrap.style.setProperty("--default-font-family", "'Inter Variable', sans-serif");
       wrap.style.padding = "2rem";
       const node = story();
