@@ -49,6 +49,15 @@ data Prop
   | Wrap String
   | Gap String
   | Position String
+  -- grid axes (rt-Grid)
+  | Columns String
+  | Rows String
+  | Flow String
+  | AlignContent String
+  | JustifyItems String
+  -- inset axes (rt-Inset)
+  | Side String
+  | Clip String
   -- margin / padding
   | M String
   | Mx String
@@ -100,6 +109,19 @@ step a = case _ of
   Wrap v -> axis "fw" ("rt-r-fw-" <> v)
   Gap v -> axis "gap" ("rt-r-gap-" <> v)
   Position v -> axis "position" ("rt-r-position-" <> v)
+  -- grid: columns/rows are enum→class for 1–9 (parseValue passes enums through);
+  -- arbitrary track strings (the custom-property path) are deferred like the
+  -- responsive-object path. flow → rt-r-gaf.
+  Columns v -> axis "gtc" ("rt-r-gtc-" <> v)
+  Rows v -> axis "gtr" ("rt-r-gtr-" <> v)
+  Flow v -> axis "gaf" ("rt-r-gaf-" <> v)
+  -- alignContent carries a parseValue: between→space-between, around→space-around,
+  -- evenly→space-evenly (start/center/end/baseline/stretch pass through).
+  AlignContent v -> axis "ac" ("rt-r-ac-" <> alignContentValue v)
+  JustifyItems v -> axis "ji" ("rt-r-ji-" <> v)
+  -- inset: side (rt-r-side, default all) + clip (rt-r-clip, default border-box).
+  Side v -> axis "side" ("rt-r-side-" <> v)
+  Clip v -> axis "clip" ("rt-r-clip-" <> v)
   M v -> axis "m" ("rt-r-m-" <> v)
   Mx v -> axis "mx" ("rt-r-mx-" <> v)
   My v -> axis "my" ("rt-r-my-" <> v)
@@ -126,6 +148,11 @@ step a = case _ of
   axis k cls = a { axes = Map.insert k cls a.axes }
   dataA k v = a { dataAttrs = Map.insert k v a.dataAttrs }
   sty k v = a { styles = Map.insert k v a.styles }
+  alignContentValue v = case v of
+    "between" -> "space-between"
+    "around" -> "space-around"
+    "evenly" -> "space-evenly"
+    _ -> v
 
 -- | Realize base classes + props into Halogen attributes (class, style, data-*,
 -- | raw). Class-token order is base, then raw `Class` tokens, then axes by key —
