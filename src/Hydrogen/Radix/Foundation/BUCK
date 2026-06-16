@@ -7,6 +7,7 @@ purescript_library(
         "Color.purs",
         "Dom.js",
         "Dom.purs",
+        "Portal.purs",
         "Style.purs",
     ],
     visibility = ["PUBLIC"],
