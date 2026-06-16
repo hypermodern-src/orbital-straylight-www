@@ -14,11 +14,22 @@
 -- |     Enter/click — choosing sets `sel`, raises `ValueChanged`, and closes
 -- |     (restoring focus to the trigger).
 -- |
--- | v1 (by feel): non-modal, no Presence, no portal, single instance (fixed ids),
+-- | v1 (by feel): non-modal, no Presence, single instance (fixed ids),
 -- | no typeahead. The trigger renders `input.trigger` (Array PlainHTML) as-is
 -- | followed by the current selected value as text — a deliberate simplification
 -- | (radix resolves the selected item's `label`; here it is the raw value string,
 -- | or nothing when unselected). Those are noted follow-ups.
+-- |
+-- | Portal-to-body (STR-335 floating template, mirrors Hydrogen.Radix.Popover):
+-- | the listbox content is ALWAYS mounted (hidden with display:none when closed) so
+-- | Halogen only patches — never removes — the node, which makes adopting it into
+-- | `document.body` safe. On open we schedule `AfterOpen` on the next frame (one-shot
+-- | rAF), which repositions then `finalize`s: on the following frame it adopts the
+-- | content into body AND focuses the selected item (the appendChild blurs it, so the
+-- | focus must happen AFTER the move). scroll/resize `Reposition` re-asserts the
+-- | portal too (the placement modify re-parents the content out of body), without
+-- | re-focusing. The restore target (trigger) is captured BEFORE opening so no
+-- | post-open `modify` un-portals the content.
 module Hydrogen.Radix.Select
   ( component
   , SelectItem
@@ -42,11 +53,13 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), Orientation(..), cn, classes, dataState, dataAttr, sideName, alignName, role, aria)
 import Web.DOM.Node (Node)
 import Web.Event.Event (Event, EventType(..))
@@ -140,13 +153,16 @@ type State =
   , idPrefix :: String
   , style :: Style
   , trigger :: Array HH.PlainHTML
+  , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
+  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentNode :: Maybe Node
   }
 
 data Action
   = Receive Input
   | TriggerClicked
+  | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
   | PointerDown Event
   | ListKeyDown KE.KeyboardEvent
@@ -189,7 +205,9 @@ initialState input =
   , idPrefix: input.idPrefix
   , style: input.style
   , trigger: input.trigger
+  , restoreEl: Nothing
   , subs: []
+  , postSub: Nothing
   , contentNode: Nothing
   }
 
@@ -218,20 +236,22 @@ render st =
           )
           -- v1: render the static trigger content, then the selected value as text.
           (map HH.fromPlainHTML st.trigger <> [ HH.text selected ])
-      , if open then
-          HH.div
-            [ HP.ref contentRef
-            , role "listbox"
-            , classes st.style.content
-            , dataState "open"
-            , dataAttr "side" (sideName st.placedSide)
-            , dataAttr "align" (alignName st.placedAlign)
-            , HP.tabIndex (-1)
-            , HP.style "position:fixed;left:0;top:0;"
-            , HE.onKeyDown ListKeyDown
-            ]
-            (mapWithIndex (renderItem st) st.items)
-        else HH.text ""
+      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
+      -- node — only patches it — which makes adopting it into body safe. The open-state
+      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
+      -- the left/top Popper applies via FFI; closing adds display:none.
+      , HH.div
+          [ HP.ref contentRef
+          , role "listbox"
+          , classes st.style.content
+          , dataState (if open then "open" else "closed")
+          , dataAttr "side" (sideName st.placedSide)
+          , dataAttr "align" (alignName st.placedAlign)
+          , HP.tabIndex (-1)
+          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
+          , HE.onKeyDown ListKeyDown
+          ]
+          (mapWithIndex (renderItem st) st.items)
       ]
 
 renderItem :: forall m. State -> Int -> SelectItem -> H.ComponentHTML Action () m
@@ -272,6 +292,13 @@ handleAction = case _ of
   TriggerClicked -> do
     st <- H.get
     if current st.ctrl then closeMenu else openMenu
+  -- after the open render flushed (content ref live): measure+place, then on the NEXT
+  -- frame (after the placement modify's re-render) portal the content into body + focus
+  -- the selected item.
+  AfterOpen -> do
+    reposition
+    st <- H.get
+    finalize (Just st.focused)
   EscapePressed -> closeMenu
   PointerDown e -> do
     st <- H.get
@@ -294,36 +321,75 @@ handleAction = case _ of
     H.modify_ _ { sel = res.next }
     H.raise (ValueChanged res.emit)
     closeMenu
-  Reposition -> reposition
+  -- scroll/resize: re-place, then re-assert the portal (the placement modify re-parents
+  -- the content back out of body, so re-adopt on the following frame). No re-focus.
+  Reposition -> do
+    reposition
+    finalize Nothing
 
 openMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openMenu = do
   st <- H.get
   when (not (current st.ctrl)) do
     let start = selectedIndex st
-    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = start }
-    H.raise (OpenChanged true)
-    reposition
-    focusItem st.idPrefix start
-    mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
+    -- capture the restore target (trigger) BEFORE opening, so no post-open `modify` is
+    -- needed for it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
+    mprev <- liftEffect (HTMLDocument.activeElement doc)
+    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = start, restoreEl = mprev }
+    H.raise (OpenChanged true)
+    mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
     win <- liftEffect Popper.windowTarget
     let docTarget = HTMLDocument.toEventTarget doc
     escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
     ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
     scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
     resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
-    H.modify_ _ { contentNode = mcNode, subs = [ escSub, ptrSub, scrollSub, resizeSub ] }
+    psid <- scheduleAfterOpen
+    H.modify_ _
+      { contentNode = mcNode
+      , subs = [ escSub, ptrSub, scrollSub, resizeSub ]
+      , postSub = Just psid
+      }
+
+-- | Dispatch `AfterOpen` on the next animation frame (after the open render flushes).
+scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterOpen = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterOpen <$ emitter)
+  liftEffect (Portal.afterFrame (HS.notify listener unit))
+  pure sid
+
+-- | On the next frame (after the placement modify's render re-parents the content),
+-- | adopt the content into body — and, when given a focus index, focus that item AFTER
+-- | the move so the appendChild doesn't blur it.
+finalize :: forall m. MonadEffect m => Maybe Int -> H.HalogenM State Action () Output m Unit
+finalize mFocus = do
+  st <- H.get
+  mbody <- liftEffect Portal.documentBody
+  mc <- H.getHTMLElementRef contentRef
+  -- resolve the item element in HalogenM (refs aren't queryable from the afterFrame
+  -- Effect), then focus it INSIDE the afterFrame after the adopt move (so appendChild
+  -- doesn't blur it). Mirrors DropdownMenu.
+  mitem <- case mFocus of
+    Just idx -> H.getHTMLElementRef (itemRef st.idPrefix idx)
+    Nothing -> pure Nothing
+  case mbody, mc of
+    Just body, Just content ->
+      liftEffect $ Portal.afterFrame do
+        Portal.adopt body (HTMLElement.toElement content)
+        for_ mitem HTMLElement.focus
+    _, _ -> pure unit
 
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeMenu = do
   st <- H.get
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
-    -- restore focus to the trigger
-    mtrig <- H.getHTMLElementRef triggerRef
-    for_ mtrig (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, subs = [], contentNode = Nothing }
+    for_ st.postSub H.unsubscribe
+    -- restore focus to the trigger captured at open time
+    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
     H.raise (OpenChanged false)
 
 focusItem :: forall m. MonadEffect m => String -> Int -> H.HalogenM State Action () Output m Unit

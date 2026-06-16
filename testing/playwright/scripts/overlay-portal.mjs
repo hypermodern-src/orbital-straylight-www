@@ -6,9 +6,13 @@ import { serve } from "./themes-states.mjs";
 import { chromium } from "@playwright/test";
 
 const CFG = {
-  "alert-dialog": { kind: "modal", role: "alertdialog", trigger: "Delete account", content: '[role="alertdialog"]', focus: true },
-  "tooltip": { kind: "hover", trigger: "Hover me", content: ".tooltip-content", focus: false },
-  "hover-card": { kind: "hover", trigger: "Hover me", content: ".hover-card-content", focus: false },
+  "alert-dialog": { kind: "modal", open: "click", trigger: "Delete account", content: '[role="alertdialog"]', focus: true, restore: true },
+  "tooltip": { kind: "hover", open: "hover", trigger: "Hover me", content: ".tooltip-content", focus: false },
+  "hover-card": { kind: "hover", open: "hover", trigger: "Hover me", content: ".hover-card-content", focus: false },
+  // menus: content (role=menu/listbox) is itself the portaled node; focus moves to an item.
+  "dropdown-menu": { kind: "menu", open: "click", trigger: "Open", content: '[role="menu"]', focus: true, restore: true },
+  "context-menu": { kind: "menu", open: "rightclick", trigger: "Right-click here", content: '[role="menu"]', focus: true, restore: false },
+  "select": { kind: "menu", open: "click", trigger: "Pick a fruit", content: '[role="listbox"]', focus: true, restore: true },
 };
 
 const [DIR, ID] = process.argv.slice(2);
@@ -19,16 +23,18 @@ const { port: PORT, close: closeSrv } = await serve(DIR);
 const b = await chromium.launch();
 const pg = await b.newPage({ viewport: { width: 1000, height: 700 } });
 const content = pg.locator(cfg.content);
-const trigger = pg.locator("button", { hasText: cfg.trigger });
+// context-menu's trigger is a right-clickable region, not a button — locate by text.
+const trigger = cfg.open === "rightclick" ? pg.getByText(cfg.trigger, { exact: false }) : pg.locator("button", { hasText: cfg.trigger });
 const fail = (m) => { throw new Error(m); };
 
 try {
   await pg.goto(`http://127.0.0.1:${PORT}/?story=${ID}`);
   await pg.waitForTimeout(250);
 
-  // hover overlays: dispatch mouseenter directly (a top-anchored tooltip covers its own
-  // trigger at the viewport edge, so Playwright's actionability-checked .hover never settles).
-  if (cfg.kind === "modal") await trigger.click();
+  // open: click / right-click / hover. Hover dispatches mouseenter directly (a top-anchored
+  // tooltip covers its own trigger at the viewport edge, defeating actionability-checked hover).
+  if (cfg.open === "click") await trigger.click();
+  else if (cfg.open === "rightclick") await trigger.click({ button: "right" });
   else await trigger.dispatchEvent("mouseenter");
   await content.waitFor();
   await pg.waitForTimeout(200);
@@ -37,7 +43,7 @@ try {
   const portal = await pg.evaluate((sel) => {
     const c = document.querySelector(sel);
     if (!c) return { found: false };
-    // modal: content is inside a wrapper that is the portaled node; floating: content is.
+    // modal: content is inside a wrapper that is the portaled node; floating/menu: content is.
     const wrapperToBody = c.parentElement && c.parentElement.parentElement === document.body;
     const contentToBody = c.parentElement === document.body;
     return { found: true, wrapperToBody, contentToBody };
@@ -68,9 +74,9 @@ try {
   if (await content.isVisible().catch(() => false)) fail("Escape did not dismiss");
   console.log("✓ Escape dismiss");
 
-  // 5. modal restores focus to the trigger
-  if (cfg.focus) {
-    const onTrigger = await pg.evaluate((t) => document.activeElement && document.activeElement.textContent.trim() === t, cfg.trigger);
+  // 5. restores focus to the trigger on close
+  if (cfg.restore) {
+    const onTrigger = await pg.evaluate((t) => !!document.activeElement && (document.activeElement.textContent || "").includes(t), cfg.trigger);
     if (!onTrigger) fail("focus not restored to trigger");
     console.log("✓ focus restored to trigger");
   }
