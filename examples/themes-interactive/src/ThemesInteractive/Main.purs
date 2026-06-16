@@ -18,9 +18,11 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.Dialog as Dialog
+import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), cn)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
@@ -43,6 +45,7 @@ type Slots =
   , popover :: Popover.Slot Unit
   , tooltip :: Tooltip.Slot Unit
   , hovercard :: HoverCard.Slot Unit
+  , dropdownmenu :: DropdownMenu.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -59,6 +62,9 @@ _tooltip = Proxy
 
 _hovercard :: Proxy "hovercard"
 _hovercard = Proxy
+
+_dropdownmenu :: Proxy "dropdownmenu"
+_dropdownmenu = Proxy
 
 main :: Effect Unit
 main = do
@@ -86,6 +92,7 @@ view c = box [ P "6" ]
       "popover" -> HH.slot_ _popover unit Popover.component popoverInput
       "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
       "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
+      "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
       _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
   ]
 
@@ -216,6 +223,66 @@ hoverCardStyle =
   { trigger: cn "rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"
   , content: cn "rt-HoverCardContent rt-PopperContent rt-r-max-w rt-r-size-2"
   }
+
+-- | The themed DropdownMenu: a soft "Options" trigger opening a solid menu panel with
+-- | items, ⌘-shortcuts, separators, and a red Delete (the upstream demo). Menus position
+-- | via Popper, so defaultOpen stays false and the driver clicks open.
+dropdownMenuInput :: DropdownMenu.Input
+dropdownMenuInput = DropdownMenu.defaultInput
+  { style = menuStyle
+  , trigger = [ HH.text "Options", chevron ]
+  , entries =
+      [ menuRow "edit" "Edit" "⌘ E" ""
+      , menuRow "duplicate" "Duplicate" "⌘ D" ""
+      , DropdownMenu.menuSeparator
+      , menuRow "archive" "Archive" "⌘ N" ""
+      , DropdownMenu.menuSeparator
+      , menuRow "delete" "Delete" "⌘ ⌫" "red"
+      ]
+  }
+
+-- | One themed menu item: label + right-aligned shortcut + optional accent.
+menuRow :: String -> String -> String -> String -> DropdownMenu.MenuEntry
+menuRow value label shortcut accent =
+  DropdownMenu.MenuItemEntry
+    { value
+    , label: [ HH.text label ]
+    , shortcut: [ HH.text shortcut ]
+    , accent
+    , disabled: false
+    }
+
+-- | Radix Themes' DropdownMenu class vocabulary (from the open-state golden).
+menuStyle :: DropdownMenu.Style
+menuStyle =
+  { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+  , content: cn "rt-BaseMenuContent rt-DropdownMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , viewport: cn "rt-BaseMenuViewport rt-DropdownMenuViewport"
+  , item: cn "rt-BaseMenuItem rt-DropdownMenuItem rt-reset"
+  , shortcut: cn "rt-BaseMenuShortcut rt-DropdownMenuShortcut"
+  , separator: cn "rt-BaseMenuSeparator rt-DropdownMenuSeparator"
+  }
+
+-- | The down-chevron (radix's TriggerIcon / SelectIcon) — same 9×9 currentColor path
+-- | upstream uses. Rendered in the SVG namespace so it paints.
+chevron :: forall w i. HH.HTML w i
+chevron =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "d")
+            "M0.135232 3.15803C0.324102 2.95657 0.640521 2.94637 0.841971 3.13523L4.5 6.56464L8.158 3.13523C8.3595 2.94637 8.6759 2.95657 8.8648 3.15803C9.0536 3.35949 9.0434 3.67591 8.842 3.86477L4.84197 7.6148C4.64964 7.7951 4.35036 7.7951 4.15803 7.6148L0.158031 3.86477C-0.0434285 3.67591 -0.0536285 3.35949 0.135232 3.15803Z"
+        ]
+        []
+    ]
+
+svgNS :: HH.Namespace
+svgNS = HH.Namespace "http://www.w3.org/2000/svg"
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────
 queryParam :: String -> Effect String

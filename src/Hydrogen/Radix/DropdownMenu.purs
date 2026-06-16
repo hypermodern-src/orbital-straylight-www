@@ -24,6 +24,9 @@
 module Hydrogen.Radix.DropdownMenu
   ( component
   , MenuItem
+  , MenuEntry(..)
+  , menuItem
+  , menuSeparator
   , Input
   , Output(..)
   , Query(..)
@@ -35,8 +38,8 @@ module Hydrogen.Radix.DropdownMenu
 
 import Prelude
 
-import Data.Array (length, mapWithIndex)
-import Data.Foldable (for_, traverse_)
+import Data.Array as Array
+import Data.Foldable (foldl, for_, traverse_)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -67,24 +70,52 @@ import Web.UIEvent.KeyboardEvent as KE
 type MenuItem =
   { value :: String
   , label :: Array HH.PlainHTML
+  , shortcut :: Array HH.PlainHTML  -- right-aligned shortcut hint (empty = none)
+  , accent :: String                -- per-item data-accent-color (e.g. "red"); "" = none
   , disabled :: Boolean
   }
+
+-- | A menu is a list of ENTRIES: focusable items interleaved with non-focusable
+-- | separators. Roving focus + ArrowDown/Up navigate the items only; separators are
+-- | skipped (they carry no ref and no role=menuitem).
+data MenuEntry
+  = MenuItemEntry MenuItem
+  | MenuSeparator
+
+-- | Smart constructor for a plain item (no shortcut/accent, enabled).
+menuItem :: String -> Array HH.PlainHTML -> MenuEntry
+menuItem value label = MenuItemEntry { value, label, shortcut: [], accent: "", disabled: false }
+
+menuSeparator :: MenuEntry
+menuSeparator = MenuSeparator
+
+-- | The number of focusable (non-separator) items — the roving-focus modulus.
+itemCount :: Array MenuEntry -> Int
+itemCount = Array.length <<< Array.filter case _ of
+  MenuItemEntry _ -> true
+  MenuSeparator -> false
 
 type Style =
   { trigger :: ClassNames
   , content :: ClassNames
+  , viewport :: ClassNames    -- the inner items wrapper (rt-BaseMenuViewport)
   , item :: ClassNames
+  , shortcut :: ClassNames    -- the right-aligned shortcut span
+  , separator :: ClassNames
   }
 
 defaultStyle :: Style
 defaultStyle =
   { trigger: cn "rdx-dropdown-trigger"
   , content: cn "rdx-dropdown-content"
+  , viewport: cn "rdx-dropdown-viewport"
   , item: cn "rdx-dropdown-item"
+  , shortcut: cn "rdx-dropdown-shortcut"
+  , separator: cn "rdx-dropdown-separator"
   }
 
 type Input =
-  { items :: Array MenuItem
+  { entries :: Array MenuEntry
   , open :: Maybe Boolean
   , defaultOpen :: Boolean
   , side :: Side
@@ -98,7 +129,7 @@ type Input =
 
 defaultInput :: Input
 defaultInput =
-  { items: []
+  { entries: []
   , open: Nothing
   , defaultOpen: false
   , side: Bottom
@@ -126,8 +157,8 @@ type Slot id = H.Slot Query Output id
 
 type State =
   { ctrl :: Controllable Boolean
-  , items :: Array MenuItem
-  , focused :: Int               -- roving tab stop among items
+  , entries :: Array MenuEntry
+  , focused :: Int               -- roving tab stop among focusable items
   , side :: Side
   , align :: Align
   , offset :: Number
@@ -177,7 +208,7 @@ component =
 initialState :: Input -> State
 initialState input =
   { ctrl: controllable input.open input.defaultOpen
-  , items: input.items
+  , entries: input.entries
   , focused: 0
   , side: input.side
   , align: input.align
@@ -225,30 +256,56 @@ render st =
           , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
           , HE.onKeyDown MenuKeyDown
           ]
-          (mapWithIndex (renderItem st) st.items)
+          [ HH.div [ classes st.style.viewport ] (renderEntries st) ]
       ]
 
+-- | Render the entries, threading a running focusable-item index so separators are
+-- | skipped in the roving order (only MenuItemEntry consumes an index / gets a ref).
+renderEntries :: forall m. State -> Array (H.ComponentHTML Action () m)
+renderEntries st = _.html (foldl step { idx: 0, html: [] } st.entries)
+  where
+  step acc = case _ of
+    MenuSeparator -> acc { html = acc.html <> [ renderSep st ] }
+    MenuItemEntry item -> acc
+      { idx = acc.idx + 1
+      , html = acc.html <> [ renderItem st acc.idx item ]
+      }
+
+-- | A menu item is a DIV (radix uses generic elements, not buttons) with role=menuitem,
+-- | a roving tab stop, optional per-item accent, and an optional right-aligned shortcut.
 renderItem :: forall m. State -> Int -> MenuItem -> H.ComponentHTML Action () m
 renderItem st idx item =
-  HH.button
-    ( [ HP.type_ HP.ButtonButton
-      , HP.ref (itemRef st.idPrefix idx)
+  HH.div
+    ( [ HP.ref (itemRef st.idPrefix idx)
       , role "menuitem"
       , classes st.style.item
       , HP.tabIndex (tabIndexFor st.focused idx)
-      , HP.disabled item.disabled
+      , dataAttr "radix-collection-item" ""
+      , dataAttr "orientation" "vertical"
       , HE.onClick \_ -> ItemClicked item.value
       ]
-        <> (if item.disabled then [ dataAttr "disabled" "" ] else [])
+        <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
+        <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
     )
-    (map HH.fromPlainHTML item.label)
+    ( map HH.fromPlainHTML item.label
+        <> (if Array.null item.shortcut then [] else [ HH.div [ classes st.style.shortcut ] (map HH.fromPlainHTML item.shortcut) ])
+    )
+
+renderSep :: forall m. State -> H.ComponentHTML Action () m
+renderSep st =
+  HH.div
+    [ classes st.style.separator
+    , role "separator"
+    , aria "orientation" "horizontal"
+    ]
+    []
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
-      , items = input.items
+      , entries = input.entries
       , side = input.side
       , align = input.align
       , offset = input.offset
@@ -276,7 +333,7 @@ handleAction = case _ of
     st <- H.get
     let
       cfg = { orientation: Vertical, dir: LTR, loop: true }
-      pos = { count: length st.items, current: st.focused }
+      pos = { count: itemCount st.entries, current: st.focused }
     case navigate cfg pos (KE.key ke) of
       Stay -> pure unit
       MoveTo idx -> do

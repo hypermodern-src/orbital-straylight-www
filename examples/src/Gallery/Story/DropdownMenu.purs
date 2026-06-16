@@ -39,11 +39,11 @@ view =
   where
   input = DropdownMenu.defaultInput
     { trigger = [ HH.text "Open" ]
-    , items =
-        [ { value: "new", label: [ HH.text "New Tab" ], disabled: false }
-        , { value: "window", label: [ HH.text "New Window" ], disabled: false }
-        , { value: "private", label: [ HH.text "New Private Window" ], disabled: true }
-        , { value: "share", label: [ HH.text "Share" ], disabled: false }
+    , entries =
+        [ DropdownMenu.menuItem "new" [ HH.text "New Tab" ]
+        , DropdownMenu.menuItem "window" [ HH.text "New Window" ]
+        , DropdownMenu.MenuItemEntry { value: "private", label: [ HH.text "New Private Window" ], shortcut: [], accent: "", disabled: true }
+        , DropdownMenu.menuItem "share" [ HH.text "Share" ]
         ]
     , style = DropdownMenu.defaultStyle { content = cn "dropdown-content" }
     }
