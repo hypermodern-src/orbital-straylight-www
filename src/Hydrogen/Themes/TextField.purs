@@ -34,6 +34,8 @@ textFieldValue placeholder value props =
         [ HP.class_ (HH.ClassName "rt-reset rt-TextFieldInput")
         , HP.spellcheck false
         , HP.placeholder placeholder
-        , HP.value value
+        -- the `value` ATTRIBUTE (radix's defaultValue), not HP.value (which sets the DOM
+        -- property — invisible to an attribute snapshot).
+        , HP.attr (HH.AttrName "value") value
         ]
     ]

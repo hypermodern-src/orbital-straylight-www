@@ -18,8 +18,10 @@ import Hydrogen.Themes.Prop (Prop(..), el)
 
 -- | `button [ Variant "soft", Size "3" ] [ HH.text "Save" ]`. Caller props override
 -- | the defaults because the engine's single-value axes are last-wins.
+-- Defaults include `type=button` and `Color ""` (→ `data-accent-color=""`, the empty
+-- "inherit the theme accent" form radix always emits); a caller `Color` overrides it.
 button :: forall w i. Array Prop -> Array (HH.HTML w i) -> HH.HTML w i
-button props = el "button" [ "rt-reset", "rt-BaseButton", "rt-Button" ] ([ Variant "solid", Size "2" ] <> props)
+button props = el "button" [ "rt-reset", "rt-BaseButton", "rt-Button" ] ([ Variant "solid", Size "2", Color "", RawAttr "type" "button" ] <> props)
 
 -- | The disabled-button props (the real `disabled` attribute plus radix's
 -- | `data-disabled`, which its `[data-disabled]` rules also key on). Spread into a

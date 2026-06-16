@@ -44,6 +44,14 @@ try {
       const pad = "  ".repeat(d);
       if (el.nodeType === 3) { const t = el.textContent.trim(); return t ? pad + "#" + t : ""; }
       if (el.nodeType !== 1 || SKIP.has(el.tagName)) return "";
+      // Transparent wrapper: a Halogen component-root <div> carrying ONLY style=display:contents
+      // and no semantic content. React (the golden) has no per-component root, so render the
+      // children at the same depth and skip the wrapper — a framework-artifact canonicalization,
+      // the structural analog of the id/px run-to-run noise normalized below.
+      const onlyStyle = el.attributes.length === 1 && el.attributes[0].name === "style";
+      if (el.tagName === "DIV" && onlyStyle && /display:\s*contents/.test(el.getAttribute("style") || "")) {
+        return [...el.childNodes].map((k) => fmt(k, d)).filter(Boolean).join("\n");
+      }
       const cls = (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort().join(" ");
       const extra = [...el.attributes].filter((a) => a.name !== "class").map((a) => `${a.name}=${a.value}`).sort().join(" ");
       const head = `${pad}<${el.tagName.toLowerCase()}${cls ? ' class="' + cls + '"' : ""}${extra ? " " + extra : ""}>`;

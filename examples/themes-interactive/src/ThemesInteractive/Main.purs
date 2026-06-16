@@ -11,6 +11,7 @@ import Prelude
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Tuple (Tuple(..))
 import Data.String (drop, indexOf, splitAt) as Str
 import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
@@ -24,7 +25,7 @@ import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
-import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn)
+import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.Select as Select
@@ -33,7 +34,7 @@ import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
 import Hydrogen.Themes.TextArea (textArea)
-import Hydrogen.Themes.TextField (textField)
+import Hydrogen.Themes.TextField (textField, textFieldValue)
 import Hydrogen.Themes.Typography (textAs)
 import Type.Proxy (Proxy(..))
 import Web.DOM.ParentNode (QuerySelector(..))
@@ -92,37 +93,63 @@ root c =
     , eval: H.mkEval H.defaultEval
     }
 
--- | Each demo is wrapped in `Box p="6"` exactly as the golden app wraps its pages, so the
--- | trigger sits at the same position and the port↔golden screenshots line up 1:1.
+-- | The ROOT theme — a `<div class="radix-themes light" data-…>` inside #root, exactly as
+-- | upstream nests it (the <body> stays bare). Each demo is then wrapped in `Box p="6"` as
+-- | the golden wraps its pages. Portaled overlays re-apply the theme themselves (so adopted-
+-- | to-body content stays themed) — see `portalThemeAttrs`.
 view :: String -> H.ComponentHTML Void Slots Aff
-view c = box [ P "6" ]
-  [ case c of
-      "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
-      "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
-      "popover" -> HH.slot_ _popover unit Popover.component popoverInput
-      "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
-      "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
-      "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
-      "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
-      "select" -> HH.slot_ _select unit Select.component selectInput
-      _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
+view c =
+  HH.div
+    ( [ HP.class_ (HH.ClassName "radix-themes light")
+      , HP.style "--default-font-family: 'Inter Variable', sans-serif;"
+      ] <> themeDataAttrs true
+    )
+    [ box [ P "6" ]
+        [ case c of
+            "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
+            "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
+            "popover" -> HH.slot_ _popover unit Popover.component popoverInput
+            "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
+            "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
+            "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
+            "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
+            "select" -> HH.slot_ _select unit Select.component selectInput
+            _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
+        ]
+    ]
+
+-- | The theme `data-*` attributes radix stamps on every `.radix-themes` root. `isRoot`
+-- | distinguishes the page root (has-background + is-root-theme = true) from a re-themed
+-- | portal (both false — it sits on the bare body, carrying no panel background).
+themeDataAttrs :: forall r i. Boolean -> Array (HH.IProp r i)
+themeDataAttrs isRoot =
+  [ dataAttr "accent-color" "indigo"
+  , dataAttr "gray-color" "slate"
+  , dataAttr "has-background" (if isRoot then "true" else "false")
+  , dataAttr "is-root-theme" (if isRoot then "true" else "false")
+  , dataAttr "panel-background" "translucent"
+  , dataAttr "radius" "medium"
+  , dataAttr "scaling" "100%"
   ]
 
 -- | The themed Dialog: the Radix primitive driven open, with the rt-* Style + content
--- | built from the at-rest Themes components. `defaultOpen` so the open state renders.
+-- | built from the at-rest Themes components. Driven open by the shared state driver
+-- | (not defaultOpen — so the DOM-oracle driver, which clicks the trigger, can open it;
+-- | a defaultOpen modal renders with the backdrop already over the trigger).
 dialogInput :: Dialog.Input
 dialogInput = Dialog.defaultInput
-  { defaultOpen = true
-  , style = dialogStyle
-  , contentStyle = "max-width: 450px"
+  { style = dialogStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--max-width: 450px; pointer-events: auto;"
   , trigger = [ HH.text "Edit profile" ]
   , title = [ HH.text "Edit profile" ]
   , description = [ HH.text "Make changes to your profile." ]
   , content =
-      [ box [ Mb "4" ]
-          [ flex [ Direction "column", Gap "1" ]
-              [ textAs "label" [ Size "2", Weight "bold" ] [ HH.text "Name" ]
-              , textField "Enter your full name" []
+      [ flex [ Direction "column", Gap "3" ]
+          [ HH.label_
+              [ textAs "div" [ Size "2", Mb "1", Weight "bold" ] [ HH.text "Name" ]
+              , textFieldValue "Enter your full name" "Freja Johnsen" []
               ]
           ]
       , flex [ Gap "3", Mt "4", Justify "end" ]
@@ -132,16 +159,31 @@ dialogInput = Dialog.defaultInput
       ]
   }
 
--- | Radix Themes' Dialog class vocabulary (from the open-state golden).
+-- | The theme `data-*` attrs (as k/v pairs) a preset stamps on a portaled overlay so the
+-- | adopted-to-body content stays themed — the portal variant (is-root-theme/has-background
+-- | both false). Paired with `light radix-themes` in the overlay's class list.
+portalThemeAttrs :: Array (Tuple String String)
+portalThemeAttrs =
+  [ Tuple "accent-color" "indigo"
+  , Tuple "gray-color" "slate"
+  , Tuple "has-background" "false"
+  , Tuple "is-root-theme" "false"
+  , Tuple "panel-background" "translucent"
+  , Tuple "radius" "medium"
+  , Tuple "scaling" "100%"
+  ]
+
+-- | Radix Themes' Dialog class vocabulary (from the open-state golden). The overlay (the
+-- | portaled root) carries `light radix-themes` so it re-themes the adopted content.
 dialogStyle :: Dialog.Style
 dialogStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"
-  , overlay: cn "rt-BaseDialogOverlay rt-DialogOverlay"
+  , overlay: cn "light radix-themes rt-BaseDialogOverlay rt-DialogOverlay"
   , scroll: cn "rt-BaseDialogScroll rt-DialogScroll"
   , scrollPadding: cn "rt-BaseDialogScrollPadding rt-DialogScrollPadding rt-r-align-center"
-  , content: cn "rt-BaseDialogContent rt-DialogContent rt-r-size-3"
-  , title: cn "rt-Heading rt-r-size-5 rt-r-mb-3"
-  , description: cn "rt-Text rt-r-size-2 rt-r-mb-4 rt-r-color-gray"
+  , content: cn "rt-BaseDialogContent rt-DialogContent rt-r-max-w rt-r-size-3"
+  , title: cn "rt-Heading rt-r-lt-start rt-r-size-5 rt-r-mb-3"
+  , description: cn "rt-Text rt-r-size-2 rt-r-mb-4"
   }
 
 -- | The themed AlertDialog: same modal anatomy as Dialog (overlay > scroll > scrollPadding
@@ -149,8 +191,7 @@ dialogStyle =
 -- | access" demo content. `defaultOpen` so the open state renders.
 alertDialogInput :: AlertDialog.Input
 alertDialogInput = AlertDialog.defaultInput
-  { defaultOpen = true
-  , style = alertDialogStyle
+  { style = alertDialogStyle
   , contentStyle = "--max-width: 450px"
   , trigger = [ HH.text "Revoke access" ]
   , title = [ HH.text "Revoke access" ]
