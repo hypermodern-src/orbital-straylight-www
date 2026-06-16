@@ -9,6 +9,7 @@ module ThemesInteractive.Main where
 import Prelude
 
 import Data.Array as Array
+import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (drop, indexOf, splitAt) as Str
 import Data.String.Pattern (Pattern(..))
@@ -20,13 +21,16 @@ import Halogen.HTML as HH
 import Halogen.VDom.Driver (runUI)
 import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.Dialog as Dialog
-import Hydrogen.Radix.Foundation.Style (cn)
+import Hydrogen.Radix.Foundation.Style (Align(..), cn)
+import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
+import Hydrogen.Themes.TextArea (textArea)
 import Hydrogen.Themes.TextField (textField)
 import Hydrogen.Themes.Typography (textAs)
 import Type.Proxy (Proxy(..))
+import Web.DOM.ParentNode (QuerySelector(..))
 import Web.HTML as HTML
 import Web.HTML.Location as Location
 import Web.HTML.Window as Window
@@ -34,6 +38,7 @@ import Web.HTML.Window as Window
 type Slots =
   ( dialog :: Dialog.Slot Unit
   , alertdialog :: AlertDialog.Slot Unit
+  , popover :: Popover.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -42,12 +47,16 @@ _dialog = Proxy
 _alertdialog :: Proxy "alertdialog"
 _alertdialog = Proxy
 
+_popover :: Proxy "popover"
+_popover = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
   HA.runHalogenAff do
-    body <- HA.awaitBody
-    void (runUI (root c) unit body)
+    HA.awaitLoad
+    mEl <- HA.selectElement (QuerySelector "#root")
+    for_ mEl \el -> void (runUI (root c) unit el)
 
 root :: forall q i o. String -> H.Component q i o Aff
 root c =
@@ -57,11 +66,16 @@ root c =
     , eval: H.mkEval H.defaultEval
     }
 
+-- | Each demo is wrapped in `Box p="6"` exactly as the golden app wraps its pages, so the
+-- | trigger sits at the same position and the port↔golden screenshots line up 1:1.
 view :: String -> H.ComponentHTML Void Slots Aff
-view = case _ of
-  "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
-  "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
-  _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
+view c = box [ P "6" ]
+  [ case c of
+      "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
+      "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
+      "popover" -> HH.slot_ _popover unit Popover.component popoverInput
+      _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
+  ]
 
 -- | The themed Dialog: the Radix primitive driven open, with the rt-* Style + content
 -- | built from the at-rest Themes components. `defaultOpen` so the open state renders.
@@ -128,6 +142,31 @@ alertDialogStyle =
   , content: cn "rt-BaseDialogContent rt-AlertDialogContent rt-r-max-w rt-r-size-3"
   , title: cn "rt-Heading rt-r-lt-start rt-r-mb-3 rt-r-size-5"
   , description: cn "rt-Text rt-r-size-2"
+  }
+
+-- | The themed Popover: floating content anchored bottom-start, the upstream "Comment"
+-- | demo (a soft trigger + a 360px-wide textarea card). `defaultOpen` so it renders open.
+-- NOTE: defaultOpen is FALSE (unlike the modal presets) — a floating overlay is
+-- positioned by Popper inside openPopover, which only runs on an actual open
+-- transition (trigger click), so the screenshot driver clicks it open.
+popoverInput :: Popover.Input
+popoverInput = Popover.defaultInput
+  { align = Start
+  , style = popoverStyle
+  , contentStyle = "--width: 360px;"
+  , trigger = [ HH.text "Comment" ]
+  , content =
+      [ flex [ Gap "3" ]
+          [ box [ Class "rt-r-fg-1" ]
+              [ textArea "Write a comment…" [ Height "80px" ] ]
+          ]
+      ]
+  }
+
+popoverStyle :: Popover.Style
+popoverStyle =
+  { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+  , content: cn "rt-PopoverContent rt-PopperContent rt-r-max-w rt-r-size-2 rt-r-w"
   }
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────

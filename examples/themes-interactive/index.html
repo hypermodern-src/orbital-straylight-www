@@ -19,6 +19,10 @@
     data-panel-background="translucent"
     style="--default-font-family: 'Inter Variable', sans-serif"
   >
+    <!-- The app mounts in #root (mirrors the golden's structure so the shared Playwright
+         state driver — which scopes the trigger to #root — works against both). Portaled
+         overlays still adopt into <body>, inheriting the theme set on it above. -->
+    <div id="root"></div>
     <script type="module" src="app.js"></script>
   </body>
 </html>

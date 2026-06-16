@@ -78,6 +78,7 @@ type Input =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String      -- extra inline style on the content (e.g. --width/--max-width)
   }
 
 defaultInput :: Input
@@ -91,6 +92,7 @@ defaultInput =
   , style: defaultStyle
   , trigger: []
   , content: []
+  , contentStyle: ""
   }
 
 data Output = OpenChanged Boolean
@@ -114,6 +116,7 @@ type State =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -162,6 +165,7 @@ initialState input =
   , style: input.style
   , trigger: input.trigger
   , content: input.content
+  , contentStyle: input.contentStyle
   , placedSide: input.side
   , placedAlign: input.align
   , restoreEl: Nothing
@@ -201,7 +205,9 @@ render st =
           , dataAttr "side" (sideName st.placedSide)
           , dataAttr "align" (alignName st.placedAlign)
           , HP.tabIndex (-1)
-          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
+          -- the style string stays CONSTANT across renders (contentStyle is from input) so
+          -- Halogen never rewrites it and clobbers the left/top Popper applies via FFI.
+          , HP.style ("position:fixed;left:0;top:0;" <> st.contentStyle <> (if open then "" else "display:none;"))
           , HE.onKeyDown ContentKeyDown
           ]
           (map HH.fromPlainHTML st.content)
@@ -222,6 +228,7 @@ handleAction = case _ of
       , style = input.style
       , trigger = input.trigger
       , content = input.content
+      , contentStyle = input.contentStyle
       }
   TriggerClicked -> do
     st <- H.get
