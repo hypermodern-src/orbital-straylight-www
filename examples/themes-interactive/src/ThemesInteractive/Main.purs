@@ -18,6 +18,7 @@ import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.VDom.Driver (runUI)
+import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.Foundation.Style (cn)
 import Hydrogen.Themes.Button (button)
@@ -30,10 +31,16 @@ import Web.HTML as HTML
 import Web.HTML.Location as Location
 import Web.HTML.Window as Window
 
-type Slots = (dialog :: Dialog.Slot Unit)
+type Slots =
+  ( dialog :: Dialog.Slot Unit
+  , alertdialog :: AlertDialog.Slot Unit
+  )
 
 _dialog :: Proxy "dialog"
 _dialog = Proxy
+
+_alertdialog :: Proxy "alertdialog"
+_alertdialog = Proxy
 
 main :: Effect Unit
 main = do
@@ -53,6 +60,7 @@ root c =
 view :: String -> H.ComponentHTML Void Slots Aff
 view = case _ of
   "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
+  "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
   _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
 
 -- | The themed Dialog: the Radix primitive driven open, with the rt-* Style + content
@@ -89,6 +97,37 @@ dialogStyle =
   , content: cn "rt-BaseDialogContent rt-DialogContent rt-r-size-3"
   , title: cn "rt-Heading rt-r-size-5 rt-r-mb-3"
   , description: cn "rt-Text rt-r-size-2 rt-r-mb-4 rt-r-color-gray"
+  }
+
+-- | The themed AlertDialog: same modal anatomy as Dialog (overlay > scroll > scrollPadding
+-- | > content) but role=alertdialog, no close-on-outside-click, and the upstream "Revoke
+-- | access" demo content. `defaultOpen` so the open state renders.
+alertDialogInput :: AlertDialog.Input
+alertDialogInput = AlertDialog.defaultInput
+  { defaultOpen = true
+  , style = alertDialogStyle
+  , contentStyle = "--max-width: 450px"
+  , trigger = [ HH.text "Revoke access" ]
+  , title = [ HH.text "Revoke access" ]
+  , description = [ HH.text "Are you sure? This application will no longer be accessible." ]
+  , content =
+      [ flex [ Gap "3", Mt "4", Justify "end" ]
+          [ button [ Variant "soft", Color "gray" ] [ HH.text "Cancel" ]
+          , button [ Color "red" ] [ HH.text "Revoke access" ]
+          ]
+      ]
+  }
+
+-- | Radix Themes' AlertDialog class vocabulary (from the open-state golden).
+alertDialogStyle :: AlertDialog.Style
+alertDialogStyle =
+  { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"
+  , overlay: cn "rt-BaseDialogOverlay rt-AlertDialogOverlay"
+  , scroll: cn "rt-BaseDialogScroll rt-AlertDialogScroll"
+  , scrollPadding: cn "rt-BaseDialogScrollPadding rt-AlertDialogScrollPadding rt-r-align-center"
+  , content: cn "rt-BaseDialogContent rt-AlertDialogContent rt-r-max-w rt-r-size-3"
+  , title: cn "rt-Heading rt-r-lt-start rt-r-mb-3 rt-r-size-5"
+  , description: cn "rt-Text rt-r-size-2"
   }
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────

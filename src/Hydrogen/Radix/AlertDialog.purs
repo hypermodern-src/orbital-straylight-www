@@ -70,10 +70,14 @@ import Web.UIEvent.KeyboardEvent as KE
 -- Public surface
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- | Per-part class lists.
+-- | Per-part class lists. `scroll`/`scrollPadding` are the layout wrappers between the
+-- | overlay and the content (radix-themes' centering + scroll-when-tall structure); the
+-- | bare primitive leaves them semantic, a preset supplies the rt-* classes.
 type Style =
   { trigger :: ClassNames
   , overlay :: ClassNames
+  , scroll :: ClassNames
+  , scrollPadding :: ClassNames
   , content :: ClassNames
   , title :: ClassNames
   , description :: ClassNames
@@ -83,6 +87,8 @@ defaultStyle :: Style
 defaultStyle =
   { trigger: cn "rdx-alert-dialog-trigger"
   , overlay: cn "rdx-alert-dialog-overlay"
+  , scroll: cn "rdx-alert-dialog-scroll"
+  , scrollPadding: cn "rdx-alert-dialog-scroll-padding"
   , content: cn "rdx-alert-dialog-content"
   , title: cn "rdx-alert-dialog-title"
   , description: cn "rdx-alert-dialog-description"
@@ -97,6 +103,7 @@ type Input =
   , title :: Array HH.PlainHTML
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String         -- extra inline style on the content (e.g. --max-width)
   }
 
 defaultInput :: Input
@@ -109,6 +116,7 @@ defaultInput =
   , title: []
   , description: []
   , content: []
+  , contentStyle: ""
   }
 
 data Output = OpenChanged Boolean
@@ -131,10 +139,12 @@ type State =
   , title :: Array HH.PlainHTML
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , locked :: Boolean
+  , contentId :: String      -- generated on Initialize, trigger aria-controls target + content id
   , titleId :: String        -- generated on Initialize, aria-labelledby target
   , descriptionId :: String  -- generated on Initialize, aria-describedby target
   }
@@ -176,10 +186,12 @@ initialState input =
   , title: input.title
   , description: input.description
   , content: input.content
+  , contentStyle: input.contentStyle
   , restoreEl: Nothing
   , escSub: Nothing
   , postSub: Nothing
   , locked: false
+  , contentId: ""
   , titleId: ""
   , descriptionId: ""
   }
@@ -197,12 +209,16 @@ render st =
   in
     HH.div_
       [ HH.button
-          [ HP.type_ HP.ButtonButton
-          , classes st.style.trigger
-          , aria "expanded" (show open)
-          , aria "haspopup" "dialog"
-          , HE.onClick \_ -> TriggerClicked
-          ]
+          ( [ HP.type_ HP.ButtonButton
+            , classes st.style.trigger
+            , aria "expanded" (show open)
+            , aria "haspopup" "dialog"
+            , dataState (if open then "open" else "closed")
+            , HE.onClick \_ -> TriggerClicked
+            ]
+              -- aria-controls references the content only while open (upstream gates it)
+              <> (if open then [ aria "controls" st.contentId ] else [])
+          )
           (map HH.fromPlainHTML st.trigger)
       , overlayContent open st
       ]
@@ -210,44 +226,48 @@ render st =
 -- | The overlay is ALWAYS mounted (a stable VDOM child Halogen patches by reference,
 -- | never removes — so moving it to `body` never trips Halogen's removal), hidden with
 -- | `display:none` when closed. On open it is adopted into `document.body` (AfterOpen).
+-- | Anatomy mirrors upstream: body > overlay > scroll > scrollPadding > content. The
+-- | overlay is the portaled, themed root carrying the backdrop. An alert dialog does NOT
+-- | close on outside click, so the overlay has NO click handler (backdrop only).
 overlayContent :: forall m. Boolean -> State -> H.ComponentHTML Action () m
 overlayContent open st =
   HH.div
     [ HP.ref portalRef
-    , HP.style (if open then "" else "display:none")
+    , classes st.style.overlay
+    , dataState (if open then "open" else "closed")
+    , HP.style ("position:fixed;inset:0;" <> (if open then "" else "display:none;"))
     ]
-    [ HH.div
-        [ classes st.style.overlay
-        , dataState (if open then "open" else "closed")
-        , HP.style "position:fixed;inset:0;"
-        -- NOTE: alert dialog does NOT close on outside click; backdrop only.
-        ]
-        []
-    , HH.div
-        ( [ HP.ref contentRef
-          , classes st.style.content
-          , roleAttr "alertdialog"
-          , aria "modal" "true"
-          , dataState (if open then "open" else "closed")
-          , HP.tabIndex (-1)
-          , HP.style "position:fixed;"
-          , HE.onKeyDown ContentKeyDown
-          ]
-            <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
-            <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
-        )
-        [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
-        , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
-        , HH.div_ (map HH.fromPlainHTML st.content)
+    [ HH.div [ classes st.style.scroll ]
+        [ HH.div [ classes st.style.scrollPadding ]
+            [ HH.div
+                ( [ HP.ref contentRef
+                  , HP.id st.contentId
+                  , classes st.style.content
+                  , roleAttr "alertdialog"
+                  -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
+                  , dataState (if open then "open" else "closed")
+                  , HP.tabIndex (-1)
+                  , HP.style st.contentStyle
+                  , HE.onKeyDown ContentKeyDown
+                  ]
+                    <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
+                    <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
+                )
+                [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
+                , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
+                , HH.div_ (map HH.fromPlainHTML st.content)
+                ]
+            ]
         ]
     ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Initialize -> do
+    cid <- useId
     tid <- useId
     did <- useId
-    H.modify_ _ { titleId = tid, descriptionId = did }
+    H.modify_ _ { contentId = cid, titleId = tid, descriptionId = did }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -257,6 +277,7 @@ handleAction = case _ of
       , title = input.title
       , description = input.description
       , content = input.content
+      , contentStyle = input.contentStyle
       }
   TriggerClicked -> openDialog
   EscapePressed -> do
