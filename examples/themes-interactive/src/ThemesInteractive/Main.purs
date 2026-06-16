@@ -304,7 +304,12 @@ hoverCardInput :: HoverCard.Input
 hoverCardInput = HoverCard.defaultInput
   { align = Start
   , style = hoverCardStyle
-  , contentStyle = "--max-width: 300px;"
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--max-width: 9999px; " <> popperContentVars "hover-card"
+  , wrapperClass = cn "rt-Text"
+  , proseBefore = [ HH.text "Follow " ]
+  , proseAfter = [ HH.text " for updates." ]
   , trigger = [ HH.text "@radix_ui" ]
   , content =
       [ textAs "div" [ Size "1", Color "gray" ]
@@ -315,7 +320,7 @@ hoverCardInput = HoverCard.defaultInput
 hoverCardStyle :: HoverCard.Style
 hoverCardStyle =
   { trigger: cn "rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"
-  , content: cn "rt-HoverCardContent rt-PopperContent rt-r-max-w rt-r-size-2"
+  , content: cn "light radix-themes rt-HoverCardContent rt-PopperContent rt-r-max-w rt-r-size-2"
   }
 
 -- | The themed DropdownMenu: a soft "Options" trigger opening a solid menu panel with
