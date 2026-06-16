@@ -8,7 +8,8 @@ import { chromium } from "@playwright/test";
 const CFG = {
   "alert-dialog": { kind: "modal", open: "click", trigger: "Delete account", content: '[role="alertdialog"]', focus: true, restore: true },
   "tooltip": { kind: "hover", open: "hover", trigger: "Hover me", content: ".tooltip-content", focus: false },
-  "hover-card": { kind: "hover", open: "hover", trigger: "Hover me", content: ".hover-card-content", focus: false },
+  // hover-card's trigger is an inline <a> (radix HoverCard wraps a link), not a button.
+  "hover-card": { kind: "hover", open: "hover", trigger: "Hover me", triggerTag: "a", content: ".hover-card-content", focus: false },
   // menus: content (role=menu/listbox) is itself the portaled node; focus moves to an item.
   "dropdown-menu": { kind: "menu", open: "click", trigger: "Open", content: '[role="menu"]', focus: true, restore: true },
   "context-menu": { kind: "menu", open: "rightclick", trigger: "Right-click here", content: '[role="menu"]', focus: true, restore: false },
@@ -24,7 +25,8 @@ const b = await chromium.launch();
 const pg = await b.newPage({ viewport: { width: 1000, height: 700 } });
 const content = pg.locator(cfg.content);
 // context-menu's trigger is a right-clickable region, not a button — locate by text.
-const trigger = cfg.open === "rightclick" ? pg.getByText(cfg.trigger, { exact: false }) : pg.locator("button", { hasText: cfg.trigger });
+// hover-card's trigger is an <a> (triggerTag); others default to a button.
+const trigger = cfg.open === "rightclick" ? pg.getByText(cfg.trigger, { exact: false }) : pg.locator(cfg.triggerTag ?? "button", { hasText: cfg.trigger });
 const fail = (m) => { throw new Error(m); };
 
 try {
@@ -39,18 +41,20 @@ try {
   await content.waitFor();
   await pg.waitForTimeout(200);
 
-  // 1. portal-to-body
+  // 1. portal-to-body. Floating/menu: the content node itself is the body child. Modal:
+  // the portaled node is an ancestor (the themed anatomy nests the content under
+  // overlay > scroll > scrollPadding), so walk up to a direct body child.
   const portal = await pg.evaluate((sel) => {
     const c = document.querySelector(sel);
     if (!c) return { found: false };
-    // modal: content is inside a wrapper that is the portaled node; floating/menu: content is.
-    const wrapperToBody = c.parentElement && c.parentElement.parentElement === document.body;
     const contentToBody = c.parentElement === document.body;
-    return { found: true, wrapperToBody, contentToBody };
+    let n = c, ancestorToBody = false;
+    while (n && n.parentElement) { if (n.parentElement === document.body) { ancestorToBody = true; break; } n = n.parentElement; }
+    return { found: true, ancestorToBody, contentToBody };
   }, cfg.content);
   if (!portal.found) fail(`no ${cfg.content} after open`);
-  const portaled = cfg.kind === "modal" ? portal.wrapperToBody : portal.contentToBody;
-  if (!portaled) fail(`not portaled to body (kind=${cfg.kind}, wrapper→body=${portal.wrapperToBody}, content→body=${portal.contentToBody})`);
+  const portaled = cfg.kind === "modal" ? portal.ancestorToBody : portal.contentToBody;
+  if (!portaled) fail(`not portaled to body (kind=${cfg.kind}, ancestor→body=${portal.ancestorToBody}, content→body=${portal.contentToBody})`);
   console.log(`✓ portal-to-body (${cfg.kind})`);
 
   // 2. floating overlays are positioned by Popper (data-side stamped + off-origin)
