@@ -262,10 +262,14 @@ popperContentVars c =
 tooltipInput :: Tooltip.Input
 tooltipInput = Tooltip.defaultInput
   { style = tooltipStyle
-  -- offset 8 holds the 5px arrow + a small gap; padding 10 = radix's collisionPadding, so
-  -- near the viewport top the preferred `top` overflows the gutter and flips to `bottom`.
+  -- offset 8 holds the 5px arrow; padding 10 = radix's collisionPadding. Near the viewport
+  -- top the preferred `top` overflows the gutter and genuinely flips to `bottom` (the
+  -- content is now measured at its true max-content size, so the flip fires correctly).
   , offset = 8.0
   , padding = 10.0
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--max-width: 9999px; " <> popperContentVars "tooltip"
   , trigger = [ HH.text "Hover me" ]
   , content = [ textAs "p" [ Size "1", Class "rt-TooltipText" ] [ HH.text "Add to library" ] ]
   , arrow = [ tooltipArrow ]
@@ -281,6 +285,7 @@ tooltipArrow =
     , HP.attr (HH.AttrName "height") "5"
     , HP.attr (HH.AttrName "viewBox") "0 0 30 10"
     , HP.attr (HH.AttrName "preserveAspectRatio") "none"
+    , HP.attr (HH.AttrName "style") "display: block;"
     ]
     [ HH.elementNS svgNS (HH.ElemName "polygon")
         [ HP.attr (HH.AttrName "points") "0,0 30,0 15,10" ]
@@ -290,7 +295,7 @@ tooltipArrow =
 tooltipStyle :: Tooltip.Style
 tooltipStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
-  , content: cn "rt-TooltipContent rt-r-max-w"
+  , content: cn "light radix-themes rt-TooltipContent rt-r-max-w"
   }
 
 -- | The themed HoverCard: an inline link trigger (@radix_ui) that, on hover, reveals a

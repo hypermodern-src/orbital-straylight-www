@@ -203,12 +203,16 @@ positionArrow p = do
     setL v = setInlineStyle p.arrow "left" (show v <> "px")
     setT v = setInlineStyle p.arrow "top" (show v <> "px")
     setR d = setInlineStyle p.arrow "transform" ("rotate(" <> show d <> "deg)")
-  setInlineStyle p.arrow "position" "absolute"
+    -- declaration order matches upstream's serialized form: position, transform, left, top,
+    -- transform-origin (position already sits first from the element's rendered style).
+    place deg lv tv origin = setInlineStyle p.arrow "position" "absolute"
+      *> setR deg *> setL lv *> setT tv
+      *> setInlineStyle p.arrow "transform-origin" origin
   case p.side of
-    Bottom -> setL crossX *> setT (negate ar.height) *> setR 180.0
-    Top -> setL crossX *> setT fl.height *> setR 0.0
-    Right -> setT crossY *> setL (negate ar.width) *> setR 90.0
-    Left -> setT crossY *> setL fl.width *> setR 270.0
+    Bottom -> place 180.0 crossX (negate ar.height) "center 0px"
+    Top -> place 0.0 crossX fl.height "center 0px"
+    Right -> place 90.0 (negate ar.width) crossY "0px center"
+    Left -> place 270.0 fl.width crossY "0px center"
 
 -- | Radix Select's default "item-aligned" positioning: place the listbox so the SELECTED
 -- | item sits over the trigger (its center aligned with the trigger's center) and the left

@@ -35,6 +35,7 @@ import Prelude
 
 import Data.Array (null)
 import Data.Foldable (for_, traverse_)
+import Data.Tuple (Tuple(..))
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -80,8 +81,10 @@ type Input =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
-  , contentStyle :: String      -- extra inline style on the content (e.g. --max-width)
+  , contentStyle :: String      -- the content's CONSTANT style (--max-width + var aliases)
   , arrow :: Array HH.PlainHTML  -- optional arrow svg, positioned at the content edge
+  , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
+  , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
   }
 
 defaultInput :: Input
@@ -97,6 +100,8 @@ defaultInput =
   , content: []
   , contentStyle: ""
   , arrow: []
+  , triggerAttrs: []
+  , portalAttrs: []
   }
 
 data Output = OpenChanged Boolean
@@ -122,6 +127,8 @@ type State =
   , content :: Array HH.PlainHTML
   , contentStyle :: String
   , arrow :: Array HH.PlainHTML
+  , triggerAttrs :: Array (Tuple String String)
+  , portalAttrs :: Array (Tuple String String)
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -148,6 +155,16 @@ contentRef = H.RefLabel "rdx-tooltip-content"
 arrowRef :: H.RefLabel
 arrowRef = H.RefLabel "rdx-tooltip-arrow"
 
+wrapperRef :: H.RefLabel
+wrapperRef = H.RefLabel "rdx-tooltip-wrapper"
+
+portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
+
+-- | radix's VisuallyHidden inline style (the screen-reader-only tooltip-role copy).
+visuallyHiddenStyle :: String
+visuallyHiddenStyle = "position: absolute; border: 0px; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; overflow-wrap: normal;"
+
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
   H.mkComponent
@@ -173,6 +190,8 @@ initialState input =
   , content: input.content
   , contentStyle: input.contentStyle
   , arrow: input.arrow
+  , triggerAttrs: input.triggerAttrs
+  , portalAttrs: input.portalAttrs
   , placedSide: input.side
   , placedAlign: input.align
   , restoreEl: Nothing
@@ -186,40 +205,48 @@ render st =
   let
     open = current st.ctrl
   in
-    HH.div_
+    -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
+    HH.div [ HP.style "display:contents" ]
       [ HH.button
-          [ HP.type_ HP.ButtonButton
-          , HP.ref triggerRef
-          , classes st.style.trigger
-          , aria "describedby" st.contentId
-          , dataState (if open then "open" else "closed")
-          , HE.onMouseEnter \_ -> Show
-          , HE.onMouseLeave \_ -> Hide
-          , HE.onFocus \_ -> Show
-          , HE.onBlur \_ -> Hide
-          ]
-          (map HH.fromPlainHTML st.trigger)
-      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
-      -- node — only patches it — which makes adopting it into body safe. The open-state
-      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
-      -- the left/top Popper applies via FFI; closing adds display:none.
-      , HH.div
-          [ HP.ref contentRef
-          , HP.id st.contentId
-          , role "tooltip"
-          , classes st.style.content
-          , dataState (if open then "open" else "closed")
-          , dataAttr "side" (sideName st.placedSide)
-          , dataAttr "align" (alignName st.placedAlign)
-          -- CONSTANT style string (contentStyle is from input) so Halogen never clobbers
-          -- the left/top Popper applies via FFI.
-          , HP.style ("position:fixed;left:0;top:0;" <> st.contentStyle <> (if open then "" else "display:none;"))
-          ]
-          ( map HH.fromPlainHTML st.content
-              -- the arrow is a child of the content (radix puts it inside), absolutely
-              -- positioned; Popper.positionArrow pins its left/top/transform on open.
-              <> (if null st.arrow then [] else [ HH.span [ HP.ref arrowRef, HP.style "position:absolute;" ] (map HH.fromPlainHTML st.arrow) ])
+          -- NOTE: the tooltip trigger has NO type=button and its open state is "delayed-open"
+          -- (radix Tooltip shows after a delay), matching the golden.
+          ( [ HP.ref triggerRef
+            , classes st.style.trigger
+            , aria "describedby" st.contentId
+            , dataState (if open then "delayed-open" else "closed")
+            , dataAttr "radix-popper-side" (sideName st.placedSide)
+            , dataAttr "radix-popper-align" (alignName st.placedAlign)
+            , HE.onMouseEnter \_ -> Show
+            , HE.onMouseLeave \_ -> Hide
+            , HE.onFocus \_ -> Show
+            , HE.onBlur \_ -> Hide
+            ] <> portalData st.triggerAttrs
           )
+          (map HH.fromPlainHTML st.trigger)
+      -- the popper WRAPPER (portal root) — always mounted, positioned out-of-band by Popper.
+      , HH.div
+          [ HP.ref wrapperRef
+          , dataAttr "radix-popper-content-wrapper" ""
+          -- position:fixed up front so the content shrink-wraps (max-content) at flip-measure
+          -- time; the rest of the wrapper style is FFI (positionWrapper).
+          , HP.style (if open then "position: fixed;" else "display:none;")
+          ]
+          [ HH.div
+              ( [ HP.ref contentRef
+                , classes st.style.content
+                , dataState (if open then "delayed-open" else "closed")
+                , dataAttr "side" (sideName st.placedSide)
+                , dataAttr "align" (alignName st.placedAlign)
+                , HP.style st.contentStyle
+                ] <> portalData st.portalAttrs
+              )
+              -- the visible label, then the arrow, then a VisuallyHidden role=tooltip copy
+              -- carrying the id (the trigger's aria-describedby target). Radix's a11y shape.
+              ( map HH.fromPlainHTML st.content
+                  <> (if null st.arrow then [] else [ HH.span [ HP.ref arrowRef, HP.style "position: absolute;" ] (map HH.fromPlainHTML st.arrow) ])
+                  <> [ HH.span [ HP.id st.contentId, role "tooltip", HP.style visuallyHiddenStyle ] (map HH.fromPlainHTML st.content) ]
+              )
+          ]
       ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
@@ -239,6 +266,8 @@ handleAction = case _ of
       , content = input.content
       , contentStyle = input.contentStyle
       , arrow = input.arrow
+      , triggerAttrs = input.triggerAttrs
+      , portalAttrs = input.portalAttrs
       }
   Show -> openTooltip
   Hide -> closeTooltip
@@ -247,13 +276,13 @@ handleAction = case _ of
   -- tooltip never takes focus, so finalize never focuses.
   AfterOpen -> do
     reposition
-    finalize
+    finalize true
   EscapePressed -> closeTooltip
   -- scroll/resize: re-place, then re-assert the portal (the placement modify re-parents
   -- the content back out of body, so re-adopt on the following frame).
   Reposition -> do
     reposition
-    finalize
+    finalize false
 
 openTooltip :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openTooltip = do
@@ -288,14 +317,15 @@ scheduleAfterOpen = do
 -- | On the next frame (after the placement modify's render re-parents the content),
 -- | adopt the content into body. A tooltip never takes focus, so this only moves the
 -- | node — it does not capture focus.
-finalize :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
-finalize = do
+-- | Adopt the WRAPPER into body. A tooltip never takes focus and (unlike popover/dialog)
+-- | radix renders NO focus-guard sentinels around it.
+finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
+finalize _ = do
   mbody <- liftEffect Portal.documentBody
-  mc <- H.getHTMLElementRef contentRef
-  case mbody, mc of
-    Just body, Just content ->
-      liftEffect $ Portal.afterFrame do
-        Portal.adopt body (HTMLElement.toElement content)
+  mwrap <- H.getHTMLElementRef wrapperRef
+  case mbody, mwrap of
+    Just body, Just wrap ->
+      liftEffect $ Portal.afterFrame (Portal.adopt body (HTMLElement.toElement wrap))
     _, _ -> pure unit
 
 closeTooltip :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
@@ -308,22 +338,22 @@ closeTooltip = do
     H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing }
     H.raise (OpenChanged false)
 
--- | Measure + solve + apply, and stamp the resolved placement for data-side/align.
+-- | Position the WRAPPER, stamp the placement, and pin the arrow to the content edge.
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
   st <- H.get
   manchor <- H.getHTMLElementRef triggerRef
+  mwrap <- H.getHTMLElementRef wrapperRef
   mfloat <- H.getHTMLElementRef contentRef
-  case manchor, mfloat of
-    Just anchor, Just floating -> do
-      placed <- liftEffect (Popper.position
-        { anchor, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
+  case manchor, mwrap, mfloat of
+    Just anchor, Just wrapper, Just floating -> do
+      placed <- liftEffect (Popper.positionWrapper
+        { anchor, wrapper, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
       H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
-      -- pin the arrow to the (now-positioned) content edge facing the trigger
       marrow <- H.getHTMLElementRef arrowRef
       for_ marrow \arrow ->
         liftEffect (Popper.positionArrow { anchor, floating, arrow, side: placed.placement.side, padding: st.padding })
-    _, _ -> pure unit
+    _, _, _ -> pure unit
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

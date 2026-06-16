@@ -222,7 +222,10 @@ render st =
       , HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
-          , HP.style (if open then "" else "display:none;")
+          -- position:fixed from the start so the content is shrink-to-fit (max-content) when
+          -- Popper measures it for the flip; the rest of the style is FFI (and position:fixed
+          -- stays first in the serialization, matching upstream's order).
+          , HP.style (if open then "position: fixed;" else "display:none;")
           ]
           [ HH.div
               ( [ HP.ref contentRef
