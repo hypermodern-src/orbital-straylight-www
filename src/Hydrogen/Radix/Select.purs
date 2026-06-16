@@ -1,35 +1,30 @@
 -- | Hydrogen.Radix.Select — a button-triggered listbox with a selected value
 -- | (radix `Select`).
 -- |
--- | Select IS `DropdownMenu`: a button trigger + a Popper-positioned floating
--- | content + Escape/pointer-outside dismissal + reposition + RovingFocus over the
--- | items + focus-first-on-open + restore-focus-to-trigger-on-close. It adds
--- | **listbox semantics** and a **selected value**:
+-- | Select IS a MODAL `DropdownMenu` whose floating content is ITEM-ALIGNED rather than
+-- | popper-positioned: a button trigger + a `role=listbox` content + Escape/pointer-outside
+-- | dismissal + reposition + a selected value. It adds **listbox semantics**:
 -- |   * content is `role=listbox`, items are `role=option`;
--- |   * a SECOND controllable (`sel :: Controllable String`) carries the chosen
--- |     value alongside `ctrl :: Controllable Boolean` (open). Both are refreshed
--- |     from input on `Receive` (`sync input.open st.ctrl`, `sync input.value st.sel`);
--- |   * opening focuses the SELECTED item (its index, else 0) rather than always 0;
--- |   * arrow keys navigate + move focus only (do NOT select); selection happens on
--- |     Enter/click — choosing sets `sel`, raises `ValueChanged`, and closes
--- |     (restoring focus to the trigger).
+-- |   * a SECOND controllable (`sel :: Controllable String`) carries the chosen value
+-- |     alongside `ctrl :: Controllable Boolean` (open). Both are refreshed from input on
+-- |     `Receive` (`sync input.open st.ctrl`, `sync input.value st.sel`);
+-- |   * opening focuses the listbox CONTENT (radix focuses the content on open, not an
+-- |     item, not the trigger), and item-aligns the listbox so the SELECTED option overlays
+-- |     the trigger;
+-- |   * choosing an item sets `sel`, raises `ValueChanged`, and closes (restoring focus to
+-- |     the trigger).
 -- |
--- | v1 (by feel): non-modal, no Presence, single instance (fixed ids),
--- | no typeahead. The trigger renders `input.trigger` (Array PlainHTML) as-is
--- | followed by the current selected value as text — a deliberate simplification
--- | (radix resolves the selected item's `label`; here it is the raw value string,
--- | or nothing when unselected). Those are noted follow-ups.
+-- | MODAL envelope (mirrors DropdownMenu): on open the body is scroll-locked
+-- | (`data-scroll-locked` + `pointer-events:none`), the two focus-guard sentinels bracket
+-- | the body, and every other body child is aria-hidden. Torn down on close.
 -- |
--- | Portal-to-body (STR-335 floating template, mirrors Hydrogen.Radix.Popover):
--- | the listbox content is ALWAYS mounted (hidden with display:none when closed) so
--- | Halogen only patches — never removes — the node, which makes adopting it into
--- | `document.body` safe. On open we schedule `AfterOpen` on the next frame (one-shot
--- | rAF), which repositions then `finalize`s: on the following frame it adopts the
--- | content into body AND focuses the selected item (the appendChild blurs it, so the
--- | focus must happen AFTER the move). scroll/resize `Reposition` re-asserts the
--- | portal too (the placement modify re-parents the content out of body), without
--- | re-focusing. The restore target (trigger) is captured BEFORE opening so no
--- | post-open `modify` un-portals the content.
+-- | Portal-to-body: the listbox sits inside a plain POSITION WRAPPER (`wrapperRef`) that is
+-- | ALWAYS mounted (hidden with `display:none` when closed) so Halogen only patches — never
+-- | removes — the node, which makes adopting the WRAPPER into `document.body` safe. On open
+-- | we schedule `AfterOpen` via a one-shot MICROTASK; it `reposition`s (item-aligned, which
+-- | sets the whole wrapper style) then `finalize`s SYNCHRONOUSLY: adopt the wrapper into
+-- | body, layer the modal envelope, and focus the content. `Reposition` (scroll/resize)
+-- | re-asserts placement only.
 module Hydrogen.Radix.Select
   ( component
   , SelectItem
@@ -44,9 +39,11 @@ module Hydrogen.Radix.Select
 
 import Prelude
 
-import Data.Array (find, findIndex, length, mapWithIndex, null)
+import Data.Array (find, findIndex, index, length, mapWithIndex, null)
 import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -57,10 +54,13 @@ import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
-import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Behavior.Id (useId)
+import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Dom as Dom
+import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
-import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), Orientation(..), cn, classes, dataState, dataAttr, sideName, alignName, role, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, role, aria)
 import Web.DOM.Node (Node)
 import Web.Event.Event (Event, EventType(..))
 import Web.HTML as HTML
@@ -81,14 +81,14 @@ type SelectItem =
 
 type Style =
   { trigger :: ClassNames
-  , value :: ClassNames      -- the trigger's inner value slot (rt-SelectTriggerInner)
-  , content :: ClassNames
-  , viewport :: ClassNames    -- the inner scroll/items wrapper (rt-SelectViewport)
-  , group :: ClassNames       -- the option group (role=group)
-  , label :: ClassNames       -- the group label
+  , value :: ClassNames          -- the trigger's inner value slot (rt-SelectTriggerInner)
+  , content :: ClassNames        -- the role=listbox content
+  , scrollRoot :: ClassNames     -- rt-ScrollAreaRoot
+  , scrollViewport :: ClassNames -- rt-ScrollAreaViewport rt-SelectViewport
+  , group :: ClassNames          -- the option group (role=group)
+  , label :: ClassNames          -- the group label
   , item :: ClassNames
-  , indicator :: ClassNames   -- the selected-item check slot (rt-SelectItemIndicator)
-  , itemText :: ClassNames    -- the per-option text span
+  , indicator :: ClassNames      -- the selected-item check slot (rt-SelectItemIndicator)
   }
 
 defaultStyle :: Style
@@ -96,12 +96,12 @@ defaultStyle =
   { trigger: cn "rdx-select-trigger"
   , value: cn "rdx-select-value"
   , content: cn "rdx-select-content"
-  , viewport: cn "rdx-select-viewport"
+  , scrollRoot: cn "rdx-select-scroll-root"
+  , scrollViewport: cn "rdx-select-scroll-viewport"
   , group: cn "rdx-select-group"
   , label: cn "rdx-select-label"
   , item: cn "rdx-select-item"
   , indicator: cn "rdx-select-indicator"
-  , itemText: cn "rdx-select-item-text"
   }
 
 type Input =
@@ -110,8 +110,6 @@ type Input =
   , defaultOpen :: Boolean
   , value :: Maybe String
   , defaultValue :: String
-  , side :: Side
-  , align :: Align
   , offset :: Number
   , padding :: Number
   , idPrefix :: String
@@ -119,6 +117,8 @@ type Input =
   , trigger :: Array HH.PlainHTML       -- rendered AFTER the value slot (e.g. the chevron)
   , groupLabel :: Array HH.PlainHTML    -- optional label heading the option group
   , checkIcon :: Array HH.PlainHTML     -- placed in the indicator slot of the selected item
+  , contentStyle :: String              -- the content's CONSTANT style (box-sizing/flex/outline/pointer-events)
+  , portalAttrs :: Array (Tuple String String)  -- data-* on the content (theme re-application)
   }
 
 defaultInput :: Input
@@ -128,8 +128,6 @@ defaultInput =
   , defaultOpen: false
   , value: Nothing
   , defaultValue: ""
-  , side: Bottom
-  , align: Start
   , offset: 4.0
   , padding: 8.0
   , idPrefix: "rdx-select"
@@ -137,6 +135,8 @@ defaultInput =
   , trigger: []
   , groupLabel: []
   , checkIcon: []
+  , contentStyle: ""
+  , portalAttrs: []
   }
 
 data Output
@@ -160,25 +160,27 @@ type State =
   , sel :: Controllable String     -- selected value
   , items :: Array SelectItem
   , focused :: Int                  -- roving tab stop among items
-  , side :: Side
-  , align :: Align
   , offset :: Number
   , padding :: Number
-  , placedSide :: Side
-  , placedAlign :: Align
   , idPrefix :: String
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , groupLabel :: Array HH.PlainHTML
   , checkIcon :: Array HH.PlainHTML
+  , contentStyle :: String
+  , portalAttrs :: Array (Tuple String String)
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
-  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
+  , postSub :: Maybe H.SubscriptionId  -- one-shot subscription for AfterOpen
   , contentNode :: Maybe Node
+  , contentId :: String   -- generated on Initialize; trigger aria-controls target + content id (= <id0>)
+  , labelId :: String     -- generated on Initialize; group aria-labelledby + label id (= <id1>)
+  , itemIds :: Array String  -- generated on Initialize; per-option value-span ids (= <id2>…)
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | TriggerClicked
   | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
@@ -193,8 +195,17 @@ triggerRef = H.RefLabel "rdx-select-trigger"
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-select-content"
 
+wrapperRef :: H.RefLabel
+wrapperRef = H.RefLabel "rdx-select-wrapper"
+
 itemRef :: String -> Int -> H.RefLabel
 itemRef pfx i = H.RefLabel (pfx <> "-item-" <> show i)
+
+portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
+
+dir :: forall r i. String -> HP.IProp r i
+dir = HP.attr (HH.AttrName "dir")
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -205,6 +216,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -214,21 +226,22 @@ initialState input =
   , sel: controllable input.value input.defaultValue
   , items: input.items
   , focused: 0
-  , side: input.side
-  , align: input.align
   , offset: input.offset
   , padding: input.padding
-  , placedSide: input.side
-  , placedAlign: input.align
   , idPrefix: input.idPrefix
   , style: input.style
   , trigger: input.trigger
   , groupLabel: input.groupLabel
   , checkIcon: input.checkIcon
+  , contentStyle: input.contentStyle
+  , portalAttrs: input.portalAttrs
   , restoreEl: Nothing
   , subs: []
   , postSub: Nothing
   , contentNode: Nothing
+  , contentId: ""
+  , labelId: ""
+  , itemIds: []
   }
 
 -- | The index of the currently selected item, or 0 when nothing matches.
@@ -247,9 +260,9 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   let
     open = current st.ctrl
-    selected = current st.sel
   in
-    HH.div_
+    -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
+    HH.div [ HP.style "display:contents" ]
       [ HH.button
           ( [ HP.type_ HP.ButtonButton
             , HP.ref triggerRef
@@ -258,75 +271,108 @@ render st =
             , aria "autocomplete" "none"
             , aria "expanded" (if open then "true" else "false")
             , dataState (if open then "open" else "closed")
+            , dir "ltr"
             , HE.onClick \_ -> TriggerClicked
             ]
-              <> (if selected == "" then [ dataAttr "placeholder" "" ] else [])
+              <> (if open then [ aria "controls" st.contentId ] else [])
           )
           -- the value slot (rt-SelectTriggerInner) wraps the selected value; the trigger
           -- PlainHTML (e.g. the chevron) renders after it.
           ( [ HH.span [ classes st.style.value ]
-                [ HH.span [ HP.style "pointer-events:none" ] (selectedLabel st) ]
+                [ HH.span [ HP.style "pointer-events: none;" ] (selectedLabel st) ]
             ] <> map HH.fromPlainHTML st.trigger
           )
-      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
-      -- node — only patches it — which makes adopting it into body safe. The open-state
-      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
-      -- the left/top Popper applies via FFI; closing adds display:none.
+      -- the POSITION WRAPPER (portal root) — a plain div whose whole style is written by
+      -- positionItemAligned (display:flex; position:fixed; left/top/height/max-height …).
+      -- ALWAYS mounted; display:none when closed so Halogen only patches it.
       , HH.div
-          [ HP.ref contentRef
-          , role "listbox"
-          , classes st.style.content
-          , dataState (if open then "open" else "closed")
-          , dataAttr "side" (sideName st.placedSide)
-          , dataAttr "align" (alignName st.placedAlign)
-          , HP.tabIndex (-1)
-          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
-          , HE.onKeyDown ListKeyDown
+          [ HP.ref wrapperRef
+          , HP.style (if open then "" else "display:none;")
           ]
-          [ HH.div [ classes st.style.viewport ]
-              [ HH.div [ classes st.style.group, role "group" ]
-                  ( (if null st.groupLabel then [] else [ HH.div [ classes st.style.label ] (map HH.fromPlainHTML st.groupLabel) ])
-                      <> mapWithIndex (renderItem st) st.items
-                  )
+          [ HH.div
+              ( [ HP.ref contentRef
+                , HP.id st.contentId
+                , role "listbox"
+                , classes st.style.content
+                , dataState (if open then "open" else "closed")
+                , dir "ltr"
+                , HP.tabIndex (-1)
+                , HP.style st.contentStyle
+                , HE.onKeyDown ListKeyDown
+                ] <> portalData st.portalAttrs
+              )
+              -- Select's rt-ScrollArea nesting:
+              -- scrollRoot > scrollViewport > table-div > group > [ label, items… ]
+              [ HH.div
+                  [ classes st.style.scrollRoot
+                  , dir "ltr"
+                  , HP.style "position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+                  ]
+                  [ HH.div
+                      [ classes st.style.scrollViewport
+                      , dataAttr "radix-scroll-area-viewport" ""
+                      , dataAttr "radix-select-viewport" ""
+                      , role "presentation"
+                      , HP.style "overflow: hidden auto; position: relative; flex: 1 1 0%;"
+                      ]
+                      [ HH.div [ HP.style "min-width: 100%; display: table;" ]
+                          [ HH.div
+                              [ classes st.style.group
+                              , role "group"
+                              , aria "labelledby" st.labelId
+                              ]
+                              ( (if null st.groupLabel then [] else [ HH.div [ classes st.style.label, HP.id st.labelId ] (map HH.fromPlainHTML st.groupLabel) ])
+                                  <> mapWithIndex (renderItem st) st.items
+                              )
+                          ]
+                      ]
+                  ]
               ]
           ]
       ]
 
--- | A select option is a DIV (role=option) carrying data-value/aria-selected/data-state,
--- | a check indicator when selected, and a text span. data-highlighted marks the roving
--- | focus (matches radix's highlighted styling).
+-- | A select option is a DIV (role=option) carrying aria-labelledby/aria-selected/data-state,
+-- | a check indicator when selected, and a value span (id only, no class). The SELECTED
+-- | option also carries `data-highlighted` (radix highlights the selected one on open).
 renderItem :: forall m. State -> Int -> SelectItem -> H.ComponentHTML Action () m
 renderItem st idx item =
   let
     isSelected = item.value == current st.sel
+    itemId = fromMaybe "" (index st.itemIds idx)
   in
     HH.div
       ( [ HP.ref (itemRef st.idPrefix idx)
         , role "option"
         , classes st.style.item
-        , dataAttr "value" item.value
-        , dataAttr "radix-collection-item" ""
+        , aria "labelledby" itemId
         , aria "selected" (if isSelected then "true" else "false")
         , dataState (if isSelected then "checked" else "unchecked")
-        , HP.tabIndex (tabIndexFor st.focused idx)
+        , dataAttr "radix-collection-item" ""
+        , HP.tabIndex (-1)
         , HE.onClick \_ -> ItemChosen item.value
         ]
-          <> (if st.focused == idx then [ dataAttr "highlighted" "true" ] else [])
+          <> (if isSelected then [ dataAttr "highlighted" "" ] else [])
           <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
       )
       ( (if isSelected then [ HH.span [ classes st.style.indicator, aria "hidden" "true" ] (map HH.fromPlainHTML st.checkIcon) ] else [])
-          <> [ HH.span [ classes st.style.itemText ] (map HH.fromPlainHTML item.label) ]
+          <> [ HH.span [ HP.id itemId ] (map HH.fromPlainHTML item.label) ]
       )
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  -- mint ids in the order the golden canonicalizes them: contentId (<id0>), labelId (<id1>),
+  -- then one per item in order (<id2>, <id3>, …).
+  Initialize -> do
+    st <- H.get
+    cid <- useId
+    lid <- useId
+    iids <- traverse (const useId) st.items
+    H.modify_ _ { contentId = cid, labelId = lid, itemIds = iids }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
       , sel = sync input.value st.sel
       , items = input.items
-      , side = input.side
-      , align = input.align
       , offset = input.offset
       , padding = input.padding
       , idPrefix = input.idPrefix
@@ -334,17 +380,17 @@ handleAction = case _ of
       , trigger = input.trigger
       , groupLabel = input.groupLabel
       , checkIcon = input.checkIcon
+      , contentStyle = input.contentStyle
+      , portalAttrs = input.portalAttrs
       }
   TriggerClicked -> do
     st <- H.get
     if current st.ctrl then closeMenu else openMenu
-  -- after the open render flushed (content ref live): measure+place, then on the NEXT
-  -- frame (after the placement modify's re-render) portal the content into body + focus
-  -- the selected item.
+  -- after the open render flushed (refs live): item-align, then SYNCHRONOUSLY adopt the
+  -- wrapper into body, layer the modal envelope, and focus the content.
   AfterOpen -> do
     reposition
-    st <- H.get
-    finalize (Just st.focused)
+    finalize
   EscapePressed -> closeMenu
   PointerDown e -> do
     st <- H.get
@@ -367,11 +413,9 @@ handleAction = case _ of
     H.modify_ _ { sel = res.next }
     H.raise (ValueChanged res.emit)
     closeMenu
-  -- scroll/resize: re-place, then re-assert the portal (the placement modify re-parents
-  -- the content back out of body, so re-adopt on the following frame). No re-focus.
-  Reposition -> do
-    reposition
-    finalize Nothing
+  -- scroll/resize: just re-place. Item-aligned has no side/align to stamp, so no modify is
+  -- needed (and a modify would re-render and re-parent the portaled wrapper out of body).
+  Reposition -> reposition
 
 openMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openMenu = do
@@ -379,7 +423,7 @@ openMenu = do
   when (not (current st.ctrl)) do
     let start = selectedIndex st
     -- capture the restore target (trigger) BEFORE opening, so no post-open `modify` is
-    -- needed for it (which would un-portal the content).
+    -- needed for it (which would un-portal the wrapper).
     doc <- liftEffect (HTML.window >>= Window.document)
     mprev <- liftEffect (HTMLDocument.activeElement doc)
     H.modify_ _ { ctrl = (change true st.ctrl).next, focused = start, restoreEl = mprev }
@@ -398,33 +442,31 @@ openMenu = do
       , postSub = Just psid
       }
 
--- | Dispatch `AfterOpen` on the next animation frame (after the open render flushes).
+-- | Dispatch `AfterOpen` on the next MICROTASK (after the open render flushes) — a microtask,
+-- | not a frame, so the content is focused before any keypress lands on the stale focus.
 scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
 scheduleAfterOpen = do
   { emitter, listener } <- liftEffect HS.create
   sid <- H.subscribe (AfterOpen <$ emitter)
-  liftEffect (Portal.afterFrame (HS.notify listener unit))
+  liftEffect (Dom.queueMicrotask (HS.notify listener unit))
   pure sid
 
--- | On the next frame (after the placement modify's render re-parents the content),
--- | adopt the content into body — and, when given a focus index, focus that item AFTER
--- | the move so the appendChild doesn't blur it.
-finalize :: forall m. MonadEffect m => Maybe Int -> H.HalogenM State Action () Output m Unit
-finalize mFocus = do
-  st <- H.get
+-- | Adopt the WRAPPER into body; layer the MODAL select envelope (scroll-lock + focus guards
+-- | + aria-hide siblings) and focus the listbox CONTENT. SYNCHRONOUS (not an afterFrame): the
+-- | item-aligned reposition does not modify, so there's no pending re-render to re-parent the
+-- | wrapper, and the content can be focused in this same frame.
+finalize :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+finalize = do
   mbody <- liftEffect Portal.documentBody
-  mc <- H.getHTMLElementRef contentRef
-  -- resolve the item element in HalogenM (refs aren't queryable from the afterFrame
-  -- Effect), then focus it INSIDE the afterFrame after the adopt move (so appendChild
-  -- doesn't blur it). Mirrors DropdownMenu.
-  mitem <- case mFocus of
-    Just idx -> H.getHTMLElementRef (itemRef st.idPrefix idx)
-    Nothing -> pure Nothing
-  case mbody, mc of
-    Just body, Just content ->
-      liftEffect $ Portal.afterFrame do
-        Portal.adopt body (HTMLElement.toElement content)
-        for_ mitem HTMLElement.focus
+  mwrap <- H.getHTMLElementRef wrapperRef
+  mcontent <- H.getHTMLElementRef contentRef
+  case mbody, mwrap of
+    Just body, Just wrap -> liftEffect do
+      Portal.adopt body (HTMLElement.toElement wrap)
+      Envelope.lockScroll
+      Envelope.addFocusGuards
+      Envelope.hideOthers wrap
+      for_ mcontent HTMLElement.focus
     _, _ -> pure unit
 
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
@@ -433,7 +475,8 @@ closeMenu = do
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
-    -- restore focus to the trigger captured at open time
+    -- tear down the modal envelope + restore focus to the trigger captured on open
+    liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
     H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
     H.raise (OpenChanged false)
@@ -443,19 +486,20 @@ focusItem pfx idx = do
   mel <- H.getHTMLElementRef (itemRef pfx idx)
   for_ mel (liftEffect <<< HTMLElement.focus)
 
--- | Item-aligned positioning (radix Select's default): the listbox overlays the trigger
--- | with the SELECTED option aligned to it, not a popper dropdown below. Needs the trigger,
--- | the content, and the selected item's element.
+-- | Item-aligned positioning (radix Select's default): the listbox overlays the trigger with
+-- | the SELECTED option aligned to it. `positionItemAligned` sets the whole WRAPPER style;
+-- | we pass it the trigger, wrapper, content, and the selected item's element.
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
   st <- H.get
   mtrigger <- H.getHTMLElementRef triggerRef
+  mwrapper <- H.getHTMLElementRef wrapperRef
   mcontent <- H.getHTMLElementRef contentRef
   msel <- H.getHTMLElementRef (itemRef st.idPrefix (selectedIndex st))
-  case mtrigger, mcontent, msel of
-    Just trigger, Just content, Just selectedItem ->
-      liftEffect (Popper.positionItemAligned { trigger, content, selectedItem, padding: st.padding })
-    _, _, _ -> pure unit
+  case mtrigger, mwrapper, mcontent, msel of
+    Just trigger, Just wrapper, Just content, Just selectedItem ->
+      liftEffect (Popper.positionItemAligned { trigger, wrapper, content, selectedItem, padding: st.padding })
+    _, _, _, _ -> pure unit
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

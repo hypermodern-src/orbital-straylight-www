@@ -258,6 +258,7 @@ positionArrow p = do
 -- | (content below/above the trigger), the content OVERLAYS the trigger.
 positionItemAligned
   :: { trigger :: HTMLElement
+     , wrapper :: HTMLElement
      , content :: HTMLElement
      , selectedItem :: HTMLElement
      , padding :: Number
@@ -276,4 +277,20 @@ positionItemAligned p = do
     clamp lo hi v = max lo (min (max lo hi) v)
     top = clamp (vp.y + p.padding) (vp.y + vp.height - c.height - p.padding) rawTop
     left = clamp (vp.x + p.padding) (vp.x + vp.width - c.width - p.padding) t.x
-  applyPosition p.content { x: left, y: top }
+    maxH = vp.height - 2.0 * p.padding
+    px n = show n <> "px"
+    set = setInlineStyle p.wrapper
+  -- the Select position WRAPPER style, in upstream's property order (px values normalized
+  -- by the DOM oracle); the content inside fills it (max-height:100%).
+  set "display" "flex"
+  set "flex-direction" "column"
+  set "position" "fixed"
+  set "min-width" (px t.width)
+  set "left" (px left)
+  set "top" (px top)
+  set "height" (px c.height)
+  -- two DISTINCT values so the shorthand doesn't collapse to one (radix emits `<v> <v>`).
+  set "margin" "10px 0px"
+  set "min-height" "0px"
+  set "max-height" (px maxH)
+  set "z-index" "auto"

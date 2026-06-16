@@ -416,6 +416,8 @@ selectInput :: Select.Input
 selectInput = Select.defaultInput
   { defaultValue = "apple"
   , style = selectStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"
   , trigger = [ chevronCls "rt-SelectIcon" ]
   , groupLabel = [ HH.text "Fruits" ]
   , checkIcon = [ checkSvg ]
@@ -430,13 +432,13 @@ selectStyle :: Select.Style
 selectStyle =
   { trigger: cn "rt-reset rt-SelectTrigger rt-r-size-2 rt-variant-surface"
   , value: cn "rt-SelectTriggerInner"
-  , content: cn "rt-SelectContent rt-r-size-2 rt-variant-solid"
-  , viewport: cn "rt-SelectViewport"
+  , content: cn "light radix-themes rt-SelectContent rt-r-size-2 rt-variant-solid"
+  , scrollRoot: cn "rt-ScrollAreaRoot"
+  , scrollViewport: cn "rt-ScrollAreaViewport rt-SelectViewport"
   , group: cn "rt-SelectGroup"
   , label: cn "rt-SelectLabel"
   , item: cn "rt-SelectItem"
   , indicator: cn "rt-SelectItemIndicator"
-  , itemText: cn ""
   }
 
 -- | The down-chevron (radix's TriggerIcon / SelectIcon) — same 9×9 currentColor path
@@ -448,7 +450,8 @@ chevron = chevronCls ""
 chevronCls :: forall w i. String -> HH.HTML w i
 chevronCls klass =
   HH.elementNS svgNS (HH.ElemName "svg")
-    ( (if klass == "" then [] else [ HP.attr (HH.AttrName "class") klass ])
+    -- a classed chevron is the SelectIcon (aria-hidden); the bare one is the menu TriggerIcon.
+    ( (if klass == "" then [] else [ HP.attr (HH.AttrName "class") klass, HP.attr (HH.AttrName "aria-hidden") "true" ])
         <>
           [ HP.attr (HH.AttrName "width") "9"
           , HP.attr (HH.AttrName "height") "9"
