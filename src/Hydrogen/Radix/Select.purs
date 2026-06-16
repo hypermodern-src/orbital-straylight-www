@@ -44,7 +44,7 @@ module Hydrogen.Radix.Select
 
 import Prelude
 
-import Data.Array (findIndex, length, mapWithIndex)
+import Data.Array (find, findIndex, length, mapWithIndex, null)
 import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -81,15 +81,27 @@ type SelectItem =
 
 type Style =
   { trigger :: ClassNames
+  , value :: ClassNames      -- the trigger's inner value slot (rt-SelectTriggerInner)
   , content :: ClassNames
+  , viewport :: ClassNames    -- the inner scroll/items wrapper (rt-SelectViewport)
+  , group :: ClassNames       -- the option group (role=group)
+  , label :: ClassNames       -- the group label
   , item :: ClassNames
+  , indicator :: ClassNames   -- the selected-item check slot (rt-SelectItemIndicator)
+  , itemText :: ClassNames    -- the per-option text span
   }
 
 defaultStyle :: Style
 defaultStyle =
   { trigger: cn "rdx-select-trigger"
+  , value: cn "rdx-select-value"
   , content: cn "rdx-select-content"
+  , viewport: cn "rdx-select-viewport"
+  , group: cn "rdx-select-group"
+  , label: cn "rdx-select-label"
   , item: cn "rdx-select-item"
+  , indicator: cn "rdx-select-indicator"
+  , itemText: cn "rdx-select-item-text"
   }
 
 type Input =
@@ -104,7 +116,9 @@ type Input =
   , padding :: Number
   , idPrefix :: String
   , style :: Style
-  , trigger :: Array HH.PlainHTML
+  , trigger :: Array HH.PlainHTML       -- rendered AFTER the value slot (e.g. the chevron)
+  , groupLabel :: Array HH.PlainHTML    -- optional label heading the option group
+  , checkIcon :: Array HH.PlainHTML     -- placed in the indicator slot of the selected item
   }
 
 defaultInput :: Input
@@ -121,6 +135,8 @@ defaultInput =
   , idPrefix: "rdx-select"
   , style: defaultStyle
   , trigger: []
+  , groupLabel: []
+  , checkIcon: []
   }
 
 data Output
@@ -153,6 +169,8 @@ type State =
   , idPrefix :: String
   , style :: Style
   , trigger :: Array HH.PlainHTML
+  , groupLabel :: Array HH.PlainHTML
+  , checkIcon :: Array HH.PlainHTML
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
@@ -205,6 +223,8 @@ initialState input =
   , idPrefix: input.idPrefix
   , style: input.style
   , trigger: input.trigger
+  , groupLabel: input.groupLabel
+  , checkIcon: input.checkIcon
   , restoreEl: Nothing
   , subs: []
   , postSub: Nothing
@@ -215,6 +235,13 @@ initialState input =
 selectedIndex :: State -> Int
 selectedIndex st =
   fromMaybe 0 (findIndex (\item -> item.value == current st.sel) st.items)
+
+-- | The selected item's LABEL (what radix shows in the trigger), not the raw value;
+-- | empty when nothing is selected (the preset's placeholder, if any, would show).
+selectedLabel :: forall m. State -> Array (H.ComponentHTML Action () m)
+selectedLabel st = case find (\item -> item.value == current st.sel) st.items of
+  Just item -> map HH.fromPlainHTML item.label
+  Nothing -> []
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
@@ -227,15 +254,20 @@ render st =
           ( [ HP.type_ HP.ButtonButton
             , HP.ref triggerRef
             , classes st.style.trigger
-            , aria "haspopup" "listbox"
+            , role "combobox"
+            , aria "autocomplete" "none"
             , aria "expanded" (if open then "true" else "false")
             , dataState (if open then "open" else "closed")
             , HE.onClick \_ -> TriggerClicked
             ]
               <> (if selected == "" then [ dataAttr "placeholder" "" ] else [])
           )
-          -- v1: render the static trigger content, then the selected value as text.
-          (map HH.fromPlainHTML st.trigger <> [ HH.text selected ])
+          -- the value slot (rt-SelectTriggerInner) wraps the selected value; the trigger
+          -- PlainHTML (e.g. the chevron) renders after it.
+          ( [ HH.span [ classes st.style.value ]
+                [ HH.span [ HP.style "pointer-events:none" ] (selectedLabel st) ]
+            ] <> map HH.fromPlainHTML st.trigger
+          )
       -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
       -- node — only patches it — which makes adopting it into body safe. The open-state
       -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
@@ -251,28 +283,40 @@ render st =
           , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
           , HE.onKeyDown ListKeyDown
           ]
-          (mapWithIndex (renderItem st) st.items)
+          [ HH.div [ classes st.style.viewport ]
+              [ HH.div [ classes st.style.group, role "group" ]
+                  ( (if null st.groupLabel then [] else [ HH.div [ classes st.style.label ] (map HH.fromPlainHTML st.groupLabel) ])
+                      <> mapWithIndex (renderItem st) st.items
+                  )
+              ]
+          ]
       ]
 
+-- | A select option is a DIV (role=option) carrying data-value/aria-selected/data-state,
+-- | a check indicator when selected, and a text span. data-highlighted marks the roving
+-- | focus (matches radix's highlighted styling).
 renderItem :: forall m. State -> Int -> SelectItem -> H.ComponentHTML Action () m
 renderItem st idx item =
   let
     isSelected = item.value == current st.sel
   in
-    HH.button
-      ( [ HP.type_ HP.ButtonButton
-        , HP.ref (itemRef st.idPrefix idx)
+    HH.div
+      ( [ HP.ref (itemRef st.idPrefix idx)
         , role "option"
         , classes st.style.item
+        , dataAttr "value" item.value
+        , dataAttr "radix-collection-item" ""
         , aria "selected" (if isSelected then "true" else "false")
         , dataState (if isSelected then "checked" else "unchecked")
         , HP.tabIndex (tabIndexFor st.focused idx)
-        , HP.disabled item.disabled
         , HE.onClick \_ -> ItemChosen item.value
         ]
-          <> (if item.disabled then [ dataAttr "disabled" "" ] else [])
+          <> (if st.focused == idx then [ dataAttr "highlighted" "true" ] else [])
+          <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
       )
-      (map HH.fromPlainHTML item.label)
+      ( (if isSelected then [ HH.span [ classes st.style.indicator, aria "hidden" "true" ] (map HH.fromPlainHTML st.checkIcon) ] else [])
+          <> [ HH.span [ classes st.style.itemText ] (map HH.fromPlainHTML item.label) ]
+      )
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
@@ -288,6 +332,8 @@ handleAction = case _ of
       , idPrefix = input.idPrefix
       , style = input.style
       , trigger = input.trigger
+      , groupLabel = input.groupLabel
+      , checkIcon = input.checkIcon
       }
   TriggerClicked -> do
     st <- H.get

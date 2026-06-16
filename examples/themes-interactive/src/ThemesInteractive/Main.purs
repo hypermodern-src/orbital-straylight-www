@@ -27,6 +27,7 @@ import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), cn)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
+import Hydrogen.Radix.Select as Select
 import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
@@ -48,6 +49,7 @@ type Slots =
   , hovercard :: HoverCard.Slot Unit
   , dropdownmenu :: DropdownMenu.Slot Unit
   , contextmenu :: ContextMenu.Slot Unit
+  , select :: Select.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -70,6 +72,9 @@ _dropdownmenu = Proxy
 
 _contextmenu :: Proxy "contextmenu"
 _contextmenu = Proxy
+
+_select :: Proxy "select"
+_select = Proxy
 
 main :: Effect Unit
 main = do
@@ -99,6 +104,7 @@ view c = box [ P "6" ]
       "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
       "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
       "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
+      "select" -> HH.slot_ _select unit Select.component selectInput
       _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
   ]
 
@@ -307,20 +313,77 @@ contextMenuStyle =
   , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"
   }
 
+-- | The themed Select: a surface trigger showing the selected value + chevron, opening a
+-- | solid listbox with a "Fruits" group and a check indicator on the selected option.
+-- | Apple is the default value. Listbox positions via Popper, so the driver clicks open.
+selectInput :: Select.Input
+selectInput = Select.defaultInput
+  { defaultValue = "apple"
+  , style = selectStyle
+  , trigger = [ chevronCls "rt-SelectIcon" ]
+  , groupLabel = [ HH.text "Fruits" ]
+  , checkIcon = [ checkSvg ]
+  , items =
+      [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
+      , { value: "orange", label: [ HH.text "Orange" ], disabled: false }
+      , { value: "grape", label: [ HH.text "Grape" ], disabled: false }
+      ]
+  }
+
+selectStyle :: Select.Style
+selectStyle =
+  { trigger: cn "rt-reset rt-SelectTrigger rt-r-size-2 rt-variant-surface"
+  , value: cn "rt-SelectTriggerInner"
+  , content: cn "rt-SelectContent rt-r-size-2 rt-variant-solid"
+  , viewport: cn "rt-SelectViewport"
+  , group: cn "rt-SelectGroup"
+  , label: cn "rt-SelectLabel"
+  , item: cn "rt-SelectItem"
+  , indicator: cn "rt-SelectItemIndicator"
+  , itemText: cn ""
+  }
+
 -- | The down-chevron (radix's TriggerIcon / SelectIcon) — same 9×9 currentColor path
--- | upstream uses. Rendered in the SVG namespace so it paints.
+-- | upstream uses. Rendered in the SVG namespace so it paints. `chevron` is the bare
+-- | menu-trigger icon; `chevronCls` adds a class (rt-SelectIcon for the select trigger).
 chevron :: forall w i. HH.HTML w i
-chevron =
+chevron = chevronCls ""
+
+chevronCls :: forall w i. String -> HH.HTML w i
+chevronCls klass =
   HH.elementNS svgNS (HH.ElemName "svg")
-    [ HP.attr (HH.AttrName "width") "9"
+    ( (if klass == "" then [] else [ HP.attr (HH.AttrName "class") klass ])
+        <>
+          [ HP.attr (HH.AttrName "width") "9"
+          , HP.attr (HH.AttrName "height") "9"
+          , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+          , HP.attr (HH.AttrName "fill") "currentcolor"
+          , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+          ]
+    )
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "d")
+            "M0.135232 3.15803C0.324102 2.95657 0.640521 2.94637 0.841971 3.13523L4.5 6.56464L8.158 3.13523C8.3595 2.94637 8.6759 2.95657 8.8648 3.15803C9.0536 3.35949 9.0434 3.67591 8.842 3.86477L4.84197 7.6148C4.64964 7.7951 4.35036 7.7951 4.15803 7.6148L0.158031 3.86477C-0.0434285 3.67591 -0.0536285 3.35949 0.135232 3.15803Z"
+        ]
+        []
+    ]
+
+-- | The selected-option check (radix's ThickCheckIcon), with the indicator-icon class.
+checkSvg :: forall w i. HH.HTML w i
+checkSvg =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") "rt-SelectItemIndicatorIcon"
+    , HP.attr (HH.AttrName "width") "9"
     , HP.attr (HH.AttrName "height") "9"
     , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
     , HP.attr (HH.AttrName "fill") "currentcolor"
     , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
     ]
     [ HH.elementNS svgNS (HH.ElemName "path")
-        [ HP.attr (HH.AttrName "d")
-            "M0.135232 3.15803C0.324102 2.95657 0.640521 2.94637 0.841971 3.13523L4.5 6.56464L8.158 3.13523C8.3595 2.94637 8.6759 2.95657 8.8648 3.15803C9.0536 3.35949 9.0434 3.67591 8.842 3.86477L4.84197 7.6148C4.64964 7.7951 4.35036 7.7951 4.15803 7.6148L0.158031 3.86477C-0.0434285 3.67591 -0.0536285 3.35949 0.135232 3.15803Z"
+        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        , HP.attr (HH.AttrName "d")
+            "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z"
         ]
         []
     ]
