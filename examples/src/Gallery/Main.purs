@@ -23,9 +23,12 @@ import Effect.Aff (Aff)
 import Gallery.Story (GallerySlots, Story, _story)
 import Gallery.Story.Checkbox as Checkbox
 import Gallery.Story.Collapsible as Collapsible
+import Gallery.Story.AlertDialog as AlertDialog
 import Gallery.Story.Dialog as Dialog
+import Gallery.Story.HoverCard as HoverCard
 import Gallery.Story.Label as Label
 import Gallery.Story.Popover as Popover
+import Gallery.Story.Tooltip as Tooltip
 import Gallery.Story.Separator as Separator
 import Gallery.Story.Switch as Switch
 import Gallery.Story.Toggle as Toggle
@@ -52,6 +55,9 @@ stories =
   , Collapsible.story
   , Dialog.story
   , Popover.story
+  , AlertDialog.story
+  , Tooltip.story
+  , HoverCard.story
   ]
 
 -- ─────────────────────────────────────────────────────────────────────────────

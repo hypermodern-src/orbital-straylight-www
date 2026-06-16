@@ -19,10 +19,14 @@
 -- | AlertDialogs in one document don't collide; each link is emitted only when its
 -- | part is non-empty (matching radix).
 -- |
--- | v1 scope mirrors `Dialog`: single layer/scope (no nested-layer stack), portal
--- | rendered in place with `position:fixed` (no portal-to-body), no exit-animation
--- | Presence. NOTE: focus-on-open reads the content ref right after the open
--- | `modify`; if Halogen hasn't flushed the render the capture is skipped.
+-- | Portal-to-body (mirrors `Dialog`): the overlay wrapper is ALWAYS mounted (a
+-- | stable VDOM child Halogen patches by reference, never removes — so moving it to
+-- | `body` never trips Halogen's removal), hidden with `display:none` when closed. On
+-- | open it is adopted into `document.body` after the next frame (`AfterOpen`), so the
+-- | backdrop/content escape any ancestor stacking/overflow/transform context. The
+-- | restore target (the trigger) is captured in the open handler BEFORE the portal,
+-- | so no post-open `modify` (which would re-parent the wrapper back out of body) is
+-- | needed for focus.
 -- |
 -- | Compound API (separate Trigger/Content/Action/Cancel components) is deferred;
 -- | v1 takes the parts as `Array HH.PlainHTML` in input.
@@ -41,21 +45,24 @@ import Prelude
 
 import Data.Array (null)
 import Data.Foldable (for_)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Id (useId)
-import Hydrogen.Radix.Behavior.FocusScope (Restore, captureFocus, tabLoop)
+import Hydrogen.Radix.Behavior.FocusScope (captureFocus, tabLoop)
 import Hydrogen.Radix.Behavior.ScrollLock as ScrollLock
+import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
 import Web.Event.Event as Event
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
 
@@ -124,8 +131,9 @@ type State =
   , title :: Array HH.PlainHTML
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
-  , restore :: Maybe Restore
+  , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , escSub :: Maybe H.SubscriptionId
+  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , locked :: Boolean
   , titleId :: String        -- generated on Initialize, aria-labelledby target
   , descriptionId :: String  -- generated on Initialize, aria-describedby target
@@ -137,9 +145,14 @@ data Action
   | TriggerClicked
   | ContentKeyDown KE.KeyboardEvent
   | EscapePressed
+  | AfterOpen           -- runs after the open render flushed: portal + focus
 
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-alert-dialog-content"
+
+-- | The portaled overlay wrapper — adopted into `document.body` on open.
+portalRef :: H.RefLabel
+portalRef = H.RefLabel "rdx-alert-dialog-portal"
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -163,8 +176,9 @@ initialState input =
   , title: input.title
   , description: input.description
   , content: input.content
-  , restore: Nothing
+  , restoreEl: Nothing
   , escSub: Nothing
+  , postSub: Nothing
   , locked: false
   , titleId: ""
   , descriptionId: ""
@@ -190,15 +204,21 @@ render st =
           , HE.onClick \_ -> TriggerClicked
           ]
           (map HH.fromPlainHTML st.trigger)
-      , if open then overlayContent st else HH.text ""
+      , overlayContent open st
       ]
 
-overlayContent :: forall m. State -> H.ComponentHTML Action () m
-overlayContent st =
-  HH.div_
+-- | The overlay is ALWAYS mounted (a stable VDOM child Halogen patches by reference,
+-- | never removes — so moving it to `body` never trips Halogen's removal), hidden with
+-- | `display:none` when closed. On open it is adopted into `document.body` (AfterOpen).
+overlayContent :: forall m. Boolean -> State -> H.ComponentHTML Action () m
+overlayContent open st =
+  HH.div
+    [ HP.ref portalRef
+    , HP.style (if open then "" else "display:none")
+    ]
     [ HH.div
         [ classes st.style.overlay
-        , dataState "open"
+        , dataState (if open then "open" else "closed")
         , HP.style "position:fixed;inset:0;"
         -- NOTE: alert dialog does NOT close on outside click; backdrop only.
         ]
@@ -208,7 +228,7 @@ overlayContent st =
           , classes st.style.content
           , roleAttr "alertdialog"
           , aria "modal" "true"
-          , dataState "open"
+          , dataState (if open then "open" else "closed")
           , HP.tabIndex (-1)
           , HP.style "position:fixed;"
           , HE.onKeyDown ContentKeyDown
@@ -247,35 +267,57 @@ handleAction = case _ of
     for_ mnode \node -> do
       handled <- liftEffect (tabLoop true node ke)
       when handled (liftEffect (Event.preventDefault (KE.toEvent ke)))
+  -- runs on the frame after the open render flushed, so the refs are live. Adopt the
+  -- overlay into body FIRST, THEN focus into the dialog — focusing after the move means
+  -- the appendChild doesn't blur it. No `modify` here: a re-render would re-parent the
+  -- wrapper back out of body (the restore target was already captured in openDialog).
+  AfterOpen -> do
+    mbody <- liftEffect Portal.documentBody
+    mwrap <- H.getHTMLElementRef portalRef
+    case mbody, mwrap of
+      Just body, Just wrap -> liftEffect (Portal.adopt body (HTMLElement.toElement wrap))
+      _, _ -> pure unit
+    mnode <- H.getHTMLElementRef contentRef
+    for_ mnode \node -> liftEffect (void (captureFocus node))
 
 openDialog :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openDialog = do
   st <- H.get
   when (not (current st.ctrl)) do
-    H.modify_ _ { ctrl = (change true st.ctrl).next }
+    -- remember who had focus (the trigger) BEFORE we open, to restore on close — done
+    -- now, before the portal, so no post-open `modify` is needed (which would un-portal).
+    doc <- liftEffect (HTML.window >>= Window.document)
+    mprev <- liftEffect (HTMLDocument.activeElement doc)
+    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev }
     H.raise (OpenChanged true)
-    -- post-open setup (see NOTE on ref timing)
-    mnode <- H.getHTMLElementRef contentRef
-    restore <- case mnode of
-      Just node -> Just <$> liftEffect (captureFocus node)
-      Nothing -> pure Nothing
     -- always modal: lock scroll unconditionally.
     liftEffect ScrollLock.lock
     sub <-
-      if st.closeOnEscape then do
-        doc <- liftEffect (HTML.window >>= Window.document)
+      if st.closeOnEscape then
         Just <$> H.subscribe (Dismiss.escape (HTMLDocument.toEventTarget doc) EscapePressed)
       else pure Nothing
-    H.modify_ _ { restore = restore, escSub = sub, locked = true }
+    -- portal + focus happen AFTER the render flushes (the content ref isn't live yet).
+    psid <- scheduleAfterOpen
+    H.modify_ _ { escSub = sub, postSub = Just psid, locked = true }
+
+-- | Dispatch `AfterOpen` on the next animation frame (after Halogen patches the open
+-- | render). A one-shot subscription, torn down in `closeDialog`.
+scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterOpen = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterOpen <$ emitter)
+  liftEffect (Portal.afterFrame (HS.notify listener unit))
+  pure sid
 
 closeDialog :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeDialog = do
   st <- H.get
   when (current st.ctrl) do
     for_ st.escSub H.unsubscribe
-    liftEffect (fromMaybe (pure unit) st.restore)
+    for_ st.postSub H.unsubscribe
+    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
     when st.locked (liftEffect ScrollLock.unlock)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, restore = Nothing, escSub = Nothing, locked = false }
+    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, escSub = Nothing, postSub = Nothing, locked = false }
     H.raise (OpenChanged false)
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)

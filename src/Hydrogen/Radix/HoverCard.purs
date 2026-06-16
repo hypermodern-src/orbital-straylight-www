@@ -11,6 +11,9 @@
 -- |   * `DismissableLayer` — Escape only (document keydown); subscription set up on
 -- |     open, torn down on close. NO pointer-outside dismiss (radix HoverCard has
 -- |     none), NO focus trap.
+-- |   * portal-to-body: the content is appended to `document.body` after open so
+-- |     its `position:fixed` escapes any ancestor stacking/overflow/transform
+-- |     context (mirrors the Popover template; STR-335 floating template).
 -- |   * the stable surface: data-state/data-side/data-align on the content.
 -- |
 -- | Hover semantics: BOTH the trigger and the content carry
@@ -19,9 +22,12 @@
 -- | not close it. The trigger additionally opens on focus and closes on blur (so
 -- | it is keyboard-reachable).
 -- |
--- | v1 (by feel): non-modal, no Presence exit animation (mount/unmount), no portal
--- | (content is position:fixed in place). The content id is generated per mount
--- | (Behavior.Id) so instances don't collide; the fixed RefLabels stay single-instance.
+-- | v1 (by feel): non-modal, no Presence exit animation (the content node is
+-- | ALWAYS mounted, hidden with display:none when closed — so Halogen never
+-- | removes it and portaling it into body is safe). The content id is generated
+-- | per mount (Behavior.Id) so instances don't collide; the fixed RefLabels stay
+-- | single-instance. HoverCard does NOT trap or move focus, so the portal finalize
+-- | re-asserts placement without focusing.
 -- | NOTE: radix has open/close *delays* (openDelay/closeDelay) so brushing past the
 -- | trigger doesn't flash the card; we skip them for v1 (open/close are immediate).
 module Hydrogen.Radix.HoverCard
@@ -37,7 +43,7 @@ module Hydrogen.Radix.HoverCard
 
 import Prelude
 
-import Data.Foldable (traverse_)
+import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -45,14 +51,17 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName)
 import Web.Event.Event (EventType(..))
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window as Window
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -118,7 +127,9 @@ type State =
   , content :: Array HH.PlainHTML
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
+  , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (whatever was focused before open)
   , subs :: Array H.SubscriptionId
+  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentId :: String         -- generated on Initialize (unique content id)
   }
 
@@ -127,6 +138,7 @@ data Action
   | Receive Input
   | Show
   | Hide
+  | AfterOpen           -- after the open render flushed: position + portal
   | EscapePressed
   | Reposition
 
@@ -161,7 +173,9 @@ initialState input =
   , content: input.content
   , placedSide: input.side
   , placedAlign: input.align
+  , restoreEl: Nothing
   , subs: []
+  , postSub: Nothing
   , contentId: ""
   }
 
@@ -182,20 +196,22 @@ render st =
           , HE.onBlur \_ -> Hide
           ]
           (map HH.fromPlainHTML st.trigger)
-      , if open then
-          HH.div
-            [ HP.ref contentRef
-            , HP.id st.contentId
-            , classes st.style.content
-            , dataState "open"
-            , dataAttr "side" (sideName st.placedSide)
-            , dataAttr "align" (alignName st.placedAlign)
-            , HP.style "position:fixed;left:0;top:0;"
-            , HE.onMouseEnter \_ -> Show
-            , HE.onMouseLeave \_ -> Hide
-            ]
-            (map HH.fromPlainHTML st.content)
-        else HH.text ""
+      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
+      -- node — only patches it — which makes adopting it into body safe. The open-state
+      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
+      -- the left/top Popper applies via FFI; closing adds display:none.
+      , HH.div
+          [ HP.ref contentRef
+          , HP.id st.contentId
+          , classes st.style.content
+          , dataState (if open then "open" else "closed")
+          , dataAttr "side" (sideName st.placedSide)
+          , dataAttr "align" (alignName st.placedAlign)
+          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
+          , HE.onMouseEnter \_ -> Show
+          , HE.onMouseLeave \_ -> Hide
+          ]
+          (map HH.fromPlainHTML st.content)
       ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
@@ -216,31 +232,68 @@ handleAction = case _ of
       }
   Show -> openCard
   Hide -> closeCard
+  -- after the open render flushed (content ref live): measure+place, then on the NEXT
+  -- frame (after the placement modify's re-render) portal the content into body. NO
+  -- focus — HoverCard does not trap or move focus.
+  AfterOpen -> do
+    reposition
+    finalize
   EscapePressed -> closeCard
-  Reposition -> reposition
+  -- scroll/resize: re-place, then re-assert the portal (the placement modify re-parents
+  -- the content back out of body, so re-adopt on the following frame).
+  Reposition -> do
+    reposition
+    finalize
 
 openCard :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openCard = do
   st <- H.get
   when (not (current st.ctrl)) do
-    H.modify_ _ { ctrl = (change true st.ctrl).next }
-    H.raise (OpenChanged true)
-    reposition
-    -- dismissal (Escape only) + reposition subscriptions
+    -- capture the restore target BEFORE opening, so no post-open `modify` is needed for
+    -- it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
+    mprev <- liftEffect (HTMLDocument.activeElement doc)
+    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev }
+    H.raise (OpenChanged true)
+    -- dismissal (Escape only) + reposition subscriptions
     win <- liftEffect Popper.windowTarget
     let docTarget = HTMLDocument.toEventTarget doc
     escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
     scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
     resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
-    H.modify_ _ { subs = [ escSub, scrollSub, resizeSub ] }
+    psid <- scheduleAfterOpen
+    H.modify_ _
+      { subs = [ escSub, scrollSub, resizeSub ]
+      , postSub = Just psid
+      }
+
+-- | Dispatch `AfterOpen` on the next animation frame (after the open render flushes).
+scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterOpen = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterOpen <$ emitter)
+  liftEffect (Portal.afterFrame (HS.notify listener unit))
+  pure sid
+
+-- | On the next frame (after the placement modify's render re-parents the content),
+-- | adopt the content into body. HoverCard does not move focus, so no captureFocus.
+finalize :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+finalize = do
+  mbody <- liftEffect Portal.documentBody
+  mc <- H.getHTMLElementRef contentRef
+  case mbody, mc of
+    Just body, Just content ->
+      liftEffect $ Portal.afterFrame (Portal.adopt body (HTMLElement.toElement content))
+    _, _ -> pure unit
 
 closeCard :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeCard = do
   st <- H.get
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
-    H.modify_ _ { ctrl = (change false st.ctrl).next, subs = [] }
+    for_ st.postSub H.unsubscribe
+    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing }
     H.raise (OpenChanged false)
 
 -- | Measure + solve + apply, and stamp the resolved placement for data-side/align.
