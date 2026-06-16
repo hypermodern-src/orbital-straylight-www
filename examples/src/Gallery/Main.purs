@@ -23,6 +23,7 @@ import Effect.Aff (Aff)
 import Gallery.Story (GallerySlots, Story, _story)
 import Gallery.Story.Checkbox as Checkbox
 import Gallery.Story.Collapsible as Collapsible
+import Gallery.Story.Dialog as Dialog
 import Gallery.Story.Label as Label
 import Gallery.Story.Separator as Separator
 import Gallery.Story.Switch as Switch
@@ -48,6 +49,7 @@ stories =
   , Toggle.story
   , Switch.story
   , Collapsible.story
+  , Dialog.story
   ]
 
 -- ─────────────────────────────────────────────────────────────────────────────

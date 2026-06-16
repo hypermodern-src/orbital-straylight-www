@@ -13,6 +13,7 @@ purescript_app(
         "src/Gallery/Story.purs",
         "src/Gallery/Story/Checkbox.purs",
         "src/Gallery/Story/Collapsible.purs",
+        "src/Gallery/Story/Dialog.purs",
         "src/Gallery/Story/Label.purs",
         "src/Gallery/Story/Separator.purs",
         "src/Gallery/Story/Switch.purs",
