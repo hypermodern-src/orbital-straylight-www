@@ -25,6 +25,7 @@ import Gallery.Story.Checkbox as Checkbox
 import Gallery.Story.Collapsible as Collapsible
 import Gallery.Story.Dialog as Dialog
 import Gallery.Story.Label as Label
+import Gallery.Story.Popover as Popover
 import Gallery.Story.Separator as Separator
 import Gallery.Story.Switch as Switch
 import Gallery.Story.Toggle as Toggle
@@ -50,6 +51,7 @@ stories =
   , Switch.story
   , Collapsible.story
   , Dialog.story
+  , Popover.story
   ]
 
 -- ─────────────────────────────────────────────────────────────────────────────

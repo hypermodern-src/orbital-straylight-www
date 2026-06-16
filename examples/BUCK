@@ -15,6 +15,7 @@ purescript_app(
         "src/Gallery/Story/Collapsible.purs",
         "src/Gallery/Story/Dialog.purs",
         "src/Gallery/Story/Label.purs",
+        "src/Gallery/Story/Popover.purs",
         "src/Gallery/Story/Separator.purs",
         "src/Gallery/Story/Switch.purs",
         "src/Gallery/Story/Toggle.purs",

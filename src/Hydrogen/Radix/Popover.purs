@@ -30,17 +30,19 @@ module Hydrogen.Radix.Popover
 import Prelude
 
 import Data.Foldable (for_, traverse_)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
+import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
-import Hydrogen.Radix.Behavior.FocusScope (Restore, captureFocus, tabLoop)
+import Hydrogen.Radix.Behavior.FocusScope (captureFocus, tabLoop)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria)
 import Web.DOM.Node (Node)
 import Web.Event.Event (Event, EventType(..), preventDefault)
@@ -113,14 +115,16 @@ type State =
   , content :: Array HH.PlainHTML
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
-  , restore :: Maybe Restore
+  , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
+  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentNode :: Maybe Node
   }
 
 data Action
   = Receive Input
   | TriggerClicked
+  | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
   | PointerDown Event
   | ContentKeyDown KE.KeyboardEvent
@@ -156,8 +160,9 @@ initialState input =
   , content: input.content
   , placedSide: input.side
   , placedAlign: input.align
-  , restore: Nothing
+  , restoreEl: Nothing
   , subs: []
+  , postSub: Nothing
   , contentNode: Nothing
   }
 
@@ -176,19 +181,21 @@ render st =
           , HE.onClick \_ -> TriggerClicked
           ]
           (map HH.fromPlainHTML st.trigger)
-      , if open then
-          HH.div
-            [ HP.ref contentRef
-            , classes st.style.content
-            , dataState "open"
-            , dataAttr "side" (sideName st.placedSide)
-            , dataAttr "align" (alignName st.placedAlign)
-            , HP.tabIndex (-1)
-            , HP.style "position:fixed;left:0;top:0;"
-            , HE.onKeyDown ContentKeyDown
-            ]
-            (map HH.fromPlainHTML st.content)
-        else HH.text ""
+      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
+      -- node — only patches it — which makes adopting it into body safe. The open-state
+      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
+      -- the left/top Popper applies via FFI; closing adds display:none.
+      , HH.div
+          [ HP.ref contentRef
+          , classes st.style.content
+          , dataState (if open then "open" else "closed")
+          , dataAttr "side" (sideName st.placedSide)
+          , dataAttr "align" (alignName st.placedAlign)
+          , HP.tabIndex (-1)
+          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
+          , HE.onKeyDown ContentKeyDown
+          ]
+          (map HH.fromPlainHTML st.content)
       ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
@@ -207,6 +214,11 @@ handleAction = case _ of
   TriggerClicked -> do
     st <- H.get
     if current st.ctrl then closePopover else openPopover
+  -- after the open render flushed (content ref live): measure+place, then on the NEXT
+  -- frame (after the placement modify's re-render) portal the content into body + focus.
+  AfterOpen -> do
+    reposition
+    finalize true
   EscapePressed -> closePopover
   PointerDown e -> do
     st <- H.get
@@ -218,42 +230,66 @@ handleAction = case _ of
     for_ mnode \node -> do
       handled <- liftEffect (tabLoop true node ke)
       when handled (liftEffect (preventDefault (KE.toEvent ke)))
-  Reposition -> reposition
+  -- scroll/resize: re-place, then re-assert the portal (the placement modify re-parents
+  -- the content back out of body, so re-adopt on the following frame). No re-focus.
+  Reposition -> do
+    reposition
+    finalize false
 
 openPopover :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openPopover = do
   st <- H.get
   when (not (current st.ctrl)) do
-    H.modify_ _ { ctrl = (change true st.ctrl).next }
-    H.raise (OpenChanged true)
-    reposition
-    -- focus + dismissal + reposition subscriptions
-    restore <- do
-      mc <- H.getHTMLElementRef contentRef
-      case mc of
-        Just node -> Just <$> liftEffect (captureFocus node)
-        Nothing -> pure Nothing
-    mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
+    -- capture the restore target (trigger) BEFORE opening, so no post-open `modify` is
+    -- needed for it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
+    mprev <- liftEffect (HTMLDocument.activeElement doc)
+    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev }
+    H.raise (OpenChanged true)
+    mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
     win <- liftEffect Popper.windowTarget
     let docTarget = HTMLDocument.toEventTarget doc
     escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
     ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
     scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
     resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+    psid <- scheduleAfterOpen
     H.modify_ _
-      { restore = restore
-      , contentNode = mcNode
+      { contentNode = mcNode
       , subs = [ escSub, ptrSub, scrollSub, resizeSub ]
+      , postSub = Just psid
       }
+
+-- | Dispatch `AfterOpen` on the next animation frame (after the open render flushes).
+scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterOpen = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterOpen <$ emitter)
+  liftEffect (Portal.afterFrame (HS.notify listener unit))
+  pure sid
+
+-- | On the next frame (after the placement modify's render re-parents the content),
+-- | adopt the content into body — and, on open, focus into it AFTER the move so the
+-- | appendChild doesn't blur it.
+finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
+finalize focusToo = do
+  mbody <- liftEffect Portal.documentBody
+  mc <- H.getHTMLElementRef contentRef
+  case mbody, mc of
+    Just body, Just content ->
+      liftEffect $ Portal.afterFrame do
+        Portal.adopt body (HTMLElement.toElement content)
+        when focusToo (void (captureFocus content))
+    _, _ -> pure unit
 
 closePopover :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closePopover = do
   st <- H.get
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
-    liftEffect (fromMaybe (pure unit) st.restore)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, restore = Nothing, subs = [], contentNode = Nothing }
+    for_ st.postSub H.unsubscribe
+    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
     H.raise (OpenChanged false)
 
 -- | Measure + solve + apply, and stamp the resolved placement for data-side/align.
