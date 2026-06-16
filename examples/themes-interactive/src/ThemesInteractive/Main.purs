@@ -377,13 +377,12 @@ contextMenuInput :: ContextMenu.Input
 contextMenuInput = ContextMenu.defaultInput
   { side = Right   -- radix point-anchors the menu to the right of the cursor (data-side=right)
   , style = contextMenuStyle
-  , trigger =
-      [ flex
-          [ Align "center", Justify "center", Width "240px", Height "120px"
-          , StyleProp "border" "1px dashed var(--gray-6)", StyleProp "border-radius" "var(--radius-3)"
-          ]
-          [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
-      ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"
+  -- the trigger AREA is the dashed box itself (rt-Flex classes via style.trigger, size/border
+  -- via triggerStyle, the text as its content) — radix's asChild Trigger, one element.
+  , triggerStyle = "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);"
+  , trigger = [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
   , entries =
       [ ctxRow "edit" "Edit" "⌘ E" ""
       , ctxRow "duplicate" "Duplicate" "⌘ D" ""
@@ -399,9 +398,12 @@ ctxRow value label shortcut accent =
 
 contextMenuStyle :: ContextMenu.Style
 contextMenuStyle =
-  { trigger: cn ""
-  , content: cn "rt-BaseMenuContent rt-ContextMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
-  , viewport: cn "rt-BaseMenuViewport rt-ContextMenuViewport"
+  { trigger: cn "rt-Flex rt-r-ai-center rt-r-jc-center"
+  , content: cn "light radix-themes rt-BaseMenuContent rt-ContextMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , scrollRoot: cn "rt-ScrollAreaRoot"
+  , scrollViewport: cn "rt-ScrollAreaViewport"
+  , menuViewport: cn "rt-BaseMenuViewport rt-ContextMenuViewport"
+  , focusRing: cn "rt-ScrollAreaViewportFocusRing"
   , item: cn "rt-BaseMenuItem rt-ContextMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-ContextMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"

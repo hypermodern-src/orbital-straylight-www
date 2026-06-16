@@ -22,6 +22,7 @@ module Hydrogen.Radix.Float.Popper
   , windowTarget
   , position
   , positionWrapper
+  , positionWrapperAt
   , positionAt
   , positionArrow
   , positionItemAligned
@@ -97,14 +98,20 @@ position p = do
 -- | The popper transform-origin string, in the form radix/floating-ui emits: the cross
 -- | axis is `0%`/`100%` for start/end alignment and a px for center; the main axis a px.
 transformOriginFor :: Placement -> String
-transformOriginFor { align } =
+transformOriginFor { side, align } =
   let
     cross = case align of
       Start -> "0%"
       Center -> "0px"
       End -> "100%"
   in
-    cross <> " 0px"
+    -- the cross axis is X for a vertical side (top/bottom), Y for a horizontal side
+    -- (left/right); the main axis is a px (0px here, the oracle normalizes it).
+    case side of
+      Top -> cross <> " 0px"
+      Bottom -> cross <> " 0px"
+      Left -> "0px " <> cross
+      Right -> "0px " <> cross
 
 -- | Position a radix-style POPPER WRAPPER (the `data-radix-popper-content-wrapper` div that
 -- | the content sits inside). Mirrors floating-ui's output: `position:fixed; left/top:0;
@@ -123,11 +130,42 @@ positionWrapper
   -> Effect Positioned
 positionWrapper p = do
   anchor <- measureRect p.anchor
+  positionWrapperWith { anchor, wrapper: p.wrapper, floating: p.floating, side: p.side, align: p.align, offset: p.offset, padding: p.padding }
+
+-- | As `positionWrapper`, but against a VIRTUAL zero-size anchor at a point (the cursor) —
+-- | radix's point-anchored ContextMenu, with the popper-wrapper structure.
+positionWrapperAt
+  :: { point :: Coords
+     , wrapper :: HTMLElement
+     , floating :: HTMLElement
+     , side :: Side
+     , align :: Align
+     , offset :: Number
+     , padding :: Number
+     }
+  -> Effect Positioned
+positionWrapperAt p =
+  positionWrapperWith
+    { anchor: { x: p.point.x, y: p.point.y, width: 0.0, height: 0.0 }
+    , wrapper: p.wrapper, floating: p.floating, side: p.side, align: p.align, offset: p.offset, padding: p.padding
+    }
+
+positionWrapperWith
+  :: { anchor :: Rect
+     , wrapper :: HTMLElement
+     , floating :: HTMLElement
+     , side :: Side
+     , align :: Align
+     , offset :: Number
+     , padding :: Number
+     }
+  -> Effect Positioned
+positionWrapperWith p = do
   fl <- measureRect p.floating
   boundary <- viewportRect
   let
     solved = computePosition
-      { anchor
+      { anchor: p.anchor
       , floating: { width: fl.width, height: fl.height }
       , placement: { side: p.side, align: p.align }
       , offset: p.offset
@@ -146,8 +184,8 @@ positionWrapper p = do
   set "z-index" "auto"
   set "--radix-popper-available-width" (px availW)
   set "--radix-popper-available-height" (px availH)
-  set "--radix-popper-anchor-width" (px anchor.width)
-  set "--radix-popper-anchor-height" (px anchor.height)
+  set "--radix-popper-anchor-width" (px p.anchor.width)
+  set "--radix-popper-anchor-height" (px p.anchor.height)
   set "--radix-popper-transform-origin" (transformOriginFor solved.placement)
   pure solved
 
