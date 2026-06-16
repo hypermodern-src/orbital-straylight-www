@@ -8,6 +8,7 @@ purescript_library(
         "Direction.purs",
         "DismissableLayer.purs",
         "FocusScope.purs",
+        "Id.purs",
         "Presence.purs",
         "RovingFocus.purs",
         "ScrollLock.purs",

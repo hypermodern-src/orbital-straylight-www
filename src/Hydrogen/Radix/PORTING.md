@@ -130,8 +130,11 @@ composition) · Toolbar (arbitrary-children roving) · NavigationMenu (complex) 
 Toast (queue + portal + swipe + timing) · Form (validation) ·
 OneTimePasswordField · PasswordToggleField.
 
-**Cross-cutting v1 simplifications to revisit:** single-instance fixed ids (need a
-generated-id source) · ref-timing on open (validate focus under `hydrogen_test`) ·
+**Cross-cutting v1 simplifications to revisit:** ~~single-instance fixed ids~~ RESOLVED
+(STR-334): `Behavior.Id.useId` mints a per-mount `radix-<n>` id on `Initialize`; the
+overlays (Dialog/AlertDialog/Tooltip/HoverCard/Collapsible) and the roving controls
+(Tabs/RadioGroup/Accordion, via a `uid`-suffixed `base`) no longer collide across
+instances · ref-timing on open (validate focus under `hydrogen_test`) ·
 ContextMenu element-anchored (not point-anchored) positioning · exit animations
 only where Presence is wired (Collapsible) · the `Hydrogen.Radix.Preset.*` modules
 (orbital/daisy/shadcn `Style` records) aren't written yet — components ship

@@ -13,11 +13,11 @@
 -- |      AlertDialog closes on Escape by default), gated on `closeOnEscape`.
 -- |   3. It is always modal — there is no `modal` field; scroll lock is always on.
 -- |
--- | The content references its description via `aria-describedby` (alert dialogs
--- | point at their description so assistive tech reads the consequence). The id is
--- | a fixed prefix — NOTE: single-instance limitation (two AlertDialogs in one
--- | document would collide on the description id); a per-instance id lands when a
--- | second instance is needed.
+-- | The content references its title via `aria-labelledby` and its description via
+-- | `aria-describedby` (alert dialogs point at their description so assistive tech
+-- | reads the consequence). Both ids are generated per mount (Behavior.Id), so two
+-- | AlertDialogs in one document don't collide; each link is emitted only when its
+-- | part is non-empty (matching radix).
 -- |
 -- | v1 scope mirrors `Dialog`: single layer/scope (no nested-layer stack), portal
 -- | rendered in place with `position:fixed` (no portal-to-body), no exit-animation
@@ -39,6 +39,7 @@ module Hydrogen.Radix.AlertDialog
 
 import Prelude
 
+import Data.Array (null)
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -48,6 +49,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.FocusScope (Restore, captureFocus, tabLoop)
 import Hydrogen.Radix.Behavior.ScrollLock as ScrollLock
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
@@ -125,20 +127,19 @@ type State =
   , restore :: Maybe Restore
   , escSub :: Maybe H.SubscriptionId
   , locked :: Boolean
+  , titleId :: String        -- generated on Initialize, aria-labelledby target
+  , descriptionId :: String  -- generated on Initialize, aria-describedby target
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | TriggerClicked
   | ContentKeyDown KE.KeyboardEvent
   | EscapePressed
 
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-alert-dialog-content"
-
--- | Fixed description id (single-instance limitation — see module note).
-descriptionId :: String
-descriptionId = "rdx-alert-dialog-description"
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -149,6 +150,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -164,6 +166,8 @@ initialState input =
   , restore: Nothing
   , escSub: Nothing
   , locked: false
+  , titleId: ""
+  , descriptionId: ""
   }
 
 aria :: forall r i. String -> String -> HP.IProp r i
@@ -200,26 +204,30 @@ overlayContent st =
         ]
         []
     , HH.div
-        [ HP.ref contentRef
-        , classes st.style.content
-        , roleAttr "alertdialog"
-        , aria "modal" "true"
-        , aria "describedby" descriptionId
-        , dataState "open"
-        , HP.tabIndex (-1)
-        , HP.style "position:fixed;"
-        , HE.onKeyDown ContentKeyDown
-        ]
-        [ HH.div [ classes st.style.title ] (map HH.fromPlainHTML st.title)
-        , HH.div
-            [ HP.id descriptionId, classes st.style.description ]
-            (map HH.fromPlainHTML st.description)
+        ( [ HP.ref contentRef
+          , classes st.style.content
+          , roleAttr "alertdialog"
+          , aria "modal" "true"
+          , dataState "open"
+          , HP.tabIndex (-1)
+          , HP.style "position:fixed;"
+          , HE.onKeyDown ContentKeyDown
+          ]
+            <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
+            <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
+        )
+        [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
+        , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
         , HH.div_ (map HH.fromPlainHTML st.content)
         ]
     ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    tid <- useId
+    did <- useId
+    H.modify_ _ { titleId = tid, descriptionId = did }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

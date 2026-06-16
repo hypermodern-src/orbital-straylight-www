@@ -32,6 +32,7 @@ module Hydrogen.Radix.Dialog
 
 import Prelude
 
+import Data.Array (null)
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -40,6 +41,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.FocusScope (Restore, captureFocus, tabLoop)
 import Hydrogen.Radix.Behavior.ScrollLock as ScrollLock
@@ -124,10 +126,13 @@ type State =
   , restore :: Maybe Restore
   , escSub :: Maybe H.SubscriptionId
   , locked :: Boolean
+  , titleId :: String        -- generated on Initialize, aria-labelledby target
+  , descriptionId :: String  -- generated on Initialize, aria-describedby target
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | TriggerClicked
   | OverlayClicked
   | ContentKeyDown KE.KeyboardEvent
@@ -145,6 +150,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -162,6 +168,8 @@ initialState input =
   , restore: Nothing
   , escSub: Nothing
   , locked: false
+  , titleId: ""
+  , descriptionId: ""
   }
 
 aria :: forall r i. String -> String -> HP.IProp r i
@@ -198,23 +206,31 @@ overlayContent st =
         ]
         []
     , HH.div
-        [ HP.ref contentRef
-        , classes st.style.content
-        , roleAttr "dialog"
-        , aria "modal" (show st.modal)
-        , dataState "open"
-        , HP.tabIndex (-1)
-        , HP.style "position:fixed;"
-        , HE.onKeyDown ContentKeyDown
-        ]
-        [ HH.div [ classes st.style.title ] (map HH.fromPlainHTML st.title)
-        , HH.div [ classes st.style.description ] (map HH.fromPlainHTML st.description)
+        ( [ HP.ref contentRef
+          , classes st.style.content
+          , roleAttr "dialog"
+          , aria "modal" (show st.modal)
+          , dataState "open"
+          , HP.tabIndex (-1)
+          , HP.style "position:fixed;"
+          , HE.onKeyDown ContentKeyDown
+          ]
+            -- link title/description only when present (radix is conditional)
+            <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
+            <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
+        )
+        [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
+        , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
         , HH.div_ (map HH.fromPlainHTML st.content)
         ]
     ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    tid <- useId
+    did <- useId
+    H.modify_ _ { titleId = tid, descriptionId = did }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

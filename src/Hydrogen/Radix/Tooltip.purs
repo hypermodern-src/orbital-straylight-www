@@ -15,7 +15,8 @@
 -- |
 -- | v1 (by feel): no open/close delay (`delayMs` is a follow-up — show/hide fire
 -- | immediately), no Presence exit animation (mount/unmount), no portal (content is
--- | position:fixed in place), single instance per page (fixed id/refs).
+-- | position:fixed in place). The content id is generated per mount (Behavior.Id) so
+-- | multiple instances don't collide; the fixed RefLabels are still single-instance.
 module Hydrogen.Radix.Tooltip
   ( component
   , Input
@@ -39,6 +40,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria, role)
 import Web.Event.Event (EventType(..))
@@ -110,10 +112,12 @@ type State =
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , subs :: Array H.SubscriptionId
+  , contentId :: String         -- generated on Initialize; trigger aria-describedby → content id
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | Show
   | Hide
   | Reposition
@@ -125,10 +129,6 @@ triggerRef = H.RefLabel "rdx-tooltip-trigger"
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-tooltip-content"
 
--- | Single-instance id linking trigger `aria-describedby` to the content node.
-contentId :: String
-contentId = "rdx-tooltip-content"
-
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
   H.mkComponent
@@ -138,6 +138,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -154,6 +155,7 @@ initialState input =
   , placedSide: input.side
   , placedAlign: input.align
   , subs: []
+  , contentId: ""
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -166,7 +168,7 @@ render st =
           [ HP.type_ HP.ButtonButton
           , HP.ref triggerRef
           , classes st.style.trigger
-          , aria "describedby" contentId
+          , aria "describedby" st.contentId
           , dataState (if open then "open" else "closed")
           , HE.onMouseEnter \_ -> Show
           , HE.onMouseLeave \_ -> Hide
@@ -177,7 +179,7 @@ render st =
       , if open then
           HH.div
             [ HP.ref contentRef
-            , HP.id contentId
+            , HP.id st.contentId
             , role "tooltip"
             , classes st.style.content
             , dataState "open"
@@ -191,6 +193,9 @@ render st =
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    cid <- useId
+    H.modify_ _ { contentId = cid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

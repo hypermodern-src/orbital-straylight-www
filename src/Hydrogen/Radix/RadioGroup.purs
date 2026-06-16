@@ -17,8 +17,9 @@
 -- |     not be used as a real item value.
 -- |
 -- | Like radix, Enter does NOT activate (WAI-ARIA radio semantics); selection is
--- | by click or by arrow-key navigation. Default orientation is `Vertical`.
--- | Single instance per page for the fixed id prefix (note in Input).
+-- | by click or by arrow-key navigation. Default orientation is `Vertical`. The item
+-- | ids combine the readable `idPrefix` with a per-mount generated id (Behavior.Id),
+-- | so two default-prefixed groups on a page don't collide.
 module Hydrogen.Radix.RadioGroup
   ( component
   , Item
@@ -43,6 +44,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria)
 import Web.HTML.HTMLElement as HTMLElement
@@ -120,12 +122,19 @@ type State =
   , disabled :: Boolean
   , idPrefix :: String
   , style :: Style
+  , uid :: String       -- generated on Initialize; makes ids unique per instance
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | Selected String
   | ListKeyDown KE.KeyboardEvent
+
+-- | The effective, per-instance unique id base: readable prefix + the id minted on
+-- | Initialize (so two default-prefixed RadioGroups on a page never collide).
+base :: State -> String
+base st = if st.uid == "" then st.idPrefix else st.idPrefix <> "-" <> st.uid
 
 itemRef :: String -> String -> H.RefLabel
 itemRef pfx value = H.RefLabel (pfx <> "-item-" <> value)
@@ -139,6 +148,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -153,6 +163,7 @@ initialState input =
   , disabled: input.disabled
   , idPrefix: input.idPrefix
   , style: input.style
+  , uid: ""
   }
 
 -- | The uncontrolled starting value: the `defaultValue` if given, else `""`
@@ -184,7 +195,7 @@ renderItem st _ item =
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
-        , HP.ref (itemRef st.idPrefix item.value)
+        , HP.ref (itemRef (base st) item.value)
         , HP.id (itemId st item.value)
         , role "radio"
         , aria "checked" (if selected then "true" else "false")
@@ -211,7 +222,7 @@ renderItem st _ item =
       )
 
 itemId :: State -> String -> String
-itemId st value = st.idPrefix <> "-item-" <> value
+itemId st value = base st <> "-item-" <> value
 
 -- | The index of the roving tab stop: the selected item's index, or 0 when
 -- | nothing is selected (the first item is the keyboard entry point).
@@ -220,6 +231,9 @@ selectedIndex st = fromMaybe 0 (findIndex (\i -> i.value == current st.ctrl) st.
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    uid <- useId
+    H.modify_ _ { uid = uid }
   Receive input ->
     H.modify_ \st -> st
       { items = input.items
@@ -244,7 +258,7 @@ handleAction = case _ of
         Nothing -> pure unit
         Just item -> when (not (item.disabled || st.disabled)) do
           -- focus the target item, then (automatic activation) select it
-          mel <- H.getHTMLElementRef (itemRef st.idPrefix item.value)
+          mel <- H.getHTMLElementRef (itemRef (base st) item.value)
           for_ mel (liftEffect <<< HTMLElement.focus)
           selectValue item.value
 

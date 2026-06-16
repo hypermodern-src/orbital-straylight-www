@@ -47,6 +47,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria)
 import Web.HTML.HTMLElement as HTMLElement
@@ -134,12 +135,19 @@ type State =
   , disabled :: Boolean
   , idPrefix :: String
   , style :: Style
+  , uid :: String       -- generated on Initialize; makes ids unique per instance
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | Toggle String
   | HeadersKeyDown KE.KeyboardEvent
+
+-- | The effective, per-instance unique id base: readable prefix + the id minted on
+-- | Initialize (so two default-prefixed Accordions on a page never collide).
+base :: State -> String
+base st = if st.uid == "" then st.idPrefix else st.idPrefix <> "-" <> st.uid
 
 triggerRef :: String -> String -> H.RefLabel
 triggerRef pfx value = H.RefLabel (pfx <> "-trigger-" <> value)
@@ -153,6 +161,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -168,6 +177,7 @@ initialState input =
   , disabled: input.disabled
   , idPrefix: input.idPrefix
   , style: input.style
+  , uid: ""
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -202,7 +212,7 @@ renderItem st _ item =
           ]
           [ HH.button
               ( [ HP.type_ HP.ButtonButton
-                , HP.ref (triggerRef st.idPrefix item.value)
+                , HP.ref (triggerRef (base st) item.value)
                 , HP.id (triggerId st item.value)
                 , aria "expanded" (if open then "true" else "false")
                 , aria "controls" (panelId st item.value)
@@ -241,10 +251,10 @@ renderItem st _ item =
       ]
 
 triggerId :: State -> String -> String
-triggerId st value = st.idPrefix <> "-trigger-" <> value
+triggerId st value = base st <> "-trigger-" <> value
 
 panelId :: State -> String -> String
-panelId st value = st.idPrefix <> "-panel-" <> value
+panelId st value = base st <> "-panel-" <> value
 
 -- | The roving tab stop: the first OPEN item's index, else 0.
 tabStopIndex :: State -> Int
@@ -253,6 +263,9 @@ tabStopIndex st =
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    uid <- useId
+    H.modify_ _ { uid = uid }
   Receive input ->
     H.modify_ \st -> st
       { items = input.items
@@ -278,7 +291,7 @@ handleAction = case _ of
         Nothing -> pure unit
         Just item -> when (not (st.disabled || item.disabled)) do
           -- manual activation: move focus only; toggling stays on click/Enter/Space
-          mel <- H.getHTMLElementRef (triggerRef st.idPrefix item.value)
+          mel <- H.getHTMLElementRef (triggerRef (base st) item.value)
           for_ mel (liftEffect <<< HTMLElement.focus)
 
 -- | Toggle item `value`'s membership in the open set, honoring single/collapsible.

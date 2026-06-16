@@ -15,10 +15,10 @@
 -- |   * the stable surface CSS targets — `data-state`, `data-disabled`,
 -- |     `aria-expanded`, `aria-controls` — plus per-part classes from `Style`.
 -- |
--- | v1 scope: the content `id` (used for `aria-controls`) is a fixed string
--- | (`rdx-collapsible-content`); a multi-instance page would want a generated id.
--- | Parts taken as `Array HH.PlainHTML` (trigger label + content); the compound
--- | Trigger/Content component API is deferred.
+-- | The content `id` (the `aria-controls` target) is generated per mount
+-- | (Behavior.Id), so multiple Collapsibles on a page don't collide. Parts taken as
+-- | `Array HH.PlainHTML` (trigger label + content); the compound Trigger/Content
+-- | component API is deferred.
 module Hydrogen.Radix.Collapsible
   ( component
   , Input
@@ -40,6 +40,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState, dataAttr, aria)
 import Web.HTML.HTMLElement as HTMLElement
@@ -105,16 +106,14 @@ type State =
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , animSub :: Maybe H.SubscriptionId
+  , contentId :: String  -- generated on Initialize; the trigger aria-controls target
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | Toggle
   | AnimDone
-
--- | Fixed content id — also the `aria-controls` target (see module note on v1 scope).
-contentId :: String
-contentId = "rdx-collapsible-content"
 
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-collapsible-content"
@@ -128,6 +127,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -140,6 +140,7 @@ initialState input =
   , trigger: input.trigger
   , content: input.content
   , animSub: Nothing
+  , contentId: ""
   }
   where
   open = case input.open of
@@ -158,7 +159,7 @@ render st =
       ( [ HH.button
             ( [ HP.type_ HP.ButtonButton
               , aria "expanded" (show open)
-              , aria "controls" contentId
+              , aria "controls" st.contentId
               , dataState (if open then "open" else "closed")
               , HP.disabled st.disabled
               , classes st.style.trigger
@@ -172,7 +173,7 @@ render st =
             ( if isRendered st.presence then
                 [ HH.div
                     ( [ HP.ref contentRef
-                      , HP.id contentId
+                      , HP.id st.contentId
                       , dataState (dataStateOf st.presence)
                       , classes st.style.content
                       ]
@@ -186,6 +187,9 @@ render st =
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    cid <- useId
+    H.modify_ _ { contentId = cid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

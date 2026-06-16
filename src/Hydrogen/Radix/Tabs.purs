@@ -12,8 +12,9 @@
 -- |     labelledby/orientation, data-state active/inactive, data-orientation.
 -- |
 -- | v1 scope (by feel): automatic activation (arrow moves selection); `manual`
--- | mode (arrow moves focus only, Enter/Space selects) is noted, not built.
--- | Single instance per page for the fixed id prefix (note in Input).
+-- | mode (arrow moves focus only, Enter/Space selects) is noted, not built. The
+-- | tab/panel ids combine the readable `idPrefix` with a per-mount generated id
+-- | (Behavior.Id), so two default-prefixed Tabs on a page don't collide.
 module Hydrogen.Radix.Tabs
   ( component
   , Tab
@@ -38,6 +39,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria)
 import Web.HTML.HTMLElement as HTMLElement
@@ -110,12 +112,19 @@ type State =
   , loop :: Boolean
   , idPrefix :: String
   , style :: Style
+  , uid :: String       -- generated on Initialize; makes ids unique per instance
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | Selected String
   | ListKeyDown KE.KeyboardEvent
+
+-- | The effective, per-instance unique id base: the readable prefix + the id minted
+-- | on Initialize (so two default-prefixed Tabs on a page never collide).
+base :: State -> String
+base st = if st.uid == "" then st.idPrefix else st.idPrefix <> "-" <> st.uid
 
 tabRef :: String -> String -> H.RefLabel
 tabRef pfx value = H.RefLabel (pfx <> "-tab-" <> value)
@@ -129,6 +138,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -141,6 +151,7 @@ initialState input =
   , loop: input.loop
   , idPrefix: input.idPrefix
   , style: input.style
+  , uid: ""
   }
 
 firstValue :: Input -> String
@@ -173,7 +184,7 @@ renderTrigger st _ tab =
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
-        , HP.ref (tabRef st.idPrefix tab.value)
+        , HP.ref (tabRef (base st) tab.value)
         , HP.id (triggerId st tab.value)
         , role "tab"
         , aria "selected" (if selected then "true" else "false")
@@ -208,16 +219,19 @@ renderPanel st tab =
       (if selected then map HH.fromPlainHTML tab.content else [])
 
 triggerId :: State -> String -> String
-triggerId st value = st.idPrefix <> "-trigger-" <> value
+triggerId st value = base st <> "-trigger-" <> value
 
 panelId :: State -> String -> String
-panelId st value = st.idPrefix <> "-panel-" <> value
+panelId st value = base st <> "-panel-" <> value
 
 selectedIndex :: State -> Int
 selectedIndex st = fromMaybe 0 (findIndex (\t -> t.value == current st.ctrl) st.tabs)
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    uid <- useId
+    H.modify_ _ { uid = uid }
   Receive input ->
     H.modify_ \st -> st
       { tabs = input.tabs
@@ -240,7 +254,7 @@ handleAction = case _ of
         Nothing -> pure unit
         Just tab -> when (not tab.disabled) do
           -- focus the target trigger, then (automatic activation) select it
-          mel <- H.getHTMLElementRef (tabRef st.idPrefix tab.value)
+          mel <- H.getHTMLElementRef (tabRef (base st) tab.value)
           for_ mel (liftEffect <<< HTMLElement.focus)
           selectValue tab.value
 

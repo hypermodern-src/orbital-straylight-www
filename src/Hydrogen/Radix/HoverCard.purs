@@ -20,7 +20,8 @@
 -- | it is keyboard-reachable).
 -- |
 -- | v1 (by feel): non-modal, no Presence exit animation (mount/unmount), no portal
--- | (content is position:fixed in place), single instance per page (fixed ids).
+-- | (content is position:fixed in place). The content id is generated per mount
+-- | (Behavior.Id) so instances don't collide; the fixed RefLabels stay single-instance.
 -- | NOTE: radix has open/close *delays* (openDelay/closeDelay) so brushing past the
 -- | trigger doesn't flash the card; we skip them for v1 (open/close are immediate).
 module Hydrogen.Radix.HoverCard
@@ -46,6 +47,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName)
 import Web.Event.Event (EventType(..))
@@ -117,10 +119,12 @@ type State =
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , subs :: Array H.SubscriptionId
+  , contentId :: String         -- generated on Initialize (unique content id)
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | Show
   | Hide
   | EscapePressed
@@ -132,9 +136,6 @@ triggerRef = H.RefLabel "rdx-hover-card-trigger"
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-hover-card-content"
 
-contentId :: String
-contentId = "rdx-hover-card-content"
-
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
   H.mkComponent
@@ -144,6 +145,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -160,6 +162,7 @@ initialState input =
   , placedSide: input.side
   , placedAlign: input.align
   , subs: []
+  , contentId: ""
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -182,7 +185,7 @@ render st =
       , if open then
           HH.div
             [ HP.ref contentRef
-            , HP.id contentId
+            , HP.id st.contentId
             , classes st.style.content
             , dataState "open"
             , dataAttr "side" (sideName st.placedSide)
@@ -197,6 +200,9 @@ render st =
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    cid <- useId
+    H.modify_ _ { contentId = cid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
