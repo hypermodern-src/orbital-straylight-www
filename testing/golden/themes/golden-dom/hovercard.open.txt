@@ -1,0 +1,14 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <span class="rt-Text">
+          #Follow
+          <a class="rt-HoverCardTrigger rt-Link rt-Text rt-reset rt-underline-auto" data-accent-color= data-radix-popper-align=start data-radix-popper-side=bottom data-state=open href=#>
+            #@radix_ui
+          #for updates.
+  <div data-radix-popper-content-wrapper= style=position: fixed; left: <px>; top: <px>; transform: translate(<px>, <px>); min-width: max-content; z-index: auto; --radix-popper-available-width: <px>; --radix-popper-available-height: <px>; --radix-popper-anchor-width: <px>; --radix-popper-anchor-height: <px>; --radix-popper-transform-origin: 0% <px>;>
+    <div class="light radix-themes rt-HoverCardContent rt-PopperContent rt-r-max-w rt-r-size-2" data-accent-color=indigo data-align=start data-gray-color=slate data-has-background=false data-is-root-theme=false data-panel-background=translucent data-radius=medium data-scaling=100% data-side=bottom data-state=open style=--max-width: <px>; --radix-hover-card-content-transform-origin: var(--radix-popper-transform-origin); --radix-hover-card-content-available-width: var(--radix-popper-available-width); --radix-hover-card-content-available-height: var(--radix-popper-available-height); --radix-hover-card-trigger-width: var(--radix-popper-anchor-width); --radix-hover-card-trigger-height: var(--radix-popper-anchor-height);>
+      <div class="rt-Text rt-r-size-1" data-accent-color=gray>
+        #The design system for building modern web applications.

@@ -52,6 +52,16 @@ import {
   Skeleton,
   TabNav,
   VisuallyHidden,
+  // Interactive (overlay) components — the open-state DOM oracle (STR-331) drives
+  // these into their states and snapshots the real upstream DOM as the golden.
+  Dialog,
+  AlertDialog,
+  Popover,
+  Tooltip,
+  HoverCard,
+  DropdownMenu,
+  ContextMenu,
+  Select,
 } from "@radix-ui/themes";
 
 type Page = { id: string; label: string; node: React.ReactNode };
@@ -583,6 +593,192 @@ const PAGES: Page[] = [
           <Text weight="bold">4-core CPU</Text>
         </RadioCards.Item>
       </RadioCards.Root>
+    ),
+  },
+  // ── Interactive (overlay) components ────────────────────────────────────────
+  // Rendered closed; the open-state DOM oracle (themes-open-dom.mjs) drives each
+  // into its states and snapshots the real upstream DOM. Content is fixed/canonical
+  // so the normalized snapshot is deterministic.
+  {
+    id: "dialog",
+    label: "Dialog",
+    node: (
+      <Dialog.Root>
+        <Dialog.Trigger>
+          <Button>Edit profile</Button>
+        </Dialog.Trigger>
+        <Dialog.Content maxWidth="450px">
+          <Dialog.Title>Edit profile</Dialog.Title>
+          <Dialog.Description size="2" mb="4">
+            Make changes to your profile.
+          </Dialog.Description>
+          <Flex direction="column" gap="3">
+            <label>
+              <Text as="div" size="2" mb="1" weight="bold">
+                Name
+              </Text>
+              <TextField.Root defaultValue="Freja Johnsen" placeholder="Enter your full name" />
+            </label>
+          </Flex>
+          <Flex gap="3" mt="4" justify="end">
+            <Dialog.Close>
+              <Button variant="soft" color="gray">
+                Cancel
+              </Button>
+            </Dialog.Close>
+            <Dialog.Close>
+              <Button>Save</Button>
+            </Dialog.Close>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
+    ),
+  },
+  {
+    id: "alertdialog",
+    label: "Alert Dialog",
+    node: (
+      <AlertDialog.Root>
+        <AlertDialog.Trigger>
+          <Button color="red">Revoke access</Button>
+        </AlertDialog.Trigger>
+        <AlertDialog.Content maxWidth="450px">
+          <AlertDialog.Title>Revoke access</AlertDialog.Title>
+          <AlertDialog.Description size="2">
+            Are you sure? This application will no longer be accessible.
+          </AlertDialog.Description>
+          <Flex gap="3" mt="4" justify="end">
+            <AlertDialog.Cancel>
+              <Button variant="soft" color="gray">
+                Cancel
+              </Button>
+            </AlertDialog.Cancel>
+            <AlertDialog.Action>
+              <Button color="red">Revoke access</Button>
+            </AlertDialog.Action>
+          </Flex>
+        </AlertDialog.Content>
+      </AlertDialog.Root>
+    ),
+  },
+  {
+    id: "popover",
+    label: "Popover",
+    node: (
+      <Popover.Root>
+        <Popover.Trigger>
+          <Button variant="soft">Comment</Button>
+        </Popover.Trigger>
+        <Popover.Content width="360px">
+          <Flex gap="3">
+            <Box flexGrow="1">
+              <TextArea placeholder="Write a comment…" style={{ height: 80 }} />
+            </Box>
+          </Flex>
+        </Popover.Content>
+      </Popover.Root>
+    ),
+  },
+  {
+    id: "tooltip",
+    label: "Tooltip",
+    node: (
+      <Tooltip content="Add to library">
+        <Button variant="soft">Hover me</Button>
+      </Tooltip>
+    ),
+  },
+  {
+    id: "hovercard",
+    label: "Hover Card",
+    node: (
+      <Text>
+        Follow{" "}
+        <HoverCard.Root>
+          <HoverCard.Trigger>
+            <Link href="#">@radix_ui</Link>
+          </HoverCard.Trigger>
+          <HoverCard.Content maxWidth="300px">
+            <Text as="div" size="1" color="gray">
+              The design system for building modern web applications.
+            </Text>
+          </HoverCard.Content>
+        </HoverCard.Root>{" "}
+        for updates.
+      </Text>
+    ),
+  },
+  {
+    id: "dropdownmenu",
+    label: "Dropdown Menu",
+    node: (
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <Button variant="soft">
+            Options
+            <DropdownMenu.TriggerIcon />
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item shortcut="⌘ E">Edit</DropdownMenu.Item>
+          <DropdownMenu.Item shortcut="⌘ D">Duplicate</DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item shortcut="⌘ N">Archive</DropdownMenu.Item>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Item shortcut="⌘ ⌫" color="red">
+            Delete
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    ),
+  },
+  {
+    id: "contextmenu",
+    label: "Context Menu",
+    node: (
+      <ContextMenu.Root>
+        <ContextMenu.Trigger>
+          <Flex
+            align="center"
+            justify="center"
+            style={{
+              width: 240,
+              height: 120,
+              border: "1px dashed var(--gray-6)",
+              borderRadius: "var(--radius-3)",
+            }}
+          >
+            <Text size="2" color="gray">
+              Right-click here
+            </Text>
+          </Flex>
+        </ContextMenu.Trigger>
+        <ContextMenu.Content>
+          <ContextMenu.Item shortcut="⌘ E">Edit</ContextMenu.Item>
+          <ContextMenu.Item shortcut="⌘ D">Duplicate</ContextMenu.Item>
+          <ContextMenu.Separator />
+          <ContextMenu.Item shortcut="⌘ ⌫" color="red">
+            Delete
+          </ContextMenu.Item>
+        </ContextMenu.Content>
+      </ContextMenu.Root>
+    ),
+  },
+  {
+    id: "select",
+    label: "Select",
+    node: (
+      <Select.Root defaultValue="apple">
+        <Select.Trigger />
+        <Select.Content>
+          <Select.Group>
+            <Select.Label>Fruits</Select.Label>
+            <Select.Item value="apple">Apple</Select.Item>
+            <Select.Item value="orange">Orange</Select.Item>
+            <Select.Item value="grape">Grape</Select.Item>
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
     ),
   },
   // The composed demo — the "looks like a finished product" target.
