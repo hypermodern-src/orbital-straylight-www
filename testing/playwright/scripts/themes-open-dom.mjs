@@ -15,66 +15,14 @@
 // Everything structural — tag tree, class SET (order-insensitive), data-*/aria-*/role,
 // data-side/data-align — stays exact. Positioning is verified structurally (side/align),
 // never by exact pixels (that was the magic-number trap the hand-roll fell into).
-import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import { join, extname } from "node:path";
 import { chromium } from "@playwright/test";
+import { serve, STATES, settle } from "./themes-states.mjs";
 
 const [DIR, ID, STATE = "open"] = process.argv.slice(2);
-const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
-const srv = createServer(async (q, s) => {
-  let p = q.url.split("?")[0]; if (p === "/") p = "/index.html";
-  try { const b = await readFile(join(DIR, p)); s.setHeader("Content-Type", MIME[extname(p)] ?? "application/octet-stream"); s.setHeader("Cache-Control", "no-store"); s.end(b); }
-  catch { s.statusCode = 404; s.end("nf"); }
-}).listen(0);
-await new Promise((r) => srv.once("listening", r));
-const PORT = srv.address().port;
-
-// ── the per-component state scripts ─────────────────────────────────────────────
-// Each puts the component into <state>; the snapshot is taken after settle().
-const root = (pg) => pg.locator("#root");
-const triggerButton = (pg) => root(pg).getByRole("button").first();
-const settle = (pg) => pg.waitForTimeout(300); // let Popper position + presence flush
-
-const openMenu = async (pg, click) => { await click(); await pg.locator('[role="menu"]').first().waitFor(); };
-
-const STATES = {
-  dialog: {
-    open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
-  },
-  alertdialog: {
-    open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("alertdialog").waitFor(); },
-  },
-  popover: {
-    open: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
-  },
-  tooltip: {
-    open: async (pg) => { await triggerButton(pg).hover(); await pg.getByRole("tooltip").waitFor(); },
-  },
-  hovercard: {
-    open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },
-  },
-  dropdownmenu: {
-    // freshly open: roving focus on the menu, no item highlighted yet.
-    open: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
-    // ArrowDown twice ⇒ second item (Duplicate) highlighted (data-highlighted).
-    item2: async (pg) => {
-      await openMenu(pg, () => triggerButton(pg).click());
-      await pg.keyboard.press("ArrowDown");
-      await pg.keyboard.press("ArrowDown");
-    },
-  },
-  contextmenu: {
-    open: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),
-  },
-  select: {
-    // open: the listbox shows; the current value (apple) is the highlighted item.
-    open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
-  },
-};
+const { port: PORT, close: closeSrv } = await serve(DIR);
 
 const spec = STATES[ID];
-if (!spec) { console.error(`no state script for id '${ID}'`); srv.close(); process.exit(2); }
+if (!spec) { console.error(`no state script for id '${ID}'`); closeSrv(); process.exit(2); }
 const step = spec[STATE];
 if (!step) { console.error(`id '${ID}' has no state '${STATE}' (have: ${Object.keys(spec).join(", ")})`); process.exit(2); }
 
@@ -115,10 +63,10 @@ try {
     .replace(/-?\d+(?:\.\d+)?px/g, "<px>");
 
   console.log(normalized);
-  await b.close(); srv.close();
+  await b.close(); closeSrv();
   process.exit(0);
 } catch (e) {
   console.error(`✗ ${ID}:${STATE} — ${e.message}`);
-  await b.close(); srv.close();
+  await b.close(); closeSrv();
   process.exit(1);
 }

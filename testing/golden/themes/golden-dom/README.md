@@ -40,3 +40,26 @@ testing/playwright/themes-open-verify.sh [<id>[:<state>] …]   # default: all
 Builds `//examples/themes-port:app`, drives the same state script, diffs against these
 baselines. Exit 0 ⇒ the port's interacted DOM == upstream's. Every P2/P3 interactive
 component must pass this to be "done".
+
+---
+
+## The verification trio
+
+The open-state DOM oracle (STR-331) is one of three complementary gates over the
+interactive components — all driven by the **same** shared state driver
+(`testing/playwright/scripts/themes-states.mjs`) so they can never disagree on what a
+state *is*:
+
+| gate | script | what it pins | baseline |
+|------|--------|--------------|----------|
+| **DOM structure** (STR-331) | `themes-open-dom.mjs` / `themes-open-*.sh` | tag tree, class set, `data-*`/`aria-*`/`role`, side/align | `golden-dom/<id>.<state>.txt` |
+| **APG keyboard** (STR-332) | `themes-apg.mjs` / `themes-apg.sh` | key→behavior per WAI-ARIA APG pattern | (executable, cites APG section) |
+| **a11y** (STR-333) | `themes-a11y.mjs` / `themes-a11y.sh` | ARIA accessibility tree + axe violation fingerprint | `golden-aria/<id>.<state>.txt` (+ `.axe.txt`) |
+
+Each is validated against the **real `@radix-ui/themes` golden** before it can judge the
+port (the non-circular discipline): the DOM/a11y baselines are captured from upstream and
+self-checked for stability; the APG table must pass on upstream. axe is held to "the port
+introduces **no new** violation beyond upstream's fingerprint" — radix itself is not
+axe-clean on every demo (underline-less `Link`, the portal focus-guard, red-variant
+contrast are upstream's own characteristics), so a "zero violations" bar would be
+self-invented rather than upstream-faithful.

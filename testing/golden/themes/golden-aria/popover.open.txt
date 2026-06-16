@@ -1,0 +1,3 @@
+- button "Comment" [expanded]
+- dialog:
+  - textbox "Write a comment…"

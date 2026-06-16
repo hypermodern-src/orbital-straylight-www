@@ -1,0 +1,5 @@
+- alertdialog "Revoke access":
+  - heading "Revoke access" [level=1]
+  - paragraph: Are you sure? This application will no longer be accessible.
+  - button "Cancel"
+  - button "Revoke access"

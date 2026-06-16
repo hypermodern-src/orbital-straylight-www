@@ -1,0 +1,5 @@
+- button "Hover me"
+- paragraph: Add to library
+- img
+- tooltip "Add to library":
+  - paragraph: Add to library

@@ -1,0 +1,9 @@
+- dialog "Edit profile":
+  - heading "Edit profile" [level=1]
+  - paragraph: Make changes to your profile.
+  - text: Name
+  - textbox "Name":
+    - /placeholder: Enter your full name
+    - text: Freja Johnsen
+  - button "Cancel"
+  - button "Save"
