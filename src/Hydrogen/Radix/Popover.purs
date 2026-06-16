@@ -41,6 +41,7 @@ import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.FocusScope (captureFocus, tabLoop)
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria)
@@ -119,10 +120,12 @@ type State =
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentNode :: Maybe Node
+  , contentId :: String  -- generated on Initialize; trigger aria-controls target + content id
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | TriggerClicked
   | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
@@ -145,6 +148,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -164,6 +168,7 @@ initialState input =
   , subs: []
   , postSub: Nothing
   , contentNode: Nothing
+  , contentId: ""
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -173,13 +178,16 @@ render st =
   in
     HH.div_
       [ HH.button
-          [ HP.type_ HP.ButtonButton
-          , HP.ref triggerRef
-          , classes st.style.trigger
-          , aria "expanded" (if open then "true" else "false")
-          , aria "haspopup" "dialog"
-          , HE.onClick \_ -> TriggerClicked
-          ]
+          ( [ HP.type_ HP.ButtonButton
+            , HP.ref triggerRef
+            , classes st.style.trigger
+            , aria "expanded" (if open then "true" else "false")
+            , aria "haspopup" "dialog"
+            , dataState (if open then "open" else "closed")
+            , HE.onClick \_ -> TriggerClicked
+            ]
+              <> (if open then [ aria "controls" st.contentId ] else [])
+          )
           (map HH.fromPlainHTML st.trigger)
       -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
       -- node — only patches it — which makes adopting it into body safe. The open-state
@@ -187,6 +195,7 @@ render st =
       -- the left/top Popper applies via FFI; closing adds display:none.
       , HH.div
           [ HP.ref contentRef
+          , HP.id st.contentId
           , classes st.style.content
           , dataState (if open then "open" else "closed")
           , dataAttr "side" (sideName st.placedSide)
@@ -200,6 +209,9 @@ render st =
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    cid <- useId
+    H.modify_ _ { contentId = cid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

@@ -130,6 +130,7 @@ type State =
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , locked :: Boolean
+  , contentId :: String      -- generated on Initialize, trigger aria-controls target + content id
   , titleId :: String        -- generated on Initialize, aria-labelledby target
   , descriptionId :: String  -- generated on Initialize, aria-describedby target
   }
@@ -178,6 +179,7 @@ initialState input =
   , escSub: Nothing
   , postSub: Nothing
   , locked: false
+  , contentId: ""
   , titleId: ""
   , descriptionId: ""
   }
@@ -195,12 +197,16 @@ render st =
   in
     HH.div_
       [ HH.button
-          [ HP.type_ HP.ButtonButton
-          , classes st.style.trigger
-          , aria "expanded" (show open)
-          , aria "haspopup" "dialog"
-          , HE.onClick \_ -> TriggerClicked
-          ]
+          ( [ HP.type_ HP.ButtonButton
+            , classes st.style.trigger
+            , aria "expanded" (show open)
+            , aria "haspopup" "dialog"
+            , dataState (if open then "open" else "closed")
+            , HE.onClick \_ -> TriggerClicked
+            ]
+              -- aria-controls references the content only while open (upstream gates it)
+              <> (if open then [ aria "controls" st.contentId ] else [])
+          )
           (map HH.fromPlainHTML st.trigger)
       , overlayContent open st
       ]
@@ -223,9 +229,10 @@ overlayContent open st =
         []
     , HH.div
         ( [ HP.ref contentRef
+          , HP.id st.contentId
           , classes st.style.content
           , roleAttr "dialog"
-          , aria "modal" (show st.modal)
+          -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
           , dataState (if open then "open" else "closed")
           , HP.tabIndex (-1)
           , HP.style "position:fixed;"
@@ -244,9 +251,10 @@ overlayContent open st =
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Initialize -> do
+    cid <- useId
     tid <- useId
     did <- useId
-    H.modify_ _ { titleId = tid, descriptionId = did }
+    H.modify_ _ { contentId = cid, titleId = tid, descriptionId = did }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
