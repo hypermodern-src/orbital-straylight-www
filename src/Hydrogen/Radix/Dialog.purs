@@ -95,6 +95,7 @@ type Input =
   , title :: Array HH.PlainHTML
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String         -- extra inline style on the content (e.g. max-width)
   }
 
 defaultInput :: Input
@@ -109,6 +110,7 @@ defaultInput =
   , title: []
   , description: []
   , content: []
+  , contentStyle: ""
   }
 
 data Output = OpenChanged Boolean
@@ -133,6 +135,7 @@ type State =
   , title :: Array HH.PlainHTML
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
@@ -182,6 +185,7 @@ initialState input =
   , title: input.title
   , description: input.description
   , content: input.content
+  , contentStyle: input.contentStyle
   , restoreEl: Nothing
   , escSub: Nothing
   , postSub: Nothing
@@ -243,6 +247,7 @@ overlayContent open st =
                   -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
                   , dataState (if open then "open" else "closed")
                   , HP.tabIndex (-1)
+                  , HP.style st.contentStyle
                   , HE.onKeyDown ContentKeyDown
                   ]
                     -- link title/description only when present (radix is conditional)
@@ -275,6 +280,7 @@ handleAction = case _ of
       , title = input.title
       , description = input.description
       , content = input.content
+      , contentStyle = input.contentStyle
       }
   TriggerClicked -> openDialog
   -- click on the overlay/scroll/padding (outside the content) closes — guard with

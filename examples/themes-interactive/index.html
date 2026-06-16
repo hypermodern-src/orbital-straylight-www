@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hydrogen.Themes — interactive port</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- The theme context lives on <body> (not a nested div) so the body-level portal
+         roots the overlays adopt into also inherit it. Inter on every .radix-themes root. -->
+    <style>.radix-themes { --default-font-family: 'Inter Variable', sans-serif; }</style>
+  </head>
+  <body
+    class="radix-themes light"
+    data-accent-color="indigo"
+    data-gray-color="slate"
+    data-radius="medium"
+    data-scaling="100%"
+    data-has-background="true"
+    data-panel-background="translucent"
+    style="--default-font-family: 'Inter Variable', sans-serif"
+  >
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
