@@ -92,13 +92,22 @@ fits boundary fl c =
     && c.x + fl.width <= boundary.x + boundary.width
     && c.y + fl.height <= boundary.y + boundary.height
 
--- | Pick the first placement that fits: the requested one, else its opposite,
--- | else (fall back to) the requested one. Closed-form over the finite candidates.
+-- | Shrink a rect inward on all sides by `p` — the collision boundary radix uses for
+-- | flip/shift is the viewport inset by `collisionPadding`, NOT the raw viewport.
+insetRect :: Number -> Rect -> Rect
+insetRect p r = { x: r.x + p, y: r.y + p, width: r.width - 2.0 * p, height: r.height - 2.0 * p }
+
+-- | Pick the first placement that fits: the requested one, else its opposite, else (fall
+-- | back to) the requested one. The fits-check is against the boundary inset by `padding`
+-- | (the collision boundary), matching radix — otherwise a placement that overflows the
+-- | collision gutter is wrongly judged to fit and never flips. Closed-form over the
+-- | finite candidates.
 flip :: Options -> Placement
 flip o =
   let
+    boundary = insetRect o.padding o.boundary
     candidates = [ o.placement, flipPlacement o.placement ]
-    ok p = fits o.boundary o.floating (coordsFromPlacement o.anchor o.floating o.offset p)
+    ok p = fits boundary o.floating (coordsFromPlacement o.anchor o.floating o.offset p)
   in
     fromMaybe o.placement (find ok candidates)
 

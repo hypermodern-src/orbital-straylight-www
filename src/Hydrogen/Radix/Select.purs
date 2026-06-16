@@ -443,17 +443,19 @@ focusItem pfx idx = do
   mel <- H.getHTMLElementRef (itemRef pfx idx)
   for_ mel (liftEffect <<< HTMLElement.focus)
 
+-- | Item-aligned positioning (radix Select's default): the listbox overlays the trigger
+-- | with the SELECTED option aligned to it, not a popper dropdown below. Needs the trigger,
+-- | the content, and the selected item's element.
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
   st <- H.get
-  manchor <- H.getHTMLElementRef triggerRef
-  mfloat <- H.getHTMLElementRef contentRef
-  case manchor, mfloat of
-    Just anchor, Just floating -> do
-      placed <- liftEffect (Popper.position
-        { anchor, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
-      H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
-    _, _ -> pure unit
+  mtrigger <- H.getHTMLElementRef triggerRef
+  mcontent <- H.getHTMLElementRef contentRef
+  msel <- H.getHTMLElementRef (itemRef st.idPrefix (selectedIndex st))
+  case mtrigger, mcontent, msel of
+    Just trigger, Just content, Just selectedItem ->
+      liftEffect (Popper.positionItemAligned { trigger, content, selectedItem, padding: st.padding })
+    _, _, _ -> pure unit
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

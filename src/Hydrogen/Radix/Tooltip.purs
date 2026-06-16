@@ -33,6 +33,7 @@ module Hydrogen.Radix.Tooltip
 
 import Prelude
 
+import Data.Array (null)
 import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -80,6 +81,7 @@ type Input =
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String      -- extra inline style on the content (e.g. --max-width)
+  , arrow :: Array HH.PlainHTML  -- optional arrow svg, positioned at the content edge
   }
 
 defaultInput :: Input
@@ -94,6 +96,7 @@ defaultInput =
   , trigger: []
   , content: []
   , contentStyle: ""
+  , arrow: []
   }
 
 data Output = OpenChanged Boolean
@@ -118,6 +121,7 @@ type State =
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String
+  , arrow :: Array HH.PlainHTML
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -140,6 +144,9 @@ triggerRef = H.RefLabel "rdx-tooltip-trigger"
 
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-tooltip-content"
+
+arrowRef :: H.RefLabel
+arrowRef = H.RefLabel "rdx-tooltip-arrow"
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -165,6 +172,7 @@ initialState input =
   , trigger: input.trigger
   , content: input.content
   , contentStyle: input.contentStyle
+  , arrow: input.arrow
   , placedSide: input.side
   , placedAlign: input.align
   , restoreEl: Nothing
@@ -207,7 +215,11 @@ render st =
           -- the left/top Popper applies via FFI.
           , HP.style ("position:fixed;left:0;top:0;" <> st.contentStyle <> (if open then "" else "display:none;"))
           ]
-          (map HH.fromPlainHTML st.content)
+          ( map HH.fromPlainHTML st.content
+              -- the arrow is a child of the content (radix puts it inside), absolutely
+              -- positioned; Popper.positionArrow pins its left/top/transform on open.
+              <> (if null st.arrow then [] else [ HH.span [ HP.ref arrowRef, HP.style "position:absolute;" ] (map HH.fromPlainHTML st.arrow) ])
+          )
       ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
@@ -226,6 +238,7 @@ handleAction = case _ of
       , trigger = input.trigger
       , content = input.content
       , contentStyle = input.contentStyle
+      , arrow = input.arrow
       }
   Show -> openTooltip
   Hide -> closeTooltip
@@ -306,6 +319,10 @@ reposition = do
       placed <- liftEffect (Popper.position
         { anchor, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
       H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
+      -- pin the arrow to the (now-positioned) content edge facing the trigger
+      marrow <- H.getHTMLElementRef arrowRef
+      for_ marrow \arrow ->
+        liftEffect (Popper.positionArrow { anchor, floating, arrow, side: placed.placement.side, padding: st.padding })
     _, _ -> pure unit
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)

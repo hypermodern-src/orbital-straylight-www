@@ -24,7 +24,7 @@ import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
-import Hydrogen.Radix.Foundation.Style (Align(..), cn)
+import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.Select as Select
@@ -206,9 +206,30 @@ popoverStyle =
 tooltipInput :: Tooltip.Input
 tooltipInput = Tooltip.defaultInput
   { style = tooltipStyle
+  -- offset 8 holds the 5px arrow + a small gap; padding 10 = radix's collisionPadding, so
+  -- near the viewport top the preferred `top` overflows the gutter and flips to `bottom`.
+  , offset = 8.0
+  , padding = 10.0
   , trigger = [ HH.text "Hover me" ]
   , content = [ textAs "p" [ Size "1", Class "rt-TooltipText" ] [ HH.text "Add to library" ] ]
+  , arrow = [ tooltipArrow ]
   }
+
+-- | The tooltip arrow (radix's rt-TooltipArrow) — a 10×5 down-pointing triangle; the
+-- | primitive rotates it to face the trigger. fill comes from rt-TooltipArrow (the bg).
+tooltipArrow :: forall w i. HH.HTML w i
+tooltipArrow =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") "rt-TooltipArrow"
+    , HP.attr (HH.AttrName "width") "10"
+    , HP.attr (HH.AttrName "height") "5"
+    , HP.attr (HH.AttrName "viewBox") "0 0 30 10"
+    , HP.attr (HH.AttrName "preserveAspectRatio") "none"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "polygon")
+        [ HP.attr (HH.AttrName "points") "0,0 30,0 15,10" ]
+        []
+    ]
 
 tooltipStyle :: Tooltip.Style
 tooltipStyle =
@@ -282,7 +303,8 @@ menuStyle =
 -- | point-anchoring is the documented Float.Popper follow-up (STR-336).
 contextMenuInput :: ContextMenu.Input
 contextMenuInput = ContextMenu.defaultInput
-  { style = contextMenuStyle
+  { side = Right   -- radix point-anchors the menu to the right of the cursor (data-side=right)
+  , style = contextMenuStyle
   , trigger =
       [ flex
           [ Align "center", Justify "center", Width "240px", Height "120px"

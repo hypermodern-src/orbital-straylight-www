@@ -46,6 +46,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
+import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -68,6 +69,7 @@ import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
+import Web.UIEvent.MouseEvent as ME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -176,6 +178,7 @@ type State =
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentNode :: Maybe Node
+  , point :: { x :: Number, y :: Number }  -- the right-click cursor point (virtual anchor)
   }
 
 data Action
@@ -227,6 +230,7 @@ initialState input =
   , subs: []
   , postSub: Nothing
   , contentNode: Nothing
+  , point: { x: 0.0, y: 0.0 }
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -238,6 +242,9 @@ render st =
       [ HH.div
           [ HP.ref triggerRef
           , classes st.style.trigger
+          -- shrink-wrap the trigger content (radix's Trigger is asChild = the content
+          -- element itself) so the right-click hit area is the content, not a full-width block.
+          , HP.style "display:inline-block"
           , dataState (if open then "open" else "closed")
           , HE.handler (EventType "contextmenu") Opened
           ]
@@ -316,8 +323,11 @@ handleAction = case _ of
       , trigger = input.trigger
       }
   Opened e -> do
-    -- suppress the native browser context menu, then open ours
+    -- suppress the native browser context menu, capture the cursor point (the menu's
+    -- virtual anchor — radix point-anchors the content at the click), then open ours.
     liftEffect (preventDefault e)
+    for_ (ME.fromEvent e) \me ->
+      H.modify_ _ { point = { x: toNumber (ME.clientX me), y: toNumber (ME.clientY me) } }
     st <- H.get
     when (not (current st.ctrl)) openMenu
   -- after the open render flushed (content ref live): measure+place, then on the NEXT
@@ -417,17 +427,17 @@ focusItem pfx idx = do
   mel <- H.getHTMLElementRef (itemRef pfx idx)
   for_ mel (liftEffect <<< HTMLElement.focus)
 
+-- | Point-anchored: position the content at the captured cursor point (a zero-size
+-- | virtual anchor), NOT the trigger element — radix's ContextMenu places the menu where
+-- | you clicked, not relative to the trigger area.
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
   st <- H.get
-  manchor <- H.getHTMLElementRef triggerRef
   mfloat <- H.getHTMLElementRef contentRef
-  case manchor, mfloat of
-    Just anchor, Just floating -> do
-      placed <- liftEffect (Popper.position
-        { anchor, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
-      H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
-    _, _ -> pure unit
+  for_ mfloat \floating -> do
+    placed <- liftEffect (Popper.positionAt
+      { point: st.point, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
+    H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
