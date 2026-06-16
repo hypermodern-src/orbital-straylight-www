@@ -46,6 +46,7 @@ import Prelude
 import Data.Array (null)
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -56,7 +57,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.FocusScope (captureFocus, tabLoop)
-import Hydrogen.Radix.Behavior.ScrollLock as ScrollLock
+import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
 import Web.Event.Event as Event
@@ -104,6 +105,8 @@ type Input =
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String         -- extra inline style on the content (e.g. --max-width)
+  , triggerAttrs :: Array (Tuple String String)  -- data-* attrs for the trigger (e.g. accent-color)
+  , portalAttrs :: Array (Tuple String String)   -- data-* attrs for the portaled overlay (theme re-application)
   }
 
 defaultInput :: Input
@@ -117,6 +120,8 @@ defaultInput =
   , description: []
   , content: []
   , contentStyle: ""
+  , triggerAttrs: []
+  , portalAttrs: []
   }
 
 data Output = OpenChanged Boolean
@@ -140,6 +145,8 @@ type State =
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String
+  , triggerAttrs :: Array (Tuple String String)
+  , portalAttrs :: Array (Tuple String String)
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
@@ -187,6 +194,8 @@ initialState input =
   , description: input.description
   , content: input.content
   , contentStyle: input.contentStyle
+  , triggerAttrs: input.triggerAttrs
+  , portalAttrs: input.portalAttrs
   , restoreEl: Nothing
   , escSub: Nothing
   , postSub: Nothing
@@ -202,12 +211,17 @@ aria name val = HP.attr (HH.AttrName ("aria-" <> name)) val
 roleAttr :: forall r i. String -> HP.IProp r i
 roleAttr = HP.attr (HH.AttrName "role")
 
+-- | Render `data-<k>=<v>` for each (k,v) — the preset's theme/accent attrs.
+portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
+
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   let
     open = current st.ctrl
   in
-    HH.div_
+    -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
+    HH.div [ HP.style "display:contents" ]
       [ HH.button
           ( [ HP.type_ HP.ButtonButton
             , classes st.style.trigger
@@ -218,6 +232,7 @@ render st =
             ]
               -- aria-controls references the content only while open (upstream gates it)
               <> (if open then [ aria "controls" st.contentId ] else [])
+              <> portalData st.triggerAttrs
           )
           (map HH.fromPlainHTML st.trigger)
       , overlayContent open st
@@ -232,11 +247,12 @@ render st =
 overlayContent :: forall m. Boolean -> State -> H.ComponentHTML Action () m
 overlayContent open st =
   HH.div
-    [ HP.ref portalRef
-    , classes st.style.overlay
-    , dataState (if open then "open" else "closed")
-    , HP.style ("position:fixed;inset:0;" <> (if open then "" else "display:none;"))
-    ]
+    ( [ HP.ref portalRef
+      , classes st.style.overlay
+      , dataState (if open then "open" else "closed")
+      , HP.style (if open then "pointer-events: auto;" else "display:none;")
+      ] <> portalData st.portalAttrs
+    )
     [ HH.div [ classes st.style.scroll ]
         [ HH.div [ classes st.style.scrollPadding ]
             [ HH.div
@@ -253,10 +269,10 @@ overlayContent open st =
                     <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
                     <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
                 )
-                [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
-                , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
-                , HH.div_ (map HH.fromPlainHTML st.content)
-                ]
+                ( [ HH.h1 ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
+                  , HH.p ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
+                  ] <> map HH.fromPlainHTML st.content
+                )
             ]
         ]
     ]
@@ -278,6 +294,8 @@ handleAction = case _ of
       , description = input.description
       , content = input.content
       , contentStyle = input.contentStyle
+      , triggerAttrs = input.triggerAttrs
+      , portalAttrs = input.portalAttrs
       }
   TriggerClicked -> openDialog
   EscapePressed -> do
@@ -300,6 +318,12 @@ handleAction = case _ of
       _, _ -> pure unit
     mnode <- H.getHTMLElementRef contentRef
     for_ mnode \node -> liftEffect (void (captureFocus node))
+    -- the modal document envelope (alert dialog is always modal), now the overlay is a body
+    -- child: scroll-lock + focus guards + aria-hide siblings. No `modify` (pure DOM effects).
+    for_ mwrap \wrap -> liftEffect do
+      Envelope.lockScroll
+      Envelope.addFocusGuards
+      Envelope.hideOthers wrap
 
 openDialog :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openDialog = do
@@ -311,8 +335,6 @@ openDialog = do
     mprev <- liftEffect (HTMLDocument.activeElement doc)
     H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev }
     H.raise (OpenChanged true)
-    -- always modal: lock scroll unconditionally.
-    liftEffect ScrollLock.lock
     sub <-
       if st.closeOnEscape then
         Just <$> H.subscribe (Dismiss.escape (HTMLDocument.toEventTarget doc) EscapePressed)
@@ -337,7 +359,7 @@ closeDialog = do
     for_ st.escSub H.unsubscribe
     for_ st.postSub H.unsubscribe
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    when st.locked (liftEffect ScrollLock.unlock)
+    when st.locked (liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll))
     H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, escSub = Nothing, postSub = Nothing, locked = false }
     H.raise (OpenChanged false)
 

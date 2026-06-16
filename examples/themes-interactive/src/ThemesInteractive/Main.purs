@@ -192,7 +192,9 @@ dialogStyle =
 alertDialogInput :: AlertDialog.Input
 alertDialogInput = AlertDialog.defaultInput
   { style = alertDialogStyle
-  , contentStyle = "--max-width: 450px"
+  , triggerAttrs = [ Tuple "accent-color" "red" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--max-width: 450px; pointer-events: auto;"
   , trigger = [ HH.text "Revoke access" ]
   , title = [ HH.text "Revoke access" ]
   , description = [ HH.text "Are you sure? This application will no longer be accessible." ]
@@ -208,7 +210,7 @@ alertDialogInput = AlertDialog.defaultInput
 alertDialogStyle :: AlertDialog.Style
 alertDialogStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"
-  , overlay: cn "rt-BaseDialogOverlay rt-AlertDialogOverlay"
+  , overlay: cn "light radix-themes rt-BaseDialogOverlay rt-AlertDialogOverlay"
   , scroll: cn "rt-BaseDialogScroll rt-AlertDialogScroll"
   , scrollPadding: cn "rt-BaseDialogScrollPadding rt-AlertDialogScrollPadding rt-r-align-center"
   , content: cn "rt-BaseDialogContent rt-AlertDialogContent rt-r-max-w rt-r-size-3"
