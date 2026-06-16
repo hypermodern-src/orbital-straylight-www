@@ -21,14 +21,17 @@ try {
   await content.waitFor();
   await pg.waitForTimeout(200); // AfterOpen → reposition → finalize (portal + focus)
 
-  // 1. portal-to-body: the content node itself is a direct child of <body>.
+  // 1. portal-to-body: the content sits inside a popper-content-wrapper that is a direct
+  //    child of <body>, so walk up to a body-child ancestor.
   const portal = await pg.evaluate(() => {
     const c = document.querySelector(".popover-content");
-    return { found: !!c, parentIsBody: !!c && c.parentElement === document.body, parentTag: c && c.parentElement && c.parentElement.tagName };
+    let n = c, toBody = false;
+    while (n && n.parentElement) { if (n.parentElement === document.body) { toBody = true; break; } n = n.parentElement; }
+    return { found: !!c, toBody, parentTag: c && c.parentElement && c.parentElement.tagName };
   });
   if (!portal.found) fail("no .popover-content after open");
-  if (!portal.parentIsBody) fail(`content not portaled to body (parent = ${portal.parentTag})`);
-  console.log("✓ portal-to-body: popover content is a direct child of <body>");
+  if (!portal.toBody) fail(`content not portaled to body (parent = ${portal.parentTag})`);
+  console.log("✓ portal-to-body: popover content's wrapper is a direct child of <body>");
 
   // 2. Popper positioned it: data-side stamped + content moved off the (0,0) origin.
   const pos = await pg.evaluate(() => {

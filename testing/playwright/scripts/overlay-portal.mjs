@@ -53,8 +53,9 @@ try {
     return { found: true, ancestorToBody, contentToBody };
   }, cfg.content);
   if (!portal.found) fail(`no ${cfg.content} after open`);
-  const portaled = cfg.kind === "modal" ? portal.ancestorToBody : portal.contentToBody;
-  if (!portaled) fail(`not portaled to body (kind=${cfg.kind}, ancestor→body=${portal.ancestorToBody}, content→body=${portal.contentToBody})`);
+  // every overlay now portals a WRAPPER (modal overlay / popper-content-wrapper / select
+  // position div) that CONTAINS the content, so walk up to a direct body-child ancestor.
+  if (!portal.ancestorToBody) fail(`not portaled to body (kind=${cfg.kind}, ancestor→body=${portal.ancestorToBody}, content→body=${portal.contentToBody})`);
   console.log(`✓ portal-to-body (${cfg.kind})`);
 
   // 2. floating overlays are positioned by Popper (data-side stamped + off-origin)
