@@ -32,6 +32,7 @@ module Hydrogen.Radix.Foundation.Dom
   ( computedStyle
   , inlineStyle
   , setInlineStyle
+  , queueMicrotask
   ) where
 
 import Data.Unit (Unit)
@@ -53,3 +54,12 @@ foreign import inlineStyle :: HTMLElement -> String -> Effect String
 -- | single point of style mutation in the port: positioning and scroll-lock are
 -- | both built on it. Passing `""` clears the property.
 foreign import setInlineStyle :: HTMLElement -> String -> String -> Effect Unit
+
+-- | Schedule `eff` as a microtask: after the current synchronous work (including Halogen's
+-- | render flush) but before the next macrotask. Used to focus a just-opened menu's content
+-- | before a keypress can land on the stale focus — a `requestAnimationFrame` runs a frame
+-- | too late and the first arrow key is lost.
+queueMicrotask :: Effect Unit -> Effect Unit
+queueMicrotask = queueMicrotask_
+
+foreign import queueMicrotask_ :: Effect Unit -> Effect Unit

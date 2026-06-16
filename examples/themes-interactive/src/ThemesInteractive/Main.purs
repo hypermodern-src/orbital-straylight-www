@@ -329,6 +329,9 @@ hoverCardStyle =
 dropdownMenuInput :: DropdownMenu.Input
 dropdownMenuInput = DropdownMenu.defaultInput
   { style = menuStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
   , trigger = [ HH.text "Options", chevron ]
   , entries =
       [ menuRow "edit" "Edit" "⌘ E" ""
@@ -355,8 +358,11 @@ menuRow value label shortcut accent =
 menuStyle :: DropdownMenu.Style
 menuStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
-  , content: cn "rt-BaseMenuContent rt-DropdownMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
-  , viewport: cn "rt-BaseMenuViewport rt-DropdownMenuViewport"
+  , content: cn "light radix-themes rt-BaseMenuContent rt-DropdownMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , scrollRoot: cn "rt-ScrollAreaRoot"
+  , scrollViewport: cn "rt-ScrollAreaViewport"
+  , menuViewport: cn "rt-BaseMenuViewport rt-DropdownMenuViewport"
+  , focusRing: cn "rt-ScrollAreaViewportFocusRing"
   , item: cn "rt-BaseMenuItem rt-DropdownMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-DropdownMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-DropdownMenuSeparator"

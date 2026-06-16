@@ -19,3 +19,10 @@ export const inlineStyle = el => prop => () =>
 export const setInlineStyle = el => prop => value => () => {
   el.style.setProperty(prop, value);
 };
+
+// queueMicrotask(eff): run eff after the current task + synchronous render flush but BEFORE
+// the next macrotask (a fired event). No web-* binding exposes it; used to move focus into a
+// just-opened menu before a driver/user keypress lands (a requestAnimationFrame is too late).
+export const queueMicrotask_ = eff => () => {
+  queueMicrotask(eff);
+};

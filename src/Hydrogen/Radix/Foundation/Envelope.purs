@@ -17,6 +17,7 @@ module Hydrogen.Radix.Foundation.Envelope
   , unlockScroll
   , addFocusGuards
   , removeFocusGuards
+  , reAdoptBeforeTrail
   , hideOthers
   , showOthers
   ) where
@@ -126,6 +127,20 @@ removeFocusGuards = do
       removeChild (toNode lead) bodyNode
       removeChild (toNode trail) bodyNode
     Ref.write Nothing guardEls
+
+-- | Re-adopt a portaled element into body keeping it BEFORE the trailing focus guard (so
+-- | the body order [lead, #root, el, trail] is preserved). A Halogen re-render re-parents
+-- | the portaled node back under its vdom parent; this puts it back without disturbing the
+-- | guards (plain appendChild would land it after the trailing guard).
+reAdoptBeforeTrail :: HTMLElement -> Effect Unit
+reAdoptBeforeTrail wrap = do
+  mg <- Ref.read guardEls
+  withBody \body -> do
+    let bodyNode = HTMLElement.toNode body
+        wrapNode = HTMLElement.toNode wrap
+    case mg of
+      Just { trail } -> insertBefore wrapNode (toNode trail) bodyNode
+      Nothing -> appendChild wrapNode bodyNode
 
 -- ── hideOthers / showOthers (modal) ─────────────────────────────────────────────
 bodyChildren :: Effect (Array Element)

@@ -41,6 +41,7 @@ import Prelude
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -51,8 +52,11 @@ import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Dom as Dom
+import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), Orientation(..), cn, classes, dataState, dataAttr, sideName, alignName, role, aria)
 import Web.DOM.Node (Node)
@@ -98,7 +102,10 @@ itemCount = Array.length <<< Array.filter case _ of
 type Style =
   { trigger :: ClassNames
   , content :: ClassNames
-  , viewport :: ClassNames    -- the inner items wrapper (rt-BaseMenuViewport)
+  , scrollRoot :: ClassNames     -- rt-ScrollAreaRoot
+  , scrollViewport :: ClassNames -- rt-ScrollAreaViewport
+  , menuViewport :: ClassNames   -- rt-BaseMenuViewport (the items wrapper)
+  , focusRing :: ClassNames      -- rt-ScrollAreaViewportFocusRing
   , item :: ClassNames
   , shortcut :: ClassNames    -- the right-aligned shortcut span
   , separator :: ClassNames
@@ -108,7 +115,10 @@ defaultStyle :: Style
 defaultStyle =
   { trigger: cn "rdx-dropdown-trigger"
   , content: cn "rdx-dropdown-content"
-  , viewport: cn "rdx-dropdown-viewport"
+  , scrollRoot: cn "rdx-dropdown-scroll-root"
+  , scrollViewport: cn "rdx-dropdown-scroll-viewport"
+  , menuViewport: cn "rdx-dropdown-viewport"
+  , focusRing: cn "rdx-dropdown-focus-ring"
   , item: cn "rdx-dropdown-item"
   , shortcut: cn "rdx-dropdown-shortcut"
   , separator: cn "rdx-dropdown-separator"
@@ -125,6 +135,9 @@ type Input =
   , idPrefix :: String
   , style :: Style
   , trigger :: Array HH.PlainHTML
+  , contentStyle :: String     -- the content's CONSTANT style (outline + menu vars + pointer-events)
+  , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
+  , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
   }
 
 defaultInput :: Input
@@ -139,6 +152,9 @@ defaultInput =
   , idPrefix: "rdx-dropdown"
   , style: defaultStyle
   , trigger: []
+  , contentStyle: ""
+  , triggerAttrs: []
+  , portalAttrs: []
   }
 
 data Output
@@ -168,14 +184,20 @@ type State =
   , idPrefix :: String
   , style :: Style
   , trigger :: Array HH.PlainHTML
+  , contentStyle :: String
+  , triggerAttrs :: Array (Tuple String String)
+  , portalAttrs :: Array (Tuple String String)
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentNode :: Maybe Node
+  , triggerId :: String   -- generated on Initialize; the content's aria-labelledby source
+  , contentId :: String   -- generated on Initialize; the trigger's aria-controls target + content id
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | TriggerClicked
   | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
@@ -190,8 +212,14 @@ triggerRef = H.RefLabel "rdx-dropdown-trigger"
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-dropdown-content"
 
+wrapperRef :: H.RefLabel
+wrapperRef = H.RefLabel "rdx-dropdown-wrapper"
+
 itemRef :: String -> Int -> H.RefLabel
 itemRef pfx i = H.RefLabel (pfx <> "-item-" <> show i)
+
+portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -202,6 +230,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -219,10 +248,15 @@ initialState input =
   , idPrefix: input.idPrefix
   , style: input.style
   , trigger: input.trigger
+  , contentStyle: input.contentStyle
+  , triggerAttrs: input.triggerAttrs
+  , portalAttrs: input.portalAttrs
   , restoreEl: Nothing
   , subs: []
   , postSub: Nothing
   , contentNode: Nothing
+  , triggerId: ""
+  , contentId: ""
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -230,34 +264,73 @@ render st =
   let
     open = current st.ctrl
   in
-    HH.div_
+    -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
+    HH.div [ HP.style "display:contents" ]
       [ HH.button
-          [ HP.type_ HP.ButtonButton
-          , HP.ref triggerRef
-          , classes st.style.trigger
-          , aria "expanded" (if open then "true" else "false")
-          , aria "haspopup" "menu"
-          , dataState (if open then "open" else "closed")
-          , HE.onClick \_ -> TriggerClicked
-          ]
+          ( [ HP.type_ HP.ButtonButton
+            , HP.ref triggerRef
+            , HP.id st.triggerId
+            , classes st.style.trigger
+            , aria "expanded" (if open then "true" else "false")
+            , aria "haspopup" "menu"
+            , dataState (if open then "open" else "closed")
+            , dataAttr "radix-popper-side" (sideName st.placedSide)
+            , dataAttr "radix-popper-align" (alignName st.placedAlign)
+            , HE.onClick \_ -> TriggerClicked
+            ]
+              <> (if open then [ aria "controls" st.contentId ] else [])
+              <> portalData st.triggerAttrs
+          )
           (map HH.fromPlainHTML st.trigger)
-      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
-      -- node — only patches it — which makes adopting it into body safe. The open-state
-      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
-      -- the left/top Popper applies via FFI; closing adds display:none.
+      -- the popper WRAPPER (portal root) — position:fixed up front (shrink-to-fit measure);
+      -- the rest of its style is FFI (positionWrapper).
       , HH.div
-          [ HP.ref contentRef
-          , role "menu"
-          , classes st.style.content
-          , dataState (if open then "open" else "closed")
-          , dataAttr "side" (sideName st.placedSide)
-          , dataAttr "align" (alignName st.placedAlign)
-          , HP.tabIndex (-1)
-          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
-          , HE.onKeyDown MenuKeyDown
+          [ HP.ref wrapperRef
+          , dataAttr "radix-popper-content-wrapper" ""
+          , dir "ltr"
+          , HP.style (if open then "position: fixed;" else "display:none;")
           ]
-          [ HH.div [ classes st.style.viewport ] (renderEntries st) ]
+          [ HH.div
+              ( [ HP.ref contentRef
+                , HP.id st.contentId
+                , role "menu"
+                , classes st.style.content
+                , aria "labelledby" st.triggerId
+                , aria "orientation" "vertical"
+                , dataState (if open then "open" else "closed")
+                , dataAttr "side" (sideName st.placedSide)
+                , dataAttr "align" (alignName st.placedAlign)
+                , dataAttr "orientation" "vertical"
+                , dataAttr "radix-menu-content" ""
+                , dir "ltr"
+                , HP.tabIndex (-1)
+                , HP.style st.contentStyle
+                , HE.onKeyDown MenuKeyDown
+                ] <> portalData st.portalAttrs
+              )
+              -- the rt-ScrollArea nesting upstream wraps menu items in:
+              -- scrollRoot > [ scrollViewport > table-div > menuViewport > items, focusRing ]
+              [ HH.div
+                  [ classes st.style.scrollRoot
+                  , dir "ltr"
+                  , HP.style "position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+                  ]
+                  [ HH.div
+                      [ classes st.style.scrollViewport
+                      , dataAttr "radix-scroll-area-viewport" ""
+                      , HP.style "overflow: scroll;"
+                      ]
+                      [ HH.div [ HP.style "min-width: 100%; display: table;" ]
+                          [ HH.div [ classes st.style.menuViewport ] (renderEntries st) ]
+                      ]
+                  , HH.div [ classes st.style.focusRing ] []
+                  ]
+              ]
+          ]
       ]
+
+dir :: forall r i. String -> HP.IProp r i
+dir = HP.attr (HH.AttrName "dir")
 
 -- | Render the entries, threading a running focusable-item index so separators are
 -- | skipped in the roving order (only MenuItemEntry consumes an index / gets a ref).
@@ -284,6 +357,7 @@ renderItem st idx item =
       , dataAttr "orientation" "vertical"
       , HE.onClick \_ -> ItemClicked item.value
       ]
+        <> (if st.focused == idx then [ dataAttr "highlighted" "" ] else [])
         <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
         <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
     )
@@ -302,6 +376,10 @@ renderSep st =
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize -> do
+    tid <- useId
+    cid <- useId
+    H.modify_ _ { triggerId = tid, contentId = cid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -313,6 +391,9 @@ handleAction = case _ of
       , idPrefix = input.idPrefix
       , style = input.style
       , trigger = input.trigger
+      , contentStyle = input.contentStyle
+      , triggerAttrs = input.triggerAttrs
+      , portalAttrs = input.portalAttrs
       }
   TriggerClicked -> do
     st <- H.get
@@ -338,15 +419,20 @@ handleAction = case _ of
       Stay -> pure unit
       MoveTo idx -> do
         H.modify_ _ { focused = idx }
-        focusItem st.idPrefix idx
+        -- the focused-state re-render re-parents the wrapper out of body; on the next frame
+        -- re-adopt it (before the trailing guard, preserving order) then focus the item.
+        mwrap <- H.getHTMLElementRef wrapperRef
+        mitem <- H.getHTMLElementRef (itemRef st.idPrefix idx)
+        liftEffect $ Dom.queueMicrotask do
+          for_ mwrap Envelope.reAdoptBeforeTrail
+          for_ mitem HTMLElement.focus
   ItemClicked value -> do
     H.raise (ItemSelected value)
     closeMenu
-  -- scroll/resize: re-place, then re-assert the portal (the placement modify re-parents
-  -- the content back out of body, so re-adopt on the following frame). No re-focus.
-  Reposition -> do
-    reposition
-    finalize false
+  -- scroll/resize: just re-place. NOT re-adopt — the wrapper stays in body across renders
+  -- (Halogen patches it in place), and re-adopting would move it past the trailing focus
+  -- guard AND blur the focused content. (This bit the menu because lockScroll fires resize.)
+  Reposition -> reposition
 
 openMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openMenu = do
@@ -356,7 +442,9 @@ openMenu = do
     -- needed for it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
     mprev <- liftEffect (HTMLDocument.activeElement doc)
-    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = 0, restoreEl = mprev }
+    -- open with NO item highlighted (focus goes to the menu content; the first ArrowDown
+    -- highlights an item) — matches radix. focused = -1 means "no roving highlight".
+    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = -1, restoreEl = mprev }
     H.raise (OpenChanged true)
     mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
     win <- liftEffect Popper.windowTarget
@@ -377,23 +465,33 @@ scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Outpu
 scheduleAfterOpen = do
   { emitter, listener } <- liftEffect HS.create
   sid <- H.subscribe (AfterOpen <$ emitter)
-  liftEffect (Portal.afterFrame (HS.notify listener unit))
+  -- a MICROTASK, not a frame: AfterOpen must focus the content before the open-state driver's
+  -- first arrow key (which fires on the next macrotask). A rAF would be a frame too late.
+  liftEffect (Dom.queueMicrotask (HS.notify listener unit))
   pure sid
 
 -- | On the next frame (after the placement modify's render re-parents the content),
 -- | adopt the content into body — and, on open, focus the first item AFTER the move so
 -- | the appendChild doesn't blur it.
+-- | Adopt the WRAPPER into body; on open layer the MODAL menu envelope (radix DropdownMenu
+-- | is modal: scroll-lock + focus guards + aria-hide siblings) and focus the menu content.
+-- | SYNCHRONOUS (not an afterFrame): with the guarded reposition there's no pending re-render
+-- | to re-parent the wrapper, so the content can be focused in this same frame — the
+-- | open-state driver fires its arrow keys immediately, before a deferred focus would land.
 finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
 finalize focusToo = do
   mbody <- liftEffect Portal.documentBody
-  mc <- H.getHTMLElementRef contentRef
-  case mbody, mc of
-    Just body, Just content -> do
-      st <- H.get
-      mitem <- H.getHTMLElementRef (itemRef st.idPrefix st.focused)
-      liftEffect $ Portal.afterFrame do
-        Portal.adopt body (HTMLElement.toElement content)
-        when focusToo (for_ mitem HTMLElement.focus)
+  mwrap <- H.getHTMLElementRef wrapperRef
+  -- radix focuses the menu CONTENT on open (role=menu, tabindex=-1), not an item.
+  mcontent <- if focusToo then H.getHTMLElementRef contentRef else pure Nothing
+  case mbody, mwrap of
+    Just body, Just wrap -> liftEffect do
+      Portal.adopt body (HTMLElement.toElement wrap)
+      when focusToo do
+        Envelope.lockScroll
+        Envelope.addFocusGuards
+        Envelope.hideOthers wrap
+        for_ mcontent HTMLElement.focus
     _, _ -> pure unit
 
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
@@ -402,27 +500,28 @@ closeMenu = do
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
-    -- restore focus to the trigger captured on open
+    -- tear down the modal envelope + restore focus to the trigger captured on open
+    liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
     H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
     H.raise (OpenChanged false)
-
-focusItem :: forall m. MonadEffect m => String -> Int -> H.HalogenM State Action () Output m Unit
-focusItem pfx idx = do
-  mel <- H.getHTMLElementRef (itemRef pfx idx)
-  for_ mel (liftEffect <<< HTMLElement.focus)
 
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
   st <- H.get
   manchor <- H.getHTMLElementRef triggerRef
+  mwrap <- H.getHTMLElementRef wrapperRef
   mfloat <- H.getHTMLElementRef contentRef
-  case manchor, mfloat of
-    Just anchor, Just floating -> do
-      placed <- liftEffect (Popper.position
-        { anchor, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
-      H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
-    _, _ -> pure unit
+  case manchor, mwrap, mfloat of
+    Just anchor, Just wrapper, Just floating -> do
+      placed <- liftEffect (Popper.positionWrapper
+        { anchor, wrapper, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
+      -- only modify (→ re-render, which re-parents the portaled wrapper) when the placement
+      -- actually changed; a no-op reposition (e.g. the resize lockScroll fires) must not
+      -- re-render, or the wrapper leaves body and we'd need to re-adopt.
+      when (placed.placement.side /= st.placedSide || placed.placement.align /= st.placedAlign) $
+        H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
+    _, _, _ -> pure unit
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
