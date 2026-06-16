@@ -22,16 +22,18 @@ try {
   await pg.getByRole("dialog").waitFor();
   await pg.waitForTimeout(150); // let the AfterOpen rAF (portal + focus) fire
 
-  // 1. portal-to-body: the overlay wrapper (the dialog's parent) is a DIRECT child of
-  //    <body> — i.e. it was lifted out of its Halogen render parent.
+  // 1. portal-to-body: the overlay (the portaled themed root: body > overlay > scroll >
+  //    padding > content) is a DIRECT child of <body>.
   const portal = await pg.evaluate(() => {
     const d = document.querySelector('[role="dialog"]');
-    const wrap = d && d.parentElement;
-    return { found: !!d, wrapParentIsBody: !!wrap && wrap.parentElement === document.body, wrapParentTag: wrap && wrap.parentElement && wrap.parentElement.tagName };
+    if (!d) return { found: false };
+    let el = d;
+    while (el.parentElement && el.parentElement !== document.body) el = el.parentElement;
+    return { found: true, rootIsBodyChild: el.parentElement === document.body };
   });
   if (!portal.found) fail("no [role=dialog] after open");
-  if (!portal.wrapParentIsBody) fail(`overlay not portaled to body (wrapper parent = ${portal.wrapParentTag})`);
-  console.log("✓ portal-to-body: overlay wrapper is a direct child of <body>");
+  if (!portal.rootIsBodyChild) fail("overlay not portaled to body (no body-child ancestor of the dialog)");
+  console.log("✓ portal-to-body: the overlay root is a direct child of <body>");
 
   // 2. focus moved into the dialog on open.
   const focusedIn = await pg.evaluate(() => { const d = document.querySelector('[role="dialog"]'); return !!d && !!document.activeElement && d.contains(document.activeElement); });

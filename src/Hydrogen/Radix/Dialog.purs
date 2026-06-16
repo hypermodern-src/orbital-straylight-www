@@ -54,15 +54,20 @@ import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
+import Web.UIEvent.MouseEvent as ME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- | Per-part class lists.
+-- | Per-part class lists. `scroll`/`scrollPadding` are the layout wrappers between the
+-- | overlay and the content (radix-themes' centering + scroll-when-tall structure); the
+-- | bare primitive leaves them semantic, a preset supplies the rt-* classes.
 type Style =
   { trigger :: ClassNames
   , overlay :: ClassNames
+  , scroll :: ClassNames
+  , scrollPadding :: ClassNames
   , content :: ClassNames
   , title :: ClassNames
   , description :: ClassNames
@@ -72,6 +77,8 @@ defaultStyle :: Style
 defaultStyle =
   { trigger: cn "rdx-dialog-trigger"
   , overlay: cn "rdx-dialog-overlay"
+  , scroll: cn "rdx-dialog-scroll"
+  , scrollPadding: cn "rdx-dialog-scroll-padding"
   , content: cn "rdx-dialog-content"
   , title: cn "rdx-dialog-title"
   , description: cn "rdx-dialog-description"
@@ -139,7 +146,7 @@ data Action
   = Initialize
   | Receive Input
   | TriggerClicked
-  | OverlayClicked
+  | OverlayClicked ME.MouseEvent
   | ContentKeyDown KE.KeyboardEvent
   | EscapePressed
   | AfterOpen           -- runs after the open render flushed: portal + focus
@@ -216,35 +223,37 @@ render st =
 -- | `display:none` when closed. On open it is adopted into `document.body` (AfterOpen).
 overlayContent :: forall m. Boolean -> State -> H.ComponentHTML Action () m
 overlayContent open st =
+  -- The OVERLAY is the portaled, themed root (matches upstream: body > overlay > scroll >
+  -- scrollPadding > content). It carries the backdrop (position:fixed inset:0) and the
+  -- click-outside handler; the scroll/padding wrappers center the content + scroll-when-tall.
   HH.div
     [ HP.ref portalRef
-    , HP.style (if open then "" else "display:none")
+    , classes st.style.overlay
+    , dataState (if open then "open" else "closed")
+    , HP.style ("position:fixed;inset:0;" <> (if open then "" else "display:none;"))
+    , HE.onClick OverlayClicked
     ]
-    [ HH.div
-        [ classes st.style.overlay
-        , dataState (if open then "open" else "closed")
-        , HP.style "position:fixed;inset:0;"
-        , HE.onClick \_ -> OverlayClicked
-        ]
-        []
-    , HH.div
-        ( [ HP.ref contentRef
-          , HP.id st.contentId
-          , classes st.style.content
-          , roleAttr "dialog"
-          -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
-          , dataState (if open then "open" else "closed")
-          , HP.tabIndex (-1)
-          , HP.style "position:fixed;"
-          , HE.onKeyDown ContentKeyDown
-          ]
-            -- link title/description only when present (radix is conditional)
-            <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
-            <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
-        )
-        [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
-        , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
-        , HH.div_ (map HH.fromPlainHTML st.content)
+    [ HH.div [ classes st.style.scroll ]
+        [ HH.div [ classes st.style.scrollPadding ]
+            [ HH.div
+                ( [ HP.ref contentRef
+                  , HP.id st.contentId
+                  , classes st.style.content
+                  , roleAttr "dialog"
+                  -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
+                  , dataState (if open then "open" else "closed")
+                  , HP.tabIndex (-1)
+                  , HE.onKeyDown ContentKeyDown
+                  ]
+                    -- link title/description only when present (radix is conditional)
+                    <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
+                    <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
+                )
+                [ HH.div ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
+                , HH.div ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
+                , HH.div_ (map HH.fromPlainHTML st.content)
+                ]
+            ]
         ]
     ]
 
@@ -268,9 +277,15 @@ handleAction = case _ of
       , content = input.content
       }
   TriggerClicked -> openDialog
-  OverlayClicked -> do
+  -- click on the overlay/scroll/padding (outside the content) closes — guard with
+  -- isOutside so a click on the content (which bubbles up here) does NOT close.
+  OverlayClicked me -> do
     st <- H.get
-    when st.closeOnOutsideClick closeDialog
+    when st.closeOnOutsideClick do
+      mc <- H.getHTMLElementRef contentRef
+      for_ mc \content -> do
+        outside <- liftEffect (Dismiss.isOutside (HTMLElement.toNode content) (ME.toEvent me))
+        when outside closeDialog
   EscapePressed -> do
     st <- H.get
     when st.closeOnEscape closeDialog
