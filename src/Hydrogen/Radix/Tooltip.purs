@@ -79,6 +79,7 @@ type Input =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String      -- extra inline style on the content (e.g. --max-width)
   }
 
 defaultInput :: Input
@@ -92,6 +93,7 @@ defaultInput =
   , style: defaultStyle
   , trigger: []
   , content: []
+  , contentStyle: ""
   }
 
 data Output = OpenChanged Boolean
@@ -115,6 +117,7 @@ type State =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -161,6 +164,7 @@ initialState input =
   , style: input.style
   , trigger: input.trigger
   , content: input.content
+  , contentStyle: input.contentStyle
   , placedSide: input.side
   , placedAlign: input.align
   , restoreEl: Nothing
@@ -199,7 +203,9 @@ render st =
           , dataState (if open then "open" else "closed")
           , dataAttr "side" (sideName st.placedSide)
           , dataAttr "align" (alignName st.placedAlign)
-          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
+          -- CONSTANT style string (contentStyle is from input) so Halogen never clobbers
+          -- the left/top Popper applies via FFI.
+          , HP.style ("position:fixed;left:0;top:0;" <> st.contentStyle <> (if open then "" else "display:none;"))
           ]
           (map HH.fromPlainHTML st.content)
       ]
@@ -219,6 +225,7 @@ handleAction = case _ of
       , style = input.style
       , trigger = input.trigger
       , content = input.content
+      , contentStyle = input.contentStyle
       }
   Show -> openTooltip
   Hide -> closeTooltip

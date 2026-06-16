@@ -22,7 +22,9 @@ import Halogen.VDom.Driver (runUI)
 import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.Foundation.Style (Align(..), cn)
+import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
+import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
@@ -39,6 +41,8 @@ type Slots =
   ( dialog :: Dialog.Slot Unit
   , alertdialog :: AlertDialog.Slot Unit
   , popover :: Popover.Slot Unit
+  , tooltip :: Tooltip.Slot Unit
+  , hovercard :: HoverCard.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -49,6 +53,12 @@ _alertdialog = Proxy
 
 _popover :: Proxy "popover"
 _popover = Proxy
+
+_tooltip :: Proxy "tooltip"
+_tooltip = Proxy
+
+_hovercard :: Proxy "hovercard"
+_hovercard = Proxy
 
 main :: Effect Unit
 main = do
@@ -74,6 +84,8 @@ view c = box [ P "6" ]
       "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
       "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
       "popover" -> HH.slot_ _popover unit Popover.component popoverInput
+      "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
+      "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
       _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
   ]
 
@@ -167,6 +179,42 @@ popoverStyle :: Popover.Style
 popoverStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
   , content: cn "rt-PopoverContent rt-PopperContent rt-r-max-w rt-r-size-2 rt-r-w"
+  }
+
+-- | The themed Tooltip: a small floating label opened by hover. Near the top of the
+-- | viewport the preferred Top side collides and Popper flips to bottom (matching the
+-- | golden's data-side=bottom). The driver hovers the trigger to open it.
+tooltipInput :: Tooltip.Input
+tooltipInput = Tooltip.defaultInput
+  { style = tooltipStyle
+  , trigger = [ HH.text "Hover me" ]
+  , content = [ textAs "p" [ Size "1", Class "rt-TooltipText" ] [ HH.text "Add to library" ] ]
+  }
+
+tooltipStyle :: Tooltip.Style
+tooltipStyle =
+  { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+  , content: cn "rt-TooltipContent rt-r-max-w"
+  }
+
+-- | The themed HoverCard: an inline link trigger (@radix_ui) that, on hover, reveals a
+-- | small gray-text card. bottom-start, 300px max-width (the upstream demo).
+hoverCardInput :: HoverCard.Input
+hoverCardInput = HoverCard.defaultInput
+  { align = Start
+  , style = hoverCardStyle
+  , contentStyle = "--max-width: 300px;"
+  , trigger = [ HH.text "@radix_ui" ]
+  , content =
+      [ textAs "div" [ Size "1", Color "gray" ]
+          [ HH.text "The design system for building modern web applications." ]
+      ]
+  }
+
+hoverCardStyle :: HoverCard.Style
+hoverCardStyle =
+  { trigger: cn "rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"
+  , content: cn "rt-HoverCardContent rt-PopperContent rt-r-max-w rt-r-size-2"
   }
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────

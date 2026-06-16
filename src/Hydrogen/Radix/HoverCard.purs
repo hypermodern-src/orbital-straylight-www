@@ -87,8 +87,10 @@ type Input =
   , offset :: Number            -- gap from the trigger
   , padding :: Number           -- min gap from viewport edges
   , style :: Style
+  , triggerHref :: String       -- the trigger is an inline link (radix HoverCard semantics)
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String      -- extra inline style on the content (e.g. --max-width)
   }
 
 defaultInput :: Input
@@ -100,8 +102,10 @@ defaultInput =
   , offset: 8.0
   , padding: 8.0
   , style: defaultStyle
+  , triggerHref: "#"
   , trigger: []
   , content: []
+  , contentStyle: ""
   }
 
 data Output = OpenChanged Boolean
@@ -123,8 +127,10 @@ type State =
   , offset :: Number
   , padding :: Number
   , style :: Style
+  , triggerHref :: String
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , contentStyle :: String
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (whatever was focused before open)
@@ -169,8 +175,10 @@ initialState input =
   , offset: input.offset
   , padding: input.padding
   , style: input.style
+  , triggerHref: input.triggerHref
   , trigger: input.trigger
   , content: input.content
+  , contentStyle: input.contentStyle
   , placedSide: input.side
   , placedAlign: input.align
   , restoreEl: Nothing
@@ -185,10 +193,16 @@ render st =
     open = current st.ctrl
   in
     HH.div_
-      [ HH.button
-          [ HP.type_ HP.ButtonButton
+      -- The trigger is an inline <a> (radix HoverCard wraps a link), not a button —
+      -- so it sits inline in prose and matches the rt-HoverCardTrigger/rt-Link look.
+      [ HH.a
+          [ HP.href st.triggerHref
           , HP.ref triggerRef
           , classes st.style.trigger
+          -- radix's Link always carries data-accent-color; its empty value means
+          -- "inherit the theme accent". rt-Link's color rule keys off the attribute's
+          -- PRESENCE (without it the link falls back to gray-12). Inert without themes CSS.
+          , dataAttr "accent-color" ""
           , dataState (if open then "open" else "closed")
           , HE.onMouseEnter \_ -> Show
           , HE.onMouseLeave \_ -> Hide
@@ -207,7 +221,9 @@ render st =
           , dataState (if open then "open" else "closed")
           , dataAttr "side" (sideName st.placedSide)
           , dataAttr "align" (alignName st.placedAlign)
-          , HP.style (if open then "position:fixed;left:0;top:0;" else "position:fixed;left:0;top:0;display:none;")
+          -- CONSTANT style string (contentStyle is from input) so Halogen never clobbers
+          -- the left/top Popper applies via FFI.
+          , HP.style ("position:fixed;left:0;top:0;" <> st.contentStyle <> (if open then "" else "display:none;"))
           , HE.onMouseEnter \_ -> Show
           , HE.onMouseLeave \_ -> Hide
           ]
@@ -227,8 +243,10 @@ handleAction = case _ of
       , offset = input.offset
       , padding = input.padding
       , style = input.style
+      , triggerHref = input.triggerHref
       , trigger = input.trigger
       , content = input.content
+      , contentStyle = input.contentStyle
       }
   Show -> openCard
   Hide -> closeCard
