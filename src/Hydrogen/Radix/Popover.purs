@@ -31,6 +31,7 @@ import Prelude
 
 import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -44,7 +45,8 @@ import Hydrogen.Radix.Behavior.FocusScope (captureFocus, tabLoop)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Portal as Portal
-import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria)
+import Hydrogen.Radix.Foundation.Envelope as Envelope
+import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria, role)
 import Web.DOM.Node (Node)
 import Web.Event.Event (Event, EventType(..), preventDefault)
 import Web.HTML as HTML
@@ -78,7 +80,9 @@ type Input =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
-  , contentStyle :: String      -- extra inline style on the content (e.g. --width/--max-width)
+  , contentStyle :: String      -- the content's CONSTANT style (--width + the var aliases)
+  , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
+  , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
   }
 
 defaultInput :: Input
@@ -93,6 +97,8 @@ defaultInput =
   , trigger: []
   , content: []
   , contentStyle: ""
+  , triggerAttrs: []
+  , portalAttrs: []
   }
 
 data Output = OpenChanged Boolean
@@ -117,6 +123,8 @@ type State =
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String
+  , triggerAttrs :: Array (Tuple String String)
+  , portalAttrs :: Array (Tuple String String)
   , placedSide :: Side          -- resolved placement (for data-side)
   , placedAlign :: Align
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -142,6 +150,14 @@ triggerRef = H.RefLabel "rdx-popover-trigger"
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-popover-content"
 
+-- | The popper-wrapper (the positioned `data-radix-popper-content-wrapper` div) — the
+-- | portal root adopted into body; the content sits statically inside it.
+wrapperRef :: H.RefLabel
+wrapperRef = H.RefLabel "rdx-popover-wrapper"
+
+portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
+
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
   H.mkComponent
@@ -166,6 +182,8 @@ initialState input =
   , trigger: input.trigger
   , content: input.content
   , contentStyle: input.contentStyle
+  , triggerAttrs: input.triggerAttrs
+  , portalAttrs: input.portalAttrs
   , placedSide: input.side
   , placedAlign: input.align
   , restoreEl: Nothing
@@ -180,7 +198,8 @@ render st =
   let
     open = current st.ctrl
   in
-    HH.div_
+    -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
+    HH.div [ HP.style "display:contents" ]
       [ HH.button
           ( [ HP.type_ HP.ButtonButton
             , HP.ref triggerRef
@@ -188,29 +207,40 @@ render st =
             , aria "expanded" (if open then "true" else "false")
             , aria "haspopup" "dialog"
             , dataState (if open then "open" else "closed")
+            , dataAttr "radix-popper-side" (sideName st.placedSide)
+            , dataAttr "radix-popper-align" (alignName st.placedAlign)
             , HE.onClick \_ -> TriggerClicked
             ]
               <> (if open then [ aria "controls" st.contentId ] else [])
+              <> portalData st.triggerAttrs
           )
           (map HH.fromPlainHTML st.trigger)
-      -- content is ALWAYS mounted (hidden when closed) so Halogen never removes the
-      -- node — only patches it — which makes adopting it into body safe. The open-state
-      -- style string is CONSTANT, so Halogen won't rewrite it on re-render and clobber
-      -- the left/top Popper applies via FFI; closing adds display:none.
+      -- The popper WRAPPER (the portal root) is ALWAYS mounted (hidden when closed) so
+      -- Halogen never removes it — only patches it — which makes adopting it into body safe.
+      -- Its style is set out-of-band by Popper.positionWrapper; the rendered string stays
+      -- CONSTANT (only the display toggle) so Halogen never clobbers the FFI writes.
       , HH.div
-          [ HP.ref contentRef
-          , HP.id st.contentId
-          , classes st.style.content
-          , dataState (if open then "open" else "closed")
-          , dataAttr "side" (sideName st.placedSide)
-          , dataAttr "align" (alignName st.placedAlign)
-          , HP.tabIndex (-1)
-          -- the style string stays CONSTANT across renders (contentStyle is from input) so
-          -- Halogen never rewrites it and clobbers the left/top Popper applies via FFI.
-          , HP.style ("position:fixed;left:0;top:0;" <> st.contentStyle <> (if open then "" else "display:none;"))
-          , HE.onKeyDown ContentKeyDown
+          [ HP.ref wrapperRef
+          , dataAttr "radix-popper-content-wrapper" ""
+          , HP.style (if open then "" else "display:none;")
           ]
-          (map HH.fromPlainHTML st.content)
+          [ HH.div
+              ( [ HP.ref contentRef
+                , HP.id st.contentId
+                , classes st.style.content
+                , role "dialog"
+                , dataState (if open then "open" else "closed")
+                , dataAttr "side" (sideName st.placedSide)
+                , dataAttr "align" (alignName st.placedAlign)
+                , HP.tabIndex (-1)
+                -- the content's CONSTANT style: --width + the --radix-popover-content-* var
+                -- aliases (the wrapper positions; the content itself is unpositioned).
+                , HP.style st.contentStyle
+                , HE.onKeyDown ContentKeyDown
+                ] <> portalData st.portalAttrs
+              )
+              (map HH.fromPlainHTML st.content)
+          ]
       ]
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
@@ -229,6 +259,8 @@ handleAction = case _ of
       , trigger = input.trigger
       , content = input.content
       , contentStyle = input.contentStyle
+      , triggerAttrs = input.triggerAttrs
+      , portalAttrs = input.portalAttrs
       }
   TriggerClicked -> do
     st <- H.get
@@ -293,12 +325,17 @@ scheduleAfterOpen = do
 finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
 finalize focusToo = do
   mbody <- liftEffect Portal.documentBody
+  mwrap <- H.getHTMLElementRef wrapperRef
   mc <- H.getHTMLElementRef contentRef
-  case mbody, mc of
-    Just body, Just content ->
+  case mbody, mwrap of
+    Just body, Just wrap ->
       liftEffect $ Portal.afterFrame do
-        Portal.adopt body (HTMLElement.toElement content)
-        when focusToo (void (captureFocus content))
+        -- adopt the WRAPPER (the positioned portal root); on open add the focus-guard
+        -- sentinels AFTER it (so the trailing guard lands last) and focus into the content.
+        Portal.adopt body (HTMLElement.toElement wrap)
+        when focusToo do
+          Envelope.addFocusGuards
+          for_ mc \content -> void (captureFocus content)
     _, _ -> pure unit
 
 closePopover :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
@@ -308,21 +345,24 @@ closePopover = do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+    liftEffect Envelope.removeFocusGuards
     H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
     H.raise (OpenChanged false)
 
--- | Measure + solve + apply, and stamp the resolved placement for data-side/align.
+-- | Measure + solve, position the WRAPPER (not the content), and stamp the resolved
+-- | placement for the trigger/content data-side/align.
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
   st <- H.get
   manchor <- H.getHTMLElementRef triggerRef
+  mwrap <- H.getHTMLElementRef wrapperRef
   mfloat <- H.getHTMLElementRef contentRef
-  case manchor, mfloat of
-    Just anchor, Just floating -> do
-      placed <- liftEffect (Popper.position
-        { anchor, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
+  case manchor, mwrap, mfloat of
+    Just anchor, Just wrapper, Just floating -> do
+      placed <- liftEffect (Popper.positionWrapper
+        { anchor, wrapper, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
       H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
-    _, _ -> pure unit
+    _, _, _ -> pure unit
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

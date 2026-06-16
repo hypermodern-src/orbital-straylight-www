@@ -227,7 +227,9 @@ popoverInput :: Popover.Input
 popoverInput = Popover.defaultInput
   { align = Start
   , style = popoverStyle
-  , contentStyle = "--width: 360px;"
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--width: 360px; --max-width: 9999px; " <> popperContentVars "popover"
   , trigger = [ HH.text "Comment" ]
   , content =
       [ flex [ Gap "3" ]
@@ -240,8 +242,19 @@ popoverInput = Popover.defaultInput
 popoverStyle :: Popover.Style
 popoverStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
-  , content: cn "rt-PopoverContent rt-PopperContent rt-r-max-w rt-r-size-2 rt-r-w"
+  , content: cn "light radix-themes rt-PopoverContent rt-PopperContent rt-r-max-w rt-r-size-2 rt-r-w"
   }
+
+-- | The `--radix-<c>-content-*` / `--radix-<c>-trigger-*` aliases radix writes inline on a
+-- | floating content, aliasing the wrapper's `--radix-popper-*` vars. `c` is the component
+-- | slug (popover / tooltip / hover-card).
+popperContentVars :: String -> String
+popperContentVars c =
+  "--radix-" <> c <> "-content-transform-origin: var(--radix-popper-transform-origin); "
+    <> "--radix-" <> c <> "-content-available-width: var(--radix-popper-available-width); "
+    <> "--radix-" <> c <> "-content-available-height: var(--radix-popper-available-height); "
+    <> "--radix-" <> c <> "-trigger-width: var(--radix-popper-anchor-width); "
+    <> "--radix-" <> c <> "-trigger-height: var(--radix-popper-anchor-height);"
 
 -- | The themed Tooltip: a small floating label opened by hover. Near the top of the
 -- | viewport the preferred Top side collides and Popper flips to bottom (matching the

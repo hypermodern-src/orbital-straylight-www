@@ -21,6 +21,7 @@ module Hydrogen.Radix.Float.Popper
   , applyPosition
   , windowTarget
   , position
+  , positionWrapper
   , positionAt
   , positionArrow
   , positionItemAligned
@@ -31,8 +32,8 @@ import Prelude
 import Data.Int (toNumber)
 import Effect (Effect)
 import Hydrogen.Radix.Foundation.Dom (setInlineStyle)
-import Hydrogen.Radix.Float.Compute (Coords, Positioned, Rect, computePosition)
-import Hydrogen.Radix.Foundation.Style (Align, Side(..))
+import Hydrogen.Radix.Float.Compute (Coords, Placement, Positioned, Rect, computePosition)
+import Hydrogen.Radix.Foundation.Style (Align(..), Side(..))
 import Web.DOM.Element as Element
 import Web.Event.EventTarget (EventTarget)
 import Web.HTML as HTML
@@ -91,6 +92,63 @@ position p = do
       , padding: p.padding
       }
   applyPosition p.floating { x: solved.x, y: solved.y }
+  pure solved
+
+-- | The popper transform-origin string, in the form radix/floating-ui emits: the cross
+-- | axis is `0%`/`100%` for start/end alignment and a px for center; the main axis a px.
+transformOriginFor :: Placement -> String
+transformOriginFor { align } =
+  let
+    cross = case align of
+      Start -> "0%"
+      Center -> "0px"
+      End -> "100%"
+  in
+    cross <> " 0px"
+
+-- | Position a radix-style POPPER WRAPPER (the `data-radix-popper-content-wrapper` div that
+-- | the content sits inside). Mirrors floating-ui's output: `position:fixed; left/top:0;
+-- | transform:translate(x,y)` plus the `--radix-popper-*` custom properties the content's
+-- | own vars alias. The properties are written in upstream's declaration order so the
+-- | serialized style attribute matches byte-for-byte (modulo the px the oracle normalizes).
+positionWrapper
+  :: { anchor :: HTMLElement
+     , wrapper :: HTMLElement
+     , floating :: HTMLElement
+     , side :: Side
+     , align :: Align
+     , offset :: Number
+     , padding :: Number
+     }
+  -> Effect Positioned
+positionWrapper p = do
+  anchor <- measureRect p.anchor
+  fl <- measureRect p.floating
+  boundary <- viewportRect
+  let
+    solved = computePosition
+      { anchor
+      , floating: { width: fl.width, height: fl.height }
+      , placement: { side: p.side, align: p.align }
+      , offset: p.offset
+      , boundary
+      , padding: p.padding
+      }
+    availW = boundary.width - 2.0 * p.padding
+    availH = boundary.height - 2.0 * p.padding
+    px n = show n <> "px"
+    set = setInlineStyle p.wrapper
+  set "position" "fixed"
+  set "left" "0px"
+  set "top" "0px"
+  set "transform" ("translate(" <> px solved.x <> ", " <> px solved.y <> ")")
+  set "min-width" "max-content"
+  set "z-index" "auto"
+  set "--radix-popper-available-width" (px availW)
+  set "--radix-popper-available-height" (px availH)
+  set "--radix-popper-anchor-width" (px anchor.width)
+  set "--radix-popper-anchor-height" (px anchor.height)
+  set "--radix-popper-transform-origin" (transformOriginFor solved.placement)
   pure solved
 
 -- | Position the floating element against a VIRTUAL zero-size anchor at a point (the

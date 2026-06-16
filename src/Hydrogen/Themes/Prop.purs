@@ -165,9 +165,11 @@ attrs base props =
     classTokens = filter (_ /= "") (a.free <> map snd (Map.toUnfoldable a.axes :: Array (Tuple String String)))
     classAttr = [ HP.class_ (HH.ClassName (joinWith " " classTokens)) ]
     styleList = Map.toUnfoldable a.styles :: Array (Tuple String String)
+    -- each declaration ends with `;` so the serialized style attribute matches the
+    -- browser's own (and React's) form — `height: 80px;`, not `height: 80px`.
     styleAttr =
       if null styleList then []
-      else [ HP.style (joinWith "; " (map (\(Tuple k v) -> k <> ": " <> v) styleList)) ]
+      else [ HP.style (joinWith " " (map (\(Tuple k v) -> k <> ": " <> v <> ";") styleList)) ]
     dataList = Map.toUnfoldable a.dataAttrs :: Array (Tuple String String)
     rawList = Map.toUnfoldable a.rawAttrs :: Array (Tuple String String)
     mkData (Tuple k v) = HP.attr (HH.AttrName ("data-" <> k)) v
