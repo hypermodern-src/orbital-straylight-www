@@ -38,10 +38,10 @@ view =
   where
   input = ContextMenu.defaultInput
     { trigger = [ HH.text "Right-click here" ]
-    , items =
-        [ { value: "back", label: [ HH.text "Back" ], disabled: false }
-        , { value: "forward", label: [ HH.text "Forward" ], disabled: true }
-        , { value: "reload", label: [ HH.text "Reload" ], disabled: false }
+    , entries =
+        [ ContextMenu.menuItem "back" [ HH.text "Back" ]
+        , ContextMenu.MenuItemEntry { value: "forward", label: [ HH.text "Forward" ], shortcut: [], accent: "", disabled: true }
+        , ContextMenu.menuItem "reload" [ HH.text "Reload" ]
         ]
     , style = ContextMenu.defaultStyle { content = cn "context-menu-content" }
     }

@@ -21,6 +21,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Hydrogen.Radix.AlertDialog as AlertDialog
+import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), cn)
@@ -46,6 +47,7 @@ type Slots =
   , tooltip :: Tooltip.Slot Unit
   , hovercard :: HoverCard.Slot Unit
   , dropdownmenu :: DropdownMenu.Slot Unit
+  , contextmenu :: ContextMenu.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -65,6 +67,9 @@ _hovercard = Proxy
 
 _dropdownmenu :: Proxy "dropdownmenu"
 _dropdownmenu = Proxy
+
+_contextmenu :: Proxy "contextmenu"
+_contextmenu = Proxy
 
 main :: Effect Unit
 main = do
@@ -93,6 +98,7 @@ view c = box [ P "6" ]
       "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
       "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
       "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
+      "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
       _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
   ]
 
@@ -261,6 +267,44 @@ menuStyle =
   , item: cn "rt-BaseMenuItem rt-DropdownMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-DropdownMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-DropdownMenuSeparator"
+  }
+
+-- | The themed ContextMenu: a dashed right-click area opening a solid menu panel. The
+-- | dashed box is the trigger CONTENT (its border is inline style the classes-only Style
+-- | can't carry); the primitive's wrapper div carries the contextmenu handler + data-state.
+-- | NOTE: the menu anchors to the trigger element (below it), not the cursor point — true
+-- | point-anchoring is the documented Float.Popper follow-up (STR-336).
+contextMenuInput :: ContextMenu.Input
+contextMenuInput = ContextMenu.defaultInput
+  { style = contextMenuStyle
+  , trigger =
+      [ flex
+          [ Align "center", Justify "center", Width "240px", Height "120px"
+          , StyleProp "border" "1px dashed var(--gray-6)", StyleProp "border-radius" "var(--radius-3)"
+          ]
+          [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
+      ]
+  , entries =
+      [ ctxRow "edit" "Edit" "⌘ E" ""
+      , ctxRow "duplicate" "Duplicate" "⌘ D" ""
+      , ContextMenu.menuSeparator
+      , ctxRow "delete" "Delete" "⌘ ⌫" "red"
+      ]
+  }
+
+ctxRow :: String -> String -> String -> String -> ContextMenu.MenuEntry
+ctxRow value label shortcut accent =
+  ContextMenu.MenuItemEntry
+    { value, label: [ HH.text label ], shortcut: [ HH.text shortcut ], accent, disabled: false }
+
+contextMenuStyle :: ContextMenu.Style
+contextMenuStyle =
+  { trigger: cn ""
+  , content: cn "rt-BaseMenuContent rt-ContextMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , viewport: cn "rt-BaseMenuViewport rt-ContextMenuViewport"
+  , item: cn "rt-BaseMenuItem rt-ContextMenuItem rt-reset"
+  , shortcut: cn "rt-BaseMenuShortcut rt-ContextMenuShortcut"
+  , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"
   }
 
 -- | The down-chevron (radix's TriggerIcon / SelectIcon) — same 9×9 currentColor path
