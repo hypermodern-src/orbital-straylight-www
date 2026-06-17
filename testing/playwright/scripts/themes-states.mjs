@@ -779,4 +779,27 @@ export const STATES = {
     // STATELESS: wait for the <label> carrying the for-association attribute.
     forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
   },
+  // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
+  // The story is defaultOpen, so the menu is mounted open at first paint — NO click. Wait for
+  // the role=menu, then for the variant's items: checkbox → a role=menuitemcheckbox carrying
+  // aria-checked=true (the checked ItemIndicator present); radio → a role=menuitemradio with
+  // aria-checked=true (the selected indicator). Keyed off UPSTREAM role/aria-checked only, so
+  // the same driver runs against golden and port.
+  dropdownmenuchecks: {
+    // CLICK-open (no defaultOpen) so the open→portal→scroll-lock lifecycle runs and the
+    // content lands in body with no item highlighted (pointer-open) — same path as
+    // dropdownmenu:open. Then wait for the variant's checked/unchecked item pair.
+    checkbox: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
 };

@@ -112,6 +112,9 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  # ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
+  "dropdownmenuchecks:checkbox"
+  "dropdownmenuchecks:radio"
 )
 
 echo "ℵ building golden dist (bun)"

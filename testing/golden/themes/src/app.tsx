@@ -1649,6 +1649,45 @@ const PAGES: Page[] = [
       </Box>
     ),
   },
+  // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem + RadioItem ──────────
+  // A SECOND dropdown-menu page (distinct id so the existing dropdownmenu oracles are
+  // untouched) exercising the item variants the flat-item story can't: CheckboxItem
+  // (role=menuitemcheckbox, aria-checked, data-state, ItemIndicator) and a RadioGroup of
+  // RadioItems (role=menuitemradio, single-selection aria-checked). `?s=checkbox` shows the
+  // checkbox group (one checked, one unchecked); `?s=radio` shows the radio group (one
+  // selected). The ItemIndicator span renders ONLY for a checked/selected item (Presence).
+  {
+    id: "dropdownmenuchecks",
+    label: "Dropdown Menu — checks",
+    interactive: true,
+    node: (() => {
+      const variant = currentState() || "checkbox";
+      return (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="soft">
+              View
+              <DropdownMenu.TriggerIcon />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            {variant === "radio" ? (
+              <DropdownMenu.RadioGroup value="medium">
+                <DropdownMenu.RadioItem value="small">Small</DropdownMenu.RadioItem>
+                <DropdownMenu.RadioItem value="medium">Medium</DropdownMenu.RadioItem>
+                <DropdownMenu.RadioItem value="large">Large</DropdownMenu.RadioItem>
+              </DropdownMenu.RadioGroup>
+            ) : (
+              <>
+                <DropdownMenu.CheckboxItem checked>Show Toolbar</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem checked={false}>Show Sidebar</DropdownMenu.CheckboxItem>
+              </>
+            )}
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      );
+    })(),
+  },
 ];
 
 function currentId(): string {

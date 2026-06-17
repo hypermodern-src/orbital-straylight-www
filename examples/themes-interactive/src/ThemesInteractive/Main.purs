@@ -99,6 +99,7 @@ type Slots =
   , toolbar :: Toolbar.Slot Unit
   , otp :: Otp.Slot Unit
   , form :: Form.Slot Unit
+  , dropdownmenuchecks :: DropdownMenu.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -188,6 +189,9 @@ _otp = Proxy
 _form :: Proxy "form"
 _form = Proxy
 
+_dropdownmenuchecks :: Proxy "dropdownmenuchecks"
+_dropdownmenuchecks = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -266,6 +270,10 @@ view c s =
             "aspectratioprim" -> aspectRatioPrimPage s
             "visuallyhiddenprim" -> visuallyHiddenPrimPage s
             "labelprim" -> labelPrimPage
+            -- Wave-C menus depth: a SECOND DropdownMenu exercising CheckboxItem / RadioItem
+            -- (defaultOpen, ?s=checkbox|radio). Distinct slot/id so the existing dropdownmenu
+            -- oracles are untouched.
+            "dropdownmenuchecks" -> HH.slot_ _dropdownmenuchecks unit DropdownMenu.component (dropdownChecksInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -535,6 +543,55 @@ menuStyle =
   , item: cn "rt-BaseMenuItem rt-DropdownMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-DropdownMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-DropdownMenuSeparator"
+  , checkboxItem: cn "rt-BaseMenuCheckboxItem rt-BaseMenuItem rt-DropdownMenuCheckboxItem rt-DropdownMenuItem"
+  , radioGroup: cn "rt-BaseMenuRadioGroup rt-DropdownMenuRadioGroup"
+  , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-DropdownMenuItem rt-DropdownMenuRadioItem"
+  , indicator: cn "rt-BaseMenuItemIndicator rt-DropdownMenuItemIndicator"
+  -- Radix Themes quirk: the CHECKBOX indicator icon carries `rt-ContextMenuItemIndicatorIcon`
+  -- (shared icon styling), while the RADIO indicator icon carries `rt-DropdownMenuItemIndicatorIcon`.
+  , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-DropdownMenuItemIndicatorIcon" ]
+  }
+
+-- | The ItemIndicator icon svg (the check mark) with a caller-supplied class. No data-state
+-- | / style on the svg itself — the gated wrapper <span> carries data-state (matches the golden).
+menuIndicatorIcon :: String -> HH.PlainHTML
+menuIndicatorIcon iconClass =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") iconClass
+    , HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ thickCheckPath ]
+
+-- | The Wave-C DropdownMenu-checks story: a defaultOpen menu whose `?s=` selects a CheckboxItem
+-- | pair (one checked, one unchecked) or a RadioGroup (medium selected). Reuses menuStyle so the
+-- | content/trigger chrome matches the canonical dropdownmenu; only the entries differ.
+dropdownChecksInput :: String -> DropdownMenu.Input
+dropdownChecksInput s = DropdownMenu.defaultInput
+  { style = menuStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
+  , trigger = [ HH.text "View", chevron ]
+  , entries =
+      if s == "radio" then
+        [ DropdownMenu.MenuRadioGroupEntry
+            { value: "medium"
+            , options:
+                [ { value: "small", label: [ HH.text "Small" ], shortcut: [], disabled: false }
+                , { value: "medium", label: [ HH.text "Medium" ], shortcut: [], disabled: false }
+                , { value: "large", label: [ HH.text "Large" ], shortcut: [], disabled: false }
+                ]
+            }
+        ]
+      else
+        [ DropdownMenu.MenuCheckboxEntry { value: "toolbar", label: [ HH.text "Show Toolbar" ], shortcut: [], check: DropdownMenu.Checked, disabled: false }
+        , DropdownMenu.MenuCheckboxEntry { value: "sidebar", label: [ HH.text "Show Sidebar" ], shortcut: [], check: DropdownMenu.Unchecked, disabled: false }
+        ]
   }
 
 -- | The themed ContextMenu: a dashed right-click area opening a solid menu panel. The
