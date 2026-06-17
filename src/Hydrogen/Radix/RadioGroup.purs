@@ -20,6 +20,25 @@
 -- | by click or by arrow-key navigation. Default orientation is `Vertical`. The item
 -- | ids combine the readable `idPrefix` with a per-mount generated id (Behavior.Id),
 -- | so two default-prefixed groups on a page don't collide.
+-- |
+-- | DOM-fidelity knobs (so the themed RadioCards usage is byte-identical to upstream):
+-- |
+-- |   * `explicitOrientation` — upstream radix RadioGroup.Root only emits
+-- |     `aria-orientation`/`data-orientation` when an explicit `orientation` prop is
+-- |     passed; RadioCards passes none, so both are omitted by default (set true to
+-- |     emit them). Likewise the item button omits `data-orientation` unless explicit.
+-- |   * `aria-required` is ALWAYS rendered (true|false), matching the primitive's
+-- |     `aria-required={required}`.
+-- |   * `dir` is always rendered (ltr|rtl) from `useDirection`.
+-- |   * `rootStyle` — an inline style string merged onto the single root div (the
+-- |     themed `Grid asChild` `--grid-template-columns` custom property).
+-- |   * `itemIds` — when false the per-item `id` is suppressed (RadioCards.Item
+-- |     buttons carry no id upstream).
+-- |   * the selected-item indicator `<span>` is rendered ONLY when the indicator
+-- |     ClassNames are non-empty; RadioCards passes an empty indicator (selection is
+-- |     the `[data-state=checked]` outline) so no span is emitted.
+-- |   * each item button always carries its `value` attribute (RadioTrigger forwards
+-- |     `value={value}` to the primitive button).
 module Hydrogen.Radix.RadioGroup
   ( component
   , Item
@@ -34,7 +53,7 @@ module Hydrogen.Radix.RadioGroup
 
 import Prelude
 
-import Data.Array (findIndex, length, mapWithIndex, (!!))
+import Data.Array (findIndex, length, mapWithIndex, null, (!!))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (for_)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -43,10 +62,10 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
-import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Direction (Dir(..), dirName)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
-import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria, unClassNames)
 import Web.HTML.HTMLElement as HTMLElement
 import Web.UIEvent.KeyboardEvent as KE
 
@@ -84,6 +103,15 @@ type Input =
   , disabled :: Boolean            -- disables the whole group
   , idPrefix :: String             -- for item ids (unique per instance)
   , style :: Style
+  -- | When false (default) the `aria-orientation`/`data-orientation` attrs are
+  -- | OMITTED on the root and items — upstream only emits them when an explicit
+  -- | `orientation` prop is passed (RadioCards passes none).
+  , explicitOrientation :: Boolean
+  -- | An inline style string applied verbatim to the root div (e.g. the themed
+  -- | RadioCards Grid `--grid-template-columns: …`). Empty → no style attr.
+  , rootStyle :: String
+  -- | When false the per-item `id` is suppressed (RadioCards.Item has no id).
+  , itemIds :: Boolean
   }
 
 defaultInput :: Input
@@ -98,6 +126,9 @@ defaultInput =
   , disabled: false
   , idPrefix: "rdx-radio-group"
   , style: defaultStyle
+  , explicitOrientation: false
+  , rootStyle: ""
+  , itemIds: true
   }
 
 data Output = ValueChanged String
@@ -122,6 +153,9 @@ type State =
   , disabled :: Boolean
   , idPrefix :: String
   , style :: Style
+  , explicitOrientation :: Boolean
+  , rootStyle :: String
+  , itemIds :: Boolean
   , uid :: String       -- generated on Initialize; makes ids unique per instance
   }
 
@@ -163,6 +197,9 @@ initialState input =
   , disabled: input.disabled
   , idPrefix: input.idPrefix
   , style: input.style
+  , explicitOrientation: input.explicitOrientation
+  , rootStyle: input.rootStyle
+  , itemIds: input.itemIds
   , uid: ""
   }
 
@@ -175,12 +212,24 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   HH.div
     ( [ role "radiogroup"
-      , aria "orientation" (orientationName st.orientation)
-      , dataOrientation st.orientation
+      , aria "required" (if st.required then "true" else "false")
+      , HP.attr (HH.AttrName "dir") (dirName st.dir)
+      -- RovingFocusGroup.Root is asChild-merged onto the radiogroup div: it carries the
+      -- roving `tabindex="0"` (focusable items present, not tabbing out) and
+      -- `style="outline: none;"`. Any caller `rootStyle` (e.g. the Grid custom property
+      -- for RadioCards) is appended after, matching upstream's style merge order.
+      , HP.attr (HH.AttrName "tabindex") "0"
+      , HP.attr (HH.AttrName "style") (if st.rootStyle == "" then "outline: none;" else "outline: none; " <> st.rootStyle)
       , classes st.style.root
       , HE.onKeyDown ListKeyDown
       ]
-        <> (if st.required then [ aria "required" "true" ] else [])
+        -- orientation attrs only when an explicit orientation was passed (upstream
+        -- omits aria-orientation/data-orientation otherwise, e.g. RadioCards).
+        <>
+          ( if st.explicitOrientation then
+              [ aria "orientation" (orientationName st.orientation), dataOrientation st.orientation ]
+            else []
+          )
         <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
     )
     (mapWithIndex (renderItem st) st.items)
@@ -192,25 +241,29 @@ renderItem st _ item =
     curIdx = selectedIndex st
     idx = fromMaybe 0 (findIndex (\i -> i.value == item.value) st.items)
     itemDisabled = item.disabled || st.disabled
+    showIndicator = not (null (unClassNames st.style.indicator))
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
         , HP.ref (itemRef (base st) item.value)
-        , HP.id (itemId st item.value)
         , role "radio"
         , aria "checked" (if selected then "true" else "false")
         , dataState (if selected then "checked" else "unchecked")
-        , dataOrientation st.orientation
+        -- Collection.ItemSlot (inside RovingFocusGroup.Item) stamps each radio button.
+        , dataAttr "radix-collection-item" ""
+        , HP.attr (HH.AttrName "value") item.value
         , HP.tabIndex (tabIndexFor curIdx idx)
         , HP.disabled itemDisabled
         , classes st.style.item
         , HE.onClick \_ -> Selected item.value
         ]
+          <> (if st.itemIds then [ HP.id (itemId st item.value) ] else [])
+          <> (if st.explicitOrientation then [ dataOrientation st.orientation ] else [])
           <> (if itemDisabled then [ dataAttr "disabled" "" ] else [])
       )
       ( map HH.fromPlainHTML item.label
           <>
-            ( if selected then
+            ( if selected && showIndicator then
                 [ HH.span
                     [ dataState "checked"
                     , classes st.style.indicator
@@ -245,6 +298,9 @@ handleAction = case _ of
       , disabled = input.disabled
       , idPrefix = input.idPrefix
       , style = input.style
+      , explicitOrientation = input.explicitOrientation
+      , rootStyle = input.rootStyle
+      , itemIds = input.itemIds
       }
   Selected value -> selectValue value
   ListKeyDown ke -> do
