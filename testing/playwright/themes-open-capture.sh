@@ -63,6 +63,18 @@ STATES=(
   "form:forceMatch"
   "form:valueMissing"
   "form:typeMismatch"
+  # Wave-B controls — core+common depth-audit close-out (STR-330).
+  "toggle:rest"
+  "toggle:disabled"
+  "switch:rest"
+  "switch:disabled"
+  "switch:required"
+  "checkbox:indeterminate"
+  "checkbox:disabled"
+  "radiogroup:keys"
+  "radiogroup:mixed"
+  "radiogroup:disabledgroup"
+  "radiogroup:horizontal"
 )
 
 echo "ℵ building golden dist (bun)"
