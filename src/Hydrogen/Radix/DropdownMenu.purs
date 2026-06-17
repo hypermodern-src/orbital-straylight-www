@@ -111,6 +111,15 @@ itemCount = Array.length <<< Array.filter case _ of
   MenuItemEntry item -> not item.disabled
   MenuSeparator -> false
 
+-- | The enabled MenuItem at roving index `n` (the keyboard-selection target). Mirrors
+-- | the same enabled-only ordering `renderEntries` assigns refs/tabindex over.
+enabledItemAt :: Int -> Array MenuEntry -> Maybe MenuItem
+enabledItemAt n entries = Array.index (Array.mapMaybe enabled entries) n
+  where
+  enabled = case _ of
+    MenuItemEntry item | not item.disabled -> Just item
+    _ -> Nothing
+
 type Style =
   { trigger :: ClassNames
   , content :: ClassNames
@@ -489,9 +498,19 @@ handleAction = case _ of
   MenuKeyDown ke -> do
     st <- H.get
     let
+      key = KE.key ke
       cfg = { orientation: Vertical, dir: LTR, loop: true }
       pos = { count: itemCount st.entries, current: st.focused }
-    case navigate cfg pos (KE.key ke) of
+    -- Enter/Space SELECT the focused item (upstream menu.tsx:667-680 SELECTION_KEYS →
+    -- currentTarget.click() + preventDefault). Keyboard activation of items, previously
+    -- impossible (navigate returned Stay for these keys).
+    if (key == "Enter" || key == " ") && st.focused >= 0 then do
+      liftEffect (preventDefault (KE.toEvent ke))
+      for_ (enabledItemAt st.focused st.entries) \it ->
+        when (not it.disabled) do
+          H.raise (ItemSelected it.value)
+          closeMenu
+    else case navigate cfg pos key of
       Stay -> pure unit
       MoveTo idx -> do
         H.modify_ _ { focused = idx }

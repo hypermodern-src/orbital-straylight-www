@@ -649,6 +649,22 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
 
+  // DropdownMenu keyboard SELECTION (menu.tsx:667-680 SELECTION_KEYS) — Enter/Space on the
+  // focused item fires onSelect + closes. Previously impossible in the port (navigate → Stay).
+  { id: "dropdownmenu", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Enter did not close the menu after selecting");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Enter-select");
+  }},
+  { id: "dropdownmenu", apg: "menu", name: "Space selects the highlighted item and closes the menu", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
+  }},
+
   // Context Menu — https://www.w3.org/WAI/ARIA/apg/patterns/menu/
   // A ContextMenu is a DropdownMenu point-anchored at the cursor: right-click the trigger
   // area opens a role=menu of role=menuitem rows with the SAME RovingFocus keyboard contract
