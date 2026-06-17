@@ -41,6 +41,7 @@ import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
+import Hydrogen.Themes.RadioGroup as ThemesRadioGroup
 import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
 import Hydrogen.Themes.TextField (textField, textFieldValue)
@@ -63,7 +64,7 @@ type Slots =
   , accordion :: Accordion.Slot Unit
   , collapsible :: Collapsible.Slot Unit
   , tabs :: Tabs.Slot Unit
-  , radiogroup :: RadioGroup.Slot Unit
+  , radiogroup :: ThemesRadioGroup.Slot Unit
   , checkbox :: Checkbox.Slot Unit
   , switch :: Switch.Slot Unit
   , toggle :: Toggle.Slot Unit
@@ -171,10 +172,10 @@ view c =
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
             "select" -> HH.slot_ _select unit Select.component selectInput
-            "accordion" -> HH.slot_ _accordion unit Accordion.component accordionInput
+            "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
-            "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
+            "radiogroup" -> HH.slot_ _radiogroup unit ThemesRadioGroup.component radioGroupInput
             "checkbox" -> HH.slot_ _checkbox unit Checkbox.component checkboxInput
             "switch" -> HH.slot_ _switch unit Switch.component switchInput
             "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
@@ -550,6 +551,7 @@ collapsibleInput = Collapsible.defaultInput
       , trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
       , content: cn ""
       }
+  , triggerAttrs = [ Tuple "accent-color" "" ]
   , trigger = [ HH.text "Toggle content" ]
   , content =
       [ box [ Pt "2" ]
@@ -592,18 +594,13 @@ tabsTriggerLabel label =
 -- | radiogroup — themes-only (RadioGroupPrimitive styled). Two options; Default is
 -- | checked initially, the driver clicks Comfortable. First-cut: the items carry the
 -- | label text directly (the golden's label/flex chrome is a fan-out refinement).
-radioGroupInput :: RadioGroup.Input
-radioGroupInput = RadioGroup.defaultInput
-  { items =
-      [ { value: "1", label: [ HH.text "Default" ], disabled: false }
-      , { value: "2", label: [ HH.text "Comfortable" ], disabled: false }
+radioGroupInput :: ThemesRadioGroup.Input
+radioGroupInput =
+  { items:
+      [ { value: "1", label: "Default" }
+      , { value: "2", label: "Comfortable" }
       ]
-  , defaultValue = Just "1"
-  , style =
-      { root: cn "rt-RadioGroupRoot"
-      , item: cn "rt-BaseRadioRoot rt-r-size-2 rt-reset rt-variant-surface"
-      , indicator: cn ""
-      }
+  , defaultValue: "1"
   }
 
 -- | checkbox — a bare single Themes checkbox, unchecked; the driver clicks to check.
@@ -718,6 +715,8 @@ radioCardsInput = RadioGroup.defaultInput
       , { value: "3", label: [ textAs "span" [ Weight "bold" ] [ HH.text "4-core CPU" ] ], disabled: false }
       ]
   , defaultValue = Just "1"
+  , rootStyle = "--grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));"
+  , itemIds = false
   , style =
       { root: cn "rt-Grid rt-RadioCardsRoot rt-r-size-2 rt-variant-surface rt-r-gtc rt-r-gap-4"
       , item: cn "rt-reset rt-BaseCard rt-RadioCardsItem"

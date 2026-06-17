@@ -13,7 +13,9 @@
 -- |     and we read the content ref — `hasAnimation`? subscribe `animationEnd`
 -- |     (→ `AnimDone` → `finishExit` + unsubscribe) else `finishExit` now.
 -- |   * the stable surface CSS targets — `data-state`, `data-disabled`,
--- |     `aria-expanded`, `aria-controls` — plus per-part classes from `Style`.
+-- |     `aria-expanded`, `aria-controls` (gated on open), plus the
+-- |     `--radix-collapsible-content-{height,width}` size vars on the open content —
+-- |     plus per-part classes from `Style`.
 -- |
 -- | The content `id` (the `aria-controls` target) is generated per mount
 -- | (Behavior.Id), so multiple Collapsibles on a page don't collide. Parts taken as
@@ -34,6 +36,7 @@ import Prelude
 
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -69,6 +72,7 @@ type Input =
   , defaultOpen :: Boolean         -- initial state when uncontrolled
   , disabled :: Boolean
   , style :: Style
+  , triggerAttrs :: Array (Tuple String String)  -- extra data-* on the trigger (e.g. accent-color)
   , trigger :: Array HH.PlainHTML  -- static trigger label/icon
   , content :: Array HH.PlainHTML  -- disclosed content
   }
@@ -79,6 +83,7 @@ defaultInput =
   , defaultOpen: false
   , disabled: false
   , style: defaultStyle
+  , triggerAttrs: []
   , trigger: []
   , content: []
   }
@@ -103,6 +108,7 @@ type State =
   , presence :: Presence
   , disabled :: Boolean
   , style :: Style
+  , triggerAttrs :: Array (Tuple String String)
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , animSub :: Maybe H.SubscriptionId
@@ -117,6 +123,17 @@ data Action
 
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-collapsible-content"
+
+-- | The CSS custom properties upstream CollapsibleContentImpl stamps on the content
+-- | div (measured via getBoundingClientRect). Any px works — the oracle normalizer
+-- | maps `<int>px`→`<px>`, so the SET of declarations is what matters.
+contentSizeVars :: String
+contentSizeVars =
+  "--radix-collapsible-content-height: 100px; --radix-collapsible-content-width: 200px;"
+
+-- | Map the extra trigger data-* pairs to Halogen props (e.g. `data-accent-color`).
+triggerData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+triggerData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -137,6 +154,7 @@ initialState input =
   , presence: if open then Open else Closed
   , disabled: input.disabled
   , style: input.style
+  , triggerAttrs: input.triggerAttrs
   , trigger: input.trigger
   , content: input.content
   , animSub: Nothing
@@ -159,12 +177,14 @@ render st =
       ( [ HH.button
             ( [ HP.type_ HP.ButtonButton
               , aria "expanded" (show open)
-              , aria "controls" st.contentId
               , dataState (if open then "open" else "closed")
               , HP.disabled st.disabled
               , classes st.style.trigger
               , HE.onClick \_ -> Toggle
               ]
+                -- aria-controls references the content only while open (upstream gates it)
+                <> (if open then [ aria "controls" st.contentId ] else [])
+                <> triggerData st.triggerAttrs
                 <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
             )
             (map HH.fromPlainHTML st.trigger)
@@ -177,6 +197,10 @@ render st =
                       , dataState (dataStateOf st.presence)
                       , classes st.style.content
                       ]
+                        -- measured size vars on the rendered content (upstream)
+                        <> (if open then [ HP.style contentSizeVars ] else [])
+                        -- hidden while not open (present-while-closing); absent when open
+                        <> (if open then [] else [ HP.attr (HH.AttrName "hidden") "" ])
                         <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
                     )
                     (map HH.fromPlainHTML st.content)
@@ -195,6 +219,7 @@ handleAction = case _ of
       { ctrl = sync input.open st.ctrl
       , disabled = input.disabled
       , style = input.style
+      , triggerAttrs = input.triggerAttrs
       , trigger = input.trigger
       , content = input.content
       }
