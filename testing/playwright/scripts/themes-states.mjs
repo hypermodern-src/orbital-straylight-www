@@ -25,6 +25,34 @@ export const settle = (pg) => pg.waitForTimeout(300); // let Popper position + p
 
 const openMenu = async (pg, click) => { await click(); await pg.locator('[role="menu"]').first().waitFor(); };
 
+// Press Escape — the DismissableLayer/RemoveScroll close path shared by every modal/popper
+// overlay (dialog, alertdialog, popover, *menu, select). Keyed off no port internals.
+const escClose = (pg) => pg.keyboard.press("Escape");
+
+// CLOSE actions (STR-335 closing oracle): given an OPEN overlay, drive it into its exit
+// (data-state="closed") lifecycle. Keyed off UPSTREAM role/rt-* selectors only, so the same
+// action runs against golden AND port. The closing driver pins the exit animation to 100s
+// BEFORE invoking this, so the closing node lingers mounted for the snapshot.
+export const CLOSE = {
+  dialog: escClose,
+  alertdialog: escClose,
+  popover: escClose,
+  dropdownmenu: escClose,
+  contextmenu: escClose,
+  // HoverCard hides on pointer-leave of BOTH trigger and content. Move the mouse off-anchor;
+  // the rt-HoverCardContent (rt-PopperContent) then lingers mounted with data-state="closed".
+  hovercard: async (pg) => { await pg.mouse.move(0, 0); await pg.mouse.move(2, 2); },
+
+  // ── DELIBERATELY NO closing oracle (verified against real @radix-ui/themes) ───────────────
+  // select  — Radix Select.Content does NOT wrap its content in Presence: on Escape the
+  //           rt-SelectContent listbox unmounts SYNCHRONOUSLY (only the rt-SelectTrigger flips
+  //           to data-state="closed"). There is no lingering data-state="closed" content node
+  //           to capture, so a closing-DOM oracle would be empty. Dropped from the matrix.
+  // tooltip — Radix Tooltip.Content likewise unmounts on hide (pointer-leave/blur) with no
+  //           lingering data-state="closed" content node — only the trigger flips to closed.
+  //           No exit lifecycle node exists to snapshot. Dropped from the matrix.
+};
+
 // id → { state → (pg) => drive into that state }. `open` is the canonical "shown" state
 // every overlay has; richer states (item highlighted, option selected) extend per component.
 export const STATES = {

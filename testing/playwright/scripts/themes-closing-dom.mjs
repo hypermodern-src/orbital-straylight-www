@@ -10,20 +10,38 @@
 //   2. Inject `* { animation-duration: 100s !important; transition-duration: 100s !important }`
 //      so the exit animation lingers indefinitely — the closing node never unmounts within
 //      the capture window (no race against animationend).
-//   3. Press Escape (DismissableLayer close) and poll until a `data-state="closed"` node is
-//      present, then snapshot. With the animation pinned to 100s, the closing DOM is stable.
+//   3. Run the per-id CLOSE action (CLOSE[id] in themes-states.mjs — Escape for the modal/
+//      popper overlays, pointer-leave for tooltip/hovercard) and poll until the overlay
+//      CONTENT node is mounted with `data-state="closed"`, then snapshot. With the animation
+//      pinned to 100s, the closing DOM is stable. Close actions key off UPSTREAM selectors
+//      only, so the same script runs against golden AND the Halogen port.
 //
 // Normalization is IDENTICAL to themes-open-dom.mjs (ids→<idN>, px→<px>, display:contents
 // wrapper stripped) — structure stays exact. The oracle is "our closing Dialog's DOM ==
 // radix's closing Dialog's DOM", never a self-written expectation.
 import { chromium } from "@playwright/test";
-import { serve, STATES, settle } from "./themes-states.mjs";
+import { serve, STATES, CLOSE, settle } from "./themes-states.mjs";
 
 const [DIR, ID] = process.argv.slice(2);
 const { port: PORT, close: closeSrv } = await serve(DIR);
 
 const spec = STATES[ID];
 if (!spec || !spec.open) { console.error(`no open driver for id '${ID}'`); closeSrv(); process.exit(2); }
+const closeAction = CLOSE[ID];
+if (!closeAction) { console.error(`no CLOSE driver for id '${ID}'`); closeSrv(); process.exit(2); }
+
+// The set of UPSTREAM selectors that identify a closing overlay CONTENT node — one per
+// overlay anatomy (modal dialog/alertdialog, Popper popovers/menus/hovercard, Select listbox,
+// Tooltip). The closing node must still be mounted with data-state="closed" (Presence keeps
+// it alive while the exit animation plays). NOT keyed off any port-internal class.
+const CLOSED_SEL = [
+  '[role="dialog"][data-state="closed"]',
+  '[role="alertdialog"][data-state="closed"]',
+  '.rt-PopperContent[data-state="closed"]',
+  '.rt-SelectContent[data-state="closed"]',
+  '.rt-TooltipContent[data-state="closed"]',
+  '.rt-HoverCardContent[data-state="closed"]',
+].join(", ");
 
 // Pin every animation/transition open-ended so the closing node lingers for the snapshot.
 const SLOWDOWN = `* { animation-duration: 100s !important; animation-delay: 0s !important;
@@ -64,14 +82,17 @@ await pg.waitForTimeout(250);
 try {
   await spec.open(pg);
   await settle(pg);
+  // Pin the exit animation to 100s BEFORE closing, so the closing node never unmounts within
+  // the capture window (no race against animationend).
   await pg.addStyleTag({ content: SLOWDOWN });
   await pg.waitForTimeout(50);
-  await pg.keyboard.press("Escape");
-  // The closing node must still be mounted with data-state="closed" (Presence lifecycle).
-  await pg.waitForFunction(() => !!document.querySelector('[data-state="closed"]'), { timeout: 3000 });
+  await closeAction(pg);
+  // The closing CONTENT node must still be mounted with data-state="closed" (Presence
+  // lifecycle) — poll on the overlay-content selector specifically, not any [data-state].
+  await pg.waitForFunction((sel) => !!document.querySelector(sel), CLOSED_SEL, { timeout: 3000 });
   await pg.waitForTimeout(150);
 
-  const closed = await pg.evaluate(() => !!document.querySelector('[role="dialog"][data-state="closed"], [role="alertdialog"][data-state="closed"], .rt-PopperContent[data-state="closed"]'));
+  const closed = await pg.evaluate((sel) => !!document.querySelector(sel), CLOSED_SEL);
   if (!closed) throw new Error("no closing overlay node mounted (data-state=closed) — Presence not keeping it alive");
 
   console.log(normalize(await snapshotDOM(pg)));
