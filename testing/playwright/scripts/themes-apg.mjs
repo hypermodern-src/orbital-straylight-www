@@ -179,6 +179,22 @@ const CHECKS = [
     await press(pg, "Home");
     ok(await activeIsNth(pg, '#root [role="menuitem"]', 0), "Home did not focus the first trigger");
   }},
+  // Enter/Space on a CLOSED trigger open the menu AND highlight the first item (menubar.tsx:
+  // 260-269 onMenuToggle + wasKeyboardTriggerOpenRef=true → first item focused, like ArrowDown).
+  { id: "menubar", apg: "menubar", name: "Enter on a trigger opens the menu and highlights the first item", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok(await activeWithin(pg, '[role="menu"]'), "Enter did not move focus into the opened menu");
+    await hlStarts(pg, "New Tab");
+  }},
+  { id: "menubar", apg: "menubar", name: "Space on a trigger opens the menu and highlights the first item", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Space");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok(await activeWithin(pg, '[role="menu"]'), "Space did not move focus into the opened menu");
+    await hlStarts(pg, "New Tab");
+  }},
   { id: "menubar", apg: "menubar", name: "ArrowDown on a trigger opens the menu and focuses the first item", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().focus();
     await pg.keyboard.press("ArrowDown");
