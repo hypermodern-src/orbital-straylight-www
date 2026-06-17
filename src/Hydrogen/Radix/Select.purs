@@ -62,7 +62,7 @@ import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, role, aria)
 import Web.DOM.Node (Node)
-import Web.Event.Event (Event, EventType(..))
+import Web.Event.Event (Event, EventType(..), preventDefault)
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
@@ -351,7 +351,7 @@ renderItem st idx item =
         , HP.tabIndex (-1)
         , HE.onClick \_ -> ItemChosen item.value
         ]
-          <> (if isSelected then [ dataAttr "highlighted" "" ] else [])
+          <> (if st.focused == idx then [ dataAttr "highlighted" "" ] else [])
           <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
       )
       ( (if isSelected then [ HH.span [ classes st.style.indicator, aria "hidden" "true" ] (map HH.fromPlainHTML st.checkIcon) ] else [])
@@ -402,11 +402,17 @@ handleAction = case _ of
     let
       cfg = { orientation: Vertical, dir: LTR, loop: true }
       pos = { count: length st.items, current: st.focused }
-    case navigate cfg pos (KE.key ke) of
-      Stay -> pure unit
-      MoveTo idx -> do
-        H.modify_ _ { focused = idx }
-        focusItem st.idPrefix idx
+    case KE.key ke of
+      -- APG listbox: Enter/Space commits the highlighted option, closes, and restores
+      -- focus to the trigger (via closeMenu's restoreEl). preventDefault so the synthesized
+      -- activation does NOT click-through to the (now refocused) trigger and re-open.
+      "Enter" -> liftEffect (preventDefault (KE.toEvent ke)) *> commitFocused
+      " " -> liftEffect (preventDefault (KE.toEvent ke)) *> commitFocused
+      _ -> case navigate cfg pos (KE.key ke) of
+        Stay -> pure unit
+        MoveTo idx -> do
+          H.modify_ _ { focused = idx }
+          focusItem st.idPrefix idx
   ItemChosen value -> do
     st <- H.get
     let res = change value st.sel
@@ -485,6 +491,20 @@ focusItem :: forall m. MonadEffect m => String -> Int -> H.HalogenM State Action
 focusItem pfx idx = do
   mel <- H.getHTMLElementRef (itemRef pfx idx)
   for_ mel (liftEffect <<< HTMLElement.focus)
+
+-- | Commit the currently-highlighted option (the roving `focused` index): set the value,
+-- | raise ValueChanged, and close (restoring focus to the trigger). The keyboard analogue
+-- | of clicking an option. A no-op for a disabled item.
+commitFocused :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+commitFocused = do
+  st <- H.get
+  case index st.items st.focused of
+    Just item | not item.disabled -> do
+      let res = change item.value st.sel
+      H.modify_ _ { sel = res.next }
+      H.raise (ValueChanged res.emit)
+      closeMenu
+    _ -> pure unit
 
 -- | Item-aligned positioning (radix Select's default): the listbox overlays the trigger with
 -- | the SELECTED option aligned to it. `positionItemAligned` sets the whole WRAPPER style;

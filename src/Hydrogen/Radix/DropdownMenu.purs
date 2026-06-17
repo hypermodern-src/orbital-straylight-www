@@ -60,7 +60,7 @@ import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), Orientation(..), cn, classes, dataState, dataAttr, sideName, alignName, role, aria)
 import Web.DOM.Node (Node)
-import Web.Event.Event (Event, EventType(..))
+import Web.Event.Event (Event, EventType(..), preventDefault)
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
@@ -193,12 +193,14 @@ type State =
   , contentNode :: Maybe Node
   , triggerId :: String   -- generated on Initialize; the content's aria-labelledby source
   , contentId :: String   -- generated on Initialize; the trigger's aria-controls target + content id
+  , openFocus :: Maybe Int  -- post-open focus target: Nothing = the content (click-open), Just i = item i (keyboard-open)
   }
 
 data Action
   = Initialize
   | Receive Input
   | TriggerClicked
+  | TriggerKeyDown KE.KeyboardEvent
   | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
   | PointerDown Event
@@ -257,6 +259,7 @@ initialState input =
   , contentNode: Nothing
   , triggerId: ""
   , contentId: ""
+  , openFocus: Nothing
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -277,6 +280,7 @@ render st =
             , dataAttr "radix-popper-side" (sideName st.placedSide)
             , dataAttr "radix-popper-align" (alignName st.placedAlign)
             , HE.onClick \_ -> TriggerClicked
+            , HE.onKeyDown TriggerKeyDown
             ]
               <> (if open then [ aria "controls" st.contentId ] else [])
               <> portalData st.triggerAttrs
@@ -398,6 +402,14 @@ handleAction = case _ of
   TriggerClicked -> do
     st <- H.get
     if current st.ctrl then closeMenu else openMenu
+  -- APG menu-button: on a CLOSED menu, ArrowDown opens + highlights the FIRST item,
+  -- ArrowUp opens + highlights the LAST. (When open, the content owns key handling.)
+  TriggerKeyDown ke -> do
+    st <- H.get
+    when (not (current st.ctrl)) case KE.key ke of
+      "ArrowDown" -> liftEffect (preventDefault (KE.toEvent ke)) *> openMenuAt 0
+      "ArrowUp" -> liftEffect (preventDefault (KE.toEvent ke)) *> openMenuAt (itemCount st.entries - 1)
+      _ -> pure unit
   -- after the open render flushed (content ref live): measure+place, then on the NEXT
   -- frame (after the placement modify's re-render) portal the content into body + focus
   -- the first item.
@@ -434,17 +446,24 @@ handleAction = case _ of
   -- guard AND blur the focused content. (This bit the menu because lockScroll fires resize.)
   Reposition -> reposition
 
+-- | Click-open: focus the menu CONTENT with NO item highlighted (the first ArrowDown
+-- | highlights an item) — matches radix.
 openMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
-openMenu = do
+openMenu = openMenuWith (-1) Nothing
+
+-- | Keyboard-open (APG menu-button): open with item `idx` highlighted and focused.
+openMenuAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+openMenuAt idx = openMenuWith idx (Just idx)
+
+openMenuWith :: forall m. MonadEffect m => Int -> Maybe Int -> H.HalogenM State Action () Output m Unit
+openMenuWith focusedIdx openFocus = do
   st <- H.get
   when (not (current st.ctrl)) do
     -- capture the restore target (trigger) BEFORE opening, so no post-open `modify` is
     -- needed for it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
     mprev <- liftEffect (HTMLDocument.activeElement doc)
-    -- open with NO item highlighted (focus goes to the menu content; the first ArrowDown
-    -- highlights an item) — matches radix. focused = -1 means "no roving highlight".
-    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = -1, restoreEl = mprev }
+    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = focusedIdx, restoreEl = mprev, openFocus = openFocus }
     H.raise (OpenChanged true)
     mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
     win <- liftEffect Popper.windowTarget
@@ -480,10 +499,16 @@ scheduleAfterOpen = do
 -- | open-state driver fires its arrow keys immediately, before a deferred focus would land.
 finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
 finalize focusToo = do
+  st <- H.get
   mbody <- liftEffect Portal.documentBody
   mwrap <- H.getHTMLElementRef wrapperRef
-  -- radix focuses the menu CONTENT on open (role=menu, tabindex=-1), not an item.
-  mcontent <- if focusToo then H.getHTMLElementRef contentRef else pure Nothing
+  -- click-open focuses the menu CONTENT (role=menu, tabindex=-1); keyboard-open (APG
+  -- menu-button) focuses the highlighted ITEM instead (openFocus = Just idx).
+  mfocus <- if focusToo
+    then case st.openFocus of
+      Just idx -> H.getHTMLElementRef (itemRef st.idPrefix idx)
+      Nothing -> H.getHTMLElementRef contentRef
+    else pure Nothing
   case mbody, mwrap of
     Just body, Just wrap -> liftEffect do
       Portal.adopt body (HTMLElement.toElement wrap)
@@ -491,7 +516,7 @@ finalize focusToo = do
         Envelope.lockScroll
         Envelope.addFocusGuards
         Envelope.hideOthers wrap
-        for_ mcontent HTMLElement.focus
+        for_ mfocus HTMLElement.focus
     _, _ -> pure unit
 
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
@@ -503,7 +528,7 @@ closeMenu = do
     -- tear down the modal envelope + restore focus to the trigger captured on open
     liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
+    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing }
     H.raise (OpenChanged false)
 
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
