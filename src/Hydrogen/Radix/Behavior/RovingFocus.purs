@@ -15,13 +15,16 @@ module Hydrogen.Radix.Behavior.RovingFocus
   , Move(..)
   , focusIntent
   , move
+  , moveMask
   , navigate
+  , navigateMask
   , tabIndexFor
   ) where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Array ((!!), length, findIndex, findLastIndex)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Foundation.Style (Orientation(..))
 
@@ -80,3 +83,63 @@ navigate cfg st key = case focusIntent cfg.orientation cfg.dir key of
 -- | The roving tabindex value for item `idx` given the current tab stop.
 tabIndexFor :: Int -> Int -> Int
 tabIndexFor current idx = if idx == current then 0 else -1
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Focusable-mask navigation (skip disabled items)
+-- ─────────────────────────────────────────────────────────────────────────────
+--
+-- radix `RovingFocusGroup` navigates over the FOCUSABLE items only
+-- (roving-focus-group.tsx:271 `getItems().filter(item => item.focusable)`): a
+-- disabled neighbour is SKIPPED, not treated as a wall. `move`/`navigate` above
+-- operate on the full index space (every item focusable) — correct for menus that
+-- drop disabled items from the collection entirely, but wrong for RadioGroup, whose
+-- disabled items stay IN the DOM order. `moveMask`/`navigateMask` take a per-index
+-- `focusable` mask and land on the next ENABLED index, honoring orientation/dir/loop.
+
+-- | Apply an intent over a focusable mask, skipping non-focusable indices. The
+-- | `current` index need not itself be focusable (it is the roving tab stop). Returns
+-- | the same `current` when there is no focusable item to move to.
+moveMask :: Boolean -> Array Boolean -> Int -> Intent -> Int
+moveMask loop mask current intent =
+  let
+    n = length mask
+    focusable i = fromMaybe false (mask !! i)
+    firstEnabled = fromMaybe current (findIndex identity mask)
+    lastEnabled = fromMaybe current (findLastIndex identity mask)
+    -- step from `i` in `dir` (+1/-1), skipping non-focusable, wrapping or clamping.
+    -- bounded by `n` attempts so a fully-disabled mask terminates.
+    stepFrom dir i =
+      let
+        go fuel j =
+          if fuel <= 0 then current
+          else
+            let
+              j' = j + dir
+              wrapped =
+                if j' < 0 then (if loop then n - 1 else 0)
+                else if j' >= n then (if loop then 0 else n - 1)
+                else j'
+            in
+              if focusable wrapped then wrapped
+              else if (not loop) && (wrapped == 0 || wrapped == n - 1) && not (focusable wrapped)
+                -- clamped at an end that is itself disabled: stop on the nearest enabled
+                then (if dir < 0 then firstEnabled else lastEnabled)
+                else go (fuel - 1) wrapped
+      in
+        go n i
+  in
+    case intent of
+      First -> firstEnabled
+      Last -> lastEnabled
+      Prev -> stepFrom (-1) current
+      Next -> stepFrom 1 current
+
+-- | The closed-form step over a focusable mask: keydown → focus move (or stay).
+navigateMask
+  :: { orientation :: Orientation, dir :: Dir, loop :: Boolean }
+  -> { mask :: Array Boolean, current :: Int }
+  -> String
+  -> Move
+navigateMask cfg st key = case focusIntent cfg.orientation cfg.dir key of
+  Nothing -> Stay
+  Just intent -> MoveTo (moveMask cfg.loop st.mask st.current intent)

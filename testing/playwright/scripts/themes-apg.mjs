@@ -966,6 +966,84 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok(await activeIsNth(pg, sel, 2), "ArrowRight did not rove to the next enabled item (L)");
     ok((await pg.evaluate(() => (document.activeElement.textContent || "").trim())) !== "New", "focus must never land on the disabled button");
+  // Toggle (button) — https://www.w3.org/WAI/ARIA/apg/patterns/button/
+  // A toggle button activates on Space AND Enter (native <button> semantics — radix binds no
+  // key handler, the host button does it). Seed `?s=rest` = the enabled, unpressed toggle.
+  { id: "toggle", state: "rest", apg: "button", name: "Space activates the toggle (off→on→off round-trip)", run: async (pg) => {
+    const sel = 'button[aria-pressed]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIs(pg, sel), "could not focus the toggle");
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "false", "toggle must start unpressed");
+    await press(pg, "Space");
+    await attrEq(pg, sel, 0, "aria-pressed", "true", "Space did not press the toggle");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "on", "data-state did not follow aria-pressed on press");
+    await press(pg, "Space");
+    await attrEq(pg, sel, 0, "aria-pressed", "false", "second Space did not return the toggle to off");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "off", "data-state did not return to off");
+  }},
+  { id: "toggle", state: "rest", apg: "button", name: "Enter activates the toggle (native button key)", run: async (pg) => {
+    const sel = 'button[aria-pressed]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "false", "toggle must start unpressed");
+    await press(pg, "Enter");
+    await attrEq(pg, sel, 0, "aria-pressed", "true", "Enter did not press the toggle");
+  }},
+  { id: "toggle", state: "disabled", apg: "button", name: "a disabled toggle does NOT activate on Space", run: async (pg) => {
+    const sel = 'button[aria-pressed]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, sel, 0, "disabled")) !== null || (await pg.evaluate((s) => document.querySelector(s).disabled, sel)), "the disabled toggle must carry the disabled attribute");
+    await focusFirst(pg, sel);
+    await press(pg, "Space");
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "false", "Space must NOT press a disabled toggle");
+    ok((await attrOf(pg, sel, 0, "data-disabled")) === "", "the disabled toggle must carry data-disabled=''");
+  }},
+
+  // Checkbox — Enter is explicitly preventDefaulted (WAI-ARIA: checkboxes do NOT activate on
+  // Enter; only Space toggles). The themed checkbox seed (?s=checked = the bare unchecked
+  // interactive checkbox) is focusable; pressing Enter must leave it unchanged.
+  { id: "checkbox", state: "checked", apg: "checkbox", name: "Enter does NOT toggle the checkbox (only Space)", run: async (pg) => {
+    const sel = '[role="checkbox"]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIs(pg, sel), "could not focus the checkbox");
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "false", "checkbox must start unchecked");
+    await press(pg, "Enter");
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "false", "Enter must NOT toggle the checkbox");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "unchecked", "Enter must NOT change data-state");
+  }},
+
+  // RadioGroup — additional keyboard conformance (3-item seed via `?s=keys`).
+  // Enter does NOT activate a radio (WAI-ARIA radio semantics). A disabled radio is SKIPPED
+  // by arrow navigation (roving over focusable items only). Home/End move focus but do NOT
+  // check (selection-follows-focus is arrow-key-only). loop=false clamps at the ends.
+  { id: "radiogroup", state: "keys", apg: "radio", name: "Enter does NOT activate/select a radio", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // onto the checked radio (value=1)
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not land on the checked radio");
+    await press(pg, "Enter");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the checked radio must stay checked after Enter");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "false", "Enter must not check another radio");
+    ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "Enter must not check another radio");
+  }},
+  { id: "radiogroup", state: "keys", apg: "radio", name: "ArrowDown SKIPS a disabled radio to the next enabled one", run: async (pg) => {
+    // seed: 3 items, item[1] disabled, defaultValue=1 (item[0] checked).
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // focus item[0]
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not focus the first radio");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, '[role="radio"]', 2), "ArrowDown did not SKIP the disabled radio to the next enabled one");
+    await attrEq(pg, '[role="radio"]', 2, "aria-checked", "true", "the skipped-to radio must be checked (selection-follows-focus)");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "false", "the disabled radio must never become checked");
+  }},
+  { id: "radiogroup", state: "keys", apg: "radio", name: "End moves focus but does NOT check (3-item seed)", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "End");
+    ok(await activeIsNth(pg, '[role="radio"]', 2), "End did not move focus to the last radio");
+    ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "End must NOT check the focused radio");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked after End");
   }},
 ];
 

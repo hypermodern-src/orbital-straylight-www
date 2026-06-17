@@ -53,7 +53,7 @@ module Hydrogen.Radix.RadioGroup
 
 import Prelude
 
-import Data.Array (findIndex, length, mapWithIndex, null, (!!))
+import Data.Array (any, findIndex, mapWithIndex, null, (!!))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (for_)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -64,7 +64,7 @@ import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..), dirName)
 import Hydrogen.Radix.Behavior.Id (useId)
-import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigateMask)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria, unClassNames)
 import Web.HTML.HTMLElement as HTMLElement
 import Web.UIEvent.KeyboardEvent as KE
@@ -180,6 +180,12 @@ type State =
   , itemIds :: Boolean
   , labelOutside :: Boolean
   , uid :: String       -- generated on Initialize; makes ids unique per instance
+  -- The roving tab stop, radix `currentTabStopId` — the item value that currently
+  -- carries tabindex=0. `Nothing` at rest (no item is tabbable; the ROOT is the single
+  -- tab stop, tabindex=0), set to the focused/selected item once focus enters the group
+  -- (Tab/click/arrow). Matches RovingFocusGroup: items are `currentTabStopId===id ? 0 : -1`
+  -- with currentTabStopId starting null.
+  , tabStop :: Maybe String
   }
 
 data Action
@@ -231,6 +237,7 @@ initialState input =
   , itemIds: input.itemIds
   , labelOutside: input.labelOutside
   , uid: ""
+  , tabStop: Nothing
   }
 
 -- | The uncontrolled starting value: the `defaultValue` if given, else `""`
@@ -245,10 +252,12 @@ render st =
       , aria "required" (if st.required then "true" else "false")
       , HP.attr (HH.AttrName "dir") (dirName st.dir)
       -- RovingFocusGroup.Root is asChild-merged onto the radiogroup div: it carries the
-      -- roving `tabindex="0"` (focusable items present, not tabbing out) and
-      -- `style="outline: none;"`. Any caller `rootStyle` (e.g. the Grid custom property
-      -- for RadioCards) is appended after, matching upstream's style merge order.
-      , HP.attr (HH.AttrName "tabindex") "0"
+      -- roving `tabindex` and `style="outline: none;"`. The root is the single tab stop
+      -- (tabindex=0) while any item is focusable; when EVERY item is disabled
+      -- (focusableItemsCount===0) it drops to -1, matching RovingFocusGroup
+      -- (`isTabbingBackOut || focusableItemsCount === 0 ? -1 : 0`). Any caller `rootStyle`
+      -- (the Grid custom property for RadioCards) is appended after, matching the merge order.
+      , HP.attr (HH.AttrName "tabindex") (if anyFocusable st then "0" else "-1")
       , HP.attr (HH.AttrName "style") (if st.rootStyle == "" then "outline: none;" else "outline: none; " <> st.rootStyle)
       , classes st.style.root
       , HE.onKeyDown ListKeyDown
@@ -278,9 +287,11 @@ renderItem :: forall m. State -> Int -> Item -> H.ComponentHTML Action () m
 renderItem st _ item =
   let
     selected = current st.ctrl == item.value
-    curIdx = selectedIndex st
-    idx = fromMaybe 0 (findIndex (\i -> i.value == item.value) st.items)
     itemDisabled = item.disabled || st.disabled
+    -- roving tabindex: the item is tabbable (0) only when it is the current tab stop
+    -- (radix `currentTabStopId===id ? 0 : -1`). At rest tabStop is Nothing → every item
+    -- is -1 and the ROOT carries the single tab stop.
+    isTabStop = st.tabStop == Just item.value
     showIndicator = not (null (unClassNames st.style.indicator))
     indicator =
       if selected && showIndicator then
@@ -299,7 +310,7 @@ renderItem st _ item =
           -- Collection.ItemSlot (inside RovingFocusGroup.Item) stamps each radio button.
           , dataAttr "radix-collection-item" ""
           , HP.attr (HH.AttrName "value") item.value
-          , HP.tabIndex (tabIndexFor curIdx idx)
+          , HP.tabIndex (if isTabStop then 0 else -1)
           , HP.disabled itemDisabled
           , classes st.style.item
           , HE.onClick \_ -> Selected item.value
@@ -327,6 +338,23 @@ itemId st value = base st <> "-item-" <> value
 selectedIndex :: State -> Int
 selectedIndex st = fromMaybe 0 (findIndex (\i -> i.value == current st.ctrl) st.items)
 
+-- | Whether the group has ANY focusable (enabled) item. When false (every item
+-- | disabled, or the whole group disabled) the root drops to tabindex=-1.
+anyFocusable :: State -> Boolean
+anyFocusable st = (not st.disabled) && any (\i -> not i.disabled) st.items
+
+-- | The item value the keyboard ENTRY focus lands on: the selected item, or the first
+-- | ENABLED item when nothing is selected (radix entry-focus skips disabled items).
+entryValue :: State -> Maybe String
+entryValue st =
+  let cur = current st.ctrl
+  in if cur /= "" then Just cur
+     else map _.value (findFirst (\i -> not (i.disabled || st.disabled)) st.items)
+  where
+  findFirst p xs = case findIndex p xs of
+    Just i -> xs !! i
+    Nothing -> Nothing
+
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Initialize -> do
@@ -348,30 +376,47 @@ handleAction = case _ of
       , itemIds = input.itemIds
       , labelOutside = input.labelOutside
       }
-  Selected value -> selectValue value
+  -- A click both selects the item AND makes it the roving tab stop (it now carries focus).
+  Selected value -> do
+    H.modify_ _ { tabStop = Just value }
+    selectValue value
   ListKeyDown ke -> do
     st <- H.get
     let
       key = KE.key ke
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
-      pos = { count: length st.items, current: selectedIndex st }
+      -- focusable mask = per-item enabled flag (radix navigates the FOCUSABLE items only,
+      -- skipping disabled neighbours; a whole-group disable masks everything out).
+      mask = map (\i -> not (i.disabled || st.disabled)) st.items
+      pos = { mask, current: selectedIndex st }
       -- selection-follows-focus is gated on a physical ARROW key (upstream
       -- radio-group.tsx:182-225 isArrowKeyPressedRef: onFocus clicks only when an arrow
       -- is held). ARROW_KEYS excludes Home/End, so Home/End MOVE focus but do NOT check.
       isArrow = key == "ArrowUp" || key == "ArrowDown" || key == "ArrowLeft" || key == "ArrowRight"
-    case navigate cfg pos key of
+    case navigateMask cfg pos key of
       Stay -> pure unit
       MoveTo idx -> case st.items !! idx of
         Nothing -> pure unit
+        -- the mask already excludes disabled items, so the landing index is always
+        -- enabled; the guard is belt-and-suspenders (a fully-disabled group yields
+        -- the unchanged current index, which may itself be disabled — then no-op).
         Just item -> when (not (item.disabled || st.disabled)) do
-          -- focus the target item; SELECT it only on an ARROW key (selection-follows-focus).
+          -- the focused item becomes the roving tab stop (radix moves currentTabStopId onto
+          -- it); focus it; SELECT only on an ARROW key (selection-follows-focus).
+          H.modify_ _ { tabStop = Just item.value }
           focusItemAt idx
           when isArrow (selectValue item.value)
-  -- Tab-into-group: forward container focus to the current roving item (the selected
-  -- radio, or item 0 when nothing is selected).
+  -- Tab-into-group: forward container focus to the entry item (the selected radio, or the
+  -- first ENABLED item when nothing is selected) and make it the roving tab stop.
   EntryFocus -> do
     st <- H.get
-    focusItemAt (selectedIndex st)
+    case entryValue st of
+      Nothing -> pure unit
+      Just v -> do
+        H.modify_ _ { tabStop = Just v }
+        case findIndex (\i -> i.value == v) st.items of
+          Just idx -> focusItemAt idx
+          Nothing -> pure unit
 
 -- | Focus the item at the given index via its existing ref (the same mechanism
 -- | ListKeyDown uses). No-op when the index is out of range.

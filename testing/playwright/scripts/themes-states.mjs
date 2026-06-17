@@ -316,6 +316,29 @@ export const STATES = {
       await pg.locator('[role="radio"][value="2"][data-state="checked"]').first().waitFor();
       await pg.locator('[role="radio"][value="1"][data-state="unchecked"]').first().waitFor();
     },
+    // ?s=keys / ?s=mixed seed — at-rest 3-item group, middle item disabled (data-disabled='').
+    // value=1 checked, value=2 disabled+unchecked, value=3 enabled+unchecked.
+    keys: async (pg) => {
+      await pg.locator('[role="radio"][value="1"][data-state="checked"]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="3"][data-state="unchecked"]').first().waitFor();
+    },
+    mixed: async (pg) => {
+      await pg.locator('[role="radio"][value="1"][data-state="checked"]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="3"][data-state="unchecked"]').first().waitFor();
+    },
+    // ?s=disabledgroup seed — whole group disabled: root + every item data-disabled=''.
+    disabledgroup: async (pg) => {
+      await pg.locator('[role="radiogroup"][data-disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=horizontal seed — explicit horizontal orientation on root + items.
+    horizontal: async (pg) => {
+      await pg.locator('[role="radiogroup"][aria-orientation="horizontal"][data-orientation="horizontal"]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-orientation="horizontal"]').first().waitFor();
+    },
   },
   checkbox: {
     checked: async (pg) => {
@@ -323,6 +346,14 @@ export const STATES = {
       await cb.waitFor();
       await cb.click();
       await root(pg).locator('[role="checkbox"][data-state="checked"]').first().waitFor();
+    },
+    // ?s=indeterminate seed — at rest the checkbox is mixed (aria-checked=mixed, indicator shown).
+    indeterminate: async (pg) => {
+      await root(pg).locator('[role="checkbox"][aria-checked="mixed"][data-state="indeterminate"]').first().waitFor();
+    },
+    // ?s=disabled seed — at rest a checked + disabled checkbox (data-disabled='' on root).
+    disabled: async (pg) => {
+      await root(pg).locator('[role="checkbox"][data-state="checked"][data-disabled][disabled]').first().waitFor();
     },
   },
   switch: {
@@ -332,6 +363,19 @@ export const STATES = {
       await sw.click();
       await root(pg).locator('button.rt-SwitchRoot[data-state="checked"]').first().waitFor();
     },
+    // at-rest, off — no click. Locks the unchecked root+thumb surface.
+    rest: async (pg) => {
+      await root(pg).locator('button.rt-SwitchRoot[role="switch"][data-state="unchecked"]').first().waitFor();
+    },
+    // ?s=disabled seed — disabled off switch (data-disabled='' on root + thumb).
+    disabled: async (pg) => {
+      await root(pg).locator('button.rt-SwitchRoot[data-state="unchecked"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=required seed — aria-required=true on the switch button (documents the divergence:
+    // port emits aria-required only when required; upstream always emits it).
+    required: async (pg) => {
+      await root(pg).locator('button.rt-SwitchRoot[role="switch"][aria-required="true"]').first().waitFor();
+    },
   },
   toggle: {
     pressed: async (pg) => {
@@ -339,6 +383,14 @@ export const STATES = {
       await btn.waitFor();
       await btn.click();
       await pg.locator('button[aria-pressed="true"][data-state="on"]').first().waitFor();
+    },
+    // at-rest, unpressed — no click. Locks the off half of the aria-pressed/data-state contract.
+    rest: async (pg) => {
+      await root(pg).locator('button[aria-pressed="false"][data-state="off"]').first().waitFor();
+    },
+    // ?s=disabled seed — assert the disabled toggle renders disabled + data-disabled='' at rest.
+    disabled: async (pg) => {
+      await root(pg).locator('button[aria-pressed="false"][data-state="off"][data-disabled][disabled]').first().waitFor();
     },
   },
   togglegroup: {

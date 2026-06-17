@@ -232,6 +232,12 @@ view c s =
             "switch" -> HH.slot_ _switch unit Switch.component switchInput
             "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
             "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component (toggleGroupInput s)
+            "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
+            "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component (radioGroupInput s)
+            "checkbox" -> HH.slot_ _checkbox unit Checkbox.component (checkboxInput s)
+            "switch" -> HH.slot_ _switch unit Switch.component (switchInput s)
+            "toggle" -> HH.slot_ _toggle unit Toggle.component (toggleInput s)
+            "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
             "segmentedcontrol" -> HH.slot_ _segmentedcontrol unit ToggleGroup.component segmentedControlInput
             "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
@@ -834,13 +840,25 @@ tabsTriggerLabel label =
 -- | initially, the driver clicks/keys to Comfortable. The themed chrome (root column
 -- | flex, per-item `<label> > inner-flex > [button, labelText]`) is supplied via the
 -- | primitive's `flex`/`itemLabel`/`itemInner` Style slots + `labelOutside`.
-radioGroupInput :: RadioGroup.Input
-radioGroupInput = RadioGroup.defaultInput
+radioGroupInput :: String -> RadioGroup.Input
+radioGroupInput s = RadioGroup.defaultInput
   { items =
-      [ { value: "1", label: [ HH.text " Default" ], disabled: false }
-      , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
-      ]
+      -- `?s=keys`/`?s=mixed` → the 3-item disabled-skip fixture (middle item disabled);
+      -- otherwise the committed 2-item group the `checked` driver exercises.
+      if s == "keys" || s == "mixed" then
+        [ { value: "1", label: [ HH.text " Default" ], disabled: false }
+        , { value: "2", label: [ HH.text " Comfortable" ], disabled: true }
+        , { value: "3", label: [ HH.text " Compact" ], disabled: false }
+        ]
+      else
+        [ { value: "1", label: [ HH.text " Default" ], disabled: false }
+        , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
+        ]
   , defaultValue = Just "1"
+  -- `?s=disabledgroup` → the whole group disabled; `?s=horizontal` → explicit horizontal.
+  , disabled = s == "disabledgroup"
+  , orientation = if s == "horizontal" then Horizontal else Vertical
+  , explicitOrientation = s == "horizontal"
   , itemIds = false
   , labelOutside = true
   , style =
@@ -855,21 +873,33 @@ radioGroupInput = RadioGroup.defaultInput
 
 -- | checkbox — a bare single Themes checkbox, unchecked; the driver clicks to check.
 -- | The indicator content is the ThickCheckIcon SVG.
-checkboxInput :: Checkbox.Input
-checkboxInput = Checkbox.defaultInput
-  { defaultChecked = Checkbox.Unchecked
+-- | `?s=indeterminate` → the mixed state (divider indicator, data-state=indeterminate);
+-- | `?s=disabled` → checked + disabled (the indicator carries data-disabled='' too).
+checkboxInput :: String -> Checkbox.Input
+checkboxInput s = Checkbox.defaultInput
+  { defaultChecked = case s of
+      "indeterminate" -> Checkbox.Indeterminate
+      "disabled" -> Checkbox.Checked
+      _ -> Checkbox.Unchecked
+  , disabled = s == "disabled"
   , value = "on"
   , style =
       { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxRoot rt-r-size-2 rt-variant-surface"
       , indicator: cn "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
       }
-  , children = [ thickCheckIconPlain ]
+  , children = case s of
+      "indeterminate" -> [ checkIndicatorWith "indeterminate" false dividerPath ]
+      "disabled" -> [ checkIndicatorWith "checked" true thickCheckPath ]
+      _ -> [ thickCheckIconPlain ]
   }
 
--- | switch — a single OFF Themes switch; the driver clicks to turn it on.
-switchInput :: Switch.Input
-switchInput = Switch.defaultInput
+-- | switch — a single OFF Themes switch; the driver clicks to turn it on. `?s=disabled`
+-- | seeds the disabled no-op variant; `?s=required` documents aria-required=true.
+switchInput :: String -> Switch.Input
+switchInput s = Switch.defaultInput
   { defaultChecked = false
+  , disabled = s == "disabled"
+  , required = s == "required"
   , value = "on"
   , style =
       { root: cn "rt-reset rt-SwitchRoot rt-r-size-2 rt-variant-surface"
@@ -877,11 +907,13 @@ switchInput = Switch.defaultInput
       }
   }
 
--- | toggle — a soft "B" toggle, unpressed; the driver clicks to press.
-toggleInput :: Toggle.Input
-toggleInput = Toggle.defaultInput
+-- | toggle — a soft "B" toggle, unpressed; the driver clicks to press. `?s=disabled`
+-- | seeds the disabled (no-op + data-disabled='') variant.
+toggleInput :: String -> Toggle.Input
+toggleInput s = Toggle.defaultInput
   { pressed = Nothing
   , defaultPressed = false
+  , disabled = s == "disabled"
   , ariaLabel = Just "Bold"
   , style = { root: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft" }
   , children = [ HH.text "B" ]
@@ -1201,13 +1233,11 @@ tabNavPage =
 -- | `style="pointer-events: none;"` (the merge upstream's CheckboxIndicator asChild
 -- | performs onto its child).
 thickCheckIconPlain :: HH.PlainHTML
-thickCheckIconPlain = thickCheckIndicator "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
+thickCheckIconPlain = checkIndicatorWith "checked" false thickCheckPath
 
--- | The ThickCheckIcon indicator svg with the given indicator class set, merging the
--- | asChild indicator props (class, data-state=checked, pointer-events:none) onto the
--- | icon svg -- exactly the node upstream's CheckboxIndicator emits. NB:
--- | SVGElement.className is a read-only SVGAnimatedString, so class/data-state must be
--- | set via setAttribute (HP.attr).
+-- | The ThickCheckIcon asChild indicator with a CALLER-SUPPLIED class set (the
+-- | CheckboxGroup/CheckboxCards item indicators carry a different class). data-state is
+-- | always "checked" (these callers only render the checked indicator).
 thickCheckIndicator :: String -> HH.PlainHTML
 thickCheckIndicator indicatorClass =
   HH.elementNS svgNS (HH.ElemName "svg")
@@ -1220,14 +1250,51 @@ thickCheckIndicator indicatorClass =
     , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
     , HP.style "pointer-events: none;"
     ]
-    [ HH.elementNS svgNS (HH.ElemName "path")
-        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
-        , HP.attr (HH.AttrName "clip-rule") "evenodd"
-        , HP.attr (HH.AttrName "d")
-            "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z"
-        ]
-        []
+    [ thickCheckPath ]
+
+-- | The asChild indicator svg with a baked `data-state` and (optional) `data-disabled=''`,
+-- | parameterized over the inner path — `thickCheckPath` (checked) or `dividerPath`
+-- | (indeterminate). Merges the asChild indicator props upstream's CheckboxIndicator stamps
+-- | onto its child (class, data-state, optional data-disabled, pointer-events:none). NB:
+-- | SVGElement.className is a read-only SVGAnimatedString, so class/data-state must be set
+-- | via setAttribute (HP.attr).
+checkIndicatorWith :: String -> Boolean -> HH.PlainHTML -> HH.PlainHTML
+checkIndicatorWith state disabled innerPath =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    ( [ HP.attr (HH.AttrName "class") "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
+      , HP.attr (HH.AttrName "data-state") state
+      , HP.attr (HH.AttrName "width") "9"
+      , HP.attr (HH.AttrName "height") "9"
+      , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+      , HP.attr (HH.AttrName "fill") "currentcolor"
+      , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+      , HP.style "pointer-events: none;"
+      ]
+        <> (if disabled then [ HP.attr (HH.AttrName "data-disabled") "" ] else [])
+    )
+    [ innerPath ]
+
+-- | The ThickCheckIcon path (the check mark).
+thickCheckPath :: HH.PlainHTML
+thickCheckPath =
+  HH.elementNS svgNS (HH.ElemName "path")
+    [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+    , HP.attr (HH.AttrName "clip-rule") "evenodd"
+    , HP.attr (HH.AttrName "d")
+        "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z"
     ]
+    []
+
+-- | The ThickDividerHorizontalIcon path (the indeterminate dash).
+dividerPath :: HH.PlainHTML
+dividerPath =
+  HH.elementNS svgNS (HH.ElemName "path")
+    [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+    , HP.attr (HH.AttrName "clip-rule") "evenodd"
+    , HP.attr (HH.AttrName "d")
+        "M0.75 4.5C0.75 4.08579 1.08579 3.75 1.5 3.75H7.5C7.91421 3.75 8.25 4.08579 8.25 4.5C8.25 4.91421 7.91421 5.25 7.5 5.25H1.5C1.08579 5.25 0.75 4.91421 0.75 4.5Z"
+    ]
+    []
 
 -- | The down-chevron (radix's TriggerIcon / SelectIcon) — same 9×9 currentColor path
 -- | upstream uses. Rendered in the SVG namespace so it paints. `chevron` is the bare

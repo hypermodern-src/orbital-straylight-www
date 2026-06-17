@@ -1048,47 +1048,137 @@ const PAGES: Page[] = [
     id: "radiogroup",
     label: "RadioGroup (interactive)",
     interactive: true,
-    node: (
-      <RadioGroup.Root defaultValue="1">
-        <Flex direction="column" gap="2">
-          <Text as="label" size="2">
-            <Flex gap="2" align="center">
-              <RadioGroup.Item value="1" /> Default
+    // Default: 2 items (the committed `checked` driver clicks value=2). `?s=keys` seeds a
+    // 3-item group with the MIDDLE item disabled — the canonical fixture for disabled-skip
+    // roving, Enter-no-activate, Home/End-no-check, and a real first→last wrap.
+    node: (() => {
+      const s = currentState();
+      // `?s=keys` / `?s=mixed` — 3 items, middle disabled (roving-skip + mixed-render fixture).
+      if (s === "keys" || s === "mixed") {
+        return (
+          <RadioGroup.Root defaultValue="1">
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" disabled /> Comfortable
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="3" /> Compact
+                </Flex>
+              </Text>
             </Flex>
-          </Text>
-          <Text as="label" size="2">
-            <Flex gap="2" align="center">
-              <RadioGroup.Item value="2" /> Comfortable
+          </RadioGroup.Root>
+        );
+      }
+      // `?s=disabledgroup` — the whole group disabled (root + every item data-disabled='').
+      if (s === "disabledgroup") {
+        return (
+          <RadioGroup.Root defaultValue="1" disabled>
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" /> Comfortable
+                </Flex>
+              </Text>
             </Flex>
-          </Text>
-        </Flex>
-      </RadioGroup.Root>
-    ),
+          </RadioGroup.Root>
+        );
+      }
+      // `?s=horizontal` — explicit horizontal orientation (aria-orientation/data-orientation).
+      if (s === "horizontal") {
+        return (
+          <RadioGroup.Root defaultValue="1" orientation="horizontal">
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" /> Comfortable
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
+      return (
+        <RadioGroup.Root defaultValue="1">
+          <Flex direction="column" gap="2">
+            <Text as="label" size="2">
+              <Flex gap="2" align="center">
+                <RadioGroup.Item value="1" /> Default
+              </Flex>
+            </Text>
+            <Text as="label" size="2">
+              <Flex gap="2" align="center">
+                <RadioGroup.Item value="2" /> Comfortable
+              </Flex>
+            </Text>
+          </Flex>
+        </RadioGroup.Root>
+      );
+    })(),
   },
   {
     id: "checkbox",
     label: "Checkbox (interactive)",
     interactive: true,
-    node: <Checkbox />,
+    // default = bare unchecked (the `checked` driver clicks to check). `?s=indeterminate`
+    // seeds the mixed state (aria-checked=mixed, indicator shown); `?s=disabled` the no-op
+    // disabled render (data-disabled='' on root AND indicator).
+    node: (() => {
+      const s = currentState();
+      if (s === "indeterminate") return <Checkbox defaultChecked="indeterminate" />;
+      if (s === "disabled") return <Checkbox disabled defaultChecked />;
+      return <Checkbox />;
+    })(),
   },
   {
     id: "switch",
     label: "Switch (interactive)",
     interactive: true,
-    node: <Switch />,
+    // default = OFF (the `on` driver clicks to turn on; `rest` captures off). `?s=disabled`
+    // seeds the disabled no-op render (data-disabled='' on root + thumb); `?s=required`
+    // documents the aria-required=true surface.
+    node: (() => {
+      const s = currentState();
+      if (s === "disabled") return <Switch disabled />;
+      if (s === "required") return <Switch required />;
+      return <Switch />;
+    })(),
   },
   {
     id: "toggle",
     label: "Toggle",
     interactive: true,
-    node: (
-      <Toggle
-        className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
-        aria-label="Bold"
-      >
-        B
-      </Toggle>
-    ),
+    // `?s=disabled` seeds a disabled toggle (the no-op + data-disabled='' contract);
+    // every other state (rest, pressed) drives the default enabled toggle.
+    node: (() => {
+      const disabled = currentState() === "disabled";
+      return (
+        <Toggle
+          className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+          aria-label="Bold"
+          {...(disabled ? { disabled: true } : {})}
+        >
+          B
+        </Toggle>
+      );
+    })(),
   },
   {
     id: "togglegroup",
