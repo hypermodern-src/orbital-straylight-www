@@ -113,6 +113,7 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  "labelprim:forfocus"
   # Wave-C: Themes.Separator WRAPPER depth oracle.
   "separatorthemes:default"
   "separatorthemes:semantic"

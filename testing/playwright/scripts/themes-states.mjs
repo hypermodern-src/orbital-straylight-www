@@ -781,6 +781,20 @@ export const STATES = {
   labelprim: {
     // STATELESS: wait for the <label> carrying the for-association attribute.
     forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
+    // Wave-C runtime contract: clicking the label FOCUSES the for-associated control
+    // (native <label for=…> behavior the port's for attribute must enable). Click the
+    // label text, then assert document.activeElement is the input#email — the gate is the
+    // waitForFunction (throws/times out if focus didn't transfer); the post-click DOM is
+    // unchanged (focus isn't in the normalized snapshot) so golden==port DOM trivially.
+    forfocus: async (pg) => {
+      const lbl = pg.locator("label[for]").first();
+      await lbl.waitFor({ state: "attached" });
+      await lbl.click();
+      await pg.waitForFunction(() => {
+        const a = document.activeElement;
+        return a && a.tagName === "INPUT" && a.id === "email";
+      });
+    },
   },
   // ── Wave-C: Themes.Separator WRAPPER (rt-Separator) depth oracle ─────────────────
   // STATELESS: wait for the rt-Separator span (present in every state). The contract
