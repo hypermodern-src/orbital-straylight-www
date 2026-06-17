@@ -37,10 +37,12 @@ module Hydrogen.Radix.Dialog
 
 import Prelude
 
-import Data.Array (null)
+import Data.Array (elem, null)
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
+import Data.String (toLower, trim) as Str
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -55,6 +57,9 @@ import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRe
 import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
+import Unsafe.Reference (unsafeRefEq)
+import Web.DOM.Element as Element
+import Web.DOM.Node as Node
 import Web.Event.Event as Event
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -105,6 +110,7 @@ type Input =
   , contentStyle :: String         -- extra inline style on the content (e.g. max-width)
   , triggerAttrs :: Array (Tuple String String)  -- data-* attrs for the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)  -- data-* attrs for the portaled root (theme re-application)
+  , closeLabels :: Array String  -- trimmed button labels inside content that act as DialogClose (close on click)
   }
 
 defaultInput :: Input
@@ -122,6 +128,7 @@ defaultInput =
   , contentStyle: ""
   , triggerAttrs: []
   , portalAttrs: []
+  , closeLabels: []
   }
 
 data Output = OpenChanged Boolean
@@ -150,6 +157,7 @@ type State =
   , contentStyle :: String
   , triggerAttrs :: Array (Tuple String String)
   , portalAttrs :: Array (Tuple String String)
+  , closeLabels :: Array String
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
@@ -165,6 +173,7 @@ data Action
   | Receive Input
   | TriggerClicked
   | OverlayClicked ME.MouseEvent
+  | ContentClicked ME.MouseEvent
   | ContentKeyDown KE.KeyboardEvent
   | EscapePressed
   | AfterOpen           -- runs after the open render flushed: portal + focus
@@ -206,6 +215,7 @@ initialState input =
   , contentStyle: input.contentStyle
   , triggerAttrs: input.triggerAttrs
   , portalAttrs: input.portalAttrs
+  , closeLabels: input.closeLabels
   , restoreEl: Nothing
   , escSub: Nothing
   , postSub: Nothing
@@ -289,6 +299,7 @@ overlayContent st =
                   , HP.tabIndex (-1)
                   , HP.style st.contentStyle
                   , HE.onKeyDown ContentKeyDown
+                  , HE.onClick ContentClicked
                   ]
                     -- link title/description only when present (radix is conditional)
                     <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
@@ -325,8 +336,20 @@ handleAction = case _ of
       , contentStyle = input.contentStyle
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
+      , closeLabels = input.closeLabels
       }
   TriggerClicked -> openDialog
+  -- DialogClose: a click landing on a content <button> whose trimmed text is in `closeLabels`
+  -- closes the dialog (radix `Dialog.Close` → onOpenChange(false)). DOM-invisible: no marker
+  -- attribute is added (the golden's Close is `asChild`, so its button carries no extra attr) —
+  -- the wiring is purely behavioral, matching upstream.
+  ContentClicked me -> do
+    st <- H.get
+    when (not (null st.closeLabels)) do
+      mc <- H.getHTMLElementRef contentRef
+      for_ mc \content -> do
+        hit <- liftEffect (closeLabelHit (HTMLElement.toNode content) st.closeLabels (ME.toEvent me))
+        when hit closeDialog
   -- click on the overlay/scroll/padding (outside the content) closes — guard with
   -- isOutside so a click on the content (which bubbles up here) does NOT close.
   OverlayClicked me -> do
@@ -461,3 +484,27 @@ handleQuery = case _ of
   GetOpen reply -> do
     st <- H.get
     pure (Just (reply (current st.ctrl)))
+
+-- | Walk from the click target up to (and excluding) `content`, returning true if any
+-- | crossed element is a `<button>` whose trimmed text is in `labels` (case-insensitive).
+-- | This is the DialogClose match: radix `Dialog.Close` fires onOpenChange(false) when a
+-- | button it wraps is clicked; the port reproduces it behaviorally without a DOM marker.
+closeLabelHit :: Node.Node -> Array String -> Event.Event -> Effect Boolean
+closeLabelHit content labels ev =
+  case Event.target ev >>= Node.fromEventTarget of
+    Nothing -> pure false
+    Just start -> walk start
+  where
+  wanted = map (Str.toLower <<< Str.trim) labels
+  walk node
+    | unsafeRefEq node content = pure false
+    | otherwise = do
+        isHit <- case Element.fromNode node of
+          Just el | Str.toLower (Element.tagName el) == "button" -> do
+            txt <- Node.textContent node
+            pure (elem (Str.toLower (Str.trim txt)) wanted)
+          _ -> pure false
+        if isHit then pure true
+        else Node.parentNode node >>= case _ of
+          Just p -> walk p
+          Nothing -> pure false

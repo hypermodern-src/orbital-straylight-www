@@ -1121,6 +1121,41 @@ const CHECKS = [
     await press(pg, "Space"); // collapse
     await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "Space did not collapse the disclosure");
   }},
+
+  // ── Wave-C modal depth gaps (STR-330) ───────────────────────────────────────
+  // Dialog — DialogClose (dialog.tsx:472-492): a button inside content composes its onClick
+  // with onOpenChange(false). The golden's Cancel/Save are each wrapped in Dialog.Close, so a
+  // click on either closes the dialog AND restores focus to the trigger. The port reproduces
+  // this behaviorally (closeLabels match, no DOM marker — golden's Close is asChild). Keyed off
+  // role=dialog + the button text, so the same check runs on golden and port.
+  { id: "dialog", apg: "dialog-modal", name: "clicking the Cancel close-button closes the dialog + restores focus", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    await pg.getByRole("dialog").getByRole("button", { name: "Cancel" }).click(); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="dialog"]')), "Cancel close-button did not close the dialog");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Cancel close");
+  }},
+  { id: "dialog", apg: "dialog-modal", name: "clicking the Save close-button closes the dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    await pg.getByRole("dialog").getByRole("button", { name: "Save" }).click(); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="dialog"]')), "Save close-button did not close the dialog");
+  }},
+
+  // AlertDialog — AlertDialogCancel AND AlertDialogAction both close (alert-dialog.tsx: both are
+  // DialogPrimitive.Close). Cancel is the safe action focused on open; Action is the destructive
+  // confirm. Clicking either closes + restores focus to the trigger. Keyed off role=alertdialog.
+  { id: "alertdialog", apg: "dialog-modal", name: "clicking Cancel closes the alert dialog + restores focus", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    await pg.getByRole("alertdialog").getByRole("button", { name: "Cancel" }).click(); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="alertdialog"]')), "Cancel did not close the alert dialog");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Cancel");
+  }},
+  { id: "alertdialog", apg: "dialog-modal", name: "clicking the destructive Action closes the alert dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    // the Action button is the red "Revoke access" confirm; scope to the alertdialog so it is
+    // not confused with the same-labelled trigger.
+    await pg.getByRole("alertdialog").getByRole("button", { name: "Revoke access" }).click(); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="alertdialog"]')), "Action did not close the alert dialog");
+  }},
 ];
 
 const b = await chromium.launch();
