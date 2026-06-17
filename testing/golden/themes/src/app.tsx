@@ -19,6 +19,12 @@ import * as Toast from "@radix-ui/react-toast";
 import * as PasswordToggleField from "@radix-ui/react-password-toggle-field";
 import * as OneTimePasswordField from "@radix-ui/react-one-time-password-field";
 import * as Form from "@radix-ui/react-form";
+// Bare stateless primitives (Wave-B depth audit) — the genuine upstream DOM contract
+// (role/aria/data-*/inline-style) the Hydrogen.Radix / Hydrogen.Themes ports reproduce.
+import * as SeparatorPrim from "@radix-ui/react-separator";
+import * as AspectRatioPrim from "@radix-ui/react-aspect-ratio";
+import * as VisuallyHiddenPrim from "@radix-ui/react-visually-hidden";
+import * as LabelPrim from "@radix-ui/react-label";
 // Bundle Inter (Radix Themes' intended typeface) so the render is deterministic —
 // headless Chromium has no system sans; without this the golden falls back to mono.
 import "@fontsource-variable/inter";
@@ -1287,6 +1293,106 @@ const PAGES: Page[] = [
         </Box>
       );
     })(),
+  },
+  // ── Wave-B stateless depth oracles ─────────────────────────────────────────────
+  // Bare @radix-ui/react-* primitives driven into at-rest variant stories via ?s=<state>.
+  // The DOM (role/aria/data-*/inline-style) is the oracle — no interaction.
+  {
+    id: "separatorprim",
+    label: "Separator (primitive)",
+    interactive: true,
+    // Four combos via ?s=: hsem (horizontal+semantic) / vsem (vertical+semantic) /
+    // hdec (horizontal+decorative) / vdec (vertical+decorative). The a11y contract:
+    // semantic → role=separator (+ aria-orientation ONLY when vertical); decorative →
+    // role=none, NO aria-orientation. data-orientation always present.
+    node: (() => {
+      const s = currentState();
+      const orientation = s === "vsem" || s === "vdec" ? "vertical" : "horizontal";
+      const decorative = s === "hdec" || s === "vdec";
+      return <SeparatorPrim.Root orientation={orientation} decorative={decorative} />;
+    })(),
+  },
+  {
+    id: "aspectratioprim",
+    label: "Aspect Ratio (primitive)",
+    interactive: true,
+    // ?s=default (ratio omitted ⇒ default 1/1 ⇒ padding-bottom:100%), ?s=wide (16/9 ⇒
+    // 56.25%), ?s=tall (1/2 ⇒ 200%), ?s=styled (inner style background merge + id/aria/
+    // data-* passthrough onto the INNER div + class on inner). The wrapper carries
+    // data-radix-aspect-ratio-wrapper="" and the relative/padding-bottom box geometry.
+    node: (() => {
+      const s = currentState();
+      const ratio = s === "wide" ? 16 / 9 : s === "tall" ? 1 / 2 : undefined;
+      if (s === "styled") {
+        return (
+          <AspectRatioPrim.Root
+            ratio={16 / 9}
+            id="ar-inner"
+            aria-label="cover"
+            data-foo="bar"
+            className="my-inner"
+            style={{ backgroundColor: "red" }}
+          >
+            <span>X</span>
+          </AspectRatioPrim.Root>
+        );
+      }
+      return (
+        <AspectRatioPrim.Root {...(ratio === undefined ? {} : { ratio })}>
+          <span>X</span>
+        </AspectRatioPrim.Root>
+      );
+    })(),
+  },
+  {
+    id: "visuallyhiddenprim",
+    label: "Visually Hidden (primitive)",
+    interactive: true,
+    // ?s=plain (canonical clip style + text in a11y tree), ?s=props (id + aria-* + data-*
+    // passthrough onto the span), ?s=stylemerge (caller style overrides one default key
+    // and adds a new key — last-wins merge over VISUALLY_HIDDEN_STYLES).
+    node: (() => {
+      const s = currentState();
+      if (s === "props") {
+        return (
+          <VisuallyHiddenPrim.Root id="vh-1" aria-live="polite" data-state="x">
+            required
+          </VisuallyHiddenPrim.Root>
+        );
+      }
+      if (s === "stylemerge") {
+        return (
+          <VisuallyHiddenPrim.Root style={{ position: "fixed", color: "red" }}>
+            required
+          </VisuallyHiddenPrim.Root>
+        );
+      }
+      return <VisuallyHiddenPrim.Root>required</VisuallyHiddenPrim.Root>;
+    })(),
+  },
+  {
+    id: "labelprim",
+    label: "Label (primitive)",
+    interactive: true,
+    // for-association (htmlFor="email") + arbitrary prop passthrough (id / data-* /
+    // aria-describedby / title) onto the <label>. The associated <input id="email">
+    // makes the for→control linkage structurally present. The onMouseDown multi-click
+    // text-selection guard is a browser-selection side effect (not DOM-observable), so
+    // it is tracked as a residual, not asserted here.
+    node: (
+      <div>
+        <LabelPrim.Root
+          htmlFor="email"
+          id="email-label"
+          data-foo="bar"
+          aria-describedby="hint"
+          title="Your email"
+        >
+          Email
+        </LabelPrim.Root>
+        <input id="email" />
+      </div>
+    ),
   },
   // The composed demo — the "looks like a finished product" target.
   {

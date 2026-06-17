@@ -63,6 +63,19 @@ STATES=(
   "form:forceMatch"
   "form:valueMissing"
   "form:typeMismatch"
+  # Wave-B stateless depth oracles (bare primitives).
+  "separatorprim:hsem"
+  "separatorprim:vsem"
+  "separatorprim:hdec"
+  "separatorprim:vdec"
+  "aspectratioprim:default"
+  "aspectratioprim:wide"
+  "aspectratioprim:tall"
+  "aspectratioprim:styled"
+  "visuallyhiddenprim:plain"
+  "visuallyhiddenprim:props"
+  "visuallyhiddenprim:stylemerge"
+  "labelprim:forattrs"
 )
 
 echo "ℵ building golden dist (bun)"
