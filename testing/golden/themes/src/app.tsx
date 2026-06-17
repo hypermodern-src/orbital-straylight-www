@@ -756,34 +756,40 @@ const PAGES: Page[] = [
   {
     id: "contextmenu",
     label: "Context Menu",
-    node: (
-      <ContextMenu.Root>
-        <ContextMenu.Trigger>
-          <Flex
-            align="center"
-            justify="center"
-            style={{
-              width: 240,
-              height: 120,
-              border: "1px dashed var(--gray-6)",
-              borderRadius: "var(--radius-3)",
-            }}
-          >
-            <Text size="2" color="gray">
-              Right-click here
-            </Text>
-          </Flex>
-        </ContextMenu.Trigger>
-        <ContextMenu.Content>
-          <ContextMenu.Item shortcut="⌘ E">Edit</ContextMenu.Item>
-          <ContextMenu.Item shortcut="⌘ D">Duplicate</ContextMenu.Item>
-          <ContextMenu.Separator />
-          <ContextMenu.Item shortcut="⌘ ⌫" color="red">
-            Delete
-          </ContextMenu.Item>
-        </ContextMenu.Content>
-      </ContextMenu.Root>
-    ),
+    // `?s=disabled` disables the SECOND item (Duplicate) so the APG disabled-skip check
+    // proves roving navigation skips it (menu.tsx:540 filter(!disabled), :720
+    // focusable={!disabled}). Every other state renders all enabled.
+    node: (() => {
+      const dupDisabled = currentState() === "disabled";
+      return (
+        <ContextMenu.Root>
+          <ContextMenu.Trigger>
+            <Flex
+              align="center"
+              justify="center"
+              style={{
+                width: 240,
+                height: 120,
+                border: "1px dashed var(--gray-6)",
+                borderRadius: "var(--radius-3)",
+              }}
+            >
+              <Text size="2" color="gray">
+                Right-click here
+              </Text>
+            </Flex>
+          </ContextMenu.Trigger>
+          <ContextMenu.Content>
+            <ContextMenu.Item shortcut="⌘ E">Edit</ContextMenu.Item>
+            <ContextMenu.Item shortcut="⌘ D" disabled={dupDisabled}>Duplicate</ContextMenu.Item>
+            <ContextMenu.Separator />
+            <ContextMenu.Item shortcut="⌘ ⌫" color="red">
+              Delete
+            </ContextMenu.Item>
+          </ContextMenu.Content>
+        </ContextMenu.Root>
+      );
+    })(),
   },
   {
     id: "select",

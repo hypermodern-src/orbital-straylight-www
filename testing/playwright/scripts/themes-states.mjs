@@ -120,6 +120,31 @@ export const STATES = {
   },
   contextmenu: {
     open: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),
+    // right-click open then ArrowDown ×2 → the second enabled item (Duplicate) lands
+    // data-highlighted (roving tabindex=0). Mirrors dropdownmenu.item2. Keyed off
+    // role/data-* only, so the same driver runs against golden and port.
+    item2: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.keyboard.press("ArrowDown");
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Duplicate");
+      });
+    },
+    // ?s=disabled disables Duplicate. Open via right-click, ArrowDown highlights Edit,
+    // ArrowDown SKIPS the disabled Duplicate to Delete — the snapshot pins the disabled
+    // item's data-disabled/aria-disabled + tabindex=-1 and the roving tabindex distribution.
+    disabled: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menuitem"][data-highlighted]').first().waitFor();
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Delete");
+      });
+    },
   },
   menubar: {
     // Menubar is a horizontal roving bar of DropdownMenu-style menus. Open the FIRST menu

@@ -1,0 +1,30 @@
+ℵ straylight project: hydrogen-ps
+<body data-scroll-locked=1 style=pointer-events: none;>
+  <span aria-hidden=true data-aria-hidden=true data-radix-focus-guard= style=outline: none; opacity: 0; position: fixed; pointer-events: none; tabindex=0>
+  <div aria-hidden=true data-aria-hidden=true id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-Flex rt-r-ai-center rt-r-jc-center" data-state=open style=width: <px>; height: <px>; border: <px> dashed var(--gray-6); border-radius: var(--radius-3);>
+          <span class="rt-Text rt-r-size-2" data-accent-color=gray>
+            #Right-click here
+  <div data-radix-popper-content-wrapper= dir=ltr style=position: fixed; left: <px>; top: <px>; transform: translate(<px>, <px>); min-width: max-content; z-index: auto; --radix-popper-available-width: <px>; --radix-popper-available-height: <px>; --radix-popper-anchor-width: <px>; --radix-popper-anchor-height: <px>; --radix-popper-transform-origin: <px> 0%;>
+    <div class="light radix-themes rt-BaseMenuContent rt-ContextMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid" aria-orientation=vertical data-accent-color=indigo data-align=start data-gray-color=slate data-has-background=false data-is-root-theme=false data-orientation=vertical data-panel-background=translucent data-radius=medium data-radix-menu-content= data-scaling=100% data-side=right data-state=open dir=ltr role=menu style=outline: none; --radix-context-menu-content-transform-origin: var(--radix-popper-transform-origin); --radix-context-menu-content-available-width: var(--radix-popper-available-width); --radix-context-menu-content-available-height: var(--radix-popper-available-height); --radix-context-menu-trigger-width: var(--radix-popper-anchor-width); --radix-context-menu-trigger-height: var(--radix-popper-anchor-height); pointer-events: auto; tabindex=-1>
+      <div class="rt-ScrollAreaRoot" dir=ltr style=position: relative; --radix-scroll-area-corner-width: <px>; --radix-scroll-area-corner-height: <px>;>
+        <div class="rt-ScrollAreaViewport" data-radix-scroll-area-viewport= style=overflow: scroll;>
+          <div style=min-width: 100%; display: table;>
+            <div class="rt-BaseMenuViewport rt-ContextMenuViewport">
+              <div class="rt-BaseMenuItem rt-ContextMenuItem rt-reset" data-orientation=vertical data-radix-collection-item= role=menuitem tabindex=-1>
+                #Edit
+                <div class="rt-BaseMenuShortcut rt-ContextMenuShortcut">
+                  #⌘ E
+              <div class="rt-BaseMenuItem rt-ContextMenuItem rt-reset" data-highlighted= data-orientation=vertical data-radix-collection-item= role=menuitem tabindex=0>
+                #Duplicate
+                <div class="rt-BaseMenuShortcut rt-ContextMenuShortcut">
+                  #⌘ D
+              <div class="rt-BaseMenuSeparator rt-ContextMenuSeparator" aria-orientation=horizontal role=separator>
+              <div class="rt-BaseMenuItem rt-ContextMenuItem rt-reset" data-accent-color=red data-orientation=vertical data-radix-collection-item= role=menuitem tabindex=-1>
+                #Delete
+                <div class="rt-BaseMenuShortcut rt-ContextMenuShortcut">
+                  #⌘ ⌫
+        <div class="rt-ScrollAreaViewportFocusRing">
+  <span aria-hidden=true data-aria-hidden=true data-radix-focus-guard= style=outline: none; opacity: 0; position: fixed; pointer-events: none; tabindex=0>

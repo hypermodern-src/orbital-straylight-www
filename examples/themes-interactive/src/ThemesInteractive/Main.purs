@@ -218,7 +218,7 @@ view c s =
             "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
             "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component (dropdownMenuInput s)
-            "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
+            "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component (contextMenuInput s)
             "menubar" -> HH.slot_ _menubar unit Menubar.component menubarInput
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
@@ -507,8 +507,8 @@ menuStyle =
 -- | can't carry); the primitive's wrapper div carries the contextmenu handler + data-state.
 -- | NOTE: the menu anchors to the trigger element (below it), not the cursor point — true
 -- | point-anchoring is the documented Float.Popper follow-up (STR-336).
-contextMenuInput :: ContextMenu.Input
-contextMenuInput = ContextMenu.defaultInput
+contextMenuInput :: String -> ContextMenu.Input
+contextMenuInput s = ContextMenu.defaultInput
   { side = Right   -- radix point-anchors the menu to the right of the cursor (data-side=right)
   , style = contextMenuStyle
   , portalAttrs = portalThemeAttrs
@@ -518,17 +518,19 @@ contextMenuInput = ContextMenu.defaultInput
   , triggerStyle = "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);"
   , trigger = [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
   , entries =
-      [ ctxRow "edit" "Edit" "⌘ E" ""
-      , ctxRow "duplicate" "Duplicate" "⌘ D" ""
+      -- `?s=disabled` disables the SECOND item (Duplicate) so the APG disabled-skip
+      -- check proves roving navigation skips it (menu.tsx:540 filter(!disabled)).
+      [ ctxRow "edit" "Edit" "⌘ E" "" false
+      , ctxRow "duplicate" "Duplicate" "⌘ D" "" (s == "disabled")
       , ContextMenu.menuSeparator
-      , ctxRow "delete" "Delete" "⌘ ⌫" "red"
+      , ctxRow "delete" "Delete" "⌘ ⌫" "red" false
       ]
   }
 
-ctxRow :: String -> String -> String -> String -> ContextMenu.MenuEntry
-ctxRow value label shortcut accent =
+ctxRow :: String -> String -> String -> String -> Boolean -> ContextMenu.MenuEntry
+ctxRow value label shortcut accent disabled =
   ContextMenu.MenuItemEntry
-    { value, label: [ HH.text label ], shortcut: [ HH.text shortcut ], accent, disabled: false }
+    { value, label: [ HH.text label ], shortcut: [ HH.text shortcut ], accent, disabled }
 
 contextMenuStyle :: ContextMenu.Style
 contextMenuStyle =

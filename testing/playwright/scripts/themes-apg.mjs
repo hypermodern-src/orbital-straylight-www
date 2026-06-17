@@ -648,6 +648,48 @@ const CHECKS = [
     ok(filled === "4", `typing did not fill the first slot (got '${filled}')`);
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
+
+  // Context Menu — https://www.w3.org/WAI/ARIA/apg/patterns/menu/
+  // A ContextMenu is a DropdownMenu point-anchored at the cursor: right-click the trigger
+  // area opens a role=menu of role=menuitem rows with the SAME RovingFocus keyboard contract
+  // (ArrowDown/Up rove, Home/End first/last, Enter/Space select+close, Escape close+restore).
+  // The port wired navigate + Dismiss.escape but had NO APG gate. Keyed off role/data-* only,
+  // so the same checks run against golden AND port. ctxOpen right-clicks the trigger area.
+  { id: "contextmenu", apg: "menu", name: "ArrowDown roves Edit→Duplicate (right-click open)", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Duplicate");
+  }},
+  { id: "contextmenu", apg: "menu", name: "End highlights the last item, Home the first", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
+    await pg.keyboard.press("Home"); await hlStarts(pg, "Edit");
+  }},
+  { id: "contextmenu", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Enter did not close the menu after selecting");
+  }},
+  { id: "contextmenu", apg: "menu", name: "Escape closes the menu", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Escape did not close the menu");
+  }},
+  // ?s=disabled disables Duplicate; it carries data-disabled + tabindex=-1 and is NOT in
+  // the roving order, so ArrowDown from Edit SKIPS it and lands on Delete.
+  { id: "contextmenu", state: "disabled", apg: "menu", name: "ArrowDown SKIPS a disabled item to the next enabled one", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menuitem"]')].find((x) => (x.textContent || "").startsWith("Duplicate")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Delete");
+  }},
 ];
 
 const b = await chromium.launch();

@@ -42,7 +42,7 @@ import Prelude
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
 import Data.Int (toNumber)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
 import Data.String (Pattern(..), stripSuffix)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -96,10 +96,22 @@ menuSeparator :: MenuEntry
 menuSeparator = MenuSeparator
 
 -- | The number of focusable (non-separator) items — the roving-focus modulus.
+-- | The roving order counts only ENABLED items (upstream menu.tsx:540
+-- | `getItems().filter(!disabled)`, :720 `focusable={!disabled}`). A disabled item
+-- | renders but is excluded from the roving order entirely, so arrows skip OVER it.
 itemCount :: Array MenuEntry -> Int
 itemCount = Array.length <<< Array.filter case _ of
-  MenuItemEntry _ -> true
+  MenuItemEntry item -> not item.disabled
   MenuSeparator -> false
+
+-- | The enabled MenuItem at roving index `n` (the keyboard-selection target). Mirrors
+-- | the same enabled-only ordering `renderEntries` assigns refs/tabindex over.
+enabledItemAt :: Int -> Array MenuEntry -> Maybe MenuItem
+enabledItemAt n entries = Array.index (Array.mapMaybe enabled entries) n
+  where
+  enabled = case _ of
+    MenuItemEntry item | not item.disabled -> Just item
+    _ -> Nothing
 
 type Style =
   { trigger :: ClassNames
@@ -360,25 +372,29 @@ renderEntries st = _.html (foldl step { idx: 0, html: [] } st.entries)
   where
   step acc = case _ of
     MenuSeparator -> acc { html = acc.html <> [ renderSep st ] }
-    MenuItemEntry item -> acc
-      { idx = acc.idx + 1
-      , html = acc.html <> [ renderItem st acc.idx item ]
-      }
+    MenuItemEntry item
+      | item.disabled -> acc { html = acc.html <> [ renderItem st Nothing item ] }
+      | otherwise -> acc
+          { idx = acc.idx + 1
+          , html = acc.html <> [ renderItem st (Just acc.idx) item ]
+          }
 
 -- | A menu item is a DIV (radix uses generic elements) with role=menuitem, a roving tab
 -- | stop, optional per-item accent, and an optional right-aligned shortcut.
-renderItem :: forall m. State -> Int -> MenuItem -> H.ComponentHTML Action () m
-renderItem st idx item =
+-- | `mIdx = Nothing` ⇒ the item is DISABLED — out of the roving order: tabindex -1,
+-- | never `data-highlighted`, click is a no-op (the handler guards on disabled).
+renderItem :: forall m. State -> Maybe Int -> MenuItem -> H.ComponentHTML Action () m
+renderItem st mIdx item =
   HH.div
-    ( [ HP.ref (itemRef st.idPrefix idx)
-      , role "menuitem"
+    ( [ role "menuitem"
       , classes st.style.item
-      , HP.tabIndex (tabIndexFor st.focused idx)
+      , HP.tabIndex (maybe (-1) (tabIndexFor st.focused) mIdx)
       , dataAttr "radix-collection-item" ""
       , dataAttr "orientation" "vertical"
       , HE.onClick \_ -> ItemClicked item.value
       ]
-        <> (if st.focused == idx then [ dataAttr "highlighted" "" ] else [])
+        <> maybe [] (\i -> [ HP.ref (itemRef st.idPrefix i) ]) mIdx
+        <> (if mIdx == Just st.focused then [ dataAttr "highlighted" "" ] else [])
         <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
         <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
     )
@@ -463,9 +479,20 @@ handleAction = case _ of
   MenuKeyDown ke -> do
     st <- H.get
     let
+      key = KE.key ke
       cfg = { orientation: Vertical, dir: LTR, loop: true }
       pos = { count: itemCount st.entries, current: st.focused }
-    case navigate cfg pos (KE.key ke) of
+    -- Enter/Space SELECT the focused item (upstream menu.tsx:667-680 SELECTION_KEYS →
+    -- currentTarget.click() + preventDefault). Keyboard activation of items, previously
+    -- impossible (navigate returned Stay for these keys).
+    if (key == "Enter" || key == " ")
+      && st.focused >= 0 then do
+      liftEffect (preventDefault (KE.toEvent ke))
+      for_ (enabledItemAt st.focused st.entries) \it ->
+        when (not it.disabled) do
+          H.raise (ItemSelected it.value)
+          closeMenu
+    else case navigate cfg pos key of
       Stay -> pure unit
       MoveTo idx -> do
         H.modify_ _ { focused = idx }
@@ -477,8 +504,17 @@ handleAction = case _ of
           for_ mwrap Envelope.reAdoptBeforeTrail
           for_ mitem HTMLElement.focus
   ItemClicked value -> do
-    H.raise (ItemSelected value)
-    closeMenu
+    st <- H.get
+    -- a disabled item is non-interactive (upstream menu.tsx:639 handleSelect disabled
+    -- guard) — clicking it neither selects nor closes the menu.
+    let
+      pick = case _ of
+        MenuItemEntry it | it.value == value -> Just it
+        _ -> Nothing
+      mItem = Array.findMap pick st.entries
+    when (maybe true (not <<< _.disabled) mItem) do
+      H.raise (ItemSelected value)
+      closeMenu
   -- scroll/resize: just re-place. NOT re-adopt — the wrapper stays in body across renders
   -- (Halogen patches it in place), and re-adopting would move it past the trailing focus
   -- guard AND blur the focused content. (This bit the menu because lockScroll fires resize.)
