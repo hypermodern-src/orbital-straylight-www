@@ -212,7 +212,6 @@ render st =
           -- (radix Tooltip shows after a delay), matching the golden.
           ( [ HP.ref triggerRef
             , classes st.style.trigger
-            , aria "describedby" st.contentId
             , dataState (if open then "delayed-open" else "closed")
             , dataAttr "radix-popper-side" (sideName st.placedSide)
             , dataAttr "radix-popper-align" (alignName st.placedAlign)
@@ -221,6 +220,9 @@ render st =
             , HE.onFocus \_ -> Show
             , HE.onBlur \_ -> Hide
             ] <> portalData st.triggerAttrs
+            -- aria-describedby points at the content id ONLY while open (upstream:
+            -- `context.open ? contentId : undefined`); when closed the attr is absent.
+            <> (if open then [ aria "describedby" st.contentId ] else [])
           )
           (map HH.fromPlainHTML st.trigger)
       -- the popper WRAPPER (portal root) — always mounted, positioned out-of-band by Popper.

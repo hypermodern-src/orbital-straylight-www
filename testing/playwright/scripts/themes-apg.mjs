@@ -231,6 +231,19 @@ const CHECKS = [
     await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="tooltip"]')), "Escape did not hide the tooltip");
   }},
+  // aria-describedby is set on the trigger ONLY while open (upstream tooltip.tsx:290
+  // `context.open ? context.contentId : undefined`). Closed ⇒ the attribute is ABSENT;
+  // open ⇒ it points at the role=tooltip content's id. (Validated on --golden first.)
+  { id: "tooltip", apg: "tooltip", name: "aria-describedby is absent when closed, present (→ the tooltip) when open", run: async (pg) => {
+    await triggerBtn(pg).waitFor();
+    ok((await attrOf(pg, "#root button", 0, "aria-describedby")) === null,
+      "trigger must have NO aria-describedby while the tooltip is closed");
+    await triggerBtn(pg).focus(); await pg.getByRole("tooltip").waitFor({ timeout: 3000 }); await pg.waitForTimeout(120);
+    const db = await attrOf(pg, "#root button", 0, "aria-describedby");
+    ok(db !== null && db !== "", "trigger must gain aria-describedby when the tooltip opens");
+    const linked = await pg.evaluate((id) => { const e = document.getElementById(id); return !!(e && e.getAttribute("role") === "tooltip"); }, db);
+    ok(linked, `aria-describedby (${db}) must reference the role=tooltip content`);
+  }},
 
   // Radio Group — https://www.w3.org/WAI/ARIA/apg/patterns/radio/
   // Keyboard table: Tab moves focus into the group, onto the checked radio (or first if none
