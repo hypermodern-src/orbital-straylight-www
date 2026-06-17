@@ -1,14 +1,5 @@
 node_modules/
 .gallery-dist/
 .themes-dist/
-.dialog-dist/
-.alertdialog-dist/
-.popover-dist/
-.tooltip-dist/
-.hovercard-dist/
-.dropdownmenu-dist/
-.contextmenu-dist/
-.select-dist/
-.scrollarea-dist/
 test-results/
 playwright-report/
