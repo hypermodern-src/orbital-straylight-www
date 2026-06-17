@@ -50,6 +50,7 @@ import Hydrogen.Radix.Toolbar as Toolbar
 import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
+import Hydrogen.Themes.AccessibleIcon (accessibleIcon) as AccessibleIcon
 import Hydrogen.Themes.Progress (progress) as Progress
 import Hydrogen.Themes.Prop (Prop(..))
 import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
@@ -235,6 +236,9 @@ view c s =
             "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
             "checkboxcards" -> checkboxCardsPage
+            -- `Align` is ambiguous here (Prop.Align vs Foundation.Style.Align in scope),
+            -- so spell the flex align class directly: align="center" → rt-r-ai-center.
+            "accessibleicon" -> flex [ Class "rt-r-ai-center" ] (AccessibleIcon.accessibleIcon "Settings" gearIcon)
             "progress" -> box [ StyleProp "max-width" "320px" ] [ Progress.progress 25 [] ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
@@ -1218,6 +1222,30 @@ checkSvg =
         , HP.attr (HH.AttrName "clip-rule") "evenodd"
         , HP.attr (HH.AttrName "d")
             "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z"
+        ]
+        []
+    ]
+
+-- | The 15×15 Settings (gear) icon for the AccessibleIcon demo, authored already
+-- | carrying `aria-hidden="true"` + `focusable="false"` ON the svg (upstream injects
+-- | them onto the icon node via cloneElement) — so the rendered DOM matches the golden.
+gearIcon :: forall w i. HH.HTML w i
+gearIcon =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "width") "15"
+    , HP.attr (HH.AttrName "height") "15"
+    , HP.attr (HH.AttrName "viewBox") "0 0 15 15"
+    , HP.attr (HH.AttrName "fill") "none"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    , HP.attr (HH.AttrName "aria-hidden") "true"
+    , HP.attr (HH.AttrName "focusable") "false"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        , HP.attr (HH.AttrName "fill") "currentColor"
+        , HP.attr (HH.AttrName "d")
+            "M7.07.65a1.5 1.5 0 0 0-1.14 0l-.69.29-.74-.18a1.5 1.5 0 0 0-1.07.2l-.6.43-.76.05a1.5 1.5 0 0 0-.98.55l-.42.6-.7.3a1.5 1.5 0 0 0-.78.78l-.3.7-.43.6a1.5 1.5 0 0 0-.2 1.07l.18.74-.29.69a1.5 1.5 0 0 0 0 1.14l.29.69-.18.74a1.5 1.5 0 0 0 .2 1.07l.43.6.3.7c.16.36.43.63.78.78l.7.3.42.6c.24.34.6.55.98.55l.76.05.6.43c.32.23.7.3 1.07.2l.74-.18.69.29c.36.15.78.15 1.14 0l.69-.29.74.18c.37.1.75.03 1.07-.2l.6-.43.76-.05c.38 0 .74-.21.98-.55l.42-.6.7-.3a1.5 1.5 0 0 0 .78-.78l.3-.7.43-.6c.23-.32.3-.7.2-1.07l-.18-.74.29-.69a1.5 1.5 0 0 0 0-1.14l-.29-.69.18-.74a1.5 1.5 0 0 0-.2-1.07l-.43-.6-.3-.7a1.5 1.5 0 0 0-.78-.78l-.7-.3-.42-.6a1.5 1.5 0 0 0-.98-.55l-.76-.05-.6-.43a1.5 1.5 0 0 0-1.07-.2l-.74.18L7.07.65ZM7.5 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
         ]
         []
     ]

@@ -6,16 +6,12 @@
 -- |
 -- | The primitive renders a React Fragment (NO wrapper element):
 -- |   1. the single icon child, cloned with the accessibility attributes
--- |      `aria-hidden="true"` and `focusable="false"` injected onto it, then
+-- |      `aria-hidden="true"` and `focusable="false"` injected ONTO IT, then
 -- |   2. a `<VisuallyHidden>` holding the `label` string.
 -- |
--- | `VisuallyHidden` (`primitives/.../visually-hidden/src/visually-hidden.tsx`)
--- | is a bare `<span>` with NO class — only the frozen Bootstrap visually-hidden
--- | inline style block (position:absolute; border:0; width:1px; height:1px;
--- | padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0);
--- | white-space:nowrap; word-wrap:normal). We reproduce that exact style string so
--- | the label is announced to screen readers but takes no layout space — the
--- | visible pixels are just the icon.
+-- | The visually-hidden label span uses `Hydrogen.Radix.VisuallyHidden` so its
+-- | sr-only style is the canonical (browser-normalized) radix string — node-for-node
+-- | the upstream VisuallyHidden, matching the open-DOM oracle.
 -- |
 -- | Since the icon child arrives here as opaque `HH.HTML`, we cannot clone attrs
 -- | onto it the way React does; callers author the icon with `aria-hidden="true"`
@@ -26,19 +22,15 @@ module Hydrogen.Themes.AccessibleIcon
   ) where
 
 import Halogen.HTML as HH
-import Hydrogen.Themes.VisuallyHidden (visuallyHidden)
+import Hydrogen.Radix.VisuallyHidden (visuallyHidden_)
 
 -- | `accessibleIcon "Settings" gearSvg` → the icon followed by a visually-hidden
--- | `<span>` announcing the label. The icon should already carry
--- | `aria-hidden="true"` / `focusable="false"` (as upstream injects). Returns the
--- | two siblings as an array — Halogen has no Fragment node, so the caller splices
--- | this into a parent's children (the primitive's React Fragment adds no wrapper).
--- |
--- | The label span delegates to `Hydrogen.Themes.VisuallyHidden` so its sr-only
--- | style goes through the engine's `HP.style` (the browser normalizes the cssText
--- | — `0`→`0px`, `word-wrap`→`overflow-wrap`), matching upstream's serialized form.
+-- | `<span>` announcing the label, as SIBLINGS (the primitive's React Fragment adds
+-- | no wrapper; Halogen has no Fragment node, so the caller splices this array into a
+-- | parent's children). The icon should already carry `aria-hidden="true"` /
+-- | `focusable="false"` (as upstream injects).
 accessibleIcon :: forall w i. String -> HH.HTML w i -> Array (HH.HTML w i)
 accessibleIcon label icon =
   [ icon
-  , visuallyHidden [] [ HH.text label ]
+  , visuallyHidden_ [ HH.text label ]
   ]

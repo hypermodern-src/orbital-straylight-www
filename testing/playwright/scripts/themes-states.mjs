@@ -286,6 +286,14 @@ export const STATES = {
       await pg.locator('a.rt-TabNavLink[aria-current="page"]').first().waitFor();
     },
   },
+  accessibleicon: {
+    // STATELESS: the svg carries aria-hidden="true"+focusable="false" (injected ONTO the
+    // icon, not a wrapper), followed by a VisuallyHidden label span. `shown` just waits for
+    // the hidden svg; rest and shown snapshot the SAME static DOM.
+    shown: async (pg) => {
+      await pg.locator('svg[aria-hidden="true"]').first().waitFor({ state: "attached" });
+    },
+  },
   progress: {
     // Determinate progress bar — STATELESS (no interaction). The `shown` state just
     // waits for the role=progressbar to be laid out; rest and shown snapshot the SAME

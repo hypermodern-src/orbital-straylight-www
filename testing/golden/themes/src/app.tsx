@@ -1124,6 +1124,29 @@ const PAGES: Page[] = [
     ),
   },
   {
+    id: "accessibleicon",
+    label: "Accessible Icon (interactive)",
+    interactive: true,
+    // The primitive cloneElements aria-hidden="true" + focusable="false" ONTO the svg
+    // itself (NOT a wrapper span), then renders a VisuallyHidden label sibling. The svg
+    // here is authored WITHOUT those attrs so the oracle proves upstream injects them on
+    // the icon node. No interaction; the at-rest DOM is the oracle.
+    node: (
+      <Flex align="center">
+        <AccessibleIcon label="Settings">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              fill="currentColor"
+              d="M7.07.65a1.5 1.5 0 0 0-1.14 0l-.69.29-.74-.18a1.5 1.5 0 0 0-1.07.2l-.6.43-.76.05a1.5 1.5 0 0 0-.98.55l-.42.6-.7.3a1.5 1.5 0 0 0-.78.78l-.3.7-.43.6a1.5 1.5 0 0 0-.2 1.07l.18.74-.29.69a1.5 1.5 0 0 0 0 1.14l.29.69-.18.74a1.5 1.5 0 0 0 .2 1.07l.43.6.3.7c.16.36.43.63.78.78l.7.3.42.6c.24.34.6.55.98.55l.76.05.6.43c.32.23.7.3 1.07.2l.74-.18.69.29c.36.15.78.15 1.14 0l.69-.29.74.18c.37.1.75.03 1.07-.2l.6-.43.76-.05c.38 0 .74-.21.98-.55l.42-.6.7-.3a1.5 1.5 0 0 0 .78-.78l.3-.7.43-.6c.23-.32.3-.7.2-1.07l-.18-.74.29-.69a1.5 1.5 0 0 0 0-1.14l-.29-.69.18-.74a1.5 1.5 0 0 0-.2-1.07l-.43-.6-.3-.7a1.5 1.5 0 0 0-.78-.78l-.7-.3-.42-.6a1.5 1.5 0 0 0-.98-.55l-.76-.05-.6-.43a1.5 1.5 0 0 0-1.07-.2l-.74.18L7.07.65ZM7.5 10a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+            />
+          </svg>
+        </AccessibleIcon>
+      </Flex>
+    ),
+  },
+  {
     id: "progress",
     label: "Progress (interactive)",
     interactive: true,

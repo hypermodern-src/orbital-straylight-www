@@ -18,11 +18,14 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Foundation.Style (ClassNames, classes)
 
--- | The canonical visually-hidden inline style (matches radix exactly).
+-- | The canonical visually-hidden inline style, in the BROWSER-NORMALIZED form the
+-- | DOM-oracle sees (React sets it via the style PROPERTY, so `0`→`0px` and
+-- | `word-wrap`→`overflow-wrap` when serialized). Authoring the normalized string
+-- | makes the literal `style=` attribute byte-match upstream node-for-node.
 inlineStyle :: String
 inlineStyle =
-  "position:absolute;border:0;width:1px;height:1px;padding:0;margin:-1px;"
-    <> "overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;word-wrap:normal;"
+  "position: absolute; border: 0px; width: 1px; height: 1px; padding: 0px; margin: -1px; "
+    <> "overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; overflow-wrap: normal;"
 
 -- | A visually-hidden span with extra classes and static children.
 visuallyHidden :: forall w i. ClassNames -> Array HH.PlainHTML -> HH.HTML w i
