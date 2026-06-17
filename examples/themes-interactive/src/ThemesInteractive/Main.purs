@@ -266,6 +266,9 @@ view c s =
             "aspectratioprim" -> aspectRatioPrimPage s
             "visuallyhiddenprim" -> visuallyHiddenPrimPage s
             "labelprim" -> labelPrimPage
+            -- Wave-C ScrollArea family: ?s=horizontal → one horizontal bar; ?s=both → two
+            -- bars + corner. Same primitive, the `scrollbars` field selects the family.
+            "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -738,6 +741,7 @@ scrollAreaInput = ScrollArea.defaultInput
       , focusRing: cn "rt-ScrollAreaViewportFocusRing"
       , scrollbar: cn "rt-ScrollAreaScrollbar rt-r-size-1"
       , thumb: cn "rt-ScrollAreaThumb"
+      , corner: cn "rt-ScrollAreaCorner"
       }
   , content =
       [ box [ P "2", Width "160px" ]
@@ -1526,3 +1530,33 @@ firstJust = case _ of
   isJust = case _ of
     Just _ -> true
     Nothing -> false
+
+-- ── Wave-C ScrollArea family input (horizontal + both+corner) ───────────────────
+-- | The themed Radix ScrollArea exercising the MISSING-IN-PORT scrollbar family.
+-- | `?s=horizontal` → scrollbars=Horizontal' (one horizontal bar, overflow scroll
+-- | hidden, --thumb-width, translate3d X). Else `?s=both` → scrollbars=Both (TWO
+-- | bars in upstream order horizontal-then-vertical, overflow:scroll, + a
+-- | rt-ScrollAreaCorner with non-zero --radix-scroll-area-corner-{width,height}).
+-- | Content is wide+tall (width:400 nowrap rows) so BOTH axes overflow at rest.
+scrollAreaXInput :: String -> ScrollArea.Input
+scrollAreaXInput s = ScrollArea.defaultInput
+  { widthPx = 200
+  , heightPx = 120
+  , scrollbars = if s == "horizontal" then ScrollArea.Horizontal' else ScrollArea.Both
+  , style =
+      { root: cn "rt-ScrollAreaRoot"
+      , viewport: cn "rt-ScrollAreaViewport"
+      , focusRing: cn "rt-ScrollAreaViewportFocusRing"
+      , scrollbar: cn "rt-ScrollAreaScrollbar rt-r-size-1"
+      , thumb: cn "rt-ScrollAreaThumb"
+      , corner: cn "rt-ScrollAreaCorner"
+      }
+  , content =
+      [ box [ P "2", Width "400px" ]
+          ( map
+              ( \n -> textAs "p" [ Size "2", StyleProp "white-space" "nowrap" ]
+                  [ HH.text "Line ", HH.text (show n), HH.text " — a long row that overflows horizontally as well" ] )
+              (Array.range 1 12)
+          )
+      ]
+  }

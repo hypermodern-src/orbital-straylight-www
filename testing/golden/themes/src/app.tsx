@@ -1649,6 +1649,35 @@ const PAGES: Page[] = [
       </Box>
     ),
   },
+  // ── Wave-C ScrollArea family: horizontal + both(+corner) ─────────────────────
+  // The canonical `scrollarea` story is scrollbars="vertical" (one bar, no corner).
+  // This second id exercises the MISSING-IN-PORT scrollbar family: `?s=horizontal`
+  // → type=always scrollbars="horizontal" (ONE horizontal bar: data-orientation=
+  // horizontal, bottom/left/right inline style, --radix-scroll-area-thumb-width,
+  // translate3d on X); `?s=both` → scrollbars="both" ⇒ TWO scrollbars (X+Y) AND a
+  // rt-ScrollAreaCorner, with non-zero --radix-scroll-area-corner-{width,height} on
+  // Root. Content overflows on BOTH axes (wide+tall). All px-normalized — the oracle
+  // tests the scrollbar/corner STRUCTURE the port must reproduce.
+  {
+    id: "scrollareax",
+    label: "Scroll Area (family)",
+    interactive: true,
+    node: (() => {
+      const s = currentState();
+      const scrollbars = s === "horizontal" ? "horizontal" : "both";
+      return (
+        <ScrollArea type="always" scrollbars={scrollbars} style={{ width: 200, height: 120 }}>
+          <Box p="2" style={{ width: 400 }}>
+            {Array.from({ length: 12 }, (_, i) => (
+              <Text key={i} as="p" size="2" style={{ whiteSpace: "nowrap" }}>
+                Line {i + 1} — a long row that overflows horizontally as well
+              </Text>
+            ))}
+          </Box>
+        </ScrollArea>
+      );
+    })(),
+  },
 ];
 
 function currentId(): string {

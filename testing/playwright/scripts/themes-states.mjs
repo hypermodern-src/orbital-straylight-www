@@ -779,4 +779,28 @@ export const STATES = {
     // STATELESS: wait for the <label> carrying the for-association attribute.
     forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
   },
+  // Wave-C ScrollArea family (horizontal + both+corner). type="always" mounts the
+  // bar(s) unconditionally; content overflows both axes. Keyed off UPSTREAM
+  // data-orientation/data-state + the rt-ScrollAreaCorner class, so the SAME driver
+  // runs against golden and port; wait until the thumb(s) are measured (height/width
+  // ratio applied) so the post-measure DOM has settled before the snapshot.
+  scrollareax: {
+    horizontal: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('.rt-ScrollAreaThumb');
+        return t && t.getBoundingClientRect().width > 1;
+      });
+    },
+    both: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaCorner').first().waitFor();
+      await pg.waitForFunction(() => {
+        const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
+        return ts.length >= 2 &&
+          [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
+      });
+    },
+  },
 };

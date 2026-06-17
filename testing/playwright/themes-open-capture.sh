@@ -112,6 +112,9 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  # ── Wave-C ScrollArea family depth oracles (STR-330) ─────────────────────────
+  "scrollareax:horizontal"
+  "scrollareax:both"
 )
 
 echo "ℵ building golden dist (bun)"
