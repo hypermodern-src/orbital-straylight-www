@@ -148,6 +148,7 @@ data Action
   = Receive Input
   | Toggled String
   | ListKeyDown KE.KeyboardEvent
+  | EntryFocus
 
 itemRef :: String -> String -> H.RefLabel
 itemRef pfx value = H.RefLabel (pfx <> "-item-" <> value)
@@ -188,6 +189,10 @@ render st =
       , HP.style "outline: none;"
       , classes st.style.root
       , HE.onKeyDown ListKeyDown
+      -- Tab-into-group: the container (the roving tabindex=0 element) receives focus;
+      -- forward it to the current roving item. `focus` does not bubble, so a child
+      -- item receiving focus never re-triggers this — no re-entry loop.
+      , HE.onFocus (const EntryFocus)
       ]
         <> (case st.ariaLabel of
               Just l -> [ aria "label" l ]
@@ -265,8 +270,23 @@ handleAction = case _ of
         Nothing -> pure unit
         Just item -> when (not item.disabled) do
           -- roving focus only: move focus, do NOT toggle (activation is manual)
-          mel <- H.getHTMLElementRef (itemRef st.idPrefix item.value)
-          for_ mel (liftEffect <<< HTMLElement.focus)
+          focusItemAt idx
+  -- Tab-into-group: forward container focus to the current roving item (the first
+  -- pressed item, or item 0 when nothing is pressed).
+  EntryFocus -> do
+    st <- H.get
+    focusItemAt (tabStopIndex st)
+
+-- | Focus the item at the given index via its existing ref (the same mechanism
+-- | ListKeyDown uses). No-op when the index is out of range.
+focusItemAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+focusItemAt idx = do
+  st <- H.get
+  case st.items !! idx of
+    Nothing -> pure unit
+    Just item -> do
+      mel <- H.getHTMLElementRef (itemRef st.idPrefix item.value)
+      for_ mel (liftEffect <<< HTMLElement.focus)
 
 setValue :: forall m. Array String -> H.HalogenM State Action () Output m Unit
 setValue value = do

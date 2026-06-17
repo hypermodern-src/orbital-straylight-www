@@ -164,14 +164,20 @@ data Action
   | Receive Input
   | Selected String
   | ListKeyDown KE.KeyboardEvent
+  | EntryFocus
 
 -- | The effective, per-instance unique id base: readable prefix + the id minted on
 -- | Initialize (so two default-prefixed RadioGroups on a page never collide).
 base :: State -> String
 base st = if st.uid == "" then st.idPrefix else st.idPrefix <> "-" <> st.uid
 
-itemRef :: String -> String -> H.RefLabel
-itemRef pfx value = H.RefLabel (pfx <> "-item-" <> value)
+-- | The ref label for an item button. COMPONENT-INTERNAL (Halogen scopes refs per
+-- | component instance) and never serialized to the DOM, so it does NOT need the
+-- | per-mount `uid` — and MUST NOT use it: a ref label that changes after mount (uid is
+-- | minted on Initialize, after the first render) leaves `getHTMLElementRef` unable to
+-- | resolve the element. Key off the stable item value alone.
+itemRef :: String -> H.RefLabel
+itemRef value = H.RefLabel ("item-" <> value)
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -222,6 +228,10 @@ render st =
       , HP.attr (HH.AttrName "style") (if st.rootStyle == "" then "outline: none;" else "outline: none; " <> st.rootStyle)
       , classes st.style.root
       , HE.onKeyDown ListKeyDown
+      -- Tab-into-group: the container (the roving tabindex=0 element) receives focus;
+      -- forward it to the current roving item. `focus` does not bubble, so a child
+      -- item receiving focus never re-triggers this — no re-entry loop.
+      , HE.onFocus (const EntryFocus)
       ]
         -- orientation attrs only when an explicit orientation was passed (upstream
         -- omits aria-orientation/data-orientation otherwise, e.g. RadioCards).
@@ -245,7 +255,7 @@ renderItem st _ item =
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
-        , HP.ref (itemRef (base st) item.value)
+        , HP.ref (itemRef item.value)
         , role "radio"
         , aria "checked" (if selected then "true" else "false")
         , dataState (if selected then "checked" else "unchecked")
@@ -314,9 +324,24 @@ handleAction = case _ of
         Nothing -> pure unit
         Just item -> when (not (item.disabled || st.disabled)) do
           -- focus the target item, then (automatic activation) select it
-          mel <- H.getHTMLElementRef (itemRef (base st) item.value)
-          for_ mel (liftEffect <<< HTMLElement.focus)
+          focusItemAt idx
           selectValue item.value
+  -- Tab-into-group: forward container focus to the current roving item (the selected
+  -- radio, or item 0 when nothing is selected).
+  EntryFocus -> do
+    st <- H.get
+    focusItemAt (selectedIndex st)
+
+-- | Focus the item at the given index via its existing ref (the same mechanism
+-- | ListKeyDown uses). No-op when the index is out of range.
+focusItemAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+focusItemAt idx = do
+  st <- H.get
+  case st.items !! idx of
+    Nothing -> pure unit
+    Just item -> do
+      mel <- H.getHTMLElementRef (itemRef item.value)
+      for_ mel (liftEffect <<< HTMLElement.focus)
 
 selectValue :: forall m. String -> H.HalogenM State Action () Output m Unit
 selectValue value = do

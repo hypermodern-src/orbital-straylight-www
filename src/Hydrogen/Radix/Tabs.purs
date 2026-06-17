@@ -123,6 +123,7 @@ data Action
   | Receive Input
   | Selected String
   | ListKeyDown KE.KeyboardEvent
+  | EntryFocus
 
 -- | The effective, per-instance unique id base: the readable prefix + the id minted
 -- | on Initialize (so two default-prefixed Tabs on a page never collide).
@@ -132,8 +133,14 @@ base st
   | st.idPrefix == "" = st.uid
   | otherwise = st.idPrefix <> "-" <> st.uid
 
-tabRef :: String -> String -> H.RefLabel
-tabRef pfx value = H.RefLabel (pfx <> "-tab-" <> value)
+-- | The ref label for a trigger. This is COMPONENT-INTERNAL (Halogen scopes refs per
+-- | component instance) and is never serialized to the DOM, so it does NOT need the
+-- | per-mount `uid` for cross-instance uniqueness — and MUST NOT use it: a ref label
+-- | that changes after mount (uid is minted on Initialize, after the first render)
+-- | leaves `getHTMLElementRef` unable to resolve the element. Key off the stable
+-- | tab value alone.
+tabRef :: String -> H.RefLabel
+tabRef value = H.RefLabel ("tab-" <> value)
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -184,6 +191,10 @@ render st =
           , HP.attr (HH.AttrName "style") "outline: none;"
           , HP.tabIndex 0
           , HE.onKeyDown ListKeyDown
+          -- Tab-into-tablist: the container (the roving tabindex=0 element) receives
+          -- focus; forward it to the active trigger. `focus` does not bubble, so a
+          -- child trigger receiving focus never re-triggers this — no re-entry loop.
+          , HE.onFocus (const EntryFocus)
           ]
           (mapWithIndex (renderTrigger st) st.tabs)
       ]
@@ -206,7 +217,7 @@ renderTrigger st _ tab =
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
-        , HP.ref (tabRef (base st) tab.value)
+        , HP.ref (tabRef tab.value)
         , HP.id (triggerId st tab.value)
         , role "tab"
         , aria "selected" (if selected then "true" else "false")
@@ -284,9 +295,23 @@ handleAction = case _ of
         Nothing -> pure unit
         Just tab -> when (not tab.disabled) do
           -- focus the target trigger, then (automatic activation) select it
-          mel <- H.getHTMLElementRef (tabRef (base st) tab.value)
-          for_ mel (liftEffect <<< HTMLElement.focus)
+          focusTabAt idx
           selectValue tab.value
+  -- Tab-into-tablist: forward container focus to the active trigger.
+  EntryFocus -> do
+    st <- H.get
+    focusTabAt (selectedIndex st)
+
+-- | Focus the trigger at the given index via its existing ref (the same mechanism
+-- | ListKeyDown uses). No-op when the index is out of range.
+focusTabAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+focusTabAt idx = do
+  st <- H.get
+  case st.tabs !! idx of
+    Nothing -> pure unit
+    Just tab -> do
+      mel <- H.getHTMLElementRef (tabRef tab.value)
+      for_ mel (liftEffect <<< HTMLElement.focus)
 
 selectValue :: forall m. String -> H.HalogenM State Action () Output m Unit
 selectValue value = do
