@@ -92,9 +92,28 @@ export const STATES = {
   },
   tooltip: {
     open: async (pg) => { await triggerButton(pg).hover(); await pg.getByRole("tooltip").waitFor(); },
+    // FOCUS-open path: upstream `onFocus → onOpen → handleOpen` sets wasOpenDelayedRef=false,
+    // so the stateAttribute is "instant-open" (NOT the hover path's "delayed-open"). Keyed off
+    // the upstream role=tooltip + the trigger's data-state, so the same driver runs golden+port.
+    focusopen: async (pg) => {
+      await triggerButton(pg).focus();
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
   },
   hovercard: {
     open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },
+    // RICH-CONTENT (?s=richcontent): the card holds a tabbable <a>; on open, upstream sets
+    // tabindex=-1 on every tabbable content descendant (the card is a preview, not a focus
+    // target). Hover the TRIGGER link (the first link in the prose), wait for the content, then
+    // wait until the in-content link has tabindex=-1 (the getTabbableNodes effect ran). Keyed
+    // off the rt-HoverCardContent + the inner anchor's tabindex, so the same driver runs
+    // golden+port.
+    richcontent: async (pg) => {
+      await root(pg).getByRole("link").first().hover();
+      await pg.locator(".rt-HoverCardContent").waitFor();
+      await pg.locator('.rt-HoverCardContent a[tabindex="-1"]').first().waitFor();
+    },
   },
   dropdownmenu: {
     open: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
@@ -176,6 +195,32 @@ export const STATES = {
     // omits defaultValue. No interaction — wait for the closed trigger.
     closed: async (pg) => {
       await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+    },
+    // VERTICAL orientation (?s=vertical): OPEN at first paint (defaultValue="one") with
+    // data-orientation=vertical. Same open-state wait as `open`, plus assert the nav carries
+    // data-orientation=vertical (the Indicator then measures top/height/translateY). Keyed off
+    // UPSTREAM data-orientation/data-state selectors so the same driver runs golden+port.
+    vertical: async (pg) => {
+      await root(pg).locator('[data-orientation="vertical"]').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // TOGGLE-CLOSE (?s=open): open at first paint, then CLICK the open trigger → onItemSelect
+    // root toggle (prevValue===itemValue ? '' : itemValue) closes it. Snapshot the post-click
+    // at-rest nav (both triggers aria-expanded=false, content unmounted). Keyed off the open
+    // trigger's aria-expanded=true then waiting for it to flip to false.
+    clicktoggle: async (pg) => {
+      const openTrig = root(pg).locator('button[aria-expanded="true"]').first();
+      await openTrig.waitFor();
+      await openTrig.click();
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelectorAll('button[aria-expanded="true"]').length === 0);
     },
   },
 
