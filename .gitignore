@@ -33,3 +33,5 @@ result-*
 .gallery-dist/
 test-results/
 playwright-report/
+testing/playwright/.themes-a11y-dist/
+testing/playwright/.themes-open-dist/

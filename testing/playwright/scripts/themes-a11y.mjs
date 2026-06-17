@@ -1,7 +1,8 @@
 // themes-a11y.mjs <dist> <capture|verify> [<id> …] — the a11y oracle (STR-333).
 //
-// Two checks per interactive component, in its `rest` and `open` states (driven by the
-// shared themes-states.mjs, identical to the DOM oracle):
+// Two checks per interactive component, in its `rest` and canonical-`shown` states (open for
+// overlays, checked/on/pressed/selected/active/… for the non-overlay interactive set), driven
+// by the shared themes-states.mjs, identical to the DOM oracle:
 //   1. ARIA accessibility-tree snapshot (Playwright built-in) diffed against the committed
 //      upstream baseline golden-aria/<id>.<state>.txt — so roles / accessible names /
 //      states / relationships match real radix-themes exactly.
@@ -31,8 +32,11 @@ const AXE = join(HERE, "..", "vendor", "axe.min.js");
 const OFF = ["region", "landmark-one-main", "page-has-heading-one", "bypass", "document-title", "html-has-lang", "html-lang-valid", "meta-viewport", "landmark-unique"];
 const axeOpts = { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa"] }, rules: Object.fromEntries(OFF.map((r) => [r, { enabled: false }])) };
 
-// rest = closed (trigger only); open = the canonical shown state.
-const MATRIX = Object.keys(STATES).flatMap((id) => [{ id, state: "rest" }, { id, state: "open" }]);
+// rest = closed/at-rest (trigger only); `shown` = the canonical post-interaction state.
+// Overlays expose "open"; the non-overlay interactive components expose their own single
+// shown state (checked/on/pressed/selected/active/tab2) — pick the one non-rest key.
+const shown = (id) => Object.keys(STATES[id]).includes("open") ? "open" : Object.keys(STATES[id]).filter((s) => s !== "rest")[0];
+const MATRIX = Object.keys(STATES).flatMap((id) => [{ id, state: "rest" }, { id, state: shown(id) }]);
 
 const { port: PORT, close: closeSrv } = await serve(DIR);
 const b = await chromium.launch();
@@ -43,8 +47,15 @@ for (const { id, state } of MATRIX) {
   const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
   const tag = `${id}:${state}`;
   try {
-    await pg.goto(`http://127.0.0.1:${PORT}/?c=${id}`); await pg.waitForTimeout(250);
-    if (state === "open") { if (!STATES[id].open) continue; await STATES[id].open(pg); await settle(pg); }
+    // Always select the golden's `interactive` story (?c=<id>&s=<state>) — the SAME single
+    // drivable instance the port (themes-interactive) renders — for BOTH the rest snapshot
+    // (un-driven) and the shown state (driven), exactly as the DOM oracle does. The plain
+    // ?c=<id> at-rest pixel page is a DIFFERENT, seeded story (named/pre-checked, no panels),
+    // so snapshotting it for `rest` would compare two different stories; &s= keeps golden and
+    // port symmetric. For ids with no interactive variant (the 8 overlays) &s= falls back to
+    // the single page, so their baselines are unaffected.
+    await pg.goto(`http://127.0.0.1:${PORT}/?c=${id}&s=${state}`); await pg.waitForTimeout(250);
+    if (state !== "rest") { await STATES[id][state](pg); await settle(pg); }
 
     // 1. axe-core → the violated-rule fingerprint (impact moderate+; minor = noise).
     await pg.addScriptTag({ path: AXE });

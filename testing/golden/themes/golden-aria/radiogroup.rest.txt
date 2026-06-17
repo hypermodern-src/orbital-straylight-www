@@ -1,0 +1,5 @@
+- radiogroup:
+  - radio "Default" [checked]
+  - text: Default
+  - radio "Comfortable"
+  - text: Comfortable

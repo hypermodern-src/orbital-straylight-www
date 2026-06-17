@@ -1,0 +1,4 @@
+- group:
+  - text: Agree to Terms and Conditions
+  - checkbox "Agree to Terms and Conditions" [checked]:
+    - img

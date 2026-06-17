@@ -1,0 +1,4 @@
+- group:
+  - radio "Inbox"
+  - radio "Drafts" [checked]
+  - radio "Sent"

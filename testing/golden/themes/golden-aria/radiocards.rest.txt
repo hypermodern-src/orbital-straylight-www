@@ -1,0 +1,4 @@
+- radiogroup:
+  - radio "8-core CPU" [checked]
+  - radio "6-core CPU"
+  - radio "4-core CPU"
