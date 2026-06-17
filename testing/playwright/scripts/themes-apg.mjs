@@ -795,6 +795,7 @@ const CHECKS = [
     ok(t && t.expanded === "false" && t.state === "closed", "closed trigger is not aria-expanded=false / data-state=closed");
     ok(!t.controls, "closed trigger must NOT carry aria-controls");
     ok(!t.side && !t.align, "closed trigger must NOT carry data-radix-popper-side/align (those live on Popper.Anchor, mounted only while open)");
+  } },
   // Select trigger keyboard-OPEN (select.tsx:31 OPEN_KEYS, :380-389 handleOpen) — a
   // keyboard-only user opens the listbox with Space/Enter/ArrowUp/ArrowDown on the focused
   // trigger; on open focus moves to the SELECTED option. Keyed off role only → golden + port.
@@ -890,6 +891,7 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
     ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menuitem"]')].find((x) => (x.textContent || "").startsWith("Duplicate")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Delete");
+  } },
   // ── Wave-B nav-group depth checks (STR-330) ──────────────────────────────────
   // HoverCard — https://www.w3.org/WAI/ARIA/apg/ (a hover-card is keyboard-reachable:
   // focusing the trigger link opens it, blur/Escape closes it). The trigger is an inline
@@ -919,6 +921,7 @@ const CHECKS = [
     await pg.keyboard.press("End"); await pg.waitForTimeout(80);
     ok(await pg.evaluate(() => { const t = document.querySelectorAll('button[aria-expanded]'); return document.activeElement === t[t.length - 1]; }),
       "End did not focus the last trigger");
+  } },
   // ToggleGroup (disabled-skip + multiple) — depth gaps (STR-330 wave-b roving).
   // Disabled item is SKIPPED by roving focus: RovingFocusGroup filters candidateNodes to
   // focusable items (roving-focus-group.tsx:271; ToggleGroupItem focusable={!disabled}), so
@@ -1014,6 +1017,7 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok(await activeIsNth(pg, sel, 2), "ArrowRight did not rove to the next enabled item (L)");
     ok((await pg.evaluate(() => (document.activeElement.textContent || "").trim())) !== "New", "focus must never land on the disabled button");
+  } },
   // Toggle (button) — https://www.w3.org/WAI/ARIA/apg/patterns/button/
   // A toggle button activates on Space AND Enter (native <button> semantics — radix binds no
   // key handler, the host button does it). Seed `?s=rest` = the enabled, unpressed toggle.
@@ -1092,6 +1096,7 @@ const CHECKS = [
     ok(await activeIsNth(pg, '[role="radio"]', 2), "End did not move focus to the last radio");
     ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "End must NOT check the focused radio");
     ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked after End");
+  } },
   // Disclosure (Collapsible) — https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
   // The trigger is a native type=button, so Enter and Space both fire `click` → onOpenToggle.
   // APG: activating the trigger toggles aria-expanded and shows/hides the content; while closed

@@ -237,17 +237,11 @@ view c s =
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component (collapsibleInput s)
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component (tabsInput s)
-            "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
-            "checkbox" -> HH.slot_ _checkbox unit Checkbox.component checkboxInput
-            "switch" -> HH.slot_ _switch unit Switch.component switchInput
-            "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
             "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component (toggleGroupInput s)
-            "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
             "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component (radioGroupInput s)
             "checkbox" -> HH.slot_ _checkbox unit Checkbox.component (checkboxInput s)
             "switch" -> HH.slot_ _switch unit Switch.component (switchInput s)
             "toggle" -> HH.slot_ _toggle unit Toggle.component (toggleInput s)
-            "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
             "segmentedcontrol" -> HH.slot_ _segmentedcontrol unit ToggleGroup.component segmentedControlInput
             "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
