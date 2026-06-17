@@ -1675,6 +1675,38 @@ const PAGES: Page[] = [
       </Tabs.Root>
     ),
   },
+  // Wave-C: Accordion type="single" COLLAPSIBLE — item-1 open at first paint; clicking the
+  // open trigger CLOSES it (empty open set). With collapsible the open trigger is NOT
+  // aria-disabled (it can be closed), the contrast to the non-collapsible `single` story.
+  {
+    id: "accordioncollapsible",
+    label: "Accordion (single, collapsible)",
+    interactive: true,
+    node: (
+      <Box style={{ maxWidth: 360 }}>
+        <Accordion.Root type="single" defaultValue="item-1" collapsible>
+          <Accordion.Item value="item-1">
+            <Accordion.Header>
+              <Accordion.Trigger>Is it accessible?</Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content>Yes. It adheres to the WAI-ARIA design pattern.</Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-2">
+            <Accordion.Header>
+              <Accordion.Trigger>Is it styled?</Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content>No. It is unstyled by default.</Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-3">
+            <Accordion.Header>
+              <Accordion.Trigger>Is it animated?</Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content>Yes, with CSS.</Accordion.Content>
+          </Accordion.Item>
+        </Accordion.Root>
+      </Box>
+    ),
+  },
   // Wave-C: ToggleGroup group-level disabled — the Root `disabled` prop ORs into every
   // item so the WHOLE group is non-focusable/non-togglable (toggle-group.tsx ToggleGroupImpl
   // disabled flows into context). Single-mode, no item pre-pressed.

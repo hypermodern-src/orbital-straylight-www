@@ -1219,6 +1219,42 @@ const CHECKS = [
     await pg.keyboard.up("Control");
     ok(await activeIsNth(pg, sel, 0), "Ctrl+ArrowRight must NOT move focus (modifiers ignored)");
   }},
+
+  // Accordion — type="single" NON-collapsible: clicking the OPEN trigger does NOT close it
+  // (accordion.tsx the open trigger is aria-disabled). The `single` story opens item-1 at
+  // mount; clicking it leaves it open + aria-expanded=true.
+  { id: "accordion", state: "single", apg: "accordion", name: "single non-collapsible: clicking the open trigger does NOT close it", run: async (pg) => {
+    const t0 = pg.locator('#root button[aria-expanded]').first();
+    await t0.waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must be open at mount");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-disabled")) === "true", "the single open trigger must be aria-disabled (cannot close)");
+    await t0.click({ force: true }).catch(() => {});
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "single non-collapsible: the open item must stay open after clicking its trigger");
+  }},
+  // Accordion — type="single" non-collapsible: clicking ANOTHER trigger swaps the single open
+  // item (item-1 closes, item-2 opens) — set stays size 1.
+  { id: "accordion", state: "single", apg: "accordion", name: "single: clicking another trigger swaps the single open item", run: async (pg) => {
+    const all = pg.locator('#root button[aria-expanded]');
+    await all.first().waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must start open");
+    await all.nth(1).click();
+    await attrEq(pg, '#root button[aria-expanded]', 1, "aria-expanded", "true", "clicking item-2 must open it");
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "opening item-2 must close item-1 (single)");
+    const openCount = await pg.evaluate(() => [...document.querySelectorAll('#root button[aria-expanded]')].filter((b) => b.getAttribute("aria-expanded") === "true").length);
+    ok(openCount === 1, "exactly one item may be open in single mode");
+  }},
+  // Accordion — type="single" COLLAPSIBLE: clicking the open trigger CLOSES it (empty set),
+  // and the open trigger is NOT aria-disabled.
+  { id: "accordioncollapsible", state: "collapsible", apg: "accordion", name: "single collapsible: clicking the open trigger closes it (open trigger NOT aria-disabled)", run: async (pg) => {
+    const t0 = pg.locator('#root button[aria-expanded]').first();
+    await t0.waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must be open at mount");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-disabled")) === null, "collapsible: the open trigger must NOT be aria-disabled");
+    await t0.click();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "collapsible: clicking the open trigger must close it");
+    const openCount = await pg.evaluate(() => [...document.querySelectorAll('#root button[aria-expanded]')].filter((b) => b.getAttribute("aria-expanded") === "true").length);
+    ok(openCount === 0, "collapsible: closing the last open item must leave an empty open set");
+  }},
 ];
 
 const b = await chromium.launch();

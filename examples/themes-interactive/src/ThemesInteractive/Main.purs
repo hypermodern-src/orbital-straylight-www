@@ -274,6 +274,8 @@ view c s =
             "togglegroupdisabled" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupDisabledInput
             "togglegroupnoloop" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupNoLoopInput
             "togglegroupvert" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupVertInput
+            -- Wave-C Accordion: type=single COLLAPSIBLE (open trigger closeable, NOT aria-disabled).
+            "accordioncollapsible" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionCollapsibleInput ]
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1587,4 +1589,26 @@ toggleGroupVertInput = ToggleGroup.defaultInput
       , { value: "c", label: [ HH.text "Right" ], disabled: false }
       ]
   , style = { root: cn "", item: cn "" }
+  }
+
+-- | accordion (single, collapsible) — item-1 open at first paint; clicking the open
+-- | trigger CLOSES it (empty open set). collapsible=true ⇒ the open trigger is NOT
+-- | aria-disabled (the contrast to the non-collapsible `single` story).
+accordionCollapsibleInput :: Accordion.Input
+accordionCollapsibleInput = Accordion.defaultInput
+  { items =
+      [ { value: "item-1", header: [ HH.text "Is it accessible?" ], content: [ HH.text "Yes. It adheres to the WAI-ARIA design pattern." ], disabled: false }
+      , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: false }
+      , { value: "item-3", header: [ HH.text "Is it animated?" ], content: [ HH.text "Yes, with CSS." ], disabled: false }
+      ]
+  , single = true
+  , collapsible = true
+  , defaultValue = [ "item-1" ]
+  , style =
+      { root: cn ""
+      , item: cn ""
+      , header: cn ""
+      , trigger: cn ""
+      , content: cn ""
+      }
   }
