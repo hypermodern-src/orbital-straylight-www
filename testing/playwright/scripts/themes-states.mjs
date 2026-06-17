@@ -471,5 +471,23 @@ export const STATES = {
         return !!(db && db.split(" ").some((id) => document.getElementById(id)));
       });
     },
+    // Event-gated TYPE-mismatch: type a non-email into the required email Control + submit →
+    // native validity.typeMismatch=true (NOT valueMissing) → the TypeMismatch Message
+    // ("Provide a valid email") mounts and registers into aria-describedby. Proves the field
+    // reads the LIVE ValidityState, not just valueMissing. Wait for the typeMismatch message
+    // span to exist AND be linked, never a timeout.
+    typeMismatch: async (pg) => {
+      const email = root(pg).locator('input[name="email"]');
+      await email.fill("abc");
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
+        // the TypeMismatch message text must be present among the described-by targets.
+        return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").includes("valid email"));
+      });
+    },
   },
 };

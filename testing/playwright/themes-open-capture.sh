@@ -62,6 +62,7 @@ STATES=(
   "form:serverInvalid"
   "form:forceMatch"
   "form:valueMissing"
+  "form:typeMismatch"
 )
 
 echo "ℵ building golden dist (bun)"

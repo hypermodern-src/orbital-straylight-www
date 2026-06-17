@@ -44,7 +44,9 @@ module Hydrogen.Radix.Form
 import Prelude
 
 import Data.Array (elem, filter, mapWithIndex, null, (!!))
+import Data.Array (filterA) as Array
 import Data.Foldable (for_)
+import Effect (Effect)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -62,6 +64,9 @@ import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataAttr, aria)
 import Web.Event.Event (EventType(..), preventDefault)
 import Web.Event.Event as Event
 import Web.HTML.HTMLElement as HTMLElement
+import Web.HTML.HTMLInputElement as HTMLInputElement
+import Web.HTML.ValidityState (ValidityState)
+import Web.HTML.ValidityState as ValidityState
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -80,6 +85,21 @@ data Matcher
   | BadInput
 
 derive instance eqMatcher :: Eq Matcher
+
+-- | Whether the given declared matcher's HTML validity flag is currently set on the
+-- | control (upstream reads validityStateToObject; this maps each modelled matcher to
+-- | its `ValidityState` accessor). Returned in `Effect` since the flags are read live.
+matcherFails :: ValidityState -> Matcher -> Effect Boolean
+matcherFails vs = case _ of
+  ValueMissing -> ValidityState.valueMissing vs
+  TypeMismatch -> ValidityState.typeMismatch vs
+  PatternMismatch -> ValidityState.patternMismatch vs
+  TooLong -> ValidityState.tooLong vs
+  TooShort -> ValidityState.tooShort vs
+  RangeOverflow -> ValidityState.rangeOverflow vs
+  RangeUnderflow -> ValidityState.rangeUnderflow vs
+  StepMismatch -> ValidityState.stepMismatch vs
+  BadInput -> ValidityState.badInput vs
 
 type Message =
   { match :: Matcher
@@ -309,13 +329,19 @@ handleAction = case _ of
       }
   ControlInvalid i -> do
     st <- H.get
-    -- the native `invalid` event fired — compute which matchers fail. We model the
-    -- deterministic case the oracle exercises: a required-empty control fails
-    -- ValueMissing. (Reading the live ValidityState per-flag would generalize this.)
-    let
-      fails = case st.fields !! i of
-        Just f -> filter (\m -> m == ValueMissing) (map _.match f.messages)
-        Nothing -> []
+    -- the native `invalid` event fired — read the control's LIVE ValidityState and keep
+    -- the field's declared matchers whose flag is set (upstream form.tsx:290-352 reads the
+    -- full validityStateToObject, not just valueMissing) — so e.g. a typeMismatch on the
+    -- email control mounts its TypeMismatch Message too.
+    fails <- case st.fields !! i of
+      Nothing -> pure []
+      Just f -> do
+        mel <- H.getHTMLElementRef (controlRef i)
+        case mel >>= HTMLInputElement.fromHTMLElement of
+          Nothing -> pure (filter (\m -> m == ValueMissing) (map _.match f.messages))
+          Just input -> liftEffect do
+            vs <- HTMLInputElement.validity input
+            Array.filterA (\m -> matcherFails vs m) (map _.match f.messages)
     H.modify_ _ { failed = Map.insert i fails st.failed }
   ControlInput i ->
     -- typing clears the field's failed set (radix re-validates on input).
