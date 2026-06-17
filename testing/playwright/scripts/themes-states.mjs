@@ -446,6 +446,17 @@ export const STATES = {
         return a[0].value === "4" && a[1].value === "5" && a[2].getAttribute("tabindex") === "0";
       });
     },
+    // `?s=alpha` golden variant → validationType="alpha": every slot inputmode=text +
+    // pattern=[a-zA-Z]{1}, defaultValue "abc". No interaction; the at-rest DOM is the oracle.
+    alpha: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("pattern") === "[a-zA-Z]{1}" && i.getAttribute("inputmode") === "text")
+          && document.querySelector('input[type="hidden"]')?.value === "abc";
+      });
+    },
   },
   form: {
     // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true

@@ -66,6 +66,7 @@ STATES=(
   # Wave-B inputs depth-audit additions (STR-330).
   "slider:rest"
   "slider:disabled"
+  "otp:alpha"
 )
 
 echo "ℵ building golden dist (bun)"

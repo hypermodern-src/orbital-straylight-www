@@ -1253,9 +1253,16 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       const empty = s === "empty" || s === "typed";
+      // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
+      // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
+      const alpha = s === "alpha";
       return (
         <Box>
-          <OneTimePasswordField.Root {...(empty ? {} : { defaultValue: "123" })} autoFocus={false}>
+          <OneTimePasswordField.Root
+            {...(empty ? {} : { defaultValue: alpha ? "abc" : "123" })}
+            {...(alpha ? { validationType: "alpha" as const } : {})}
+            autoFocus={false}
+          >
             <OneTimePasswordField.Input />
             <OneTimePasswordField.Input />
             <OneTimePasswordField.Input />

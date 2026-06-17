@@ -1097,8 +1097,12 @@ toolbarInput s = Toolbar.defaultInput
 otpInput :: String -> Otp.Input
 otpInput s = Otp.defaultInput
   { length = 3
-  , defaultValue = if s == "empty" || s == "typed" then "" else "123"
-  , validation = Otp.Numeric
+  , defaultValue =
+      if s == "empty" || s == "typed" then ""
+      else if s == "alpha" then "abc"
+      else "123"
+  -- `?s=alpha` exercises the Alpha validation set (inputmode=text, pattern=[a-zA-Z]{1}).
+  , validation = if s == "alpha" then Otp.Alpha else Otp.Numeric
   , style = { root: cn "", input: cn "" }
   }
 
