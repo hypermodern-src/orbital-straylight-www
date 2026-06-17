@@ -1143,6 +1143,28 @@ const CHECKS = [
     // (2) the trigger button carries no `type` attribute (triggers may be anchors).
     ok((await attrOf(pg, "#root button", 0, "type")) === null, "the tooltip trigger must have NO type attribute");
   }},
+  // Toast — the SR announce node + the viewport landmark, the two a11y contracts the DOM/ARIA
+  // oracles can't pin (the DOM oracle strips role=status; the ARIA snapshot doesn't expose
+  // aria-live polarity). Append-only, no story/port change (the port already satisfies both):
+  //  (1) the announce node is role=status with aria-live=assertive for a FOREGROUND toast
+  //      (background ⇒ polite; toast.tsx:564-566). The golden story is Foreground.
+  //  (2) the viewport region carries the hotkey aria-label "Notifications (F8)" (the {hotkey}
+  //      placeholder substituted into the label; toast.tsx:293). Port hardcodes this label.
+  // The toast is rendered controlled-open at first paint (duration=Infinity), so just wait for
+  // the open <li>, then read the sibling role=status + the region aria-label.
+  { id: "toast", apg: "alert", name: "foreground toast announces assertively; viewport carries the F8 hotkey label", run: async (pg) => {
+    await pg.locator('li[data-state="open"][data-swipe-direction]').first().waitFor();
+    // (1) role=status announce node, aria-live=assertive (foreground polarity).
+    ok(await pg.evaluate(() => {
+      const s = document.querySelector('[role="status"]');
+      return !!s && s.getAttribute("aria-live") === "assertive";
+    }), "the foreground announce node must be role=status with aria-live=assertive");
+    // (2) the viewport landmark carries the hotkey-substituted aria-label.
+    ok(await pg.evaluate(() => {
+      const r = document.querySelector('[role="region"]');
+      return !!r && /Notifications \(F8\)/.test(r.getAttribute("aria-label") || "");
+    }), 'the toast viewport region must carry the aria-label "Notifications (F8)"');
+  }},
   // HoverCard — the DEFINING contract vs a tooltip: moving the pointer from the trigger INTO
   // the content keeps the card OPEN (both trigger and content bind onPointerEnter/Leave, so the
   // card survives the cross-move). Hover the trigger link → wait for the content → move the
