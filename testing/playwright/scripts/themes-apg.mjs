@@ -353,8 +353,14 @@ const CHECKS = [
   // selection-follows-focus (unlike radix RadioGroup): Arrow keys ROVE focus only; the focused
   // item is ACTIVATED (selected) by Space/Enter. Verified against the real upstream golden.
   // Seed: type=single defaultValue="b" so item[1] (Center) is checked/tabbable; 3 items.
-  { id: "togglegroup", state: "pressed", apg: "toolbar", name: "single-mode items are role=radio; after entry roving tabindex on the selected", run: async (pg) => {
+  // The bare single-mode ToggleGroup ROOT is role="group" in the installed/bundled
+  // @radix-ui/react-toggle-group dist the golden renders (the role="radiogroup" branch
+  // landed in a LATER upstream source than the shipped dist) — so the golden adjudicates
+  // role="group", and the port matches. (Validated on --golden first.)
+  { id: "togglegroup", state: "pressed", apg: "toolbar", name: "single-mode root is role=group (bundled dist), items role=radio; roving tabindex on the selected", run: async (pg) => {
     await pg.locator('[role="radio"]').first().waitFor();
+    const rootRole = await pg.evaluate(() => document.querySelector('[role="radio"]')?.parentElement?.getAttribute("role"));
+    ok(rootRole === "group", `single-mode root must be role=group in the bundled dist (got ${rootRole})`);
     ok((await pg.locator('[role="radio"]').count()) === 3, "expected 3 single-mode radio items");
     ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "true", "item[1] (Center) must be selected at rest");
     await press(pg, "Tab"); // onto the selected item (Center, idx 1)
