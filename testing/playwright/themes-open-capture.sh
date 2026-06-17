@@ -115,6 +115,8 @@ STATES=(
   # ── Wave-C ScrollArea family depth oracles (STR-330) ─────────────────────────
   "scrollareax:horizontal"
   "scrollareax:both"
+  # ── Wave-C Collapsible closed-rest DOM oracle (STR-330) ──────────────────────
+  "collapsible:rest"
 )
 
 echo "ℵ building golden dist (bun)"

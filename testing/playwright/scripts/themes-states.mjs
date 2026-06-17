@@ -311,6 +311,13 @@ export const STATES = {
     disabled: async (pg) => {
       await root(pg).locator('button[disabled][data-state="closed"]').first().waitFor();
     },
+    // `?s=rest` — the at-rest CLOSED disclosure (NO interaction). The oracle pins the
+    // closed-DOM contract: trigger aria-expanded=false with NO aria-controls, and (per
+    // upstream Presence) the content node ABSENT from the document while closed. Keyed
+    // off the UPSTREAM closed trigger only, so the same driver runs golden + port.
+    rest: async (pg) => {
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+    },
   },
   tabs: {
     tab2: async (pg) => {
