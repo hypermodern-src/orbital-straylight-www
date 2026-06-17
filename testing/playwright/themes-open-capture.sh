@@ -117,6 +117,8 @@ STATES=(
   "scrollareax:both"
   # ── Wave-C Collapsible closed-rest DOM oracle (STR-330) ──────────────────────
   "collapsible:rest"
+  # ── Wave-C Progress out-of-range validation oracle (STR-330) ─────────────────
+  "progress:invalid"
 )
 
 echo "ℵ building golden dist (bun)"

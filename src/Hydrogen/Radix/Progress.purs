@@ -7,6 +7,8 @@ module Hydrogen.Radix.Progress
   , progressState
   , fmtNum
   , valueLabel
+  , validMax
+  , validValue
   ) where
 
 import Prelude
@@ -17,6 +19,21 @@ import Data.Number.Format (toString) as Num
 import DOM.HTML.Indexed (HTMLdiv)
 import Halogen.HTML as HH
 import Hydrogen.Radix.Foundation.Style (ClassNames, classes, dataState, dataAttr, role, aria)
+
+-- | `isValidMaxNumber`: a valid max is a positive number (upstream rejects ≤0/NaN and
+-- | falls back to DEFAULT_MAX=100, logging getInvalidMaxError). `validMax` resolves the
+-- | effective max: the supplied value if positive, else 100.
+validMax :: Number -> Number
+validMax max = if max > 0.0 then max else 100.0
+
+-- | `isValidValueNumber`: a valid value is a number with `0 <= value <= max`. An
+-- | out-of-range value is coerced to indeterminate (Nothing) upstream (clamp-to-null +
+-- | getInvalidValueError). `validValue` resolves the effective value against the
+-- | (already-validated) max: it passes a Just through only when in range, else Nothing.
+validValue :: Maybe Number -> Number -> Maybe Number
+validValue mv mx = case mv of
+  Nothing -> Nothing
+  Just v -> if v >= 0.0 && v <= mx then Just v else Nothing
 
 -- | `getProgressState`: indeterminate when `value` is absent; `complete` when
 -- | `value === max` (upstream uses STRICT equality, not `>=`); else `loading`.
@@ -53,29 +70,34 @@ progress
   -> HH.HTML w i
 progress o =
   let
-    st = progressState o.value o.max
+    -- upstream validates max (≤0/NaN → DEFAULT_MAX 100) and value (out of [0,max] →
+    -- indeterminate) BEFORE deriving state/attrs, so an invalid value/max never reaches
+    -- aria-valuenow/data-value/data-state. The valid inputs flow through unchanged.
+    mx = validMax o.max
+    val = validValue o.value mx
+    st = progressState val mx
   in
     HH.div
       ( [ classes o.class_
         , role "progressbar"
         , aria "valuemin" "0"
-        , aria "valuemax" (fmtNum o.max)
+        , aria "valuemax" (fmtNum mx)
         , dataState st
-        , dataAttr "max" (fmtNum o.max)
+        , dataAttr "max" (fmtNum mx)
         ]
           <> o.rootAttrs
           <> maybe []
               ( \v ->
                   [ aria "valuenow" (fmtNum v)
-                  , aria "valuetext" (valueLabel v o.max)
+                  , aria "valuetext" (valueLabel v mx)
                   , dataAttr "value" (fmtNum v)
                   ]
               )
-              o.value
+              val
       )
       [ HH.div
-          ( [ classes o.indicator, dataState st, dataAttr "max" (fmtNum o.max) ]
-              <> maybe [] (\v -> [ dataAttr "value" (fmtNum v) ]) o.value
+          ( [ classes o.indicator, dataState st, dataAttr "max" (fmtNum mx) ]
+              <> maybe [] (\v -> [ dataAttr "value" (fmtNum v) ]) val
           )
           []
       ]

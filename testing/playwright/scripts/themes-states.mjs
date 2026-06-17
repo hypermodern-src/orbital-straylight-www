@@ -535,6 +535,14 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuetext") === "25%");
     },
+    // `?s=invalid` — value=150 > max=100: upstream clamps to indeterminate. The oracle
+    // pins data-state=indeterminate + the ABSENCE of aria-valuenow/data-value (the
+    // value/max validation gap). Keyed off the UPSTREAM indeterminate state.
+    invalid: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
+    },
   },
   scrollarea: {
     // type="always" renders the scrollbar at rest — no click/hover/scroll needed. The

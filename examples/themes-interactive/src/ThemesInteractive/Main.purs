@@ -716,6 +716,10 @@ progressVariant s = case s of
   "indeterminate" -> prim Nothing 100.0 ""
   "complete" -> prim (Just 100.0) 100.0 "--progress-value: 100;"
   "custommax" -> prim (Just 50.0) 200.0 "--progress-value: 50; --progress-max: 200;"
+  -- `?s=invalid` — value=150 > max=100: the primitive's validValue clamps the ARIA to
+  -- indeterminate (data-state=indeterminate, NO aria-valuenow/data-value), but the Themes
+  -- wrapper still stamps --progress-value from the RAW value (upstream parity).
+  "invalid" -> prim (Just 150.0) 100.0 "--progress-value: 150;"
   _ -> Progress.progress 25 []
   where
   prim mv mx styl = RadixProgress.progress

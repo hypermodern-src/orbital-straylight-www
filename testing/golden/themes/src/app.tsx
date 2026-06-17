@@ -1366,6 +1366,9 @@ const PAGES: Page[] = [
         s === "indeterminate" ? <Progress /> :
         s === "complete" ? <Progress value={100} /> :
         s === "custommax" ? <Progress value={50} max={200} /> :
+        // `?s=invalid` — value=150 > max=100: upstream isValidValueNumber rejects it and
+        // coerces to indeterminate (data-state=indeterminate, NO aria-valuenow/data-value).
+        s === "invalid" ? <Progress value={150} /> :
         <Progress value={25} />;
       return <Box style={{ maxWidth: 320 }}>{inner}</Box>;
     })(),
