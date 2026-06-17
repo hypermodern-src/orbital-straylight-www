@@ -352,16 +352,21 @@ handleAction = case _ of
   ListKeyDown ke -> do
     st <- H.get
     let
+      key = KE.key ke
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
       pos = { count: length st.items, current: selectedIndex st }
-    case navigate cfg pos (KE.key ke) of
+      -- selection-follows-focus is gated on a physical ARROW key (upstream
+      -- radio-group.tsx:182-225 isArrowKeyPressedRef: onFocus clicks only when an arrow
+      -- is held). ARROW_KEYS excludes Home/End, so Home/End MOVE focus but do NOT check.
+      isArrow = key == "ArrowUp" || key == "ArrowDown" || key == "ArrowLeft" || key == "ArrowRight"
+    case navigate cfg pos key of
       Stay -> pure unit
       MoveTo idx -> case st.items !! idx of
         Nothing -> pure unit
         Just item -> when (not (item.disabled || st.disabled)) do
-          -- focus the target item, then (automatic activation) select it
+          -- focus the target item; SELECT it only on an ARROW key (selection-follows-focus).
           focusItemAt idx
-          selectValue item.value
+          when isArrow (selectValue item.value)
   -- Tab-into-group: forward container focus to the current roving item (the selected
   -- radio, or item 0 when nothing is selected).
   EntryFocus -> do

@@ -338,6 +338,28 @@ const CHECKS = [
     ok(await activeIsNth(pg, '[role="radio"]', 1), "ArrowUp from the first radio did not wrap to the last");
     await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "ArrowUp wrap did not check the last radio");
   }},
+  // Selection-follows-focus is gated on a physical ARROW key (radio-group.tsx:182-225
+  // isArrowKeyPressedRef). ARROW_KEYS excludes Home/End — so Home/End MOVE focus but do
+  // NOT check; and focusing a radio programmatically (no arrow) likewise does NOT check.
+  // (Validated on --golden first.)
+  { id: "radiogroup", state: "checked", apg: "radio", name: "programmatic focus (no arrow) does NOT check the radio", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    focusFirst(pg, '[role="radio"]:nth-of-type(1)');
+    // focus the SECOND (unchecked) radio directly — no arrow key involved.
+    await pg.evaluate(() => document.querySelectorAll('[role="radio"]')[1].focus());
+    await pg.waitForTimeout(100);
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "could not focus the second radio");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "false", "plain focus must NOT check the radio");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked");
+  }},
+  { id: "radiogroup", state: "checked", apg: "radio", name: "End moves focus but does NOT check (Home/End not arrow keys)", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // focus radio 0 (checked)
+    await press(pg, "End");
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "End did not move focus to the last radio");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "false", "End must NOT check the focused radio");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked after End");
+  }},
 
   // Tabs — https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
   // Roving tabindex on the tablist (one tab tabbable). With AUTOMATIC activation (radix default)
