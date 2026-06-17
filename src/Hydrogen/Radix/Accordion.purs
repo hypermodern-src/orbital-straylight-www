@@ -142,6 +142,7 @@ type State =
   , style :: Style
   , uid :: String        -- generated on Initialize; makes ids unique per instance
   , ids :: Array ItemIds  -- per-item trigger/panel ids (bare useId tokens), minted on Initialize
+  , initialOpen :: Array String  -- items open AT MOUNT (mount-animation-prevention set)
   }
 
 -- | Per-item generated ids: bare `useId` tokens (`radix-<n>`) for the trigger and its
@@ -173,10 +174,15 @@ triggerRef value = H.RefLabel ("rdx-accordion-trigger-" <> value)
 -- | The inline style upstream AccordionContent + CollapsibleContentImpl stamp on the
 -- | OPEN content node: the accordion→collapsible var aliases plus the measured
 -- | collapsible content height/width (any px; the oracle normalizer maps `<int>px`→`<px>`).
-openContentStyle :: String
-openContentStyle =
+-- | An item that was open AT MOUNT (initial open set) additionally carries
+-- | `transition-duration: 0s; animation-name: none;` between the var aliases and the
+-- | measured px — upstream's `isMountAnimationPreventedRef` (Collapsible) suppresses the
+-- | first open animation. Click-opened items animate normally (no prevention block).
+openContentStyle :: Boolean -> String
+openContentStyle preventMountAnim =
   "--radix-accordion-content-height: var(--radix-collapsible-content-height); "
     <> "--radix-accordion-content-width: var(--radix-collapsible-content-width); "
+    <> (if preventMountAnim then "transition-duration: 0s; animation-name: none; " else "")
     <> "--radix-collapsible-content-height: 100px; "
     <> "--radix-collapsible-content-width: 200px;"
 
@@ -214,6 +220,9 @@ initialState input =
   , style: input.style
   , uid: ""
   , ids: []
+  -- the open set AT MOUNT — these items suppress their first open animation
+  -- (upstream isMountAnimationPreventedRef); later (click-)opened items animate.
+  , initialOpen: current (controllable input.value input.defaultValue)
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -260,6 +269,11 @@ renderItem st _ item =
                 ]
                   -- aria-controls present ONLY when open (upstream CollapsibleTrigger)
                   <> (if open then [ aria "controls" (panelId st item.value) ] else [])
+                  -- aria-disabled on the OPEN trigger of a single non-collapsible accordion:
+                  -- it cannot be closed, so it announces as disabled (accordion.tsx:452
+                  -- aria-disabled={(open && !collapsible) || undefined}). In multiple mode
+                  -- upstream forces collapsible=true, so this never fires (single=false here).
+                  <> (if open && st.single && not st.collapsible then [ aria "disabled" "true" ] else [])
                   <> (if disabled then [ dataAttr "disabled" "" ] else [])
               )
               (map HH.fromPlainHTML item.header)
@@ -272,7 +286,7 @@ renderItem st _ item =
             , dataState "open"
             , dataOrientation st.orientation
             , classes st.style.content
-            , HP.style openContentStyle
+            , HP.style (openContentStyle (item.value `elem` st.initialOpen))
             ]
             (map HH.fromPlainHTML item.content)
         else
