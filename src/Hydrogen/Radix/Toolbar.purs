@@ -259,6 +259,7 @@ renderItem st gi = case _ of
           { orientation: flipOrientation st.orientation
           , decorative: false
           , class_: st.style.separator
+          , attrs: []
           }
       )
   ToggleGroup g -> renderToggleGroup st gi g
