@@ -182,6 +182,7 @@ data Action
   = Initialize
   | Receive Input
   | TriggerClicked
+  | TriggerKeyDown KE.KeyboardEvent
   | AfterOpen           -- after the open render flushed: position + portal + focus
   | EscapePressed
   | PointerDown Event
@@ -273,6 +274,7 @@ render st =
             , dataState (if open then "open" else "closed")
             , dir "ltr"
             , HE.onClick \_ -> TriggerClicked
+            , HE.onKeyDown TriggerKeyDown
             ]
               <> (if open then [ aria "controls" st.contentId ] else [])
           )
@@ -386,6 +388,17 @@ handleAction = case _ of
   TriggerClicked -> do
     st <- H.get
     if current st.ctrl then closeMenu else openMenu
+  -- APG listbox/combobox: Space/Enter/ArrowUp/ArrowDown on the focused trigger OPEN the
+  -- listbox (upstream select.tsx:31 OPEN_KEYS, :380-389 handleOpen + preventDefault). On
+  -- open radix focuses the SELECTED option (openMenu sets focused=selectedIndex). Without
+  -- this a keyboard-only user could not open the select at all.
+  TriggerKeyDown ke -> do
+    st <- H.get
+    let key = KE.key ke
+    when ((key == " " || key == "Enter" || key == "ArrowUp" || key == "ArrowDown")
+      && not (current st.ctrl)) do
+      liftEffect (preventDefault (KE.toEvent ke))
+      openMenu
   -- after the open render flushed (refs live): item-align, then SYNCHRONOUSLY adopt the
   -- wrapper into body, layer the modal envelope, and focus the content.
   AfterOpen -> do

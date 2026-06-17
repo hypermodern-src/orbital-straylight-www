@@ -25,6 +25,8 @@ STATES=(
   "dropdownmenu:item2"
   "dropdownmenu:disabled"
   "contextmenu:open"
+  "contextmenu:item2"
+  "contextmenu:disabled"
   "select:open"
   # Interactive (stateful, non-overlay) components — STR (13 new oracles).
   "accordion:open"
@@ -32,6 +34,7 @@ STATES=(
   "toast:open"
   "menubar:open"
   "menubar:item1"
+  "menubar:disabled"
   "navigationmenu:closed"
   "navigationmenu:open"
   "tabs:tab2"

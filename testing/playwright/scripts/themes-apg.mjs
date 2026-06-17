@@ -747,6 +747,101 @@ const CHECKS = [
     ok(t && t.expanded === "false" && t.state === "closed", "closed trigger is not aria-expanded=false / data-state=closed");
     ok(!t.controls, "closed trigger must NOT carry aria-controls");
     ok(!t.side && !t.align, "closed trigger must NOT carry data-radix-popper-side/align (those live on Popper.Anchor, mounted only while open)");
+  // Select trigger keyboard-OPEN (select.tsx:31 OPEN_KEYS, :380-389 handleOpen) — a
+  // keyboard-only user opens the listbox with Space/Enter/ArrowUp/ArrowDown on the focused
+  // trigger; on open focus moves to the SELECTED option. Keyed off role only → golden + port.
+  ...["ArrowDown", "ArrowUp", "Enter", " "].map((key) => ({
+    id: "select", apg: "listbox", name: `${key === " " ? "Space" : key} on the trigger opens the listbox`, run: async (pg) => {
+      await pg.locator(".rt-SelectTrigger").focus();
+      ok(!(await visible(pg, '[role="listbox"]')), "listbox should be closed before keydown");
+      await pg.keyboard.press(key === " " ? "Space" : key);
+      await pg.locator('[role="listbox"]').waitFor();
+      ok(await visible(pg, '[role="listbox"]'), `${key} did not open the listbox`);
+      await hlStarts(pg, "Apple");
+    },
+  })),
+  { id: "select", apg: "listbox", name: "Home highlights the first option, End the last", run: async (pg) => {
+    await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor();
+    await hlStarts(pg, "Apple");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Grape");
+    await pg.keyboard.press("Home"); await hlStarts(pg, "Apple");
+  }},
+
+  // Menubar in-menu keyboard SELECTION (re-exports react-menu SELECTION_KEYS) — Enter/Space on
+  // the focused item fires onSelect + closes; and the disabled-item skip in vertical roving.
+  { id: "menubar", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor();
+    await hlStarts(pg, "New Tab");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Enter did not close the menu after selecting");
+  }},
+  // ?s=disabled disables "New Window" (item-2): data-disabled + tabindex=-1, out of the roving
+  // order, so ArrowDown from New Tab SKIPS it to Print.
+  { id: "menubar", state: "disabled", apg: "menu", name: "ArrowDown SKIPS a disabled item to the next enabled one", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor();
+    await hlStarts(pg, "New Tab");
+    ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menu"] [role="menuitem"]')].find((x) => (x.textContent || "").startsWith("New Window")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Print");
+  }},
+
+  // DropdownMenu keyboard SELECTION (menu.tsx:667-680 SELECTION_KEYS) — Enter/Space on the
+  // focused item fires onSelect + closes. Previously impossible in the port (navigate → Stay).
+  { id: "dropdownmenu", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Enter did not close the menu after selecting");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Enter-select");
+  }},
+  { id: "dropdownmenu", apg: "menu", name: "Space selects the highlighted item and closes the menu", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
+  }},
+
+  // Context Menu — https://www.w3.org/WAI/ARIA/apg/patterns/menu/
+  // A ContextMenu is a DropdownMenu point-anchored at the cursor: right-click the trigger
+  // area opens a role=menu of role=menuitem rows with the SAME RovingFocus keyboard contract
+  // (ArrowDown/Up rove, Home/End first/last, Enter/Space select+close, Escape close+restore).
+  // The port wired navigate + Dismiss.escape but had NO APG gate. Keyed off role/data-* only,
+  // so the same checks run against golden AND port. ctxOpen right-clicks the trigger area.
+  { id: "contextmenu", apg: "menu", name: "ArrowDown roves Edit→Duplicate (right-click open)", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Duplicate");
+  }},
+  { id: "contextmenu", apg: "menu", name: "End highlights the last item, Home the first", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
+    await pg.keyboard.press("Home"); await hlStarts(pg, "Edit");
+  }},
+  { id: "contextmenu", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Enter did not close the menu after selecting");
+  }},
+  { id: "contextmenu", apg: "menu", name: "Escape closes the menu", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Escape did not close the menu");
+  }},
+  // ?s=disabled disables Duplicate; it carries data-disabled + tabindex=-1 and is NOT in
+  // the roving order, so ArrowDown from Edit SKIPS it and lands on Delete.
+  { id: "contextmenu", state: "disabled", apg: "menu", name: "ArrowDown SKIPS a disabled item to the next enabled one", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menuitem"]')].find((x) => (x.textContent || "").startsWith("Duplicate")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Delete");
   }},
 ];
 

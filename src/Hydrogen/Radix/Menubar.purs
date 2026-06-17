@@ -47,7 +47,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -98,10 +98,22 @@ menuItem value label = MenuItemEntry { value, label, shortcut: [], accent: "", d
 menuSeparator :: MenuEntry
 menuSeparator = MenuSeparator
 
+-- | The roving order counts only ENABLED items (upstream re-exports react-menu's
+-- | `getItems().filter(!disabled)` / `focusable={!disabled}`). A disabled item renders
+-- | but is excluded from the roving order, so vertical arrows skip OVER it.
 itemCount :: Array MenuEntry -> Int
 itemCount = Array.length <<< Array.filter case _ of
-  MenuItemEntry _ -> true
+  MenuItemEntry item -> not item.disabled
   MenuSeparator -> false
+
+-- | The enabled MenuItem at roving index `n` (the keyboard-selection target). Mirrors
+-- | the same enabled-only ordering `renderEntries` assigns refs/tabindex over.
+enabledItemAt :: Int -> Array MenuEntry -> Maybe MenuItem
+enabledItemAt n entries = Array.index (Array.mapMaybe enabled entries) n
+  where
+  enabled = case _ of
+    MenuItemEntry item | not item.disabled -> Just item
+    _ -> Nothing
 
 -- | One menu in the bar: a stable `value` (the open-value key), the trigger label, and the
 -- | menu entries. NO DOM of its own — collapses into Root's render (trigger + portal+content).
@@ -395,23 +407,27 @@ renderEntries st entries = _.html (foldl step { idx: 0, html: [] } entries)
   where
   step acc = case _ of
     MenuSeparator -> acc { html = acc.html <> [ renderSep st ] }
-    MenuItemEntry item -> acc
-      { idx = acc.idx + 1
-      , html = acc.html <> [ renderItem st acc.idx item ]
-      }
+    MenuItemEntry item
+      | item.disabled -> acc { html = acc.html <> [ renderItem st Nothing item ] }
+      | otherwise -> acc
+          { idx = acc.idx + 1
+          , html = acc.html <> [ renderItem st (Just acc.idx) item ]
+          }
 
-renderItem :: forall m. State -> Int -> MenuItem -> H.ComponentHTML Action () m
-renderItem st idx item =
+-- | `mIdx = Nothing` ⇒ DISABLED — out of the roving order: tabindex -1, never
+-- | highlighted, click is a no-op (the handler guards on disabled).
+renderItem :: forall m. State -> Maybe Int -> MenuItem -> H.ComponentHTML Action () m
+renderItem st mIdx item =
   HH.div
-    ( [ HP.ref (itemRef st.idPrefix idx)
-      , role "menuitem"
+    ( [ role "menuitem"
       , classes st.style.item
-      , HP.tabIndex (tabIndexFor st.itemFocus idx)
+      , HP.tabIndex (maybe (-1) (tabIndexFor st.itemFocus) mIdx)
       , dataAttr "radix-collection-item" ""
       , dataAttr "orientation" "vertical"
       , HE.onClick \_ -> ItemClicked item.value
       ]
-        <> (if st.itemFocus == idx then [ dataAttr "highlighted" "" ] else [])
+        <> maybe [] (\i -> [ HP.ref (itemRef st.idPrefix i) ]) mIdx
+        <> (if mIdx == Just st.itemFocus then [ dataAttr "highlighted" "" ] else [])
         <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
         <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
     )
@@ -525,20 +541,34 @@ handleAction = case _ of
       -- trigger's menu (handled here via the menu list + wrap, NOT the vertical roving).
       "ArrowRight" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st 1
       "ArrowLeft" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st (-1)
-      key -> case navigate cfg pos key of
-        Stay -> pure unit
-        MoveTo idx -> do
-          H.modify_ _ { itemFocus = idx }
-          mwrap <- H.getHTMLElementRef wrapperRef
-          mitem <- H.getHTMLElementRef (itemRef st.idPrefix idx)
-          liftEffect $ Dom.queueMicrotask do
-            for_ mwrap Envelope.reAdoptBeforeTrail
-            for_ mitem HTMLElement.focus
+      -- Enter/Space SELECT the focused item + close (upstream re-exports menu.tsx:667-680
+      -- SELECTION_KEYS). Keyboard activation of items was previously impossible.
+      key
+        | (key == "Enter" || key == " ") && st.itemFocus >= 0 -> do
+            liftEffect (preventDefault (KE.toEvent ke))
+            for_ (enabledItemAt st.itemFocus (openEntries st)) \it ->
+              when (not it.disabled) (handleAction (ItemClicked it.value))
+        | otherwise -> case navigate cfg pos key of
+            Stay -> pure unit
+            MoveTo idx -> do
+              H.modify_ _ { itemFocus = idx }
+              mwrap <- H.getHTMLElementRef wrapperRef
+              mitem <- H.getHTMLElementRef (itemRef st.idPrefix idx)
+              liftEffect $ Dom.queueMicrotask do
+                for_ mwrap Envelope.reAdoptBeforeTrail
+                for_ mitem HTMLElement.focus
   ItemClicked value -> do
     st <- H.get
-    for_ (openIndex st >>= Array.index st.menus) \menu ->
-      H.raise (ItemSelected { menu: menu.value, item: value })
-    closeMenu
+    -- a disabled item is non-interactive — clicking it neither selects nor closes.
+    let
+      pick = case _ of
+        MenuItemEntry it | it.value == value -> Just it
+        _ -> Nothing
+      mItem = Array.findMap pick (openEntries st)
+    when (maybe true (not <<< _.disabled) mItem) do
+      for_ (openIndex st >>= Array.index st.menus) \menu ->
+        H.raise (ItemSelected { menu: menu.value, item: value })
+      closeMenu
   Reposition -> reposition
 
 -- | The last focusable item index of menu `i` (for ArrowUp-open → highlight last).
