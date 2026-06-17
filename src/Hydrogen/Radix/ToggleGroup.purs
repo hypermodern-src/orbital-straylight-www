@@ -142,6 +142,9 @@ type State =
   , ariaLabel :: Maybe String
   , trailing :: Array HH.PlainHTML
   , style :: Style
+  , focusEntered :: Boolean   -- false ⇒ every item -1 (the root holds the tab stop);
+                              -- true once focus enters the group (RovingFocusGroup migrates
+                              -- the tab stop from the root onto the current item).
   }
 
 data Action
@@ -149,6 +152,7 @@ data Action
   | Toggled String
   | ListKeyDown KE.KeyboardEvent
   | EntryFocus
+  | ItemFocused String
 
 itemRef :: String -> String -> H.RefLabel
 itemRef pfx value = H.RefLabel (pfx <> "-item-" <> value)
@@ -178,6 +182,7 @@ initialState input =
   , ariaLabel: input.ariaLabel
   , trailing: input.trailing
   , style: input.style
+  , focusEntered: false
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -207,16 +212,21 @@ renderItem st idx item =
     on = item.value `elem` pressedSet
     disabled = st.disabled || item.disabled
     curIdx = tabStopIndex st
+    -- roving tabindex: -1 on every item until focus enters the group (the root is the
+    -- single tab stop); once entered, 0 migrates onto the current item. Matches
+    -- RovingFocusGroup, which starts with currentTabStopId=null (root holds the stop).
+    ti = if not st.focusEntered then (-1) else tabIndexFor curIdx idx
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
         , HP.ref (itemRef st.idPrefix item.value)
         , dataState (if on then "on" else "off")
         , dataAttr "radix-collection-item" ""
-        , HP.tabIndex (tabIndexFor curIdx idx)
+        , HP.tabIndex ti
         , HP.disabled disabled
         , classes st.style.item
         , HE.onClick \_ -> Toggled item.value
+        , HE.onFocus (const (ItemFocused item.value))
         ]
           -- single mode → radio semantics (role + aria-checked, NO aria-pressed),
           -- mirroring upstream ToggleGroupItemImpl's singleProps; multiple mode keeps
@@ -227,11 +237,18 @@ renderItem st idx item =
       )
       (map HH.fromPlainHTML item.label)
 
--- | The roving tab stop: the first pressed item's index, else 0.
+-- | The roving tab stop: the first pressed item's index, else the first ENABLED
+-- | item's index (a disabled item is never the tab stop — RovingFocusGroup builds
+-- | the tab stop over focusable items only), else 0.
 tabStopIndex :: State -> Int
 tabStopIndex st =
-  let pressedSet = current st.ctrl
-  in fromMaybe 0 (findIndex (\i -> i.value `elem` pressedSet) st.items)
+  let
+    pressedSet = current st.ctrl
+    enabledAt i = not (st.disabled || i.disabled)
+  in
+    case findIndex (\i -> i.value `elem` pressedSet && enabledAt i) st.items of
+      Just k -> k
+      Nothing -> fromMaybe 0 (findIndex enabledAt st.items)
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
@@ -261,32 +278,52 @@ handleAction = case _ of
       setValue next
   ListKeyDown ke -> do
     st <- H.get
+    -- upstream RovingFocusGroup filters candidateNodes to focusable items
+    -- (roving-focus-group.tsx:271 getItems().filter(item => item.focusable),
+    -- ToggleGroupItem focusable={!disabled}). So arrows navigate WITHIN the enabled
+    -- subset and SKIP disabled items entirely (rather than stalling on one). Build the
+    -- enabled subset, find the current roving item's index within it, navigate there.
     let
+      enabled = filter (\i -> not (st.disabled || i.disabled)) st.items
+      curValue = current st.ctrl
+      -- the roving cursor maps onto the enabled subset: the first pressed enabled item,
+      -- else the first enabled item (index 0 of the subset).
+      curEnabled = fromMaybe 0 (findIndex (\i -> i.value `elem` curValue) enabled)
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
-      pos = { count: length st.items, current: tabStopIndex st }
-    case navigate cfg pos (KE.key ke) of
+      pos = { count: length enabled, current: curEnabled }
+    when (length enabled > 0) $ case navigate cfg pos (KE.key ke) of
       Stay -> pure unit
-      MoveTo idx -> case st.items !! idx of
+      MoveTo idx -> case enabled !! idx of
         Nothing -> pure unit
-        Just item -> when (not item.disabled) do
+        Just item -> do
           -- roving focus only: move focus, do NOT toggle (activation is manual)
-          focusItemAt idx
-  -- Tab-into-group: forward container focus to the current roving item (the first
-  -- pressed item, or item 0 when nothing is pressed).
+          H.modify_ _ { focusEntered = true }
+          focusItemByValue item.value
+  -- Tab-into-group: forward container focus to the current roving item — the first
+  -- pressed ENABLED item, or the first enabled item when nothing is pressed. (A disabled
+  -- item is never a roving stop, matching RovingFocusGroup.Item focusable={!disabled}.)
   EntryFocus -> do
+    H.modify_ _ { focusEntered = true }
     st <- H.get
-    focusItemAt (tabStopIndex st)
+    let
+      enabled = filter (\i -> not (st.disabled || i.disabled)) st.items
+      curValue = current st.ctrl
+      target = case findIndex (\i -> i.value `elem` curValue) enabled of
+        Just k -> enabled !! k
+        Nothing -> enabled !! 0
+    for_ target \item -> focusItemByValue item.value
+  -- An item received focus directly (the native button focus on click, or a programmatic
+  -- .focus()) — mark focus as entered so the roving tab stop migrates from the root onto
+  -- an item (matching RovingFocusGroup.Item onFocus → currentTabStopId ← me).
+  ItemFocused _ -> H.modify_ _ { focusEntered = true }
 
--- | Focus the item at the given index via its existing ref (the same mechanism
--- | ListKeyDown uses). No-op when the index is out of range.
-focusItemAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
-focusItemAt idx = do
+-- | Focus the item with the given value via its existing ref (the same mechanism
+-- | ListKeyDown uses). No-op when no such item exists.
+focusItemByValue :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+focusItemByValue value = do
   st <- H.get
-  case st.items !! idx of
-    Nothing -> pure unit
-    Just item -> do
-      mel <- H.getHTMLElementRef (itemRef st.idPrefix item.value)
-      for_ mel (liftEffect <<< HTMLElement.focus)
+  mel <- H.getHTMLElementRef (itemRef st.idPrefix value)
+  for_ mel (liftEffect <<< HTMLElement.focus)
 
 setValue :: forall m. Array String -> H.HalogenM State Action () Output m Unit
 setValue value = do

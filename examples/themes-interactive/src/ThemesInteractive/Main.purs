@@ -226,12 +226,12 @@ view c s =
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
-            "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
+            "tabs" -> HH.slot_ _tabs unit Tabs.component (tabsInput s)
             "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
             "checkbox" -> HH.slot_ _checkbox unit Checkbox.component checkboxInput
             "switch" -> HH.slot_ _switch unit Switch.component switchInput
             "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
-            "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
+            "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component (toggleGroupInput s)
             "segmentedcontrol" -> HH.slot_ _segmentedcontrol unit ToggleGroup.component segmentedControlInput
             "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
@@ -703,8 +703,11 @@ accordionInput s = Accordion.defaultInput
       , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: s == "disabled" }
       , { value: "item-3", header: [ HH.text "Is it animated?" ], content: [ HH.text "Yes, with CSS." ], disabled: false }
       ]
-  , single = false
-  , defaultValue = []
+  -- `?s=single` → type="single" NON-collapsible with item-1 open: the open trigger can't be
+  -- closed, so it carries aria-disabled=true (accordion.tsx:452). Else type="multiple" closed.
+  , single = s == "single"
+  , collapsible = false
+  , defaultValue = if s == "single" then [ "item-1" ] else []
   , style =
       { root: cn ""
       , item: cn ""
@@ -773,11 +776,13 @@ toastInput = Toast.defaultInput
 
 -- | tabs — three tabs (Account/Documents/Settings) starting on account; the driver
 -- | clicks the second tab. Themed with the rt-Tabs* class vocabulary.
-tabsInput :: Tabs.Input
-tabsInput = Tabs.defaultInput
+-- | `?s=disabled-skip` disables the MIDDLE tab (Documents) so the APG roving check proves
+-- | ArrowRight skips OVER it (keyboard-only — no new DOM golden).
+tabsInput :: String -> Tabs.Input
+tabsInput s = Tabs.defaultInput
   { tabs =
       [ { value: "account", label: tabsTriggerLabel "Account", content: [ textAs "span" [ Size "2" ] [ HH.text "Make changes to your account." ] ], disabled: false }
-      , { value: "documents", label: tabsTriggerLabel "Documents", content: [ textAs "span" [ Size "2" ] [ HH.text "Access and update your documents." ] ], disabled: false }
+      , { value: "documents", label: tabsTriggerLabel "Documents", content: [ textAs "span" [ Size "2" ] [ HH.text "Access and update your documents." ] ], disabled: s == "disabled-skip" }
       , { value: "settings", label: tabsTriggerLabel "Settings", content: [ textAs "span" [ Size "2" ] [ HH.text "Edit your profile or update contact information." ] ], disabled: false }
       ]
   , defaultValue = Just "account"
@@ -865,18 +870,38 @@ toggleInput = Toggle.defaultInput
 -- | togglegroup — the bare @radix-ui ToggleGroup primitive (no Radix Themes wrapper),
 -- | single-select, Center pre-pressed; the driver clicks the first item (Left). The
 -- | upstream nodes are classless, so the Style is empty to match.
-toggleGroupInput :: ToggleGroup.Input
-toggleGroupInput = ToggleGroup.defaultInput
-  { single = true
-  , defaultValue = [ "b" ]
-  , ariaLabel = Just "Text alignment"
-  , items =
-      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
-      , { value: "b", label: [ HH.text "Center" ], disabled: false }
-      , { value: "c", label: [ HH.text "Right" ], disabled: false }
-      ]
-  , style = { root: cn "", item: cn "" }
-  }
+-- | `?s=disabled-skip` disables the MIDDLE item (b/Center) so the APG roving check proves
+-- | arrows skip OVER it; `?s=multiple` renders type=multiple (items keep aria-pressed, NOT
+-- | role=radio) with two items pressed. Every other state is the canonical single-mode
+-- | instance (Center pre-pressed) the pressed oracle pins.
+toggleGroupInput :: String -> ToggleGroup.Input
+toggleGroupInput s
+  | s == "multiple" = ToggleGroup.defaultInput
+      { single = false
+      , defaultValue = [ "a", "c" ]
+      , ariaLabel = Just "Text formatting"
+      , items =
+          [ { value: "a", label: [ HH.text "Bold" ], disabled: false }
+          , { value: "b", label: [ HH.text "Italic" ], disabled: false }
+          , { value: "c", label: [ HH.text "Underline" ], disabled: false }
+          ]
+      , style = { root: cn "", item: cn "" }
+      }
+  | otherwise =
+      let
+        disableMiddle = s == "disabled-skip"
+      in
+        ToggleGroup.defaultInput
+          { single = true
+          , defaultValue = [ if disableMiddle then "a" else "b" ]
+          , ariaLabel = Just "Text alignment"
+          , items =
+              [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+              , { value: "b", label: [ HH.text "Center" ], disabled: disableMiddle }
+              , { value: "c", label: [ HH.text "Right" ], disabled: false }
+              ]
+          , style = { root: cn "", item: cn "" }
+          }
 
 -- | segmentedcontrol — themes-only, driven by the ToggleGroup primitive (single). 3
 -- | segments (Inbox/Drafts/Sent), Inbox default; the driver clicks Drafts. Each item
@@ -1066,7 +1091,7 @@ toolbarInput s = Toolbar.defaultInput
   , dir = LTR
   , ariaLabel = Just "Formatting"
   , items =
-      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: false }
+      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: s == "disabled" }
       , Toolbar.Link { value: "edit", label: [ HH.text "Edit" ], href: "#", disabled: false }
       , Toolbar.Sep
       , Toolbar.ToggleGroup

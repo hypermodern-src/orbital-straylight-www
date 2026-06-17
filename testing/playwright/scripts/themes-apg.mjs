@@ -648,6 +648,103 @@ const CHECKS = [
     ok(filled === "4", `typing did not fill the first slot (got '${filled}')`);
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
+
+  // ToggleGroup (disabled-skip + multiple) — depth gaps (STR-330 wave-b roving).
+  // Disabled item is SKIPPED by roving focus: RovingFocusGroup filters candidateNodes to
+  // focusable items (roving-focus-group.tsx:271; ToggleGroupItem focusable={!disabled}), so
+  // an arrow toward a disabled item lands on the NEXT enabled one (never stalls). Seed
+  // (?s=disabled-skip): single-mode value="a" (Left selected), the MIDDLE item (Center)
+  // disabled → ArrowRight from Left must land on Right (idx 2), skipping the disabled idx 1.
+  { id: "togglegroup", state: "disabled-skip", apg: "toolbar", name: "ArrowRight SKIPS a disabled item to the next enabled one", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 3, "expected 3 single-mode radio items");
+    ok((await attrOf(pg, sel, 1, "data-disabled")) !== null, "the middle item must be disabled in this state");
+    ok((await attrOf(pg, sel, 1, "disabled")) !== null, "the middle item must carry the native disabled attr");
+    await press(pg, "Tab"); // onto the selected item (Left, idx 0)
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the selected item");
+    await press(pg, "ArrowRight");
+    // idx 1 is disabled → out of the roving order → ArrowRight lands on idx 2 (Right).
+    ok(await activeIsNth(pg, sel, 2), "ArrowRight did not skip the disabled middle item to idx 2");
+    ok((await attrOf(pg, sel, 1, "tabindex")) === "-1", "the disabled item must never be tabbable");
+  }},
+  // multiple-mode (?s=multiple): items keep aria-pressed (NOT role=radio/aria-checked); root
+  // role=group (bundled dist); two items pressed simultaneously and toggling is independent.
+  { id: "togglegroup", state: "multiple", apg: "toolbar", name: "multiple-mode items are aria-pressed (not radio); two on at once; toggle is independent", run: async (pg) => {
+    const sel = 'button[aria-pressed]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator('[role="radio"]').count()) === 0, "multiple-mode items must NOT be role=radio");
+    ok((await pg.locator(sel).count()) === 3, "expected 3 aria-pressed items");
+    const rootRole = await pg.evaluate(() => document.querySelector('button[aria-pressed]')?.parentElement?.getAttribute("role"));
+    ok(rootRole === "group", `multiple-mode root must be role=group in the bundled dist (got ${rootRole})`);
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "item[0] must be pressed at rest");
+    ok((await attrOf(pg, sel, 2, "aria-pressed")) === "true", "item[2] must be pressed at rest (two on simultaneously)");
+    ok((await attrOf(pg, sel, 1, "aria-pressed")) === "false", "item[1] must be unpressed at rest");
+    // toggling item[1] ON must NOT deselect the others (independent multi-select).
+    await pg.locator(sel).nth(1).click();
+    await attrEq(pg, sel, 1, "aria-pressed", "true", "click did not press item[1]");
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "pressing item[1] must not deselect item[0] (multi-select)");
+    ok((await attrOf(pg, sel, 2, "aria-pressed")) === "true", "pressing item[1] must not deselect item[2] (multi-select)");
+  }},
+
+  // Tabs disabled-skip — depth gap (STR-330 wave-b roving). A disabled tab is SKIPPED by
+  // roving navigation (tabs.tsx:168-169 RovingFocusGroup.Item focusable={!disabled}), so
+  // ArrowRight from tab[0] lands on tab[2] (skipping the disabled middle tab), and the
+  // disabled tab is never tabbable / activatable. Seed (?s=disabled-skip): defaultValue=
+  // "account" (tab[0] selected), the MIDDLE tab (Documents) disabled.
+  { id: "tabs", state: "disabled-skip", apg: "tabs", name: "ArrowRight SKIPS a disabled tab to the next enabled one (and never activates it)", run: async (pg) => {
+    const sel = '[role="tab"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 3, "expected 3 tabs");
+    ok((await attrOf(pg, sel, 1, "data-disabled")) !== null, "the middle tab must be disabled in this state");
+    ok((await attrOf(pg, sel, 1, "disabled")) !== null, "the middle tab must carry the native disabled attr");
+    await press(pg, "Tab"); // onto the selected tab (Account, idx 0)
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the selected tab");
+    await press(pg, "ArrowRight");
+    // idx 1 is disabled → out of the roving order → ArrowRight lands on idx 2 (Settings)
+    // and (automatic activation) selects it; the disabled tab is never selected.
+    ok(await activeIsNth(pg, sel, 2), "ArrowRight did not skip the disabled middle tab to idx 2");
+    await attrEq(pg, sel, 2, "aria-selected", "true", "ArrowRight did not activate the landed tab (automatic activation)");
+    ok((await attrOf(pg, sel, 1, "aria-selected")) === "false", "the disabled tab must never be selected");
+    ok((await attrOf(pg, sel, 1, "tabindex")) === "-1", "the disabled tab must never be tabbable");
+  }},
+
+  // Toolbar — continuous roving across the nested ToggleGroup boundary (core gap). The 4
+  // focusable items are: button New (0), link Edit (1), toggle L (2), toggle C (3). The inner
+  // ToggleGroup has rovingFocus={false}, so its items rove as part of the OUTER toolbar — one
+  // continuous order. From New, ArrowRight must walk Edit → L → C, crossing the group boundary.
+  { id: "toolbar", state: "default", apg: "toolbar", name: "ArrowRight walks the full 4-item order, CROSSING the toggle-group boundary", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 4, "expected 4 focusable items (New, Edit, L, C)");
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first item (New)");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not move to the link (Edit)");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "ArrowRight did not CROSS into the toggle-group (item L)");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 3), "ArrowRight did not advance to the second toggle item (C)");
+  }},
+  // Toolbar disabled-skip (?s=disabled) — the disabled button is excluded from the roving order
+  // (focusable={!disabled}); ArrowRight from the FIRST focusable lands on the next ENABLED item,
+  // never on the disabled button, which is also non-tabbable. Seed disables New, so the focusable
+  // order is link Edit (0), toggle L (1), toggle C (2) — and the disabled New is not in the order.
+  { id: "toolbar", state: "disabled", apg: "toolbar", name: "a disabled button is non-tabbable and skipped by the roving order", run: async (pg) => {
+    await pg.locator('[role="toolbar"]').first().waitFor();
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    // the disabled button stays a collection item (count unchanged) but carries the native
+    // disabled attr and tabindex=-1 — it is excluded from the focusable candidateNodes.
+    ok((await attrOf(pg, sel, 0, "disabled")) !== null, "the first item (New) must be disabled");
+    ok((await attrOf(pg, sel, 0, "tabindex")) === "-1", "the disabled item must be non-tabbable");
+    // focus the first ENABLED item (the link Edit, idx 1) and rove forward — the disabled
+    // button is never a roving stop; ArrowRight reaches the toggle items, never New.
+    await pg.evaluate((s) => document.querySelectorAll(s)[1].focus(), sel);
+    ok(await activeIsNth(pg, sel, 1), "could not focus the first enabled item (Edit)");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "ArrowRight did not rove to the next enabled item (L)");
+    ok((await pg.evaluate(() => (document.activeElement.textContent || "").trim())) !== "New", "focus must never land on the disabled button");
+  }},
 ];
 
 const b = await chromium.launch();

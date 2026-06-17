@@ -63,6 +63,11 @@ STATES=(
   "form:forceMatch"
   "form:valueMissing"
   "form:typeMismatch"
+  # wave-b roving depth gaps (STR-330): new DOM oracles.
+  "togglegroup:multiple"
+  "accordion:multiple"
+  "accordion:single"
+  "toolbar:disabled"
 )
 
 echo "ℵ building golden dist (bun)"
