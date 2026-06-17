@@ -114,6 +114,9 @@ STATES=(
   "labelprim:forattrs"
   # ── Wave-C inputs depth-audit additions (STR-330) ────────────────────────────
   "slider:vertical"
+  "otp:password"
+  "otp:disabled"
+  "otp:readonly"
 )
 
 echo "ℵ building golden dist (bun)"

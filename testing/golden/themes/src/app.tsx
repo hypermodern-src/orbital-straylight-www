@@ -1466,11 +1466,19 @@ const PAGES: Page[] = [
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
+      // `?s=password` masks each slot (type=password); `?s=disabled` disables every slot
+      // (disabled attr + dropped from the roving order); `?s=readonly` stamps readonly.
+      const password = s === "password";
+      const disabled = s === "disabled";
+      const readonly = s === "readonly";
       return (
         <Box>
           <OneTimePasswordField.Root
             {...(empty ? {} : { defaultValue: alpha ? "abc" : "123" })}
             {...(alpha ? { validationType: "alpha" as const } : {})}
+            {...(password ? { type: "password" as const } : {})}
+            {...(disabled ? { disabled: true } : {})}
+            {...(readonly ? { readOnly: true } : {})}
             autoFocus={false}
           >
             <OneTimePasswordField.Input />

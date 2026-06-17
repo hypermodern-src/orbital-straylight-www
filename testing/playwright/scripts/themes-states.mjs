@@ -682,6 +682,32 @@ export const STATES = {
           && document.querySelector('input[type="hidden"]')?.value === "abc";
       });
     },
+    // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
+    password: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("type") === "password")
+          && document.querySelector('input[type="hidden"]')?.value === "123";
+      });
+    },
+    // `?s=disabled` → every slot carries the disabled attr and is dropped from the roving
+    // order (tabindex=-1 on all; no slot is the tab stop). At rest.
+    disabled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.disabled && i.getAttribute("tabindex") === "-1");
+      });
+    },
+    // `?s=readonly` → every slot carries the readonly attr. At rest.
+    readonly: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.readOnly);
+      });
+    },
   },
   form: {
     // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true

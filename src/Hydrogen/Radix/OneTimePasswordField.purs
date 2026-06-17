@@ -76,6 +76,9 @@ type Input =
   , orientation :: Orientation
   , dir :: Dir
   , name :: Maybe String           -- hidden input's form name
+  , password :: Boolean            -- type=password masks every slot input
+  , disabled :: Boolean            -- disables every slot + drops them from the roving order
+  , readOnly :: Boolean            -- stamps readonly on every slot input
   , style :: Style
   }
 
@@ -88,6 +91,9 @@ defaultInput =
   , orientation: Horizontal
   , dir: LTR
   , name: Nothing
+  , password: false
+  , disabled: false
+  , readOnly: false
   , style: defaultStyle
   }
 
@@ -110,6 +116,9 @@ type State =
   , orientation :: Orientation
   , dir :: Dir
   , name :: Maybe String
+  , password :: Boolean
+  , disabled :: Boolean
+  , readOnly :: Boolean
   , style :: Style
   , cursor :: Int          -- roving cursor over the slots
   , focusEntered :: Boolean -- false ⇒ all slots -1 (root holds the tab stop), autocomplete on slot 0
@@ -150,6 +159,9 @@ initialState input =
   , orientation: input.orientation
   , dir: input.dir
   , name: input.name
+  , password: input.password
+  , disabled: input.disabled
+  , readOnly: input.readOnly
   , style: input.style
   , cursor: 0
   , focusEntered: false
@@ -166,7 +178,9 @@ render st =
     [ role "group"
     , dataOrientation st.orientation
     , HP.style "outline: none;"
-    , HP.tabIndex 0
+    -- RovingFocusGroup root tab stop: tabindex=0 while there is a focusable item; when the
+    -- field is disabled EVERY slot is non-focusable, so the group itself drops to tabindex=-1.
+    , HP.tabIndex (if st.disabled then (-1) else 0)
     , classes st.style.root
     ]
     ( mapWithIndex (renderSlot st) (current st.chars)
@@ -178,10 +192,15 @@ renderSlot st idx ch =
   let
     acIdx = autoCompleteIndex st
     isAuto = idx == acIdx
-    tab = if st.focusEntered then tabIndexFor st.cursor idx else (-1)
+    -- A disabled field drops EVERY slot from the roving order (radix focusable=!disabled), so
+    -- no slot is the tab stop and all carry tabindex=-1; the group root keeps its tabindex=0.
+    tab =
+      if st.disabled then (-1)
+      else if st.focusEntered then tabIndexFor st.cursor idx
+      else (-1)
   in
     HH.input
-      ( [ HP.type_ HP.InputText
+      ( [ HP.type_ (if st.password then HP.InputPassword else HP.InputText)
         , HP.ref (slotRef idx)
         , HP.attr (HH.AttrName "aria-label") ("Character " <> show (idx + 1) <> " of " <> show st.len)
         , HP.attr (HH.AttrName "value") ch
@@ -198,6 +217,8 @@ renderSlot st idx ch =
         , HE.onFocus (const (SlotFocused idx))
         ]
           <> validationAttrs st.validation
+          <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
+          <> (if st.readOnly then [ HP.attr (HH.AttrName "readonly") "" ] else [])
           <> (if isAuto then [] else passwordManagerIgnore)
       )
 
@@ -262,6 +283,9 @@ handleAction = case _ of
       , orientation = input.orientation
       , dir = input.dir
       , name = input.name
+      , password = input.password
+      , disabled = input.disabled
+      , readOnly = input.readOnly
       , style = input.style
       }
   SlotFocused idx ->
@@ -269,10 +293,11 @@ handleAction = case _ of
   SlotInput idx raw -> do
     st <- H.get
     -- Take the LAST typed char (handles the slot already holding a value), accept it
-    -- only if valid; fill the slot and auto-advance focus to the next slot.
+    -- only if valid; fill the slot and auto-advance focus to the next slot. A disabled or
+    -- read-only field never mutates (radix gates the SET_CHAR dispatch on both).
     let
       typed = lastChar raw
-    when (typed /= "" && accepts st.validation typed) do
+    when (not st.disabled && not st.readOnly && typed /= "" && accepts st.validation typed) do
       let
         cur = current st.chars
         next = fromMaybe cur (updateAt idx typed cur)
@@ -284,7 +309,7 @@ handleAction = case _ of
     st <- H.get
     let key = KE.key ke
     case key of
-      "Backspace" -> do
+      "Backspace" | not st.disabled && not st.readOnly -> do
         let
           cur = current st.chars
           atIdx = fromMaybe "" (cur !! idx)
