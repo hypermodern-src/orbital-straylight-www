@@ -21,18 +21,27 @@ import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
+import Hydrogen.Radix.Accordion as Accordion
 import Hydrogen.Radix.AlertDialog as AlertDialog
+import Hydrogen.Radix.Checkbox as Checkbox
+import Hydrogen.Radix.Collapsible as Collapsible
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
+import Hydrogen.Radix.RadioGroup as RadioGroup
 import Hydrogen.Radix.Select as Select
+import Hydrogen.Radix.Switch as Switch
+import Hydrogen.Radix.Tabs as Tabs
+import Hydrogen.Radix.Toggle as Toggle
+import Hydrogen.Radix.ToggleGroup as ToggleGroup
 import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
+import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
 import Hydrogen.Themes.TextField (textField, textFieldValue)
 import Hydrogen.Themes.Typography (textAs)
@@ -51,6 +60,18 @@ type Slots =
   , dropdownmenu :: DropdownMenu.Slot Unit
   , contextmenu :: ContextMenu.Slot Unit
   , select :: Select.Slot Unit
+  , accordion :: Accordion.Slot Unit
+  , collapsible :: Collapsible.Slot Unit
+  , tabs :: Tabs.Slot Unit
+  , radiogroup :: RadioGroup.Slot Unit
+  , checkbox :: Checkbox.Slot Unit
+  , switch :: Switch.Slot Unit
+  , toggle :: Toggle.Slot Unit
+  , togglegroup :: ToggleGroup.Slot Unit
+  , segmentedcontrol :: ToggleGroup.Slot Unit
+  , checkboxgroup :: Checkbox.Slot Unit
+  , radiocards :: RadioGroup.Slot Unit
+  , checkboxcards :: Checkbox.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -76,6 +97,42 @@ _contextmenu = Proxy
 
 _select :: Proxy "select"
 _select = Proxy
+
+_accordion :: Proxy "accordion"
+_accordion = Proxy
+
+_collapsible :: Proxy "collapsible"
+_collapsible = Proxy
+
+_tabs :: Proxy "tabs"
+_tabs = Proxy
+
+_radiogroup :: Proxy "radiogroup"
+_radiogroup = Proxy
+
+_checkbox :: Proxy "checkbox"
+_checkbox = Proxy
+
+_switch :: Proxy "switch"
+_switch = Proxy
+
+_toggle :: Proxy "toggle"
+_toggle = Proxy
+
+_togglegroup :: Proxy "togglegroup"
+_togglegroup = Proxy
+
+_segmentedcontrol :: Proxy "segmentedcontrol"
+_segmentedcontrol = Proxy
+
+_checkboxgroup :: Proxy "checkboxgroup"
+_checkboxgroup = Proxy
+
+_radiocards :: Proxy "radiocards"
+_radiocards = Proxy
+
+_checkboxcards :: Proxy "checkboxcards"
+_checkboxcards = Proxy
 
 main :: Effect Unit
 main = do
@@ -114,6 +171,19 @@ view c =
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
             "select" -> HH.slot_ _select unit Select.component selectInput
+            "accordion" -> HH.slot_ _accordion unit Accordion.component accordionInput
+            "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
+            "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
+            "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
+            "checkbox" -> HH.slot_ _checkbox unit Checkbox.component checkboxInput
+            "switch" -> HH.slot_ _switch unit Switch.component switchInput
+            "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
+            "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
+            "segmentedcontrol" -> HH.slot_ _segmentedcontrol unit ToggleGroup.component segmentedControlInput
+            "checkboxgroup" -> HH.slot_ _checkboxgroup unit Checkbox.component checkboxGroupInput
+            "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
+            "checkboxcards" -> HH.slot_ _checkboxcards unit Checkbox.component checkboxCardsInput
+            "tabnav" -> tabNavPage
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -440,6 +510,252 @@ selectStyle =
   , item: cn "rt-SelectItem"
   , indicator: cn "rt-SelectItemIndicator"
   }
+
+-- ── interactive (inline, non-portal) routes ─────────────────────────────────────
+-- Each of the 13 component routes below renders the themed Radix primitive inline
+-- (no portal): the primitive supplies behavior + the click-driven state transition
+-- the DOM-oracle drives, and a themed `Style`/content reproduces the upstream rt-*
+-- class anatomy. Each `*Input` binding is SELF-CONTAINED (one top-level binding) so a
+-- later fan-out can perfect one without touching its neighbors.
+
+-- | accordion — the bare @radix-ui Accordion primitive (Radix Themes ships none, so
+-- | NO rt-* classes; the golden is the unstyled primitive). type=multiple, closed.
+accordionInput :: Accordion.Input
+accordionInput = Accordion.defaultInput
+  { items =
+      [ { value: "item-1", header: [ HH.text "Is it accessible?" ], content: [ HH.text "Yes. It adheres to the WAI-ARIA design pattern." ], disabled: false }
+      , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: false }
+      , { value: "item-3", header: [ HH.text "Is it animated?" ], content: [ HH.text "Yes, with CSS." ], disabled: false }
+      ]
+  , single = false
+  , defaultValue = []
+  , style =
+      { root: cn ""
+      , item: cn ""
+      , header: cn ""
+      , trigger: cn ""
+      , content: cn ""
+      }
+  }
+
+-- | collapsible — a themed soft Button trigger + a Box>Text content panel. The
+-- | primitive Content div itself carries NO rt-* class (bare Primitive.div), so
+-- | style.content is empty; the rt-Box/rt-Text classes live on the children.
+collapsibleInput :: Collapsible.Input
+collapsibleInput = Collapsible.defaultInput
+  { open = Nothing
+  , defaultOpen = false
+  , style =
+      { root: cn ""
+      , trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+      , content: cn ""
+      }
+  , trigger = [ HH.text "Toggle content" ]
+  , content =
+      [ box [ Pt "2" ]
+          [ textAs "div" [ Size "2" ] [ HH.text "Disclosed content line one." ] ]
+      ]
+  }
+
+-- | tabs — three tabs (Account/Documents/Settings) starting on account; the driver
+-- | clicks the second tab. Themed with the rt-Tabs* class vocabulary.
+tabsInput :: Tabs.Input
+tabsInput = Tabs.defaultInput
+  { tabs =
+      [ { value: "account", label: [ HH.text "Account" ], content: [ textAs "span" [ Size "2" ] [ HH.text "Make changes to your account." ] ], disabled: false }
+      , { value: "documents", label: [ HH.text "Documents" ], content: [ textAs "span" [ Size "2" ] [ HH.text "Access and update your documents." ] ], disabled: false }
+      , { value: "settings", label: [ HH.text "Settings" ], content: [ textAs "span" [ Size "2" ] [ HH.text "Edit your profile or update contact information." ] ], disabled: false }
+      ]
+  , defaultValue = Just "account"
+  , idPrefix = "rt"
+  , style =
+      { list: cn "rt-BaseTabList rt-TabsList rt-r-size-2"
+      , trigger: cn "rt-reset rt-BaseTabListTrigger rt-TabsTrigger"
+      , content: cn "rt-TabsContent"
+      }
+  }
+
+-- | radiogroup — themes-only (RadioGroupPrimitive styled). Two options; Default is
+-- | checked initially, the driver clicks Comfortable. First-cut: the items carry the
+-- | label text directly (the golden's label/flex chrome is a fan-out refinement).
+radioGroupInput :: RadioGroup.Input
+radioGroupInput = RadioGroup.defaultInput
+  { items =
+      [ { value: "1", label: [ HH.text "Default" ], disabled: false }
+      , { value: "2", label: [ HH.text "Comfortable" ], disabled: false }
+      ]
+  , defaultValue = Just "1"
+  , style =
+      { root: cn "rt-RadioGroupRoot"
+      , item: cn "rt-BaseRadioRoot rt-r-size-2 rt-reset rt-variant-surface"
+      , indicator: cn ""
+      }
+  }
+
+-- | checkbox — a bare single Themes checkbox, unchecked; the driver clicks to check.
+-- | The indicator content is the ThickCheckIcon SVG.
+checkboxInput :: Checkbox.Input
+checkboxInput = Checkbox.defaultInput
+  { defaultChecked = Checkbox.Unchecked
+  , value = "on"
+  , style =
+      { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxRoot rt-r-size-2 rt-variant-surface"
+      , indicator: cn "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
+      }
+  , children = [ thickCheckIconPlain ]
+  }
+
+-- | switch — a single OFF Themes switch; the driver clicks to turn it on.
+switchInput :: Switch.Input
+switchInput = Switch.defaultInput
+  { defaultChecked = false
+  , value = "on"
+  , style =
+      { root: cn "rt-reset rt-SwitchRoot rt-r-size-2 rt-variant-surface"
+      , thumb: cn "rt-SwitchThumb"
+      }
+  }
+
+-- | toggle — a soft "B" toggle, unpressed; the driver clicks to press.
+toggleInput :: Toggle.Input
+toggleInput = Toggle.defaultInput
+  { pressed = Nothing
+  , defaultPressed = false
+  , style = { root: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft" }
+  , children = [ HH.text "B" ]
+  }
+
+-- | togglegroup — the bare @radix-ui ToggleGroup primitive (no Radix Themes wrapper),
+-- | single-select, Center pre-pressed; the driver clicks the first item (Left). The
+-- | upstream nodes are classless, so the Style is empty to match.
+toggleGroupInput :: ToggleGroup.Input
+toggleGroupInput = ToggleGroup.defaultInput
+  { single = true
+  , defaultValue = [ "b" ]
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | segmentedcontrol — themes-only, driven by the ToggleGroup primitive (single). 3
+-- | segments (Inbox/Drafts/Sent), Inbox default; the driver clicks Drafts. Each item
+-- | label is the upstream separator+label sub-tree. NOTE: the trailing
+-- | `rt-SegmentedControlIndicator` sibling div the golden carries is a primitive
+-- | xFix (the ToggleGroup root does not emit it) — left for the fan-out.
+segmentedControlInput :: ToggleGroup.Input
+segmentedControlInput = ToggleGroup.defaultInput
+  { single = true
+  , defaultValue = [ "inbox" ]
+  , items =
+      [ { value: "inbox", label: segmentLabel "Inbox", disabled: false }
+      , { value: "drafts", label: segmentLabel "Drafts", disabled: false }
+      , { value: "sent", label: segmentLabel "Sent", disabled: false }
+      ]
+  , style =
+      { root: cn "rt-SegmentedControlRoot rt-r-size-2 rt-variant-surface"
+      , item: cn "rt-reset rt-SegmentedControlItem"
+      }
+  }
+
+-- | The upstream SegmentedControl item inner sub-tree (separator span + label wrapper
+-- | with active/inactive label spans), as the ToggleGroup Item label.
+segmentLabel :: String -> Array HH.PlainHTML
+segmentLabel label =
+  [ HH.span [ HP.class_ (HH.ClassName "rt-SegmentedControlItemSeparator") ] []
+  , HH.span [ HP.class_ (HH.ClassName "rt-SegmentedControlItemLabel") ]
+      [ HH.span [ HP.class_ (HH.ClassName "rt-SegmentedControlItemLabelActive") ] [ HH.text label ]
+      , HH.span
+          [ HP.class_ (HH.ClassName "rt-SegmentedControlItemLabelInactive")
+          , HP.attr (HH.AttrName "aria-hidden") "true"
+          ]
+          [ HH.text label ]
+      ]
+  ]
+
+-- | checkboxgroup — themes-only, first-cut driven by the Checkbox primitive (a single
+-- | item starting unchecked; the driver clicks to check). The golden wraps it in a
+-- | label.rt-CheckboxGroupItem + rt-CheckboxGroupItemInner span — that label chrome and
+-- | the svg-as-indicator (vs span wrapper) are primitive xFixes for the fan-out.
+checkboxGroupInput :: Checkbox.Input
+checkboxGroupInput = Checkbox.defaultInput
+  { defaultChecked = Checkbox.Unchecked
+  , value = "1"
+  , required = true
+  , style =
+      { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxGroupItemCheckbox rt-r-size-2 rt-variant-surface"
+      , indicator: cn "rt-BaseCheckboxIndicator"
+      }
+  , children = [ thickCheckIconPlain ]
+  }
+
+-- | radiocards — themes-only (RadioGroupPrimitive styled as cards). Three options,
+-- | value 2 pre-selected? No: value 1 default, the driver clicks card 2. Each label is
+-- | a bold rt-Text span. NOTE: the grid root style/attrs (aria-required, dir, the
+-- | --grid-template-columns custom prop) and indicator-span suppression are primitive
+-- | xFixes for the fan-out.
+radioCardsInput :: RadioGroup.Input
+radioCardsInput = RadioGroup.defaultInput
+  { items =
+      [ { value: "1", label: [ textAs "span" [ Weight "bold" ] [ HH.text "8-core CPU" ] ], disabled: false }
+      , { value: "2", label: [ textAs "span" [ Weight "bold" ] [ HH.text "6-core CPU" ] ], disabled: false }
+      , { value: "3", label: [ textAs "span" [ Weight "bold" ] [ HH.text "4-core CPU" ] ], disabled: false }
+      ]
+  , defaultValue = Just "1"
+  , style =
+      { root: cn "rt-Grid rt-RadioCardsRoot rt-r-size-2 rt-variant-surface rt-r-gtc rt-r-gap-4"
+      , item: cn "rt-reset rt-BaseCard rt-RadioCardsItem"
+      , indicator: cn ""
+      }
+  }
+
+-- | checkboxcards — themes-only, first-cut driven by the Checkbox primitive (single
+-- | card starting unchecked; the driver clicks to check). The golden wraps it in a
+-- | label.rt-BaseCard.rt-CheckboxCardsItem carrying a rt-Text label + the checkbox
+-- | button, inside a grid root — that card/grid chrome is a fan-out refinement.
+checkboxCardsInput :: Checkbox.Input
+checkboxCardsInput = Checkbox.defaultInput
+  { defaultChecked = Checkbox.Unchecked
+  , value = "terms"
+  , required = true
+  , style =
+      { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxCardCheckbox rt-r-size-2 rt-variant-surface"
+      , indicator: cn "rt-BaseCheckboxIndicator"
+      }
+  , children = [ thickCheckIconPlain ]
+  }
+
+-- | tabnav — themes-only AND at-rest (no Halogen component): rendered directly inline
+-- | as the declarative active-link nav. Account is the active link.
+tabNavPage :: forall w i. HH.HTML w i
+tabNavPage =
+  tabNavRoot []
+    [ tabNavLink true "#account" [] [ HH.text "Account" ]
+    , tabNavLink false "#documents" [] [ HH.text "Documents" ]
+    , tabNavLink false "#settings" [] [ HH.text "Settings" ]
+    ]
+
+-- | The ThickCheckIcon as a PlainHTML SVG (radix's check; the indicator content for
+-- | the Checkbox-family routes). svg width/height 9, viewBox 0 0 9 9, fill currentcolor.
+thickCheckIconPlain :: HH.PlainHTML
+thickCheckIconPlain =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        , HP.attr (HH.AttrName "d")
+            "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z"
+        ]
+        []
+    ]
 
 -- | The down-chevron (radix's TriggerIcon / SelectIcon) — same 9×9 currentColor path
 -- | upstream uses. Rendered in the SVG namespace so it paints. `chevron` is the bare
