@@ -14,15 +14,19 @@
 -- |
 -- | The rendered element is a `<button role="checkbox">` carrying
 -- | `aria-checked` ("true"/"false"/"mixed"), `aria-required`, `data-state`
--- | ("checked"/"unchecked"/"indeterminate"), `data-disabled`, and `disabled`,
--- | plus the `style.root` classes. The indicator part (the check/dash) renders
--- | as a `<span>` inside the button only when Checked or Indeterminate, carrying
--- | its own `data-state` + `style.indicator` classes.
+-- | ("checked"/"unchecked"/"indeterminate"), `data-disabled`, `disabled`, `value`,
+-- | plus the `style.root` classes and any `extraAttrs` (the Group/Cards RovingFocus
+-- | + Collection attributes). The indicator (the check/dash) is rendered with
+-- | `asChild` semantics: when Checked or Indeterminate the single `children`
+-- | element IS the indicator (the icon svg already carrying the indicator classes,
+-- | `data-state`, and `pointer-events: none`), with NO wrapping span — matching
+-- | upstream's CheckboxIndicator asChild.
 -- |
 -- | NOTE: radix also renders a hidden bubble `<input type="checkbox">` so the
--- | control participates in native form submission/validation. That requires
--- | DOM-ref plumbing (size mirroring, event bubbling) we deliberately skip in
--- | v1; this is a controlled/ARIA checkbox only, not yet a native form control.
+-- | control participates in native form submission/validation, but only when the
+-- | control is inside (or SSR-defaults into) a `<form>`. A bare mounted checkbox
+-- | with no `<form>` ancestor resolves `isFormControl` false post-mount, so no
+-- | bubble input is rendered — which is the case for these gallery pages.
 module Hydrogen.Radix.Checkbox
   ( CheckedState(..)
   , component
@@ -38,6 +42,7 @@ module Hydrogen.Radix.Checkbox
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -73,7 +78,12 @@ type Input =
   , name :: String
   , value :: String
   , style :: Style
-  , children :: Array HH.PlainHTML   -- static indicator content (check/dash icon)
+  , children :: Array HH.PlainHTML   -- the asChild indicator element (check/dash icon)
+  -- Extra raw attributes stamped on the button. Group/Cards contexts inject the
+  -- attributes RovingFocus + the Collection ItemSlot merge onto the item button
+  -- (e.g. `data-radix-collection-item`, `tabindex`, an explicit `aria-required`);
+  -- for a bare standalone checkbox this is empty.
+  , extraAttrs :: Array (Tuple String String)
   }
 
 defaultInput :: Input
@@ -86,6 +96,7 @@ defaultInput =
   , value: "on"
   , style: defaultStyle
   , children: []
+  , extraAttrs: []
   }
 
 -- | Emitted whenever the user requests a change — including in controlled mode,
@@ -111,6 +122,7 @@ type State =
   , value :: String
   , style :: Style
   , children :: Array HH.PlainHTML
+  , extraAttrs :: Array (Tuple String String)
   }
 
 data Action
@@ -138,6 +150,7 @@ initialState input =
   , value: input.value
   , style: input.style
   , children: input.children
+  , extraAttrs: input.extraAttrs
   }
 
 -- | The next value on click: Indeterminate resolves to Checked, otherwise toggle.
@@ -169,22 +182,25 @@ render st =
   in
     HH.button
       ( [ HP.type_ HP.ButtonButton
+        , ARIA.role "checkbox"
         , ARIA.checked (ariaCheckedName checked)
         , dataState (stateName checked)
+        , HP.value st.value
         , HP.disabled st.disabled
         , classes st.style.root
         , HE.onClick \_ -> Clicked
         ]
           <> (if st.required then [ ARIA.required "true" ] else [])
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+          <> map (\(Tuple k v) -> HP.attr (HH.AttrName k) v) st.extraAttrs
       )
       ( if showIndicator then
-          [ HH.span
-              [ dataState (stateName checked)
-              , classes st.style.indicator
-              ]
-              (map HH.fromPlainHTML st.children)
-          ]
+          -- asChild semantics: the Indicator merges its classes/data-state/pointer-
+          -- events onto the SINGLE child element (the icon svg) — no wrapping span.
+          -- The gallery supplies a child already carrying the rt-* indicator classes,
+          -- data-state, and `style="pointer-events: none;"` (see Main.purs helpers),
+          -- matching upstream's CheckboxIndicator asChild render byte-for-byte.
+          map HH.fromPlainHTML st.children
         else
           []
       )
@@ -206,6 +222,7 @@ handleAction = case _ of
       , value = input.value
       , style = input.style
       , children = input.children
+      , extraAttrs = input.extraAttrs
       }
 
 handleQuery :: forall m a. Query a -> H.HalogenM State Action () Output m (Maybe a)
