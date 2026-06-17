@@ -28,7 +28,8 @@ import Hydrogen.Radix.Collapsible as Collapsible
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
-import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn, dataAttr)
+import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.PasswordToggleField as PasswordToggleField
 import Hydrogen.Radix.Popover as Popover
@@ -40,6 +41,7 @@ import Hydrogen.Radix.Switch as Switch
 import Hydrogen.Radix.Tabs as Tabs
 import Hydrogen.Radix.Toggle as Toggle
 import Hydrogen.Radix.ToggleGroup as ToggleGroup
+import Hydrogen.Radix.Toolbar as Toolbar
 import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
@@ -78,6 +80,7 @@ type Slots =
   , checkboxcards :: Checkbox.Slot Unit
   , scrollarea :: ScrollArea.Slot Unit
   , passwordtoggle :: PasswordToggleField.Slot Unit
+  , toolbar :: Toolbar.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -149,6 +152,9 @@ _scrollarea = Proxy
 _passwordtoggle :: Proxy "passwordtoggle"
 _passwordtoggle = Proxy
 
+_toolbar :: Proxy "toolbar"
+_toolbar = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -203,6 +209,7 @@ view c s =
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
             "passwordtoggle" -> passwordTogglePage
+            "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -903,6 +910,40 @@ passwordToggleInput = PasswordToggleField.defaultInput
   , toggleVisible = [ HH.text "Hide" ]
   , toggleHidden = [ HH.text "Show" ]
   , style = { input: cn "", toggle: cn "" }
+  }
+
+-- | toolbar — the bare @radix-ui Toolbar primitive (Radix Themes ships none, so NO
+-- | rt-* classes; the golden is the unstyled primitive). A "Formatting" toolbar with a
+-- | Button (New), Link (Edit), Separator, and a single-select ToggleGroup (Align: L/C,
+-- | Left pre-pressed). `?s=vertical` flips orientation (aria/data-orientation, and the
+-- | separator's FLIPPED orientation). Bare ⇒ every Style slot empty.
+toolbarInput :: String -> Toolbar.Input
+toolbarInput s = Toolbar.defaultInput
+  { orientation = if s == "vertical" then Vertical else Horizontal
+  , dir = LTR
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: false }
+      , Toolbar.Link { value: "edit", label: [ HH.text "Edit" ], href: "#", disabled: false }
+      , Toolbar.Sep
+      , Toolbar.ToggleGroup
+          { items:
+              [ { value: "left", label: [ HH.text "L" ], disabled: false }
+              , { value: "center", label: [ HH.text "C" ], disabled: false }
+              ]
+          , single: true
+          , defaultValue: [ "left" ]
+          , ariaLabel: Just "Align"
+          }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
+      }
   }
 
 -- | tabnav — themes-only AND at-rest (no Halogen component): rendered directly inline

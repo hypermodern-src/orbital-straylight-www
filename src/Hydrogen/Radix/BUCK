@@ -28,6 +28,7 @@ purescript_library(
         "Tabs.purs",
         "Toggle.purs",
         "ToggleGroup.purs",
+        "Toolbar.purs",
         "Tooltip.purs",
         "VisuallyHidden.purs",
     ],
