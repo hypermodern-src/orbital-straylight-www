@@ -632,6 +632,7 @@ toggleInput :: Toggle.Input
 toggleInput = Toggle.defaultInput
   { pressed = Nothing
   , defaultPressed = false
+  , ariaLabel = Just "Bold"
   , style = { root: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft" }
   , children = [ HH.text "B" ]
   }
@@ -643,6 +644,7 @@ toggleGroupInput :: ToggleGroup.Input
 toggleGroupInput = ToggleGroup.defaultInput
   { single = true
   , defaultValue = [ "b" ]
+  , ariaLabel = Just "Text alignment"
   , items =
       [ { value: "a", label: [ HH.text "Left" ], disabled: false }
       , { value: "b", label: [ HH.text "Center" ], disabled: false }
@@ -665,6 +667,9 @@ segmentedControlInput = ToggleGroup.defaultInput
       , { value: "drafts", label: segmentLabel "Drafts", disabled: false }
       , { value: "sent", label: segmentLabel "Sent", disabled: false }
       ]
+  -- upstream SegmentedControl.Root appends a trailing sliding-indicator div as the
+  -- last child of the root (after the segment buttons) -- emitted via `trailing`.
+  , trailing = [ HH.div [ HP.class_ (HH.ClassName "rt-SegmentedControlIndicator") ] [] ]
   , style =
       { root: cn "rt-SegmentedControlRoot rt-r-size-2 rt-variant-surface"
       , item: cn "rt-reset rt-SegmentedControlItem"

@@ -50,6 +50,7 @@ type Input =
   { pressed :: Maybe Boolean       -- controlled pressed state (Nothing = uncontrolled)
   , defaultPressed :: Boolean      -- initial state when uncontrolled
   , disabled :: Boolean
+  , ariaLabel :: Maybe String      -- accessible label (radix `aria-label`); omitted when Nothing
   , style :: Style
   , children :: Array HH.PlainHTML  -- static label/icon content
   }
@@ -59,6 +60,7 @@ defaultInput =
   { pressed: Nothing
   , defaultPressed: false
   , disabled: false
+  , ariaLabel: Nothing
   , style: defaultStyle
   , children: []
   }
@@ -81,6 +83,7 @@ type Slot id = H.Slot Query Output id
 type State =
   { ctrl :: Controllable Boolean
   , disabled :: Boolean
+  , ariaLabel :: Maybe String
   , style :: Style
   , children :: Array HH.PlainHTML
   }
@@ -105,6 +108,7 @@ initialState :: Input -> State
 initialState input =
   { ctrl: controllable input.pressed input.defaultPressed
   , disabled: input.disabled
+  , ariaLabel: input.ariaLabel
   , style: input.style
   , children: input.children
   }
@@ -122,6 +126,9 @@ render st =
         , classes st.style.root
         , HE.onClick \_ -> Clicked
         ]
+          <> (case st.ariaLabel of
+                Just l -> [ ARIA.label l ]
+                Nothing -> [])
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
       )
       (map HH.fromPlainHTML st.children)
@@ -138,6 +145,7 @@ handleAction = case _ of
     H.modify_ \st -> st
       { ctrl = sync input.pressed st.ctrl
       , disabled = input.disabled
+      , ariaLabel = input.ariaLabel
       , style = input.style
       , children = input.children
       }

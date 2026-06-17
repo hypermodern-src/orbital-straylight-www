@@ -20,6 +20,15 @@
 -- | This loses radix's `rovingFocus={false}` and `type="single"` non-array output
 -- | shape, but keeps ONE state path and ONE `ValueChanged (Array String)` output.
 -- |
+-- | UPSTREAM DOM CONTRACT (verified against committed golden-dom oracles):
+-- |   * Root → `<div role="group" dir="ltr" tabindex="0" style="outline: none">`
+-- |     (optional `aria-label`). RovingFocusGroup.Root passes no orientation prop,
+-- |     so NO `aria-orientation` / `data-orientation` is stamped.
+-- |   * Item → `<button type="button" data-state="on|off" data-radix-collection-item
+-- |     tabindex>` plus, in SINGLE mode, `role="radio" aria-checked` and NO
+-- |     `aria-pressed` (ToggleGroupItemImpl singleProps overrides aria-pressed away);
+-- |     in MULTIPLE mode the bare Toggle's `aria-pressed`. No item data-orientation.
+-- |
 -- | Activation is manual: arrow keys move focus ONLY (roving focus); click (or the
 -- | button's native Enter/Space) toggles. The roving tab stop is the first pressed
 -- | item's index, or 0 when nothing is pressed.
@@ -48,9 +57,9 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
-import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Direction (Dir(..), dirName)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
-import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, role, aria)
 import Web.HTML.HTMLElement as HTMLElement
 import Web.UIEvent.KeyboardEvent as KE
 
@@ -85,6 +94,9 @@ type Input =
   , loop :: Boolean
   , disabled :: Boolean             -- disable the whole group
   , idPrefix :: String              -- for item refs (unique per instance)
+  , ariaLabel :: Maybe String       -- group label (radix `aria-label`); omitted when Nothing
+  , trailing :: Array HH.PlainHTML  -- extra nodes appended after the items (e.g. the themed
+                                    -- SegmentedControl sliding-indicator div)
   , style :: Style
   }
 
@@ -99,6 +111,8 @@ defaultInput =
   , loop: true
   , disabled: false
   , idPrefix: "rdx-toggle-group"
+  , ariaLabel: Nothing
+  , trailing: []
   , style: defaultStyle
   }
 
@@ -125,6 +139,8 @@ type State =
   , loop :: Boolean
   , disabled :: Boolean
   , idPrefix :: String
+  , ariaLabel :: Maybe String
+  , trailing :: Array HH.PlainHTML
   , style :: Style
   }
 
@@ -158,19 +174,26 @@ initialState input =
   , loop: input.loop
   , disabled: input.disabled
   , idPrefix: input.idPrefix
+  , ariaLabel: input.ariaLabel
+  , trailing: input.trailing
   , style: input.style
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   HH.div
-    [ role "group"
-    , aria "orientation" (orientationName st.orientation)
-    , dataOrientation st.orientation
-    , classes st.style.root
-    , HE.onKeyDown ListKeyDown
-    ]
-    (mapWithIndex (renderItem st) st.items)
+    ( [ role "group"
+      , HP.attr (HH.AttrName "dir") (dirName st.dir)
+      , HP.tabIndex 0
+      , HP.style "outline: none;"
+      , classes st.style.root
+      , HE.onKeyDown ListKeyDown
+      ]
+        <> (case st.ariaLabel of
+              Just l -> [ aria "label" l ]
+              Nothing -> [])
+    )
+    (mapWithIndex (renderItem st) st.items <> map HH.fromPlainHTML st.trailing)
 
 renderItem :: forall m. State -> Int -> Item -> H.ComponentHTML Action () m
 renderItem st idx item =
@@ -183,14 +206,18 @@ renderItem st idx item =
     HH.button
       ( [ HP.type_ HP.ButtonButton
         , HP.ref (itemRef st.idPrefix item.value)
-        , aria "pressed" (if on then "true" else "false")
         , dataState (if on then "on" else "off")
-        , dataOrientation st.orientation
+        , dataAttr "radix-collection-item" ""
         , HP.tabIndex (tabIndexFor curIdx idx)
         , HP.disabled disabled
         , classes st.style.item
         , HE.onClick \_ -> Toggled item.value
         ]
+          -- single mode → radio semantics (role + aria-checked, NO aria-pressed),
+          -- mirroring upstream ToggleGroupItemImpl's singleProps; multiple mode keeps
+          -- the bare Toggle's aria-pressed.
+          <> (if st.single then [ role "radio", aria "checked" (if on then "true" else "false") ]
+              else [ aria "pressed" (if on then "true" else "false") ])
           <> (if disabled then [ dataAttr "disabled" "" ] else [])
       )
       (map HH.fromPlainHTML item.label)
@@ -213,6 +240,8 @@ handleAction = case _ of
       , loop = input.loop
       , disabled = input.disabled
       , idPrefix = input.idPrefix
+      , ariaLabel = input.ariaLabel
+      , trailing = input.trailing
       , style = input.style
       }
   Toggled value -> do
