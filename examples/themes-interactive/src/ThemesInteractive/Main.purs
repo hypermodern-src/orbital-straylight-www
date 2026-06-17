@@ -28,6 +28,7 @@ import Hydrogen.Radix.Collapsible as Collapsible
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
+import Hydrogen.Radix.Form as Form
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
@@ -83,6 +84,7 @@ type Slots =
   , passwordtoggle :: PasswordToggleField.Slot Unit
   , toolbar :: Toolbar.Slot Unit
   , otp :: Otp.Slot Unit
+  , form :: Form.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -160,6 +162,9 @@ _toolbar = Proxy
 _otp :: Proxy "otp"
 _otp = Proxy
 
+_form :: Proxy "form"
+_form = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -216,6 +221,7 @@ view c s =
             "passwordtoggle" -> passwordTogglePage
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
             "otp" -> box [] [ HH.slot_ _otp unit Otp.component (otpInput s) ]
+            "form" -> box [] [ HH.slot_ _form unit Form.component (formInput s) ]
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -962,6 +968,45 @@ otpInput s = Otp.defaultInput
   , defaultValue = if s == "empty" || s == "typed" then "" else "123"
   , validation = Otp.Numeric
   , style = { root: cn "", input: cn "" }
+  }
+
+-- | form — the bare @radix-ui Form primitive (Radix Themes ships none, so NO rt-*
+-- | classes; the golden is the unstyled primitive). A single required email field
+-- | with a valueMissing + a typeMismatch Message, wrapped in a `<Box>` (inner rt-Box).
+-- | `?s=serverInvalid` flips the field's serverInvalid prop (pure → data-invalid +
+-- | aria-invalid); `?s=forceMatch` renders the valueMissing Message unconditionally
+-- | (registers aria-describedby on first paint). The default (rest-valid/valueMissing)
+-- | is the required-empty story; valueMissing fires when the driver clicks Submit.
+formInput :: String -> Form.Input
+formInput s = Form.defaultInput
+  { submitLabel = [ HH.text "Submit" ]
+  , fields =
+      [ Form.defaultField
+          { name = "email"
+          , label = [ HH.text "Email" ]
+          , inputType = "email"
+          , required = true
+          , serverInvalid = s == "serverInvalid"
+          , messages =
+              [ { match: Form.ValueMissing
+                , forceMatch: s == "forceMatch"
+                , text: [ HH.text "This value is missing" ]
+                }
+              , { match: Form.TypeMismatch
+                , forceMatch: false
+                , text: [ HH.text "Provide a valid email" ]
+                }
+              ]
+          }
+      ]
+  , style =
+      { root: cn ""
+      , field: cn ""
+      , label: cn ""
+      , control: cn ""
+      , message: cn ""
+      , submit: cn ""
+      }
   }
 
 -- | tabnav — themes-only AND at-rest (no Halogen component): rendered directly inline

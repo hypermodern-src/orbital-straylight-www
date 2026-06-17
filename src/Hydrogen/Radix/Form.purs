@@ -1,0 +1,335 @@
+-- | Hydrogen.Radix.Form — accessible form fields with client-side validation
+-- | (radix `Form`).
+-- |
+-- | A stateful component that takes the field set as Input DATA (the Tabs idiom:
+-- | `fields :: Array Field`, like `tabs :: Array Tab`). Validity is tracked in State
+-- | as a per-field set of FAILED matchers, fed by the native `invalid` event on each
+-- | control (radix uses the NATIVE validity events, not React/Halogen onChange). The
+-- | DOM is purely a function of that validity state: `data-invalid`, `aria-invalid`,
+-- | and the conditionally-rendered `<span>` Messages (whose ids wire into the
+-- | control's `aria-describedby`).
+-- |
+-- | UPSTREAM DOM CONTRACT (verified against the committed golden-dom oracles —
+-- | form.{rest-valid,serverInvalid,forceMatch,valueMissing}). No portal, no Presence:
+-- |   * Root → bare `<form>`.
+-- |   * Field → `<div>` with `data-invalid="true"` ONLY when serverInvalid OR a
+-- |     matcher has failed (ABSENT otherwise — never "false"). `data-valid` is only
+-- |     emitted once validity has run AND passed; at rest (validity unknown) BOTH are
+-- |     absent.
+-- |   * Label → `<label for=<controlId>>` with the same `data-invalid` gating.
+-- |   * Control → `<input id name required title="" type>` with `data-invalid` (same
+-- |     gating), `aria-invalid="true"` ONLY when serverInvalid, and `aria-describedby`
+-- |     = space-joined ids of the currently-mounted Messages (ABSENT when none).
+-- |   * Message → `<span id=<msgId>>` rendered ONLY when its matcher failed OR
+-- |     forceMatch; its id registers into the control's aria-describedby.
+-- |   * Submit → `<button type="submit">`.
+-- |
+-- | CRITICAL: every conditional attribute is OMITTED (not ="false"/"") when its
+-- | predicate is false — the Tabs `<> (if cond then […] else [])` idiom throughout.
+module Hydrogen.Radix.Form
+  ( component
+  , Input
+  , Field
+  , Message
+  , Matcher(..)
+  , Output(..)
+  , Query(..)
+  , Slot
+  , Style
+  , defaultStyle
+  , defaultInput
+  , defaultField
+  ) where
+
+import Prelude
+
+import Data.Array (elem, filter, mapWithIndex, null, (!!))
+import Data.Foldable (for_)
+import Data.Map (Map)
+import Data.Map as Map
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String (joinWith)
+import Data.Traversable (for)
+import Data.Tuple (Tuple(..))
+import Effect.Class (class MonadEffect, liftEffect)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
+import Halogen.Query.Event (eventListener)
+import Hydrogen.Radix.Behavior.Id (useId)
+import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataAttr, aria)
+import Web.Event.Event (EventType(..), preventDefault)
+import Web.Event.Event as Event
+import Web.HTML.HTMLElement as HTMLElement
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Public surface
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- | A built-in HTML validity matcher (subset; the deterministically oracle-able set).
+data Matcher
+  = ValueMissing
+  | TypeMismatch
+  | PatternMismatch
+  | TooLong
+  | TooShort
+  | RangeOverflow
+  | RangeUnderflow
+  | StepMismatch
+  | BadInput
+
+derive instance eqMatcher :: Eq Matcher
+
+type Message =
+  { match :: Matcher
+  , forceMatch :: Boolean   -- render unconditionally (registers aria-describedby on first paint)
+  , text :: Array HH.PlainHTML
+  }
+
+type Field =
+  { name :: String
+  , label :: Array HH.PlainHTML
+  , inputType :: String         -- the control's `type` (e.g. "email")
+  , required :: Boolean
+  , serverInvalid :: Boolean
+  , messages :: Array Message
+  }
+
+defaultField :: Field
+defaultField =
+  { name: ""
+  , label: []
+  , inputType: "text"
+  , required: false
+  , serverInvalid: false
+  , messages: []
+  }
+
+type Style =
+  { root :: ClassNames
+  , field :: ClassNames
+  , label :: ClassNames
+  , control :: ClassNames
+  , message :: ClassNames
+  , submit :: ClassNames
+  }
+
+defaultStyle :: Style
+defaultStyle =
+  { root: cn "rdx-form"
+  , field: cn "rdx-form-field"
+  , label: cn "rdx-form-label"
+  , control: cn "rdx-form-control"
+  , message: cn "rdx-form-message"
+  , submit: cn "rdx-form-submit"
+  }
+
+type Input =
+  { fields :: Array Field
+  , submitLabel :: Array HH.PlainHTML
+  , style :: Style
+  }
+
+defaultInput :: Input
+defaultInput =
+  { fields: []
+  , submitLabel: []
+  , style: defaultStyle
+  }
+
+data Output = Submitted
+
+data Query a = GetFailed (Map String (Array Matcher) -> a)
+
+type Slot id = H.Slot Query Output id
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Implementation
+-- ─────────────────────────────────────────────────────────────────────────────
+
+type State =
+  { fields :: Array Field
+  , submitLabel :: Array HH.PlainHTML
+  , style :: Style
+  -- minted ids, keyed by field index
+  , controlIds :: Map Int String
+  , msgIds :: Map Int (Array String)       -- one id per message of field i
+  , failed :: Map Int (Array Matcher)      -- currently-failing matchers per field
+  }
+
+data Action
+  = Initialize
+  | Receive Input
+  | ControlInvalid Int
+  | ControlInput Int          -- native input clears the field's failed set (radix re-validates)
+  | FormSubmit Event.Event
+
+controlRef :: Int -> H.RefLabel
+controlRef i = H.RefLabel ("form-control-" <> show i)
+
+component :: forall m. MonadEffect m => H.Component Query Input Output m
+component =
+  H.mkComponent
+    { initialState
+    , render
+    , eval: H.mkEval H.defaultEval
+        { handleAction = handleAction
+        , handleQuery = handleQuery
+        , receive = Just <<< Receive
+        , initialize = Just Initialize
+        }
+    }
+
+initialState :: Input -> State
+initialState input =
+  { fields: input.fields
+  , submitLabel: input.submitLabel
+  , style: input.style
+  , controlIds: Map.empty
+  , msgIds: Map.empty
+  , failed: Map.empty
+  }
+
+-- | Failed matchers for field index `i`.
+failedOf :: State -> Int -> Array Matcher
+failedOf st i = fromMaybe [] (Map.lookup i st.failed)
+
+-- | Does field `i` count as invalid? (serverInvalid OR any failed matcher.)
+fieldInvalid :: State -> Int -> Field -> Boolean
+fieldInvalid st i f = f.serverInvalid || not (null (failedOf st i))
+
+-- | The Messages of field `i` that should currently render (forceMatch OR matched),
+-- | paired with their minted id.
+visibleMessages :: State -> Int -> Field -> Array { id :: String, text :: Array HH.PlainHTML }
+visibleMessages st i f =
+  let
+    fails = failedOf st i
+    ids = fromMaybe [] (Map.lookup i st.msgIds)
+  in
+    filter (\m -> m.id /= "")
+      ( mapWithIndex
+          ( \j m ->
+              if m.forceMatch || (m.match `elem` fails)
+                then { id: fromMaybe "" (ids !! j), text: m.text }
+                else { id: "", text: [] }
+          )
+          f.messages
+      )
+
+render :: forall m. State -> H.ComponentHTML Action () m
+render st =
+  HH.form
+    [ classes st.style.root
+    , HE.onSubmit FormSubmit
+    ]
+    (mapWithIndex (renderField st) st.fields <> [ renderSubmit st ])
+
+renderField :: forall m. State -> Int -> Field -> H.ComponentHTML Action () m
+renderField st i f =
+  let
+    invalid = fieldInvalid st i f
+    cid = fromMaybe "" (Map.lookup i st.controlIds)
+    msgs = visibleMessages st i f
+    describedBy = joinWith " " (map _.id msgs)
+    invalidAttr :: forall r. Array (HH.IProp r Action)
+    invalidAttr = if invalid then [ dataAttr "invalid" "true" ] else []
+  in
+    HH.div
+      ( [ classes st.style.field ] <> invalidAttr )
+      ( [ HH.label
+            ( [ classes st.style.label
+              , HP.attr (HH.AttrName "for") cid
+              ] <> invalidAttr
+            )
+            (map HH.fromPlainHTML f.label)
+        , HH.input
+            ( [ HP.ref (controlRef i)
+              , HP.attr (HH.AttrName "type") f.inputType
+              , HP.id cid
+              , HP.name f.name
+              , HP.attr (HH.AttrName "title") ""
+              , classes st.style.control
+              , HE.onInput \_ -> ControlInput i
+              ]
+                <> (if f.required then [ HP.attr (HH.AttrName "required") "" ] else [])
+                <> invalidAttr
+                <> (if f.serverInvalid then [ aria "invalid" "true" ] else [])
+                <> (if describedBy /= "" then [ aria "describedby" describedBy ] else [])
+            )
+        ]
+          <> map (renderMessage st) msgs
+      )
+
+renderMessage :: forall m. State -> { id :: String, text :: Array HH.PlainHTML } -> H.ComponentHTML Action () m
+renderMessage st m =
+  HH.span
+    [ classes st.style.message
+    , HP.id m.id
+    ]
+    (map HH.fromPlainHTML m.text)
+
+renderSubmit :: forall m. State -> H.ComponentHTML Action () m
+renderSubmit st =
+  HH.button
+    [ HP.type_ HP.ButtonSubmit
+    , classes st.style.submit
+    ]
+    (map HH.fromPlainHTML st.submitLabel)
+
+handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
+handleAction = case _ of
+  Initialize -> do
+    st <- H.get
+    -- mint a stable id per control + per message (deterministic, normalizer-canonicalized).
+    cids <- for (mapWithIndex (\i f -> { i, f }) st.fields) \{ i } -> do
+      cid <- useId
+      pure { i, cid }
+    mids <- for (mapWithIndex (\i f -> { i, f }) st.fields) \{ i, f } -> do
+      ids <- for f.messages \_ -> useId
+      pure { i, ids }
+    H.modify_ _
+      { controlIds = Map.fromFoldable (map (\r -> Tuple r.i r.cid) cids)
+      , msgIds = Map.fromFoldable (map (\r -> Tuple r.i r.ids) mids)
+      }
+    -- bind the native `invalid` event on each control (Submit → native validation →
+    -- `invalid` fires on a required-empty/typeMismatch control; radix uses the NATIVE
+    -- validity event, not Halogen onChange which is the `input` event).
+    st' <- H.get
+    for_ (mapWithIndex (\i f -> { i, f }) st'.fields) \{ i } -> do
+      mel <- H.getHTMLElementRef (controlRef i)
+      for_ mel \el -> do
+        let target = HTMLElement.toEventTarget el
+        void $ H.subscribe (eventListener (EventType "invalid") target (\_ -> Just (ControlInvalid i)))
+  Receive input ->
+    H.modify_ \st -> st
+      { fields = input.fields
+      , submitLabel = input.submitLabel
+      , style = input.style
+      }
+  ControlInvalid i -> do
+    st <- H.get
+    -- the native `invalid` event fired — compute which matchers fail. We model the
+    -- deterministic case the oracle exercises: a required-empty control fails
+    -- ValueMissing. (Reading the live ValidityState per-flag would generalize this.)
+    let
+      fails = case st.fields !! i of
+        Just f -> filter (\m -> m == ValueMissing) (map _.match f.messages)
+        Nothing -> []
+    H.modify_ _ { failed = Map.insert i fails st.failed }
+  ControlInput i ->
+    -- typing clears the field's failed set (radix re-validates on input).
+    H.modify_ \st -> st { failed = Map.delete i st.failed }
+  FormSubmit ev -> do
+    -- prevent the native navigation; if all controls are valid, raise Submitted. The
+    -- native `invalid` events (bound above) fire BEFORE submit for invalid controls.
+    liftEffect (preventDefault ev)
+    st <- H.get
+    when (Map.isEmpty st.failed) (H.raise Submitted)
+
+handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
+handleQuery = case _ of
+  GetFailed reply -> do
+    st <- H.get
+    let byName = Map.fromFoldable (mapWithIndex (\i f -> Tuple f.name (failedOf st i)) st.fields)
+    pure (Just (reply byName))

@@ -14,6 +14,7 @@ purescript_library(
         "ContextMenu.purs",
         "Dialog.purs",
         "DropdownMenu.purs",
+        "Form.purs",
         "HoverCard.purs",
         "Label.purs",
         "OneTimePasswordField.purs",
