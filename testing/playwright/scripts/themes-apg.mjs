@@ -1123,6 +1123,26 @@ const CHECKS = [
   }},
 
   // ── Wave-C nav-group depth checks (STR-330) ──────────────────────────────────
+  // Tooltip a11y invariants the open golden only INCIDENTALLY covered — promoted to explicit
+  // checked invariants (no port change; the port already satisfies both):
+  //  (1) the VisuallyHidden role=tooltip copy (the trigger's aria-describedby target, the
+  //      accessible name) carries NO arrow/svg — upstream suppresses the Arrow inside the
+  //      VisuallyHidden subtree (VisuallyHiddenContentContext isInside ⇒ Arrow returns null),
+  //      so the SR copy never duplicates the decorative arrow (tooltip.tsx:483-484,596-604).
+  //  (2) the trigger button has NO type attribute — deliberate upstream (triggers are often
+  //      anchors; tooltip.tsx:287-289). A regression adding type=button would now be caught.
+  // Open via focus (instant-open) so the role=tooltip copy is present, then assert both.
+  { id: "tooltip", apg: "tooltip", name: "the VisuallyHidden role=tooltip copy has no arrow, and the trigger has no type attr", run: async (pg) => {
+    await triggerBtn(pg).focus();
+    await pg.getByRole("tooltip").waitFor({ timeout: 3000 });
+    // (1) no svg/arrow inside the role=tooltip accessible-name copy.
+    ok(await pg.evaluate(() => {
+      const sr = document.querySelector('[role="tooltip"]');
+      return !!sr && sr.querySelector("svg") === null;
+    }), "the role=tooltip accessible-name copy must NOT contain the decorative arrow svg");
+    // (2) the trigger button carries no `type` attribute (triggers may be anchors).
+    ok((await attrOf(pg, "#root button", 0, "type")) === null, "the tooltip trigger must have NO type attribute");
+  }},
   // HoverCard — the DEFINING contract vs a tooltip: moving the pointer from the trigger INTO
   // the content keeps the card OPEN (both trigger and content bind onPointerEnter/Leave, so the
   // card survives the cross-move). Hover the trigger link → wait for the content → move the
