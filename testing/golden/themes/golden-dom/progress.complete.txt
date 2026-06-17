@@ -1,0 +1,8 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-Box" style=max-width: <px>;>
+          <div class="rt-ProgressRoot rt-r-size-2 rt-variant-surface" aria-valuemax=100 aria-valuemin=0 aria-valuenow=100 aria-valuetext=100% data-max=100 data-state=complete data-value=100 role=progressbar style=--progress-value: 100;>
+            <div class="rt-ProgressIndicator" data-max=100 data-state=complete data-value=100>

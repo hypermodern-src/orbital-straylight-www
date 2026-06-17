@@ -93,6 +93,12 @@ STATES=(
   "slider:disabled"
   "otp:alpha"
   "form:multiMessage"
+  # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
+  "collapsible:disabled"
+  "progress:indeterminate"
+  "progress:complete"
+  "progress:custommax"
+  "avatar:fallback"
 )
 
 echo "ℵ building golden dist (bun)"

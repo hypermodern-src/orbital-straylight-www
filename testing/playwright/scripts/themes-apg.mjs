@@ -1092,6 +1092,29 @@ const CHECKS = [
     ok(await activeIsNth(pg, '[role="radio"]', 2), "End did not move focus to the last radio");
     ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "End must NOT check the focused radio");
     ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked after End");
+  // Disclosure (Collapsible) — https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
+  // The trigger is a native type=button, so Enter and Space both fire `click` → onOpenToggle.
+  // APG: activating the trigger toggles aria-expanded and shows/hides the content; while closed
+  // aria-controls is ABSENT (radix gates it on open). Seed: the default (closed) story.
+  { id: "collapsible", state: "open", apg: "disclosure", name: "Enter on the trigger toggles aria-expanded and discloses the content", run: async (pg) => {
+    const trig = pg.locator('#root button[aria-expanded]').first();
+    await trig.waitFor();
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-expanded")) === "false", "trigger must start collapsed");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-controls")) === null, "aria-controls must be ABSENT while closed");
+    await trig.focus();
+    await press(pg, "Enter");
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "Enter did not expand the disclosure");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-controls")) !== null, "aria-controls must appear (→ the content) when open");
+    await pg.locator('[data-state="open"]:not([hidden])').first().waitFor();
+  }},
+  { id: "collapsible", state: "open", apg: "disclosure", name: "Space toggles the disclosure closed again", run: async (pg) => {
+    const trig = pg.locator('#root button[aria-expanded]').first();
+    await trig.waitFor();
+    await trig.focus();
+    await press(pg, "Enter"); // open
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "Enter did not expand");
+    await press(pg, "Space"); // collapse
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "Space did not collapse the disclosure");
   }},
 ];
 

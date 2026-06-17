@@ -127,7 +127,9 @@ component =
 
 initialState :: Input -> State
 initialState input =
-  { status: if input.src == "" then Idle else Loading
+  -- upstream useImageLoadingStatus: a missing/empty `src` resolves to 'error' (avatar.tsx:
+  -- 156-158), NOT 'idle' — so onLoadingStatusChange('error') fires and the fallback shows.
+  { status: if input.src == "" then Errored else Loading
   , src: input.src
   , alt: input.alt
   , fallback: input.fallback
@@ -169,9 +171,10 @@ handleAction = case _ of
   Receive input -> do
     st <- H.get
     let
-      -- A changed src restarts the load lifecycle; otherwise keep current status.
+      -- A changed src restarts the load lifecycle; a cleared src resolves to 'error'
+      -- (upstream treats missing/empty src as 'error', not 'idle'); otherwise keep status.
       next
-        | input.src /= st.src = if input.src == "" then Idle else Loading
+        | input.src /= st.src = if input.src == "" then Errored else Loading
         | otherwise = st.status
     H.modify_ _
       { status = next
