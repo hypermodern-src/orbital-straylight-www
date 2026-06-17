@@ -1123,6 +1123,25 @@ const CHECKS = [
   }},
 
   // ── Wave-C nav-group depth checks (STR-330) ──────────────────────────────────
+  // HoverCard — the DEFINING contract vs a tooltip: moving the pointer from the trigger INTO
+  // the content keeps the card OPEN (both trigger and content bind onPointerEnter/Leave, so the
+  // card survives the cross-move). Hover the trigger link → wait for the content → move the
+  // pointer onto the content's box → assert it is STILL open (data-state=open, not closing).
+  // Keyed off the upstream .rt-HoverCardContent + data-state only, so the same check runs on
+  // golden and port. (Wave-A/B verified focus-open + Escape; this pins the hover-card-vs-tooltip
+  // distinction the existing oracles never exercised.)
+  { id: "hovercard", apg: "hover-card", name: "pointer over the content keeps the card open (hover-card, not tooltip)", run: async (pg) => {
+    await pg.locator("#root").getByRole("link").first().hover();
+    const content = pg.locator(".rt-HoverCardContent").first();
+    await content.waitFor({ timeout: 3000 });
+    // move the pointer onto the content's center — the cross-move must NOT close it.
+    const box = await content.boundingBox();
+    ok(!!box, "could not measure the hover-card content box");
+    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await pg.waitForTimeout(150);
+    ok(await visible(pg, ".rt-HoverCardContent"), "the card closed when the pointer moved onto its content (hover-card must stay open)");
+    ok((await attrOf(pg, ".rt-HoverCardContent", 0, "data-state")) === "open", "the content must remain data-state=open while the pointer is over it");
+  }},
   // NavigationMenu content-link roving — once focus is INSIDE the open content (a separate
   // FocusGroup over the content's links), ArrowRight/ArrowLeft rove between the links and are
   // CLAMPED (non-looping, slice-from-current) just like the trigger bar. The `open` story
