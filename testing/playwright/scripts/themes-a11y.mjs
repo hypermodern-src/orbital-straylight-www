@@ -44,7 +44,7 @@ for (const { id, state } of MATRIX) {
   const tag = `${id}:${state}`;
   try {
     await pg.goto(`http://127.0.0.1:${PORT}/?c=${id}`); await pg.waitForTimeout(250);
-    if (state === "open") { await STATES[id].open(pg); await settle(pg); }
+    if (state === "open") { if (!STATES[id].open) continue; await STATES[id].open(pg); await settle(pg); }
 
     // 1. axe-core → the violated-rule fingerprint (impact moderate+; minor = noise).
     await pg.addScriptTag({ path: AXE });

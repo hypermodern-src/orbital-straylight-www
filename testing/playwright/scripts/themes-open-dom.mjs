@@ -30,7 +30,10 @@ const b = await chromium.launch();
 // Fixed, roomy viewport so the default `open` state never flips near an edge
 // (collision-flip is its own state to add later). deviceScaleFactor irrelevant for DOM.
 const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
-await pg.goto(`http://127.0.0.1:${PORT}/?c=${ID}`);
+// &s=<state> selects the golden's `interactive` page for ids that also have an at-rest
+// pixel page (checkbox/switch/tabs/…); the port app ignores the unknown param, so the
+// contract (?c=<id>) stays symmetric across golden and port.
+await pg.goto(`http://127.0.0.1:${PORT}/?c=${ID}&s=${STATE}`);
 await pg.waitForTimeout(250);
 
 try {

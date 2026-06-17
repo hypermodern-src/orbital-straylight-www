@@ -5,6 +5,13 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "@radix-ui/themes/styles.css";
+// Bare Radix primitives — Radix Themes ships NO Accordion/Collapsible/Toggle/ToggleGroup,
+// so these stories compose the genuine upstream primitives directly (the DOM contract the
+// Halogen port reproduces). They live in their own packages, present in node_modules.
+import * as Accordion from "@radix-ui/react-accordion";
+import * as Collapsible from "@radix-ui/react-collapsible";
+import { Toggle } from "@radix-ui/react-toggle";
+import * as ToggleGroup from "@radix-ui/react-toggle-group";
 // Bundle Inter (Radix Themes' intended typeface) so the render is deterministic —
 // headless Chromium has no system sans; without this the golden falls back to mono.
 import "@fontsource-variable/inter";
@@ -64,7 +71,7 @@ import {
   Select,
 } from "@radix-ui/themes";
 
-type Page = { id: string; label: string; node: React.ReactNode };
+type Page = { id: string; label: string; node: React.ReactNode; interactive?: boolean };
 
 const PAGES: Page[] = [
   {
@@ -781,6 +788,203 @@ const PAGES: Page[] = [
       </Select.Root>
     ),
   },
+  // ── Interactive (stateful, non-overlay) components — open-state DOM oracle ──────
+  // Driven into a post-interaction state (checked / active / pressed / open / selected)
+  // by themes-open-dom.mjs and snapshotted as the golden. Flagged `interactive` so the
+  // open-state path (?c=<id>&s=<state>) selects THESE pages while the at-rest pixel path
+  // (?c=<id>) keeps hitting the canonical at-rest pages above (PNG oracles untouched).
+  // For the four primitives Radix Themes ships NO component (Accordion/Collapsible/Toggle/
+  // ToggleGroup) these are the genuine bare @radix-ui/react-* upstream — the port's contract.
+  {
+    id: "accordion",
+    label: "Accordion",
+    interactive: true,
+    node: (() => {
+      const items = [
+        { value: "item-1", header: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
+        { value: "item-2", header: "Is it styled?", content: "No. It is unstyled by default." },
+        { value: "item-3", header: "Is it animated?", content: "Yes, with CSS." },
+      ];
+      return (
+        <Box style={{ maxWidth: 360 }}>
+          <Accordion.Root type="multiple">
+            {items.map((it) => (
+              <Accordion.Item key={it.value} value={it.value}>
+                <Accordion.Header>
+                  <Accordion.Trigger>{it.header}</Accordion.Trigger>
+                </Accordion.Header>
+                <Accordion.Content>{it.content}</Accordion.Content>
+              </Accordion.Item>
+            ))}
+          </Accordion.Root>
+        </Box>
+      );
+    })(),
+  },
+  {
+    id: "collapsible",
+    label: "Collapsible",
+    interactive: true,
+    node: (
+      <Collapsible.Root>
+        <Collapsible.Trigger asChild>
+          <Button variant="soft">Toggle content</Button>
+        </Collapsible.Trigger>
+        <Collapsible.Content>
+          <Box pt="2">
+            <Text as="div" size="2">Disclosed content line one.</Text>
+          </Box>
+        </Collapsible.Content>
+      </Collapsible.Root>
+    ),
+  },
+  {
+    id: "tabs",
+    label: "Tabs (interactive)",
+    interactive: true,
+    node: (
+      <Tabs.Root defaultValue="account">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="account">
+          <Text size="2">Make changes to your account.</Text>
+        </Tabs.Content>
+        <Tabs.Content value="documents">
+          <Text size="2">Access and update your documents.</Text>
+        </Tabs.Content>
+        <Tabs.Content value="settings">
+          <Text size="2">Edit your profile or update contact information.</Text>
+        </Tabs.Content>
+      </Tabs.Root>
+    ),
+  },
+  {
+    id: "radiogroup",
+    label: "RadioGroup (interactive)",
+    interactive: true,
+    node: (
+      <RadioGroup.Root defaultValue="1">
+        <Flex direction="column" gap="2">
+          <Text as="label" size="2">
+            <Flex gap="2" align="center">
+              <RadioGroup.Item value="1" /> Default
+            </Flex>
+          </Text>
+          <Text as="label" size="2">
+            <Flex gap="2" align="center">
+              <RadioGroup.Item value="2" /> Comfortable
+            </Flex>
+          </Text>
+        </Flex>
+      </RadioGroup.Root>
+    ),
+  },
+  {
+    id: "checkbox",
+    label: "Checkbox (interactive)",
+    interactive: true,
+    node: <Checkbox />,
+  },
+  {
+    id: "switch",
+    label: "Switch (interactive)",
+    interactive: true,
+    node: <Switch />,
+  },
+  {
+    id: "toggle",
+    label: "Toggle",
+    interactive: true,
+    node: (
+      <Toggle
+        className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+        aria-label="Bold"
+      >
+        B
+      </Toggle>
+    ),
+  },
+  {
+    id: "togglegroup",
+    label: "Toggle Group",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="b" aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
+  {
+    id: "segmentedcontrol",
+    label: "Segmented Control (interactive)",
+    interactive: true,
+    node: (
+      <SegmentedControl.Root defaultValue="inbox">
+        <SegmentedControl.Item value="inbox">Inbox</SegmentedControl.Item>
+        <SegmentedControl.Item value="drafts">Drafts</SegmentedControl.Item>
+        <SegmentedControl.Item value="sent">Sent</SegmentedControl.Item>
+      </SegmentedControl.Root>
+    ),
+  },
+  {
+    id: "checkboxgroup",
+    label: "Checkbox Group (interactive)",
+    interactive: true,
+    node: (
+      <CheckboxGroup.Root>
+        <CheckboxGroup.Item value="1">Fun</CheckboxGroup.Item>
+      </CheckboxGroup.Root>
+    ),
+  },
+  {
+    id: "radiocards",
+    label: "Radio Cards (interactive)",
+    interactive: true,
+    node: (
+      <RadioCards.Root defaultValue="1">
+        <RadioCards.Item value="1">
+          <Text weight="bold">8-core CPU</Text>
+        </RadioCards.Item>
+        <RadioCards.Item value="2">
+          <Text weight="bold">6-core CPU</Text>
+        </RadioCards.Item>
+        <RadioCards.Item value="3">
+          <Text weight="bold">4-core CPU</Text>
+        </RadioCards.Item>
+      </RadioCards.Root>
+    ),
+  },
+  {
+    id: "checkboxcards",
+    label: "Checkbox Cards (interactive)",
+    interactive: true,
+    node: (
+      <CheckboxCards.Root>
+        <CheckboxCards.Item value="terms">
+          <Text>Agree to Terms and Conditions</Text>
+        </CheckboxCards.Item>
+      </CheckboxCards.Root>
+    ),
+  },
+  {
+    id: "tabnav",
+    label: "Tab Nav (interactive)",
+    interactive: true,
+    node: (
+      <TabNav.Root>
+        <TabNav.Link href="#account" active>
+          Account
+        </TabNav.Link>
+        <TabNav.Link href="#documents">Documents</TabNav.Link>
+        <TabNav.Link href="#settings">Settings</TabNav.Link>
+      </TabNav.Root>
+    ),
+  },
   // The composed demo — the "looks like a finished product" target.
   {
     id: "signin",
@@ -848,7 +1052,7 @@ function Index() {
       </Text>
       <Flex direction="column" gap="4">
         {PAGES.map((p) => (
-          <Card key={p.id} size="2">
+          <Card key={p.id + (p.interactive ? "-i" : "")} size="2">
             <Heading size="2" mb="3" color="gray">
               <a href={`?c=${p.id}`} style={{ color: "inherit", textDecoration: "none" }}>
                 {p.label}
@@ -863,7 +1067,14 @@ function Index() {
 }
 
 const id = currentId();
-const page = PAGES.find((p) => p.id === id);
+// Open-state DOM oracle path: ?c=<id>&s=<state> selects the `interactive` page for that id
+// (a stateful story driven into <state>), keeping the plain ?c=<id> pixel/a11y path on the
+// canonical at-rest page above. For ids that only have an interactive page (the four bare
+// primitives), either path resolves to it.
+const openState = /[?&]s=/.test(location.search);
+const page =
+  (openState ? PAGES.find((p) => p.id === id && p.interactive) : undefined) ??
+  PAGES.find((p) => p.id === id);
 const content = page ? <Box p="6">{page.node}</Box> : <Index />;
 
 createRoot(document.getElementById("root")!).render(

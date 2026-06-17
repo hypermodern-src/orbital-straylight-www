@@ -1,0 +1,15 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-RadioGroupRoot" aria-required=false dir=ltr role=radiogroup style=outline: none; tabindex=0>
+          <div class="rt-Flex rt-r-fd-column rt-r-gap-2">
+            <label class="rt-Text rt-r-size-2">
+              <div class="rt-Flex rt-r-ai-center rt-r-gap-2">
+                <button class="rt-BaseRadioRoot rt-r-size-2 rt-reset rt-variant-surface" aria-checked=false data-radix-collection-item= data-state=unchecked role=radio tabindex=-1 type=button value=1>
+                #Default
+            <label class="rt-Text rt-r-size-2">
+              <div class="rt-Flex rt-r-ai-center rt-r-gap-2">
+                <button class="rt-BaseRadioRoot rt-r-size-2 rt-reset rt-variant-surface" aria-checked=true data-radix-collection-item= data-state=checked role=radio tabindex=0 type=button value=2>
+                #Comfortable

@@ -57,4 +57,126 @@ export const STATES = {
   select: {
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
   },
+
+  // ── Interactive (stateful, non-overlay) components ──────────────────────────────
+  // Driven into a single post-interaction state, keyed off UPSTREAM role/class/data-state
+  // selectors only (never port-internal classes) so the same driver runs against golden
+  // and port. These have no `open` state — themes-a11y guards on STATES[id].open.
+  accordion: {
+    open: async (pg) => {
+      const trig = root(pg).locator('button[aria-expanded]').first();
+      await trig.click();
+      await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
+    },
+  },
+  collapsible: {
+    open: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[data-state="open"]:not([hidden])').first().waitFor();
+    },
+  },
+  tabs: {
+    tab2: async (pg) => {
+      const tabs = root(pg).getByRole("tab");
+      await tabs.nth(1).click();
+      await pg.locator('[role="tabpanel"]:not([hidden])').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelectorAll('[role="tab"]')[1];
+        return t && t.getAttribute("data-state") === "active";
+      });
+    },
+  },
+  radiogroup: {
+    checked: async (pg) => {
+      const target = pg.locator('[role="radio"][value="2"]').first();
+      await target.waitFor();
+      await target.click();
+      await pg.locator('[role="radio"][value="2"][data-state="checked"]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-state="unchecked"]').first().waitFor();
+    },
+  },
+  checkbox: {
+    checked: async (pg) => {
+      const cb = root(pg).getByRole("checkbox").first();
+      await cb.waitFor();
+      await cb.click();
+      await root(pg).locator('[role="checkbox"][data-state="checked"]').first().waitFor();
+    },
+  },
+  switch: {
+    on: async (pg) => {
+      const sw = root(pg).locator('button.rt-SwitchRoot[role="switch"]').first();
+      await sw.waitFor();
+      await sw.click();
+      await root(pg).locator('button.rt-SwitchRoot[data-state="checked"]').first().waitFor();
+    },
+  },
+  toggle: {
+    pressed: async (pg) => {
+      const btn = root(pg).locator('button[aria-pressed]').first();
+      await btn.waitFor();
+      await btn.click();
+      await pg.locator('button[aria-pressed="true"][data-state="on"]').first().waitFor();
+    },
+  },
+  togglegroup: {
+    // Single-mode bare ToggleGroup renders the root as role=group (NOT radiogroup) with
+    // role=radio items. Click the FIRST item ("Left") so exactly one lands data-state=on /
+    // aria-checked=true, away from the defaultValue="b" seed.
+    pressed: async (pg) => {
+      const first = root(pg).locator('[role="radio"]').first();
+      await first.waitFor();
+      await first.click();
+      await root(pg).locator('[role="radio"][data-state="on"][aria-checked="true"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const r = [...document.querySelectorAll('[role="radio"]')];
+        return r.length === 3 && r[0].getAttribute("data-state") === "on"
+          && r[1].getAttribute("data-state") === "off";
+      });
+    },
+  },
+  segmentedcontrol: {
+    selected: async (pg) => {
+      const items = pg.locator(".rt-SegmentedControlRoot button.rt-SegmentedControlItem");
+      await items.nth(1).waitFor();
+      await items.nth(1).click();
+      await pg.locator('button.rt-SegmentedControlItem[data-state="on"]').nth(0).waitFor();
+      await pg.waitForFunction(() => {
+        const btns = [...document.querySelectorAll("button.rt-SegmentedControlItem")];
+        return btns.length === 3 && btns[1].getAttribute("data-state") === "on"
+          && btns[0].getAttribute("data-state") === "off";
+      });
+    },
+  },
+  checkboxgroup: {
+    checked: async (pg) => {
+      const item = pg.locator('.rt-CheckboxGroupItemCheckbox[data-state="unchecked"]').first();
+      await item.waitFor();
+      await item.click();
+      await pg.locator('.rt-CheckboxGroupItemCheckbox[data-state="checked"]').first().waitFor();
+    },
+  },
+  radiocards: {
+    selected: async (pg) => {
+      const items = pg.locator('#root [role="radio"].rt-RadioCardsItem');
+      await items.nth(1).waitFor();
+      await items.nth(1).click();
+      await pg.locator('#root [role="radio"].rt-RadioCardsItem[data-state="checked"][aria-checked="true"][value="2"]').waitFor();
+      await pg.locator('#root [role="radio"].rt-RadioCardsItem[data-state="unchecked"][value="1"]').waitFor();
+    },
+  },
+  checkboxcards: {
+    selected: async (pg) => {
+      const card = pg.locator('label.rt-CheckboxCardsItem').first();
+      await card.waitFor();
+      await card.click();
+      await pg.locator('button.rt-CheckboxCardCheckbox[data-state="checked"]').first().waitFor();
+    },
+  },
+  tabnav: {
+    active: async (pg) => {
+      await pg.locator('a.rt-TabNavLink[data-active]').first().waitFor();
+      await pg.locator('a.rt-TabNavLink[aria-current="page"]').first().waitFor();
+    },
+  },
 };

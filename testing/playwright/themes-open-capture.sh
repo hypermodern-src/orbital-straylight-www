@@ -25,6 +25,20 @@ STATES=(
   "dropdownmenu:item2"
   "contextmenu:open"
   "select:open"
+  # Interactive (stateful, non-overlay) components — STR (13 new oracles).
+  "accordion:open"
+  "collapsible:open"
+  "tabs:tab2"
+  "radiogroup:checked"
+  "checkbox:checked"
+  "switch:on"
+  "toggle:pressed"
+  "togglegroup:pressed"
+  "segmentedcontrol:selected"
+  "checkboxgroup:checked"
+  "radiocards:selected"
+  "checkboxcards:selected"
+  "tabnav:active"
 )
 
 echo "ℵ building golden dist (bun)"
