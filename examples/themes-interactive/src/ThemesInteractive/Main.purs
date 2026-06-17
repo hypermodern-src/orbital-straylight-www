@@ -220,7 +220,7 @@ view c s =
         [ case c of
             "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
             "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
-            "popover" -> HH.slot_ _popover unit Popover.component popoverInput
+            "popover" -> HH.slot_ _popover unit Popover.component (popoverInput s)
             "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
             "hovercard" -> HH.slot_ _hovercard unit HoverCard.component (hoverCardInput s)
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component (dropdownMenuInput s)
@@ -377,18 +377,30 @@ alertDialogStyle =
 -- NOTE: defaultOpen is FALSE (unlike the modal presets) — a floating overlay is
 -- positioned by Popper inside openPopover, which only runs on an actual open
 -- transition (trigger click), so the screenshot driver clicks it open.
-popoverInput :: Popover.Input
-popoverInput = Popover.defaultInput
+-- | ?s=close adds a `Popover.Close` "Comment" submit button (size 1) below the textarea —
+-- | a click closes the popover + restores focus (PopoverClose). Every other `s` renders the
+-- | original textarea-only content (matching the default golden). Append-only: a new branch
+-- | inside this one binding, no existing case line touched.
+popoverInput :: String -> Popover.Input
+popoverInput s = Popover.defaultInput
   { align = Start
   , style = popoverStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "--width: 360px; --max-width: 9999px; " <> popperContentVars "popover"
   , trigger = [ HH.text "Comment" ]
+  , closeLabels = if s == "close" then [ "Comment" ] else []
   , content =
       [ flex [ Gap "3" ]
           [ box [ Class "rt-r-fg-1" ]
-              [ textArea "Write a comment…" [ Height "80px" ] ]
+              ( [ textArea "Write a comment…" [ Height "80px" ] ]
+                  <> ( if s == "close" then
+                        [ flex [ Gap "3", Mt "3", Justify "end" ]
+                            [ button [ Size "1" ] [ HH.text "Comment" ] ]
+                        ]
+                      else []
+                     )
+              )
           ]
       ]
   }

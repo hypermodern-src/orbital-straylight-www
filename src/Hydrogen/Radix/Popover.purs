@@ -34,9 +34,12 @@ module Hydrogen.Radix.Popover
 
 import Prelude
 
+import Data.Array (elem, null)
 import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..))
+import Data.String (toLower, trim) as Str
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -53,13 +56,18 @@ import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria, role)
+import Unsafe.Reference (unsafeRefEq)
+import Web.DOM.Element as Element
 import Web.DOM.Node (Node)
+import Web.DOM.Node as Node
 import Web.Event.Event (Event, EventType(..), preventDefault)
+import Web.Event.Event as Event
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
+import Web.UIEvent.MouseEvent as ME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -89,6 +97,7 @@ type Input =
   , contentStyle :: String      -- the content's CONSTANT style (--width + the var aliases)
   , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
+  , closeLabels :: Array String  -- trimmed button labels in content acting as PopoverClose (close on click)
   }
 
 defaultInput :: Input
@@ -102,6 +111,7 @@ defaultInput =
   , style: defaultStyle
   , trigger: []
   , content: []
+  , closeLabels: []
   , contentStyle: ""
   , triggerAttrs: []
   , portalAttrs: []
@@ -129,6 +139,7 @@ type State =
   , style :: Style
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , closeLabels :: Array String
   , contentStyle :: String
   , triggerAttrs :: Array (Tuple String String)
   , portalAttrs :: Array (Tuple String String)
@@ -146,6 +157,7 @@ data Action
   = Initialize
   | Receive Input
   | TriggerClicked
+  | ContentClicked ME.MouseEvent
   | AfterOpen           -- after the open render flushed: position + portal + focus
   | AfterClose          -- after the closing render flushed: re-adopt + arm exit animation
   | AnimDone            -- the content exit animation finished: finishExit + removeFocusGuards
@@ -192,6 +204,7 @@ initialState input =
   , style: input.style
   , trigger: input.trigger
   , content: input.content
+  , closeLabels: input.closeLabels
   , contentStyle: input.contentStyle
   , triggerAttrs: input.triggerAttrs
   , portalAttrs: input.portalAttrs
@@ -271,6 +284,7 @@ render st =
                 -- aliases (the wrapper positions; the content itself is unpositioned).
                 , HP.style st.contentStyle
                 , HE.onKeyDown ContentKeyDown
+                , HE.onClick ContentClicked
                 ] <> portalData st.portalAttrs
               )
               (map HH.fromPlainHTML st.content)
@@ -292,6 +306,7 @@ handleAction = case _ of
       , style = input.style
       , trigger = input.trigger
       , content = input.content
+      , closeLabels = input.closeLabels
       , contentStyle = input.contentStyle
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
@@ -299,6 +314,16 @@ handleAction = case _ of
   TriggerClicked -> do
     st <- H.get
     if current st.ctrl then closePopover else openPopover
+  -- PopoverClose (popover.tsx): a button inside content calls onOpenChange(false). A click on
+  -- a content <button> whose trimmed text is in `closeLabels` closes the popover. DOM-invisible
+  -- (radix Close is asChild) so the open-state golden stays byte-identical.
+  ContentClicked me -> do
+    st <- H.get
+    when (not (null st.closeLabels)) do
+      mc <- H.getHTMLElementRef contentRef
+      for_ mc \content -> do
+        hit <- liftEffect (closeLabelHit (HTMLElement.toNode content) st.closeLabels (ME.toEvent me))
+        when hit closePopover
   -- after the open render flushed (content ref live): measure+place, then on the NEXT
   -- frame (after the placement modify's re-render) portal the content into body + focus.
   AfterOpen -> do
@@ -450,3 +475,26 @@ handleQuery = case _ of
   GetOpen reply -> do
     st <- H.get
     pure (Just (reply (current st.ctrl)))
+
+-- | Walk from the click target up to (excluding) `content`, returning true if any crossed
+-- | element is a `<button>` whose trimmed text is in `labels` (case-insensitive) — the
+-- | PopoverClose match, reproduced behaviorally without a DOM marker.
+closeLabelHit :: Node -> Array String -> Event -> Effect Boolean
+closeLabelHit content labels ev =
+  case Event.target ev >>= Node.fromEventTarget of
+    Nothing -> pure false
+    Just start -> walk start
+  where
+  wanted = map (Str.toLower <<< Str.trim) labels
+  walk node
+    | unsafeRefEq node content = pure false
+    | otherwise = do
+        isHit <- case Element.fromNode node of
+          Just el | Str.toLower (Element.tagName el) == "button" -> do
+            txt <- Node.textContent node
+            pure (elem (Str.toLower (Str.trim txt)) wanted)
+          _ -> pure false
+        if isHit then pure true
+        else Node.parentNode node >>= case _ of
+          Just p -> walk p
+          Nothing -> pure false

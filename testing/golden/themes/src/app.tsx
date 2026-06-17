@@ -685,20 +685,35 @@ const PAGES: Page[] = [
   {
     id: "popover",
     label: "Popover",
-    node: (
-      <Popover.Root>
-        <Popover.Trigger>
-          <Button variant="soft">Comment</Button>
-        </Popover.Trigger>
-        <Popover.Content width="360px">
-          <Flex gap="3">
-            <Box flexGrow="1">
-              <TextArea placeholder="Write a comment…" style={{ height: 80 }} />
-            </Box>
-          </Flex>
-        </Popover.Content>
-      </Popover.Root>
-    ),
+    interactive: true,
+    // ?s=close → the content adds a Popover.Close "Comment" submit button (popover.tsx Close →
+    // onOpenChange(false)): a click closes the popover + restores focus to the trigger. Every
+    // other path renders the original textarea-only content, so the at-rest/open/closing oracles
+    // (?c=popover, no ?s) are byte-identical — this variant is append-only.
+    node: (() => {
+      const withClose = currentState() === "close";
+      return (
+        <Popover.Root>
+          <Popover.Trigger>
+            <Button variant="soft">Comment</Button>
+          </Popover.Trigger>
+          <Popover.Content width="360px">
+            <Flex gap="3">
+              <Box flexGrow="1">
+                <TextArea placeholder="Write a comment…" style={{ height: 80 }} />
+                {withClose ? (
+                  <Flex gap="3" mt="3" justify="end">
+                    <Popover.Close>
+                      <Button size="1">Comment</Button>
+                    </Popover.Close>
+                  </Flex>
+                ) : null}
+              </Box>
+            </Flex>
+          </Popover.Content>
+        </Popover.Root>
+      );
+    })(),
   },
   {
     id: "tooltip",

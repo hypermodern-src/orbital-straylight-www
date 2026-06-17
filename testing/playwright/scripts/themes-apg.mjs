@@ -1156,6 +1156,17 @@ const CHECKS = [
     await pg.getByRole("alertdialog").getByRole("button", { name: "Revoke access" }).click(); await pg.waitForTimeout(220);
     ok(!(await visible(pg, '[role="alertdialog"]')), "Action did not close the alert dialog");
   }},
+
+  // Popover — PopoverClose (popover.tsx Close → onOpenChange(false)). The ?s=close story adds a
+  // "Comment" submit button wrapped in Popover.Close; clicking it closes the popover + restores
+  // focus to the trigger. The check opens via ?c=popover&s=close (state field), so it runs on
+  // the golden's Close-bearing page AND the port's. Validated on --golden first.
+  { id: "popover", apg: "dialog", state: "close", name: "clicking the PopoverClose button closes the popover + restores focus", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); await pg.waitForTimeout(180);
+    await pg.locator(".rt-PopoverContent").getByRole("button", { name: "Comment" }).click(); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '.rt-PopoverContent')), "PopoverClose did not close the popover");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after PopoverClose");
+  }},
 ];
 
 const b = await chromium.launch();

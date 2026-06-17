@@ -97,6 +97,10 @@ export const STATES = {
   },
   popover: {
     open: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
+    // ?s=close → the content holds a Popover.Close submit button below the textarea. The open
+    // driver is the same (click the trigger); the snapshot pins the extra close-button markup.
+    // Keyed off rt-PopoverContent, so the same driver runs golden + port.
+    close: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
   },
   tooltip: {
     open: async (pg) => { await triggerButton(pg).hover(); await pg.getByRole("tooltip").waitFor(); },

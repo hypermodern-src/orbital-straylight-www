@@ -112,6 +112,8 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  # Wave-C modal depth gaps (STR-330): PopoverClose variant (a Popover.Close submit button).
+  "popover:close"
 )
 
 echo "ℵ building golden dist (bun)"
