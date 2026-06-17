@@ -517,5 +517,23 @@ export const STATES = {
         return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").includes("valid email"));
       });
     },
+    // `?s=multiMessage` forceMatches BOTH messages on first paint → aria-describedby lists TWO
+    // ids, space-joined in registration order (valueMissing then typeMismatch), each resolving
+    // to a mounted span. Proves the multi-id describedby join/ordering. No interaction.
+    multiMessage: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!db) return false;
+        const ids = db.split(" ").filter(Boolean);
+        if (ids.length !== 2) return false;
+        const els = ids.map((id) => document.getElementById(id));
+        if (!els.every(Boolean)) return false;
+        // registration order: first id's span is the valueMissing text, second the typeMismatch.
+        return (els[0].textContent || "").includes("missing")
+          && (els[1].textContent || "").includes("valid email");
+      });
+    },
   },
 };

@@ -1283,16 +1283,19 @@ const PAGES: Page[] = [
       const s = currentState();
       const serverInvalid = s === "serverInvalid";
       const forceMatch = s === "forceMatch";
+      // `?s=multiMessage` forceMatches BOTH messages at once → aria-describedby must list
+      // BOTH ids, space-joined in registration order (the multi-id describedby contract).
+      const multi = s === "multiMessage";
       return (
         <Box>
           <Form.Root>
             <Form.Field name="email" serverInvalid={serverInvalid}>
               <Form.Label>Email</Form.Label>
               <Form.Control type="email" required />
-              <Form.Message match="valueMissing" forceMatch={forceMatch}>
+              <Form.Message match="valueMissing" forceMatch={forceMatch || multi}>
                 This value is missing
               </Form.Message>
-              <Form.Message match="typeMismatch">Provide a valid email</Form.Message>
+              <Form.Message match="typeMismatch" forceMatch={multi}>Provide a valid email</Form.Message>
             </Form.Field>
             <Form.Submit>Submit</Form.Submit>
           </Form.Root>

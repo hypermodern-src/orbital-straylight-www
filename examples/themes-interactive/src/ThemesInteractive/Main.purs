@@ -1124,12 +1124,14 @@ formInput s = Form.defaultInput
           , required = true
           , serverInvalid = s == "serverInvalid"
           , messages =
+              -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
+              -- in registration order (the multi-id describedby contract).
               [ { match: Form.ValueMissing
-                , forceMatch: s == "forceMatch"
+                , forceMatch: s == "forceMatch" || s == "multiMessage"
                 , text: [ HH.text "This value is missing" ]
                 }
               , { match: Form.TypeMismatch
-                , forceMatch: false
+                , forceMatch: s == "multiMessage"
                 , text: [ HH.text "Provide a valid email" ]
                 }
               ]

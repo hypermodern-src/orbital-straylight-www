@@ -67,6 +67,7 @@ STATES=(
   "slider:rest"
   "slider:disabled"
   "otp:alpha"
+  "form:multiMessage"
 )
 
 echo "ℵ building golden dist (bun)"
