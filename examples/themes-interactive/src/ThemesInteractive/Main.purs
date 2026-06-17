@@ -22,6 +22,10 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Hydrogen.Radix.Accordion as Accordion
+import Hydrogen.Radix.AspectRatio as AspectRatio
+import Hydrogen.Radix.Label as Label
+import Hydrogen.Radix.Separator as Separator
+import Hydrogen.Radix.VisuallyHidden as VisuallyHidden
 import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.Checkbox as Checkbox
 import Hydrogen.Radix.Collapsible as Collapsible
@@ -246,6 +250,13 @@ view c s =
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
             "otp" -> box [] [ HH.slot_ _otp unit Otp.component (otpInput s) ]
             "form" -> box [] [ HH.slot_ _form unit Form.component (formInput s) ]
+            -- Wave-B stateless depth oracles: the bare Hydrogen.Radix primitives, driven
+            -- into at-rest variant stories by `s`. DOM (role/aria/data-*/inline-style) is
+            -- the oracle, diffed node-for-node against the bare @radix-ui/react-* golden.
+            "separatorprim" -> separatorPrimPage s
+            "aspectratioprim" -> aspectRatioPrimPage s
+            "visuallyhiddenprim" -> visuallyHiddenPrimPage s
+            "labelprim" -> labelPrimPage
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1256,6 +1267,84 @@ gearIcon =
 
 svgNS :: HH.Namespace
 svgNS = HH.Namespace "http://www.w3.org/2000/svg"
+
+-- ── Wave-B stateless depth-oracle pages (bare Hydrogen.Radix primitives) ──────────
+
+-- | Separator: four at-rest combos keyed off `s` — semantic ⇒ role=separator (+ aria-
+-- | orientation only when vertical); decorative ⇒ role=none. data-orientation always.
+separatorPrimPage :: forall w i. String -> HH.HTML w i
+separatorPrimPage s =
+  Separator.separator_ orientation decorative
+  where
+  orientation = if s == "vsem" || s == "vdec" then Vertical else Horizontal
+  decorative = s == "hdec" || s == "vdec"
+
+-- | AspectRatio: ratio variants + the `styled` story (caller style merged before the
+-- | inset override, id/aria/data-* + class on the INNER div).
+aspectRatioPrimPage :: forall w i. String -> HH.HTML w i
+aspectRatioPrimPage s
+  | s == "styled" =
+      AspectRatio.aspectRatio
+        ( AspectRatio.defaultInput
+            { ratio = 16.0 / 9.0
+            , class_ = cn "my-inner"
+            , style = "background-color: red; "
+            , attrs =
+                [ HP.id "ar-inner"
+                , HP.attr (HH.AttrName "aria-label") "cover"
+                , HP.attr (HH.AttrName "data-foo") "bar"
+                ]
+            }
+        )
+        [ HH.span_ [ HH.text "X" ] ]
+  | otherwise =
+      AspectRatio.aspectRatio_ ratio [ HH.span_ [ HH.text "X" ] ]
+      where
+      ratio = if s == "wide" then 16.0 / 9.0 else if s == "tall" then 1.0 / 2.0 else 1.0
+
+-- | VisuallyHidden: plain (canonical clip style + text), props (id/aria-*/data-*
+-- | passthrough), stylemerge (caller style overrides one default key in place + appends).
+visuallyHiddenPrimPage :: forall w i. String -> HH.HTML w i
+visuallyHiddenPrimPage s
+  | s == "props" =
+      VisuallyHidden.visuallyHiddenWith
+        { class_: mempty
+        , style: []
+        , attrs:
+            [ HP.id "vh-1"
+            , HP.attr (HH.AttrName "aria-live") "polite"
+            , HP.attr (HH.AttrName "data-state") "x"
+            ]
+        }
+        [ HH.text "required" ]
+  | s == "stylemerge" =
+      VisuallyHidden.visuallyHiddenWith
+        { class_: mempty
+        , style: [ Tuple "position" "fixed", Tuple "color" "red" ]
+        , attrs: []
+        }
+        [ HH.text "required" ]
+  | otherwise =
+      VisuallyHidden.visuallyHidden_ [ HH.text "required" ]
+
+-- | Label: the for-association attribute + arbitrary prop passthrough (id/data-*/aria-
+-- | describedby/title) on the <label>, with the associated <input id="email"> sibling.
+labelPrimPage :: forall w i. HH.HTML w i
+labelPrimPage =
+  HH.div_
+    [ Label.labelWith
+        { for: "email"
+        , class_: mempty
+        , attrs:
+            [ HP.id "email-label"
+            , HP.attr (HH.AttrName "data-foo") "bar"
+            , HP.attr (HH.AttrName "aria-describedby") "hint"
+            , HP.attr (HH.AttrName "title") "Your email"
+            ]
+        }
+        [ HH.text "Email" ]
+    , HH.input [ HP.id "email" ]
+    ]
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────
 queryParam :: String -> Effect String
