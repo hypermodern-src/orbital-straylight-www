@@ -108,6 +108,7 @@ STATES=(
   "aspectratioprim:wide"
   "aspectratioprim:tall"
   "aspectratioprim:styled"
+  "aspectratioprim:verywide"
   "visuallyhiddenprim:plain"
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"

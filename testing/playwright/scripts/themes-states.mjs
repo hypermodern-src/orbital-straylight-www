@@ -768,6 +768,9 @@ export const STATES = {
     wide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
     tall: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
     styled: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    // Wave-C edge ratio: 21/9 → padding-bottom:42.857142857142854% (pins the non-terminating
+    // decimal serialization — exercises the 100/ratio number formatting at a non-round ratio).
+    verywide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
   },
   visuallyhiddenprim: {
     // STATELESS: wait for the sr-only span (clip-based hiding ⇒ overflow:hidden in inline style).

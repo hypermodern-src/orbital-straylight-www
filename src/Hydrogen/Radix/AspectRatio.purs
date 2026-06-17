@@ -23,10 +23,27 @@ module Hydrogen.Radix.AspectRatio
 import Prelude
 
 import DOM.HTML.Indexed (HTMLdiv)
-import Data.Number.Format (toString)
+import Data.Array (dropEnd, length, takeEnd)
+import Data.Number.Format (precision, toStringWith)
+import Data.String (Pattern(..), contains) as Str
+import Data.String.CodeUnits (fromCharArray, toCharArray)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Foundation.Style (ClassNames, classes)
+
+-- | Serialize the padding-bottom percentage the way the BROWSER'S CSSOM does: a CSS
+-- | `<percentage>` is rounded to at most 6 significant figures, with trailing zeros (and a
+-- | bare trailing dot) dropped. React sets `paddingBottom` via the style PROPERTY, so the
+-- | committed golden carries the browser-rounded form (e.g. 100/(21/9) → "42.8571", not the
+-- | full-precision "42.857142857142854"). `precision 6` is JS `toPrecision(6)`; we then trim.
+cssPercent :: Number -> String
+cssPercent n =
+  let s = toStringWith (precision 6) n
+  in if Str.contains (Str.Pattern ".") s then fromCharArray (trimDot (dropZeros (toCharArray s))) else s
+  where
+  -- drop trailing '0's, then a single trailing '.' if it became bare (e.g. "200." → "200").
+  dropZeros cs = if length cs > 0 && takeEnd 1 cs == [ '0' ] then dropZeros (dropEnd 1 cs) else cs
+  trimDot cs = if takeEnd 1 cs == [ '.' ] then dropEnd 1 cs else cs
 
 -- | The inner-div prop surface. `ratio` is width÷height; `class_` / `style` / `attrs`
 -- | all land on the INNER (absolutely-positioned) div, mirroring upstream's `{...props}`
@@ -50,7 +67,7 @@ aspectRatio
 aspectRatio o children =
   HH.div
     [ HP.attr (HH.AttrName "data-radix-aspect-ratio-wrapper") ""
-    , HP.style ("position: relative; width: 100%; padding-bottom: " <> toString (100.0 / o.ratio) <> "%;")
+    , HP.style ("position: relative; width: 100%; padding-bottom: " <> cssPercent (100.0 / o.ratio) <> "%;")
     ]
     [ HH.div
         ( [ classes o.class_

@@ -1450,7 +1450,7 @@ aspectRatioPrimPage s
   | otherwise =
       AspectRatio.aspectRatio_ ratio [ HH.span_ [ HH.text "X" ] ]
       where
-      ratio = if s == "wide" then 16.0 / 9.0 else if s == "tall" then 1.0 / 2.0 else 1.0
+      ratio = if s == "wide" then 16.0 / 9.0 else if s == "tall" then 1.0 / 2.0 else if s == "verywide" then 21.0 / 9.0 else 1.0
 
 -- | VisuallyHidden: plain (canonical clip style + text), props (id/aria-*/data-*
 -- | passthrough), stylemerge (caller style overrides one default key in place + appends).

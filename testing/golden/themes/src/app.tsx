@@ -1529,7 +1529,7 @@ const PAGES: Page[] = [
     // data-radix-aspect-ratio-wrapper="" and the relative/padding-bottom box geometry.
     node: (() => {
       const s = currentState();
-      const ratio = s === "wide" ? 16 / 9 : s === "tall" ? 1 / 2 : undefined;
+      const ratio = s === "wide" ? 16 / 9 : s === "tall" ? 1 / 2 : s === "verywide" ? 21 / 9 : undefined;
       if (s === "styled") {
         return (
           <AspectRatioPrim.Root
