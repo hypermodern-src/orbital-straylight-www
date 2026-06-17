@@ -648,6 +648,21 @@ const CHECKS = [
   // → last; a printable char fills the slot and auto-advances focus. Roving slots are reachable once
   // populated, so drive the arrow checks against the FILLED story (defaultValue="123") and the
   // auto-advance check against the EMPTY story. Selector is the upstream data-radix-otp-input hook.
+  // Password Toggle Field — the toggle is a native <button type=button>, so Space and Enter
+  // activate it (flipping the password↔text visibility). APG button activation pattern.
+  { id: "passwordtoggle", state: "hidden", apg: "button", name: "Space and Enter on the toggle flip the input type (password↔text)", run: async (pg) => {
+    const btn = '#root button';
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "input should start as type=password");
+    await focusFirst(pg, btn);
+    ok(await activeIs(pg, btn), "could not focus the toggle button");
+    await press(pg, "Space");
+    ok((await attrOf(pg, inp, 0, "type")) === "text", "Space did not reveal the password (type→text)");
+    await press(pg, "Enter");
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "Enter did not re-hide the password (type→password)");
+  }},
+
   { id: "otp", state: "filled", apg: "roving-tabindex", name: "ArrowRight/ArrowLeft rove between slots; the tab stop migrates", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
