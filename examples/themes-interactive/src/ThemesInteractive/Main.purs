@@ -31,6 +31,7 @@ import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
+import Hydrogen.Radix.OneTimePasswordField as Otp
 import Hydrogen.Radix.PasswordToggleField as PasswordToggleField
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.RadioGroup as RadioGroup
@@ -81,6 +82,7 @@ type Slots =
   , scrollarea :: ScrollArea.Slot Unit
   , passwordtoggle :: PasswordToggleField.Slot Unit
   , toolbar :: Toolbar.Slot Unit
+  , otp :: Otp.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -155,6 +157,9 @@ _passwordtoggle = Proxy
 _toolbar :: Proxy "toolbar"
 _toolbar = Proxy
 
+_otp :: Proxy "otp"
+_otp = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -210,6 +215,7 @@ view c s =
             "tabnav" -> tabNavPage
             "passwordtoggle" -> passwordTogglePage
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
+            "otp" -> box [] [ HH.slot_ _otp unit Otp.component (otpInput s) ]
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -944,6 +950,18 @@ toolbarInput s = Toolbar.defaultInput
       , toggleGroup: cn ""
       , toggleItem: cn ""
       }
+  }
+
+-- | otp — the bare @radix-ui OneTimePasswordField primitive (Radix Themes ships none,
+-- | so NO rt-* classes; the golden is the unstyled primitive). A 3-slot numeric field
+-- | wrapped in a `<Box>` (inner rt-Box). The default story seeds defaultValue="123"
+-- | (filled); `?s=empty`/`?s=typed` render empty (the driver types "45" for typed).
+otpInput :: String -> Otp.Input
+otpInput s = Otp.defaultInput
+  { length = 3
+  , defaultValue = if s == "empty" || s == "typed" then "" else "123"
+  , validation = Otp.Numeric
+  , style = { root: cn "", input: cn "" }
   }
 
 -- | tabnav — themes-only AND at-rest (no Halogen component): rendered directly inline
