@@ -141,6 +141,18 @@ const CHECKS = [
     ok(!(await visible(pg, '[role="menu"]')), "Escape did not close the menu");
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
   }},
+  // Disabled item is SKIPPED by roving navigation (menu.tsx:540 filter(!disabled), :720
+  // focusable={!disabled}); it renders data-disabled + tabindex=-1 but is never highlighted
+  // and ArrowDown jumps OVER it to the next enabled item. (?s=disabled disables Duplicate.)
+  { id: "dropdownmenu", state: "disabled", apg: "menu", name: "ArrowDown SKIPS a disabled item to the next enabled one", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "Edit");
+    // the disabled item carries data-disabled and is NOT in the roving order (tabindex -1).
+    ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menuitem"]')].find((x) => (x.textContent || "").startsWith("Duplicate")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
+    // ArrowDown from Edit must SKIP the disabled Duplicate and land on Archive.
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Archive");
+  }},
 
   // Menubar — https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
   // The trigger bar is a horizontal RovingFocus of role=menuitem buttons; each opens a

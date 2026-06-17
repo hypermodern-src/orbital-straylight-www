@@ -726,26 +726,32 @@ const PAGES: Page[] = [
   {
     id: "dropdownmenu",
     label: "Dropdown Menu",
-    node: (
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <Button variant="soft">
-            Options
-            <DropdownMenu.TriggerIcon />
-          </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          <DropdownMenu.Item shortcut="⌘ E">Edit</DropdownMenu.Item>
-          <DropdownMenu.Item shortcut="⌘ D">Duplicate</DropdownMenu.Item>
-          <DropdownMenu.Separator />
-          <DropdownMenu.Item shortcut="⌘ N">Archive</DropdownMenu.Item>
-          <DropdownMenu.Separator />
-          <DropdownMenu.Item shortcut="⌘ ⌫" color="red">
-            Delete
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
-    ),
+    // `?s=disabled` disables the SECOND item (Duplicate) so the APG disabled-skip check
+    // proves roving navigation + click skip it (menu.tsx:540 filter(!disabled), :720
+    // focusable={!disabled}, :639 select guard). Every other path renders all enabled.
+    node: (() => {
+      const dupDisabled = currentState() === "disabled";
+      return (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="soft">
+              Options
+              <DropdownMenu.TriggerIcon />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <DropdownMenu.Item shortcut="⌘ E">Edit</DropdownMenu.Item>
+            <DropdownMenu.Item shortcut="⌘ D" disabled={dupDisabled}>Duplicate</DropdownMenu.Item>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Item shortcut="⌘ N">Archive</DropdownMenu.Item>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Item shortcut="⌘ ⌫" color="red">
+              Delete
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      );
+    })(),
   },
   {
     id: "contextmenu",

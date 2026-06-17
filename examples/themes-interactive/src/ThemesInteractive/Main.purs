@@ -217,7 +217,7 @@ view c s =
             "popover" -> HH.slot_ _popover unit Popover.component popoverInput
             "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
             "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
-            "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
+            "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component (dropdownMenuInput s)
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
             "menubar" -> HH.slot_ _menubar unit Menubar.component menubarInput
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
@@ -458,32 +458,34 @@ hoverCardStyle =
 -- | The themed DropdownMenu: a soft "Options" trigger opening a solid menu panel with
 -- | items, ⌘-shortcuts, separators, and a red Delete (the upstream demo). Menus position
 -- | via Popper, so defaultOpen stays false and the driver clicks open.
-dropdownMenuInput :: DropdownMenu.Input
-dropdownMenuInput = DropdownMenu.defaultInput
+dropdownMenuInput :: String -> DropdownMenu.Input
+dropdownMenuInput s = DropdownMenu.defaultInput
   { style = menuStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
   , trigger = [ HH.text "Options", chevron ]
   , entries =
-      [ menuRow "edit" "Edit" "⌘ E" ""
-      , menuRow "duplicate" "Duplicate" "⌘ D" ""
+      -- `?s=disabled` disables the SECOND item (Duplicate) so the APG disabled-skip
+      -- check proves roving navigation skips OVER it to Archive.
+      [ menuRow "edit" "Edit" "⌘ E" "" false
+      , menuRow "duplicate" "Duplicate" "⌘ D" "" (s == "disabled")
       , DropdownMenu.menuSeparator
-      , menuRow "archive" "Archive" "⌘ N" ""
+      , menuRow "archive" "Archive" "⌘ N" "" false
       , DropdownMenu.menuSeparator
-      , menuRow "delete" "Delete" "⌘ ⌫" "red"
+      , menuRow "delete" "Delete" "⌘ ⌫" "red" false
       ]
   }
 
--- | One themed menu item: label + right-aligned shortcut + optional accent.
-menuRow :: String -> String -> String -> String -> DropdownMenu.MenuEntry
-menuRow value label shortcut accent =
+-- | One themed menu item: label + right-aligned shortcut + optional accent + disabled.
+menuRow :: String -> String -> String -> String -> Boolean -> DropdownMenu.MenuEntry
+menuRow value label shortcut accent disabled =
   DropdownMenu.MenuItemEntry
     { value
     , label: [ HH.text label ]
     , shortcut: [ HH.text shortcut ]
     , accent
-    , disabled: false
+    , disabled
     }
 
 -- | Radix Themes' DropdownMenu class vocabulary (from the open-state golden).

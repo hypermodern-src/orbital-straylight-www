@@ -103,6 +103,20 @@ export const STATES = {
       await pg.keyboard.press("ArrowDown");
       await pg.keyboard.press("ArrowDown");
     },
+    // ?s=disabled disables Duplicate. Open via ArrowDown (highlights Edit), then ArrowDown
+    // SKIPS the disabled Duplicate to Archive — the snapshot pins the disabled item's
+    // data-disabled/aria-disabled + tabindex=-1 and the roving tabindex distribution.
+    disabled: async (pg) => {
+      await triggerButton(pg).focus();
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitem"][data-highlighted]').first().waitFor();
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Archive");
+      });
+    },
   },
   contextmenu: {
     open: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),

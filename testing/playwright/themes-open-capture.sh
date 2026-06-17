@@ -23,6 +23,7 @@ STATES=(
   "hovercard:open"
   "dropdownmenu:open"
   "dropdownmenu:item2"
+  "dropdownmenu:disabled"
   "contextmenu:open"
   "select:open"
   # Interactive (stateful, non-overlay) components — STR (13 new oracles).
