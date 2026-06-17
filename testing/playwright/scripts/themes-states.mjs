@@ -799,6 +799,34 @@ export const STATES = {
           && (els[1].textContent || "").includes("valid email");
       });
     },
+    // Event-gated data-valid: fill a VALID email into the required Control + fire native `change`
+    // → validity.valid===true → the field/label/control stamp data-valid="true" (radix
+    // getValidAttribute). Proves the validated-and-valid branch. Wait until data-valid resolves.
+    validValid: async (pg) => {
+      const email = root(pg).locator('input[name="email"]');
+      await email.waitFor();
+      await email.fill("a@b.com");
+      // dispatch a real `change` (blur-equivalent) so the field records validity===valid.
+      await pg.evaluate(() => {
+        const i = document.querySelector('input[name="email"]');
+        i.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i?.getAttribute("data-valid") === "true" && !i.hasAttribute("data-invalid");
+      });
+    },
+    // `?s=defaultMessage` forceMatches a childless valueMissing Message → the span shows the
+    // default built-in text "This value is missing". No interaction; first paint is the oracle.
+    defaultMessage: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
+        return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").trim() === "This value is missing");
+      });
+    },
   },
   // ── Wave-B stateless depth oracles (bare primitives) ─────────────────────────────
   separatorprim: {

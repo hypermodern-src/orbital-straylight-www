@@ -1276,6 +1276,11 @@ formInput s = Form.defaultInput
           , required = true
           , serverInvalid = s == "serverInvalid"
           , messages =
+              -- `?s=defaultMessage` forceMatches a single valueMissing Message with EMPTY text →
+              -- the default built-in message text fallback (radix DEFAULT_BUILT_IN_MESSAGES).
+              if s == "defaultMessage" then
+                [ { match: Form.ValueMissing, forceMatch: true, text: [] } ]
+              else
               -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
               -- in registration order (the multi-id describedby contract).
               [ { match: Form.ValueMissing

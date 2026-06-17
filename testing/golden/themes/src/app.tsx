@@ -1538,6 +1538,22 @@ const PAGES: Page[] = [
       // `?s=multiMessage` forceMatches BOTH messages at once → aria-describedby must list
       // BOTH ids, space-joined in registration order (the multi-id describedby contract).
       const multi = s === "multiMessage";
+      // `?s=defaultMessage` forceMatches a Message with NO children → renders the
+      // DEFAULT_BUILT_IN_MESSAGES[valueMissing] fallback text.
+      if (s === "defaultMessage") {
+        return (
+          <Box>
+            <Form.Root>
+              <Form.Field name="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" required />
+                <Form.Message match="valueMissing" forceMatch />
+              </Form.Field>
+              <Form.Submit>Submit</Form.Submit>
+            </Form.Root>
+          </Box>
+        );
+      }
       return (
         <Box>
           <Form.Root>

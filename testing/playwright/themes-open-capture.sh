@@ -119,6 +119,8 @@ STATES=(
   "otp:readonly"
   "passwordtoggle:autolabel"
   "passwordtoggle:disabled"
+  "form:validValid"
+  "form:defaultMessage"
 )
 
 echo "ℵ building golden dist (bun)"

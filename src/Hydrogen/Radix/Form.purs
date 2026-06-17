@@ -176,6 +176,7 @@ type State =
   , controlIds :: Map Int String
   , msgIds :: Map Int (Array String)       -- one id per message of field i
   , failed :: Map Int (Array Matcher)      -- currently-failing matchers per field
+  , validPassed :: Map Int Boolean         -- field i has run validation AND passed (validity.valid===true)
   }
 
 data Action
@@ -183,6 +184,7 @@ data Action
   | Receive Input
   | ControlInvalid Int
   | ControlInput Int          -- native input clears the field's failed set (radix re-validates)
+  | ControlChange Int         -- native `change` re-reads validity (radix's revalidate trigger)
   | FormSubmit Event.Event
 
 controlRef :: Int -> H.RefLabel
@@ -209,6 +211,7 @@ initialState input =
   , controlIds: Map.empty
   , msgIds: Map.empty
   , failed: Map.empty
+  , validPassed: Map.empty
   }
 
 -- | Failed matchers for field index `i`.
@@ -231,11 +234,26 @@ visibleMessages st i f =
       ( mapWithIndex
           ( \j m ->
               if m.forceMatch || (m.match `elem` fails)
-                then { id: fromMaybe "" (ids !! j), text: m.text }
+                -- a Message with NO children falls back to the default built-in message text
+                -- for its matcher (radix DEFAULT_BUILT_IN_MESSAGES).
+                then { id: fromMaybe "" (ids !! j), text: if null m.text then [ HH.text (defaultBuiltInMessage m.match) ] else m.text }
                 else { id: "", text: [] }
           )
           f.messages
       )
+
+-- | radix DEFAULT_BUILT_IN_MESSAGES — the fallback text a Message with no children renders.
+defaultBuiltInMessage :: Matcher -> String
+defaultBuiltInMessage = case _ of
+  ValueMissing -> "This value is missing"
+  TypeMismatch -> "This value does not match the required type"
+  PatternMismatch -> "This value does not match the required pattern"
+  TooLong -> "This value is too long"
+  TooShort -> "This value is too short"
+  RangeOverflow -> "This value is too large"
+  RangeUnderflow -> "This value is too small"
+  StepMismatch -> "This value does not match the required step"
+  BadInput -> "This value is not valid"
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
@@ -249,18 +267,23 @@ renderField :: forall m. State -> Int -> Field -> H.ComponentHTML Action () m
 renderField st i f =
   let
     invalid = fieldInvalid st i f
+    -- data-valid="true" iff validation has RUN and passed (validity.valid===true) AND the field
+    -- is not serverInvalid (radix getValidAttribute). Absent until validation runs.
+    valid = fromMaybe false (Map.lookup i st.validPassed) && not f.serverInvalid
     cid = fromMaybe "" (Map.lookup i st.controlIds)
     msgs = visibleMessages st i f
     describedBy = joinWith " " (map _.id msgs)
     invalidAttr :: forall r. Array (HH.IProp r Action)
     invalidAttr = if invalid then [ dataAttr "invalid" "true" ] else []
+    validAttr :: forall r. Array (HH.IProp r Action)
+    validAttr = if valid then [ dataAttr "valid" "true" ] else []
   in
     HH.div
-      ( [ classes st.style.field ] <> invalidAttr )
+      ( [ classes st.style.field ] <> validAttr <> invalidAttr )
       ( [ HH.label
             ( [ classes st.style.label
               , HP.attr (HH.AttrName "for") cid
-              ] <> invalidAttr
+              ] <> validAttr <> invalidAttr
             )
             (map HH.fromPlainHTML f.label)
         , HH.input
@@ -271,8 +294,10 @@ renderField st i f =
               , HP.attr (HH.AttrName "title") ""
               , classes st.style.control
               , HE.onInput \_ -> ControlInput i
+              , HE.onChange \_ -> ControlChange i
               ]
                 <> (if f.required then [ HP.attr (HH.AttrName "required") "" ] else [])
+                <> validAttr
                 <> invalidAttr
                 <> (if f.serverInvalid then [ aria "invalid" "true" ] else [])
                 <> (if describedBy /= "" then [ aria "describedby" describedBy ] else [])
@@ -321,6 +346,9 @@ handleAction = case _ of
       for_ mel \el -> do
         let target = HTMLElement.toEventTarget el
         void $ H.subscribe (eventListener (EventType "invalid") target (\_ -> Just (ControlInvalid i)))
+        -- radix revalidates on the native `change` (NOT input): re-read validity so an
+        -- invalid→valid recovery stamps data-valid and clears the failed set.
+        void $ H.subscribe (eventListener (EventType "change") target (\_ -> Just (ControlChange i)))
   Receive input ->
     H.modify_ \st -> st
       { fields = input.fields
@@ -342,10 +370,37 @@ handleAction = case _ of
           Just input -> liftEffect do
             vs <- HTMLInputElement.validity input
             Array.filterA (\m -> matcherFails vs m) (map _.match f.messages)
-    H.modify_ _ { failed = Map.insert i fails st.failed }
+    -- a failed control is no longer "validated valid".
+    H.modify_ _ { failed = Map.insert i fails st.failed, validPassed = Map.delete i st.validPassed }
   ControlInput i ->
-    -- typing clears the field's failed set (radix re-validates on input).
-    H.modify_ \st -> st { failed = Map.delete i st.failed }
+    -- typing clears the field's failed set (radix re-validates on input). It does NOT stamp
+    -- data-valid — that is the `change`-driven path (validity recorded on change, not input).
+    H.modify_ \st -> st { failed = Map.delete i st.failed, validPassed = Map.delete i st.validPassed }
+  ControlChange i -> do
+    -- the native `change` fired — re-read the control's LIVE ValidityState (radix
+    -- updateControlValidity). If valid, record validPassed (→ data-valid) + clear failed;
+    -- if invalid, recompute the failed matcher set off the live flags.
+    st <- H.get
+    case st.fields !! i of
+      Nothing -> pure unit
+      Just f -> do
+        mel <- H.getHTMLElementRef (controlRef i)
+        case mel >>= HTMLInputElement.fromHTMLElement of
+          Nothing -> pure unit
+          Just input -> do
+            vs <- liftEffect (HTMLInputElement.validity input)
+            isValid <- liftEffect (ValidityState.valid vs)
+            if isValid then
+              H.modify_ \s -> s
+                { validPassed = Map.insert i true s.validPassed
+                , failed = Map.delete i s.failed
+                }
+            else do
+              fails <- liftEffect (Array.filterA (\m -> matcherFails vs m) (map _.match f.messages))
+              H.modify_ \s -> s
+                { validPassed = Map.delete i s.validPassed
+                , failed = Map.insert i fails s.failed
+                }
   FormSubmit ev -> do
     -- prevent the native navigation; if all controls are valid, raise Submitted. The
     -- native `invalid` events (bound above) fire BEFORE submit for invalid controls.
