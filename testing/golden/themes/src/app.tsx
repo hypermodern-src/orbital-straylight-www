@@ -706,22 +706,36 @@ const PAGES: Page[] = [
   {
     id: "hovercard",
     label: "Hover Card",
-    node: (
-      <Text>
-        Follow{" "}
-        <HoverCard.Root>
-          <HoverCard.Trigger>
-            <Link href="#">@radix_ui</Link>
-          </HoverCard.Trigger>
-          <HoverCard.Content maxWidth="300px">
-            <Text as="div" size="1" color="gray">
-              The design system for building modern web applications.
-            </Text>
-          </HoverCard.Content>
-        </HoverCard.Root>{" "}
-        for updates.
-      </Text>
-    ),
+    interactive: true,
+    // ?s=richcontent → the card content holds a tabbable <a>; upstream's open effect walks
+    // getTabbableNodes(content) and sets tabindex=-1 on each (a hover-card is a PREVIEW, not a
+    // focus target). Every other path renders the plain prose content (the original story), so
+    // the open/rest oracles are unchanged.
+    node: (() => {
+      const rich = currentState() === "richcontent";
+      return (
+        <Text>
+          Follow{" "}
+          <HoverCard.Root>
+            <HoverCard.Trigger>
+              <Link href="#">@radix_ui</Link>
+            </HoverCard.Trigger>
+            <HoverCard.Content maxWidth="300px">
+              {rich ? (
+                <Text as="div" size="1" color="gray">
+                  See the <Link href="https://radix-ui.com">docs</Link> for details.
+                </Text>
+              ) : (
+                <Text as="div" size="1" color="gray">
+                  The design system for building modern web applications.
+                </Text>
+              )}
+            </HoverCard.Content>
+          </HoverCard.Root>{" "}
+          for updates.
+        </Text>
+      );
+    })(),
   },
   {
     id: "dropdownmenu",
@@ -964,9 +978,16 @@ const PAGES: Page[] = [
       // Render OPEN only for the explicit `open` capture state (defaultValue="one" → open at
       // first paint, no timer). Every other path (the `closed`/`rest` capture, the index
       // gallery) renders at rest, so the a11y `rest` baseline is the genuine closed nav.
-      const open = currentState() === "open";
+      const open = currentState() === "open" || currentState() === "clicktoggle";
+      // Wave-B depth: ?s=vertical → an OPEN vertical-orientation nav (data-orientation=vertical,
+      // the Indicator measures top/height/translateY instead of left/width/translateX). ?s=open
+      // and ?s=vertical both open Item One at first paint via defaultValue.
+      const vertical = currentState() === "vertical";
       return (
-        <NavigationMenu.Root {...(open ? { defaultValue: "one" } : {})}>
+        <NavigationMenu.Root
+          {...(open || vertical ? { defaultValue: "one" } : {})}
+          {...(vertical ? { orientation: "vertical" as const } : {})}
+        >
           <NavigationMenu.List>
             <NavigationMenu.Item value="one">
               <NavigationMenu.Trigger>Item One</NavigationMenu.Trigger>

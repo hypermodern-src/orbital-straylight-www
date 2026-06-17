@@ -216,7 +216,7 @@ view c s =
             "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
             "popover" -> HH.slot_ _popover unit Popover.component popoverInput
             "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
-            "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
+            "hovercard" -> HH.slot_ _hovercard unit HoverCard.component (hoverCardInput s)
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component (dropdownMenuInput s)
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component (contextMenuInput s)
             "menubar" -> HH.slot_ _menubar unit Menubar.component (menubarInput s)
@@ -432,8 +432,8 @@ tooltipStyle =
 
 -- | The themed HoverCard: an inline link trigger (@radix_ui) that, on hover, reveals a
 -- | small gray-text card. bottom-start, 300px max-width (the upstream demo).
-hoverCardInput :: HoverCard.Input
-hoverCardInput = HoverCard.defaultInput
+hoverCardInput :: String -> HoverCard.Input
+hoverCardInput s = HoverCard.defaultInput
   { align = Start
   , style = hoverCardStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
@@ -443,10 +443,25 @@ hoverCardInput = HoverCard.defaultInput
   , proseBefore = [ HH.text "Follow " ]
   , proseAfter = [ HH.text " for updates." ]
   , trigger = [ HH.text "@radix_ui" ]
+  -- ?s=richcontent → a card holding a tabbable <a> (which the open effect must remove from the
+  -- tab order, tabindex=-1). Any other path renders the plain prose (the canonical open oracle).
   , content =
-      [ textAs "div" [ Size "1", Color "gray" ]
-          [ HH.text "The design system for building modern web applications." ]
-      ]
+      if s == "richcontent" then
+        [ textAs "div" [ Size "1", Color "gray" ]
+            [ HH.text "See the "
+            , HH.a
+                [ HP.href "https://radix-ui.com"
+                , HP.class_ (HH.ClassName "rt-Link rt-Text rt-reset rt-underline-auto")
+                , HP.attr (HH.AttrName "data-accent-color") ""
+                ]
+                [ HH.text "docs" ]
+            , HH.text " for details."
+            ]
+        ]
+      else
+        [ textAs "div" [ Size "1", Color "gray" ]
+            [ HH.text "The design system for building modern web applications." ]
+        ]
   }
 
 hoverCardStyle :: HoverCard.Style
@@ -595,7 +610,8 @@ navigationMenuInput s = NavigationMenu.defaultInput
   -- OPEN at first paint (defaultValue="one") ONLY for the explicit `open` capture (?s=open);
   -- every other path (the `closed`/`rest` capture, the index) renders at rest — mirroring the
   -- golden story's `currentState() === "open"` switch (so the a11y `rest` baseline matches too).
-  { defaultValue = if s == "open" then "one" else ""
+  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" then "one" else ""
+  , orientation = if s == "vertical" then Vertical else Horizontal
   , items =
       [ { value: "one"
         , trigger: [ HH.text "Item One" ]

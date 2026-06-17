@@ -66,6 +66,11 @@ STATES=(
   "form:forceMatch"
   "form:valueMissing"
   "form:typeMismatch"
+  # ── Wave-B nav-group depth oracles (STR-330) ─────────────────────────────────
+  "tooltip:focusopen"
+  "hovercard:richcontent"
+  "navigationmenu:vertical"
+  "navigationmenu:clicktoggle"
 )
 
 echo "ℵ building golden dist (bun)"

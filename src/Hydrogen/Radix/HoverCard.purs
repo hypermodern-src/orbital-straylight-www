@@ -59,11 +59,13 @@ import Halogen.Query.Event (eventListener)
 import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
+import Hydrogen.Radix.Behavior.FocusScope (tabbables)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName)
+import Web.DOM.Element (setAttribute) as Element
 import Web.Event.Event (EventType(..))
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -321,6 +323,10 @@ handleAction = case _ of
   -- focus-guard sentinels (HoverCard, like popover, brackets the body). NO focus move.
   AfterOpen -> do
     reposition
+    -- a hover-card is a PREVIEW, not a focus target: remove every tabbable content descendant
+    -- from the tab order (upstream getTabbableNodes → setAttribute tabindex -1). The trigger
+    -- itself stays focusable (it's outside the content).
+    removeContentFromTabOrder
     finalize true
   -- runs on the frame after the CLOSING render flushed. The wrapper is still mounted (Presence
   -- Closing) with the content at data-state=closed; re-adopt it into body (Halogen re-parents
@@ -381,6 +387,17 @@ scheduleAfterOpen = do
   sid <- H.subscribe (AfterOpen <$ emitter)
   liftEffect (Portal.afterFrame (HS.notify listener unit))
   pure sid
+
+-- | Remove every tabbable descendant of the content from the tab order (tabindex=-1), so the
+-- | card's links/buttons are not reachable by Tab — a hover-card previews, it never owns focus.
+-- | Mirrors upstream's getTabbableNodes(content).forEach(setAttribute 'tabindex' '-1').
+removeContentFromTabOrder :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+removeContentFromTabOrder = do
+  mcontent <- H.getHTMLElementRef contentRef
+  for_ mcontent \content -> do
+    ts <- liftEffect (tabbables content)
+    for_ ts \el ->
+      liftEffect (Element.setAttribute "tabindex" "-1" (HTMLElement.toElement el))
 
 -- | Adopt the WRAPPER into body. HoverCard does not trap or move focus and (like tooltip)
 -- | radix renders NO focus-guard sentinels around it.

@@ -135,12 +135,14 @@ type State =
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentId :: String         -- generated on Initialize; trigger aria-describedby → content id
+  , wasDelayed :: Boolean       -- the open path: hover (delayed-open) vs focus (instant-open)
   }
 
 data Action
   = Initialize
   | Receive Input
-  | Show
+  | Show         -- pointer/hover open → delayed-open stateAttribute
+  | FocusShow    -- focus open → instant-open stateAttribute (wasOpenDelayedRef=false)
   | Hide
   | AfterOpen           -- after the open render flushed: position + portal
   | Reposition
@@ -198,12 +200,15 @@ initialState input =
   , subs: []
   , postSub: Nothing
   , contentId: ""
+  , wasDelayed: false
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   let
     open = current st.ctrl
+    -- the tri-state stateAttribute: instant-open (focus / skip-window) vs delayed-open (hover).
+    stateAttr = if open then (if st.wasDelayed then "delayed-open" else "instant-open") else "closed"
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
@@ -212,12 +217,12 @@ render st =
           -- (radix Tooltip shows after a delay), matching the golden.
           ( [ HP.ref triggerRef
             , classes st.style.trigger
-            , dataState (if open then "delayed-open" else "closed")
+            , dataState stateAttr
             , dataAttr "radix-popper-side" (sideName st.placedSide)
             , dataAttr "radix-popper-align" (alignName st.placedAlign)
             , HE.onMouseEnter \_ -> Show
             , HE.onMouseLeave \_ -> Hide
-            , HE.onFocus \_ -> Show
+            , HE.onFocus \_ -> FocusShow
             , HE.onBlur \_ -> Hide
             ] <> portalData st.triggerAttrs
             -- aria-describedby points at the content id ONLY while open (upstream:
@@ -236,7 +241,7 @@ render st =
           [ HH.div
               ( [ HP.ref contentRef
                 , classes st.style.content
-                , dataState (if open then "delayed-open" else "closed")
+                , dataState stateAttr
                 , dataAttr "side" (sideName st.placedSide)
                 , dataAttr "align" (alignName st.placedAlign)
                 , HP.style st.contentStyle
@@ -271,7 +276,8 @@ handleAction = case _ of
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
       }
-  Show -> openTooltip
+  Show -> openTooltip true
+  FocusShow -> openTooltip false
   Hide -> closeTooltip
   -- after the open render flushed (content ref live): measure+place, then on the NEXT
   -- frame (after the placement modify's re-render) portal the content into body. A
@@ -286,15 +292,15 @@ handleAction = case _ of
     reposition
     finalize false
 
-openTooltip :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
-openTooltip = do
+openTooltip :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
+openTooltip delayed = do
   st <- H.get
   when (not (current st.ctrl)) do
     -- capture the restore target (the focused trigger) BEFORE opening, so no post-open
     -- `modify` is needed for it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
     mprev <- liftEffect (HTMLDocument.activeElement doc)
-    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev }
+    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev, wasDelayed = delayed }
     H.raise (OpenChanged true)
     -- dismissal (Escape only) + reposition subscriptions
     win <- liftEffect Popper.windowTarget
@@ -360,7 +366,7 @@ reposition = do
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
   SetOpen v a -> do
-    if v then openTooltip else closeTooltip
+    if v then openTooltip true else closeTooltip
     pure (Just a)
   GetOpen reply -> do
     st <- H.get
