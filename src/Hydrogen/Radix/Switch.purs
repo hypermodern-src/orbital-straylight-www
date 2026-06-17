@@ -138,6 +138,7 @@ render st =
         , ARIA.role "switch"
         , ARIA.checked (if checked then "true" else "false")
         , dataState stateName
+        , HP.value st.value
         , HP.disabled st.disabled
         , classes st.style.root
         , HE.onClick \_ -> Clicked
@@ -146,9 +147,11 @@ render st =
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
       )
       ( [ HH.span
-            [ dataState stateName
-            , classes st.style.thumb
-            ]
+            ( [ dataState stateName
+              , classes st.style.thumb
+              ]
+                <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+            )
             []
         ]
           <> map HH.fromPlainHTML st.children

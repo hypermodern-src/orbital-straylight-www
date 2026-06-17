@@ -40,11 +40,11 @@ switch checked isDisabled props =
   where
   -- both Root and Thumb carry data-disabled when disabled (the [data-disabled]
   -- CSS rules style the thumb too).
-  disabledAttrs = if isDisabled then [ RawAttr "disabled" "disabled", DataAttr "disabled" "true" ] else []
+  disabledAttrs = if isDisabled then [ RawAttr "disabled" "disabled", DataAttr "disabled" "" ] else []
 
   thumb =
     el "span" [ "rt-SwitchThumb" ]
-      ([ DataAttr "state" (state checked) ] <> (if isDisabled then [ DataAttr "disabled" "true" ] else []))
+      ([ DataAttr "state" (state checked) ] <> (if isDisabled then [ DataAttr "disabled" "" ] else []))
       []
 
   state c = if c then "checked" else "unchecked"
