@@ -41,6 +41,19 @@ STATES=(
   "tabnav:active"
   "slider:stepped"
   "scrollarea:shown"
+  # Bare @radix-ui/react-* primitives Radix Themes ships no component for (STR-330).
+  "toolbar:default"
+  "toolbar:vertical"
+  "toolbar:roved"
+  "passwordtoggle:hidden"
+  "passwordtoggle:visible"
+  "otp:filled"
+  "otp:empty"
+  "otp:typed"
+  "form:rest-valid"
+  "form:serverInvalid"
+  "form:forceMatch"
+  "form:valueMissing"
 )
 
 echo "ℵ building golden dist (bun)"

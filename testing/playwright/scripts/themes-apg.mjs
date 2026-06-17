@@ -325,6 +325,89 @@ const CHECKS = [
     await press(pg, "End");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", max, "End did not move the thumb to the maximum");
   }},
+
+  // Toolbar — https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
+  // Roving tabindex over the focusable items (button New, link Edit, toggle items L/C — each a
+  // RovingFocusGroup.Item stamped data-radix-collection-item). At rest the toolbar ROOT is the
+  // single tab stop (tabindex=0, items -1); on focus-in the tab stop migrates onto an item. Horizontal
+  // orientation: ArrowRight → next item, ArrowLeft → previous, Home → first, End → last. Seed: the bare
+  // golden toolbar (aria-label="Formatting") with 4 focusable items. The collection-item selector is
+  // the upstream roving hook (the port stamps it identically), so the same checks run against the port.
+  { id: "toolbar", state: "default", apg: "toolbar", name: "at rest the toolbar root is the single tab stop (roving tabindex)", run: async (pg) => {
+    await pg.locator('[role="toolbar"]').first().waitFor();
+    ok((await attrOf(pg, '[role="toolbar"]', 0, "tabindex")) === "0", "toolbar root must be tabindex=0 at rest");
+    ok((await tabbableCount(pg, '[role="toolbar"] [data-radix-collection-item]')) === 0, "no item may be tabbable before focus enters (roving tabindex on root)");
+  }},
+  { id: "toolbar", state: "default", apg: "toolbar", name: "ArrowRight roves focus to the next item; the tab stop migrates onto it", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 4, "expected 4 focusable toolbar items (New, Edit, L, C)");
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first toolbar item");
+    ok((await attrOf(pg, sel, 0, "tabindex")) === "0", "the focused item must become the single tab stop");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not rove focus to the next item");
+    await attrEq(pg, sel, 1, "tabindex", "0", "ArrowRight did not migrate the roving tab stop onto the next item");
+    ok((await attrOf(pg, sel, 0, "tabindex")) === "-1", "the previously focused item must drop to tabindex=-1");
+  }},
+  { id: "toolbar", state: "default", apg: "toolbar", name: "ArrowLeft roves to the previous item", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not move to item 1");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "ArrowLeft did not rove back to the previous item");
+  }},
+  { id: "toolbar", state: "default", apg: "toolbar", name: "End focuses the last item, Home the first", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await press(pg, "End");
+    ok(await activeIsNth(pg, sel, 3), "End did not focus the last toolbar item");
+    await press(pg, "Home");
+    ok(await activeIsNth(pg, sel, 0), "Home did not focus the first toolbar item");
+  }},
+
+  // One-Time Password Field — not a named APG pattern; its nav IS the APG Roving Tabindex technique
+  // (https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/#kbd_roving_tabindex) over a group
+  // of single-char inputs. Horizontal: ArrowRight → next slot, ArrowLeft → previous, Home → first, End
+  // → last; a printable char fills the slot and auto-advances focus. Roving slots are reachable once
+  // populated, so drive the arrow checks against the FILLED story (defaultValue="123") and the
+  // auto-advance check against the EMPTY story. Selector is the upstream data-radix-otp-input hook.
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "ArrowRight/ArrowLeft rove between slots; the tab stop migrates", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 3, "expected 3 OTP input slots");
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first slot");
+    ok((await attrOf(pg, sel, 0, "tabindex")) === "0", "the focused slot must be the single tab stop");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not rove to the next slot");
+    await attrEq(pg, sel, 1, "tabindex", "0", "ArrowRight did not migrate the roving tab stop");
+    ok((await attrOf(pg, sel, 0, "tabindex")) === "-1", "the previous slot must drop to tabindex=-1");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "ArrowLeft did not rove back to the previous slot");
+  }},
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "End focuses the last slot, Home the first", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await press(pg, "End");
+    ok(await activeIsNth(pg, sel, 2), "End did not focus the last slot");
+    await press(pg, "Home");
+    ok(await activeIsNth(pg, sel, 0), "Home did not focus the first slot");
+  }},
+  { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first slot");
+    await pg.keyboard.type("4"); await pg.waitForTimeout(120);
+    const filled = await pg.evaluate((s) => document.querySelectorAll(s)[0].value, sel);
+    ok(filled === "4", `typing did not fill the first slot (got '${filled}')`);
+    ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
+  }},
 ];
 
 const b = await chromium.launch();

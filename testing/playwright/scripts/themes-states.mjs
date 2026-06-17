@@ -238,4 +238,126 @@ export const STATES = {
         document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "45");
     },
   },
+
+  // ── Bare @radix-ui/react-* primitives (toolbar / passwordtoggle / otp / form) ─────────
+  // Radix Themes ships no component for these; the golden renders the genuine upstream
+  // primitive unstyled. Drivers key ONLY off upstream role/data-*/aria/type selectors so the
+  // same driver runs against golden and port. No overlay → no CLOSE-table entry for any of them.
+  toolbar: {
+    // APG Toolbar (https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/). At rest (before focus enters)
+    // RovingFocusGroup carries tabindex=0 on the toolbar ROOT and -1 on every item; the tabindex=0
+    // migrates onto an item only once focus enters (the `roved` state proves that). The at-rest DOM
+    // is fully deterministic — wait for the toolbar root + its (-1) items to be laid out.
+    default: async (pg) => {
+      await root(pg).locator('[role="toolbar"][tabindex="0"]').first().waitFor();
+      await pg.locator('[role="toolbar"] > button').first().waitFor();
+    },
+    // `?s=vertical` golden variant → orientation flip (aria-orientation/data-orientation=vertical).
+    vertical: async (pg) => {
+      await root(pg).locator('[role="toolbar"][aria-orientation="vertical"]').first().waitFor();
+      await pg.locator('[role="toolbar"] > button').first().waitFor();
+    },
+    // ArrowRight rotates the roving tabindex=0 from item 0 → item 1 (deterministic: focus + keydown
+    // are synchronous). Keyed off the focusable toolbar items (those carrying a tabindex attr).
+    roved: async (pg) => {
+      const items = root(pg).locator('[role="toolbar"] > *[tabindex]');
+      await items.first().waitFor();
+      await items.first().focus();
+      await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() => {
+        const it = [...document.querySelectorAll('[role="toolbar"] > *')].filter((e) => e.hasAttribute("tabindex"));
+        return it[1]?.getAttribute("tabindex") === "0" && it[0]?.getAttribute("tabindex") === "-1";
+      });
+    },
+  },
+  passwordtoggle: {
+    // At rest: input type=password (the load-bearing state signal). No interaction.
+    hidden: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.locator('input[type="password"]').first().waitFor();
+    },
+    // Click the toggle → flushSync flips type=password→text and Slot text Show→Hide synchronously.
+    visible: async (pg) => {
+      const btn = root(pg).getByRole("button").first();
+      await btn.waitFor();
+      await btn.click();
+      await pg.locator('input[type="text"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector("button")?.textContent?.trim() === "Hide");
+    },
+  },
+  otp: {
+    // defaultValue="123" 3-slot at rest: inputs carry value 1/2/3, hidden input value=123, roving
+    // tabstop = clamp(len,0,size-1). No interaction; the at-rest DOM is the oracle.
+    filled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => document.querySelector('input[type="hidden"]')?.value === "123");
+    },
+    // `?s=empty` golden variant → no defaultValue: every slot empty, hidden input empty. (At rest,
+    // before focus enters, RovingFocusGroup carries tabindex=-1 on every input; tabindex=0 migrates
+    // onto a slot only on focus — the `typed` state proves that. The at-rest DOM is deterministic.)
+    empty: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.value === "")
+          && document.querySelector('input[type="hidden"]')?.value === "";
+      });
+    },
+    // Type "45" into the empty story → inputs[0]=4 inputs[1]=5, roving tabstop advanced to index 2
+    // (deterministic: value-driven, no timing). Drive against `?s=empty` (see capture matrix).
+    typed: async (pg) => {
+      const first = root(pg).locator('input[data-radix-otp-input][data-radix-index="0"]');
+      await first.waitFor();
+      await first.focus();
+      await pg.keyboard.type("45");
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a[0].value === "4" && a[1].value === "5" && a[2].getAttribute("tabindex") === "0";
+      });
+    },
+  },
+  form: {
+    // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true
+    // and the control carries aria-invalid=true. NOTE — a bare match="valueMissing" Message does NOT
+    // render here (validity.valueMissing is false; serverInvalid is a separate flag), so there is no
+    // aria-describedby on this path; the Message+describedby anatomy is the `forceMatch` state's job.
+    // This state's distinct contract is the data-invalid/aria-invalid stamping.
+    serverInvalid: async (pg) => {
+      await root(pg).locator('input[aria-invalid="true"][data-invalid="true"]').first().waitFor();
+      await pg.locator('label[data-invalid]').first().waitFor();
+    },
+    // forceMatch renders the Message unconditionally on first paint (no event) → proves the <span id>
+    // anatomy + aria-describedby registration. data-invalid is NOT set (validity still valid).
+    forceMatch: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        return !!(db && db.split(" ").some((id) => document.getElementById(id)));
+      });
+    },
+    // At rest: no data-valid/invalid anywhere, control has title="" + id + name, NO aria-describedby,
+    // NO Message span. Just wait for the control to be present (no interaction).
+    "rest-valid": async (pg) => {
+      await root(pg).locator('input[name="email"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i && !i.hasAttribute("aria-describedby") && !i.hasAttribute("data-invalid");
+      });
+    },
+    // Event-gated: press Submit on the required-empty Control → native `invalid` fires → the
+    // valueMissing Message mounts and registers into aria-describedby. Capture ONLY after the
+    // aria-describedby link RESOLVES (message id present AND getElementById exists), never a timeout.
+    valueMissing: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        return !!(db && db.split(" ").some((id) => document.getElementById(id)));
+      });
+    },
+  },
 };

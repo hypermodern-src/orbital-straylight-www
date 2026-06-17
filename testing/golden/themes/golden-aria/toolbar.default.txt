@@ -1,0 +1,8 @@
+- toolbar "Formatting":
+  - button "New"
+  - link "Edit":
+    - /url: "#"
+  - separator
+  - group "Align":
+    - radio "L" [checked]
+    - radio "C"

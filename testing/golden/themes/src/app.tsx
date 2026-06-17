@@ -12,6 +12,10 @@ import * as Accordion from "@radix-ui/react-accordion";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { Toggle } from "@radix-ui/react-toggle";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import * as Toolbar from "@radix-ui/react-toolbar";
+import * as PasswordToggleField from "@radix-ui/react-password-toggle-field";
+import * as OneTimePasswordField from "@radix-ui/react-one-time-password-field";
+import * as Form from "@radix-ui/react-form";
 // Bundle Inter (Radix Themes' intended typeface) so the render is deterministic —
 // headless Chromium has no system sans; without this the golden falls back to mono.
 import "@fontsource-variable/inter";
@@ -1017,6 +1021,102 @@ const PAGES: Page[] = [
       </ScrollArea>
     ),
   },
+  // ── Bare @radix-ui/react-* primitives Radix Themes ships NO component for ───────
+  // (toolbar / password-toggle-field / one-time-password-field / form). These render the
+  // genuine upstream primitive directly (unstyled — NO rt-* classes) so the open-state DOM
+  // oracle captures the real role/data-*/aria/tabindex contract the Halogen port reproduces.
+  // Some carry a `?s=<variant>` switch (read off location.search) so one interactive page can
+  // expose multiple at-rest stories (toolbar vertical, otp empty) without a second id.
+  {
+    id: "toolbar",
+    label: "Toolbar",
+    interactive: true,
+    // APG Toolbar: roving tabindex stamps tabindex=0 on the first focusable item and -1 on the
+    // rest synchronously on mount — fully deterministic at rest. `?s=vertical` flips orientation.
+    node: (() => {
+      const orientation = currentState() === "vertical" ? "vertical" : "horizontal";
+      return (
+        <Toolbar.Root aria-label="Formatting" orientation={orientation}>
+          <Toolbar.Button>New</Toolbar.Button>
+          <Toolbar.Link href="#">Edit</Toolbar.Link>
+          <Toolbar.Separator />
+          <Toolbar.ToggleGroup type="single" defaultValue="left" aria-label="Align">
+            <Toolbar.ToggleItem value="left">L</Toolbar.ToggleItem>
+            <Toolbar.ToggleItem value="center">C</Toolbar.ToggleItem>
+          </Toolbar.ToggleGroup>
+        </Toolbar.Root>
+      );
+    })(),
+  },
+  {
+    id: "passwordtoggle",
+    label: "Password Toggle Field",
+    interactive: true,
+    // Text Slot (Show/Hide) so the button has inner text → the auto aria-label (MutationObserver
+    // + hydration timing) is SUPPRESSED; explicit input id="password" so inputId is literal (no
+    // useId) and the toggle's id/aria-controls don't even need the id normalizer.
+    node: (
+      <Box>
+        <label htmlFor="password">Password</label>
+        <PasswordToggleField.Root>
+          <PasswordToggleField.Input id="password" />
+          <PasswordToggleField.Toggle>
+            <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+          </PasswordToggleField.Toggle>
+        </PasswordToggleField.Root>
+      </Box>
+    ),
+  },
+  {
+    id: "otp",
+    label: "One-Time Password Field",
+    interactive: true,
+    // 3-slot field; `?s=empty` renders without defaultValue. autoFocus={false} so no input is
+    // focused at mount (the active element is non-deterministic; the roving tabindex 0/-1 we
+    // oracle is value-derived, not focus-derived). validationType defaults to numeric.
+    node: (() => {
+      const s = currentState();
+      const empty = s === "empty" || s === "typed";
+      return (
+        <Box>
+          <OneTimePasswordField.Root {...(empty ? {} : { defaultValue: "123" })} autoFocus={false}>
+            <OneTimePasswordField.Input />
+            <OneTimePasswordField.Input />
+            <OneTimePasswordField.Input />
+            <OneTimePasswordField.HiddenInput />
+          </OneTimePasswordField.Root>
+        </Box>
+      );
+    })(),
+  },
+  {
+    id: "form",
+    label: "Form",
+    interactive: true,
+    // `?s=serverInvalid` / `?s=forceMatch` pre-seed the deterministic invalid anatomy (pure prop /
+    // forceMatch render — no event, no async). The default (rest-valid / valueMissing) story is a
+    // required email Control with two match Messages; valueMissing fires via the Submit click.
+    node: (() => {
+      const s = currentState();
+      const serverInvalid = s === "serverInvalid";
+      const forceMatch = s === "forceMatch";
+      return (
+        <Box>
+          <Form.Root>
+            <Form.Field name="email" serverInvalid={serverInvalid}>
+              <Form.Label>Email</Form.Label>
+              <Form.Control type="email" required />
+              <Form.Message match="valueMissing" forceMatch={forceMatch}>
+                This value is missing
+              </Form.Message>
+              <Form.Message match="typeMismatch">Provide a valid email</Form.Message>
+            </Form.Field>
+            <Form.Submit>Submit</Form.Submit>
+          </Form.Root>
+        </Box>
+      );
+    })(),
+  },
   // The composed demo — the "looks like a finished product" target.
   {
     id: "signin",
@@ -1069,6 +1169,14 @@ const PAGES: Page[] = [
 
 function currentId(): string {
   const m = location.search.match(/[?&]c=([^&]+)/);
+  return m ? decodeURIComponent(m[1]) : "";
+}
+
+// The `?s=<state>` value — lets one interactive page expose multiple at-rest variant stories
+// (toolbar vertical, otp empty, form serverInvalid/forceMatch) keyed off the capture state name,
+// without minting a second page id. Drivers that only interact (no variant) ignore this.
+function currentState(): string {
+  const m = location.search.match(/[?&]s=([^&]+)/);
   return m ? decodeURIComponent(m[1]) : "";
 }
 
