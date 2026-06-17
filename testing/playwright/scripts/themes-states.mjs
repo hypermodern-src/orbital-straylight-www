@@ -272,6 +272,24 @@ export const STATES = {
       await trig.click();
       await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
     },
+    // ?s=single: type=single NON-collapsible, item-1 OPEN at first paint. STATELESS — wait for
+    // the open region AND the aria-disabled=true open trigger (the un-closable single open item).
+    single: async (pg) => {
+      await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"][aria-disabled="true"]').first().waitFor();
+    },
+    // ?s=multiple (the default type): open TWO items (item-1 then item-3) and assert BOTH
+    // regions are open simultaneously (independent toggles, set semantics). Keyed off upstream
+    // aria-expanded/role=region only, so the same driver runs against golden and port.
+    multiple: async (pg) => {
+      const trigs = root(pg).locator('button[aria-expanded]');
+      await trigs.nth(0).click();
+      await trigs.nth(2).click();
+      await pg.waitForFunction(() => {
+        const open = [...document.querySelectorAll('[role="region"][data-state="open"]')].filter((e) => !e.hasAttribute("hidden"));
+        return open.length === 2;
+      });
+    },
   },
   collapsible: {
     open: async (pg) => {
@@ -336,6 +354,19 @@ export const STATES = {
         const r = [...document.querySelectorAll('[role="radio"]')];
         return r.length === 3 && r[0].getAttribute("data-state") === "on"
           && r[1].getAttribute("data-state") === "off";
+      });
+    },
+    // multiple-mode (?s=multiple): TWO items pressed at first paint (defaultValue=[a,c]).
+    // Items keep aria-pressed (NOT role=radio/aria-checked); root role=group. STATELESS —
+    // just wait for the two pressed items so the at-rest multi-select DOM is the oracle.
+    multiple: async (pg) => {
+      await root(pg).locator('button[aria-pressed]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const b = [...document.querySelectorAll('button[aria-pressed]')];
+        return b.length === 3 && b[0].getAttribute("aria-pressed") === "true"
+          && b[1].getAttribute("aria-pressed") === "false"
+          && b[2].getAttribute("aria-pressed") === "true"
+          && !document.querySelector('[role="radio"]');
       });
     },
   },
@@ -463,6 +494,13 @@ export const STATES = {
         const it = [...document.querySelectorAll('[role="toolbar"] > *')].filter((e) => e.hasAttribute("tabindex"));
         return it[1]?.getAttribute("tabindex") === "0" && it[0]?.getAttribute("tabindex") === "-1";
       });
+    },
+    // `?s=disabled` golden variant → the first BUTTON (New) carries the native disabled attr
+    // and is excluded from the roving order (RovingFocusGroup.Item focusable={!disabled}).
+    // STATELESS at-rest — wait for the disabled button to be laid out.
+    disabled: async (pg) => {
+      await root(pg).locator('[role="toolbar"][tabindex="0"]').first().waitFor();
+      await pg.locator('[role="toolbar"] > button[disabled]').first().waitFor();
     },
   },
   passwordtoggle: {

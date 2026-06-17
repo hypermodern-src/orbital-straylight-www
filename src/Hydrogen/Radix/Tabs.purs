@@ -29,7 +29,7 @@ module Hydrogen.Radix.Tabs
 
 import Prelude
 
-import Data.Array (findIndex, length, mapWithIndex, (!!))
+import Data.Array (filter, findIndex, length, mapWithIndex, (!!))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (for_)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -286,16 +286,22 @@ handleAction = case _ of
   Selected value -> selectValue value
   ListKeyDown ke -> do
     st <- H.get
+    -- upstream RovingFocusGroup.Item focusable={!disabled} (tabs.tsx:168-169) → arrows
+    -- navigate WITHIN the enabled subset and SKIP disabled tabs entirely (rather than
+    -- stalling on a disabled neighbour). Build the enabled subset, find the selected tab's
+    -- index within it, navigate there, focus + (automatic activation) select the result.
     let
+      enabled = filter (not <<< _.disabled) st.tabs
+      curEnabled = fromMaybe 0 (findIndex (\t -> t.value == current st.ctrl) enabled)
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
-      pos = { count: length st.tabs, current: selectedIndex st }
-    case navigate cfg pos (KE.key ke) of
+      pos = { count: length enabled, current: curEnabled }
+    when (length enabled > 0) $ case navigate cfg pos (KE.key ke) of
       Stay -> pure unit
-      MoveTo idx -> case st.tabs !! idx of
+      MoveTo idx -> case enabled !! idx of
         Nothing -> pure unit
-        Just tab -> when (not tab.disabled) do
+        Just tab -> do
           -- focus the target trigger, then (automatic activation) select it
-          focusTabAt idx
+          focusTabByValue tab.value
           selectValue tab.value
   -- Tab-into-tablist: forward container focus to the active trigger.
   EntryFocus -> do
@@ -309,9 +315,14 @@ focusTabAt idx = do
   st <- H.get
   case st.tabs !! idx of
     Nothing -> pure unit
-    Just tab -> do
-      mel <- H.getHTMLElementRef (tabRef tab.value)
-      for_ mel (liftEffect <<< HTMLElement.focus)
+    Just tab -> focusTabByValue tab.value
+
+-- | Focus the trigger with the given value via its ref (enabled-subset indices differ
+-- | from full-list indices, so navigation focuses by value, not raw index).
+focusTabByValue :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+focusTabByValue value = do
+  mel <- H.getHTMLElementRef (tabRef value)
+  for_ mel (liftEffect <<< HTMLElement.focus)
 
 selectValue :: forall m. String -> H.HalogenM State Action () Output m Unit
 selectValue value = do

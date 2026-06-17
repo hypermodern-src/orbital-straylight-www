@@ -837,15 +837,23 @@ const PAGES: Page[] = [
       // `?s=disabled` disables the MIDDLE trigger (item-2) so the APG disabled-skip
       // check can prove arrows skip OVER it (accordion.tsx:236 filters disabled out of
       // the navigable collection). Every other state renders all three enabled.
-      const disableMiddle = currentState() === "disabled";
+      const s = currentState();
+      const disableMiddle = s === "disabled";
       const items = [
         { value: "item-1", header: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern.", disabled: false },
         { value: "item-2", header: "Is it styled?", content: "No. It is unstyled by default.", disabled: disableMiddle },
         { value: "item-3", header: "Is it animated?", content: "Yes, with CSS.", disabled: false },
       ];
+      // `?s=single` renders type="single" (NON-collapsible) with item-1 open at first paint:
+      // the open trigger CANNOT be closed, so upstream stamps aria-disabled=true on it
+      // (accordion.tsx:452). Every other state keeps the default type="multiple".
+      const rootProps =
+        s === "single"
+          ? ({ type: "single", defaultValue: "item-1" } as const)
+          : ({ type: "multiple" } as const);
       return (
         <Box style={{ maxWidth: 360 }}>
-          <Accordion.Root type="multiple">
+          <Accordion.Root {...rootProps}>
             {items.map((it) => (
               <Accordion.Item key={it.value} value={it.value}>
                 <Accordion.Header>
@@ -1013,11 +1021,15 @@ const PAGES: Page[] = [
     id: "tabs",
     label: "Tabs (interactive)",
     interactive: true,
+    // `?s=disabled-skip` disables the MIDDLE tab (Documents) so the APG roving check proves
+    // ArrowRight skips OVER it (RovingFocusGroup.Item focusable={!disabled}). Keyboard-only
+    // (no new DOM golden — the themed rt-Tabs class contract is pinned by tab2). Every other
+    // state keeps the 3-enabled instance.
     node: (
       <Tabs.Root defaultValue="account">
         <Tabs.List>
           <Tabs.Trigger value="account">Account</Tabs.Trigger>
-          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="documents" disabled={currentState() === "disabled-skip"}>Documents</Tabs.Trigger>
           <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="account">
@@ -1082,13 +1094,35 @@ const PAGES: Page[] = [
     id: "togglegroup",
     label: "Toggle Group",
     interactive: true,
-    node: (
-      <ToggleGroup.Root type="single" defaultValue="b" aria-label="Text alignment">
-        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
-        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
-        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
-      </ToggleGroup.Root>
-    ),
+    // `?s=disabled-skip` disables the MIDDLE item so the APG roving check can prove arrows
+    // SKIP over it (RovingFocusGroup filters candidateNodes to focusable items). `?s=multiple`
+    // renders type=multiple (root role=group in the dist; items keep aria-pressed, NOT
+    // role=radio/aria-checked) with TWO items pressed simultaneously. Every other state keeps
+    // the canonical single-mode 3-enabled instance the pressed oracle pins.
+    node: (() => {
+      const s = currentState();
+      if (s === "multiple") {
+        return (
+          <ToggleGroup.Root type="multiple" defaultValue={["a", "c"]} aria-label="Text formatting">
+            <ToggleGroup.Item value="a">Bold</ToggleGroup.Item>
+            <ToggleGroup.Item value="b">Italic</ToggleGroup.Item>
+            <ToggleGroup.Item value="c">Underline</ToggleGroup.Item>
+          </ToggleGroup.Root>
+        );
+      }
+      const disableMiddle = s === "disabled-skip";
+      // disabled-skip seeds value="a" (Center is the disabled middle, so it can't be the
+      // selected/tab-stop item); the canonical pressed path keeps defaultValue="b" (Center
+      // selected) so the existing pressed oracle + APG checks are untouched.
+      const dv = disableMiddle ? "a" : "b";
+      return (
+        <ToggleGroup.Root type="single" defaultValue={dv} aria-label="Text alignment">
+          <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+          <ToggleGroup.Item value="b" disabled={disableMiddle}>Center</ToggleGroup.Item>
+          <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+        </ToggleGroup.Root>
+      );
+    })(),
   },
   {
     id: "segmentedcontrol",
@@ -1238,10 +1272,14 @@ const PAGES: Page[] = [
     // APG Toolbar: roving tabindex stamps tabindex=0 on the first focusable item and -1 on the
     // rest synchronously on mount — fully deterministic at rest. `?s=vertical` flips orientation.
     node: (() => {
-      const orientation = currentState() === "vertical" ? "vertical" : "horizontal";
+      const s = currentState();
+      const orientation = s === "vertical" ? "vertical" : "horizontal";
+      // `?s=disabled` disables the BUTTON (New) so the roving order skips it (it gets the
+      // native disabled attr + is excluded from candidateNodes — focusable={!disabled}).
+      const disableButton = s === "disabled";
       return (
         <Toolbar.Root aria-label="Formatting" orientation={orientation}>
-          <Toolbar.Button>New</Toolbar.Button>
+          <Toolbar.Button disabled={disableButton}>New</Toolbar.Button>
           <Toolbar.Link href="#">Edit</Toolbar.Link>
           <Toolbar.Separator />
           <Toolbar.ToggleGroup type="single" defaultValue="left" aria-label="Align">
