@@ -41,6 +41,9 @@ const CLOSED_SEL = [
   '.rt-SelectContent[data-state="closed"]',
   '.rt-TooltipContent[data-state="closed"]',
   '.rt-HoverCardContent[data-state="closed"]',
+  // Toast: the bare <li> lingers data-state="closed" (Presence) through the golden story's
+  // exit keyframe — keyed off the upstream li, no port-internal class.
+  'li[data-state="closed"][data-swipe-direction]',
 ].join(", ");
 
 // Pin every animation/transition open-ended so the closing node lingers for the snapshot.
@@ -53,6 +56,9 @@ const snapshotDOM = (pg) => pg.evaluate(() => {
     const pad = "  ".repeat(d);
     if (el.nodeType === 3) { const t = el.textContent.trim(); return t ? pad + "#" + t : ""; }
     if (el.nodeType !== 1 || SKIP.has(el.tagName)) return "";
+    // Radix Toast SR-announce mirror (role=status, aria-live, timer-driven content/unmount) —
+    // stripped symmetrically from golden AND port, same as in themes-open-dom.mjs.
+    if (el.tagName === "SPAN" && el.getAttribute("role") === "status" && el.hasAttribute("aria-live")) return "";
     const onlyStyle = el.attributes.length === 1 && el.attributes[0].name === "style";
     if (el.tagName === "DIV" && onlyStyle && /display:\s*contents/.test(el.getAttribute("style") || "")) {
       return [...el.childNodes].map((k) => fmt(k, d)).filter(Boolean).join("\n");

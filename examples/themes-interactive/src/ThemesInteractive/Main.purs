@@ -43,6 +43,7 @@ import Hydrogen.Radix.Select as Select
 import Hydrogen.Radix.Slider as Slider
 import Hydrogen.Radix.Switch as Switch
 import Hydrogen.Radix.Tabs as Tabs
+import Hydrogen.Radix.Toast as Toast
 import Hydrogen.Radix.Toggle as Toggle
 import Hydrogen.Radix.ToggleGroup as ToggleGroup
 import Hydrogen.Radix.Toolbar as Toolbar
@@ -74,6 +75,7 @@ type Slots =
   , slider :: Slider.Slot Unit
   , accordion :: Accordion.Slot Unit
   , collapsible :: Collapsible.Slot Unit
+  , toast :: Toast.Slot Unit
   , tabs :: Tabs.Slot Unit
   , radiogroup :: RadioGroup.Slot Unit
   , checkbox :: Checkbox.Slot Unit
@@ -129,6 +131,9 @@ _accordion = Proxy
 
 _collapsible :: Proxy "collapsible"
 _collapsible = Proxy
+
+_toast :: Proxy "toast"
+_toast = Proxy
 
 _tabs :: Proxy "tabs"
 _tabs = Proxy
@@ -218,6 +223,7 @@ view c s =
             "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
+            "toast" -> HH.slot_ _toast unit Toast.component toastInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
             "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
             "checkbox" -> HH.slot_ _checkbox unit Checkbox.component checkboxInput
@@ -716,6 +722,43 @@ collapsibleInput = Collapsible.defaultInput
       [ box [ Pt "2" ]
           [ textAs "div" [ Size "2" ] [ HH.text "Disclosed content line one." ] ]
       ]
+  }
+
+-- | toast — the BARE @radix-ui Toast primitive (Radix Themes ships none, so NO rt-* classes;
+-- | EMPTY style slots, same as the golden's unstyled story). Rendered UNCONTROLLED (open=
+-- | Nothing, defaultOpen=true → mounted open at first paint, internal open live so Escape can
+-- | close it) so it matches the golden's open AND closing oracle. The announce mirror text is
+-- | the literal upstream string ("Notification" label + the concatenated visible non-excluded
+-- | part text) — supplied here since PlainHTML is not introspectable. Same structure/labels as
+-- | the golden: Title "Scheduled", Description "Friday at 5pm", Action "Undo" (altText="Undo"),
+-- | Close "×" (aria-label "Close").
+toastInput :: Toast.Input
+toastInput = Toast.defaultInput
+  { open = Nothing
+  , defaultOpen = true
+  , label = "Notifications (F8)"
+  , swipeDirection = "right"
+  , announceLabel = "Notification"
+  , announceText = "Notification ScheduledFriday at 5pmUndo"
+  , altText = "Undo"
+  , closeLabel = "Close"
+  , style =
+      { viewport: cn ""
+      , wrapper: cn ""
+      , root: cn ""
+      , title: cn ""
+      , description: cn ""
+      , action: cn ""
+      , close: cn ""
+      }
+  , title = [ HH.text "Scheduled" ]
+  , description = [ HH.text "Friday at 5pm" ]
+  , action = [ HH.text "Undo" ]
+  , close = [ HH.text "×" ]
+  -- mirror the golden story's inline exit keyframe so the closing li lingers data-state=closed
+  -- through its (pinned) exit animation (otherwise Presence unmounts it synchronously). <style>
+  -- is in the normalizer SKIP set, so it never enters the DOM diff.
+  , exitCss = "@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } } li[data-state=\"closed\"][data-swipe-direction] { animation: toastExit 100ms ease-out; }"
   }
 
 -- | tabs — three tabs (Account/Documents/Settings) starting on account; the driver

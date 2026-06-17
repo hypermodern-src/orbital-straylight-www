@@ -15,6 +15,7 @@ import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { Toggle } from "@radix-ui/react-toggle";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import * as Toolbar from "@radix-ui/react-toolbar";
+import * as Toast from "@radix-ui/react-toast";
 import * as PasswordToggleField from "@radix-ui/react-password-toggle-field";
 import * as OneTimePasswordField from "@radix-ui/react-one-time-password-field";
 import * as Form from "@radix-ui/react-form";
@@ -843,6 +844,42 @@ const PAGES: Page[] = [
           </Box>
         </Collapsible.Content>
       </Collapsible.Root>
+    ),
+  },
+  {
+    id: "toast",
+    label: "Toast",
+    interactive: true,
+    // Bare @radix-ui/react-toast (Radix Themes ships none) — NO rt-* classes; the genuine
+    // upstream primitive. Toast is TIME-DRIVEN (auto-dismiss + swipe + queue), so the whole
+    // determinism game is to defuse the clock: render ONE toast CONTROLLED open={true} with
+    // duration={Infinity} AND a huge Provider duration, so the auto-dismiss timer NEVER fires
+    // inside the capture window and the open state is stable at first paint (no trigger click,
+    // no queue timing). swipeDirection="right" pins data-swipe-direction.
+    //
+    // UNCONTROLLED, not open={true}: the Root takes NO `open` prop, so it falls to defaultOpen=
+    // true (it is mounted open at first paint — identical open oracle) BUT the internal open
+    // state remains LIVE, so Escape → onClose → setOpen(false) actually flips it (a controlled
+    // open={true} would re-pin open=true and suppress the close, making the closing oracle
+    // impossible). duration={Infinity} kills the auto-dismiss timer either way, so uncontrolled
+    // is still race-free for the OPEN snapshot. The story injects a minimal exit keyframe on
+    // li[data-state="closed"] so the CLOSING lifecycle is real and capturable (Presence keeps
+    // the li mounted through the exit animation, then unmounts) — otherwise unstyled toast would
+    // unmount synchronously like select/tooltip and there would be no closing node to oracle.
+    node: (
+      <>
+        <style>{`@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } }
+          li[data-state="closed"][data-swipe-direction] { animation: toastExit 100ms ease-out; }`}</style>
+        <Toast.Provider duration={1000000} swipeDirection="right">
+          <Toast.Root duration={Infinity}>
+            <Toast.Title>Scheduled</Toast.Title>
+            <Toast.Description>Friday at 5pm</Toast.Description>
+            <Toast.Action altText="Undo">Undo</Toast.Action>
+            <Toast.Close aria-label="Close">×</Toast.Close>
+          </Toast.Root>
+          <Toast.Viewport />
+        </Toast.Provider>
+      </>
     ),
   },
   {

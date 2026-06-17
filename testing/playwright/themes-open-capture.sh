@@ -28,6 +28,7 @@ STATES=(
   # Interactive (stateful, non-overlay) components — STR (13 new oracles).
   "accordion:open"
   "collapsible:open"
+  "toast:open"
   "menubar:open"
   "menubar:item1"
   "navigationmenu:closed"

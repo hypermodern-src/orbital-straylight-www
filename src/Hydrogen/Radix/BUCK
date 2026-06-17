@@ -30,6 +30,7 @@ purescript_library(
         "Slider.purs",
         "Switch.purs",
         "Tabs.purs",
+        "Toast.purs",
         "Toggle.purs",
         "ToggleGroup.purs",
         "Toolbar.purs",

@@ -42,6 +42,16 @@ export const CLOSE = {
   // HoverCard hides on pointer-leave of BOTH trigger and content. Move the mouse off-anchor;
   // the rt-HoverCardContent (rt-PopperContent) then lingers mounted with data-state="closed".
   hovercard: async (pg) => { await pg.mouse.move(0, 0); await pg.mouse.move(2, 2); },
+  // Toast closes via Escape on the FOCUSED toast (onEscapeKeyDown → handleClose). Focus the
+  // <li> first (it is tabindex=0), then Escape. The golden story adds a 100ms exit keyframe on
+  // li[data-state="closed"] so Presence keeps the li MOUNTED (data-state=closed) through the
+  // pinned (100s) exit — the lingering closing node the oracle captures. Keyed off UPSTREAM
+  // selectors only (the tabbable li), so the same action runs against golden AND port.
+  toast: async (pg) => {
+    const li = pg.locator('li[data-state="open"][data-swipe-direction]').first();
+    await li.focus();
+    await pg.keyboard.press("Escape");
+  },
 
   // ── DELIBERATELY NO closing oracle (verified against real @radix-ui/themes) ───────────────
   // select  — Radix Select.Content does NOT wrap its content in Presence: on Escape the
@@ -111,6 +121,19 @@ export const STATES = {
   },
   select: {
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
+  },
+  toast: {
+    // Toast is rendered CONTROLLED open={true} duration={Infinity} (golden story), so it is
+    // MOUNTED open at first paint — NO click, NO queue timing. The driver just waits for the
+    // portaled <li> to be in the DOM. The <li> is a PLAIN <li> (NO role; the separate role=
+    // status node is the SR announce mirror, normalized out — see themes-open-dom.mjs). Key
+    // off the li's stable data-* (data-state=open + data-swipe-direction) inside the role=
+    // region viewport, never any port-internal class, so the same driver runs golden + port.
+    // The role=status announce node self-unmounts 1000ms after open (radix isAnnounced timer);
+    // it is also stripped symmetrically in the normalizer, so the snapshot is stable either way.
+    open: async (pg) => {
+      await pg.locator('li[data-state="open"][data-swipe-direction]').first().waitFor();
+    },
   },
   navigationmenu: {
     // OPEN at first paint via defaultValue="one" — NO click/hover, so the delayDuration/

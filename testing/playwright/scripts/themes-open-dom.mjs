@@ -47,6 +47,14 @@ try {
       const pad = "  ".repeat(d);
       if (el.nodeType === 3) { const t = el.textContent.trim(); return t ? pad + "#" + t : ""; }
       if (el.nodeType !== 1 || SKIP.has(el.tagName)) return "";
+      // Radix Toast SR-announce mirror: a VisuallyHidden <span role="status" aria-live=…>
+      // that radix portals to body, fills with the toast's text on the next frame, then
+      // UNMOUNTS itself ~1000ms after open (the isAnnounced timer). Its presence AND mirrored
+      // content are TIMER-DRIVEN — a non-deterministic node for a structural DOM oracle, and an
+      // SR-only artifact the port need not reproduce byte-for-byte. Strip it SYMMETRICALLY from
+      // golden AND port (like the display:contents wrapper), narrowly matched on the exact
+      // signature (span + role=status + aria-live), so nothing load-bearing is removed.
+      if (el.tagName === "SPAN" && el.getAttribute("role") === "status" && el.hasAttribute("aria-live")) return "";
       // Transparent wrapper: a Halogen component-root <div> carrying ONLY style=display:contents
       // and no semantic content. React (the golden) has no per-component root, so render the
       // children at the same depth and skip the wrapper — a framework-artifact canonicalization,

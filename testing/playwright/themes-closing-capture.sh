@@ -20,7 +20,7 @@ GD="$HY/testing/golden/themes"; OUT="$GD/golden-dom"; mkdir -p "$OUT"
 # Radix's Select.Content / Tooltip.Content unmount SYNCHRONOUSLY on close (only the TRIGGER
 # flips to data-state="closed"), so there is no lingering closed content node to capture
 # (see CLOSE in scripts/themes-states.mjs). Default-run the 6 capturable overlays.
-if [ "$#" -gt 0 ]; then STATES=("$@"); else STATES=(dialog alertdialog popover dropdownmenu contextmenu hovercard); fi
+if [ "$#" -gt 0 ]; then STATES=("$@"); else STATES=(dialog alertdialog popover dropdownmenu contextmenu hovercard toast); fi
 
 echo "ℵ building golden dist (bun)"
 ( cd "$GD" && rm -rf dist && mkdir dist && nix shell nixpkgs#bun -c bun build ./src/app.tsx --outdir dist --minify >/dev/null && cp index.html dist/ )
