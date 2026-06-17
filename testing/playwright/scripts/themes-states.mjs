@@ -157,6 +157,19 @@ export const STATES = {
       await pg.keyboard.press("ArrowDown");
       await pg.locator('[role="menu"] [role="menuitem"][data-highlighted]').first().waitFor();
     },
+    // ?s=disabled disables "New Window" (item-2 of File). Open via ArrowDown (highlights New
+    // Tab), ArrowDown SKIPS the disabled New Window to Print — the snapshot pins the disabled
+    // item's data-disabled/aria-disabled + tabindex=-1 and the roving tabindex distribution.
+    disabled: async (pg) => {
+      await root(pg).getByRole("menuitem").first().focus();
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menu"] [role="menuitem"][data-highlighted]').first().waitFor();
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menu"] [role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Print");
+      });
+    },
   },
   select: {
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },

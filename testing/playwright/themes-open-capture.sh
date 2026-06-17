@@ -34,6 +34,7 @@ STATES=(
   "toast:open"
   "menubar:open"
   "menubar:item1"
+  "menubar:disabled"
   "navigationmenu:closed"
   "navigationmenu:open"
   "tabs:tab2"

@@ -649,6 +649,25 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
 
+  // Menubar in-menu keyboard SELECTION (re-exports react-menu SELECTION_KEYS) — Enter/Space on
+  // the focused item fires onSelect + closes; and the disabled-item skip in vertical roving.
+  { id: "menubar", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor();
+    await hlStarts(pg, "New Tab");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Enter did not close the menu after selecting");
+  }},
+  // ?s=disabled disables "New Window" (item-2): data-disabled + tabindex=-1, out of the roving
+  // order, so ArrowDown from New Tab SKIPS it to Print.
+  { id: "menubar", state: "disabled", apg: "menu", name: "ArrowDown SKIPS a disabled item to the next enabled one", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor();
+    await hlStarts(pg, "New Tab");
+    ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menu"] [role="menuitem"]')].find((x) => (x.textContent || "").startsWith("New Window")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Print");
+  }},
+
   // DropdownMenu keyboard SELECTION (menu.tsx:667-680 SELECTION_KEYS) — Enter/Space on the
   // focused item fires onSelect + closes. Previously impossible in the port (navigate → Stay).
   { id: "dropdownmenu", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {

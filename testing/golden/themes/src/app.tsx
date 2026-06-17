@@ -907,14 +907,19 @@ const PAGES: Page[] = [
     // MenubarMenu is non-modal (no scroll-lock/hideOthers), but DOES use the Popper + Presence
     // + roving. The driver opens the first menu (File) and (for item1) ArrowDowns to highlight
     // the first item. Fixed labels, no checkbox/radio/sub in v1.
-    node: (
+    // `?s=disabled` disables "New Window" (item-2 of File) so the APG disabled-skip check
+    // proves vertical roving skips it (react-menu filter(!disabled)); every other state
+    // renders all enabled.
+    node: (() => {
+      const newWindowDisabled = currentState() === "disabled";
+      return (
       <Menubar.Root>
         <Menubar.Menu value="file">
           <Menubar.Trigger>File</Menubar.Trigger>
           <Menubar.Portal>
             <Menubar.Content align="start">
               <Menubar.Item>New Tab</Menubar.Item>
-              <Menubar.Item>New Window</Menubar.Item>
+              <Menubar.Item disabled={newWindowDisabled}>New Window</Menubar.Item>
               <Menubar.Separator />
               <Menubar.Item>Print</Menubar.Item>
             </Menubar.Content>
@@ -939,7 +944,8 @@ const PAGES: Page[] = [
           </Menubar.Portal>
         </Menubar.Menu>
       </Menubar.Root>
-    ),
+      );
+    })(),
   },
   {
     id: "navigationmenu",
