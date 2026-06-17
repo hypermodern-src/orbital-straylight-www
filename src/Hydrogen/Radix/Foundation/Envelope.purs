@@ -15,6 +15,8 @@
 module Hydrogen.Radix.Foundation.Envelope
   ( lockScroll
   , unlockScroll
+  , releaseScrollPointer
+  , clearPointerEvents
   , addFocusGuards
   , removeFocusGuards
   , reAdoptBeforeTrail
@@ -79,6 +81,18 @@ unlockScroll = do
   when (n' == 0) $ withBody \body -> do
     removeAttribute "data-scroll-locked" (HTMLElement.toElement body)
     setInlineStyle body "pointer-events" ""
+
+-- | Release ONLY the `pointer-events:none` the scroll lock put on body, keeping the
+-- | `data-scroll-locked` marker. Mirrors radix RemoveScroll disabling on close-start: the
+-- | pointer block lifts immediately while the closing overlay lingers for its exit animation
+-- | (the marker is dropped later by `unlockScroll` at unmount). Does NOT touch the ref count.
+releaseScrollPointer :: Effect Unit
+releaseScrollPointer = withBody \body -> setInlineStyle body "pointer-events" ""
+
+-- | Clear the inline `pointer-events` on an element (the closing dialog content drops the
+-- | `pointer-events:auto` the open RemoveScroll wrapper set), leaving its other inline style.
+clearPointerEvents :: Element -> Effect Unit
+clearPointerEvents el = for_ (HTMLElement.fromElement el) \he -> setInlineStyle he "pointer-events" ""
 
 -- ── focus guards (ref-counted) ──────────────────────────────────────────────────
 guardDepth :: Ref Int

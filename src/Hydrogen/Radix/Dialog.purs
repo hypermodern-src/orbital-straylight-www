@@ -11,9 +11,14 @@
 -- |   * the stable surface — `role="dialog"`, `aria-modal`, `data-state` — plus
 -- |     per-part classes from the `Style` record.
 -- |
+-- | Exit animation: on close the overlay+content stay MOUNTED with `data-state=closed`
+-- | (and the modal envelope — scroll-lock, focus guards, hideOthers — stays in place)
+-- | until the content's exit animation (`rt-dialog-content-hide`) ends, THEN the envelope
+-- | is torn down and the overlay unmounts — mirroring radix `Presence`/Collapsible. If the
+-- | content has no exit animation, the close is immediate (no gap).
+-- |
 -- | v1 scope (by feel): single layer/scope (no nested-layer stack), portal
--- | rendered in place with `position:fixed` (no portal-to-body), no exit-animation
--- | Presence. NOTE: focus-on-open reads the content ref right after the open
+-- | rendered in place with `position:fixed` (no portal-to-body). NOTE: focus-on-open reads the content ref right after the open
 -- | `modify`; if Halogen hasn't flushed the render the capture is skipped —
 -- | validate under `hydrogen_test` and add a render-flush step if needed.
 -- |
@@ -46,6 +51,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.FocusScope (captureFocus, tabLoop)
+import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
@@ -132,6 +138,7 @@ type Slot id = H.Slot Query Output id
 
 type State =
   { ctrl :: Controllable Boolean
+  , presence :: Presence  -- Open / Closing (mounted, exiting) / Closed (unmounted)
   , modal :: Boolean
   , closeOnEscape :: Boolean
   , closeOnOutsideClick :: Boolean
@@ -146,6 +153,7 @@ type State =
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
+  , animSub :: Maybe H.SubscriptionId  -- content `animationend` subscription during exit
   , locked :: Boolean
   , contentId :: String      -- generated on Initialize, trigger aria-controls target + content id
   , titleId :: String        -- generated on Initialize, aria-labelledby target
@@ -160,6 +168,8 @@ data Action
   | ContentKeyDown KE.KeyboardEvent
   | EscapePressed
   | AfterOpen           -- runs after the open render flushed: portal + focus
+  | AfterClose          -- runs after the closing render flushed: re-portal + arm exit animation
+  | AnimDone            -- the content exit animation finished: finishExit + tear down envelope
 
 contentRef :: H.RefLabel
 contentRef = H.RefLabel "rdx-dialog-content"
@@ -184,6 +194,7 @@ component =
 initialState :: Input -> State
 initialState input =
   { ctrl: controllable input.open input.defaultOpen
+  , presence: if startOpen then Open else Closed
   , modal: input.modal
   , closeOnEscape: input.closeOnEscape
   , closeOnOutsideClick: input.closeOnOutsideClick
@@ -198,11 +209,16 @@ initialState input =
   , restoreEl: Nothing
   , escSub: Nothing
   , postSub: Nothing
+  , animSub: Nothing
   , locked: false
   , contentId: ""
   , titleId: ""
   , descriptionId: ""
   }
+  where
+  startOpen = case input.open of
+    Just v -> v
+    Nothing -> input.defaultOpen
 
 aria :: forall r i. String -> String -> HP.IProp r i
 aria name val = HP.attr (HH.AttrName ("aria-" <> name)) val
@@ -223,37 +239,41 @@ render st =
     -- hold trigger + always-mounted overlay, but React/upstream has none — the DOM oracle
     -- normalizer strips this bare wrapper so the trigger sits directly in its parent.
     HH.div [ HP.style "display:contents" ]
-      [ HH.button
-          ( [ HP.type_ HP.ButtonButton
-            , classes st.style.trigger
-            , aria "expanded" (show open)
-            , aria "haspopup" "dialog"
-            , dataState (if open then "open" else "closed")
-            , HE.onClick \_ -> TriggerClicked
-            ]
-              -- aria-controls references the content only while open (upstream gates it)
-              <> (if open then [ aria "controls" st.contentId ] else [])
-              <> portalData st.triggerAttrs
-          )
-          (map HH.fromPlainHTML st.trigger)
-      , overlayContent open st
-      ]
+      ( [ HH.button
+            ( [ HP.type_ HP.ButtonButton
+              , classes st.style.trigger
+              , aria "expanded" (show open)
+              , aria "haspopup" "dialog"
+              , dataState (if open then "open" else "closed")
+              , HE.onClick \_ -> TriggerClicked
+              ]
+                -- aria-controls references the content only while open (upstream gates it)
+                <> (if open then [ aria "controls" st.contentId ] else [])
+                <> portalData st.triggerAttrs
+            )
+            (map HH.fromPlainHTML st.trigger)
+        ]
+          -- the overlay is rendered while `isRendered presence` (Open OR Closing): on close it
+          -- LINGERS with data-state=closed through its exit animation, then unmounts at Closed.
+          <> (if isRendered st.presence then [ overlayContent st ] else [])
+      )
 
--- | The overlay is ALWAYS mounted (a stable VDOM child Halogen patches by reference,
--- | never removes — so moving it to `body` never trips Halogen's removal), hidden with
--- | `display:none` when closed. On open it is adopted into `document.body` (AfterOpen).
-overlayContent :: forall m. Boolean -> State -> H.ComponentHTML Action () m
-overlayContent open st =
-  -- The OVERLAY is the portaled, themed root (matches upstream: body > overlay > scroll >
-  -- scrollPadding > content). It carries the backdrop (position:fixed inset:0) and the
-  -- click-outside handler; the scroll/padding wrappers center the content + scroll-when-tall.
+-- | The OVERLAY is the portaled, themed root (matches upstream: body > overlay > scroll >
+-- | scrollPadding > content). It carries the backdrop and the click-outside handler; the
+-- | scroll/padding wrappers center the content. Rendered while `isRendered presence` —
+-- | mounted on open, kept through the exit animation on close (Presence), dropped at Closed.
+-- | On each (re)render while present it is re-adopted into `document.body` (AfterOpen /
+-- | AfterClose), since Halogen re-parents it under the component root on every patch.
+overlayContent :: forall m. State -> H.ComponentHTML Action () m
+overlayContent st =
   HH.div
     ( [ HP.ref portalRef
       , classes st.style.overlay
-      , dataState (if open then "open" else "closed")
+      , dataState (dataStateOf st.presence)
       -- the rt-BaseDialogOverlay class supplies position:fixed/inset:0; inline only carries
-      -- pointer-events:auto (the modal re-enables pointers over the dimmed, pointer-locked body).
-      , HP.style (if open then "pointer-events: auto;" else "display:none;")
+      -- pointer-events:auto (the modal re-enables pointers over the dimmed, pointer-locked
+      -- body) — present in BOTH Open and Closing (radix keeps the closing overlay visible).
+      , HP.style "pointer-events: auto;"
       , HE.onClick OverlayClicked
       ] <> portalData st.portalAttrs
     )
@@ -265,7 +285,7 @@ overlayContent open st =
                   , classes st.style.content
                   , roleAttr "dialog"
                   -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
-                  , dataState (if open then "open" else "closed")
+                  , dataState (dataStateOf st.presence)
                   , HP.tabIndex (-1)
                   , HP.style st.contentStyle
                   , HE.onKeyDown ContentKeyDown
@@ -344,6 +364,39 @@ handleAction = case _ of
       Envelope.lockScroll
       Envelope.addFocusGuards
       Envelope.hideOthers wrap
+  -- runs on the frame after the CLOSING render flushed. Halogen re-parented the overlay back
+  -- under the component root on the close re-render, so re-adopt it into body (it must linger
+  -- there with data-state=closed through the exit animation). Then read the content ref and
+  -- arm the exit: if it has a running CSS exit animation, finishExit when `animationend` fires;
+  -- otherwise finishExit now (no animation ⇒ immediate unmount, like radix). The modal envelope
+  -- (scroll-lock, guards, hideOthers) is intentionally NOT torn down here — it lingers until AnimDone.
+  AfterClose -> do
+    -- Arm the exit FIRST (the `animSub` modify re-renders, which re-parents the overlay back
+    -- under the component root), THEN re-adopt into body as the LAST effect so no subsequent
+    -- render moves it out again (mirrors AfterOpen's "no modify after adopt" discipline).
+    mnode <- H.getHTMLElementRef contentRef
+    armed <- case mnode of
+      Nothing -> pure false
+      Just node -> do
+        animates <- liftEffect (hasAnimation node)
+        if animates then do
+          sub <- H.subscribe (animationEnd (HTMLElement.toEventTarget node) AnimDone)
+          H.modify_ _ { animSub = Just sub }
+          pure true
+        else pure false
+    if armed then do
+      -- re-adopt the overlay BEFORE the trailing focus guard (the guards already exist; a
+      -- plain appendChild would land it after the trail guard and break body order).
+      mwrap <- H.getHTMLElementRef portalRef
+      for_ mwrap \wrap -> liftEffect (Envelope.reAdoptBeforeTrail wrap)
+      -- release the pointer block the OPEN envelope set: radix's RemoveScroll disables the
+      -- moment `open` flips false (the body `pointer-events:none` and the content's
+      -- `pointer-events:auto` go away), while the closing node lingers for the exit animation.
+      -- The `data-scroll-locked` marker + focus guards + hideOthers stay until unmount.
+      liftEffect Envelope.releaseScrollPointer
+      for_ mnode \node -> liftEffect (Envelope.clearPointerEvents (HTMLElement.toElement node))
+    else finishClose
+  AnimDone -> finishClose
 
 openDialog :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openDialog = do
@@ -353,25 +406,31 @@ openDialog = do
     -- now, before the portal, so no post-open `modify` is needed (which would un-portal).
     doc <- liftEffect (HTML.window >>= Window.document)
     mprev <- liftEffect (HTMLDocument.activeElement doc)
-    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev }
+    -- re-opening cancels any in-flight exit (the overlay is still mounted/Closing).
+    for_ st.animSub H.unsubscribe
+    H.modify_ _ { ctrl = (change true st.ctrl).next, restoreEl = mprev, presence = Open, animSub = Nothing }
     H.raise (OpenChanged true)
     sub <-
       if st.closeOnEscape then do
         Just <$> H.subscribe (Dismiss.escape (HTMLDocument.toEventTarget doc) EscapePressed)
       else pure Nothing
     -- portal + focus happen AFTER the render flushes (the content ref isn't live yet).
-    psid <- scheduleAfterOpen
+    psid <- scheduleAfter AfterOpen
     H.modify_ _ { escSub = sub, postSub = Just psid, locked = st.modal }
 
--- | Dispatch `AfterOpen` on the next animation frame (after Halogen patches the open
--- | render). A one-shot subscription, torn down in `closeDialog`.
-scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
-scheduleAfterOpen = do
+-- | Dispatch `act` on the next animation frame (after Halogen patches the render). A one-shot
+-- | subscription; the open path tracks it in `postSub` (torn down in closeDialog).
+scheduleAfter :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfter act = do
   { emitter, listener } <- liftEffect HS.create
-  sid <- H.subscribe (AfterOpen <$ emitter)
+  sid <- H.subscribe (act <$ emitter)
   liftEffect (Portal.afterFrame (HS.notify listener unit))
   pure sid
 
+-- | Begin the close: flip controllable + Presence to Closing (the overlay stays MOUNTED with
+-- | data-state=closed, still portaled in body, envelope still up), tear down the open-time
+-- | document subscriptions, restore focus to the trigger, and schedule AfterClose to arm the
+-- | exit animation on the next frame. The envelope teardown + unmount happen at AnimDone.
 closeDialog :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeDialog = do
   st <- H.get
@@ -379,9 +438,20 @@ closeDialog = do
     for_ st.escSub H.unsubscribe
     for_ st.postSub H.unsubscribe
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    when st.locked (liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll))
-    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, escSub = Nothing, postSub = Nothing, locked = false }
+    H.modify_ _ { ctrl = (change false st.ctrl).next, presence = present false st.presence, escSub = Nothing, postSub = Nothing }
     H.raise (OpenChanged false)
+    psid <- scheduleAfter AfterClose
+    H.modify_ _ { postSub = Just psid }
+
+-- | The exit animation finished (or there was none): tear down the modal envelope, drop the
+-- | overlay (Presence Closing → Closed unmounts it), and clear the exit subscriptions.
+finishClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+finishClose = do
+  st <- H.get
+  for_ st.animSub H.unsubscribe
+  for_ st.postSub H.unsubscribe
+  when st.locked (liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll))
+  H.modify_ _ { presence = finishExit st.presence, restoreEl = Nothing, animSub = Nothing, postSub = Nothing, locked = false }
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

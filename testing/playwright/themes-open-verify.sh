@@ -13,9 +13,11 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; HY="$(cd "$HERE/../.." && pwd)"
 OUT="$HY/testing/golden/themes/golden-dom"
 
-# default: every committed oracle (<id>.<state>.txt → <id>:<state>)
+# default: every committed OPEN-state oracle (<id>.<state>.txt → <id>:<state>). The closing
+# oracles (<id>.closing.txt) are driven by a separate harness (themes-closing-verify.sh) — they
+# need the open→Escape→linger script, not the open-state driver — so skip them here.
 if [ "$#" -eq 0 ]; then
-  set -- $(cd "$OUT" && for f in *.txt; do b="${f%.txt}"; echo "${b%.*}:${b##*.}"; done)
+  set -- $(cd "$OUT" && for f in *.txt; do case "$f" in *.closing.txt) continue;; esac; b="${f%.txt}"; echo "${b%.*}:${b##*.}"; done)
 fi
 
 echo "ℵ building the Halogen port (//examples/themes-interactive:app)"
