@@ -1121,6 +1121,43 @@ const CHECKS = [
     await press(pg, "Space"); // collapse
     await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "Space did not collapse the disclosure");
   }},
+
+  // ── Wave-C nav-group depth checks (STR-330) ──────────────────────────────────
+  // NavigationMenu content-link roving — once focus is INSIDE the open content (a separate
+  // FocusGroup over the content's links), ArrowRight/ArrowLeft rove between the links and are
+  // CLAMPED (non-looping, slice-from-current) just like the trigger bar. The `open` story
+  // (defaultValue="one") opens Item One whose content has TWO links (Content One / Content Two).
+  // ArrowDown from the open trigger enters the content (lands on the first link); ArrowRight
+  // then moves to the second; a second ArrowRight stays put (clamp); ArrowLeft returns to the
+  // first. Keyed off role=link inside the open content (aria-labelledby), same on the port.
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "content-link roving: Arrow keys move between content links (CLAMPED, non-looping)", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded="true"]');
+    await press(pg, "ArrowDown"); // enter the content → first link
+    ok(await activeWithin(pg, '[aria-labelledby]'), "ArrowDown did not move focus into the content");
+    const links = '[aria-labelledby] a[href]';
+    await pg.locator(links).first().waitFor();
+    ok((await pg.locator(links).count()) >= 2, "the open content must expose at least two links to rove");
+    ok(await activeIsNth(pg, links, 0), "entry did not land on the FIRST content link");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, links, 1), "ArrowRight did not move to the second content link");
+    // CLAMP: a second ArrowRight at the last link stays put (NavigationMenu content FocusGroup must NOT loop).
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, links, 1), "ArrowRight wrapped (content FocusGroup must clamp, not loop)");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, links, 0), "ArrowLeft did not move back to the first content link");
+  }},
+  // NavigationMenu HORIZONTAL roving no-ops: on a trigger, ArrowUp does NOTHING (vertical axis,
+  // not in the horizontal FocusGroup's plane), and ArrowDown on the open trigger is the ENTRY
+  // key (handled above) — it never roves the trigger bar. This pins the axis-restriction: a
+  // stray ArrowUp must not move trigger focus. Keyed off the trigger bar (button[aria-expanded]).
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "ArrowUp on a trigger is a no-op (horizontal axis only)", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded]');
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "could not focus the first trigger");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "ArrowUp moved trigger focus (must be a no-op on the horizontal axis)");
+  }},
 ];
 
 const b = await chromium.launch();
