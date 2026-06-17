@@ -57,14 +57,16 @@ type Tab =
   }
 
 type Style =
-  { list :: ClassNames
+  { root :: ClassNames
+  , list :: ClassNames
   , trigger :: ClassNames
   , content :: ClassNames
   }
 
 defaultStyle :: Style
 defaultStyle =
-  { list: cn "rdx-tabs-list"
+  { root: cn "rdx-tabs-root"
+  , list: cn "rdx-tabs-list"
   , trigger: cn "rdx-tabs-trigger"
   , content: cn "rdx-tabs-content"
   }
@@ -113,6 +115,7 @@ type State =
   , idPrefix :: String
   , style :: Style
   , uid :: String       -- generated on Initialize; makes ids unique per instance
+  , initialValue :: String  -- the originally-selected value (mount-animation-prevented panel)
   }
 
 data Action
@@ -124,7 +127,10 @@ data Action
 -- | The effective, per-instance unique id base: the readable prefix + the id minted
 -- | on Initialize (so two default-prefixed Tabs on a page never collide).
 base :: State -> String
-base st = if st.uid == "" then st.idPrefix else st.idPrefix <> "-" <> st.uid
+base st
+  | st.uid == "" = st.idPrefix
+  | st.idPrefix == "" = st.uid
+  | otherwise = st.idPrefix <> "-" <> st.uid
 
 tabRef :: String -> String -> H.RefLabel
 tabRef pfx value = H.RefLabel (pfx <> "-tab-" <> value)
@@ -152,6 +158,7 @@ initialState input =
   , idPrefix: input.idPrefix
   , style: input.style
   , uid: ""
+  , initialValue: firstValue input
   }
 
 firstValue :: Input -> String
@@ -164,16 +171,31 @@ firstValue input = case input.defaultValue of
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   HH.div
-    [ dataOrientation st.orientation ]
-    [ HH.div
-        [ role "tablist"
-        , aria "orientation" (orientationName st.orientation)
-        , classes st.style.list
-        , HE.onKeyDown ListKeyDown
-        ]
-        (mapWithIndex (renderTrigger st) st.tabs)
-    , HH.div_ (map (renderPanel st) st.tabs)
+    [ classes st.style.root
+    , dataOrientation st.orientation
+    , HP.attr (HH.AttrName "dir") (dirName st.dir)
     ]
+    ( [ HH.div
+          [ classes st.style.list
+          , aria "orientation" (orientationName st.orientation)
+          , dataOrientation st.orientation
+          , role "tablist"
+          -- RovingFocusGroup gives the tablist outline:none + a roving tabstop of its own.
+          , HP.attr (HH.AttrName "style") "outline: none;"
+          , HP.tabIndex 0
+          , HE.onKeyDown ListKeyDown
+          ]
+          (mapWithIndex (renderTrigger st) st.tabs)
+      ]
+        -- Panels are direct children of the root (no wrapper div); every panel renders,
+        -- non-selected ones carrying `hidden` (matching the committed oracle).
+        <> map (renderPanel st) st.tabs
+    )
+
+dirName :: Dir -> String
+dirName = case _ of
+  LTR -> "ltr"
+  RTL -> "rtl"
 
 renderTrigger :: forall m. State -> Int -> Tab -> H.ComponentHTML Action () m
 renderTrigger st _ tab =
@@ -189,6 +211,7 @@ renderTrigger st _ tab =
         , role "tab"
         , aria "selected" (if selected then "true" else "false")
         , aria "controls" (panelId st tab.value)
+        , dataAttr "radix-collection-item" ""
         , dataState (if selected then "active" else "inactive")
         , dataOrientation st.orientation
         , HP.tabIndex (tabIndexFor curIdx idx)
@@ -200,10 +223,16 @@ renderTrigger st _ tab =
       )
       (map HH.fromPlainHTML tab.label)
 
+-- | Every panel renders. The selected one is `data-state=active` and carries its
+-- | content; non-selected panels are `data-state=inactive hidden` with no children.
+-- | The originally-selected panel additionally carries an (empty) `style` attribute —
+-- | upstream's mount-animation-prevention (`isMountAnimationPreventedRef`) stamps an
+-- | inline `animation-duration` only on the panel that was selected at mount.
 renderPanel :: forall m. State -> Tab -> H.ComponentHTML Action () m
 renderPanel st tab =
   let
     selected = current st.ctrl == tab.value
+    isInitial = tab.value == st.initialValue
   in
     HH.div
       ( [ HP.id (panelId st tab.value)
@@ -215,6 +244,7 @@ renderPanel st tab =
         , classes st.style.content
         ]
           <> (if selected then [] else [ HP.attr (HH.AttrName "hidden") "" ])
+          <> (if isInitial then [ HP.attr (HH.AttrName "style") "" ] else [])
       )
       (if selected then map HH.fromPlainHTML tab.content else [])
 
@@ -222,7 +252,7 @@ triggerId :: State -> String -> String
 triggerId st value = base st <> "-trigger-" <> value
 
 panelId :: State -> String -> String
-panelId st value = base st <> "-panel-" <> value
+panelId st value = base st <> "-content-" <> value
 
 selectedIndex :: State -> Int
 selectedIndex st = fromMaybe 0 (findIndex (\t -> t.value == current st.ctrl) st.tabs)

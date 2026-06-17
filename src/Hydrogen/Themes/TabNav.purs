@@ -39,14 +39,23 @@ import Hydrogen.Themes.Prop (Prop(..), attrs, el)
 tabNavRoot :: forall w i. Array Prop -> Array (HH.HTML w i) -> HH.HTML w i
 tabNavRoot props children =
   HH.element (HH.ElemName "nav")
-    (attrs [ "rt-TabNavRoot" ] (filter isColor props))
-    [ el "div" [ "rt-reset", "rt-BaseTabList", "rt-TabNavList" ]
-        ( [ Size "2"
-          , RawAttr "role" "tablist"
-          , RawAttr "aria-orientation" "horizontal"
-          ] <> filter (not <<< isColor) props
-        )
-        children
+    ( attrs [ "rt-TabNavRoot" ] (filter isColor props)
+        <> [ HP.attr (HH.AttrName "aria-label") "Main"
+           , HP.attr (HH.AttrName "data-orientation") "horizontal"
+           , HP.attr (HH.AttrName "dir") "ltr"
+           ]
+    )
+    -- NavigationMenuList wraps the <ul> in the indicatorTrack <div style="position: relative">
+    -- (NOT display:contents, so the normalizer keeps it).
+    [ HH.div [ HP.style "position: relative;" ]
+        [ el "ul" [ "rt-reset", "rt-BaseTabList", "rt-TabNavList" ]
+            ( [ Size "2"
+              , DataAttr "orientation" "horizontal"
+              , RawAttr "dir" "ltr"
+              ] <> filter (not <<< isColor) props
+            )
+            children
+        ]
     ]
   where
   -- The accent color is the only axis the root <nav> carries; everything else
@@ -62,12 +71,15 @@ tabNavRoot props children =
 -- | link (absent when inactive).
 tabNavLink :: forall w i. Boolean -> String -> Array Prop -> Array (HH.HTML w i) -> HH.HTML w i
 tabNavLink active href props children =
-  HH.div
+  HH.element (HH.ElemName "li")
     [ HP.class_ (HH.ClassName "rt-TabNavItem") ]
     [ HH.element (HH.ElemName "a")
         ( attrs [ "rt-reset", "rt-BaseTabListTrigger", "rt-TabNavLink" ]
-            ( [ RawAttr "href" href ]
-                <> (if active then [ DataAttr "active" "" ] else [])
+            ( [ RawAttr "href" href
+              -- Radix's Collection.ItemSlot (FocusGroupItem) stamps this marker attr.
+              , DataAttr "radix-collection-item" ""
+              ]
+                <> (if active then [ DataAttr "active" "", RawAttr "aria-current" "page" ] else [])
                 <> props
             )
         )
