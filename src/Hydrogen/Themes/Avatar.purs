@@ -24,7 +24,10 @@ import Hydrogen.Themes.Prop (Prop(..), el)
 -- | props override the `size=3` / `variant=soft` defaults (engine axes are last-wins).
 avatar :: forall w i. String -> Array Prop -> HH.HTML w i
 avatar fallback props =
-  el "span" [ "rt-reset", "rt-AvatarRoot" ] ([ Size "3", Variant "soft" ] <> props)
+  -- upstream Avatar.Root emits `data-accent-color={color}` unconditionally — an EMPTY
+  -- `data-accent-color=""` when no `color` is set. Seed `Color ""` first so the attribute
+  -- is always present; a caller's `Color "indigo"` overrides it (engine axes are last-wins).
+  el "span" [ "rt-reset", "rt-AvatarRoot" ] ([ Size "3", Variant "soft", Color "" ] <> props)
     [ el "span" ([ "rt-AvatarFallback" ] <> letterClass) [] [ HH.text fallback ] ]
   where
   letterClass = case length fallback of
