@@ -497,6 +497,40 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "false", "the previously selected segment must deselect on activation");
   }},
 
+  // ScrollArea — the thumb re-offsets on scroll (upstream scroll-area.tsx:780-819 rAF
+  // unlinked-scroll listener; the port recomputes on Halogen onScroll). The rAF/debounce
+  // machinery is an internal detail — NOT DOM-observable — but its RESULT is: after scrolling
+  // the viewport, the thumb's translate3d Y must equal getThumbOffsetFromScroll =
+  // (scrollTop/maxScroll)·(track − thumb). This pins the post-scroll offset the at-rest oracle
+  // never exercised. Computed from live geometry → identical on golden AND port. (--golden first.)
+  { id: "scrollarea", state: "shown", apg: "scrollarea", name: "thumb re-offsets on scroll to getThumbOffsetFromScroll", run: async (pg) => {
+    const vp = pg.locator(".rt-ScrollAreaViewport").first();
+    const thumb = pg.locator(".rt-ScrollAreaThumb").first();
+    await thumb.waitFor();
+    const tyOf = () => pg.evaluate(() => {
+      const t = document.querySelector(".rt-ScrollAreaThumb");
+      const m = new DOMMatrixReadOnly(getComputedStyle(t).transform);
+      return m.m42; // translateY
+    });
+    const before = await tyOf();
+    ok(before < 1, `thumb must start near the top (translateY=${before})`);
+    // scroll the viewport to a fixed offset and let the (rAF / onScroll) recompute flush.
+    await pg.evaluate(() => { document.querySelector(".rt-ScrollAreaViewport").scrollTop = 40; });
+    await pg.waitForTimeout(120);
+    const after = await tyOf();
+    // the EXPECTED offset from the live geometry (the same formula upstream + port use).
+    const expected = await pg.evaluate(() => {
+      const vp = document.querySelector(".rt-ScrollAreaViewport");
+      const sb = document.querySelector('.rt-ScrollAreaScrollbar[data-orientation="vertical"]');
+      const th = document.querySelector(".rt-ScrollAreaThumb");
+      const maxScroll = vp.scrollHeight - vp.clientHeight;
+      const track = sb.clientHeight; const thumb = th.getBoundingClientRect().height;
+      return maxScroll <= 0 ? 0 : (vp.scrollTop / maxScroll) * (track - thumb);
+    });
+    ok(after > before, `thumb did not re-offset on scroll (stayed ${after})`);
+    ok(Math.abs(after - expected) <= 1.5, `thumb translateY ${after} != getThumbOffsetFromScroll ${expected}`);
+  }},
+
   // Slider — https://www.w3.org/WAI/ARIA/apg/patterns/slider/
   // The thumb is role=slider carrying aria-valuemin/valuemax/valuenow. APG keyboard table:
   // Right/Up Arrow increases by step, Left/Down decreases, Home → min, End → max; each change
