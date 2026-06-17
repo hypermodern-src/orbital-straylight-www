@@ -162,6 +162,43 @@ const CHECKS = [
     ok(await activeIsNth(pg, '#root [role="menuitem"]', 0), "focus did not return to the trigger after Escape");
   }},
 
+  // NavigationMenu — https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/ (navigation variant).
+  // The trigger bar is a HORIZONTAL FocusGroup of role=button triggers + role=link items;
+  // ArrowLeft/ArrowRight move between FocusGroup items but DO NOT LOOP (slice-from-current,
+  // unlike Tabs/Menu). With its content OPEN, ArrowDown (horizontal) on the trigger moves focus
+  // INTO the content (first tabbable link); Escape closes + restores focus to the trigger. The
+  // `open` story renders OPEN at first paint via defaultValue="one" (NO open-delay timer on the
+  // capture path). Keyed off role/aria-expanded/data-state only → same on the port. Two items
+  // (Item One open / Item Two); Item One's content has two links.
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "ArrowRight/ArrowLeft rove between triggers (NON-looping)", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded]');
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "could not focus the first trigger");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 1), "ArrowRight did not move to the next trigger");
+    // NON-looping: a second ArrowRight at the last item stays put (no wrap to the first).
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 1), "ArrowRight wrapped (NavigationMenu FocusGroup must NOT loop)");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "ArrowLeft did not move back to the previous trigger");
+  }},
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "ArrowDown on the open trigger moves focus into the content", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded="true"]');
+    ok(await activeIs(pg, '#root button[aria-expanded="true"]'), "could not focus the open trigger");
+    await press(pg, "ArrowDown");
+    ok(await activeWithin(pg, '[aria-labelledby]'), "ArrowDown did not move focus into the open content");
+  }},
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "Escape closes the content and returns focus to the trigger", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded="true"]');
+    await press(pg, "ArrowDown"); // focus into content first (Escape fires from inside)
+    ok(await activeWithin(pg, '[aria-labelledby]'), "did not move focus into the content");
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
+    ok(!(await pg.locator('#root button[aria-expanded="true"]').count()), "Escape did not close the menu (a trigger is still expanded)");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "focus did not return to the trigger after Escape");
+  }},
+
   // Listbox (Select) — https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ (select-only)
   { id: "select", apg: "listbox", name: "open highlights the selected option", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);

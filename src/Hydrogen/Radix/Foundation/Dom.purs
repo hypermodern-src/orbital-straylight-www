@@ -33,6 +33,8 @@ module Hydrogen.Radix.Foundation.Dom
   , inlineStyle
   , setInlineStyle
   , queueMicrotask
+  , OffsetMetrics
+  , offsetMetrics
   ) where
 
 import Data.Unit (Unit)
@@ -63,3 +65,16 @@ queueMicrotask :: Effect Unit -> Effect Unit
 queueMicrotask = queueMicrotask_
 
 foreign import queueMicrotask_ :: Effect Unit -> Effect Unit
+
+-- | An element's CSS *layout-box* offsets — its `offsetWidth`/`offsetHeight` (border-box
+-- | size) and `offsetLeft`/`offsetTop` (position relative to its offsetParent). These are
+-- | the values NavigationMenu's Indicator (active trigger offsetWidth/offsetLeft) and
+-- | Viewport (active content offsetWidth/offsetHeight) measure to size/place themselves.
+type OffsetMetrics = { width :: Number, height :: Number, left :: Number, top :: Number }
+
+-- | Read an element's `offset*` layout metrics in one DOM touch. Distinct from
+-- | `getBoundingClientRect` (Float.Popper.measureRect): `offset*` is the integral, layout-box
+-- | geometry UNAFFECTED by CSS transforms, which is exactly what NavigationMenu measures —
+-- | so the indicator/viewport numbers match upstream's structurally (both then normalize to
+-- | `<px>` in the DOM oracle). Observing-only: retains nothing, mutates nothing.
+foreign import offsetMetrics :: HTMLElement -> Effect OffsetMetrics

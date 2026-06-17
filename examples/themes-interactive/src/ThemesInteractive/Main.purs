@@ -33,6 +33,7 @@ import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Menubar as Menubar
+import Hydrogen.Radix.NavigationMenu as NavigationMenu
 import Hydrogen.Radix.OneTimePasswordField as Otp
 import Hydrogen.Radix.PasswordToggleField as PasswordToggleField
 import Hydrogen.Radix.Popover as Popover
@@ -68,6 +69,7 @@ type Slots =
   , dropdownmenu :: DropdownMenu.Slot Unit
   , contextmenu :: ContextMenu.Slot Unit
   , menubar :: Menubar.Slot Unit
+  , navigationmenu :: NavigationMenu.Slot Unit
   , select :: Select.Slot Unit
   , slider :: Slider.Slot Unit
   , accordion :: Accordion.Slot Unit
@@ -112,6 +114,9 @@ _contextmenu = Proxy
 
 _menubar :: Proxy "menubar"
 _menubar = Proxy
+
+_navigationmenu :: Proxy "navigationmenu"
+_navigationmenu = Proxy
 
 _select :: Proxy "select"
 _select = Proxy
@@ -208,6 +213,7 @@ view c s =
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
             "menubar" -> HH.slot_ _menubar unit Menubar.component menubarInput
+            "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
             "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
@@ -555,6 +561,35 @@ menubarInput = Menubar.defaultInput
         , entries:
             [ Menubar.menuItem "zoom-in" [ HH.text "Zoom In" ]
             , Menubar.menuItem "zoom-out" [ HH.text "Zoom Out" ]
+            ]
+        }
+      ]
+  }
+
+-- | navigationmenu — the bare @radix-ui NavigationMenu primitive (Radix Themes ships none, so
+-- | NO rt-* classes; the golden is the unstyled primitive). Two menu items, the SAME structure
+-- | and labels as the golden story: Item One (open via defaultValue="one") → Content One/Two
+-- | links; Item Two → Content Three. Viewport mode (the Content is proxied into the Viewport
+-- | sibling), with the measured Indicator + size vars. defaultValue="one" so it is OPEN at first
+-- | paint (off the open-delay timer path). Bare ⇒ every Style slot empty.
+navigationMenuInput :: String -> NavigationMenu.Input
+navigationMenuInput s = NavigationMenu.defaultInput
+  -- OPEN at first paint (defaultValue="one") ONLY for the explicit `open` capture (?s=open);
+  -- every other path (the `closed`/`rest` capture, the index) renders at rest — mirroring the
+  -- golden story's `currentState() === "open"` switch (so the a11y `rest` baseline matches too).
+  { defaultValue = if s == "open" then "one" else ""
+  , items =
+      [ { value: "one"
+        , trigger: [ HH.text "Item One" ]
+        , links:
+            [ { href: "#one", label: [ HH.text "Content One" ], active: false }
+            , { href: "#two", label: [ HH.text "Content Two" ], active: false }
+            ]
+        }
+      , { value: "two"
+        , trigger: [ HH.text "Item Two" ]
+        , links:
+            [ { href: "#three", label: [ HH.text "Content Three" ], active: false }
             ]
         }
       ]

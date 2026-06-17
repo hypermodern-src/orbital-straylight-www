@@ -58,6 +58,14 @@ export const CLOSE = {
   //           animation). Unlike the THEMED DropdownMenu (whose rt-* content animates and so
   //           lingers), there is no closing node to capture. Dropped from the matrix, same as
   //           select/tooltip. (The OPEN/item1 oracles cover the menubar DOM contract.)
+  // navigationmenu — the bare @radix-ui/react-navigation-menu primitive ships NO exit CSS, so
+  //           its viewport-proxied Content (Presence present={isActive}) has animation-name:none.
+  //           On value-clear (Escape / re-click) the active content node UNMOUNTS SYNCHRONOUSLY —
+  //           verified empirically: the next frame the open trigger is gone (aria-expanded=true
+  //           count → 0), no lingering data-state="closed" / data-motion node exists, even with
+  //           animations pinned. Same call as menubar/select/tooltip — dropped from the matrix.
+  //           (The closed/open DOM oracles cover the full DOM contract; the keyboard close path
+  //           is the APG "Escape closes + restores focus" gate.)
 };
 
 // id → { state → (pg) => drive into that state }. `open` is the canonical "shown" state
@@ -103,6 +111,35 @@ export const STATES = {
   },
   select: {
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
+  },
+  navigationmenu: {
+    // OPEN at first paint via defaultValue="one" — NO click/hover, so the delayDuration/
+    // skipDelayDuration open timers never run (the toast-like racy part is off the capture
+    // path). Wait for the open trigger (aria-expanded=true), the mounted content (data-state=
+    // open), the Viewport's measured size var to resolve (offsetWidth/Height via ResizeObserver
+    // → rAF), AND the Indicator node ([data-state="visible"], which renders null until its
+    // position is measured). Then settle() flushes the ResizeObserver rAF. Keyed off UPSTREAM
+    // role/data-* selectors only, so the same driver runs against golden and port.
+    open: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      // the active content (proxied into the viewport) — has aria-labelledby, NO data-state.
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      // the indicator renders null until its position is measured (it's an absolutely-
+      // positioned zero-flow node, so wait for ATTACHED, not visible).
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      // the viewport sets its size var only after measuring the active content's offset dims.
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
+    // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
+    // omits defaultValue. No interaction — wait for the closed trigger.
+    closed: async (pg) => {
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+    },
   },
 
   // ── Interactive (stateful, non-overlay) components ──────────────────────────────

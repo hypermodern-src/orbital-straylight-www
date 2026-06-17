@@ -18,6 +18,7 @@ purescript_library(
         "HoverCard.purs",
         "Label.purs",
         "Menubar.purs",
+        "NavigationMenu.purs",
         "OneTimePasswordField.purs",
         "PasswordToggleField.purs",
         "Popover.purs",

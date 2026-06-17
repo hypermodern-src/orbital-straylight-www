@@ -1,8 +1,8 @@
 // Hydrogen.Radix.Dom — the ONLY foreign code in the radix port.
 //
-// Three primitives, kept here because purescript-web-* exposes no binding for
-// them (see Dom.purs for the why of each). DOM-only: standard browser APIs, no
-// external dependency, no module state. If you reach for a fourth, it almost
+// A handful of primitives, kept here because purescript-web-* exposes no binding
+// for them (see Dom.purs for the why of each). DOM-only: standard browser APIs, no
+// external dependency, no module state. Before adding another, check it almost
 // certainly already exists in Web.DOM.* / Web.HTML.* — use that instead.
 
 // getComputedStyle(el).getPropertyValue(prop): the engine's resolved value (the
@@ -26,3 +26,14 @@ export const setInlineStyle = el => prop => value => () => {
 export const queueMicrotask_ = eff => () => {
   queueMicrotask(eff);
 };
+
+// { width: el.offsetWidth, height: el.offsetHeight, left: el.offsetLeft, top: el.offsetTop }:
+// the element's layout-box geometry (integral, transform-independent). NavigationMenu measures
+// these (NOT getBoundingClientRect) to size its viewport (active content) and place its
+// indicator (active trigger), so the port must read the same to match upstream.
+export const offsetMetrics = el => () => ({
+  width: el.offsetWidth,
+  height: el.offsetHeight,
+  left: el.offsetLeft,
+  top: el.offsetTop,
+});

@@ -11,6 +11,7 @@ import "@radix-ui/themes/styles.css";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import * as Menubar from "@radix-ui/react-menubar";
+import * as NavigationMenu from "@radix-ui/react-navigation-menu";
 import { Toggle } from "@radix-ui/react-toggle";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import * as Toolbar from "@radix-ui/react-toolbar";
@@ -886,6 +887,47 @@ const PAGES: Page[] = [
         </Menubar.Menu>
       </Menubar.Root>
     ),
+  },
+  {
+    id: "navigationmenu",
+    label: "Navigation Menu",
+    interactive: true,
+    // Bare @radix-ui/react-navigation-menu (Radix Themes ships none) — NO rt-* classes; the
+    // genuine upstream primitive. A horizontal nav with ONE item (value="one"): Trigger
+    // "Item One" + Content (two Links). DETERMINISM: the `open` story sets defaultValue="one"
+    // so the panel is OPEN at first paint — sidestepping the delayDuration/skipDelayDuration
+    // open timers entirely (no hover, no waitForTimeout race). The `closed` variant (?s=closed)
+    // omits defaultValue → at rest. Viewport mode (the default): Content is proxied INTO the
+    // Viewport (a sibling of List under Root), which measures the active content and sets the
+    // --radix-navigation-menu-viewport-width/height vars; the Indicator (inside the List's
+    // relative track) measures the active trigger's offset and renders translateX(offset)/width.
+    node: (() => {
+      // Render OPEN only for the explicit `open` capture state (defaultValue="one" → open at
+      // first paint, no timer). Every other path (the `closed`/`rest` capture, the index
+      // gallery) renders at rest, so the a11y `rest` baseline is the genuine closed nav.
+      const open = currentState() === "open";
+      return (
+        <NavigationMenu.Root {...(open ? { defaultValue: "one" } : {})}>
+          <NavigationMenu.List>
+            <NavigationMenu.Item value="one">
+              <NavigationMenu.Trigger>Item One</NavigationMenu.Trigger>
+              <NavigationMenu.Content>
+                <NavigationMenu.Link href="#one">Content One</NavigationMenu.Link>
+                <NavigationMenu.Link href="#two">Content Two</NavigationMenu.Link>
+              </NavigationMenu.Content>
+            </NavigationMenu.Item>
+            <NavigationMenu.Item value="two">
+              <NavigationMenu.Trigger>Item Two</NavigationMenu.Trigger>
+              <NavigationMenu.Content>
+                <NavigationMenu.Link href="#three">Content Three</NavigationMenu.Link>
+              </NavigationMenu.Content>
+            </NavigationMenu.Item>
+            <NavigationMenu.Indicator />
+          </NavigationMenu.List>
+          <NavigationMenu.Viewport />
+        </NavigationMenu.Root>
+      );
+    })(),
   },
   {
     id: "tabs",

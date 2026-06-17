@@ -30,6 +30,8 @@ STATES=(
   "collapsible:open"
   "menubar:open"
   "menubar:item1"
+  "navigationmenu:closed"
+  "navigationmenu:open"
   "tabs:tab2"
   "radiogroup:checked"
   "checkbox:checked"
