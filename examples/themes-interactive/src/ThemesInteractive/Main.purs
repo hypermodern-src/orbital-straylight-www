@@ -30,6 +30,7 @@ import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
+import Hydrogen.Radix.PasswordToggleField as PasswordToggleField
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.RadioGroup as RadioGroup
 import Hydrogen.Radix.ScrollArea as ScrollArea
@@ -76,6 +77,7 @@ type Slots =
   , radiocards :: RadioGroup.Slot Unit
   , checkboxcards :: Checkbox.Slot Unit
   , scrollarea :: ScrollArea.Slot Unit
+  , passwordtoggle :: PasswordToggleField.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -144,19 +146,23 @@ _checkboxcards = Proxy
 _scrollarea :: Proxy "scrollarea"
 _scrollarea = Proxy
 
+_passwordtoggle :: Proxy "passwordtoggle"
+_passwordtoggle = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
+  s <- queryParam "s"
   HA.runHalogenAff do
     HA.awaitLoad
     mEl <- HA.selectElement (QuerySelector "#root")
-    for_ mEl \el -> void (runUI (root c) unit el)
+    for_ mEl \el -> void (runUI (root c s) unit el)
 
-root :: forall q i o. String -> H.Component q i o Aff
-root c =
+root :: forall q i o. String -> String -> H.Component q i o Aff
+root c s =
   H.mkComponent
     { initialState: const unit
-    , render: const (view c)
+    , render: const (view c s)
     , eval: H.mkEval H.defaultEval
     }
 
@@ -164,8 +170,8 @@ root c =
 -- | upstream nests it (the <body> stays bare). Each demo is then wrapped in `Box p="6"` as
 -- | the golden wraps its pages. Portaled overlays re-apply the theme themselves (so adopted-
 -- | to-body content stays themed) — see `portalThemeAttrs`.
-view :: String -> H.ComponentHTML Void Slots Aff
-view c =
+view :: String -> String -> H.ComponentHTML Void Slots Aff
+view c s =
   HH.div
     ( [ HP.class_ (HH.ClassName "radix-themes light")
       , HP.style "--default-font-family: 'Inter Variable', sans-serif;"
@@ -196,6 +202,7 @@ view c =
             "checkboxcards" -> checkboxCardsPage
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
+            "passwordtoggle" -> passwordTogglePage
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -873,6 +880,30 @@ checkboxCardsPage =
         , HH.slot_ _checkboxcards unit Checkbox.component checkboxCardsInput
         ]
     ]
+
+-- | passwordtoggle — the bare @radix-ui PasswordToggleField primitive (Radix Themes
+-- | ships none, so NO rt-* classes; the golden is the unstyled primitive). The page is a
+-- | `<Box>` (inner rt-Box) wrapping a `<label for=password>Password</label>` sibling + the
+-- | component (input+button). The explicit input id="password" makes inputId literal (no
+-- | useId) so the toggle's id/aria-controls don't even need the id normalizer; a text Slot
+-- | (Show/Hide) suppresses the auto aria-label. The driver clicks the toggle → type flips
+-- | password→text and the Slot text Show→Hide.
+passwordTogglePage :: H.ComponentHTML Void Slots Aff
+passwordTogglePage =
+  box []
+    [ HH.label
+        [ HP.attr (HH.AttrName "for") "password" ]
+        [ HH.text "Password" ]
+    , HH.slot_ _passwordtoggle unit PasswordToggleField.component passwordToggleInput
+    ]
+
+passwordToggleInput :: PasswordToggleField.Input
+passwordToggleInput = PasswordToggleField.defaultInput
+  { inputId = Just "password"
+  , toggleVisible = [ HH.text "Hide" ]
+  , toggleHidden = [ HH.text "Show" ]
+  , style = { input: cn "", toggle: cn "" }
+  }
 
 -- | tabnav — themes-only AND at-rest (no Halogen component): rendered directly inline
 -- | as the declarative active-link nav. Account is the active link.
