@@ -598,6 +598,20 @@ const CHECKS = [
     await press(pg, "ArrowLeft");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", min, "ArrowLeft past the minimum did not clamp");
   }},
+  // Vertical orientation (?s=vertical): ArrowUp = +step, ArrowDown = -step; ArrowLeft/Right are
+  // NO-OPS (radix swaps the active axis for vertical). Proves the orientation-gated keyboard axis.
+  { id: "slider", state: "vertical", apg: "slider", name: "vertical: ArrowUp/ArrowDown step; ArrowLeft/ArrowRight are no-ops", run: async (pg) => {
+    await pg.locator('[role="slider"][aria-orientation="vertical"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    await press(pg, "ArrowUp");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before + 1), "vertical ArrowUp did not increment by one step");
+    await press(pg, "ArrowDown");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "vertical ArrowDown did not decrement by one step");
+    await press(pg, "ArrowLeft");
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "vertical ArrowLeft/ArrowRight must be no-ops");
+  }},
 
   // Toolbar — https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
   // Roving tabindex over the focusable items (button New, link Edit, toggle items L/C — each a

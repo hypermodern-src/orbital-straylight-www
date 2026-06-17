@@ -1305,8 +1305,20 @@ const PAGES: Page[] = [
     interactive: true,
     // `?s=disabled` renders the disabled slider (aria-disabled + data-disabled on root/track/
     // range/thumb, thumb tabindex dropped). Default (rest/stepped) is the enabled single thumb.
+    // `?s=vertical` renders the vertical-orientation slider (data-orientation=vertical,
+    // translateY thumb-transform, bottom/top edges on range+thumb). The vertical box gets a
+    // fixed height so the track has extent.
     node: (() => {
-      const disabled = currentState() === "disabled";
+      const s = currentState();
+      const disabled = s === "disabled";
+      const vertical = s === "vertical";
+      if (vertical) {
+        return (
+          <Box style={{ height: 160 }}>
+            <Slider defaultValue={[40]} orientation="vertical" />
+          </Box>
+        );
+      }
       return (
         <Box style={{ maxWidth: 320 }}>
           <Slider defaultValue={[40]} {...(disabled ? { disabled: true } : {})} />

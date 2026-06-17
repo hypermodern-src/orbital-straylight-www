@@ -576,6 +576,14 @@ export const STATES = {
       await pg.waitForFunction(() =>
         !document.querySelector('[role="slider"]')?.hasAttribute("tabindex"));
     },
+    // `?s=vertical` → orientation flip: data-orientation=vertical on root/track/range/thumb,
+    // --radix-slider-thumb-transform: translateY(50%), range uses bottom/top edges, thumb wrapper
+    // uses `bottom: calc(40% + <px>)`. No interaction; the at-rest vertical DOM is the oracle.
+    vertical: async (pg) => {
+      await root(pg).locator('[role="slider"][data-orientation="vertical"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-orientation") === "vertical");
+    },
   },
 
   // ── Bare @radix-ui/react-* primitives (toolbar / passwordtoggle / otp / form) ─────────

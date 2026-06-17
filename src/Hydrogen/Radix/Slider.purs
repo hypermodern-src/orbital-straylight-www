@@ -192,16 +192,26 @@ render st =
   let
     value = current st.ctrl
     pct = percent st value
-    rangeRight = fmtPct (100.0 - pct)
-    thumbLeft = fmtPct pct
+    -- The orientation picks the CSS edges (radix SliderHorizontal/SliderVertical): horizontal
+    -- LTR slides from the left (startEdge=left, endEdge=right, thumb-transform translateX(-50%));
+    -- vertical slides from the bottom (startEdge=bottom, endEdge=top, thumb-transform translateY(50%)).
+    -- Range stamps `{startEdge}: 0%; {endEdge}: {100-pct}%`; the thumb wrapper stamps
+    -- `{startEdge}: calc({pct}% + <px>)`. Key ORDER (start then end) matches React's style object.
+    isVertical = st.orientation == Vertical
+    startEdge = if isVertical then "bottom" else "left"
+    endEdge = if isVertical then "top" else "right"
+    thumbTransform = if isVertical then "translateY(50%)" else "translateX(-50%)"
+    rangeEnd = fmtPct (100.0 - pct)
+    thumbStart = fmtPct pct
   in
     HH.span
       ( [ classes st.style.root
         , aria "disabled" (if st.disabled then "true" else "false")
         , dataOrientation st.orientation
-        , HP.attr (HH.AttrName "dir") (dirName st.dir)
-        , HP.attr (HH.AttrName "style") "--radix-slider-thumb-transform: translateX(-50%);"
+        , HP.attr (HH.AttrName "style") ("--radix-slider-thumb-transform: " <> thumbTransform <> ";")
         ]
+          -- only SliderHorizontal forwards `dir` to SliderImpl (radix); SliderVertical omits it.
+          <> (if isVertical then [] else [ HP.attr (HH.AttrName "dir") (dirName st.dir) ])
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
       )
       [ HH.span
@@ -213,7 +223,7 @@ render st =
           [ HH.span
               ( [ classes st.style.range
                 , dataOrientation st.orientation
-                , HP.attr (HH.AttrName "style") ("left: 0%; right: " <> rangeRight <> "%;")
+                , HP.attr (HH.AttrName "style") (startEdge <> ": 0%; " <> endEdge <> ": " <> rangeEnd <> "%;")
                 ]
                   <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
               )
@@ -221,7 +231,7 @@ render st =
           ]
       , HH.span
           [ HP.attr (HH.AttrName "style")
-              ("transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(" <> thumbLeft <> "% + 0px);")
+              ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> thumbStart <> "% + 0px);")
           ]
           [ HH.span
               ( [ classes st.style.thumb

@@ -228,7 +228,12 @@ view c s =
             "menubar" -> HH.slot_ _menubar unit Menubar.component (menubarInput s)
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
-            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
+            "slider" ->
+              -- `?s=vertical` swaps the wrapper to a fixed-height box (matching the golden's
+              -- height:160 box) and drives the vertical-orientation slider; otherwise the
+              -- horizontal max-width:320 box.
+              if s == "vertical" then box [ StyleProp "height" "160px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
+              else box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
             -- `?s=disabled` renders the Root disabled (data-disabled stamping). The primitive
             -- injects (via exitCss) the golden story's exit keyframe on the closing content so
@@ -693,6 +698,7 @@ sliderInput s = Slider.defaultInput
   , max = 100
   , step = 1
   , disabled = s == "disabled"
+  , orientation = if s == "vertical" then Vertical else Horizontal
   , style =
       { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
       , track: cn "rt-SliderTrack"

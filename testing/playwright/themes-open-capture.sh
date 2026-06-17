@@ -112,6 +112,8 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  # ── Wave-C inputs depth-audit additions (STR-330) ────────────────────────────
+  "slider:vertical"
 )
 
 echo "ℵ building golden dist (bun)"
