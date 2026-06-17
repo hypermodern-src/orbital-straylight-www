@@ -649,6 +649,26 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
 
+  // Select trigger keyboard-OPEN (select.tsx:31 OPEN_KEYS, :380-389 handleOpen) — a
+  // keyboard-only user opens the listbox with Space/Enter/ArrowUp/ArrowDown on the focused
+  // trigger; on open focus moves to the SELECTED option. Keyed off role only → golden + port.
+  ...["ArrowDown", "ArrowUp", "Enter", " "].map((key) => ({
+    id: "select", apg: "listbox", name: `${key === " " ? "Space" : key} on the trigger opens the listbox`, run: async (pg) => {
+      await pg.locator(".rt-SelectTrigger").focus();
+      ok(!(await visible(pg, '[role="listbox"]')), "listbox should be closed before keydown");
+      await pg.keyboard.press(key === " " ? "Space" : key);
+      await pg.locator('[role="listbox"]').waitFor();
+      ok(await visible(pg, '[role="listbox"]'), `${key} did not open the listbox`);
+      await hlStarts(pg, "Apple");
+    },
+  })),
+  { id: "select", apg: "listbox", name: "Home highlights the first option, End the last", run: async (pg) => {
+    await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor();
+    await hlStarts(pg, "Apple");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Grape");
+    await pg.keyboard.press("Home"); await hlStarts(pg, "Apple");
+  }},
+
   // Menubar in-menu keyboard SELECTION (re-exports react-menu SELECTION_KEYS) — Enter/Space on
   // the focused item fires onSelect + closes; and the disabled-item skip in vertical roving.
   { id: "menubar", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
