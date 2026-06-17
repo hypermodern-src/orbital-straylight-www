@@ -51,6 +51,13 @@ export const CLOSE = {
   // tooltip — Radix Tooltip.Content likewise unmounts on hide (pointer-leave/blur) with no
   //           lingering data-state="closed" content node — only the trigger flips to closed.
   //           No exit lifecycle node exists to snapshot. Dropped from the matrix.
+  // menubar — the BARE @radix-ui/react-menubar primitive carries NO rt-* exit CSS, so its
+  //           MenubarContent has animation-name:none. Presence therefore unmounts it
+  //           SYNCHRONOUSLY on Escape (verified: the role=menu node is GONE the next frame,
+  //           even with animations pinned to 100s — the pin only stalls nodes that HAVE an
+  //           animation). Unlike the THEMED DropdownMenu (whose rt-* content animates and so
+  //           lingers), there is no closing node to capture. Dropped from the matrix, same as
+  //           select/tooltip. (The OPEN/item1 oracles cover the menubar DOM contract.)
 };
 
 // id → { state → (pg) => drive into that state }. `open` is the canonical "shown" state
@@ -81,6 +88,18 @@ export const STATES = {
   },
   contextmenu: {
     open: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),
+  },
+  menubar: {
+    // Menubar is a horizontal roving bar of DropdownMenu-style menus. Open the FIRST menu
+    // (File) by clicking its trigger (role=menuitem); the menus are non-modal so no scroll-lock.
+    // Keyed off upstream role/data-* only, so the same driver runs against golden and port.
+    open: async (pg) => openMenu(pg, () => root(pg).getByRole("menuitem").first().click()),
+    // open then ArrowDown → the first menu item lands data-highlighted (roving tabindex=0).
+    item1: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menu"] [role="menuitem"][data-highlighted]').first().waitFor();
+    },
   },
   select: {
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },

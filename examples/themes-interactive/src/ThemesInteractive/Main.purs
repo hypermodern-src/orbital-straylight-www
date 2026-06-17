@@ -32,6 +32,7 @@ import Hydrogen.Radix.Form as Form
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
+import Hydrogen.Radix.Menubar as Menubar
 import Hydrogen.Radix.OneTimePasswordField as Otp
 import Hydrogen.Radix.PasswordToggleField as PasswordToggleField
 import Hydrogen.Radix.Popover as Popover
@@ -66,6 +67,7 @@ type Slots =
   , hovercard :: HoverCard.Slot Unit
   , dropdownmenu :: DropdownMenu.Slot Unit
   , contextmenu :: ContextMenu.Slot Unit
+  , menubar :: Menubar.Slot Unit
   , select :: Select.Slot Unit
   , slider :: Slider.Slot Unit
   , accordion :: Accordion.Slot Unit
@@ -107,6 +109,9 @@ _dropdownmenu = Proxy
 
 _contextmenu :: Proxy "contextmenu"
 _contextmenu = Proxy
+
+_menubar :: Proxy "menubar"
+_menubar = Proxy
 
 _select :: Proxy "select"
 _select = Proxy
@@ -202,6 +207,7 @@ view c s =
             "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
+            "menubar" -> HH.slot_ _menubar unit Menubar.component menubarInput
             "select" -> HH.slot_ _select unit Select.component selectInput
             "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
@@ -515,6 +521,43 @@ contextMenuStyle =
   , item: cn "rt-BaseMenuItem rt-ContextMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-ContextMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"
+  }
+
+-- | menubar — the bare @radix-ui Menubar primitive (Radix Themes ships none, so NO rt-*
+-- | classes; the golden is the unstyled primitive). A horizontal roving bar of three menus
+-- | (File/Edit/View); File's menu has New Tab / New Window / sep / Print, the same structure
+-- | and labels as the golden story. Bare ⇒ every Style slot empty, no portalAttrs. The content
+-- | style carries outline:none + the `--radix-menubar-*` popper var aliases (NO pointer-events:
+-- | the menus are modal={false}, so no scroll-lock/pointer block — see Menubar's non-modal env).
+menubarInput :: Menubar.Input
+menubarInput = Menubar.defaultInput
+  { align = Start
+  , contentStyle = "outline: none; " <> popperContentVars "menubar"
+  , menus =
+      [ { value: "file"
+        , trigger: [ HH.text "File" ]
+        , entries:
+            [ Menubar.menuItem "new-tab" [ HH.text "New Tab" ]
+            , Menubar.menuItem "new-window" [ HH.text "New Window" ]
+            , Menubar.menuSeparator
+            , Menubar.menuItem "print" [ HH.text "Print" ]
+            ]
+        }
+      , { value: "edit"
+        , trigger: [ HH.text "Edit" ]
+        , entries:
+            [ Menubar.menuItem "undo" [ HH.text "Undo" ]
+            , Menubar.menuItem "redo" [ HH.text "Redo" ]
+            ]
+        }
+      , { value: "view"
+        , trigger: [ HH.text "View" ]
+        , entries:
+            [ Menubar.menuItem "zoom-in" [ HH.text "Zoom In" ]
+            , Menubar.menuItem "zoom-out" [ HH.text "Zoom Out" ]
+            ]
+        }
+      ]
   }
 
 -- | The themed Select: a surface trigger showing the selected value + chevron, opening a

@@ -10,6 +10,7 @@ import "@radix-ui/themes/styles.css";
 // Halogen port reproduces). They live in their own packages, present in node_modules.
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Collapsible from "@radix-ui/react-collapsible";
+import * as Menubar from "@radix-ui/react-menubar";
 import { Toggle } from "@radix-ui/react-toggle";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import * as Toolbar from "@radix-ui/react-toolbar";
@@ -841,6 +842,49 @@ const PAGES: Page[] = [
           </Box>
         </Collapsible.Content>
       </Collapsible.Root>
+    ),
+  },
+  {
+    id: "menubar",
+    label: "Menubar",
+    interactive: true,
+    // Bare @radix-ui/react-menubar (Radix Themes ships none) — NO rt-* classes; the genuine
+    // upstream primitive. A horizontal roving bar of DropdownMenu-style menus. Each
+    // MenubarMenu is non-modal (no scroll-lock/hideOthers), but DOES use the Popper + Presence
+    // + roving. The driver opens the first menu (File) and (for item1) ArrowDowns to highlight
+    // the first item. Fixed labels, no checkbox/radio/sub in v1.
+    node: (
+      <Menubar.Root>
+        <Menubar.Menu value="file">
+          <Menubar.Trigger>File</Menubar.Trigger>
+          <Menubar.Portal>
+            <Menubar.Content align="start">
+              <Menubar.Item>New Tab</Menubar.Item>
+              <Menubar.Item>New Window</Menubar.Item>
+              <Menubar.Separator />
+              <Menubar.Item>Print</Menubar.Item>
+            </Menubar.Content>
+          </Menubar.Portal>
+        </Menubar.Menu>
+        <Menubar.Menu value="edit">
+          <Menubar.Trigger>Edit</Menubar.Trigger>
+          <Menubar.Portal>
+            <Menubar.Content align="start">
+              <Menubar.Item>Undo</Menubar.Item>
+              <Menubar.Item>Redo</Menubar.Item>
+            </Menubar.Content>
+          </Menubar.Portal>
+        </Menubar.Menu>
+        <Menubar.Menu value="view">
+          <Menubar.Trigger>View</Menubar.Trigger>
+          <Menubar.Portal>
+            <Menubar.Content align="start">
+              <Menubar.Item>Zoom In</Menubar.Item>
+              <Menubar.Item>Zoom Out</Menubar.Item>
+            </Menubar.Content>
+          </Menubar.Portal>
+        </Menubar.Menu>
+      </Menubar.Root>
     ),
   },
   {

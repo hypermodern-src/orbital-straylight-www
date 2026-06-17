@@ -106,6 +106,62 @@ const CHECKS = [
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
   }},
 
+  // Menubar — https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
+  // The trigger bar is a horizontal RovingFocus of role=menuitem buttons; each opens a
+  // DropdownMenu-style role=menu. APG menubar keyboard table: on the BAR ArrowRight→next
+  // trigger (loop), ArrowLeft→prev, Home→first, End→last; on a CLOSED trigger ArrowDown
+  // opens + focuses the first item; INSIDE a menu ArrowDown/Up rove (loop) and
+  // ArrowRight/ArrowLeft close it + open the adjacent trigger's menu; Escape closes + restores
+  // focus to the trigger. The bare menubar has 3 triggers (File/Edit/View); File's menu has
+  // New Tab / New Window / sep / Print. Keyed off role/data-highlighted only → same on the port.
+  { id: "menubar", apg: "menubar", name: "ArrowRight/ArrowLeft rove between triggers along the bar (loop)", run: async (pg) => {
+    const t = (n) => pg.locator('#root [role="menuitem"]').nth(n);
+    await t(0).focus();
+    ok(await activeIs(pg, '#root [role="menuitem"]'), "could not focus the first trigger");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '#root [role="menuitem"]', 1), "ArrowRight did not move to the next trigger");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, '#root [role="menuitem"]', 0), "ArrowLeft did not move back to the previous trigger");
+  }},
+  { id: "menubar", apg: "menubar", name: "Home focuses the first trigger, End the last", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().waitFor();
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await press(pg, "End");
+    ok(await activeIsNth(pg, '#root [role="menuitem"]', 2), "End did not focus the last trigger");
+    await press(pg, "Home");
+    ok(await activeIsNth(pg, '#root [role="menuitem"]', 0), "Home did not focus the first trigger");
+  }},
+  { id: "menubar", apg: "menubar", name: "ArrowDown on a trigger opens the menu and focuses the first item", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok(await activeWithin(pg, '[role="menu"]'), "ArrowDown did not move focus into the opened menu");
+    await hlStarts(pg, "New Tab");
+  }},
+  { id: "menubar", apg: "menu", name: "inside a menu ArrowDown/Up rove the items", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor();
+    await hlStarts(pg, "New Tab");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "New Window");
+    await pg.keyboard.press("ArrowUp"); await hlStarts(pg, "New Tab");
+  }},
+  { id: "menubar", apg: "menubar", name: "ArrowRight inside an open menu opens the adjacent menu", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    // the open menu is File's (aria-labelledby → File). ArrowRight closes it and opens Edit's.
+    await pg.keyboard.press("ArrowRight"); await pg.waitForTimeout(180);
+    const openLabel = await pg.evaluate(() => { const m = document.querySelector('[role="menu"]'); const l = m && document.getElementById(m.getAttribute("aria-labelledby")); return l ? l.textContent.trim() : null; });
+    ok(openLabel === "Edit", `ArrowRight did not open the adjacent (Edit) menu (open menu is ${openLabel})`);
+    ok(await activeWithin(pg, '[role="menu"]'), "focus did not move into the adjacent menu");
+  }},
+  { id: "menubar", apg: "menubar", name: "Escape closes the menu and returns focus to its trigger", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "Escape did not close the menu");
+    ok(await activeIsNth(pg, '#root [role="menuitem"]', 0), "focus did not return to the trigger after Escape");
+  }},
+
   // Listbox (Select) — https://www.w3.org/WAI/ARIA/apg/patterns/combobox/ (select-only)
   { id: "select", apg: "listbox", name: "open highlights the selected option", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);

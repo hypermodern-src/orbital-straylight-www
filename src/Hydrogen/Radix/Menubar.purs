@@ -1,0 +1,681 @@
+-- | Hydrogen.Radix.Menubar — a horizontal roving bar of DropdownMenu-style menus
+-- | (radix `Menubar`).
+-- |
+-- | Menubar IS DropdownMenu under a RovingFocus bar: each `MenubarMenu` is a
+-- | `MenubarTrigger` (role=menuitem button, the RovingFocus.Item AND the menu's anchor)
+-- | plus a portaled `role=menu` content positioned by the Popper, dismissed by Escape /
+-- | pointer-outside, kept mounted through its exit by Presence. This module REUSES the
+-- | DropdownMenu machinery wholesale (Float.Popper, Foundation.Portal/Envelope,
+-- | Behavior.{Presence,DismissableLayer,ControllableState,Id,RovingFocus}) and adds only:
+-- |
+-- |   * the trigger BAR — N role=menuitem triggers in a `role=menubar` div with a HORIZONTAL
+-- |     RovingFocus tab stop (ArrowLeft/Right/Home/End move between triggers; the same pure
+-- |     `RovingFocus.navigate` used vertically inside the content);
+-- |   * a single open-value (which menu is open) — exactly ONE popper/content is rendered at a
+-- |     time, anchored to the open menu's trigger;
+-- |   * the signature menubar behaviors: ArrowDown on a closed trigger opens + focuses the
+-- |     first item; ArrowRight/ArrowLeft from INSIDE an open menu close it + open the adjacent
+-- |     trigger's menu (cross-menu); pointerenter on a trigger while another menu is open
+-- |     switches the open menu to it (open-on-hover).
+-- |
+-- | MODALITY: MenubarMenu is `modal={false}` — UNLIKE DropdownMenu it does NOT scroll-lock,
+-- | aria-hide siblings, or block body pointer-events. It DOES still render the two
+-- | `data-radix-focus-guard` sentinels (FocusGuards is independent of modality) and uses the
+-- | dismiss + reposition + focus-restore path. So the open envelope here is the NON-MODAL
+-- | subset: `addFocusGuards` + `reAdoptBeforeTrail` only — never lockScroll/hideOthers.
+-- |
+-- | v1 (mirrors DropdownMenu v1): no typeahead, no submenus, no checkbox/radio items. The
+-- | content has NO ScrollArea nesting (the bare primitive renders items as direct children of
+-- | the role=menu div).
+module Hydrogen.Radix.Menubar
+  ( component
+  , Menu
+  , MenuEntry(..)
+  , MenuItem
+  , menuItem
+  , menuSeparator
+  , Input
+  , Output(..)
+  , Query(..)
+  , Slot
+  , Style
+  , defaultStyle
+  , defaultInput
+  ) where
+
+import Prelude
+
+import Data.Array as Array
+import Data.Foldable (foldl, for_, traverse_)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
+import Effect.Class (class MonadEffect, liftEffect)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
+import Halogen.Query.Event (eventListener)
+import Halogen.Subscription as HS
+import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
+import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
+import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Id (useId)
+import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
+import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Dom as Dom
+import Hydrogen.Radix.Foundation.Envelope as Envelope
+import Hydrogen.Radix.Foundation.Portal as Portal
+import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), Orientation(..), cn, classes, dataState, dataAttr, sideName, alignName, role, aria)
+import Web.DOM.Node (Node)
+import Web.Event.Event (Event, EventType(..), preventDefault)
+import Web.HTML as HTML
+import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.HTMLElement as HTMLElement
+import Web.HTML.Window as Window
+import Web.UIEvent.KeyboardEvent as KE
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Public surface — MenuItem/MenuEntry mirror DropdownMenu verbatim.
+-- ─────────────────────────────────────────────────────────────────────────────
+
+type MenuItem =
+  { value :: String
+  , label :: Array HH.PlainHTML
+  , shortcut :: Array HH.PlainHTML
+  , accent :: String
+  , disabled :: Boolean
+  }
+
+data MenuEntry
+  = MenuItemEntry MenuItem
+  | MenuSeparator
+
+menuItem :: String -> Array HH.PlainHTML -> MenuEntry
+menuItem value label = MenuItemEntry { value, label, shortcut: [], accent: "", disabled: false }
+
+menuSeparator :: MenuEntry
+menuSeparator = MenuSeparator
+
+itemCount :: Array MenuEntry -> Int
+itemCount = Array.length <<< Array.filter case _ of
+  MenuItemEntry _ -> true
+  MenuSeparator -> false
+
+-- | One menu in the bar: a stable `value` (the open-value key), the trigger label, and the
+-- | menu entries. NO DOM of its own — collapses into Root's render (trigger + portal+content).
+type Menu =
+  { value :: String
+  , trigger :: Array HH.PlainHTML
+  , entries :: Array MenuEntry
+  }
+
+type Style =
+  { root :: ClassNames
+  , trigger :: ClassNames
+  , content :: ClassNames
+  , item :: ClassNames
+  , shortcut :: ClassNames
+  , separator :: ClassNames
+  }
+
+defaultStyle :: Style
+defaultStyle =
+  { root: cn ""
+  , trigger: cn ""
+  , content: cn ""
+  , item: cn ""
+  , shortcut: cn ""
+  , separator: cn ""
+  }
+
+type Input =
+  { menus :: Array Menu
+  , value :: Maybe String          -- controlled open-value ("" = none); Nothing = uncontrolled
+  , defaultValue :: String         -- uncontrolled initial open-value ("" = none)
+  , side :: Side
+  , align :: Align
+  , offset :: Number
+  , padding :: Number
+  , loop :: Boolean
+  , dir :: Dir
+  , idPrefix :: String
+  , style :: Style
+  , contentStyle :: String         -- the content's CONSTANT style (outline + menubar vars)
+  , triggerAttrs :: Array (Tuple String String)
+  , portalAttrs :: Array (Tuple String String)
+  }
+
+defaultInput :: Input
+defaultInput =
+  { menus: []
+  , value: Nothing
+  , defaultValue: ""
+  , side: Bottom
+  , align: Start
+  , offset: 4.0
+  , padding: 8.0
+  , loop: true
+  , dir: LTR
+  , idPrefix: "rdx-menubar"
+  , style: defaultStyle
+  , contentStyle: ""
+  , triggerAttrs: []
+  , portalAttrs: []
+  }
+
+data Output
+  = OpenChanged (Maybe String)              -- the open menu value (Nothing = none)
+  | ItemSelected { menu :: String, item :: String }
+
+data Query a
+  = SetOpen (Maybe String) a
+  | GetOpen (Maybe String -> a)
+
+type Slot id = H.Slot Query Output id
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Implementation
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- | "" is the open-value sentinel for "no menu open" (mirrors DropdownMenu's Boolean ctrl,
+-- | here a String identifying which menu). Controllable String threads controlled/uncontrolled.
+type State =
+  { ctrl :: Controllable String     -- the open menu value ("" = none)
+  , presence :: Presence            -- the open menu's content lifecycle
+  , menus :: Array Menu
+  , triggerFocus :: Int             -- roving tab stop among the triggers (horizontal)
+  , itemFocus :: Int                -- roving tab stop inside the open content (vertical)
+  , side :: Side
+  , align :: Align
+  , offset :: Number
+  , padding :: Number
+  , loop :: Boolean
+  , dir :: Dir
+  , placedSide :: Side
+  , placedAlign :: Align
+  , idPrefix :: String
+  , style :: Style
+  , contentStyle :: String
+  , triggerAttrs :: Array (Tuple String String)
+  , portalAttrs :: Array (Tuple String String)
+  , restoreEl :: Maybe HTMLElement.HTMLElement
+  , subs :: Array H.SubscriptionId
+  , postSub :: Maybe H.SubscriptionId
+  , animSub :: Maybe H.SubscriptionId
+  , contentNode :: Maybe Node
+  , triggerIds :: Array String      -- one per menu (generated on Initialize)
+  , contentIds :: Array String      -- one per menu
+  , openFocus :: Maybe Int          -- post-open focus: Nothing = content, Just i = item i
+  }
+
+data Action
+  = Initialize
+  | Receive Input
+  | TriggerClicked Int
+  | TriggerKeyDown Int KE.KeyboardEvent
+  | TriggerPointerEnter Int
+  | AfterOpen
+  | AfterClose
+  | AnimDone
+  | EscapePressed
+  | PointerDown Event
+  | MenuKeyDown KE.KeyboardEvent
+  | ItemClicked String
+  | Reposition
+
+triggerRef :: String -> Int -> H.RefLabel
+triggerRef pfx i = H.RefLabel (pfx <> "-trigger-" <> show i)
+
+contentRef :: H.RefLabel
+contentRef = H.RefLabel "rdx-menubar-content"
+
+wrapperRef :: H.RefLabel
+wrapperRef = H.RefLabel "rdx-menubar-wrapper"
+
+itemRef :: String -> Int -> H.RefLabel
+itemRef pfx i = H.RefLabel (pfx <> "-item-" <> show i)
+
+portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
+portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
+
+-- | The open menu's index (Nothing if none open).
+openIndex :: State -> Maybe Int
+openIndex st =
+  let v = current st.ctrl
+  in if v == "" then Nothing else Array.findIndex (\m -> m.value == v) st.menus
+
+-- | The currently-open menu's entries (empty if none).
+openEntries :: State -> Array MenuEntry
+openEntries st = fromMaybe [] (openIndex st >>= \i -> Array.index st.menus i <#> _.entries)
+
+component :: forall m. MonadEffect m => H.Component Query Input Output m
+component =
+  H.mkComponent
+    { initialState
+    , render
+    , eval: H.mkEval H.defaultEval
+        { handleAction = handleAction
+        , handleQuery = handleQuery
+        , receive = Just <<< Receive
+        , initialize = Just Initialize
+        }
+    }
+
+initialState :: Input -> State
+initialState input =
+  { ctrl: controllable input.value input.defaultValue
+  , presence: if startVal /= "" then Open else Closed
+  , menus: input.menus
+  , triggerFocus: 0
+  , itemFocus: 0
+  , side: input.side
+  , align: input.align
+  , offset: input.offset
+  , padding: input.padding
+  , loop: input.loop
+  , dir: input.dir
+  , placedSide: input.side
+  , placedAlign: input.align
+  , idPrefix: input.idPrefix
+  , style: input.style
+  , contentStyle: input.contentStyle
+  , triggerAttrs: input.triggerAttrs
+  , portalAttrs: input.portalAttrs
+  , restoreEl: Nothing
+  , subs: []
+  , postSub: Nothing
+  , animSub: Nothing
+  , contentNode: Nothing
+  , triggerIds: []
+  , contentIds: []
+  , openFocus: Nothing
+  }
+  where
+  startVal = case input.value of
+    Just v -> v
+    Nothing -> input.defaultValue
+
+-- | The id for menu index `i` (generated on Initialize; falls back to "" pre-init).
+triggerIdAt :: State -> Int -> String
+triggerIdAt st i = fromMaybe "" (Array.index st.triggerIds i)
+
+contentIdAt :: State -> Int -> String
+contentIdAt st i = fromMaybe "" (Array.index st.contentIds i)
+
+render :: forall m. State -> H.ComponentHTML Action () m
+render st =
+  let
+    rendered = isRendered st.presence
+    mOpenI = openIndex st
+    orientName = "horizontal"
+  in
+    -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
+    HH.div [ HP.style "display:contents" ]
+      [ HH.div
+          [ role "menubar"
+          , classes st.style.root
+          , dataAttr "orientation" orientName
+          , HP.style "outline: none;"
+          , HP.tabIndex 0
+          ]
+          (Array.mapWithIndex (renderTrigger st mOpenI) st.menus)
+      -- exactly ONE popper wrapper/content — the open menu's (or a hidden placeholder when none).
+      , HH.div
+          [ HP.ref wrapperRef
+          , dataAttr "radix-popper-content-wrapper" ""
+          , dir "ltr"
+          , HP.style (if rendered then "position: fixed;" else "display:none;")
+          ]
+          ( case mOpenI of
+              Nothing -> []
+              Just i -> [ renderContent st i ]
+          )
+      ]
+
+renderTrigger :: forall m. State -> Maybe Int -> Int -> Menu -> H.ComponentHTML Action () m
+renderTrigger st mOpenI i menu =
+  let
+    open = mOpenI == Just i
+  in
+    HH.button
+      ( [ HP.type_ HP.ButtonButton
+        , HP.ref (triggerRef st.idPrefix i)
+        , HP.id (triggerIdAt st i)
+        , role "menuitem"
+        , classes st.style.trigger
+        , aria "haspopup" "menu"
+        , aria "expanded" (if open then "true" else "false")
+        , dataAttr "orientation" "horizontal"
+        , dataAttr "radix-collection-item" ""
+        , dataState (if open then "open" else "closed")
+        , HP.tabIndex (tabIndexFor st.triggerFocus i)
+        , HE.onClick \_ -> TriggerClicked i
+        , HE.onKeyDown (TriggerKeyDown i)
+        , HE.onMouseEnter \_ -> TriggerPointerEnter i
+        ]
+          <> (if open then [ aria "controls" (contentIdAt st i) ] else [])
+          <> (if open then [ dataAttr "radix-popper-side" (sideName st.placedSide), dataAttr "radix-popper-align" (alignName st.placedAlign) ] else [])
+          <> portalData st.triggerAttrs
+      )
+      (map HH.fromPlainHTML menu.trigger)
+
+renderContent :: forall m. State -> Int -> H.ComponentHTML Action () m
+renderContent st i =
+  let
+    menu = fromMaybe { value: "", trigger: [], entries: [] } (Array.index st.menus i)
+  in
+    HH.div
+      ( [ HP.ref contentRef
+        , HP.id (contentIdAt st i)
+        , role "menu"
+        , classes st.style.content
+        , aria "labelledby" (triggerIdAt st i)
+        , aria "orientation" "vertical"
+        , dataState (dataStateOf st.presence)
+        , dataAttr "side" (sideName st.placedSide)
+        , dataAttr "align" (alignName st.placedAlign)
+        , dataAttr "orientation" "vertical"
+        , dataAttr "radix-menu-content" ""
+        , dataAttr "radix-menubar-content" ""
+        , dir "ltr"
+        , HP.tabIndex (-1)
+        , HP.style st.contentStyle
+        , HE.onKeyDown MenuKeyDown
+        ] <> portalData st.portalAttrs
+      )
+      (renderEntries st menu.entries)
+
+dir :: forall r i. String -> HP.IProp r i
+dir = HP.attr (HH.AttrName "dir")
+
+renderEntries :: forall m. State -> Array MenuEntry -> Array (H.ComponentHTML Action () m)
+renderEntries st entries = _.html (foldl step { idx: 0, html: [] } entries)
+  where
+  step acc = case _ of
+    MenuSeparator -> acc { html = acc.html <> [ renderSep st ] }
+    MenuItemEntry item -> acc
+      { idx = acc.idx + 1
+      , html = acc.html <> [ renderItem st acc.idx item ]
+      }
+
+renderItem :: forall m. State -> Int -> MenuItem -> H.ComponentHTML Action () m
+renderItem st idx item =
+  HH.div
+    ( [ HP.ref (itemRef st.idPrefix idx)
+      , role "menuitem"
+      , classes st.style.item
+      , HP.tabIndex (tabIndexFor st.itemFocus idx)
+      , dataAttr "radix-collection-item" ""
+      , dataAttr "orientation" "vertical"
+      , HE.onClick \_ -> ItemClicked item.value
+      ]
+        <> (if st.itemFocus == idx then [ dataAttr "highlighted" "" ] else [])
+        <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
+        <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
+    )
+    ( map HH.fromPlainHTML item.label
+        <> (if Array.null item.shortcut then [] else [ HH.div [ classes st.style.shortcut ] (map HH.fromPlainHTML item.shortcut) ])
+    )
+
+renderSep :: forall m. State -> H.ComponentHTML Action () m
+renderSep st =
+  HH.div
+    [ classes st.style.separator
+    , role "separator"
+    , aria "orientation" "horizontal"
+    ]
+    []
+
+handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
+handleAction = case _ of
+  Initialize -> do
+    st <- H.get
+    -- one trigger id + one content id per menu, in order (so aria-labelledby/controls resolve).
+    tids <- traverse (const useId) st.menus
+    cids <- traverse (const useId) st.menus
+    H.modify_ _ { triggerIds = tids, contentIds = cids }
+  Receive input ->
+    H.modify_ \st -> st
+      { ctrl = sync input.value st.ctrl
+      , menus = input.menus
+      , side = input.side
+      , align = input.align
+      , offset = input.offset
+      , padding = input.padding
+      , loop = input.loop
+      , dir = input.dir
+      , idPrefix = input.idPrefix
+      , style = input.style
+      , contentStyle = input.contentStyle
+      , triggerAttrs = input.triggerAttrs
+      , portalAttrs = input.portalAttrs
+      }
+  TriggerClicked i -> do
+    st <- H.get
+    -- the trigger that was clicked becomes the bar tab stop; toggle/switch its menu.
+    H.modify_ _ { triggerFocus = i }
+    if openIndex st == Just i then closeMenu
+    else if current st.ctrl /= "" then switchTo i (-1) Nothing
+    else openMenuAt i (-1) Nothing
+  -- On a CLOSED trigger ArrowDown opens + highlights the first item (APG menubar). The
+  -- horizontal arrows / Home / End rove the BAR. (When open, the content owns key handling.)
+  TriggerKeyDown i ke -> do
+    st <- H.get
+    when (current st.ctrl == "") case KE.key ke of
+      "ArrowDown" -> liftEffect (preventDefault (KE.toEvent ke)) *> (H.modify_ _ { triggerFocus = i } *> openMenuAt i 0 (Just 0))
+      "ArrowUp" -> liftEffect (preventDefault (KE.toEvent ke)) *> (H.modify_ _ { triggerFocus = i } *> openMenuAt i (lastItem st i) (Just (lastItem st i)))
+      key -> do
+        let cfg = { orientation: Horizontal, dir: st.dir, loop: st.loop }
+        case navigate cfg { count: Array.length st.menus, current: st.triggerFocus } key of
+          Stay -> pure unit
+          MoveTo j -> do
+            liftEffect (preventDefault (KE.toEvent ke))
+            H.modify_ _ { triggerFocus = j }
+            mt <- H.getHTMLElementRef (triggerRef st.idPrefix j)
+            for_ mt (liftEffect <<< HTMLElement.focus)
+  -- open-on-hover: while a menu is open, entering a DIFFERENT trigger switches the open menu
+  -- to it and focuses that trigger (the signature menubar behavior).
+  TriggerPointerEnter i -> do
+    st <- H.get
+    when (current st.ctrl /= "" && openIndex st /= Just i) do
+      H.modify_ _ { triggerFocus = i }
+      mt <- H.getHTMLElementRef (triggerRef st.idPrefix i)
+      for_ mt (liftEffect <<< HTMLElement.focus)
+      switchTo i (-1) Nothing
+  AfterOpen -> do
+    reposition
+    finalize true
+  AfterClose -> do
+    mnode <- H.getHTMLElementRef contentRef
+    armed <- case mnode of
+      Nothing -> pure false
+      Just node -> do
+        animates <- liftEffect (hasAnimation node)
+        if animates then do
+          sub <- H.subscribe (animationEnd (HTMLElement.toEventTarget node) AnimDone)
+          H.modify_ _ { animSub = Just sub }
+          pure true
+        else pure false
+    if armed then do
+      mwrap <- H.getHTMLElementRef wrapperRef
+      for_ mwrap \wrap -> liftEffect (Envelope.reAdoptBeforeTrail wrap)
+    else finishClose
+  AnimDone -> finishClose
+  EscapePressed -> closeMenu
+  PointerDown e -> do
+    st <- H.get
+    for_ st.contentNode \node -> do
+      outside <- liftEffect (Dismiss.isOutside node e)
+      when outside closeMenu
+  MenuKeyDown ke -> do
+    st <- H.get
+    let
+      cfg = { orientation: Vertical, dir: st.dir, loop: st.loop }
+      pos = { count: itemCount (openEntries st), current: st.itemFocus }
+    case KE.key ke of
+      -- cross-menu: ArrowRight/ArrowLeft from inside the content close it and open the adjacent
+      -- trigger's menu (handled here via the menu list + wrap, NOT the vertical roving).
+      "ArrowRight" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st 1
+      "ArrowLeft" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st (-1)
+      key -> case navigate cfg pos key of
+        Stay -> pure unit
+        MoveTo idx -> do
+          H.modify_ _ { itemFocus = idx }
+          mwrap <- H.getHTMLElementRef wrapperRef
+          mitem <- H.getHTMLElementRef (itemRef st.idPrefix idx)
+          liftEffect $ Dom.queueMicrotask do
+            for_ mwrap Envelope.reAdoptBeforeTrail
+            for_ mitem HTMLElement.focus
+  ItemClicked value -> do
+    st <- H.get
+    for_ (openIndex st >>= Array.index st.menus) \menu ->
+      H.raise (ItemSelected { menu: menu.value, item: value })
+    closeMenu
+  Reposition -> reposition
+
+-- | The last focusable item index of menu `i` (for ArrowUp-open → highlight last).
+lastItem :: State -> Int -> Int
+lastItem st i = case Array.index st.menus i of
+  Just menu -> itemCount menu.entries - 1
+  Nothing -> 0
+
+-- | Move to the menu `delta` away from the open one (wrapping), closing the current content
+-- | and opening the adjacent one focused into its content. The cross-menu arrow behavior.
+adjacentMenu :: forall m. MonadEffect m => State -> Int -> H.HalogenM State Action () Output m Unit
+adjacentMenu st delta = case openIndex st of
+  Nothing -> pure unit
+  Just i -> do
+    let
+      n = Array.length st.menus
+      j = (((i + delta) `mod` n) + n) `mod` n
+    when (j /= i) do
+      H.modify_ _ { triggerFocus = j }
+      switchTo j (-1) Nothing
+
+openMenuAt :: forall m. MonadEffect m => Int -> Int -> Maybe Int -> H.HalogenM State Action () Output m Unit
+openMenuAt i focusedIdx openFocus = do
+  st <- H.get
+  for_ (Array.index st.menus i) \menu -> when (current st.ctrl /= menu.value) do
+    doc <- liftEffect (HTML.window >>= Window.document)
+    mprev <- liftEffect (HTMLDocument.activeElement doc)
+    for_ st.animSub H.unsubscribe
+    H.modify_ _ { ctrl = (change menu.value st.ctrl).next, presence = Open, itemFocus = focusedIdx, restoreEl = mprev, openFocus = openFocus, animSub = Nothing }
+    H.raise (OpenChanged (Just menu.value))
+    mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
+    win <- liftEffect Popper.windowTarget
+    let docTarget = HTMLDocument.toEventTarget doc
+    escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+    ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
+    scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+    resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+    psid <- scheduleAfterOpen
+    H.modify_ _
+      { contentNode = mcNode
+      , subs = [ escSub, ptrSub, scrollSub, resizeSub ]
+      , postSub = Just psid
+      }
+
+-- | Switch the open menu to menu `i` WITHOUT tearing down the open-time subscriptions (the
+-- | bar stays "open"). Re-points the open-value, resets item focus, and schedules a reposition
+-- | + focus against the NEW trigger/content. Used by cross-menu arrow + open-on-hover.
+switchTo :: forall m. MonadEffect m => Int -> Int -> Maybe Int -> H.HalogenM State Action () Output m Unit
+switchTo i focusedIdx openFocus = do
+  st <- H.get
+  for_ (Array.index st.menus i) \menu -> when (current st.ctrl /= menu.value) do
+    -- ensure the open-time subscriptions exist (switching from a closed bar shouldn't happen,
+    -- but if the previous open had no subs we (re)arm via openMenuAt instead).
+    if Array.null st.subs then openMenuAt i focusedIdx openFocus
+    else do
+      H.modify_ _ { ctrl = (change menu.value st.ctrl).next, presence = Open, itemFocus = focusedIdx, openFocus = openFocus }
+      H.raise (OpenChanged (Just menu.value))
+      mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
+      psid <- scheduleAfterOpen
+      H.modify_ _ { contentNode = mcNode, postSub = Just psid }
+
+scheduleAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterOpen = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterOpen <$ emitter)
+  liftEffect (Dom.queueMicrotask (HS.notify listener unit))
+  pure sid
+
+-- | Adopt the wrapper into body + (non-modal) add focus guards; focus the content (click-open)
+-- | or the highlighted item (keyboard-open). NON-MODAL: NO lockScroll / hideOthers.
+finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
+finalize focusToo = do
+  st <- H.get
+  mbody <- liftEffect Portal.documentBody
+  mwrap <- H.getHTMLElementRef wrapperRef
+  mfocus <- if focusToo
+    then case st.openFocus of
+      Just idx -> H.getHTMLElementRef (itemRef st.idPrefix idx)
+      Nothing -> H.getHTMLElementRef contentRef
+    else pure Nothing
+  case mbody, mwrap of
+    Just body, Just wrap -> liftEffect do
+      Portal.adopt body (HTMLElement.toElement wrap)
+      when focusToo do
+        Envelope.addFocusGuards
+        for_ mfocus HTMLElement.focus
+    _, _ -> pure unit
+
+closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+closeMenu = do
+  st <- H.get
+  when (current st.ctrl /= "") do
+    traverse_ H.unsubscribe st.subs
+    for_ st.postSub H.unsubscribe
+    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+    H.modify_ _ { ctrl = (change "" st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing }
+    H.raise (OpenChanged Nothing)
+    psid <- scheduleAfterClose
+    H.modify_ _ { postSub = Just psid }
+
+scheduleAfterClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterClose = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterClose <$ emitter)
+  liftEffect (Dom.queueMicrotask (HS.notify listener unit))
+  pure sid
+
+finishClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+finishClose = do
+  st <- H.get
+  for_ st.animSub H.unsubscribe
+  for_ st.postSub H.unsubscribe
+  liftEffect Envelope.removeFocusGuards
+  H.modify_ _ { presence = finishExit st.presence, animSub = Nothing, postSub = Nothing }
+
+reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+reposition = do
+  st <- H.get
+  case openIndex st of
+    Nothing -> pure unit
+    Just i -> do
+      manchor <- H.getHTMLElementRef (triggerRef st.idPrefix i)
+      mwrap <- H.getHTMLElementRef wrapperRef
+      mfloat <- H.getHTMLElementRef contentRef
+      case manchor, mwrap, mfloat of
+        Just anchor, Just wrapper, Just floating -> do
+          placed <- liftEffect (Popper.positionWrapper
+            { anchor, wrapper, floating, side: st.side, align: st.align, offset: st.offset, padding: st.padding })
+          when (placed.placement.side /= st.placedSide || placed.placement.align /= st.placedAlign) $
+            H.modify_ _ { placedSide = placed.placement.side, placedAlign = placed.placement.align }
+        _, _, _ -> pure unit
+
+handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
+handleQuery = case _ of
+  SetOpen mv a -> do
+    st <- H.get
+    case mv of
+      Nothing -> closeMenu
+      Just v -> case Array.findIndex (\m -> m.value == v) st.menus of
+        Just i -> openMenuAt i (-1) Nothing
+        Nothing -> pure unit
+    pure (Just a)
+  GetOpen reply -> do
+    st <- H.get
+    let v = current st.ctrl
+    pure (Just (reply (if v == "" then Nothing else Just v)))
