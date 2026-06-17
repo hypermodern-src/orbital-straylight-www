@@ -648,6 +648,37 @@ const CHECKS = [
     ok(filled === "4", `typing did not fill the first slot (got '${filled}')`);
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
+
+  // ── Wave-B nav-group depth checks (STR-330) ──────────────────────────────────
+  // HoverCard — https://www.w3.org/WAI/ARIA/apg/ (a hover-card is keyboard-reachable:
+  // focusing the trigger link opens it, blur/Escape closes it). The trigger is an inline
+  // <a> link (not a button), so key off role=link.
+  { id: "hovercard", apg: "hover-card", name: "focus on the trigger shows the card", run: async (pg) => {
+    await pg.locator("#root").getByRole("link").first().focus();
+    await pg.locator(".rt-HoverCardContent").waitFor({ timeout: 3000 });
+    ok(await visible(pg, ".rt-HoverCardContent"), "hover card did not show on focus");
+  }},
+  { id: "hovercard", apg: "hover-card", name: "Escape hides the card", run: async (pg) => {
+    await pg.locator("#root").getByRole("link").first().focus();
+    await pg.locator(".rt-HoverCardContent").waitFor({ timeout: 3000 });
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, ".rt-HoverCardContent")), "Escape did not hide the hover card");
+  }},
+
+  // NavigationMenu — Home/End jump the trigger roving to first/last (FocusGroup
+  // isFocusNavigationKey Home→0, End→count-1). The story opens via defaultValue="one";
+  // focus the open trigger then Home/End. Two triggers (Item One / Item Two).
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "Home/End jump trigger roving to first/last", run: async (pg) => {
+    const triggers = pg.locator('#root button[aria-expanded]');
+    await triggers.first().waitFor();
+    await triggers.nth(1).focus();
+    await pg.keyboard.press("Home"); await pg.waitForTimeout(80);
+    ok(await pg.evaluate(() => document.activeElement === document.querySelectorAll('button[aria-expanded]')[0]),
+      "Home did not focus the first trigger");
+    await pg.keyboard.press("End"); await pg.waitForTimeout(80);
+    ok(await pg.evaluate(() => { const t = document.querySelectorAll('button[aria-expanded]'); return document.activeElement === t[t.length - 1]; }),
+      "End did not focus the last trigger");
+  }},
 ];
 
 const b = await chromium.launch();
