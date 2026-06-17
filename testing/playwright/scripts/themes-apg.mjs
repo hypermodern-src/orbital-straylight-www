@@ -648,6 +648,35 @@ const CHECKS = [
     ok(filled === "4", `typing did not fill the first slot (got '${filled}')`);
     ok(await activeIsNth(pg, sel, 1), "typing a char did not auto-advance focus to the next slot");
   }},
+
+  // ── Wave-B modal depth gaps (STR-330) ───────────────────────────────────────
+  // Dialog (Modal) — FocusScope loop=true wrap (dialog.tsx:406) + onMountAutoFocus first
+  // tabbable (dialog.tsx:408). The base 3 dialog checks above assert focus-into/trap/escape;
+  // these tighten the WRAP DIRECTION and the exact initial focus target.
+  { id: "dialog", apg: "dialog-modal", name: "open focuses the FIRST tabbable inside the content", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    // first tabbable in the dialog story is the soft/gray Cancel button (DOM order before Save + the input).
+    ok(await activeWithin(pg, '[role="dialog"]'), "focus did not move into the dialog");
+    const isFirst = await pg.evaluate(() => {
+      const d = document.querySelector('[role="dialog"]');
+      const f = d && d.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      return document.activeElement === f;
+    });
+    ok(isFirst, "open did not focus the FIRST tabbable element in the content");
+  }},
+  { id: "dialog", apg: "dialog-modal", name: "Shift+Tab from the first focusable wraps to the last (loop)", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    // focus the first focusable, Shift+Tab → must wrap to the LAST focusable (FocusScope loop).
+    await pg.evaluate(() => { const d = document.querySelector('[role="dialog"]'); const f = d.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'); f && f.focus(); });
+    await pg.keyboard.press("Shift+Tab"); await pg.waitForTimeout(120);
+    const onLast = await pg.evaluate(() => {
+      const d = document.querySelector('[role="dialog"]');
+      const all = [...d.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')];
+      return document.activeElement === all[all.length - 1];
+    });
+    ok(onLast, "Shift+Tab from the first focusable did not wrap to the last (loop broken)");
+  }},
+
 ];
 
 const b = await chromium.launch();
