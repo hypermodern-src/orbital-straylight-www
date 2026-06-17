@@ -713,6 +713,41 @@ const CHECKS = [
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
   }},
 
+  // Popover — popover.tsx. Non-modal default: focus moves into content on open (404-408),
+  // FocusScope loop wraps Tab within content (404-407), Escape closes + restores focus to the
+  // trigger (411-418 + onCloseAutoFocus). Keyed off role=dialog inside the popper wrapper.
+  { id: "popover", apg: "dialog", name: "open moves focus into the popover content", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); await pg.waitForTimeout(180);
+    ok(await activeWithin(pg, '.rt-PopoverContent'), "focus did not move into the popover content on open");
+  }},
+  { id: "popover", apg: "dialog", name: "Escape closes the popover and returns focus to the trigger", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); await pg.waitForTimeout(180);
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '.rt-PopoverContent')), "Escape did not close the popover");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
+  }},
+  // Closed-rest trigger contract (popover.tsx:147 aria-controls gated on open; the Popper
+  // data-radix-popper-side/align live on Popper.Anchor, which wraps the trigger ONLY while
+  // open — popper.tsx:126-127). A full closed-DOM oracle is incompatible with the port's
+  // deliberately always-mounted (display:none) popper wrapper, so the closed-trigger
+  // attribute contract is pinned here as an attr check (validated on golden first). This
+  // caught a real port bug: the trigger stamped data-radix-popper-side/align even when closed.
+  { id: "popover", apg: "dialog", name: "closed trigger has NO aria-controls and NO popper side/align attrs", run: async (pg) => {
+    await triggerBtn(pg).waitFor();
+    const t = await pg.evaluate(() => {
+      const b = document.querySelector("#root button[aria-expanded]");
+      return b && {
+        expanded: b.getAttribute("aria-expanded"),
+        state: b.getAttribute("data-state"),
+        controls: b.hasAttribute("aria-controls"),
+        side: b.hasAttribute("data-radix-popper-side"),
+        align: b.hasAttribute("data-radix-popper-align"),
+      };
+    });
+    ok(t && t.expanded === "false" && t.state === "closed", "closed trigger is not aria-expanded=false / data-state=closed");
+    ok(!t.controls, "closed trigger must NOT carry aria-controls");
+    ok(!t.side && !t.align, "closed trigger must NOT carry data-radix-popper-side/align (those live on Popper.Anchor, mounted only while open)");
+  }},
 ];
 
 const b = await chromium.launch();

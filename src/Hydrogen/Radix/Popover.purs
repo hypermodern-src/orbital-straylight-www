@@ -223,11 +223,22 @@ render st =
             , aria "expanded" (if open then "true" else "false")
             , aria "haspopup" "dialog"
             , dataState (if open then "open" else "closed")
-            , dataAttr "radix-popper-side" (sideName st.placedSide)
-            , dataAttr "radix-popper-align" (alignName st.placedAlign)
             , HE.onClick \_ -> TriggerClicked
             ]
+              -- aria-controls references the content only while OPEN (popover.tsx:147).
               <> (if open then [ aria "controls" st.contentId ] else [])
+              -- data-radix-popper-side/align are stamped by Popper.Anchor, which wraps the
+              -- trigger while the Popper subtree is MOUNTED — i.e. Open OR exiting (Closing),
+              -- NOT once fully Closed (unmounted). Gate on `isRendered presence` (the same
+              -- predicate as the content), so the closed-REST trigger drops them (matching
+              -- upstream's unmounted-Popper closed trigger) while the CLOSING trigger keeps
+              -- them through the exit animation (the content/Popper still mounted).
+              <> ( if isRendered st.presence then
+                     [ dataAttr "radix-popper-side" (sideName st.placedSide)
+                     , dataAttr "radix-popper-align" (alignName st.placedAlign)
+                     ]
+                   else []
+                 )
               <> portalData st.triggerAttrs
           )
           (map HH.fromPlainHTML st.trigger)
