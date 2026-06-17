@@ -48,7 +48,7 @@ module Hydrogen.Radix.ToggleGroup
 
 import Prelude
 
-import Data.Array (elem, filter, findIndex, length, mapWithIndex, snoc, (!!))
+import Data.Array (elem, filter, find, findIndex, length, mapWithIndex, snoc, (!!))
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -59,7 +59,7 @@ import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..), dirName)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
-import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, role, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, role, aria)
 import Web.HTML.HTMLElement as HTMLElement
 import Web.UIEvent.KeyboardEvent as KE
 
@@ -90,6 +90,9 @@ type Input =
   , defaultValue :: Array String    -- initial pressed set when uncontrolled
   , single :: Boolean               -- enforce at-most-one pressed on toggle
   , orientation :: Orientation
+  , explicitOrientation :: Boolean  -- true ⇒ an orientation prop was actually passed, so
+                                    -- RovingFocusGroup stamps data-orientation on root+items
+                                    -- (the Themes default story passes none → no stamp).
   , dir :: Dir
   , loop :: Boolean
   , disabled :: Boolean             -- disable the whole group
@@ -107,6 +110,7 @@ defaultInput =
   , defaultValue: []
   , single: false
   , orientation: Horizontal
+  , explicitOrientation: false
   , dir: LTR
   , loop: true
   , disabled: false
@@ -135,6 +139,7 @@ type State =
   , ctrl :: Controllable (Array String)
   , single :: Boolean
   , orientation :: Orientation
+  , explicitOrientation :: Boolean
   , dir :: Dir
   , loop :: Boolean
   , disabled :: Boolean
@@ -145,6 +150,10 @@ type State =
   , focusEntered :: Boolean   -- false ⇒ every item -1 (the root holds the tab stop);
                               -- true once focus enters the group (RovingFocusGroup migrates
                               -- the tab stop from the root onto the current item).
+  , focusedValue :: Maybe String  -- the item that currently holds focus (the roving cursor
+                                  -- origin). Tracks the LAST focused item so arrow nav steps
+                                  -- relative to where focus actually is — NOT the pressed
+                                  -- value (which is constant when activation is manual).
   }
 
 data Action
@@ -175,6 +184,7 @@ initialState input =
   , ctrl: controllable input.value input.defaultValue
   , single: input.single
   , orientation: input.orientation
+  , explicitOrientation: input.explicitOrientation
   , dir: input.dir
   , loop: input.loop
   , disabled: input.disabled
@@ -183,6 +193,7 @@ initialState input =
   , trailing: input.trailing
   , style: input.style
   , focusEntered: false
+  , focusedValue: Nothing
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -202,6 +213,9 @@ render st =
         <> (case st.ariaLabel of
               Just l -> [ aria "label" l ]
               Nothing -> [])
+        -- RovingFocusGroup stamps data-orientation only when an orientation prop was passed
+        -- (the Themes default story passes none, so the existing oracles stay un-stamped).
+        <> (if st.explicitOrientation then [ dataOrientation st.orientation ] else [])
     )
     (mapWithIndex (renderItem st) st.items <> map HH.fromPlainHTML st.trailing)
 
@@ -234,6 +248,9 @@ renderItem st idx item =
           <> (if st.single then [ role "radio", aria "checked" (if on then "true" else "false") ]
               else [ aria "pressed" (if on then "true" else "false") ])
           <> (if disabled then [ dataAttr "disabled" "" ] else [])
+          -- data-orientation on items mirrors the root (RovingFocusGroup.Item), only when
+          -- an orientation prop was explicitly passed.
+          <> (if st.explicitOrientation then [ dataOrientation st.orientation ] else [])
       )
       (map HH.fromPlainHTML item.label)
 
@@ -258,6 +275,7 @@ handleAction = case _ of
       , ctrl = sync input.value st.ctrl
       , single = input.single
       , orientation = input.orientation
+      , explicitOrientation = input.explicitOrientation
       , dir = input.dir
       , loop = input.loop
       , disabled = input.disabled
@@ -278,26 +296,33 @@ handleAction = case _ of
       setValue next
   ListKeyDown ke -> do
     st <- H.get
+    -- upstream RovingFocusGroup returns early when any modifier is held
+    -- (roving-focus-group onKeyDown: metaKey||ctrlKey||altKey||shiftKey) — modifier-laden
+    -- arrows are ignored so they don't hijack browser/AT shortcuts.
+    let
+      modified = KE.metaKey ke || KE.ctrlKey ke || KE.altKey ke || KE.shiftKey ke
     -- upstream RovingFocusGroup filters candidateNodes to focusable items
     -- (roving-focus-group.tsx:271 getItems().filter(item => item.focusable),
     -- ToggleGroupItem focusable={!disabled}). So arrows navigate WITHIN the enabled
-    -- subset and SKIP disabled items entirely (rather than stalling on one). Build the
-    -- enabled subset, find the current roving item's index within it, navigate there.
+    -- subset and SKIP disabled items entirely (rather than stalling on one). The roving
+    -- cursor origin is the LAST FOCUSED item (st.focusedValue) — NOT the pressed value,
+    -- which stays put under manual activation (so loop/clamp must step from real focus).
     let
       enabled = filter (\i -> not (st.disabled || i.disabled)) st.items
       curValue = current st.ctrl
-      -- the roving cursor maps onto the enabled subset: the first pressed enabled item,
-      -- else the first enabled item (index 0 of the subset).
-      curEnabled = fromMaybe 0 (findIndex (\i -> i.value `elem` curValue) enabled)
+      originValue = case st.focusedValue of
+        Just v -> v
+        Nothing -> fromMaybe "" (map _.value (find (\i -> i.value `elem` curValue) enabled))
+      curEnabled = fromMaybe 0 (findIndex (\i -> i.value == originValue) enabled)
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
       pos = { count: length enabled, current: curEnabled }
-    when (length enabled > 0) $ case navigate cfg pos (KE.key ke) of
+    when (not modified && length enabled > 0) $ case navigate cfg pos (KE.key ke) of
       Stay -> pure unit
       MoveTo idx -> case enabled !! idx of
         Nothing -> pure unit
         Just item -> do
           -- roving focus only: move focus, do NOT toggle (activation is manual)
-          H.modify_ _ { focusEntered = true }
+          H.modify_ _ { focusEntered = true, focusedValue = Just item.value }
           focusItemByValue item.value
   -- Tab-into-group: forward container focus to the current roving item — the first
   -- pressed ENABLED item, or the first enabled item when nothing is pressed. (A disabled
@@ -311,11 +336,14 @@ handleAction = case _ of
       target = case findIndex (\i -> i.value `elem` curValue) enabled of
         Just k -> enabled !! k
         Nothing -> enabled !! 0
-    for_ target \item -> focusItemByValue item.value
+    for_ target \item -> do
+      H.modify_ _ { focusedValue = Just item.value }
+      focusItemByValue item.value
   -- An item received focus directly (the native button focus on click, or a programmatic
   -- .focus()) — mark focus as entered so the roving tab stop migrates from the root onto
-  -- an item (matching RovingFocusGroup.Item onFocus → currentTabStopId ← me).
-  ItemFocused _ -> H.modify_ _ { focusEntered = true }
+  -- an item (matching RovingFocusGroup.Item onFocus → currentTabStopId ← me), and record
+  -- it as the roving cursor origin for subsequent arrow navigation.
+  ItemFocused value -> H.modify_ _ { focusEntered = true, focusedValue = Just value }
 
 -- | Focus the item with the given value via its existing ref (the same mechanism
 -- | ListKeyDown uses). No-op when no such item exists.

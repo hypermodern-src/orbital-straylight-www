@@ -1158,6 +1158,67 @@ const CHECKS = [
     await press(pg, "Space");
     await attrEq(pg, '[role="tab"]', 2, "aria-selected", "true", "Space did not activate the focused tab in manual mode");
   }},
+
+  // ToggleGroup — group-level disabled (Root `disabled` ORs into every item). EVERY item is
+  // a disabled button (non-focusable / non-togglable); the group cannot be entered or toggled.
+  { id: "togglegroupdisabled", state: "disabled", apg: "toolbar", name: "group disabled: every item is a disabled button, none focusable", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    const items = pg.locator('[role="radio"]');
+    ok((await items.count()) === 3, "expected 3 items");
+    for (let i = 0; i < 3; i++) {
+      ok((await attrOf(pg, '[role="radio"]', i, "disabled")) !== null || await items.nth(i).isDisabled(), `item ${i} must be disabled`);
+    }
+    // clicking a disabled item must not change the pressed item (b stays checked)
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "the seeded item must stay checked");
+    await items.nth(0).click({ force: true }).catch(() => {});
+    await attrEq(pg, '[role="radio"]', 0, "aria-checked", "false", "a disabled item must not become checked on click");
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "the seeded item must remain checked after a disabled-item click");
+  }},
+
+  // ToggleGroup — loop={false}: arrow navigation CLAMPS at the ends (no wrap). Seed value="a"
+  // (item[0] is the tab stop). ArrowLeft at the first item stays on it; from the last,
+  // ArrowRight stays on the last.
+  { id: "togglegroupnoloop", state: "noloop", apg: "toolbar", name: "loop=false: ArrowLeft at the first item does NOT wrap to the last", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await press(pg, "Tab"); // enter, onto item[0] (seeded a)
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the first item");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "loop=false: ArrowLeft at the first item must clamp (not wrap to last)");
+    await press(pg, "End"); // jump to last
+    ok(await activeIsNth(pg, sel, 2), "End did not focus the last item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "loop=false: ArrowRight at the last item must clamp (not wrap to first)");
+  }},
+
+  // ToggleGroup — orientation="vertical": ArrowDown/ArrowUp navigate, ArrowLeft/ArrowRight
+  // inert. RovingFocusGroup stamps data-orientation=vertical on the root.
+  { id: "togglegroupvert", state: "vertical", apg: "toolbar", name: "vertical: ArrowDown navigates, ArrowRight is inert", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, '[role="group"]', 0, "data-orientation")) === "vertical", "root must carry data-orientation=vertical");
+    await press(pg, "Tab"); // onto item[0]
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the first item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "vertical: ArrowRight must be inert");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 1), "vertical: ArrowDown must move to the next item");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, sel, 0), "vertical: ArrowUp must move to the previous item");
+  }},
+
+  // ToggleGroup — arrow navigation IGNORES modifier keys (meta/ctrl/alt/shift). Upstream
+  // RovingFocusGroup returns early when any modifier is held (roving-focus-group onKeyDown).
+  { id: "togglegroupnoloop", state: "noloop", apg: "toolbar", name: "Ctrl+ArrowRight does NOT navigate (modifier keys ignored)", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await press(pg, "Tab");
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the first item");
+    await pg.keyboard.down("Control");
+    await pg.keyboard.press("ArrowRight");
+    await pg.keyboard.up("Control");
+    ok(await activeIsNth(pg, sel, 0), "Ctrl+ArrowRight must NOT move focus (modifiers ignored)");
+  }},
 ];
 
 const b = await chromium.launch();

@@ -270,6 +270,10 @@ view c s =
             -- activates the focused trigger. Separate route so the existing automatic-mode
             -- `tabs` story stays byte-identical.
             "tabsmanual" -> HH.slot_ _tabs unit Tabs.component (tabsManualInput s)
+            -- Wave-C ToggleGroup depth stories: group-disabled, loop=false, vertical.
+            "togglegroupdisabled" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupDisabledInput
+            "togglegroupnoloop" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupNoLoopInput
+            "togglegroupvert" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupVertInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1536,3 +1540,51 @@ firstJust = case _ of
 -- | activates it (tabs.tsx:61,192-202). Drives the `tabsmanual` route / APG check.
 tabsManualInput :: String -> Tabs.Input
 tabsManualInput s = (tabsInput s) { activationMode = Tabs.Manual }
+
+-- | togglegroup (group disabled) — Root `disabled` ORs into every item; the whole group
+-- | is non-focusable / non-togglable. Single-mode, Center pre-pressed.
+toggleGroupDisabledInput :: ToggleGroup.Input
+toggleGroupDisabledInput = ToggleGroup.defaultInput
+  { single = true
+  , disabled = true
+  , defaultValue = [ "b" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | togglegroup (loop=false) — arrow navigation clamps at the ends (no wrap). Single-mode,
+-- | Left pre-pressed.
+toggleGroupNoLoopInput :: ToggleGroup.Input
+toggleGroupNoLoopInput = ToggleGroup.defaultInput
+  { single = true
+  , loop = false
+  , defaultValue = [ "a" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | togglegroup (vertical) — ArrowUp/ArrowDown navigate; data-orientation=vertical.
+toggleGroupVertInput :: ToggleGroup.Input
+toggleGroupVertInput = ToggleGroup.defaultInput
+  { single = true
+  , orientation = Vertical
+  , explicitOrientation = true
+  , defaultValue = [ "a" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }

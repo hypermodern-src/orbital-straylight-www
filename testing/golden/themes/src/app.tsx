@@ -1675,6 +1675,49 @@ const PAGES: Page[] = [
       </Tabs.Root>
     ),
   },
+  // Wave-C: ToggleGroup group-level disabled — the Root `disabled` prop ORs into every
+  // item so the WHOLE group is non-focusable/non-togglable (toggle-group.tsx ToggleGroupImpl
+  // disabled flows into context). Single-mode, no item pre-pressed.
+  {
+    id: "togglegroupdisabled",
+    label: "ToggleGroup (group disabled)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="b" disabled aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
+  // Wave-C: ToggleGroup loop={false} — arrow navigation CLAMPS at the ends (no wrap).
+  // Upstream RovingFocusGroup loop default is true; loop=false slices instead of wrapArray.
+  {
+    id: "togglegroupnoloop",
+    label: "ToggleGroup (loop=false)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="a" loop={false} aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
+  // Wave-C: ToggleGroup orientation="vertical" — ArrowUp/ArrowDown navigate, ArrowLeft/Right
+  // inert; RovingFocusGroup stamps data-orientation=vertical on the root + items.
+  {
+    id: "togglegroupvert",
+    label: "ToggleGroup (vertical)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="a" orientation="vertical" aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
 ];
 
 function currentId(): string {
