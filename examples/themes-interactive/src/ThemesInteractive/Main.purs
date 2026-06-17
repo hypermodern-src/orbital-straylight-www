@@ -222,7 +222,7 @@ view c s =
             "menubar" -> HH.slot_ _menubar unit Menubar.component (menubarInput s)
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
-            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
+            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
@@ -672,12 +672,13 @@ selectStyle =
 -- | 40 (min 0, max 100, step 1); the driver focuses the thumb and presses ArrowRight 5× →
 -- | value 45 (range `right: 55%`, thumb `left: calc(45% + …)`). The rt-Slider* class anatomy
 -- | is supplied via the primitive's Style slots.
-sliderInput :: Slider.Input
-sliderInput = Slider.defaultInput
+sliderInput :: String -> Slider.Input
+sliderInput s = Slider.defaultInput
   { defaultValue = 40
   , min = 0
   , max = 100
   , step = 1
+  , disabled = s == "disabled"
   , style =
       { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
       , track: cn "rt-SliderTrack"
@@ -1173,8 +1174,12 @@ toolbarInput s = Toolbar.defaultInput
 otpInput :: String -> Otp.Input
 otpInput s = Otp.defaultInput
   { length = 3
-  , defaultValue = if s == "empty" || s == "typed" then "" else "123"
-  , validation = Otp.Numeric
+  , defaultValue =
+      if s == "empty" || s == "typed" then ""
+      else if s == "alpha" then "abc"
+      else "123"
+  -- `?s=alpha` exercises the Alpha validation set (inputmode=text, pattern=[a-zA-Z]{1}).
+  , validation = if s == "alpha" then Otp.Alpha else Otp.Numeric
   , style = { root: cn "", input: cn "" }
   }
 
@@ -1196,12 +1201,14 @@ formInput s = Form.defaultInput
           , required = true
           , serverInvalid = s == "serverInvalid"
           , messages =
+              -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
+              -- in registration order (the multi-id describedby contract).
               [ { match: Form.ValueMissing
-                , forceMatch: s == "forceMatch"
+                , forceMatch: s == "forceMatch" || s == "multiMessage"
                 , text: [ HH.text "This value is missing" ]
                 }
               , { match: Form.TypeMismatch
-                , forceMatch: false
+                , forceMatch: s == "multiMessage"
                 , text: [ HH.text "Provide a valid email" ]
                 }
               ]

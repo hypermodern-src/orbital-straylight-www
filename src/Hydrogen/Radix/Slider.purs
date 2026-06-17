@@ -205,14 +205,18 @@ render st =
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
       )
       [ HH.span
-          [ classes st.style.track
-          , dataOrientation st.orientation
-          ]
+          ( [ classes st.style.track
+            , dataOrientation st.orientation
+            ]
+              <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+          )
           [ HH.span
-              [ classes st.style.range
-              , dataOrientation st.orientation
-              , HP.attr (HH.AttrName "style") ("left: 0%; right: " <> rangeRight <> "%;")
-              ]
+              ( [ classes st.style.range
+                , dataOrientation st.orientation
+                , HP.attr (HH.AttrName "style") ("left: 0%; right: " <> rangeRight <> "%;")
+                ]
+                  <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+              )
               []
           ]
       , HH.span
@@ -249,8 +253,8 @@ render st =
 -- | slider ignores (so the handler can skip preventing default / re-rendering). Mirrors
 -- | radix: Home→min, End→max, Page keys ±step·10, arrows ±step (RTL flips horizontal,
 -- | vertical swaps the active axis), each snapped to the step grid and clamped to [min,max].
-nextValue :: State -> Int -> String -> Maybe Int
-nextValue st value key =
+nextValue :: State -> Int -> String -> Boolean -> Maybe Int
+nextValue st value key shiftKey =
   let
     horizontal = st.orientation == Horizontal
     -- RTL flips the horizontal arrow meaning.
@@ -258,13 +262,22 @@ nextValue st value key =
       RTL, "ArrowLeft" -> "ArrowRight"
       RTL, "ArrowRight" -> "ArrowLeft"
       _, _ -> key
-    stepBy n = Just (snapClamp st (value + n * st.step))
+    -- radix `isSkipKey = isPageKey || (shiftKey && ARROW_KEYS)` → 10× step. Shift+Arrow is
+    -- the page-equivalent skip; an arrow without shift is a single step.
+    isArrow = case k of
+      "ArrowUp" -> true
+      "ArrowDown" -> true
+      "ArrowLeft" -> true
+      "ArrowRight" -> true
+      _ -> false
+    mult = if shiftKey && isArrow then 10 else 1
+    stepBy n = Just (snapClamp st (value + n * mult * st.step))
   in
     case k of
       "Home" -> Just st.min
       "End" -> Just st.max
-      "PageUp" -> stepBy 10
-      "PageDown" -> stepBy (-10)
+      "PageUp" -> Just (snapClamp st (value + 10 * st.step))
+      "PageDown" -> Just (snapClamp st (value - 10 * st.step))
       "ArrowUp" -> if horizontal then Nothing else stepBy 1
       "ArrowDown" -> if horizontal then Nothing else stepBy (-1)
       "ArrowLeft" -> if horizontal then stepBy (-1) else Nothing
@@ -302,7 +315,7 @@ handleAction = case _ of
   ThumbKeyDown ke -> do
     st <- H.get
     when (not st.disabled) do
-      case nextValue st (current st.ctrl) (KE.key ke) of
+      case nextValue st (current st.ctrl) (KE.key ke) (KE.shiftKey ke) of
         Nothing -> pure unit
         Just v -> do
           -- prevent the browser default (page scroll on arrows / Home / End / Page keys)

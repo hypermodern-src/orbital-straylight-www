@@ -1284,11 +1284,16 @@ const PAGES: Page[] = [
     id: "slider",
     label: "Slider (interactive)",
     interactive: true,
-    node: (
-      <Box style={{ maxWidth: 320 }}>
-        <Slider defaultValue={[40]} />
-      </Box>
-    ),
+    // `?s=disabled` renders the disabled slider (aria-disabled + data-disabled on root/track/
+    // range/thumb, thumb tabindex dropped). Default (rest/stepped) is the enabled single thumb.
+    node: (() => {
+      const disabled = currentState() === "disabled";
+      return (
+        <Box style={{ maxWidth: 320 }}>
+          <Slider defaultValue={[40]} {...(disabled ? { disabled: true } : {})} />
+        </Box>
+      );
+    })(),
   },
   {
     id: "accessibleicon",
@@ -1409,9 +1414,16 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       const empty = s === "empty" || s === "typed";
+      // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
+      // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
+      const alpha = s === "alpha";
       return (
         <Box>
-          <OneTimePasswordField.Root {...(empty ? {} : { defaultValue: "123" })} autoFocus={false}>
+          <OneTimePasswordField.Root
+            {...(empty ? {} : { defaultValue: alpha ? "abc" : "123" })}
+            {...(alpha ? { validationType: "alpha" as const } : {})}
+            autoFocus={false}
+          >
             <OneTimePasswordField.Input />
             <OneTimePasswordField.Input />
             <OneTimePasswordField.Input />
@@ -1432,16 +1444,19 @@ const PAGES: Page[] = [
       const s = currentState();
       const serverInvalid = s === "serverInvalid";
       const forceMatch = s === "forceMatch";
+      // `?s=multiMessage` forceMatches BOTH messages at once → aria-describedby must list
+      // BOTH ids, space-joined in registration order (the multi-id describedby contract).
+      const multi = s === "multiMessage";
       return (
         <Box>
           <Form.Root>
             <Form.Field name="email" serverInvalid={serverInvalid}>
               <Form.Label>Email</Form.Label>
               <Form.Control type="email" required />
-              <Form.Message match="valueMissing" forceMatch={forceMatch}>
+              <Form.Message match="valueMissing" forceMatch={forceMatch || multi}>
                 This value is missing
               </Form.Message>
-              <Form.Message match="typeMismatch">Provide a valid email</Form.Message>
+              <Form.Message match="typeMismatch" forceMatch={multi}>Provide a valid email</Form.Message>
             </Form.Field>
             <Form.Submit>Submit</Form.Submit>
           </Form.Root>

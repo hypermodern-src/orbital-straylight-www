@@ -565,6 +565,39 @@ const CHECKS = [
     await press(pg, "End");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", max, "End did not move the thumb to the maximum");
   }},
+  // PageUp/PageDown = ±10·step (APG "large step"). Seed value 45 (stepped) → PageDown 35, PageUp 45.
+  { id: "slider", state: "stepped", apg: "slider", name: "PageUp/PageDown move by 10 steps", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    await press(pg, "PageDown");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before - 10), "PageDown did not decrease aria-valuenow by 10 steps");
+    await press(pg, "PageUp");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "PageUp did not increase aria-valuenow by 10 steps");
+  }},
+  // Shift+Arrow = 10·step (radix isSkipKey: shiftKey && ARROW_KEYS → page-equivalent skip).
+  { id: "slider", state: "stepped", apg: "slider", name: "Shift+ArrowRight/Left move by 10 steps", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    await pg.keyboard.down("Shift"); await press(pg, "ArrowRight"); await pg.keyboard.up("Shift");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before + 10), "Shift+ArrowRight did not move by 10 steps");
+    await pg.keyboard.down("Shift"); await press(pg, "ArrowLeft"); await pg.keyboard.up("Shift");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "Shift+ArrowLeft did not move by 10 steps");
+  }},
+  // Clamp at the grid boundaries: End then ArrowRight stays at max; Home then ArrowLeft stays at min.
+  { id: "slider", state: "stepped", apg: "slider", name: "value clamps at min/max (overshoot is a no-op)", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const min = await attrOf(pg, '[role="slider"]', 0, "aria-valuemin");
+    const max = await attrOf(pg, '[role="slider"]', 0, "aria-valuemax");
+    await press(pg, "End");
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", max, "ArrowRight past the maximum did not clamp");
+    await press(pg, "Home");
+    await press(pg, "ArrowLeft");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", min, "ArrowLeft past the minimum did not clamp");
+  }},
 
   // Toolbar — https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
   // Roving tabindex over the focusable items (button New, link Edit, toggle items L/C — each a
@@ -615,6 +648,21 @@ const CHECKS = [
   // → last; a printable char fills the slot and auto-advances focus. Roving slots are reachable once
   // populated, so drive the arrow checks against the FILLED story (defaultValue="123") and the
   // auto-advance check against the EMPTY story. Selector is the upstream data-radix-otp-input hook.
+  // Password Toggle Field — the toggle is a native <button type=button>, so Space and Enter
+  // activate it (flipping the password↔text visibility). APG button activation pattern.
+  { id: "passwordtoggle", state: "hidden", apg: "button", name: "Space and Enter on the toggle flip the input type (password↔text)", run: async (pg) => {
+    const btn = '#root button';
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "input should start as type=password");
+    await focusFirst(pg, btn);
+    ok(await activeIs(pg, btn), "could not focus the toggle button");
+    await press(pg, "Space");
+    ok((await attrOf(pg, inp, 0, "type")) === "text", "Space did not reveal the password (type→text)");
+    await press(pg, "Enter");
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "Enter did not re-hide the password (type→password)");
+  }},
+
   { id: "otp", state: "filled", apg: "roving-tabindex", name: "ArrowRight/ArrowLeft rove between slots; the tab stop migrates", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

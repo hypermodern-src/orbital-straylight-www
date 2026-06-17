@@ -88,6 +88,11 @@ STATES=(
   "radiogroup:mixed"
   "radiogroup:disabledgroup"
   "radiogroup:horizontal"
+  # Wave-B inputs depth-audit additions (STR-330).
+  "slider:rest"
+  "slider:disabled"
+  "otp:alpha"
+  "form:multiMessage"
 )
 
 echo "ℵ building golden dist (bun)"

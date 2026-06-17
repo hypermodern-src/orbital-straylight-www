@@ -515,6 +515,23 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "45");
     },
+    // At-rest single-thumb DOM (no interaction): defaultValue=40 → aria-valuenow=40, range
+    // right:60%, thumb left:calc(40% + <px>). Pins the initial-render geometry + defaultValue
+    // passthrough at the DOM level (the stepped oracle only proves the post-keyboard state).
+    rest: async (pg) => {
+      const thumb = root(pg).locator('[role="slider"]').first();
+      await thumb.waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "40");
+    },
+    // `?s=disabled` → aria-disabled on root + data-disabled='' on root/track/range/thumb, and
+    // the thumb's tabindex is dropped (non-focusable). No interaction; the at-rest DOM is the oracle.
+    disabled: async (pg) => {
+      await root(pg).locator('[aria-disabled="true"]').first().waitFor();
+      await pg.locator('[role="slider"][data-disabled]').first().waitFor();
+      await pg.waitForFunction(() =>
+        !document.querySelector('[role="slider"]')?.hasAttribute("tabindex"));
+    },
   },
 
   // ── Bare @radix-ui/react-* primitives (toolbar / passwordtoggle / otp / form) ─────────
@@ -602,6 +619,17 @@ export const STATES = {
         return a[0].value === "4" && a[1].value === "5" && a[2].getAttribute("tabindex") === "0";
       });
     },
+    // `?s=alpha` golden variant → validationType="alpha": every slot inputmode=text +
+    // pattern=[a-zA-Z]{1}, defaultValue "abc". No interaction; the at-rest DOM is the oracle.
+    alpha: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("pattern") === "[a-zA-Z]{1}" && i.getAttribute("inputmode") === "text")
+          && document.querySelector('input[type="hidden"]')?.value === "abc";
+      });
+    },
   },
   form: {
     // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true
@@ -660,6 +688,24 @@ export const STATES = {
         if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
         // the TypeMismatch message text must be present among the described-by targets.
         return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").includes("valid email"));
+      });
+    },
+    // `?s=multiMessage` forceMatches BOTH messages on first paint → aria-describedby lists TWO
+    // ids, space-joined in registration order (valueMissing then typeMismatch), each resolving
+    // to a mounted span. Proves the multi-id describedby join/ordering. No interaction.
+    multiMessage: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!db) return false;
+        const ids = db.split(" ").filter(Boolean);
+        if (ids.length !== 2) return false;
+        const els = ids.map((id) => document.getElementById(id));
+        if (!els.every(Boolean)) return false;
+        // registration order: first id's span is the valueMissing text, second the typeMismatch.
+        return (els[0].textContent || "").includes("missing")
+          && (els[1].textContent || "").includes("valid email");
       });
     },
   },
