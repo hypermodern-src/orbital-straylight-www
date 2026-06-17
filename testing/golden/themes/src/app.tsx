@@ -1127,11 +1127,16 @@ const PAGES: Page[] = [
     id: "slider",
     label: "Slider (interactive)",
     interactive: true,
-    node: (
-      <Box style={{ maxWidth: 320 }}>
-        <Slider defaultValue={[40]} />
-      </Box>
-    ),
+    // `?s=disabled` renders the disabled slider (aria-disabled + data-disabled on root/track/
+    // range/thumb, thumb tabindex dropped). Default (rest/stepped) is the enabled single thumb.
+    node: (() => {
+      const disabled = currentState() === "disabled";
+      return (
+        <Box style={{ maxWidth: 320 }}>
+          <Slider defaultValue={[40]} {...(disabled ? { disabled: true } : {})} />
+        </Box>
+      );
+    })(),
   },
   {
     id: "accessibleicon",

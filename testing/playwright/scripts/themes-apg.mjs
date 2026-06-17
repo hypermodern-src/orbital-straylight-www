@@ -565,6 +565,39 @@ const CHECKS = [
     await press(pg, "End");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", max, "End did not move the thumb to the maximum");
   }},
+  // PageUp/PageDown = ±10·step (APG "large step"). Seed value 45 (stepped) → PageDown 35, PageUp 45.
+  { id: "slider", state: "stepped", apg: "slider", name: "PageUp/PageDown move by 10 steps", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    await press(pg, "PageDown");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before - 10), "PageDown did not decrease aria-valuenow by 10 steps");
+    await press(pg, "PageUp");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "PageUp did not increase aria-valuenow by 10 steps");
+  }},
+  // Shift+Arrow = 10·step (radix isSkipKey: shiftKey && ARROW_KEYS → page-equivalent skip).
+  { id: "slider", state: "stepped", apg: "slider", name: "Shift+ArrowRight/Left move by 10 steps", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    await pg.keyboard.down("Shift"); await press(pg, "ArrowRight"); await pg.keyboard.up("Shift");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before + 10), "Shift+ArrowRight did not move by 10 steps");
+    await pg.keyboard.down("Shift"); await press(pg, "ArrowLeft"); await pg.keyboard.up("Shift");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "Shift+ArrowLeft did not move by 10 steps");
+  }},
+  // Clamp at the grid boundaries: End then ArrowRight stays at max; Home then ArrowLeft stays at min.
+  { id: "slider", state: "stepped", apg: "slider", name: "value clamps at min/max (overshoot is a no-op)", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const min = await attrOf(pg, '[role="slider"]', 0, "aria-valuemin");
+    const max = await attrOf(pg, '[role="slider"]', 0, "aria-valuemax");
+    await press(pg, "End");
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", max, "ArrowRight past the maximum did not clamp");
+    await press(pg, "Home");
+    await press(pg, "ArrowLeft");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", min, "ArrowLeft past the minimum did not clamp");
+  }},
 
   // Toolbar — https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
   // Roving tabindex over the focusable items (button New, link Edit, toggle items L/C — each a

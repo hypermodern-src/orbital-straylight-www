@@ -63,6 +63,9 @@ STATES=(
   "form:forceMatch"
   "form:valueMissing"
   "form:typeMismatch"
+  # Wave-B inputs depth-audit additions (STR-330).
+  "slider:rest"
+  "slider:disabled"
 )
 
 echo "ℵ building golden dist (bun)"

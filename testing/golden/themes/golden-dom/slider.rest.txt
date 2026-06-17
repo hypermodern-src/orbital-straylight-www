@@ -1,0 +1,11 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-Box" style=max-width: <px>;>
+          <span class="rt-SliderRoot rt-r-size-2 rt-variant-surface" aria-disabled=false data-orientation=horizontal dir=ltr style=--radix-slider-thumb-transform: translateX(-50%);>
+            <span class="rt-SliderTrack" data-orientation=horizontal>
+              <span class="rt-SliderRange" data-orientation=horizontal style=left: 0%; right: 60%;>
+            <span style=transform: var(--radix-slider-thumb-transform); position: absolute; left: calc(40% + <px>);>
+              <span class="rt-SliderThumb" aria-orientation=horizontal aria-valuemax=100 aria-valuemin=0 aria-valuenow=40 data-orientation=horizontal data-radix-collection-item= role=slider style= tabindex=0>

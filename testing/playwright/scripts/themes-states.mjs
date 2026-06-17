@@ -349,6 +349,23 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "45");
     },
+    // At-rest single-thumb DOM (no interaction): defaultValue=40 → aria-valuenow=40, range
+    // right:60%, thumb left:calc(40% + <px>). Pins the initial-render geometry + defaultValue
+    // passthrough at the DOM level (the stepped oracle only proves the post-keyboard state).
+    rest: async (pg) => {
+      const thumb = root(pg).locator('[role="slider"]').first();
+      await thumb.waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "40");
+    },
+    // `?s=disabled` → aria-disabled on root + data-disabled='' on root/track/range/thumb, and
+    // the thumb's tabindex is dropped (non-focusable). No interaction; the at-rest DOM is the oracle.
+    disabled: async (pg) => {
+      await root(pg).locator('[aria-disabled="true"]').first().waitFor();
+      await pg.locator('[role="slider"][data-disabled]').first().waitFor();
+      await pg.waitForFunction(() =>
+        !document.querySelector('[role="slider"]')?.hasAttribute("tabindex"));
+    },
   },
 
   // ── Bare @radix-ui/react-* primitives (toolbar / passwordtoggle / otp / form) ─────────

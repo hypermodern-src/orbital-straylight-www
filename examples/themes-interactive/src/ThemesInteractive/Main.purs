@@ -222,7 +222,7 @@ view c s =
             "menubar" -> HH.slot_ _menubar unit Menubar.component menubarInput
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
-            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
+            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
@@ -646,12 +646,13 @@ selectStyle =
 -- | 40 (min 0, max 100, step 1); the driver focuses the thumb and presses ArrowRight 5× →
 -- | value 45 (range `right: 55%`, thumb `left: calc(45% + …)`). The rt-Slider* class anatomy
 -- | is supplied via the primitive's Style slots.
-sliderInput :: Slider.Input
-sliderInput = Slider.defaultInput
+sliderInput :: String -> Slider.Input
+sliderInput s = Slider.defaultInput
   { defaultValue = 40
   , min = 0
   , max = 100
   , step = 1
+  , disabled = s == "disabled"
   , style =
       { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
       , track: cn "rt-SliderTrack"
