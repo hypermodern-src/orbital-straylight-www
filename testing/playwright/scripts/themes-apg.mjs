@@ -677,6 +677,42 @@ const CHECKS = [
     ok(onLast, "Shift+Tab from the first focusable did not wrap to the last (loop broken)");
   }},
 
+  // AlertDialog — alert-dialog.tsx. The defining contracts: focus the CANCEL button on open
+  // (126-129), outside-click NEVER closes (130-131 both preventDefault'd), modal Tab-trap +
+  // Escape-closes-restores (inherited from Dialog). Mirrors the dialog checks, keyed off
+  // role=alertdialog so the same checks run on golden and port.
+  { id: "alertdialog", apg: "dialog-modal", name: "open moves focus into the alert dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    ok(await activeWithin(pg, '[role="alertdialog"]'), "focus did not move into the alert dialog on open");
+  }},
+  { id: "alertdialog", apg: "dialog-modal", name: "open focuses the Cancel button (alertdialog default)", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    // the Cancel button is the soft/gray button (rt-variant-soft + data-accent-color=gray).
+    const onCancel = await pg.evaluate(() => {
+      const d = document.querySelector('[role="alertdialog"]');
+      const cancel = d && [...d.querySelectorAll("button")].find((b) => (b.textContent || "").trim() === "Cancel");
+      return document.activeElement === cancel;
+    });
+    ok(onCancel, "open did not focus the Cancel button");
+  }},
+  { id: "alertdialog", apg: "dialog-modal", name: "Tab is trapped within the alert dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    for (let i = 0; i < 6; i++) await pg.keyboard.press("Tab");
+    ok(await activeWithin(pg, '[role="alertdialog"]'), "Tab escaped the alert dialog (focus trap broken)");
+  }},
+  { id: "alertdialog", apg: "dialog-modal", name: "outside pointer-down does NOT close the alert dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    // click the scroll-padding backdrop OUTSIDE the content (top-left corner of the overlay).
+    await pg.mouse.click(8, 8); await pg.waitForTimeout(180);
+    ok(await visible(pg, '[role="alertdialog"]'), "outside click incorrectly closed the alert dialog");
+  }},
+  { id: "alertdialog", apg: "dialog-modal", name: "Escape closes and returns focus to the trigger", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("alertdialog").waitFor(); await pg.waitForTimeout(180);
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="alertdialog"]')), "Escape did not close the alert dialog");
+    ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
+  }},
+
 ];
 
 const b = await chromium.launch();
