@@ -83,6 +83,19 @@ type Style =
   { root :: ClassNames
   , item :: ClassNames
   , indicator :: ClassNames
+  -- | Optional inner wrapper around ALL items, rendered as a single `<div>` child of
+  -- | the root (e.g. the themed RadioGroup's `rt-Flex rt-r-fd-column rt-r-gap-2`
+  -- | column). Empty (default) → no wrapper, items are direct children of the root
+  -- | (the RadioCards grid layout).
+  , flex :: ClassNames
+  -- | Optional per-item wrapper element: a `<label>` carrying these classes (e.g. the
+  -- | themed RadioGroup's `rt-Text rt-r-size-2`). Empty (default) → no `<label>`, the
+  -- | button is emitted bare (RadioCards). When non-empty each item becomes
+  -- | `<label class=itemLabel> <div class=itemInner> [button, …labelText] </div> </label>`.
+  , itemLabel :: ClassNames
+  -- | The inner flex inside each item `<label>` wrapper (e.g.
+  -- | `rt-Flex rt-r-ai-center rt-r-gap-2`). Only used when `itemLabel` is non-empty.
+  , itemInner :: ClassNames
   }
 
 defaultStyle :: Style
@@ -90,6 +103,9 @@ defaultStyle =
   { root: cn "rdx-radio-group"
   , item: cn "rdx-radio-group-item"
   , indicator: cn "rdx-radio-group-indicator"
+  , flex: cn ""
+  , itemLabel: cn ""
+  , itemInner: cn ""
   }
 
 type Input =
@@ -112,6 +128,11 @@ type Input =
   , rootStyle :: String
   -- | When false the per-item `id` is suppressed (RadioCards.Item has no id).
   , itemIds :: Boolean
+  -- | Where each item's `label` renders relative to the radio button. When false
+  -- | (default, RadioCards) the label is the button's CHILDREN. When true (the themed
+  -- | RadioGroup) the label renders as a SIBLING after the button — inside the
+  -- | per-item `itemInner` wrapper — and the button itself is empty.
+  , labelOutside :: Boolean
   }
 
 defaultInput :: Input
@@ -129,6 +150,7 @@ defaultInput =
   , explicitOrientation: false
   , rootStyle: ""
   , itemIds: true
+  , labelOutside: false
   }
 
 data Output = ValueChanged String
@@ -156,6 +178,7 @@ type State =
   , explicitOrientation :: Boolean
   , rootStyle :: String
   , itemIds :: Boolean
+  , labelOutside :: Boolean
   , uid :: String       -- generated on Initialize; makes ids unique per instance
   }
 
@@ -206,6 +229,7 @@ initialState input =
   , explicitOrientation: input.explicitOrientation
   , rootStyle: input.rootStyle
   , itemIds: input.itemIds
+  , labelOutside: input.labelOutside
   , uid: ""
   }
 
@@ -242,7 +266,13 @@ render st =
           )
         <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
     )
-    (mapWithIndex (renderItem st) st.items)
+    -- Optional inner-flex wrapper (themed RadioGroup column); empty `flex` → items are
+    -- direct children of the root (RadioCards grid).
+    ( if null (unClassNames st.style.flex) then items
+      else [ HH.div [ classes st.style.flex ] items ]
+    )
+  where
+  items = mapWithIndex (renderItem st) st.items
 
 renderItem :: forall m. State -> Int -> Item -> H.ComponentHTML Action () m
 renderItem st _ item =
@@ -252,37 +282,42 @@ renderItem st _ item =
     idx = fromMaybe 0 (findIndex (\i -> i.value == item.value) st.items)
     itemDisabled = item.disabled || st.disabled
     showIndicator = not (null (unClassNames st.style.indicator))
+    indicator =
+      if selected && showIndicator then
+        [ HH.span [ dataState "checked", classes st.style.indicator ] [] ]
+      else []
+    -- RadioCards: the label is the button's CHILDREN. RadioGroup (`labelOutside`): the
+    -- button is empty and the label renders as a sibling inside the inner-flex wrapper.
+    buttonChildren = (if st.labelOutside then [] else map HH.fromPlainHTML item.label) <> indicator
+    button =
+      HH.button
+        ( [ HP.type_ HP.ButtonButton
+          , HP.ref (itemRef item.value)
+          , role "radio"
+          , aria "checked" (if selected then "true" else "false")
+          , dataState (if selected then "checked" else "unchecked")
+          -- Collection.ItemSlot (inside RovingFocusGroup.Item) stamps each radio button.
+          , dataAttr "radix-collection-item" ""
+          , HP.attr (HH.AttrName "value") item.value
+          , HP.tabIndex (tabIndexFor curIdx idx)
+          , HP.disabled itemDisabled
+          , classes st.style.item
+          , HE.onClick \_ -> Selected item.value
+          ]
+            <> (if st.itemIds then [ HP.id (itemId st item.value) ] else [])
+            <> (if st.explicitOrientation then [ dataOrientation st.orientation ] else [])
+            <> (if itemDisabled then [ dataAttr "disabled" "" ] else [])
+        )
+        buttonChildren
   in
-    HH.button
-      ( [ HP.type_ HP.ButtonButton
-        , HP.ref (itemRef item.value)
-        , role "radio"
-        , aria "checked" (if selected then "true" else "false")
-        , dataState (if selected then "checked" else "unchecked")
-        -- Collection.ItemSlot (inside RovingFocusGroup.Item) stamps each radio button.
-        , dataAttr "radix-collection-item" ""
-        , HP.attr (HH.AttrName "value") item.value
-        , HP.tabIndex (tabIndexFor curIdx idx)
-        , HP.disabled itemDisabled
-        , classes st.style.item
-        , HE.onClick \_ -> Selected item.value
+    -- No `itemLabel` wrapper → bare button (RadioCards). With a wrapper → the themed
+    -- RadioGroup chrome: `<label> <div class=inner> [button, …labelText] </div> </label>`.
+    if null (unClassNames st.style.itemLabel) then button
+    else
+      HH.label [ classes st.style.itemLabel ]
+        [ HH.div [ classes st.style.itemInner ]
+            ([ button ] <> (if st.labelOutside then map HH.fromPlainHTML item.label else []))
         ]
-          <> (if st.itemIds then [ HP.id (itemId st item.value) ] else [])
-          <> (if st.explicitOrientation then [ dataOrientation st.orientation ] else [])
-          <> (if itemDisabled then [ dataAttr "disabled" "" ] else [])
-      )
-      ( map HH.fromPlainHTML item.label
-          <>
-            ( if selected && showIndicator then
-                [ HH.span
-                    [ dataState "checked"
-                    , classes st.style.indicator
-                    ]
-                    []
-                ]
-              else []
-            )
-      )
 
 itemId :: State -> String -> String
 itemId st value = base st <> "-item-" <> value
@@ -311,6 +346,7 @@ handleAction = case _ of
       , explicitOrientation = input.explicitOrientation
       , rootStyle = input.rootStyle
       , itemIds = input.itemIds
+      , labelOutside = input.labelOutside
       }
   Selected value -> selectValue value
   ListKeyDown ke -> do

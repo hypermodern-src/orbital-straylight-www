@@ -41,7 +41,6 @@ import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.Prop (Prop(..))
-import Hydrogen.Themes.RadioGroup as ThemesRadioGroup
 import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
 import Hydrogen.Themes.TextField (textField, textFieldValue)
@@ -64,7 +63,7 @@ type Slots =
   , accordion :: Accordion.Slot Unit
   , collapsible :: Collapsible.Slot Unit
   , tabs :: Tabs.Slot Unit
-  , radiogroup :: ThemesRadioGroup.Slot Unit
+  , radiogroup :: RadioGroup.Slot Unit
   , checkbox :: Checkbox.Slot Unit
   , switch :: Switch.Slot Unit
   , toggle :: Toggle.Slot Unit
@@ -175,7 +174,7 @@ view c =
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
-            "radiogroup" -> HH.slot_ _radiogroup unit ThemesRadioGroup.component radioGroupInput
+            "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
             "checkbox" -> HH.slot_ _checkbox unit Checkbox.component checkboxInput
             "switch" -> HH.slot_ _switch unit Switch.component switchInput
             "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
@@ -591,16 +590,29 @@ tabsTriggerLabel label =
       [ HH.text label ]
   ]
 
--- | radiogroup — themes-only (RadioGroupPrimitive styled). Two options; Default is
--- | checked initially, the driver clicks Comfortable. First-cut: the items carry the
--- | label text directly (the golden's label/flex chrome is a fan-out refinement).
-radioGroupInput :: ThemesRadioGroup.Input
-radioGroupInput =
-  { items:
-      [ { value: "1", label: "Default" }
-      , { value: "2", label: "Comfortable" }
+-- | radiogroup — the themed Radix Themes radio group, driven by the real
+-- | `Hydrogen.Radix.RadioGroup` primitive (roving keyboard + onEntryFocus +
+-- | selection-follows-focus, APG-conformant). Two options; Default is checked
+-- | initially, the driver clicks/keys to Comfortable. The themed chrome (root column
+-- | flex, per-item `<label> > inner-flex > [button, labelText]`) is supplied via the
+-- | primitive's `flex`/`itemLabel`/`itemInner` Style slots + `labelOutside`.
+radioGroupInput :: RadioGroup.Input
+radioGroupInput = RadioGroup.defaultInput
+  { items =
+      [ { value: "1", label: [ HH.text " Default" ], disabled: false }
+      , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
       ]
-  , defaultValue: "1"
+  , defaultValue = Just "1"
+  , itemIds = false
+  , labelOutside = true
+  , style =
+      { root: cn "rt-RadioGroupRoot"
+      , item: cn "rt-reset rt-BaseRadioRoot rt-r-size-2 rt-variant-surface"
+      , indicator: cn ""
+      , flex: cn "rt-Flex rt-r-fd-column rt-r-gap-2"
+      , itemLabel: cn "rt-Text rt-r-size-2"
+      , itemInner: cn "rt-Flex rt-r-ai-center rt-r-gap-2"
+      }
   }
 
 -- | checkbox — a bare single Themes checkbox, unchecked; the driver clicks to check.
@@ -733,6 +745,11 @@ radioCardsInput = RadioGroup.defaultInput
       { root: cn "rt-Grid rt-RadioCardsRoot rt-r-size-2 rt-variant-surface rt-r-gtc rt-r-gap-4"
       , item: cn "rt-reset rt-BaseCard rt-RadioCardsItem"
       , indicator: cn ""
+      -- RadioCards: no inner-flex wrapper (grid root) and no per-item `<label>` chrome —
+      -- the button is a direct child of the grid and carries its own label children.
+      , flex: cn ""
+      , itemLabel: cn ""
+      , itemInner: cn ""
       }
   }
 
