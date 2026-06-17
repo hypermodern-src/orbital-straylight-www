@@ -80,6 +80,42 @@ const CHECKS = [
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
   }},
 
+  // Accordion — https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
+  // Vertical accordion: ArrowDown/ArrowUp move focus between TRIGGERS, relative to the
+  // CURRENTLY FOCUSED trigger (accordion.tsx:235-240 derives triggerIndex from event.target,
+  // NOT the open/first item), wrapping; the navigable collection EXCLUDES disabled triggers
+  // (accordion.tsx:236 filter(!disabled)) so arrows SKIP OVER them. Triggers carry aria-expanded.
+  { id: "accordion", state: "open", apg: "accordion", name: "ArrowDown moves relative to the FOCUSED trigger (nav origin = event.target)", run: async (pg) => {
+    const t = (n) => pg.locator('#root button[aria-expanded]').nth(n);
+    await t(0).waitFor();
+    await t(1).focus(); // focus the MIDDLE trigger
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 1), "could not focus the middle trigger");
+    await press(pg, "ArrowDown");
+    // origin must be the focused (#2, idx 1) → next is #3 (idx 2); the old bug computed
+    // origin from the open/first item (idx 0) and would land on #2 (idx 1, no move).
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 2), "ArrowDown did not move relative to the focused trigger (landed off #3)");
+  }},
+  { id: "accordion", state: "open", apg: "accordion", name: "Home/End focus the first/last trigger", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded]').first().waitFor();
+    await pg.locator('#root button[aria-expanded]').nth(1).focus();
+    await press(pg, "End");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 2), "End did not focus the last trigger");
+    await press(pg, "Home");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "Home did not focus the first trigger");
+  }},
+  { id: "accordion", state: "disabled", apg: "accordion", name: "ArrowDown SKIPS OVER a disabled trigger to the next enabled one", run: async (pg) => {
+    const all = pg.locator('#root button[aria-expanded]');
+    await all.first().waitFor();
+    ok((await all.count()) === 3, "expected 3 triggers");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 1, "disabled")) !== null, "the middle trigger must be disabled in this state");
+    await all.nth(0).focus(); // focus #1 (enabled)
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "could not focus the first trigger");
+    await press(pg, "ArrowDown");
+    // #2 is disabled → it is OUT of the collection, so ArrowDown lands on #3 (the next
+    // ENABLED trigger), never on the disabled #2.
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 2), "ArrowDown did not skip the disabled middle trigger to #3");
+  }},
+
   // Menu Button + Menu — https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
   { id: "dropdownmenu", apg: "menu-button", name: "ArrowDown on the trigger opens and focuses the first item", run: async (pg) => {
     await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");

@@ -223,7 +223,7 @@ view c s =
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
             "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
-            "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
+            "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
@@ -692,11 +692,13 @@ scrollAreaInput = ScrollArea.defaultInput
 
 -- | accordion — the bare @radix-ui Accordion primitive (Radix Themes ships none, so
 -- | NO rt-* classes; the golden is the unstyled primitive). type=multiple, closed.
-accordionInput :: Accordion.Input
-accordionInput = Accordion.defaultInput
+accordionInput :: String -> Accordion.Input
+accordionInput s = Accordion.defaultInput
   { items =
       [ { value: "item-1", header: [ HH.text "Is it accessible?" ], content: [ HH.text "Yes. It adheres to the WAI-ARIA design pattern." ], disabled: false }
-      , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: false }
+      -- `?s=disabled` disables the MIDDLE trigger so the APG disabled-skip check proves
+      -- arrows skip OVER it (upstream filters disabled out of the navigable collection).
+      , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: s == "disabled" }
       , { value: "item-3", header: [ HH.text "Is it animated?" ], content: [ HH.text "Yes, with CSS." ], disabled: false }
       ]
   , single = false

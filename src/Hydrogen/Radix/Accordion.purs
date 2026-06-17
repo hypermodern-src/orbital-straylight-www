@@ -37,6 +37,8 @@ module Hydrogen.Radix.Accordion
 
 import Prelude
 
+import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
+import Control.Monad.Trans.Class (lift)
 import Data.Array (elem, filter, find, findIndex, length, mapWithIndex, snoc, (!!))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (for_)
@@ -46,6 +48,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Web.DOM.Element as Element
+import Web.Event.Event as Event
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
@@ -159,8 +163,12 @@ data Action
 base :: State -> String
 base st = if st.uid == "" then st.idPrefix else st.idPrefix <> "-" <> st.uid
 
-triggerRef :: String -> String -> H.RefLabel
-triggerRef pfx value = H.RefLabel (pfx <> "-trigger-" <> value)
+-- | RefLabel for an item's trigger. Keyed off the STABLE item value alone — NOT
+-- | `base st`, whose embedded `uid` is minted on Initialize (after the first render):
+-- | a ref label that changes after mount leaves `getHTMLElementRef` unable to resolve
+-- | the element (same discipline as Tabs.tabRef). Arrow-key focus depends on this.
+triggerRef :: String -> H.RefLabel
+triggerRef value = H.RefLabel ("rdx-accordion-trigger-" <> value)
 
 -- | The inline style upstream AccordionContent + CollapsibleContentImpl stamp on the
 -- | OPEN content node: the accordion→collapsible var aliases plus the measured
@@ -239,7 +247,7 @@ renderItem st _ item =
           )
           [ HH.button
               ( [ HP.type_ HP.ButtonButton
-                , HP.ref (triggerRef (base st) item.value)
+                , HP.ref (triggerRef item.value)
                 , HP.id (triggerId st item.value)
                 , aria "expanded" (if open then "true" else "false")
                 , dataState (if open then "open" else "closed")
@@ -293,11 +301,6 @@ panelId st value = case find (\i -> i.value == value) st.ids of
   Just ids -> ids.panel
   Nothing -> base st <> "-panel-" <> value
 
--- | The roving tab stop: the first OPEN item's index, else 0.
-tabStopIndex :: State -> Int
-tabStopIndex st =
-  fromMaybe 0 (findIndex (\i -> i.value `elem` current st.ctrl) st.items)
-
 -- | Mint a bare-useId trigger + panel id pair for one item.
 mintItemIds :: forall m. MonadEffect m => Item -> H.HalogenM State Action () Output m ItemIds
 mintItemIds it = do
@@ -337,16 +340,28 @@ handleAction = case _ of
   Toggle value -> toggleItem value
   HeadersKeyDown ke -> do
     st <- H.get
+    -- upstream (accordion.tsx:235-240): the navigable collection EXCLUDES disabled
+    -- triggers, and the nav origin is the CURRENTLY FOCUSED trigger (event.target),
+    -- not the open/first item. Resolve the focused trigger from the event target's id,
+    -- find its index WITHIN the non-disabled collection, navigate there, focus the result.
+    mTargetId <- liftEffect $ runMaybeT do
+      tgt <- MaybeT $ pure (Event.target (KE.toEvent ke))
+      el <- MaybeT $ pure (Element.fromEventTarget tgt)
+      lift (Element.id el)
     let
+      enabled = filter (\i -> not (st.disabled || i.disabled)) st.items
+      focusedIdx = case mTargetId of
+        Just tid -> fromMaybe 0 (findIndex (\i -> triggerId st i.value == tid) enabled)
+        Nothing -> 0
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
-      pos = { count: length st.items, current: tabStopIndex st }
-    case navigate cfg pos (KE.key ke) of
+      pos = { count: length enabled, current: focusedIdx }
+    when (length enabled > 0) $ case navigate cfg pos (KE.key ke) of
       Stay -> pure unit
-      MoveTo idx -> case st.items !! idx of
+      MoveTo idx -> case enabled !! idx of
         Nothing -> pure unit
-        Just item -> when (not (st.disabled || item.disabled)) do
+        Just item -> do
           -- manual activation: move focus only; toggling stays on click/Enter/Space
-          mel <- H.getHTMLElementRef (triggerRef (base st) item.value)
+          mel <- H.getHTMLElementRef (triggerRef item.value)
           for_ mel (liftEffect <<< HTMLElement.focus)
 
 -- | Toggle item `value`'s membership in the open set, honoring single/collapsible.

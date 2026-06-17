@@ -808,10 +808,14 @@ const PAGES: Page[] = [
     label: "Accordion",
     interactive: true,
     node: (() => {
+      // `?s=disabled` disables the MIDDLE trigger (item-2) so the APG disabled-skip
+      // check can prove arrows skip OVER it (accordion.tsx:236 filters disabled out of
+      // the navigable collection). Every other state renders all three enabled.
+      const disableMiddle = currentState() === "disabled";
       const items = [
-        { value: "item-1", header: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern." },
-        { value: "item-2", header: "Is it styled?", content: "No. It is unstyled by default." },
-        { value: "item-3", header: "Is it animated?", content: "Yes, with CSS." },
+        { value: "item-1", header: "Is it accessible?", content: "Yes. It adheres to the WAI-ARIA design pattern.", disabled: false },
+        { value: "item-2", header: "Is it styled?", content: "No. It is unstyled by default.", disabled: disableMiddle },
+        { value: "item-3", header: "Is it animated?", content: "Yes, with CSS.", disabled: false },
       ];
       return (
         <Box style={{ maxWidth: 360 }}>
@@ -819,7 +823,7 @@ const PAGES: Page[] = [
             {items.map((it) => (
               <Accordion.Item key={it.value} value={it.value}>
                 <Accordion.Header>
-                  <Accordion.Trigger>{it.header}</Accordion.Trigger>
+                  <Accordion.Trigger disabled={it.disabled}>{it.header}</Accordion.Trigger>
                 </Accordion.Header>
                 <Accordion.Content>{it.content}</Accordion.Content>
               </Accordion.Item>
