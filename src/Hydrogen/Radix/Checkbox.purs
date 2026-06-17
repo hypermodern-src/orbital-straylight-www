@@ -87,6 +87,13 @@ type Input =
   -- (e.g. `data-radix-collection-item`, `tabindex`, an explicit `aria-required`);
   -- for a bare standalone checkbox this is empty.
   , extraAttrs :: Array (Tuple String String)
+  -- Form participation (Wave C). When the checkbox is inside (or SSR-defaults into) a
+  -- `<form>`, radix resolves `isFormControl` true and renders a hidden bubble
+  -- `<input type="checkbox" aria-hidden tabindex=-1>` SIBLING of the trigger so the
+  -- control submits with the form + drives native constraint validation. The bubble
+  -- mirrors checked/name/value/required/disabled. A bare checkbox with no `<form>`
+  -- ancestor resolves `isFormControl` false post-mount ⇒ no input (the default).
+  , isFormControl :: Boolean
   }
 
 defaultInput :: Input
@@ -100,6 +107,7 @@ defaultInput =
   , style: defaultStyle
   , children: []
   , extraAttrs: []
+  , isFormControl: false
   }
 
 -- | Emitted whenever the user requests a change — including in controlled mode,
@@ -126,6 +134,7 @@ type State =
   , style :: Style
   , children :: Array HH.PlainHTML
   , extraAttrs :: Array (Tuple String String)
+  , isFormControl :: Boolean
   }
 
 data Action
@@ -155,6 +164,7 @@ initialState input =
   , style: input.style
   , children: input.children
   , extraAttrs: input.extraAttrs
+  , isFormControl: input.isFormControl
   }
 
 -- | The next value on click: Indeterminate resolves to Checked, otherwise toggle.
@@ -178,13 +188,35 @@ ariaCheckedName = case _ of
   Unchecked -> "false"
   Indeterminate -> "mixed"
 
+-- | The hidden bubble `<input type="checkbox">` (radix `CheckboxBubbleInput`): an
+-- | aria-hidden, tabindex=-1, absolutely-positioned 0-opacity input rendered AFTER the
+-- | trigger so the control submits with the enclosing form + drives native constraint
+-- | validation. Its inline style is byte-identical to upstream's (control-size width/
+-- | height + the translateX(-100%) pull-back); the DOM oracle normalizes every `…px`
+-- | to `<px>`, so we emit literal `0px` sizes. `checked`/`required`/`disabled` are
+-- | reflected as empty boolean attributes, matching upstream.
+bubbleInput :: forall m. CheckedState -> State -> H.ComponentHTML Action () m
+bubbleInput checked st =
+  HH.input
+    ( [ HP.type_ HP.InputCheckbox
+      , ARIA.hidden "true"
+      , HP.tabIndex (-1)
+      , HP.name st.name
+      , HP.value st.value
+      , HP.style "position: absolute; pointer-events: none; opacity: 0; margin: 0px; transform: translateX(-100%); width: 0px; height: 0px;"
+      ]
+        <> (if checked == Checked then [ HP.attr (HH.AttrName "checked") "" ] else [])
+        <> (if st.required then [ HP.attr (HH.AttrName "required") "" ] else [])
+        <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
+    )
+
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   let
     checked = current st.ctrl
     showIndicator = checked == Checked || checked == Indeterminate
-  in
-    HH.button
+    trigger =
+      HH.button
       ( [ HP.type_ HP.ButtonButton
         , ARIA.role "checkbox"
         , ARIA.checked (ariaCheckedName checked)
@@ -213,6 +245,16 @@ render st =
         else
           []
       )
+  in
+    -- When the checkbox is a form control, the trigger and the hidden bubble input are
+    -- SIBLINGS. Halogen needs a single root, so wrap them in a `display:contents` div the
+    -- DOM-oracle normalizer strips — making trigger+input direct children of the <form>,
+    -- exactly as upstream renders them. Bare (non-form) checkboxes render the trigger
+    -- alone (no wrapper), keeping the at-rest pixel goldens byte-identical.
+    if st.isFormControl then
+      HH.div [ HP.style "display:contents" ] [ trigger, bubbleInput checked st ]
+    else
+      trigger
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
@@ -236,6 +278,7 @@ handleAction = case _ of
       , style = input.style
       , children = input.children
       , extraAttrs = input.extraAttrs
+      , isFormControl = input.isFormControl
       }
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)

@@ -112,6 +112,12 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  # ── Wave-C controls — form participation (hidden bubble input) depth gaps (STR-330) ─
+  "checkbox:form"
+  "switch:form"
+  "radiogroup:form"
+  # Wave-C Toggle — the disabled-AND-pressed edge state-variant (STR-330).
+  "toggle:disabledpressed"
 )
 
 echo "ℵ building golden dist (bun)"

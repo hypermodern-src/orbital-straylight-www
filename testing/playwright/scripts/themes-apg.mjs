@@ -1051,6 +1051,22 @@ const CHECKS = [
     ok((await attrOf(pg, sel, 0, "aria-pressed")) === "false", "Space must NOT press a disabled toggle");
     ok((await attrOf(pg, sel, 0, "data-disabled")) === "", "the disabled toggle must carry data-disabled=''");
   }},
+  // Wave C — the disabled-AND-pressed toggle stays locked-on: Space AND Enter are both no-ops
+  // (the control is disabled), and aria-pressed=true / data-state=on / data-disabled='' hold
+  // throughout. Closes the disabled+Enter half (the existing check covers disabled+Space only).
+  { id: "toggle", state: "disabledpressed", apg: "button", name: "a disabled-AND-pressed toggle stays locked on (Space/Enter no-op)", run: async (pg) => {
+    const sel = 'button[aria-pressed]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "the disabled toggle must start pressed");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "on", "the disabled toggle must start data-state=on");
+    ok((await attrOf(pg, sel, 0, "data-disabled")) === "", "the disabled toggle must carry data-disabled=''");
+    await focusFirst(pg, sel);
+    await press(pg, "Space");
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "Space must NOT unpress a disabled toggle");
+    await press(pg, "Enter");
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "Enter must NOT unpress a disabled toggle");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "on", "data-state must remain on");
+  }},
 
   // Checkbox — Enter is explicitly preventDefaulted (WAI-ARIA: checkboxes do NOT activate on
   // Enter; only Space toggles). The themed checkbox seed (?s=checked = the bare unchecked
