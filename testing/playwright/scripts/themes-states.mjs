@@ -779,4 +779,15 @@ export const STATES = {
     // STATELESS: wait for the <label> carrying the for-association attribute.
     forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
   },
+  // ── Wave-C: Themes.Separator WRAPPER (rt-Separator) depth oracle ─────────────────
+  // STATELESS: wait for the rt-Separator span (present in every state). The contract
+  // (role omitted when decorative-default, data-accent-color, size class, orientation
+  // class) is judged by the DOM snapshot, not the wait.
+  separatorthemes: {
+    default: async (pg) => { await pg.locator("span.rt-Separator").first().waitFor({ state: "attached" }); },
+    semantic: async (pg) => { await pg.locator('span.rt-Separator[role="separator"]').first().waitFor({ state: "attached" }); },
+    size4: async (pg) => { await pg.locator("span.rt-Separator.rt-r-size-4").first().waitFor({ state: "attached" }); },
+    accent: async (pg) => { await pg.locator('span.rt-Separator[data-accent-color="cyan"]').first().waitFor({ state: "attached" }); },
+    vertical: async (pg) => { await pg.locator("span.rt-Separator.rt-r-orientation-vertical").first().waitFor({ state: "attached" }); },
+  },
 };

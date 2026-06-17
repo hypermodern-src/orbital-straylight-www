@@ -112,6 +112,12 @@ STATES=(
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
   "labelprim:forattrs"
+  # Wave-C: Themes.Separator WRAPPER depth oracle.
+  "separatorthemes:default"
+  "separatorthemes:semantic"
+  "separatorthemes:size4"
+  "separatorthemes:accent"
+  "separatorthemes:vertical"
 )
 
 echo "ℵ building golden dist (bun)"
