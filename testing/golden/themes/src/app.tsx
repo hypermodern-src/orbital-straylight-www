@@ -843,18 +843,31 @@ const PAGES: Page[] = [
     id: "collapsible",
     label: "Collapsible",
     interactive: true,
-    node: (
-      <Collapsible.Root>
-        <Collapsible.Trigger asChild>
-          <Button variant="soft">Toggle content</Button>
-        </Collapsible.Trigger>
-        <Collapsible.Content>
-          <Box pt="2">
-            <Text as="div" size="2">Disclosed content line one.</Text>
-          </Box>
-        </Collapsible.Content>
-      </Collapsible.Root>
-    ),
+    // `?s=disabled` stamps `disabled` on the Root (→ data-disabled="" on root+trigger+content,
+    // the trigger's `disabled` attr, and a non-interactive trigger). The default (open/rest)
+    // story is the plain enabled disclosure. The injected exit keyframe on the CLOSING content
+    // (data-state="closed") makes Presence keep the content MOUNTED through the pinned (100s)
+    // exit — the lingering closing node the closing-DOM oracle captures (otherwise the bare,
+    // unstyled content has animation-name:none and unmounts synchronously, like menubar).
+    node: (() => {
+      const disabled = currentState() === "disabled";
+      return (
+        <>
+          <style>{`@keyframes collapsibleExit { from { opacity: 1 } to { opacity: 0 } }
+            div[data-state="closed"][id] { animation: collapsibleExit 100ms ease-out; }`}</style>
+          <Collapsible.Root disabled={disabled}>
+            <Collapsible.Trigger asChild>
+              <Button variant="soft">Toggle content</Button>
+            </Collapsible.Trigger>
+            <Collapsible.Content>
+              <Box pt="2">
+                <Text as="div" size="2">Disclosed content line one.</Text>
+              </Box>
+            </Collapsible.Content>
+          </Collapsible.Root>
+        </>
+      );
+    })(),
   },
   {
     id: "toast",
@@ -1157,6 +1170,16 @@ const PAGES: Page[] = [
     ),
   },
   {
+    id: "avatar",
+    label: "Avatar (interactive)",
+    interactive: true,
+    // Fallback-only avatar (NO src): Radix Avatar.Image reports loading status 'error'
+    // immediately, so the at-rest DOM is the FALLBACK branch — a single rt-AvatarFallback
+    // span, the <img> ABSENT. The oracle pins: img absent, fallback present, accessible
+    // name on the fallback, and (themes-a11y) zero axe violations on a fallback-only avatar.
+    node: <Avatar fallback="A" />,
+  },
+  {
     id: "progress",
     label: "Progress (interactive)",
     interactive: true,
@@ -1165,11 +1188,19 @@ const PAGES: Page[] = [
     // max wiring on root + indicator). value < max ⇒ data-state="loading"; React
     // stringifies the number 25 as the INTEGER "25" (the PureScript `show 25.0`="25.0"
     // divergence this oracle pins). No interaction; the at-rest DOM is the oracle.
-    node: (
-      <Box style={{ maxWidth: 320 }}>
-        <Progress value={25} />
-      </Box>
-    ),
+    // `?s` variants exercise the value/max contract the at-rest pixel oracle never did:
+    //   indeterminate (no value) → data-state=indeterminate, NO aria-valuenow/valuetext/data-value
+    //   complete (value===max)   → data-state=complete on root AND indicator (strict equality)
+    //   custommax (max=200,val=50) → aria-valuemax=200, aria-valuetext=25%, data-max=200
+    node: (() => {
+      const s = currentState();
+      const inner =
+        s === "indeterminate" ? <Progress /> :
+        s === "complete" ? <Progress value={100} /> :
+        s === "custommax" ? <Progress value={50} max={200} /> :
+        <Progress value={25} />;
+      return <Box style={{ maxWidth: 320 }}>{inner}</Box>;
+    })(),
   },
   {
     id: "scrollarea",

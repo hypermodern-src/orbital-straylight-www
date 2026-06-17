@@ -44,7 +44,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Id (useId)
-import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
+import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, hasAnimation, animationEnd)
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState, dataAttr, aria)
 import Web.HTML.HTMLElement as HTMLElement
 
@@ -75,6 +75,7 @@ type Input =
   , triggerAttrs :: Array (Tuple String String)  -- extra data-* on the trigger (e.g. accent-color)
   , trigger :: Array HH.PlainHTML  -- static trigger label/icon
   , content :: Array HH.PlainHTML  -- disclosed content
+  , exitCss :: String              -- optional <style> (an exit keyframe on the closing content)
   }
 
 defaultInput :: Input
@@ -86,6 +87,7 @@ defaultInput =
   , triggerAttrs: []
   , trigger: []
   , content: []
+  , exitCss: ""
   }
 
 -- | Emitted on every user-requested change — including in controlled mode, where
@@ -111,6 +113,7 @@ type State =
   , triggerAttrs :: Array (Tuple String String)
   , trigger :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
+  , exitCss :: String
   , animSub :: Maybe H.SubscriptionId
   , contentId :: String  -- generated on Initialize; the trigger aria-controls target
   }
@@ -157,6 +160,7 @@ initialState input =
   , triggerAttrs: input.triggerAttrs
   , trigger: input.trigger
   , content: input.content
+  , exitCss: input.exitCss
   , animSub: Nothing
   , contentId: ""
   }
@@ -171,10 +175,16 @@ render st =
     open = current st.ctrl
   in
     HH.div
-      [ classes st.style.root
-      , dataState (if open then "open" else "closed")
-      ]
-      ( [ HH.button
+      ( [ classes st.style.root
+        , dataState (if open then "open" else "closed")
+        ]
+          -- upstream stamps data-disabled="" on the Collapsible ROOT when disabled
+          -- (collapsible.tsx:69 `data-disabled={disabled ? '' : undefined}`).
+          <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+      )
+      ( (if st.exitCss == "" then [] else [ HH.element (HH.ElemName "style") [] [ HH.text st.exitCss ] ])
+          <>
+          [ HH.button
             ( [ HP.type_ HP.ButtonButton
               , aria "expanded" (show open)
               , dataState (if open then "open" else "closed")
@@ -190,22 +200,33 @@ render st =
             (map HH.fromPlainHTML st.trigger)
         ]
           <>
-            ( if isRendered st.presence then
+            -- The content WRAPPER div is ALWAYS in the DOM: upstream's CollapsibleContent passes
+            -- a render-prop child to Presence, which makes Presence `forceMount` (always render
+            -- the impl, gating visibility via `present`/`hidden`, NOT unmounting it). So even at
+            -- closed-rest the div exists — hidden, empty, data-state="closed". `isOpen = open ||
+            -- isPresent` (= the content is still rendered/animating-out) drives children + hidden.
+            ( let
+                isOpen = isRendered st.presence
+              in
                 [ HH.div
                     ( [ HP.ref contentRef
                       , HP.id st.contentId
-                      , dataState (dataStateOf st.presence)
+                      -- data-state mirrors `getState(context.open)` — open's truth NOW, so during
+                      -- the closing frame it is already "closed" (open=false, still present).
+                      , dataState (if open then "open" else "closed")
                       , classes st.style.content
+                      -- the cached measured size vars are populated only while the content is
+                      -- rendered (open OR exiting); at closed-rest upstream emits an empty
+                      -- `style=""` (height/width undefined) — match it exactly.
+                      , HP.style (if isOpen then contentSizeVars else "")
                       ]
-                        -- measured size vars on the rendered content (upstream)
-                        <> (if open then [ HP.style contentSizeVars ] else [])
-                        -- hidden while not open (present-while-closing); absent when open
-                        <> (if open then [] else [ HP.attr (HH.AttrName "hidden") "" ])
+                        -- `hidden={!isOpen}`: hidden only when neither open nor exiting.
+                        <> (if isOpen then [] else [ HP.attr (HH.AttrName "hidden") "" ])
                         <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
                     )
-                    (map HH.fromPlainHTML st.content)
+                    -- `{isOpen && children}`: children render while open OR exiting, empty otherwise.
+                    (if isOpen then map HH.fromPlainHTML st.content else [])
                 ]
-              else []
             )
       )
 
@@ -222,6 +243,7 @@ handleAction = case _ of
       , triggerAttrs = input.triggerAttrs
       , trigger = input.trigger
       , content = input.content
+      , exitCss = input.exitCss
       }
   Toggle -> do
     st <- H.get

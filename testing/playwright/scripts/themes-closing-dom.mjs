@@ -44,6 +44,9 @@ const CLOSED_SEL = [
   // Toast: the bare <li> lingers data-state="closed" (Presence) through the golden story's
   // exit keyframe — keyed off the upstream li, no port-internal class.
   'li[data-state="closed"][data-swipe-direction]',
+  // Collapsible: the content div (it carries the aria-controls `id`; the trigger button does
+  // not) lingers data-state="closed" + hidden through the golden story's injected exit keyframe.
+  'div[id][data-state="closed"]',
 ].join(", ");
 
 // Pin every animation/transition open-ended so the closing node lingers for the snapshot.

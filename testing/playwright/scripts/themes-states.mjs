@@ -52,6 +52,14 @@ export const CLOSE = {
     await li.focus();
     await pg.keyboard.press("Escape");
   },
+  // Collapsible closes by re-clicking its (now open) trigger → onOpenToggle(false). The golden
+  // story injects a 100ms exit keyframe on the closing content (div[data-state="closed"][id])
+  // so Presence keeps the content MOUNTED (data-state="closed", hidden, size-vars retained,
+  // EMPTY children) through the pinned (100s) exit — the lingering closing node the oracle
+  // captures. Keyed off the UPSTREAM trigger only, so the same action runs against golden AND
+  // port. (Without the injected keyframe the bare unstyled content has animation-name:none and
+  // unmounts synchronously, like menubar/select.)
+  collapsible: async (pg) => { await root(pg).getByRole("button").first().click(); },
 
   // ── DELIBERATELY NO closing oracle (verified against real @radix-ui/themes) ───────────────
   // select  — Radix Select.Content does NOT wrap its content in Presence: on Escape the
@@ -195,6 +203,13 @@ export const STATES = {
       await triggerButton(pg).click();
       await pg.locator('[data-state="open"]:not([hidden])').first().waitFor();
     },
+    // `?s=disabled` renders the Root disabled — NO interaction. The at-rest CLOSED DOM is the
+    // oracle: root+trigger carry data-disabled="" and the trigger the `disabled` attr (the
+    // content is absent while closed). Keyed off the UPSTREAM disabled+closed trigger only, so
+    // the same driver runs against golden and port.
+    disabled: async (pg) => {
+      await root(pg).locator('button[disabled][data-state="closed"]').first().waitFor();
+    },
   },
   tabs: {
     tab2: async (pg) => {
@@ -308,6 +323,17 @@ export const STATES = {
       await pg.locator('svg[aria-hidden="true"]').first().waitFor({ state: "attached" });
     },
   },
+  avatar: {
+    // Fallback-only avatar — STATELESS. No src ⇒ Radix reports 'error' immediately ⇒ the
+    // at-rest DOM is the fallback branch (rt-AvatarFallback span, NO <img>). The `fallback`
+    // state waits for the fallback span and asserts the <img> is ABSENT (the load-strategy
+    // contract: the real img is never in the DOM unless loaded). Keyed off the UPSTREAM
+    // rt-AvatarFallback class only, so the same driver runs against golden and port.
+    fallback: async (pg) => {
+      await root(pg).locator('.rt-AvatarFallback').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root img') === null);
+    },
+  },
   progress: {
     // Determinate progress bar — STATELESS (no interaction). The `shown` state just
     // waits for the role=progressbar to be laid out; rest and shown snapshot the SAME
@@ -317,6 +343,24 @@ export const STATES = {
       await pg.locator('[role="progressbar"]').first().waitFor();
       await pg.waitForFunction(() =>
         document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
+    },
+    // `?s=indeterminate` — no value: data-state=indeterminate, NO aria-valuenow/data-value.
+    indeterminate: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
+    },
+    // `?s=complete` — value===max: data-state=complete (strict equality).
+    complete: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="complete"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "100");
+    },
+    // `?s=custommax` — max=200,value=50: aria-valuemax=200, aria-valuetext=25%, data-max=200.
+    custommax: async (pg) => {
+      await pg.locator('[role="progressbar"][aria-valuemax="200"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuetext") === "25%");
     },
   },
   scrollarea: {

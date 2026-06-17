@@ -51,7 +51,9 @@ import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.AccessibleIcon (accessibleIcon) as AccessibleIcon
+import Hydrogen.Themes.Avatar (avatar) as Avatar
 import Hydrogen.Themes.Progress (progress) as Progress
+import Hydrogen.Radix.Progress (progress) as RadixProgress
 import Hydrogen.Themes.Prop (Prop(..))
 import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
@@ -224,7 +226,11 @@ view c s =
             "select" -> HH.slot_ _select unit Select.component selectInput
             "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
-            "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
+            -- `?s=disabled` renders the Root disabled (data-disabled stamping). The primitive
+            -- injects (via exitCss) the golden story's exit keyframe on the closing content so
+            -- the port's Presence keeps it mounted through the pinned exit (the closing oracle's
+            -- lingering node); <style> is in the normalizer SKIP set, so it never diffs.
+            "collapsible" -> HH.slot_ _collapsible unit Collapsible.component (collapsibleInput s)
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
             "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component radioGroupInput
@@ -239,7 +245,10 @@ view c s =
             -- `Align` is ambiguous here (Prop.Align vs Foundation.Style.Align in scope),
             -- so spell the flex align class directly: align="center" → rt-r-ai-center.
             "accessibleicon" -> flex [ Class "rt-r-ai-center" ] (AccessibleIcon.accessibleIcon "Settings" gearIcon)
-            "progress" -> box [ StyleProp "max-width" "320px" ] [ Progress.progress 25 [] ]
+            -- fallback-only avatar (no src): the at-rest error/fallback branch — a single
+            -- rt-AvatarFallback span, NO <img>. Matches `<Avatar fallback="A" />`.
+            "avatar" -> Avatar.avatar "A" []
+            "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
             "passwordtoggle" -> passwordTogglePage
@@ -660,6 +669,28 @@ sliderInput = Slider.defaultInput
       }
   }
 
+-- | progress variants — the `?s` value/max contract states the at-rest pixel oracle never
+-- | exercised. `shown`/default → the themed `Progress.progress 25 []` (byte-identical to the
+-- | committed shown golden). The named variants drive the Radix primitive directly with the
+-- | themed rt-ProgressRoot/Indicator classes + the matching `--progress-*` custom props upstream
+-- | Themes stamps: indeterminate (no value → no style, no aria-valuenow/data-value), complete
+-- | (value===max=100 → data-state=complete), custommax (max=200,value=50 → aria-valuemax=200,
+-- | aria-valuetext=25%, BOTH --progress-value AND --progress-max).
+progressVariant :: forall w i. String -> HH.HTML w i
+progressVariant s = case s of
+  "indeterminate" -> prim Nothing 100.0 ""
+  "complete" -> prim (Just 100.0) 100.0 "--progress-value: 100;"
+  "custommax" -> prim (Just 50.0) 200.0 "--progress-value: 50; --progress-max: 200;"
+  _ -> Progress.progress 25 []
+  where
+  prim mv mx styl = RadixProgress.progress
+    { value: mv
+    , max: mx
+    , class_: cn "rt-ProgressRoot rt-r-size-2 rt-variant-surface"
+    , indicator: cn "rt-ProgressIndicator"
+    , rootAttrs: if styl == "" then [] else [ HP.style styl ]
+    }
+
 -- | scrollarea — the themed Radix ScrollArea (type="always", scrollbars="vertical"): a
 -- | 200×120 box whose 12-line content overflows vertically, so the styled scrollbar +
 -- | thumb render at rest. The rt-* Style reproduces upstream's class anatomy; the content
@@ -717,10 +748,11 @@ accordionInput s = Accordion.defaultInput
 -- | collapsible — a themed soft Button trigger + a Box>Text content panel. The
 -- | primitive Content div itself carries NO rt-* class (bare Primitive.div), so
 -- | style.content is empty; the rt-Box/rt-Text classes live on the children.
-collapsibleInput :: Collapsible.Input
-collapsibleInput = Collapsible.defaultInput
+collapsibleInput :: String -> Collapsible.Input
+collapsibleInput s = Collapsible.defaultInput
   { open = Nothing
   , defaultOpen = false
+  , disabled = s == "disabled"
   , style =
       { root: cn ""
       , trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
@@ -732,6 +764,9 @@ collapsibleInput = Collapsible.defaultInput
       [ box [ Pt "2" ]
           [ textAs "div" [ Size "2" ] [ HH.text "Disclosed content line one." ] ]
       ]
+  -- mirror the golden story's exit keyframe on the closing content so the closing li lingers
+  -- (see CLOSE.collapsible / themes-closing-dom CLOSED_SEL). <style> is in the normalizer SKIP set.
+  , exitCss = "@keyframes collapsibleExit { from { opacity: 1 } to { opacity: 0 } } div[data-state=\"closed\"][id] { animation: collapsibleExit 100ms ease-out; }"
   }
 
 -- | toast — the BARE @radix-ui Toast primitive (Radix Themes ships none, so NO rt-* classes;
