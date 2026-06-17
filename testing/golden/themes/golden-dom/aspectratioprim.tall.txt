@@ -1,0 +1,9 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div data-radix-aspect-ratio-wrapper= style=position: relative; width: 100%; padding-bottom: 200%;>
+          <div style=position: absolute; inset: <px>;>
+            <span>
+              #X

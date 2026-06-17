@@ -36,4 +36,4 @@ view =
         ]
     ]
   where
-  sep orientation decorative = separator { orientation, decorative, class_: cn "separator-root" }
+  sep orientation decorative = separator { orientation, decorative, class_: cn "separator-root", attrs: [] }

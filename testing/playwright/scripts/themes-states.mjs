@@ -753,4 +753,30 @@ export const STATES = {
       });
     },
   },
+  // ── Wave-B stateless depth oracles (bare primitives) ─────────────────────────────
+  separatorprim: {
+    // STATELESS: four at-rest combos selected by ?s=. Wait (keyed off UPSTREAM selectors)
+    // for the div carrying data-orientation — the only structural marker present in all four.
+    hsem: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+    vsem: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+    hdec: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+    vdec: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+  },
+  aspectratioprim: {
+    // STATELESS: wait for the wrapper marker attribute (present in every variant).
+    default: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    wide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    tall: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    styled: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+  },
+  visuallyhiddenprim: {
+    // STATELESS: wait for the sr-only span (clip-based hiding ⇒ overflow:hidden in inline style).
+    plain: async (pg) => { await pg.locator('span[style*="overflow"]').first().waitFor({ state: "attached" }); },
+    props: async (pg) => { await pg.locator('span[style*="overflow"]').first().waitFor({ state: "attached" }); },
+    stylemerge: async (pg) => { await pg.locator('span[style*="overflow"]').first().waitFor({ state: "attached" }); },
+  },
+  labelprim: {
+    // STATELESS: wait for the <label> carrying the for-association attribute.
+    forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
+  },
 };
