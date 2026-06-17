@@ -19,8 +19,16 @@
 -- | the portal without re-focusing, because the placement modify re-parents the content
 -- | out of body.
 -- |
--- | v1 (by feel): non-modal, no Presence, single instance (fixed ids), no typeahead,
--- | no submenus. Those are noted follow-ups.
+-- | Exit animation (Presence): on close the wrapper + content STAY mounted (the wrapper keeps
+-- | its popper position style, the content flips to data-state="closed") and the modal envelope
+-- | (scroll-lock marker, focus guards, hideOthers) stays in place until the content's CSS exit
+-- | animation ends — THEN the envelope is torn down and the content drops to display:none. The
+-- | pointer block (body pointer-events:none + content pointer-events:auto) is released at the
+-- | START of the close (radix RemoveScroll disables the moment open flips false). If the content
+-- | has no exit animation the close is immediate. Mirrors Dialog's Presence close lifecycle.
+-- |
+-- | v1 (by feel): single instance (fixed ids), no typeahead, no submenus. Those are
+-- | noted follow-ups.
 module Hydrogen.Radix.DropdownMenu
   ( component
   , MenuItem
@@ -53,6 +61,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
+import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Dom as Dom
@@ -173,6 +182,7 @@ type Slot id = H.Slot Query Output id
 
 type State =
   { ctrl :: Controllable Boolean
+  , presence :: Presence         -- Open / Closing (mounted, exiting) / Closed (display:none)
   , entries :: Array MenuEntry
   , focused :: Int               -- roving tab stop among focusable items
   , side :: Side
@@ -189,7 +199,8 @@ type State =
   , portalAttrs :: Array (Tuple String String)
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
-  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
+  , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen / AfterClose
+  , animSub :: Maybe H.SubscriptionId  -- content `animationend` subscription during exit
   , contentNode :: Maybe Node
   , triggerId :: String   -- generated on Initialize; the content's aria-labelledby source
   , contentId :: String   -- generated on Initialize; the trigger's aria-controls target + content id
@@ -202,6 +213,8 @@ data Action
   | TriggerClicked
   | TriggerKeyDown KE.KeyboardEvent
   | AfterOpen           -- after the open render flushed: position + portal + focus
+  | AfterClose          -- after the closing render flushed: re-portal + arm exit animation
+  | AnimDone            -- the content exit animation finished: finishExit + tear down envelope
   | EscapePressed
   | PointerDown Event
   | MenuKeyDown KE.KeyboardEvent
@@ -239,6 +252,7 @@ component =
 initialState :: Input -> State
 initialState input =
   { ctrl: controllable input.open input.defaultOpen
+  , presence: if startOpen then Open else Closed
   , entries: input.entries
   , focused: 0
   , side: input.side
@@ -256,16 +270,25 @@ initialState input =
   , restoreEl: Nothing
   , subs: []
   , postSub: Nothing
+  , animSub: Nothing
   , contentNode: Nothing
   , triggerId: ""
   , contentId: ""
   , openFocus: Nothing
   }
+  where
+  startOpen = case input.open of
+    Just v -> v
+    Nothing -> input.defaultOpen
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   let
     open = current st.ctrl
+    -- the wrapper + content LINGER while the exit animation plays (Presence): rendered for
+    -- Open AND Closing, dropped to display:none only at Closed. data-state follows Presence
+    -- (closed through the exit) so the CSS exit animation runs.
+    rendered = isRendered st.presence
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
@@ -292,7 +315,7 @@ render st =
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
           , dir "ltr"
-          , HP.style (if open then "position: fixed;" else "display:none;")
+          , HP.style (if rendered then "position: fixed;" else "display:none;")
           ]
           [ HH.div
               ( [ HP.ref contentRef
@@ -301,7 +324,7 @@ render st =
                 , classes st.style.content
                 , aria "labelledby" st.triggerId
                 , aria "orientation" "vertical"
-                , dataState (if open then "open" else "closed")
+                , dataState (dataStateOf st.presence)
                 , dataAttr "side" (sideName st.placedSide)
                 , dataAttr "align" (alignName st.placedAlign)
                 , dataAttr "orientation" "vertical"
@@ -416,6 +439,37 @@ handleAction = case _ of
   AfterOpen -> do
     reposition
     finalize true
+  -- runs on the frame after the CLOSING render flushed. Halogen re-parented the wrapper back
+  -- under the component root on the close re-render, so re-adopt it into body (it must linger
+  -- there with data-state=closed through the exit animation). Then read the content ref and
+  -- arm the exit: if it has a running CSS exit animation, finishClose when `animationend` fires;
+  -- otherwise finishClose now (no animation ⇒ immediate teardown, like radix). The modal envelope
+  -- (scroll-lock marker, guards, hideOthers) is intentionally NOT torn down here — it lingers
+  -- until AnimDone.
+  AfterClose -> do
+    mnode <- H.getHTMLElementRef contentRef
+    armed <- case mnode of
+      Nothing -> pure false
+      Just node -> do
+        animates <- liftEffect (hasAnimation node)
+        if animates then do
+          sub <- H.subscribe (animationEnd (HTMLElement.toEventTarget node) AnimDone)
+          H.modify_ _ { animSub = Just sub }
+          pure true
+        else pure false
+    if armed then do
+      -- re-adopt the wrapper BEFORE the trailing focus guard (the guards already exist; a plain
+      -- appendChild would land it after the trail guard and break body order).
+      mwrap <- H.getHTMLElementRef wrapperRef
+      for_ mwrap \wrap -> liftEffect (Envelope.reAdoptBeforeTrail wrap)
+      -- release the pointer block the OPEN envelope set: radix's RemoveScroll disables the moment
+      -- `open` flips false (the body `pointer-events:none` and the content's `pointer-events:auto`
+      -- go away), while the closing node lingers for the exit animation. The `data-scroll-locked`
+      -- marker + focus guards + hideOthers stay until unmount.
+      liftEffect Envelope.releaseScrollPointer
+      for_ mnode \node -> liftEffect (Envelope.clearPointerEvents (HTMLElement.toElement node))
+    else finishClose
+  AnimDone -> finishClose
   EscapePressed -> closeMenu
   PointerDown e -> do
     st <- H.get
@@ -463,7 +517,9 @@ openMenuWith focusedIdx openFocus = do
     -- needed for it (which would un-portal the content).
     doc <- liftEffect (HTML.window >>= Window.document)
     mprev <- liftEffect (HTMLDocument.activeElement doc)
-    H.modify_ _ { ctrl = (change true st.ctrl).next, focused = focusedIdx, restoreEl = mprev, openFocus = openFocus }
+    -- re-opening cancels any in-flight exit (the content is still mounted/Closing).
+    for_ st.animSub H.unsubscribe
+    H.modify_ _ { ctrl = (change true st.ctrl).next, presence = Open, focused = focusedIdx, restoreEl = mprev, openFocus = openFocus, animSub = Nothing }
     H.raise (OpenChanged true)
     mcNode <- map HTMLElement.toNode <$> H.getHTMLElementRef contentRef
     win <- liftEffect Popper.windowTarget
@@ -519,17 +575,40 @@ finalize focusToo = do
         for_ mfocus HTMLElement.focus
     _, _ -> pure unit
 
+-- | Begin the close: flip controllable + Presence to Closing (the wrapper + content stay
+-- | MOUNTED — wrapper keeps its popper position style, content flips data-state="closed" —
+-- | still portaled in body, the modal envelope still up), tear down the open-time document
+-- | subscriptions, restore focus to the trigger, and schedule AfterClose to arm the exit
+-- | animation on the next frame. The envelope teardown + drop-to-display:none happen at AnimDone.
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeMenu = do
   st <- H.get
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
-    -- tear down the modal envelope + restore focus to the trigger captured on open
-    liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing }
+    H.modify_ _ { ctrl = (change false st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing }
     H.raise (OpenChanged false)
+    psid <- scheduleAfterClose
+    H.modify_ _ { postSub = Just psid }
+
+-- | Dispatch `AfterClose` on the next microtask (after the closing render flushes).
+scheduleAfterClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleAfterClose = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (AfterClose <$ emitter)
+  liftEffect (Dom.queueMicrotask (HS.notify listener unit))
+  pure sid
+
+-- | The exit animation finished (or there was none): tear down the modal envelope, drop the
+-- | wrapper to display:none (Presence Closing → Closed), and clear the exit subscriptions.
+finishClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+finishClose = do
+  st <- H.get
+  for_ st.animSub H.unsubscribe
+  for_ st.postSub H.unsubscribe
+  liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
+  H.modify_ _ { presence = finishExit st.presence, animSub = Nothing, postSub = Nothing }
 
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 reposition = do
