@@ -40,6 +40,27 @@ const hlStarts = async (pg, label) => {
 const triggerBtn = (pg) => pg.locator("#root").getByRole("button").first();
 const selectValue = (pg) => pg.locator(".rt-SelectTrigger").textContent();
 
+// Roving-tabindex + selection probes for the stateful non-overlay patterns.
+// `attr` reads a DOM attribute off the Nth element matching `sel` (selection-follows-focus
+// asserts aria-checked/data-state; roving tabindex asserts tabindex=0 on exactly one item).
+const attrOf = (pg, sel, n, name) => pg.evaluate(({ s, i, a }) => {
+  const el = document.querySelectorAll(s)[i];
+  return el ? el.getAttribute(a) : null;
+}, { s: sel, i: n, a: name });
+// document.activeElement is the Nth element matching sel.
+const activeIsNth = (pg, sel, n) => pg.evaluate(({ s, i }) => document.activeElement === document.querySelectorAll(s)[i], { s: sel, i: n });
+// count of elements matching sel whose tabindex === "0" (roving: must be exactly one).
+const tabbableCount = (pg, sel) => pg.evaluate((s) => [...document.querySelectorAll(s)].filter((e) => e.getAttribute("tabindex") === "0").length, sel);
+// focus the first element matching sel via the keyboard-independent DOM API.
+const focusFirst = (pg, sel) => pg.evaluate((s) => { const e = document.querySelector(s); if (e) e.focus(); }, sel);
+// press a key then let RovingFocus / activation effects flush (one keypress at a time).
+const press = async (pg, key) => { await pg.keyboard.press(key); await pg.waitForTimeout(80); };
+// poll until attrOf(sel,n,name) === want (roving/selection settle a frame or two after a key).
+const attrEq = async (pg, sel, n, name, want, msg) => {
+  for (let i = 0; i < 25; i++) { if ((await attrOf(pg, sel, n, name)) === want) return; await pg.waitForTimeout(40); }
+  ok(false, `${msg} (expected ${name}=${want}, got ${await attrOf(pg, sel, n, name)})`);
+};
+
 // ── the conformance checks, grouped by APG pattern ───────────────────────────
 const CHECKS = [
   // Dialog (Modal) — https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/
@@ -117,6 +138,158 @@ const CHECKS = [
     await pg.keyboard.press("Escape"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="tooltip"]')), "Escape did not hide the tooltip");
   }},
+
+  // Radio Group — https://www.w3.org/WAI/ARIA/apg/patterns/radio/
+  // Keyboard table: Tab moves focus into the group, onto the checked radio (or first if none
+  // checked). Down/Right Arrow → focus & CHECK the next radio (selection-follows-focus),
+  // wrapping to the first at the end. Up/Left Arrow → focus & check the previous, wrapping to
+  // the last. Only one radio is in the Tab sequence (roving tabindex). Seed: defaultValue="1"
+  // so radio[value=1] is checked (tabindex 0) and radio[value=2] is unchecked (tabindex -1).
+  { id: "radiogroup", state: "checked", apg: "radio", name: "Tab moves focus onto the checked radio (roving tabindex)", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab");
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not land focus on the checked radio");
+    // RovingFocus settles tabindex once focus enters: exactly one radio (the focused/checked) is tabbable.
+    ok((await tabbableCount(pg, '[role="radio"]')) === 1, "exactly one radio must be tabbable after entry (roving tabindex)");
+    ok((await attrOf(pg, '[role="radio"]', 0, "tabindex")) === "0", "the checked radio must be the tabbable one");
+  }},
+  { id: "radiogroup", state: "checked", apg: "radio", name: "ArrowDown moves to next radio AND checks it (selection-follows-focus)", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "ArrowDown did not move focus to the next radio");
+    await attrEq(pg, '[role="radio"]', 1, "data-state", "checked", "ArrowDown did not check the newly focused radio");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "false", "the previously checked radio must uncheck");
+  }},
+  { id: "radiogroup", state: "checked", apg: "radio", name: "ArrowUp from the first radio wraps to the last AND checks it", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // focus radio 0 (checked)
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "ArrowUp from the first radio did not wrap to the last");
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "ArrowUp wrap did not check the last radio");
+  }},
+
+  // Tabs — https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
+  // Roving tabindex on the tablist (one tab tabbable). With AUTOMATIC activation (radix default)
+  // moving focus to a tab activates it: aria-selected=true + its tabpanel shown. Right Arrow →
+  // next tab; Left Arrow → previous; Home → first; End → last. Seed: defaultValue="account" so
+  // tab[0] (Account) is selected/tabbable; 3 tabs (Account/Documents/Settings).
+  { id: "tabs", state: "tab2", apg: "tabs", name: "roving tabindex: after entry exactly one tab is tabbable, the selected one", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "tab[0] must be selected at rest");
+    await press(pg, "Tab"); // into the tablist
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Tab did not focus the selected tab");
+    ok((await tabbableCount(pg, '[role="tab"]')) === 1, "exactly one tab must be tabbable after entry (roving tabindex)");
+    ok((await attrOf(pg, '[role="tab"]', 0, "tabindex")) === "0", "the selected tab must be the tabbable one");
+  }},
+  { id: "tabs", state: "tab2", apg: "tabs", name: "ArrowRight activates the next tab (automatic activation) and shows its panel", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab"); // into the tablist, onto the selected tab
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Tab did not focus the selected tab");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '[role="tab"]', 1), "ArrowRight did not move focus to the next tab");
+    await attrEq(pg, '[role="tab"]', 1, "aria-selected", "true", "ArrowRight did not activate the focused tab (automatic activation)");
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "false", "the previously selected tab must deselect");
+    const panel = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[1]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && !p.hasAttribute("hidden"); });
+    ok(panel, "ArrowRight did not show the newly activated tab's panel");
+  }},
+  { id: "tabs", state: "tab2", apg: "tabs", name: "End activates the last tab, Home the first", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "End");
+    ok(await activeIsNth(pg, '[role="tab"]', 2), "End did not move focus to the last tab");
+    await attrEq(pg, '[role="tab"]', 2, "aria-selected", "true", "End did not activate the last tab");
+    await press(pg, "Home");
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Home did not move focus to the first tab");
+    await attrEq(pg, '[role="tab"]', 0, "aria-selected", "true", "Home did not activate the first tab");
+  }},
+
+  // Checkbox — https://www.w3.org/WAI/ARIA/apg/patterns/checkbox/
+  // Keyboard table: Space toggles the checkbox between checked and unchecked. Seed: a single
+  // unchecked checkbox; focus it, Space → checked (aria-checked + data-state), Space → unchecked.
+  { id: "checkbox", state: "checked", apg: "checkbox", name: "Space toggles aria-checked / data-state", run: async (pg) => {
+    const cb = pg.locator('[role="checkbox"]').first();
+    await cb.waitFor();
+    await focusFirst(pg, '[role="checkbox"]');
+    ok(await activeIs(pg, '[role="checkbox"]'), "could not focus the checkbox");
+    ok((await attrOf(pg, '[role="checkbox"]', 0, "aria-checked")) === "false", "checkbox must start unchecked");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="checkbox"]', 0, "aria-checked", "true", "Space did not check the checkbox");
+    ok((await attrOf(pg, '[role="checkbox"]', 0, "data-state")) === "checked", "data-state did not follow aria-checked on check");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="checkbox"]', 0, "aria-checked", "false", "Space did not uncheck the checkbox");
+  }},
+
+  // Switch — https://www.w3.org/WAI/ARIA/apg/patterns/switch/
+  // role=switch; Space toggles on/off (radix additionally binds Enter). Seed: a single OFF switch.
+  { id: "switch", state: "on", apg: "switch", name: "Space toggles the switch on and off", run: async (pg) => {
+    const sw = pg.locator('[role="switch"]').first();
+    await sw.waitFor();
+    await focusFirst(pg, '[role="switch"]');
+    ok(await activeIs(pg, '[role="switch"]'), "could not focus the switch");
+    ok((await attrOf(pg, '[role="switch"]', 0, "aria-checked")) === "false", "switch must start off");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="switch"]', 0, "aria-checked", "true", "Space did not turn the switch on");
+    ok((await attrOf(pg, '[role="switch"]', 0, "data-state")) === "checked", "data-state did not follow aria-checked on");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="switch"]', 0, "aria-checked", "false", "Space did not turn the switch off");
+  }},
+  { id: "switch", state: "on", apg: "switch", name: "Enter toggles the switch (radix)", run: async (pg) => {
+    await pg.locator('[role="switch"]').first().waitFor();
+    await focusFirst(pg, '[role="switch"]');
+    await press(pg, "Enter");
+    await attrEq(pg, '[role="switch"]', 0, "aria-checked", "true", "Enter did not turn the switch on");
+  }},
+
+  // ToggleGroup (single) — toolbar/roving + radiogroup semantics.
+  // https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/  (radix single-mode items are role=radio
+  // with a roving tabindex). NOTE — radix's bare ToggleGroup is built on RovingFocus WITHOUT
+  // selection-follows-focus (unlike radix RadioGroup): Arrow keys ROVE focus only; the focused
+  // item is ACTIVATED (selected) by Space/Enter. Verified against the real upstream golden.
+  // Seed: type=single defaultValue="b" so item[1] (Center) is checked/tabbable; 3 items.
+  { id: "togglegroup", state: "pressed", apg: "toolbar", name: "single-mode items are role=radio; after entry roving tabindex on the selected", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    ok((await pg.locator('[role="radio"]').count()) === 3, "expected 3 single-mode radio items");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "true", "item[1] (Center) must be selected at rest");
+    await press(pg, "Tab"); // onto the selected item (Center, idx 1)
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "Tab did not focus the selected item");
+    ok((await tabbableCount(pg, '[role="radio"]')) === 1, "exactly one item must be tabbable after entry (roving tabindex)");
+    ok((await attrOf(pg, '[role="radio"]', 1, "tabindex")) === "0", "the selected item must be the tabbable one");
+  }},
+  { id: "togglegroup", state: "pressed", apg: "toolbar", name: "ArrowRight roves focus to the next item; Space then activates it", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // onto the selected item (Center, idx 1)
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "Tab did not focus the selected item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '[role="radio"]', 2), "ArrowRight did not rove focus to the next item");
+    // radix ToggleGroup does NOT auto-select on arrow — selection stays on Center until activation.
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "true", "arrowing must NOT change selection (no selection-follows-focus)");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="radio"]', 2, "aria-checked", "true", "Space did not activate the focused item");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "false", "the previously selected item must deselect on activation");
+  }},
+
+  // SegmentedControl — radix single-mode ToggleGroup (same toolbar/roving table; arrow roves,
+  // activation key selects). Seed: defaultValue="inbox" so item[0] (Inbox) is selected/tabbable.
+  { id: "segmentedcontrol", state: "selected", apg: "toolbar", name: "items are role=radio; after entry roving tabindex on the selected", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    ok((await pg.locator('[role="radio"]').count()) === 3, "expected 3 segmented-control radio items");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "item[0] (Inbox) must be selected at rest");
+    await press(pg, "Tab"); // onto Inbox (idx 0)
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not focus the selected segment");
+    ok((await tabbableCount(pg, '[role="radio"]')) === 1, "exactly one item must be tabbable after entry (roving tabindex)");
+  }},
+  { id: "segmentedcontrol", state: "selected", apg: "toolbar", name: "ArrowRight roves focus to the next segment; Space then activates it", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // onto Inbox (idx 0)
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not focus the selected segment");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "ArrowRight did not rove focus to the next segment");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "arrowing must NOT change selection (no selection-follows-focus)");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "Space did not activate the focused segment");
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "false", "the previously selected segment must deselect on activation");
+  }},
 ];
 
 const b = await chromium.launch();
@@ -125,7 +298,11 @@ for (const c of CHECKS) {
   if (ONLY.length && !ONLY.includes(c.id)) continue;
   const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
   try {
-    await pg.goto(`http://127.0.0.1:${PORT}/?c=${c.id}`); await pg.waitForTimeout(250);
+    // Overlays use the plain ?c=<id> page; the stateful non-overlay patterns (radiogroup,
+    // tabs, checkbox, switch, togglegroup, segmentedcontrol) carry a `state` field so the URL
+    // becomes ?c=<id>&s=<state> — on the golden the mere presence of &s selects the INTERACTIVE
+    // page (the ?c=<id> at-rest page is a different seeded pixel page). The port ignores &s.
+    await pg.goto(`http://127.0.0.1:${PORT}/?c=${c.id}${c.state ? "&s=" + c.state : ""}`); await pg.waitForTimeout(250);
     if (c.apg !== lastApg) { console.log(`\n  ◆ ${c.id} — APG: ${c.apg}`); lastApg = c.apg; }
     await c.run(pg);
     console.log(`  ✓ ${c.name}`); pass++;
