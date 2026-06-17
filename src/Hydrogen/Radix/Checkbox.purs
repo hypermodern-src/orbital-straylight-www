@@ -43,6 +43,7 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
+import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -50,6 +51,8 @@ import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties.ARIA as ARIA
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState, dataAttr)
+import Web.Event.Event (preventDefault)
+import Web.UIEvent.KeyboardEvent as KE
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -127,9 +130,10 @@ type State =
 
 data Action
   = Clicked
+  | KeyDowned KE.KeyboardEvent
   | Receive Input
 
-component :: forall m. H.Component Query Input Output m
+component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
   H.mkComponent
     { initialState
@@ -189,6 +193,11 @@ render st =
         , HP.disabled st.disabled
         , classes st.style.root
         , HE.onClick \_ -> Clicked
+        -- WAI-ARIA: checkboxes do NOT activate on Enter; only Space toggles. Upstream
+        -- preventDefaults Enter on the trigger (checkbox.tsx:169-172) — without this a
+        -- native <button> would fire a click on Enter (toggling) and, inside a <form>,
+        -- submit the form. Mirror it: swallow Enter, leave Space to the native button.
+        , HE.onKeyDown KeyDowned
         ]
           <> (if st.required then [ ARIA.required "true" ] else [])
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
@@ -205,7 +214,7 @@ render st =
           []
       )
 
-handleAction :: forall m. Action -> H.HalogenM State Action () Output m Unit
+handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Clicked -> do
     st <- H.get
@@ -213,6 +222,10 @@ handleAction = case _ of
       let res = change (toggleChecked (current st.ctrl)) st.ctrl
       H.modify_ _ { ctrl = res.next }
       H.raise (CheckedChanged res.emit)
+  -- Enter is preventDefaulted (it must NOT toggle the checkbox or submit an enclosing form);
+  -- Space falls through to the native button click → Clicked.
+  KeyDowned ke ->
+    when (KE.key ke == "Enter") (liftEffect (preventDefault (KE.toEvent ke)))
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.checked st.ctrl
@@ -225,7 +238,7 @@ handleAction = case _ of
       , extraAttrs = input.extraAttrs
       }
 
-handleQuery :: forall m a. Query a -> H.HalogenM State Action () Output m (Maybe a)
+handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
   SetChecked v a -> do
     H.modify_ \st -> st { ctrl = (change v st.ctrl).next }
