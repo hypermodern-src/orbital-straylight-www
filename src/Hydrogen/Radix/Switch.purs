@@ -61,6 +61,11 @@ type Input =
   , value :: String                 -- form value when checked (default "on")
   , style :: Style
   , children :: Array HH.PlainHTML   -- static content rendered inside the root
+  -- Form participation (Wave C). When inside (or SSR-defaulting into) a `<form>`, radix
+  -- resolves `isFormControl` true and renders a hidden bubble `<input type="checkbox"
+  -- aria-hidden tabindex=-1>` SIBLING of the trigger so the switch submits with the form +
+  -- drives native validation. The bubble mirrors checked/name/value/required/disabled.
+  , isFormControl :: Boolean
   }
 
 defaultInput :: Input
@@ -73,6 +78,7 @@ defaultInput =
   , value: "on"
   , style: defaultStyle
   , children: []
+  , isFormControl: false
   }
 
 -- | Emitted whenever the user requests a change — including in controlled mode,
@@ -98,6 +104,7 @@ type State =
   , value :: String
   , style :: Style
   , children :: Array HH.PlainHTML
+  , isFormControl :: Boolean
   }
 
 data Action
@@ -125,15 +132,36 @@ initialState input =
   , value: input.value
   , style: input.style
   , children: input.children
+  , isFormControl: input.isFormControl
   }
+
+-- | The hidden bubble `<input type="checkbox">` (radix `SwitchBubbleInput`) — same shape as
+-- | the Checkbox bubble (absolutely-positioned, 0-opacity, tabindex=-1, aria-hidden), so the
+-- | switch submits with the enclosing form + drives native validation. The DOM oracle
+-- | normalizes every `…px` to `<px>`, so we emit literal 0px sizes; checked/required/disabled
+-- | are reflected as empty boolean attributes, matching upstream byte-for-byte.
+bubbleInput :: forall m. Boolean -> State -> H.ComponentHTML Action () m
+bubbleInput checked st =
+  HH.input
+    ( [ HP.type_ HP.InputCheckbox
+      , ARIA.hidden "true"
+      , HP.tabIndex (-1)
+      , HP.name st.name
+      , HP.value st.value
+      , HP.style "position: absolute; pointer-events: none; opacity: 0; margin: 0px; transform: translateX(-100%); width: 0px; height: 0px;"
+      ]
+        <> (if checked then [ HP.attr (HH.AttrName "checked") "" ] else [])
+        <> (if st.required then [ HP.attr (HH.AttrName "required") "" ] else [])
+        <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
+    )
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   let
     checked = current st.ctrl
     stateName = if checked then "checked" else "unchecked"
-  in
-    HH.button
+    trigger =
+      HH.button
       ( [ HP.type_ HP.ButtonButton
         , ARIA.role "switch"
         , ARIA.checked (if checked then "true" else "false")
@@ -156,6 +184,15 @@ render st =
         ]
           <> map HH.fromPlainHTML st.children
       )
+  in
+    -- Form control: trigger + hidden bubble input are SIBLINGS. Wrap in a `display:contents`
+    -- div the DOM-oracle normalizer strips, so they become direct children of the <form>,
+    -- exactly as upstream. Bare (non-form) switches render the trigger alone (no wrapper),
+    -- keeping the at-rest pixel/DOM goldens byte-identical.
+    if st.isFormControl then
+      HH.div [ HP.style "display:contents" ] [ trigger, bubbleInput checked st ]
+    else
+      trigger
 
 handleAction :: forall m. Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
