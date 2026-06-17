@@ -266,6 +266,10 @@ view c s =
             "aspectratioprim" -> aspectRatioPrimPage s
             "visuallyhiddenprim" -> visuallyHiddenPrimPage s
             "labelprim" -> labelPrimPage
+            -- Wave-C: Tabs activationMode="manual" — arrows move focus only, Enter/Space
+            -- activates the focused trigger. Separate route so the existing automatic-mode
+            -- `tabs` story stays byte-identical.
+            "tabsmanual" -> HH.slot_ _tabs unit Tabs.component (tabsManualInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1526,3 +1530,9 @@ firstJust = case _ of
   isJust = case _ of
     Just _ -> true
     Nothing -> false
+
+-- | tabs (manual activation) — same anatomy as `tabsInput` but activationMode=Manual:
+-- | arrows move the roving focus WITHOUT selecting; Enter/Space on the focused trigger
+-- | activates it (tabs.tsx:61,192-202). Drives the `tabsmanual` route / APG check.
+tabsManualInput :: String -> Tabs.Input
+tabsManualInput s = (tabsInput s) { activationMode = Tabs.Manual }

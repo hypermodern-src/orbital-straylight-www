@@ -1649,6 +1649,32 @@ const PAGES: Page[] = [
       </Box>
     ),
   },
+  // Wave-C: Tabs activationMode="manual" — arrow keys move the roving focus WITHOUT
+  // changing selection; Enter/Space on the focused trigger activates it (tabs.tsx:61,
+  // 192-202). Keyboard-only APG story (no new DOM golden; the at-rest DOM matches `tabs`).
+  {
+    id: "tabsmanual",
+    label: "Tabs (manual activation)",
+    interactive: true,
+    node: (
+      <Tabs.Root defaultValue="account" activationMode="manual">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="account">
+          <Text size="2">Make changes to your account.</Text>
+        </Tabs.Content>
+        <Tabs.Content value="documents">
+          <Text size="2">Access and update your documents.</Text>
+        </Tabs.Content>
+        <Tabs.Content value="settings">
+          <Text size="2">Edit your profile or update contact information.</Text>
+        </Tabs.Content>
+      </Tabs.Root>
+    ),
+  },
 ];
 
 function currentId(): string {

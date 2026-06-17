@@ -1121,6 +1121,43 @@ const CHECKS = [
     await press(pg, "Space"); // collapse
     await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "Space did not collapse the disclosure");
   }},
+
+  // Tabs — MANUAL activation (activationMode="manual", tabs.tsx:61,192-202). Arrow keys move
+  // the roving focus WITHOUT changing selection; only Enter/Space on the focused trigger
+  // activates it. Seed: defaultValue="account" (tab[0] selected). The id `tabsmanual` is a
+  // SEPARATE story so the automatic-mode `tabs` golden stays byte-identical.
+  { id: "tabsmanual", state: "manual", apg: "tabs", name: "manual mode: ArrowRight moves focus but does NOT activate (selection unchanged)", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "tab[0] must be selected at rest");
+    await press(pg, "Tab"); // into the tablist, onto the selected tab
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Tab did not focus the selected tab");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '[role="tab"]', 1), "ArrowRight did not move focus to the next tab");
+    ok((await attrOf(pg, '[role="tab"]', 1, "aria-selected")) === "false", "manual mode must NOT activate the focused tab on arrow");
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "the originally selected tab must stay selected in manual mode");
+    const stillHidden = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[1]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && p.hasAttribute("hidden"); });
+    ok(stillHidden, "manual mode: the focused (not activated) tab's panel must stay hidden");
+  }},
+  { id: "tabsmanual", state: "manual", apg: "tabs", name: "manual mode: Enter on the focused trigger activates it (and shows its panel)", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "ArrowRight"); // focus tab[1], NOT selected yet (manual)
+    ok(await activeIsNth(pg, '[role="tab"]', 1), "ArrowRight did not move focus to tab[1]");
+    await press(pg, "Enter"); // activate
+    await attrEq(pg, '[role="tab"]', 1, "aria-selected", "true", "Enter did not activate the focused tab in manual mode");
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "false", "the previously selected tab must deselect after Enter");
+    const shown = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[1]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && !p.hasAttribute("hidden"); });
+    ok(shown, "Enter did not show the newly activated tab's panel");
+  }},
+  { id: "tabsmanual", state: "manual", apg: "tabs", name: "manual mode: Space also activates the focused trigger", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "End"); // focus last, not selected (manual)
+    ok(await activeIsNth(pg, '[role="tab"]', 2), "End did not move focus to the last tab");
+    ok((await attrOf(pg, '[role="tab"]', 2, "aria-selected")) === "false", "End must not activate in manual mode");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="tab"]', 2, "aria-selected", "true", "Space did not activate the focused tab in manual mode");
+  }},
 ];
 
 const b = await chromium.launch();
