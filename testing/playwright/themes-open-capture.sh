@@ -119,6 +119,8 @@ STATES=(
   "collapsible:rest"
   # ── Wave-C Progress out-of-range validation oracle (STR-330) ─────────────────
   "progress:invalid"
+  # ── Wave-C Avatar loaded steady-state DOM oracle (STR-330) ───────────────────
+  "avatar:loaded"
 )
 
 echo "ℵ building golden dist (bun)"

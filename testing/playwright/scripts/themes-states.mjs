@@ -506,6 +506,14 @@ export const STATES = {
       await root(pg).locator('.rt-AvatarFallback').first().waitFor();
       await pg.waitForFunction(() => document.querySelector('#root img') === null);
     },
+    // `?s=loaded` — a data-URI src loads instantly; the LOADED steady-state is the oracle:
+    // the <img> is mounted (rt-AvatarImage, alt present, NO data-state — the primitive img
+    // carries none) and the fallback is GONE. Keyed off the UPSTREAM rt-AvatarImage only,
+    // so the same driver runs golden + port.
+    loaded: async (pg) => {
+      await root(pg).locator('img.rt-AvatarImage').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
+    },
   },
   progress: {
     // Determinate progress bar — STATELESS (no interaction). The `shown` state just

@@ -56,6 +56,7 @@ import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.AccessibleIcon (accessibleIcon) as AccessibleIcon
 import Hydrogen.Themes.Avatar (avatar) as Avatar
+import Hydrogen.Radix.Avatar as RadixAvatar
 import Hydrogen.Themes.Progress (progress) as Progress
 import Hydrogen.Radix.Progress (progress) as RadixProgress
 import Hydrogen.Themes.Prop (Prop(..))
@@ -99,6 +100,7 @@ type Slots =
   , toolbar :: Toolbar.Slot Unit
   , otp :: Otp.Slot Unit
   , form :: Form.Slot Unit
+  , avatarx :: RadixAvatar.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -188,6 +190,9 @@ _otp = Proxy
 _form :: Proxy "form"
 _form = Proxy
 
+_avatarx :: Proxy "avatarx"
+_avatarx = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -251,6 +256,10 @@ view c s =
             "accessibleicon" -> flex [ Class "rt-r-ai-center" ] (AccessibleIcon.accessibleIcon "Settings" gearIcon)
             -- fallback-only avatar (no src): the at-rest error/fallback branch — a single
             -- rt-AvatarFallback span, NO <img>. Matches `<Avatar fallback="A" />`.
+            -- `?s=loaded` swaps to the Radix Avatar primitive with a data-URI src + rt-*
+            -- classes: the LOADED steady-state (img mounted, alt, fallback gone, no
+            -- data-state on the img). Else the fallback-only Themes Avatar.
+            "avatar" | s == "loaded" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedInput
             "avatar" -> Avatar.avatar "A" []
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
@@ -1564,3 +1573,26 @@ scrollAreaXInput s = ScrollArea.defaultInput
           )
       ]
   }
+
+-- ── Wave-C Avatar loaded-state input (Radix Avatar primitive, themed) ───────────
+-- | The themed Radix Avatar primitive at the LOADED steady-state: a data-URI src that
+-- | loads synchronously, so the img mounts (rt-AvatarImage, alt, NO data-state) and the
+-- | fallback drops out. The Root span carries rt-reset/rt-AvatarRoot + the size/variant
+-- | classes and the always-present empty `data-accent-color` (upstream Themes parity).
+avatarLoadedInput :: RadixAvatar.Input
+avatarLoadedInput = RadixAvatar.defaultInput
+  { src = onePxPng
+  , alt = "Profile photo"
+  , fallback = [ HH.text "A" ]
+  , rootAttrs = [ dataAttr "accent-color" "" ]
+  , style =
+      { root: cn "rt-reset rt-AvatarRoot rt-r-size-3 rt-variant-soft"
+      , image: cn "rt-AvatarImage"
+      , fallback: cn "rt-AvatarFallback rt-one-letter"
+      }
+  }
+
+-- A 1×1 transparent PNG data-URI (loads synchronously from cache) — the Avatar reaches
+-- the LOADED steady-state deterministically, matching the golden story's ONE_PX_PNG.
+onePxPng :: String
+onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC"

@@ -87,6 +87,11 @@ import {
 
 type Page = { id: string; label: string; node: React.ReactNode; interactive?: boolean };
 
+// A 1×1 transparent PNG data-URI — loads synchronously from cache, so an Avatar with
+// this src reaches the LOADED steady-state deterministically (no network).
+const ONE_PX_PNG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
+
 const PAGES: Page[] = [
   {
     id: "button",
@@ -1345,7 +1350,15 @@ const PAGES: Page[] = [
     // immediately, so the at-rest DOM is the FALLBACK branch — a single rt-AvatarFallback
     // span, the <img> ABSENT. The oracle pins: img absent, fallback present, accessible
     // name on the fallback, and (themes-a11y) zero axe violations on a fallback-only avatar.
-    node: <Avatar fallback="A" />,
+    // `?s=loaded` swaps to a data-URI src that loads instantly: the LOADED steady-state
+    // (img mounted, data-state=loaded, alt present, fallback absent) — verifies the
+    // alt/accessible-name + loaded-state contract the fallback-only story can't.
+    node: (() => {
+      const s = currentState();
+      return s === "loaded"
+        ? <Avatar src={ONE_PX_PNG} alt="Profile photo" fallback="A" />
+        : <Avatar fallback="A" />;
+    })(),
   },
   {
     id: "progress",
