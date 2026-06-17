@@ -179,4 +179,18 @@ export const STATES = {
       await pg.locator('a.rt-TabNavLink[aria-current="page"]').first().waitFor();
     },
   },
+  slider: {
+    // Single-thumb slider (role=slider, defaultValue=[40], min 0 max 100 step 1). Drive it
+    // purely by KEYBOARD: focus the thumb, press ArrowRight 5× → a deterministic value of 45
+    // (40 + 5·step). The landed value is exact, so the thumb's `left: calc(45% + …)` and the
+    // range's `right: 55%` percentages (which the normalizer does NOT touch) are stable.
+    stepped: async (pg) => {
+      const thumb = root(pg).locator('[role="slider"]').first();
+      await thumb.waitFor();
+      await thumb.focus();
+      for (let i = 0; i < 5; i++) await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "45");
+    },
+  },
 };

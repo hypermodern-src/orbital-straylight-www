@@ -290,6 +290,41 @@ const CHECKS = [
     await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "Space did not activate the focused segment");
     ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "false", "the previously selected segment must deselect on activation");
   }},
+
+  // Slider — https://www.w3.org/WAI/ARIA/apg/patterns/slider/
+  // The thumb is role=slider carrying aria-valuemin/valuemax/valuenow. APG keyboard table:
+  // Right/Up Arrow increases by step, Left/Down decreases, Home → min, End → max; each change
+  // moves the thumb (its inline left% follows aria-valuenow). Seed: defaultValue=[40], min 0
+  // max 100 step 1, so ArrowRight → 41 and the thumb left% strictly increases.
+  { id: "slider", state: "stepped", apg: "slider", name: "thumb is role=slider with aria-valuemin/valuemax/valuenow; focusable", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    ok((await pg.locator('[role="slider"]').count()) === 1, "expected exactly one slider thumb");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuemin")) !== null, "thumb missing aria-valuemin");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuemax")) !== null, "thumb missing aria-valuemax");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuenow")) !== null, "thumb missing aria-valuenow");
+    await focusFirst(pg, '[role="slider"]');
+    ok(await activeIs(pg, '[role="slider"]'), "could not focus the slider thumb");
+  }},
+  { id: "slider", state: "stepped", apg: "slider", name: "ArrowRight increments aria-valuenow by step AND moves the thumb", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    const leftBefore = await pg.evaluate(() => getComputedStyle(document.querySelector('.rt-SliderThumb').parentElement).left);
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before + 1), "ArrowRight did not increment aria-valuenow by one step");
+    const leftAfter = await pg.evaluate(() => getComputedStyle(document.querySelector('.rt-SliderThumb').parentElement).left);
+    ok(leftAfter !== leftBefore, `ArrowRight did not move the thumb (left stayed ${leftBefore})`);
+  }},
+  { id: "slider", state: "stepped", apg: "slider", name: "Home goes to min, End goes to max", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const min = await attrOf(pg, '[role="slider"]', 0, "aria-valuemin");
+    const max = await attrOf(pg, '[role="slider"]', 0, "aria-valuemax");
+    await press(pg, "Home");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", min, "Home did not move the thumb to the minimum");
+    await press(pg, "End");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", max, "End did not move the thumb to the maximum");
+  }},
 ];
 
 const b = await chromium.launch();

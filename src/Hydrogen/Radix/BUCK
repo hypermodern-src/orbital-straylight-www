@@ -21,6 +21,7 @@ purescript_library(
         "RadioGroup.purs",
         "Select.purs",
         "Separator.purs",
+        "Slider.purs",
         "Switch.purs",
         "Tabs.purs",
         "Toggle.purs",

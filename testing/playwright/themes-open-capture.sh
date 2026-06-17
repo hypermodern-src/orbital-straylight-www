@@ -39,6 +39,7 @@ STATES=(
   "radiocards:selected"
   "checkboxcards:selected"
   "tabnav:active"
+  "slider:stepped"
 )
 
 echo "ℵ building golden dist (bun)"

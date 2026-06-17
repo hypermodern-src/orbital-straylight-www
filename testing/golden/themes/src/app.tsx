@@ -985,6 +985,16 @@ const PAGES: Page[] = [
       </TabNav.Root>
     ),
   },
+  {
+    id: "slider",
+    label: "Slider (interactive)",
+    interactive: true,
+    node: (
+      <Box style={{ maxWidth: 320 }}>
+        <Slider defaultValue={[40]} />
+      </Box>
+    ),
+  },
   // The composed demo — the "looks like a finished product" target.
   {
     id: "signin",

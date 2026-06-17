@@ -33,6 +33,7 @@ import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.RadioGroup as RadioGroup
 import Hydrogen.Radix.Select as Select
+import Hydrogen.Radix.Slider as Slider
 import Hydrogen.Radix.Switch as Switch
 import Hydrogen.Radix.Tabs as Tabs
 import Hydrogen.Radix.Toggle as Toggle
@@ -60,6 +61,7 @@ type Slots =
   , dropdownmenu :: DropdownMenu.Slot Unit
   , contextmenu :: ContextMenu.Slot Unit
   , select :: Select.Slot Unit
+  , slider :: Slider.Slot Unit
   , accordion :: Accordion.Slot Unit
   , collapsible :: Collapsible.Slot Unit
   , tabs :: Tabs.Slot Unit
@@ -97,6 +99,9 @@ _contextmenu = Proxy
 
 _select :: Proxy "select"
 _select = Proxy
+
+_slider :: Proxy "slider"
+_slider = Proxy
 
 _accordion :: Proxy "accordion"
 _accordion = Proxy
@@ -171,6 +176,7 @@ view c =
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
             "select" -> HH.slot_ _select unit Select.component selectInput
+            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component sliderInput ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionInput ]
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component tabsInput
@@ -509,6 +515,25 @@ selectStyle =
   , label: cn "rt-SelectLabel"
   , item: cn "rt-SelectItem"
   , indicator: cn "rt-SelectItemIndicator"
+  }
+
+-- | slider — the themed Radix Themes slider, driven by the real `Hydrogen.Radix.Slider`
+-- | primitive (keyboard-conformant, APG slider pattern). A single horizontal thumb at value
+-- | 40 (min 0, max 100, step 1); the driver focuses the thumb and presses ArrowRight 5× →
+-- | value 45 (range `right: 55%`, thumb `left: calc(45% + …)`). The rt-Slider* class anatomy
+-- | is supplied via the primitive's Style slots.
+sliderInput :: Slider.Input
+sliderInput = Slider.defaultInput
+  { defaultValue = 40
+  , min = 0
+  , max = 100
+  , step = 1
+  , style =
+      { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
+      , track: cn "rt-SliderTrack"
+      , range: cn "rt-SliderRange"
+      , thumb: cn "rt-SliderThumb"
+      }
   }
 
 -- ── interactive (inline, non-portal) routes ─────────────────────────────────────
