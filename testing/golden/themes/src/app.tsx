@@ -1675,6 +1675,35 @@ const PAGES: Page[] = [
       </Tabs.Root>
     ),
   },
+  // Wave-C: Toolbar loop={false} — arrow navigation clamps at the ends (no wrap).
+  {
+    id: "toolbarnoloop",
+    label: "Toolbar (loop=false)",
+    interactive: true,
+    node: (
+      <Toolbar.Root aria-label="Formatting" loop={false}>
+        <Toolbar.Button>New</Toolbar.Button>
+        <Toolbar.Button>Open</Toolbar.Button>
+        <Toolbar.Button>Save</Toolbar.Button>
+      </Toolbar.Root>
+    ),
+  },
+  // Wave-C: Toolbar ToggleGroup type="multiple" — items keep aria-pressed (NOT role=radio),
+  // two can be on at once, each toggles independently.
+  {
+    id: "toolbarmultiple",
+    label: "Toolbar (multiple toggle group)",
+    interactive: true,
+    node: (
+      <Toolbar.Root aria-label="Formatting">
+        <Toolbar.ToggleGroup type="multiple" defaultValue={["bold"]} aria-label="Text formatting">
+          <Toolbar.ToggleItem value="bold">B</Toolbar.ToggleItem>
+          <Toolbar.ToggleItem value="italic">I</Toolbar.ToggleItem>
+          <Toolbar.ToggleItem value="underline">U</Toolbar.ToggleItem>
+        </Toolbar.ToggleGroup>
+      </Toolbar.Root>
+    ),
+  },
   // Wave-C: Accordion type="single" COLLAPSIBLE — item-1 open at first paint; clicking the
   // open trigger CLOSES it (empty open set). With collapsible the open trigger is NOT
   // aria-disabled (it can be closed), the contrast to the non-collapsible `single` story.

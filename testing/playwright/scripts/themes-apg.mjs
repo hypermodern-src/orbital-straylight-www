@@ -1255,6 +1255,66 @@ const CHECKS = [
     const openCount = await pg.evaluate(() => [...document.querySelectorAll('#root button[aria-expanded]')].filter((b) => b.getAttribute("aria-expanded") === "true").length);
     ok(openCount === 0, "collapsible: closing the last open item must leave an empty open set");
   }},
+
+  // Toolbar — PageUp focuses the FIRST item, PageDown the LAST (MAP_KEY_TO_FOCUS_INTENT maps
+  // them identically to Home/End). The default story has 4 focusable items across the
+  // toggle-group boundary (New, Edit, L, C).
+  { id: "toolbar", state: "default", apg: "toolbar", name: "PageDown focuses the last item, PageUp the first", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first toolbar item");
+    await press(pg, "PageDown");
+    ok(await activeIsNth(pg, sel, 3), "PageDown did not focus the last item");
+    await press(pg, "PageUp");
+    ok(await activeIsNth(pg, sel, 0), "PageUp did not focus the first item");
+  }},
+  // Toolbar — a Toolbar.Link activates on Space (native <a> ignores Space; upstream wires
+  // ' '→currentTarget.click()). We can't observe a navigation here, but we CAN observe that
+  // Space does not throw and the link stays focused (the click is dispatched on it). Roved to
+  // the link (item index 1), Space keeps focus on it.
+  { id: "toolbar", state: "default", apg: "toolbar", name: "ToolbarLink stays focused on Space (Space wired to click)", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowRight"); // onto the Link (Edit, index 1)
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not rove onto the Link");
+    const isLink = await pg.evaluate(() => document.activeElement?.tagName === "A");
+    ok(isLink, "the roved item at index 1 must be the <a> Link");
+    await press(pg, "Space");
+    ok(await activeIsNth(pg, sel, 1), "the Link must remain focused after Space");
+  }},
+
+  // Toolbar — loop={false}: ArrowRight at the last item CLAMPS (no wrap), ArrowLeft at the
+  // first clamps. 3-button toolbar.
+  { id: "toolbarnoloop", state: "noloop", apg: "toolbar", name: "loop=false: ArrowRight at the last item does NOT wrap to the first", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 3, "expected 3 toolbar buttons");
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "loop=false: ArrowLeft at the first item must clamp");
+    await press(pg, "End");
+    ok(await activeIsNth(pg, sel, 2), "End did not focus the last item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "loop=false: ArrowRight at the last item must clamp (not wrap)");
+  }},
+
+  // Toolbar — ToggleGroup type="multiple": items carry aria-pressed (NOT role=radio), two can
+  // be on simultaneously, each toggles independently.
+  { id: "toolbarmultiple", state: "multiple", apg: "toolbar", name: "multiple toggle group: aria-pressed items, two on at once, independent toggle", run: async (pg) => {
+    const items = pg.locator('[role="toolbar"] button[aria-pressed]');
+    await items.first().waitFor();
+    ok((await items.count()) === 3, "expected 3 aria-pressed toggle items (NOT role=radio)");
+    ok((await pg.locator('[role="toolbar"] [role="radio"]').count()) === 0, "multiple mode must NOT use role=radio");
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "true", "Bold must start pressed");
+    await items.nth(1).click(); // press Italic too
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "true", "Bold must STAY pressed (independent)");
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must become pressed");
+    await items.nth(0).click(); // unpress Bold
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
+  }},
 ];
 
 const b = await chromium.launch();

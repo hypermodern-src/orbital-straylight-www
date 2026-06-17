@@ -276,6 +276,9 @@ view c s =
             "togglegroupvert" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupVertInput
             -- Wave-C Accordion: type=single COLLAPSIBLE (open trigger closeable, NOT aria-disabled).
             "accordioncollapsible" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionCollapsibleInput ]
+            -- Wave-C Toolbar: loop=false end-stop + a type=multiple toggle group (aria-pressed).
+            "toolbarnoloop" -> HH.slot_ _toolbar unit Toolbar.component toolbarNoLoopInput
+            "toolbarmultiple" -> HH.slot_ _toolbar unit Toolbar.component toolbarMultipleInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1610,5 +1613,56 @@ accordionCollapsibleInput = Accordion.defaultInput
       , header: cn ""
       , trigger: cn ""
       , content: cn ""
+      }
+  }
+
+-- | toolbar (loop=false) — 3 buttons; arrow navigation clamps at the ends (no wrap).
+toolbarNoLoopInput :: Toolbar.Input
+toolbarNoLoopInput = Toolbar.defaultInput
+  { orientation = Horizontal
+  , dir = LTR
+  , loop = false
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: false }
+      , Toolbar.Button { value: "open", label: [ HH.text "Open" ], disabled: false }
+      , Toolbar.Button { value: "save", label: [ HH.text "Save" ], disabled: false }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
+      }
+  }
+
+-- | toolbar (multiple toggle group) — a single type=multiple ToggleGroup: items keep
+-- | aria-pressed (NOT role=radio), two can be on at once, each toggles independently.
+toolbarMultipleInput :: Toolbar.Input
+toolbarMultipleInput = Toolbar.defaultInput
+  { orientation = Horizontal
+  , dir = LTR
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.ToggleGroup
+          { items:
+              [ { value: "bold", label: [ HH.text "B" ], disabled: false }
+              , { value: "italic", label: [ HH.text "I" ], disabled: false }
+              , { value: "underline", label: [ HH.text "U" ], disabled: false }
+              ]
+          , single: false
+          , defaultValue: [ "bold" ]
+          , ariaLabel: Just "Text formatting"
+          }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
       }
   }
