@@ -1,4 +1,4 @@
-# Hydrogen.Radix — the 23 ported radix-ui primitives (unstyled, accessible),
+# Hydrogen.Radix — the 24 ported radix-ui primitives (unstyled, accessible),
 # composed from the Behavior substrate, the Float positioning engine, and the
 # Foundation (Dom/Style/Color). The top of the Radix layer.
 purescript_library(
@@ -19,6 +19,7 @@ purescript_library(
         "Popover.purs",
         "Progress.purs",
         "RadioGroup.purs",
+        "ScrollArea.purs",
         "Select.purs",
         "Separator.purs",
         "Slider.purs",

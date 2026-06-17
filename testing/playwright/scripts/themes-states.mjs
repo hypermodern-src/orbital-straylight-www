@@ -179,6 +179,23 @@ export const STATES = {
       await pg.locator('a.rt-TabNavLink[aria-current="page"]').first().waitFor();
     },
   },
+  scrollarea: {
+    // type="always" renders the scrollbar at rest — no click/hover/scroll needed. The
+    // testable value is the SCROLLBAR + THUMB anatomy, deterministic because `always`
+    // mounts the scrollbar unconditionally and the fixed 120px box overflows vertically.
+    // Wait (keyed off UPSTREAM selectors) for the vertical scrollbar AND its thumb to be
+    // laid out + sized (hasThumb requires a measured viewport/content ratio), so the
+    // post-measure DOM has settled before the snapshot.
+    shown: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaThumb[data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('.rt-ScrollAreaThumb');
+        // thumb must be measured: its height var resolves to a non-zero px (ratio applied).
+        return t && t.getBoundingClientRect().height > 1;
+      });
+    },
+  },
   slider: {
     // Single-thumb slider (role=slider, defaultValue=[40], min 0 max 100 step 1). Drive it
     // purely by KEYBOARD: focus the thumb, press ArrowRight 5× → a deterministic value of 45

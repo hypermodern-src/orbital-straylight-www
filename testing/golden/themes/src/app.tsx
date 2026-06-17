@@ -37,6 +37,7 @@ import {
   Strong,
   Link,
   RadioGroup,
+  ScrollArea,
   Slider,
   Tabs,
   Table,
@@ -993,6 +994,27 @@ const PAGES: Page[] = [
       <Box style={{ maxWidth: 320 }}>
         <Slider defaultValue={[40]} />
       </Box>
+    ),
+  },
+  {
+    id: "scrollarea",
+    label: "Scroll Area (interactive)",
+    interactive: true,
+    // type="always" → the scrollbar is present at rest (no hover/scroll timing); the
+    // 120px box with taller content overflows vertically; scrollbars="vertical" renders
+    // exactly ONE scrollbar (no horizontal, no corner) for a deterministic anatomy:
+    // Root > Viewport > content + Scrollbar(vertical) > Thumb. Thumb size/offset are px
+    // (normalized to <px>); the oracle tests STRUCTURE.
+    node: (
+      <ScrollArea type="always" scrollbars="vertical" style={{ width: 200, height: 120 }}>
+        <Box p="2" style={{ width: 160 }}>
+          {Array.from({ length: 12 }, (_, i) => (
+            <Text key={i} as="p" size="2">
+              Line {i + 1}
+            </Text>
+          ))}
+        </Box>
+      </ScrollArea>
     ),
   },
   // The composed demo — the "looks like a finished product" target.

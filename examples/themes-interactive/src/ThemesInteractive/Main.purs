@@ -32,6 +32,7 @@ import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn, dataAttr)
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.RadioGroup as RadioGroup
+import Hydrogen.Radix.ScrollArea as ScrollArea
 import Hydrogen.Radix.Select as Select
 import Hydrogen.Radix.Slider as Slider
 import Hydrogen.Radix.Switch as Switch
@@ -74,6 +75,7 @@ type Slots =
   , checkboxgroup :: Checkbox.Slot Unit
   , radiocards :: RadioGroup.Slot Unit
   , checkboxcards :: Checkbox.Slot Unit
+  , scrollarea :: ScrollArea.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -139,6 +141,9 @@ _radiocards = Proxy
 _checkboxcards :: Proxy "checkboxcards"
 _checkboxcards = Proxy
 
+_scrollarea :: Proxy "scrollarea"
+_scrollarea = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -189,6 +194,7 @@ view c =
             "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
             "checkboxcards" -> checkboxCardsPage
+            "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
@@ -534,6 +540,31 @@ sliderInput = Slider.defaultInput
       , range: cn "rt-SliderRange"
       , thumb: cn "rt-SliderThumb"
       }
+  }
+
+-- | scrollarea — the themed Radix ScrollArea (type="always", scrollbars="vertical"): a
+-- | 200×120 box whose 12-line content overflows vertically, so the styled scrollbar +
+-- | thumb render at rest. The rt-* Style reproduces upstream's class anatomy; the content
+-- | mirrors the golden story (a `rt-Box rt-r-p-2 width:160px` of `rt-Text rt-r-size-2`
+-- | paragraphs, each "Line " + N as TWO text nodes, exactly as React splits the JSX).
+scrollAreaInput :: ScrollArea.Input
+scrollAreaInput = ScrollArea.defaultInput
+  { widthPx = 200
+  , heightPx = 120
+  , style =
+      { root: cn "rt-ScrollAreaRoot"
+      , viewport: cn "rt-ScrollAreaViewport"
+      , focusRing: cn "rt-ScrollAreaViewportFocusRing"
+      , scrollbar: cn "rt-ScrollAreaScrollbar rt-r-size-1"
+      , thumb: cn "rt-ScrollAreaThumb"
+      }
+  , content =
+      [ box [ P "2", Width "160px" ]
+          ( map
+              ( \n -> textAs "p" [ Size "2" ] [ HH.text "Line ", HH.text (show n) ] )
+              (Array.range 1 12)
+          )
+      ]
   }
 
 -- ── interactive (inline, non-portal) routes ─────────────────────────────────────

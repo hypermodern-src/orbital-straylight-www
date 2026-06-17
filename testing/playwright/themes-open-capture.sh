@@ -40,6 +40,7 @@ STATES=(
   "checkboxcards:selected"
   "tabnav:active"
   "slider:stepped"
+  "scrollarea:shown"
 )
 
 echo "ℵ building golden dist (bun)"
