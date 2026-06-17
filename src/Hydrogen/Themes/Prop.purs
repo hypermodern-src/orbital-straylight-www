@@ -21,11 +21,13 @@ module Hydrogen.Themes.Prop
   ( Prop(..)
   , attrs
   , el
+  , Resolved
+  , resolve
   ) where
 
 import Prelude
 
-import Data.Array (filter, null)
+import Data.Array (filter)
 import Data.Foldable (foldl)
 import Data.Map (Map)
 import Data.Map as Map
@@ -158,24 +160,43 @@ step a = case _ of
 -- | raw). Class-token order is base, then raw `Class` tokens, then axes by key —
 -- | order is irrelevant to the rendered pixels (the same classes apply the same
 -- | CSS), so this is deterministic without mirroring upstream's exact ordering.
-attrs :: forall r i. Array String -> Array Prop -> Array (HH.IProp (class :: String, style :: String | r) i)
-attrs base props =
+-- | The resolved, framework-agnostic parts of a base+props set: the joined class
+-- | string, the serialized inline style (empty if none), and the data-*/raw attr
+-- | k/v lists. `attrs` is `resolve` rendered to Halogen IProps; a preset wrapper that
+-- | hands the class/style/data to a PRIMITIVE (e.g. Themes.Progress → Radix.Progress)
+-- | uses `resolve` directly so it doesn't re-emit a parallel class attribute.
+type Resolved =
+  { class_ :: String
+  , style :: String
+  , dataAttrs :: Array (Tuple String String)
+  , rawAttrs :: Array (Tuple String String)
+  }
+
+resolve :: Array String -> Array Prop -> Resolved
+resolve base props =
   let
     a = foldl step { axes: Map.empty, free: base, dataAttrs: Map.empty, rawAttrs: Map.empty, styles: Map.empty } props
     classTokens = filter (_ /= "") (a.free <> map snd (Map.toUnfoldable a.axes :: Array (Tuple String String)))
-    classAttr = [ HP.class_ (HH.ClassName (joinWith " " classTokens)) ]
     styleList = Map.toUnfoldable a.styles :: Array (Tuple String String)
+  in
+    { class_: joinWith " " classTokens
     -- each declaration ends with `;` so the serialized style attribute matches the
     -- browser's own (and React's) form — `height: 80px;`, not `height: 80px`.
-    styleAttr =
-      if null styleList then []
-      else [ HP.style (joinWith " " (map (\(Tuple k v) -> k <> ": " <> v <> ";") styleList)) ]
-    dataList = Map.toUnfoldable a.dataAttrs :: Array (Tuple String String)
-    rawList = Map.toUnfoldable a.rawAttrs :: Array (Tuple String String)
+    , style: joinWith " " (map (\(Tuple k v) -> k <> ": " <> v <> ";") styleList)
+    , dataAttrs: Map.toUnfoldable a.dataAttrs
+    , rawAttrs: Map.toUnfoldable a.rawAttrs
+    }
+
+attrs :: forall r i. Array String -> Array Prop -> Array (HH.IProp (class :: String, style :: String | r) i)
+attrs base props =
+  let
+    r = resolve base props
+    classAttr = [ HP.class_ (HH.ClassName r.class_) ]
+    styleAttr = if r.style == "" then [] else [ HP.style r.style ]
     mkData (Tuple k v) = HP.attr (HH.AttrName ("data-" <> k)) v
     mkRaw (Tuple k v) = HP.attr (HH.AttrName k) v
   in
-    classAttr <> styleAttr <> map mkData dataList <> map mkRaw rawList
+    classAttr <> styleAttr <> map mkData r.dataAttrs <> map mkRaw r.rawAttrs
 
 -- | Render an element with a tag, base classes, props, and children.
 el :: forall w i. String -> Array String -> Array Prop -> Array (HH.HTML w i) -> HH.HTML w i

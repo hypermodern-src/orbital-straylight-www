@@ -46,6 +46,7 @@ STATES=(
   "tabnav:active"
   "slider:stepped"
   "scrollarea:shown"
+  "progress:shown"
   # Bare @radix-ui/react-* primitives Radix Themes ships no component for (STR-330).
   "toolbar:default"
   "toolbar:vertical"

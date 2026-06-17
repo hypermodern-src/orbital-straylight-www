@@ -50,6 +50,7 @@ import Hydrogen.Radix.Toolbar as Toolbar
 import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
+import Hydrogen.Themes.Progress (progress) as Progress
 import Hydrogen.Themes.Prop (Prop(..))
 import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
@@ -234,6 +235,7 @@ view c s =
             "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
             "checkboxcards" -> checkboxCardsPage
+            "progress" -> box [ StyleProp "max-width" "320px" ] [ Progress.progress 25 [] ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
             "passwordtoggle" -> passwordTogglePage

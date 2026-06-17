@@ -286,6 +286,17 @@ export const STATES = {
       await pg.locator('a.rt-TabNavLink[aria-current="page"]').first().waitFor();
     },
   },
+  progress: {
+    // Determinate progress bar — STATELESS (no interaction). The `shown` state just
+    // waits for the role=progressbar to be laid out; rest and shown snapshot the SAME
+    // static DOM. The oracle pins the integer-formatted aria-valuenow/data-value + the
+    // aria-valuetext + the data-state/value/max wiring on root AND indicator.
+    shown: async (pg) => {
+      await pg.locator('[role="progressbar"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
+    },
+  },
   scrollarea: {
     // type="always" renders the scrollbar at rest — no click/hover/scroll needed. The
     // testable value is the SCROLLBAR + THUMB anatomy, deterministic because `always`

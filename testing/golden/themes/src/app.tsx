@@ -1124,6 +1124,21 @@ const PAGES: Page[] = [
     ),
   },
   {
+    id: "progress",
+    label: "Progress (interactive)",
+    interactive: true,
+    // A single determinate bar at value=25/max=100 — the oracle target for the role=
+    // progressbar + aria-valuemin/max/now/valuetext contract (and the data-state/value/
+    // max wiring on root + indicator). value < max ⇒ data-state="loading"; React
+    // stringifies the number 25 as the INTEGER "25" (the PureScript `show 25.0`="25.0"
+    // divergence this oracle pins). No interaction; the at-rest DOM is the oracle.
+    node: (
+      <Box style={{ maxWidth: 320 }}>
+        <Progress value={25} />
+      </Box>
+    ),
+  },
+  {
     id: "scrollarea",
     label: "Scroll Area (interactive)",
     interactive: true,
