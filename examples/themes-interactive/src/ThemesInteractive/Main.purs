@@ -181,9 +181,9 @@ view c =
             "toggle" -> HH.slot_ _toggle unit Toggle.component toggleInput
             "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
             "segmentedcontrol" -> HH.slot_ _segmentedcontrol unit ToggleGroup.component segmentedControlInput
-            "checkboxgroup" -> HH.slot_ _checkboxgroup unit Checkbox.component checkboxGroupInput
+            "checkboxgroup" -> checkboxGroupPage
             "radiocards" -> HH.slot_ _radiocards unit RadioGroup.component radioCardsInput
-            "checkboxcards" -> HH.slot_ _checkboxcards unit Checkbox.component checkboxCardsInput
+            "checkboxcards" -> checkboxCardsPage
             "tabnav" -> tabNavPage
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
@@ -699,12 +699,19 @@ checkboxGroupInput :: Checkbox.Input
 checkboxGroupInput = Checkbox.defaultInput
   { defaultChecked = Checkbox.Unchecked
   , value = "1"
-  , required = true
   , style =
       { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxGroupItemCheckbox rt-r-size-2 rt-variant-surface"
       , indicator: cn "rt-BaseCheckboxIndicator"
       }
-  , children = [ thickCheckIconPlain ]
+  -- The RovingFocus + group context attributes upstream merges onto the item button:
+  -- aria-required=false (group required=false), data-radix-collection-item, and the
+  -- roving tabindex (the single clicked item becomes the current tab stop -> 0).
+  , extraAttrs =
+      [ Tuple "aria-required" "false"
+      , Tuple "data-radix-collection-item" ""
+      , Tuple "tabindex" "0"
+      ]
+  , children = [ thickCheckIndicator "rt-BaseCheckboxIndicator" ]
   }
 
 -- | radiocards — themes-only (RadioGroupPrimitive styled as cards). Three options,
@@ -737,13 +744,62 @@ checkboxCardsInput :: Checkbox.Input
 checkboxCardsInput = Checkbox.defaultInput
   { defaultChecked = Checkbox.Unchecked
   , value = "terms"
-  , required = true
   , style =
       { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxCardCheckbox rt-r-size-2 rt-variant-surface"
       , indicator: cn "rt-BaseCheckboxIndicator"
       }
-  , children = [ thickCheckIconPlain ]
+  -- The RovingFocus + group context attributes upstream merges onto the card button:
+  -- aria-required=false, data-radix-collection-item, and the roving tabindex (the
+  -- single clicked card becomes the current tab stop -> 0).
+  , extraAttrs =
+      [ Tuple "aria-required" "false"
+      , Tuple "data-radix-collection-item" ""
+      , Tuple "tabindex" "0"
+      ]
+  , children = [ thickCheckIndicator "rt-BaseCheckboxIndicator" ]
   }
+
+-- | checkboxgroup page -- the CheckboxGroup.Root chrome (a roving <div role=group>) with a
+-- | single CheckboxGroup.Item (a <label> wrapping the interactive checkbox button + the
+-- | rt-CheckboxGroupItemInner span). The button is the live Checkbox primitive (slot), so
+-- | the driver's click flips it to checked and the asChild indicator svg mounts.
+checkboxGroupPage :: H.ComponentHTML Void Slots Aff
+checkboxGroupPage =
+  HH.div
+    [ HP.class_ (HH.ClassName "rt-CheckboxGroupRoot")
+    , HP.attr (HH.AttrName "dir") "ltr"
+    , HP.attr (HH.AttrName "role") "group"
+    , HP.style "outline: none;"
+    , HP.attr (HH.AttrName "tabindex") "0"
+    ]
+    [ HH.label
+        [ HP.class_ (HH.ClassName "rt-CheckboxGroupItem rt-Text rt-r-size-2") ]
+        [ HH.slot_ _checkboxgroup unit Checkbox.component checkboxGroupInput
+        , HH.span
+            [ HP.class_ (HH.ClassName "rt-CheckboxGroupItemInner") ]
+            [ HH.text "Fun" ]
+        ]
+    ]
+
+-- | checkboxcards page -- the CheckboxCards.Root grid chrome (a roving <div role=group>) with
+-- | a single CheckboxCards.Item: a <label class="rt-BaseCard rt-CheckboxCardsItem"> whose
+-- | rt-Text label child renders FIRST, then the interactive checkbox button (slot). The
+-- | label intercepts the click (native label -> control), toggling the checkbox to checked.
+checkboxCardsPage :: H.ComponentHTML Void Slots Aff
+checkboxCardsPage =
+  HH.div
+    [ HP.class_ (HH.ClassName "rt-CheckboxCardsRoot rt-Grid rt-r-gap-4 rt-r-gtc rt-r-size-2 rt-variant-surface")
+    , HP.attr (HH.AttrName "dir") "ltr"
+    , HP.attr (HH.AttrName "role") "group"
+    , HP.style "outline: none; --grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));"
+    , HP.attr (HH.AttrName "tabindex") "0"
+    ]
+    [ HH.label
+        [ HP.class_ (HH.ClassName "rt-BaseCard rt-CheckboxCardsItem") ]
+        [ textAs "span" [] [ HH.text "Agree to Terms and Conditions" ]
+        , HH.slot_ _checkboxcards unit Checkbox.component checkboxCardsInput
+        ]
+    ]
 
 -- | tabnav — themes-only AND at-rest (no Halogen component): rendered directly inline
 -- | as the declarative active-link nav. Account is the active link.
@@ -755,16 +811,30 @@ tabNavPage =
     , tabNavLink false "#settings" [] [ HH.text "Settings" ]
     ]
 
--- | The ThickCheckIcon as a PlainHTML SVG (radix's check; the indicator content for
--- | the Checkbox-family routes). svg width/height 9, viewBox 0 0 9 9, fill currentcolor.
+-- | The ThickCheckIcon as the bare Checkbox primitive's asChild indicator child -- it
+-- | carries the standalone Checkbox indicator classes
+-- | (`rt-BaseCheckboxIndicator rt-CheckboxIndicator`), `data-state="checked"`, and
+-- | `style="pointer-events: none;"` (the merge upstream's CheckboxIndicator asChild
+-- | performs onto its child).
 thickCheckIconPlain :: HH.PlainHTML
-thickCheckIconPlain =
+thickCheckIconPlain = thickCheckIndicator "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
+
+-- | The ThickCheckIcon indicator svg with the given indicator class set, merging the
+-- | asChild indicator props (class, data-state=checked, pointer-events:none) onto the
+-- | icon svg -- exactly the node upstream's CheckboxIndicator emits. NB:
+-- | SVGElement.className is a read-only SVGAnimatedString, so class/data-state must be
+-- | set via setAttribute (HP.attr).
+thickCheckIndicator :: String -> HH.PlainHTML
+thickCheckIndicator indicatorClass =
   HH.elementNS svgNS (HH.ElemName "svg")
-    [ HP.attr (HH.AttrName "width") "9"
+    [ HP.attr (HH.AttrName "class") indicatorClass
+    , HP.attr (HH.AttrName "data-state") "checked"
+    , HP.attr (HH.AttrName "width") "9"
     , HP.attr (HH.AttrName "height") "9"
     , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
     , HP.attr (HH.AttrName "fill") "currentcolor"
     , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    , HP.style "pointer-events: none;"
     ]
     [ HH.elementNS svgNS (HH.ElemName "path")
         [ HP.attr (HH.AttrName "fill-rule") "evenodd"
