@@ -272,6 +272,14 @@ const CHECKS = [
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Orange");
   }},
+  // On open, DOM focus lands on the SELECTED option (upstream focusSelectedItem,
+  // select.tsx:683-714 focusFirst([selectedItem, content])), not the content/listbox —
+  // so ArrowUp/Down originate from it and the SR announces it. (Validated on --golden first.)
+  { id: "select", apg: "listbox", name: "open moves focus to the SELECTED option", run: async (pg) => {
+    await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
+    ok(await activeIs(pg, '[role="option"][aria-selected="true"]'), "open did not focus the selected option");
+    ok((await pg.evaluate(() => (document.activeElement.textContent || "").trim())) === "Apple", "the focused option must be the selected one (Apple)");
+  }},
   { id: "select", apg: "listbox", name: "Enter selects the highlighted option and closes", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     await pg.keyboard.press("ArrowDown"); await pg.keyboard.press("Enter"); await pg.waitForTimeout(150);

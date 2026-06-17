@@ -41,7 +41,7 @@ import Prelude
 
 import Data.Array (find, findIndex, index, length, mapWithIndex, null)
 import Data.Foldable (for_, traverse_)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -458,21 +458,30 @@ scheduleAfterOpen = do
   pure sid
 
 -- | Adopt the WRAPPER into body; layer the MODAL select envelope (scroll-lock + focus guards
--- | + aria-hide siblings) and focus the listbox CONTENT. SYNCHRONOUS (not an afterFrame): the
--- | item-aligned reposition does not modify, so there's no pending re-render to re-parent the
--- | wrapper, and the content can be focused in this same frame.
+-- | + aria-hide siblings) and focus the SELECTED option (upstream focusSelectedItem,
+-- | select.tsx:683-714 `focusFirst([selectedItem, content])`) — falling back to the listbox
+-- | CONTENT when nothing is selected. SYNCHRONOUS (not an afterFrame): the item-aligned
+-- | reposition does not modify, so there's no pending re-render to re-parent the wrapper, and
+-- | the target can be focused in this same frame.
 finalize :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 finalize = do
+  st <- H.get
   mbody <- liftEffect Portal.documentBody
   mwrap <- H.getHTMLElementRef wrapperRef
   mcontent <- H.getHTMLElementRef contentRef
+  -- the selected option's element (Nothing when nothing is selected → focus the content).
+  -- selectedIndex falls back to 0, so only resolve the option when a value actually matches.
+  let hasSelection = isJust (findIndex (\item -> item.value == current st.sel) st.items)
+  mselected <- if hasSelection then H.getHTMLElementRef (itemRef st.idPrefix (selectedIndex st)) else pure Nothing
   case mbody, mwrap of
     Just body, Just wrap -> liftEffect do
       Portal.adopt body (HTMLElement.toElement wrap)
       Envelope.lockScroll
       Envelope.addFocusGuards
       Envelope.hideOthers wrap
-      for_ mcontent HTMLElement.focus
+      case mselected of
+        Just sel -> HTMLElement.focus sel
+        Nothing -> for_ mcontent HTMLElement.focus
     _, _ -> pure unit
 
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
