@@ -117,6 +117,8 @@ STATES=(
   "otp:password"
   "otp:disabled"
   "otp:readonly"
+  "passwordtoggle:autolabel"
+  "passwordtoggle:disabled"
 )
 
 echo "ℵ building golden dist (bun)"

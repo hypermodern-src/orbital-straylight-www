@@ -638,6 +638,19 @@ export const STATES = {
       await pg.locator('input[type="text"]').first().waitFor();
       await pg.waitForFunction(() => document.querySelector("button")?.textContent?.trim() === "Hide");
     },
+    // `?s=autolabel` → icon-only toggle (no inner text): the auto aria-label "Show password"
+    // names the button. No interaction; the post-hydration DOM is the oracle.
+    autolabel: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector("button")?.getAttribute("aria-label") === "Show password");
+    },
+    // `?s=disabled` → native disabled passed through to BOTH the input and the toggle button.
+    disabled: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector("input")?.disabled === true && document.querySelector("button")?.disabled === true);
+    },
   },
   otp: {
     // defaultValue="123" 3-slot at rest: inputs carry value 1/2/3, hidden input value=123, roving

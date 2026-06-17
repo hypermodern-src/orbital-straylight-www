@@ -1441,17 +1441,51 @@ const PAGES: Page[] = [
     // Text Slot (Show/Hide) so the button has inner text → the auto aria-label (MutationObserver
     // + hydration timing) is SUPPRESSED; explicit input id="password" so inputId is literal (no
     // useId) and the toggle's id/aria-controls don't even need the id normalizer.
-    node: (
-      <Box>
-        <label htmlFor="password">Password</label>
-        <PasswordToggleField.Root>
-          <PasswordToggleField.Input id="password" />
-          <PasswordToggleField.Toggle>
-            <PasswordToggleField.Slot visible="Hide" hidden="Show" />
-          </PasswordToggleField.Toggle>
-        </PasswordToggleField.Root>
-      </Box>
-    ),
+    // `?s=autolabel` renders an ICON-ONLY toggle (no inner text) → the auto aria-label
+    // ("Show password"/"Hide password") is applied post-hydration. `?s=disabled` passes the
+    // native disabled through to BOTH the input and the toggle button.
+    node: (() => {
+      const s = currentState();
+      if (s === "autolabel") {
+        return (
+          <Box>
+            <label htmlFor="password">Password</label>
+            <PasswordToggleField.Root>
+              <PasswordToggleField.Input id="password" />
+              <PasswordToggleField.Toggle>
+                <svg width="15" height="15" viewBox="0 0 15 15" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="7.5" cy="7.5" r="2" fill="currentColor" />
+                </svg>
+              </PasswordToggleField.Toggle>
+            </PasswordToggleField.Root>
+          </Box>
+        );
+      }
+      if (s === "disabled") {
+        return (
+          <Box>
+            <label htmlFor="password">Password</label>
+            <PasswordToggleField.Root>
+              <PasswordToggleField.Input id="password" disabled />
+              <PasswordToggleField.Toggle disabled>
+                <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+              </PasswordToggleField.Toggle>
+            </PasswordToggleField.Root>
+          </Box>
+        );
+      }
+      return (
+        <Box>
+          <label htmlFor="password">Password</label>
+          <PasswordToggleField.Root>
+            <PasswordToggleField.Input id="password" />
+            <PasswordToggleField.Toggle>
+              <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+            </PasswordToggleField.Toggle>
+          </PasswordToggleField.Root>
+        </Box>
+      );
+    })(),
   },
   {
     id: "otp",

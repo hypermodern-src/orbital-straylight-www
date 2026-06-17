@@ -260,7 +260,7 @@ view c s =
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
-            "passwordtoggle" -> passwordTogglePage
+            "passwordtoggle" -> passwordTogglePage s
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
             "otp" -> box [] [ HH.slot_ _otp unit Otp.component (otpInput s) ]
             "form" -> box [] [ HH.slot_ _form unit Form.component (formInput s) ]
@@ -1162,20 +1162,44 @@ checkboxCardsPage =
 -- | useId) so the toggle's id/aria-controls don't even need the id normalizer; a text Slot
 -- | (Show/Hide) suppresses the auto aria-label. The driver clicks the toggle → type flips
 -- | password→text and the Slot text Show→Hide.
-passwordTogglePage :: H.ComponentHTML Void Slots Aff
-passwordTogglePage =
+passwordTogglePage :: String -> H.ComponentHTML Void Slots Aff
+passwordTogglePage s =
   box []
     [ HH.label
         [ HP.attr (HH.AttrName "for") "password" ]
         [ HH.text "Password" ]
-    , HH.slot_ _passwordtoggle unit PasswordToggleField.component passwordToggleInput
+    , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
     ]
 
-passwordToggleInput :: PasswordToggleField.Input
-passwordToggleInput = PasswordToggleField.defaultInput
+-- | The icon-only toggle content for `?s=autolabel` — an aria-hidden SVG with no inner text,
+-- | byte-identical to the golden so the auto aria-label ("Show password") is what names the button.
+passwordToggleIcon :: HH.PlainHTML
+passwordToggleIcon =
+  HH.elementNS (HH.Namespace "http://www.w3.org/2000/svg") (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "width") "15"
+    , HP.attr (HH.AttrName "height") "15"
+    , HP.attr (HH.AttrName "viewBox") "0 0 15 15"
+    , HP.attr (HH.AttrName "aria-hidden") "true"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS (HH.Namespace "http://www.w3.org/2000/svg") (HH.ElemName "circle")
+        [ HP.attr (HH.AttrName "cx") "7.5"
+        , HP.attr (HH.AttrName "cy") "7.5"
+        , HP.attr (HH.AttrName "r") "2"
+        , HP.attr (HH.AttrName "fill") "currentColor"
+        ]
+        []
+    ]
+
+passwordToggleInput :: String -> PasswordToggleField.Input
+passwordToggleInput s = PasswordToggleField.defaultInput
   { inputId = Just "password"
-  , toggleVisible = [ HH.text "Hide" ]
-  , toggleHidden = [ HH.text "Show" ]
+  -- `?s=autolabel` → icon-only toggle (no text) so the auto aria-label applies; otherwise the
+  -- text Slot (Show/Hide). `?s=disabled` → native disabled on both input + toggle.
+  , toggleVisible = if s == "autolabel" then [ passwordToggleIcon ] else [ HH.text "Hide" ]
+  , toggleHidden = if s == "autolabel" then [ passwordToggleIcon ] else [ HH.text "Show" ]
+  , iconOnly = s == "autolabel"
+  , disabled = s == "disabled"
   , style = { input: cn "", toggle: cn "" }
   }
 
