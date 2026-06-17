@@ -34,4 +34,5 @@ result-*
 test-results/
 playwright-report/
 testing/playwright/.themes-a11y-dist/
+testing/playwright/.themes-apg-dist/
 testing/playwright/.themes-open-dist/
