@@ -35,11 +35,13 @@ module Hydrogen.Radix.Menubar
   , CheckItem
   , RadioGroupData
   , RadioOption
+  , SubData
   , CheckState(..)
   , menuItem
   , menuSeparator
   , menuCheckbox
   , menuRadioGroup
+  , menuSub
   , Input
   , Output(..)
   , Query(..)
@@ -53,7 +55,7 @@ import Prelude
 
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
-import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe, isJust)
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -119,14 +121,27 @@ type RadioGroupData =
   , options :: Array RadioOption
   }
 
+type SubData =
+  { value :: String
+  , label :: Array HH.PlainHTML
+  , shortcut :: Array HH.PlainHTML
+  , disabled :: Boolean
+  , entries :: Array MenuEntry
+  }
+
 data MenuEntry
   = MenuItemEntry MenuItem
   | MenuSeparator
   | MenuCheckboxEntry CheckItem
   | MenuRadioGroupEntry RadioGroupData
+  | MenuSubEntry SubData
 
 menuItem :: String -> Array HH.PlainHTML -> MenuEntry
 menuItem value label = MenuItemEntry { value, label, shortcut: [], accent: "", disabled: false }
+
+-- | Smart constructor for a submenu (SubTrigger label + nested entries).
+menuSub :: String -> Array HH.PlainHTML -> Array MenuEntry -> MenuEntry
+menuSub value label entries = MenuSubEntry { value, label, shortcut: [], disabled: false, entries }
 
 menuSeparator :: MenuEntry
 menuSeparator = MenuSeparator
@@ -149,6 +164,7 @@ entryFocusables = case _ of
   MenuItemEntry item -> if item.disabled then 0 else 1
   MenuCheckboxEntry item -> if item.disabled then 0 else 1
   MenuRadioGroupEntry grp -> Array.length (Array.filter (not <<< _.disabled) grp.options)
+  MenuSubEntry sub -> if sub.disabled then 0 else 1
   MenuSeparator -> 0
 
 -- | The enabled focusable value at roving index `n` (the keyboard-selection target).
@@ -159,6 +175,7 @@ enabledValueAt n entries = Array.index (Array.concatMap enabledValues entries) n
     MenuItemEntry item | not item.disabled -> [ item.value ]
     MenuCheckboxEntry item | not item.disabled -> [ item.value ]
     MenuRadioGroupEntry grp -> map _.value (Array.filter (not <<< _.disabled) grp.options)
+    MenuSubEntry sub | not sub.disabled -> [ sub.value ]
     _ -> []
 
 -- | One menu in the bar: a stable `value` (the open-value key), the trigger label, and the
@@ -182,6 +199,9 @@ type Style =
   , indicator :: ClassNames
   , checkIndicator :: Array HH.PlainHTML  -- the indicator content (e.g. ✓) for a checkbox
   , radioIndicator :: Array HH.PlainHTML  -- the indicator content for a radio item
+  , subTrigger :: ClassNames
+  , subContent :: ClassNames
+  , subIcon :: Array HH.PlainHTML        -- SubTrigger icon (bare menubar has none → [])
   }
 
 defaultStyle :: Style
@@ -198,6 +218,9 @@ defaultStyle =
   , indicator: cn ""
   , checkIndicator: []
   , radioIndicator: []
+  , subTrigger: cn ""
+  , subContent: cn ""
+  , subIcon: []
   }
 
 type Input =
@@ -278,6 +301,17 @@ type State =
   , triggerIds :: Array String      -- one per menu (generated on Initialize)
   , contentIds :: Array String      -- one per menu
   , openFocus :: Maybe Int          -- post-open focus: Nothing = content, Just i = item i
+  -- ── submenu (one open at a time, inside the active menu's content) ──
+  , subOpen :: Maybe String
+  , subFocused :: Int
+  , subAnchorIdx :: Int
+  , subPlacedSide :: Side
+  , subPlacedAlign :: Align
+  , subOpenFocus :: Maybe Int
+  , subSubs :: Array H.SubscriptionId
+  , subPostSub :: Maybe H.SubscriptionId
+  , subGenTriggerId :: String
+  , subGenContentId :: String
   }
 
 data Action
@@ -294,6 +328,14 @@ data Action
   | MenuKeyDown KE.KeyboardEvent
   | ItemClicked String
   | Reposition
+  -- ── submenu ──
+  | SubTriggerEnter String Int
+  | SubTriggerActivate String Int
+  | SubAfterOpen
+  | SubReposition
+  | SubKeyDown KE.KeyboardEvent
+  | SubItemClicked String
+  | CloseSub
 
 triggerRef :: String -> Int -> H.RefLabel
 triggerRef pfx i = H.RefLabel (pfx <> "-trigger-" <> show i)
@@ -306,6 +348,20 @@ wrapperRef = H.RefLabel "rdx-menubar-wrapper"
 
 itemRef :: String -> Int -> H.RefLabel
 itemRef pfx i = H.RefLabel (pfx <> "-item-" <> show i)
+
+subWrapperRef :: H.RefLabel
+subWrapperRef = H.RefLabel "rdx-menubar-subwrapper"
+
+subContentRef :: H.RefLabel
+subContentRef = H.RefLabel "rdx-menubar-subcontent"
+
+subItemRef :: String -> Int -> H.RefLabel
+subItemRef pfx i = H.RefLabel (pfx <> "-subitem-" <> show i)
+
+findSub :: String -> Array MenuEntry -> Maybe SubData
+findSub value = Array.findMap case _ of
+  MenuSubEntry sub | sub.value == value -> Just sub
+  _ -> Nothing
 
 portalData :: forall r i. Array (Tuple String String) -> Array (HP.IProp r i)
 portalData = map (\(Tuple k v) -> HP.attr (HH.AttrName ("data-" <> k)) v)
@@ -361,6 +417,16 @@ initialState input =
   , triggerIds: []
   , contentIds: []
   , openFocus: Nothing
+  , subOpen: Nothing
+  , subFocused: -1
+  , subAnchorIdx: -1
+  , subPlacedSide: Right
+  , subPlacedAlign: Start
+  , subOpenFocus: Nothing
+  , subSubs: []
+  , subPostSub: Nothing
+  , subGenTriggerId: ""
+  , subGenContentId: ""
   }
   where
   startVal = case input.value of
@@ -383,7 +449,7 @@ render st =
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
-      [ HH.div
+      ( [ HH.div
           [ role "menubar"
           , classes st.style.root
           , dataAttr "orientation" orientName
@@ -403,6 +469,9 @@ render st =
               Just i -> [ renderContent st i ]
           )
       ]
+        -- the open SUBMENU layer (anchored to the SubTrigger inside the active menu's content).
+        <> maybe [] (\sub -> [ renderSubContent st sub ]) (st.subOpen >>= \v -> findSub v (openEntries st))
+      )
 
 renderTrigger :: forall m. State -> Maybe Int -> Int -> Menu -> H.ComponentHTML Action () m
 renderTrigger st mOpenI i menu =
@@ -485,6 +554,12 @@ renderEntries st entries = _.html (foldl step { idx: 0, html: [] } entries)
           { idx = inner.idx
           , html = acc.html <> [ HH.div [ classes st.style.radioGroup, role "group" ] inner.html ]
           }
+    MenuSubEntry sub
+      | sub.disabled -> acc { html = acc.html <> [ renderSubTrigger st Nothing sub ] }
+      | otherwise -> acc
+          { idx = acc.idx + 1
+          , html = acc.html <> [ renderSubTrigger st (Just acc.idx) sub ]
+          }
   radioStep selected innerAcc opt
     | opt.disabled = innerAcc { html = innerAcc.html <> [ renderRadio st selected Nothing opt ] }
     | otherwise = innerAcc
@@ -506,6 +581,106 @@ renderItem st mIdx item =
       ]
         <> maybe [] (\i -> [ HP.ref (itemRef st.idPrefix i) ]) mIdx
         <> (if mIdx == Just st.itemFocus then [ dataAttr "highlighted" "" ] else [])
+        <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
+        <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
+    )
+    ( map HH.fromPlainHTML item.label
+        <> (if Array.null item.shortcut then [] else [ HH.div [ classes st.style.shortcut ] (map HH.fromPlainHTML item.shortcut) ])
+    )
+
+-- | A SubTrigger row (role=menuitem) opening a nested SubContent. Bare menubar adds
+-- | `data-radix-menubar-subtrigger` and carries NO icon (so no trailing shortcut div unless
+-- | the caller supplies one). One parent roving index; opens on hover / click / ArrowRight.
+renderSubTrigger :: forall m. State -> Maybe Int -> SubData -> H.ComponentHTML Action () m
+renderSubTrigger st mIdx sub =
+  let
+    open = st.subOpen == Just sub.value
+    extra = map HH.fromPlainHTML sub.shortcut <> map HH.fromPlainHTML st.style.subIcon
+  in HH.div
+    ( [ role "menuitem"
+      , classes st.style.subTrigger
+      , HP.id st.subGenTriggerId
+      , aria "haspopup" "menu"
+      , aria "expanded" (if open then "true" else "false")
+      , dataState (if open then "open" else "closed")
+      , HP.tabIndex (maybe (-1) (tabIndexFor st.itemFocus) mIdx)
+      , dataAttr "radix-collection-item" ""
+      , dataAttr "radix-menubar-subtrigger" ""
+      , dataAttr "orientation" "vertical"
+      , HE.onClick \_ -> SubTriggerActivate sub.value (fromMaybe (-1) mIdx)
+      , HE.onMouseEnter \_ -> SubTriggerEnter sub.value (fromMaybe (-1) mIdx)
+      ]
+        <> maybe [] (\i -> [ HP.ref (itemRef st.idPrefix i) ]) mIdx
+        <> (if mIdx == Just st.itemFocus then [ dataAttr "highlighted" "" ] else [])
+        <> (if open then
+              [ aria "controls" st.subGenContentId
+              , dataAttr "radix-popper-side" (sideName st.subPlacedSide)
+              , dataAttr "radix-popper-align" (alignName st.subPlacedAlign)
+              ] else [])
+        <> (if sub.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
+    )
+    ( map HH.fromPlainHTML sub.label
+        <> (if Array.null extra then [] else [ HH.div [ classes st.style.shortcut ] extra ])
+    )
+
+-- | The nested SubContent: a separate popper-content-wrapper (portal-adopted into body),
+-- | anchored to the open SubTrigger, data-side=right. Bare menubar = NO ScrollArea nesting
+-- | (items are direct children) and carries both data-radix-menu-content + -menubar-content.
+renderSubContent :: forall m. State -> SubData -> H.ComponentHTML Action () m
+renderSubContent st sub =
+  HH.div
+    [ HP.ref subWrapperRef
+    , dataAttr "radix-popper-content-wrapper" ""
+    , dir "ltr"
+    , HP.style "position: fixed;"
+    ]
+    [ HH.div
+        ( [ HP.ref subContentRef
+          , HP.id st.subGenContentId
+          , role "menu"
+          , classes st.style.subContent
+          , aria "labelledby" st.subGenTriggerId
+          , aria "orientation" "vertical"
+          , dataState "open"
+          , dataAttr "side" (sideName st.subPlacedSide)
+          , dataAttr "align" (alignName st.subPlacedAlign)
+          , dataAttr "orientation" "vertical"
+          , dataAttr "radix-menu-content" ""
+          , dataAttr "radix-menubar-content" ""
+          , dir "ltr"
+          , HP.tabIndex (-1)
+          , HP.style st.contentStyle
+          , HE.onKeyDown SubKeyDown
+          ] <> portalData st.portalAttrs
+        )
+        (renderSubEntries st sub.entries)
+    ]
+
+renderSubEntries :: forall m. State -> Array MenuEntry -> Array (H.ComponentHTML Action () m)
+renderSubEntries st entries = _.html (foldl step { idx: 0, html: [] } entries)
+  where
+  step acc = case _ of
+    MenuSeparator -> acc { html = acc.html <> [ renderSep st ] }
+    MenuItemEntry item
+      | item.disabled -> acc { html = acc.html <> [ renderSubItem st Nothing item ] }
+      | otherwise -> acc
+          { idx = acc.idx + 1
+          , html = acc.html <> [ renderSubItem st (Just acc.idx) item ]
+          }
+    _ -> acc
+
+renderSubItem :: forall m. State -> Maybe Int -> MenuItem -> H.ComponentHTML Action () m
+renderSubItem st mIdx item =
+  HH.div
+    ( [ role "menuitem"
+      , classes st.style.item
+      , HP.tabIndex (maybe (-1) (tabIndexFor st.subFocused) mIdx)
+      , dataAttr "radix-collection-item" ""
+      , dataAttr "orientation" "vertical"
+      , HE.onClick \_ -> SubItemClicked item.value
+      ]
+        <> maybe [] (\i -> [ HP.ref (subItemRef st.idPrefix i) ]) mIdx
+        <> (if mIdx == Just st.subFocused then [ dataAttr "highlighted" "" ] else [])
         <> (if item.accent == "" then [] else [ dataAttr "accent-color" item.accent ])
         <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
     )
@@ -598,7 +773,9 @@ handleAction = case _ of
     -- one trigger id + one content id per menu, in order (so aria-labelledby/controls resolve).
     tids <- traverse (const useId) st.menus
     cids <- traverse (const useId) st.menus
-    H.modify_ _ { triggerIds = tids, contentIds = cids }
+    stid <- useId
+    scid <- useId
+    H.modify_ _ { triggerIds = tids, contentIds = cids, subGenTriggerId = stid, subGenContentId = scid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.value st.ctrl
@@ -683,7 +860,14 @@ handleAction = case _ of
     let
       cfg = { orientation: Vertical, dir: st.dir, loop: st.loop }
       pos = { count: itemCount (openEntries st), current: st.itemFocus }
+      -- the focused entry's value IF it is a SubTrigger: ArrowRight (and Enter/Space) must OPEN
+      -- the sub, NOT switch to the adjacent top menu (the cross-menu vs sub guard).
+      mFocusedSub = do
+        v <- enabledValueAt st.itemFocus (openEntries st)
+        _ <- findSub v (openEntries st)
+        pure v
     case KE.key ke of
+      "ArrowRight" | Just v <- mFocusedSub -> liftEffect (preventDefault (KE.toEvent ke)) *> openSub v st.itemFocus (Just 0)
       -- cross-menu: ArrowRight/ArrowLeft from inside the content close it and open the adjacent
       -- trigger's menu (handled here via the menu list + wrap, NOT the vertical roving).
       "ArrowRight" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st 1
@@ -691,6 +875,9 @@ handleAction = case _ of
       -- Enter/Space SELECT the focused item + close (upstream re-exports menu.tsx:667-680
       -- SELECTION_KEYS). Keyboard activation of items was previously impossible.
       key
+        -- Enter/Space on a SubTrigger OPENS the sub (focus its first item), not select.
+        | (key == "Enter" || key == " "), Just v <- mFocusedSub ->
+            liftEffect (preventDefault (KE.toEvent ke)) *> openSub v st.itemFocus (Just 0)
         | (key == "Enter" || key == " ") && st.itemFocus >= 0 -> do
             liftEffect (preventDefault (KE.toEvent ke))
             for_ (enabledValueAt st.itemFocus (openEntries st)) \v ->
@@ -704,6 +891,57 @@ handleAction = case _ of
               liftEffect $ Dom.queueMicrotask do
                 for_ mwrap Envelope.reAdoptBeforeTrail
                 for_ mitem HTMLElement.focus
+  -- ── submenu ──
+  SubTriggerEnter value idx -> openSub value idx Nothing
+  SubTriggerActivate value idx -> openSub value idx (Just 0)
+  SubAfterOpen -> do
+    repositionSub
+    st <- H.get
+    mwrap <- H.getHTMLElementRef wrapperRef
+    mswrap <- H.getHTMLElementRef subWrapperRef
+    for_ mwrap (liftEffect <<< Envelope.reAdoptBeforeTrail)
+    for_ mswrap (liftEffect <<< Envelope.reAdoptBeforeTrail)
+    for_ st.subOpenFocus \i -> do
+      mitem <- H.getHTMLElementRef (subItemRef st.idPrefix i)
+      for_ mitem (liftEffect <<< HTMLElement.focus)
+  SubReposition -> repositionSub
+  SubKeyDown ke -> do
+    st <- H.get
+    let
+      key = KE.key ke
+      subEntries = fromMaybe [] (map _.entries (st.subOpen >>= \v -> findSub v (openEntries st)))
+      cfg = { orientation: Vertical, dir: st.dir, loop: st.loop }
+      pos = { count: itemCount subEntries, current: st.subFocused }
+    case key of
+      "ArrowLeft" -> liftEffect (preventDefault (KE.toEvent ke)) *> closeSub
+      "Escape" -> liftEffect (preventDefault (KE.toEvent ke)) *> closeSub
+      _
+        | (key == "Enter" || key == " ") && st.subFocused >= 0 -> do
+            liftEffect (preventDefault (KE.toEvent ke))
+            for_ (enabledValueAt st.subFocused subEntries) \v -> handleAction (SubItemClicked v)
+        | otherwise -> case navigate cfg pos key of
+            Stay -> pure unit
+            MoveTo idx -> do
+              H.modify_ _ { subFocused = idx }
+              mwrap <- H.getHTMLElementRef wrapperRef
+              mswrap <- H.getHTMLElementRef subWrapperRef
+              mitem <- H.getHTMLElementRef (subItemRef st.idPrefix idx)
+              liftEffect $ Dom.queueMicrotask do
+                for_ mwrap Envelope.reAdoptBeforeTrail
+                for_ mswrap Envelope.reAdoptBeforeTrail
+                for_ mitem HTMLElement.focus
+  SubItemClicked value -> do
+    st <- H.get
+    let subEntries = fromMaybe [] (map _.entries (st.subOpen >>= \v -> findSub v (openEntries st)))
+        pick = case _ of
+          MenuItemEntry it | it.value == value -> Just it.disabled
+          _ -> Nothing
+        mDisabled = Array.findMap pick subEntries
+    when (maybe true not mDisabled) do
+      for_ (openIndex st >>= Array.index st.menus) \menu ->
+        H.raise (ItemSelected { menu: menu.value, item: value })
+      closeMenuAndSub
+  CloseSub -> closeSub
   ItemClicked value -> do
     st <- H.get
     -- a disabled item is non-interactive — clicking it neither selects nor closes.
@@ -738,6 +976,57 @@ adjacentMenu st delta = case openIndex st of
     when (j /= i) do
       H.modify_ _ { triggerFocus = j }
       switchTo j (-1) Nothing
+
+-- | Open the submenu `value` (SubTrigger at the active content's roving index `idx`). The
+-- | SubTrigger becomes the content's roving tab stop. See DropdownMenu.openSub.
+openSub :: forall m. MonadEffect m => String -> Int -> Maybe Int -> H.HalogenM State Action () Output m Unit
+openSub value idx focus = do
+  st <- H.get
+  when (current st.ctrl /= "" && st.subOpen /= Just value) do
+    H.modify_ _
+      { subOpen = Just value, itemFocus = idx, subAnchorIdx = idx, subFocused = -1
+      , subOpenFocus = focus, subPlacedSide = Right, subPlacedAlign = Start
+      }
+    psid <- scheduleSubAfterOpen
+    H.modify_ _ { subPostSub = Just psid }
+
+scheduleSubAfterOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId
+scheduleSubAfterOpen = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (SubAfterOpen <$ emitter)
+  liftEffect (Dom.queueMicrotask (HS.notify listener unit))
+  pure sid
+
+repositionSub :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+repositionSub = do
+  st <- H.get
+  manchor <- H.getHTMLElementRef (itemRef st.idPrefix st.subAnchorIdx)
+  mwrap <- H.getHTMLElementRef subWrapperRef
+  mfloat <- H.getHTMLElementRef subContentRef
+  case manchor, mwrap, mfloat of
+    Just anchor, Just wrapper, Just floating -> do
+      placed <- liftEffect (Popper.positionWrapper
+        { anchor, wrapper, floating, side: Right, align: Start, offset: 0.0, padding: st.padding })
+      when (placed.placement.side /= st.subPlacedSide || placed.placement.align /= st.subPlacedAlign) $
+        H.modify_ _ { subPlacedSide = placed.placement.side, subPlacedAlign = placed.placement.align }
+    _, _, _ -> pure unit
+
+closeSub :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+closeSub = do
+  st <- H.get
+  when (isJust st.subOpen) do
+    for_ st.subPostSub H.unsubscribe
+    H.modify_ _ { subOpen = Nothing, subFocused = -1, subPostSub = Nothing }
+    mwrap <- H.getHTMLElementRef wrapperRef
+    mtrig <- H.getHTMLElementRef (itemRef st.idPrefix st.subAnchorIdx)
+    liftEffect $ Dom.queueMicrotask do
+      for_ mwrap Envelope.reAdoptBeforeTrail
+      for_ mtrig HTMLElement.focus
+
+closeMenuAndSub :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+closeMenuAndSub = do
+  H.modify_ _ { subOpen = Nothing, subFocused = -1 }
+  closeMenu
 
 openMenuAt :: forall m. MonadEffect m => Int -> Int -> Maybe Int -> H.HalogenM State Action () Output m Unit
 openMenuAt i focusedIdx openFocus = do
@@ -813,7 +1102,7 @@ closeMenu = do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change "" st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing }
+    H.modify_ _ { ctrl = (change "" st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing, subOpen = Nothing, subFocused = -1 }
     H.raise (OpenChanged Nothing)
     psid <- scheduleAfterClose
     H.modify_ _ { postSub = Just psid }

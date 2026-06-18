@@ -923,6 +923,25 @@ const CHECKS = [
     ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menu"] [role="menuitem"]')].find((x) => (x.textContent || "").startsWith("New Window")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Print");
   }},
+  // Submenu — ArrowRight on a focused SubTrigger OPENS the sub (it must NOT switch to the
+  // adjacent top menu — the cross-menu-vs-sub guard); ArrowLeft closes it. (?s=submenu inserts
+  // a "Share" Sub in the File menu.) Non-circular: --golden (real react-menubar does the same).
+  { id: "menubar", state: "submenu", apg: "menubar", name: "ArrowRight opens the submenu (not the adjacent menu); ArrowLeft closes it", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').first().waitFor();
+    await hlStarts(pg, "New Tab");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "New Window");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Share");
+    await pg.keyboard.press("ArrowRight");
+    await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 3000 });
+    // the open menu must still be File's (ArrowRight opened the SUB, not switched to Edit).
+    const stillFile = await pg.evaluate(() => { const m = document.querySelector('[role="menu"]'); const l = m && document.getElementById(m.getAttribute("aria-labelledby")); return l ? l.textContent.trim() : null; });
+    ok(stillFile === "File", `ArrowRight wrongly switched the top menu (now ${stillFile}) instead of opening the sub`);
+    ok((await pg.evaluate(() => { const t = document.querySelector('[role="menu"] [role="menuitem"][aria-haspopup="menu"]'); return t && t.getAttribute("data-state") === "open"; })),
+      "ArrowRight must open the submenu (SubTrigger data-state=open)");
+    await pg.keyboard.press("ArrowLeft");
+    await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length === 1, null, { timeout: 3000 });
+  }},
 
   // DropdownMenu keyboard SELECTION (menu.tsx:667-680 SELECTION_KEYS) — Enter/Space on the
   // focused item fires onSelect + closes. Previously impossible in the port (navigate → Stay).

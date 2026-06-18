@@ -1011,7 +1011,9 @@ const PAGES: Page[] = [
     // proves vertical roving skips it (react-menu filter(!disabled)); every other state
     // renders all enabled.
     node: (() => {
-      const newWindowDisabled = currentState() === "disabled";
+      const s = currentState();
+      const newWindowDisabled = s === "disabled";
+      const sub = s === "submenu";
       return (
       <Menubar.Root>
         <Menubar.Menu value="file">
@@ -1021,6 +1023,19 @@ const PAGES: Page[] = [
               <Menubar.Item>New Tab</Menubar.Item>
               <Menubar.Item disabled={newWindowDisabled}>New Window</Menubar.Item>
               <Menubar.Separator />
+              {sub && (
+                <Menubar.Sub>
+                  <Menubar.SubTrigger>Share</Menubar.SubTrigger>
+                  <Menubar.Portal>
+                    <Menubar.SubContent>
+                      <Menubar.Item>Email link</Menubar.Item>
+                      <Menubar.Item>Messages</Menubar.Item>
+                      <Menubar.Separator />
+                      <Menubar.Item>Copy link</Menubar.Item>
+                    </Menubar.SubContent>
+                  </Menubar.Portal>
+                </Menubar.Sub>
+              )}
               <Menubar.Item>Print</Menubar.Item>
             </Menubar.Content>
           </Menubar.Portal>

@@ -862,11 +862,14 @@ menubarInput s = Menubar.defaultInput
         , entries:
             -- `?s=disabled` disables "New Window" so the APG disabled-skip check proves
             -- vertical roving skips it (react-menu filter(!disabled)).
-            [ Menubar.menuItem "new-tab" [ HH.text "New Tab" ]
-            , Menubar.MenuItemEntry { value: "new-window", label: [ HH.text "New Window" ], shortcut: [], accent: "", disabled: s == "disabled" }
-            , Menubar.menuSeparator
-            , Menubar.menuItem "print" [ HH.text "Print" ]
-            ]
+            ( [ Menubar.menuItem "new-tab" [ HH.text "New Tab" ]
+              , Menubar.MenuItemEntry { value: "new-window", label: [ HH.text "New Window" ], shortcut: [], accent: "", disabled: s == "disabled" }
+              , Menubar.menuSeparator
+              ]
+                -- `?s=submenu` → a SubTrigger ("Share") opening a SubContent of 3 plain items.
+                <> (if s == "submenu" then [ menubarSubEntry ] else [])
+                <> [ Menubar.menuItem "print" [ HH.text "Print" ] ]
+            )
         }
       , { value: "edit"
         , trigger: [ HH.text "Edit" ]
@@ -884,6 +887,14 @@ menubarInput s = Menubar.defaultInput
         }
       ]
   }
+
+menubarSubEntry :: Menubar.MenuEntry
+menubarSubEntry = Menubar.menuSub "share" [ HH.text "Share" ]
+  [ Menubar.menuItem "email" [ HH.text "Email link" ]
+  , Menubar.menuItem "messages" [ HH.text "Messages" ]
+  , Menubar.menuSeparator
+  , Menubar.menuItem "copy-link" [ HH.text "Copy link" ]
+  ]
 
 -- | The Wave-C Menubar-checks story: a single "View" menu whose `?s=` selects a CheckboxItem
 -- | pair (one checked) or a RadioGroup (medium selected). Bare primitive ⇒ empty Style classes;

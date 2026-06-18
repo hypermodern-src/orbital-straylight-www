@@ -37,6 +37,7 @@ STATES=(
   "menubar:open"
   "menubar:item1"
   "menubar:disabled"
+  "menubar:submenu"
   "navigationmenu:closed"
   "navigationmenu:open"
   "tabs:tab2"
