@@ -1087,6 +1087,31 @@ const PAGES: Page[] = [
     // roving, Enter-no-activate, Home/End-no-check, and a real first→last wrap.
     node: (() => {
       const s = currentState();
+      // `?s=form` — the radio group inside a <form> (Wave C). Post-mount each Radio's
+      // `isFormControl` is TRUE, so radix renders a hidden bubble <input type=radio
+      // aria-hidden tabindex=-1> per item (name shared, value per item, required on
+      // the group). The CHECKED item's bubble input is defaultChecked. The driver
+      // captures the 2-item group at rest.
+      if (s === "form") {
+        return (
+          <form>
+            <RadioGroup.Root defaultValue="1" name="plan" required>
+              <Flex direction="column" gap="2">
+                <Text as="label" size="2">
+                  <Flex gap="2" align="center">
+                    <RadioGroup.Item value="1" /> Default
+                  </Flex>
+                </Text>
+                <Text as="label" size="2">
+                  <Flex gap="2" align="center">
+                    <RadioGroup.Item value="2" /> Comfortable
+                  </Flex>
+                </Text>
+              </Flex>
+            </RadioGroup.Root>
+          </form>
+        );
+      }
       // `?s=keys` / `?s=mixed` — 3 items, middle disabled (roving-skip + mixed-render fixture).
       if (s === "keys" || s === "mixed") {
         return (
@@ -1178,6 +1203,16 @@ const PAGES: Page[] = [
       const s = currentState();
       if (s === "indeterminate") return <Checkbox defaultChecked="indeterminate" />;
       if (s === "disabled") return <Checkbox disabled defaultChecked />;
+      // `?s=form` — the checkbox inside a <form> (Wave C). Post-mount `isFormControl`
+      // resolves TRUE (control.closest("form")), so radix renders the hidden bubble
+      // <input type=checkbox aria-hidden tabindex=-1> sibling for native form
+      // participation. name/value/required flow onto it. The driver captures it at rest.
+      if (s === "form")
+        return (
+          <form>
+            <Checkbox name="agree" value="yes" required defaultChecked />
+          </form>
+        );
       return <Checkbox />;
     })(),
   },
@@ -1192,6 +1227,15 @@ const PAGES: Page[] = [
       const s = currentState();
       if (s === "disabled") return <Switch disabled />;
       if (s === "required") return <Switch required />;
+      // `?s=form` — the switch inside a <form> (Wave C). Post-mount `isFormControl`
+      // is TRUE so radix renders the hidden bubble <input type=checkbox aria-hidden
+      // tabindex=-1> sibling carrying name/value/required for native form submission.
+      if (s === "form")
+        return (
+          <form>
+            <Switch name="notify" value="on" required defaultChecked />
+          </form>
+        );
       return <Switch />;
     })(),
   },
@@ -1202,7 +1246,23 @@ const PAGES: Page[] = [
     // `?s=disabled` seeds a disabled toggle (the no-op + data-disabled='' contract);
     // every other state (rest, pressed) drives the default enabled toggle.
     node: (() => {
-      const disabled = currentState() === "disabled";
+      const s = currentState();
+      const disabled = s === "disabled";
+      // `?s=disabledpressed` (Wave C) — the disabled-AND-pressed combination: a toggle
+      // that is simultaneously data-state=on / aria-pressed=true AND disabled +
+      // data-disabled='' (e.g. a locked-on formatting control). Closes the edge
+      // state-variant gap (the existing disabled story is the OFF+disabled half).
+      if (s === "disabledpressed")
+        return (
+          <Toggle
+            className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+            aria-label="Bold"
+            defaultPressed
+            disabled
+          >
+            B
+          </Toggle>
+        );
       return (
         <Toggle
           className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"

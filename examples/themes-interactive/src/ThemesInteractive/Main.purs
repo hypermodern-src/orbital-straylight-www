@@ -254,9 +254,9 @@ view c s =
             "toast" -> HH.slot_ _toast unit Toast.component toastInput
             "tabs" -> HH.slot_ _tabs unit Tabs.component (tabsInput s)
             "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component (toggleGroupInput s)
-            "radiogroup" -> HH.slot_ _radiogroup unit RadioGroup.component (radioGroupInput s)
-            "checkbox" -> HH.slot_ _checkbox unit Checkbox.component (checkboxInput s)
-            "switch" -> HH.slot_ _switch unit Switch.component (switchInput s)
+            "radiogroup" -> formWrap s (HH.slot_ _radiogroup unit RadioGroup.component (radioGroupInput s))
+            "checkbox" -> formWrap s (HH.slot_ _checkbox unit Checkbox.component (checkboxInput s))
+            "switch" -> formWrap s (HH.slot_ _switch unit Switch.component (switchInput s))
             "toggle" -> HH.slot_ _toggle unit Toggle.component (toggleInput s)
             "segmentedcontrol" -> HH.slot_ _segmentedcontrol unit ToggleGroup.component segmentedControlInput
             "checkboxgroup" -> checkboxGroupPage
@@ -1082,6 +1082,10 @@ radioGroupInput s = RadioGroup.defaultInput
   , explicitOrientation = s == "horizontal"
   , itemIds = false
   , labelOutside = true
+  -- `?s=form` (Wave C): name + required, inside a <form> → per-item hidden bubble inputs.
+  , name = if s == "form" then "plan" else ""
+  , required = s == "form"
+  , isFormControl = s == "form"
   , style =
       { root: cn "rt-RadioGroupRoot"
       , item: cn "rt-reset rt-BaseRadioRoot rt-r-size-2 rt-variant-surface"
@@ -1101,9 +1105,18 @@ checkboxInput s = Checkbox.defaultInput
   { defaultChecked = case s of
       "indeterminate" -> Checkbox.Indeterminate
       "disabled" -> Checkbox.Checked
+      -- `?s=form` (Wave C): checked + required, inside a <form> → the hidden bubble input.
+      "form" -> Checkbox.Checked
       _ -> Checkbox.Unchecked
   , disabled = s == "disabled"
-  , value = "on"
+  -- `?s=form` matches the golden story's name/value/required on a checked checkbox.
+  , required = s == "form"
+  , name = if s == "form" then "agree" else ""
+  , value = if s == "form" then "yes" else "on"
+  -- isFormControl=true for `?s=form` so the port renders the hidden bubble
+  -- <input type=checkbox aria-hidden tabindex=-1 checked> sibling (the form story
+  -- wraps the slot in a <form>, exactly as upstream resolves isFormControl post-mount).
+  , isFormControl = s == "form"
   , style =
       { root: cn "rt-reset rt-BaseCheckboxRoot rt-CheckboxRoot rt-r-size-2 rt-variant-surface"
       , indicator: cn "rt-BaseCheckboxIndicator rt-CheckboxIndicator"
@@ -1111,6 +1124,7 @@ checkboxInput s = Checkbox.defaultInput
   , children = case s of
       "indeterminate" -> [ checkIndicatorWith "indeterminate" false dividerPath ]
       "disabled" -> [ checkIndicatorWith "checked" true thickCheckPath ]
+      "form" -> [ thickCheckIconPlain ]
       _ -> [ thickCheckIconPlain ]
   }
 
@@ -1118,10 +1132,13 @@ checkboxInput s = Checkbox.defaultInput
 -- | seeds the disabled no-op variant; `?s=required` documents aria-required=true.
 switchInput :: String -> Switch.Input
 switchInput s = Switch.defaultInput
-  { defaultChecked = false
+  -- `?s=form` (Wave C): a checked + required switch inside a <form> → the hidden bubble input.
+  { defaultChecked = s == "form"
   , disabled = s == "disabled"
-  , required = s == "required"
+  , required = s == "required" || s == "form"
+  , name = if s == "form" then "notify" else ""
   , value = "on"
+  , isFormControl = s == "form"
   , style =
       { root: cn "rt-reset rt-SwitchRoot rt-r-size-2 rt-variant-surface"
       , thumb: cn "rt-SwitchThumb"
@@ -1133,8 +1150,9 @@ switchInput s = Switch.defaultInput
 toggleInput :: String -> Toggle.Input
 toggleInput s = Toggle.defaultInput
   { pressed = Nothing
-  , defaultPressed = false
-  , disabled = s == "disabled"
+  -- `?s=disabledpressed` (Wave C): start pressed AND disabled (the locked-on combination).
+  , defaultPressed = s == "disabledpressed"
+  , disabled = s == "disabled" || s == "disabledpressed"
   , ariaLabel = Just "Bold"
   , style = { root: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft" }
   , children = [ HH.text "B" ]
@@ -1833,3 +1851,11 @@ toolbarMultipleInput = Toolbar.defaultInput
       , toggleItem: cn ""
       }
   }
+-- | formWrap (Wave C) — for the `?s=form` controls states (checkbox/switch/radiogroup),
+-- | wrap the slot in a real `<form>` so the port's hidden bubble input renders inside it,
+-- | matching upstream's `isFormControl`-resolves-true DOM. Every other state passes the
+-- | content through untouched (no wrapper), keeping the existing oracles byte-identical.
+formWrap :: String -> H.ComponentHTML Void Slots Aff -> H.ComponentHTML Void Slots Aff
+formWrap s content
+  | s == "form" = HH.form [] [ content ]
+  | otherwise = content

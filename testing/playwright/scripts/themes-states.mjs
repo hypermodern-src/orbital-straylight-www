@@ -358,6 +358,15 @@ export const STATES = {
       await pg.locator('[role="radiogroup"][aria-orientation="horizontal"][data-orientation="horizontal"]').first().waitFor();
       await pg.locator('[role="radio"][value="1"][data-orientation="horizontal"]').first().waitFor();
     },
+    // ?s=form seed (Wave C) — the radio group inside a <form>; radix renders a hidden bubble
+    // <input type=radio aria-hidden tabindex=-1> per item (name shared, value per item,
+    // required on each, the CHECKED item's input is `checked`). aria-required on the root.
+    // At rest (value=1 checked). Wait for the root, a trigger, and a bubble input.
+    form: async (pg) => {
+      await pg.locator('form [role="radiogroup"][aria-required="true"]').first().waitFor();
+      await pg.locator('form [role="radio"][value="1"][data-state="checked"]').first().waitFor();
+      await pg.locator('form input[type="radio"][aria-hidden="true"][name="plan"][value="1"]').first().waitFor({ state: "attached" });
+    },
   },
   checkbox: {
     checked: async (pg) => {
@@ -373,6 +382,13 @@ export const STATES = {
     // ?s=disabled seed — at rest a checked + disabled checkbox (data-disabled='' on root).
     disabled: async (pg) => {
       await root(pg).locator('[role="checkbox"][data-state="checked"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=form seed (Wave C) — the checkbox inside a <form>; radix renders the hidden bubble
+    // <input type=checkbox aria-hidden tabindex=-1 checked> sibling for native form
+    // participation. At rest (checked); wait for both the trigger AND the bubble input.
+    form: async (pg) => {
+      await root(pg).locator('form [role="checkbox"][data-state="checked"]').first().waitFor();
+      await root(pg).locator(`form input[type="checkbox"][aria-hidden="true"][name="agree"]`).first().waitFor({ state: "attached" });
     },
   },
   switch: {
@@ -395,6 +411,13 @@ export const STATES = {
     required: async (pg) => {
       await root(pg).locator('button.rt-SwitchRoot[role="switch"][aria-required="true"]').first().waitFor();
     },
+    // ?s=form seed (Wave C) — the switch inside a <form>; radix renders the hidden bubble
+    // <input type=checkbox aria-hidden tabindex=-1 checked> sibling carrying name/value/
+    // required for native form submission. At rest (checked). Wait for both.
+    form: async (pg) => {
+      await root(pg).locator('form button.rt-SwitchRoot[data-state="checked"]').first().waitFor();
+      await root(pg).locator('form input[type="checkbox"][aria-hidden="true"][name="notify"]').first().waitFor({ state: "attached" });
+    },
   },
   toggle: {
     pressed: async (pg) => {
@@ -410,6 +433,11 @@ export const STATES = {
     // ?s=disabled seed — assert the disabled toggle renders disabled + data-disabled='' at rest.
     disabled: async (pg) => {
       await root(pg).locator('button[aria-pressed="false"][data-state="off"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=disabledpressed seed (Wave C) — the disabled-AND-pressed combination: data-state=on /
+    // aria-pressed=true AND disabled + data-disabled='' simultaneously, at rest (no click).
+    disabledpressed: async (pg) => {
+      await root(pg).locator('button[aria-pressed="true"][data-state="on"][data-disabled][disabled]').first().waitFor();
     },
   },
   togglegroup: {

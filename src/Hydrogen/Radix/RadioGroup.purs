@@ -133,6 +133,15 @@ type Input =
   -- | RadioGroup) the label renders as a SIBLING after the button — inside the
   -- | per-item `itemInner` wrapper — and the button itself is empty.
   , labelOutside :: Boolean
+  -- | The form field name shared by every item's hidden bubble input (radix
+  -- | `RadioGroupContextValue.name`). Empty (default) → no name attr.
+  , name :: String
+  -- | Form participation (Wave C). When the group is inside (or SSR-defaults into) a
+  -- | `<form>`, each Radio resolves `isFormControl` true and renders a hidden bubble
+  -- | `<input type="radio" aria-hidden tabindex=-1>` SIBLING of its trigger (name shared,
+  -- | value per item, required mirrored, the CHECKED item's input `checked`). A bare group
+  -- | with no `<form>` ancestor resolves false post-mount ⇒ no inputs (the default).
+  , isFormControl :: Boolean
   }
 
 defaultInput :: Input
@@ -151,6 +160,8 @@ defaultInput =
   , rootStyle: ""
   , itemIds: true
   , labelOutside: false
+  , name: ""
+  , isFormControl: false
   }
 
 data Output = ValueChanged String
@@ -179,6 +190,8 @@ type State =
   , rootStyle :: String
   , itemIds :: Boolean
   , labelOutside :: Boolean
+  , name :: String
+  , isFormControl :: Boolean
   , uid :: String       -- generated on Initialize; makes ids unique per instance
   -- The roving tab stop, radix `currentTabStopId` — the item value that currently
   -- carries tabindex=0. `Nothing` at rest (no item is tabbable; the ROOT is the single
@@ -236,6 +249,8 @@ initialState input =
   , rootStyle: input.rootStyle
   , itemIds: input.itemIds
   , labelOutside: input.labelOutside
+  , name: input.name
+  , isFormControl: input.isFormControl
   , uid: ""
   , tabStop: Nothing
   }
@@ -283,6 +298,26 @@ render st =
   where
   items = mapWithIndex (renderItem st) st.items
 
+-- | The hidden bubble `<input type="radio">` (radix `RadioBubbleInput`) rendered per item
+-- | AFTER its trigger so the group submits with the enclosing form + drives native
+-- | validation. Absolutely-positioned, 0-opacity, tabindex=-1, aria-hidden; the DOM oracle
+-- | normalizes every `…px` to `<px>`, so we emit literal 0px sizes. name shared, value per
+-- | item, required mirrored; the SELECTED item's input is `checked`; per-item `disabled`.
+radioBubbleInput :: forall m. State -> Item -> Boolean -> Boolean -> H.ComponentHTML Action () m
+radioBubbleInput st item selected itemDisabled =
+  HH.input
+    ( [ HP.type_ HP.InputRadio
+      , aria "hidden" "true"
+      , HP.tabIndex (-1)
+      , HP.name st.name
+      , HP.attr (HH.AttrName "value") item.value
+      , HP.attr (HH.AttrName "style") "position: absolute; pointer-events: none; opacity: 0; margin: 0px; transform: translateX(-100%); width: 0px; height: 0px;"
+      ]
+        <> (if selected then [ HP.attr (HH.AttrName "checked") "" ] else [])
+        <> (if st.required then [ HP.attr (HH.AttrName "required") "" ] else [])
+        <> (if itemDisabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
+    )
+
 renderItem :: forall m. State -> Int -> Item -> H.ComponentHTML Action () m
 renderItem st _ item =
   let
@@ -320,14 +355,21 @@ renderItem st _ item =
             <> (if itemDisabled then [ dataAttr "disabled" "" ] else [])
         )
         buttonChildren
+    -- The hidden bubble input is a SIBLING rendered immediately AFTER the trigger (radix
+    -- renders `<button/>` then `<RadioBubbleInput/>`); empty when not a form control.
+    bubble = if st.isFormControl then [ radioBubbleInput st item selected itemDisabled ] else []
   in
     -- No `itemLabel` wrapper → bare button (RadioCards). With a wrapper → the themed
-    -- RadioGroup chrome: `<label> <div class=inner> [button, …labelText] </div> </label>`.
-    if null (unClassNames st.style.itemLabel) then button
+    -- RadioGroup chrome: `<label> <div class=inner> [button, bubble?, …labelText] </div> </label>`.
+    if null (unClassNames st.style.itemLabel) then
+      -- Bare item: when a form control, button + bubble are siblings, so wrap in a
+      -- `display:contents` div the DOM-oracle normalizer strips; else the bare button.
+      if st.isFormControl then HH.div [ HP.attr (HH.AttrName "style") "display:contents" ] ([ button ] <> bubble)
+      else button
     else
       HH.label [ classes st.style.itemLabel ]
         [ HH.div [ classes st.style.itemInner ]
-            ([ button ] <> (if st.labelOutside then map HH.fromPlainHTML item.label else []))
+            ([ button ] <> bubble <> (if st.labelOutside then map HH.fromPlainHTML item.label else []))
         ]
 
 itemId :: State -> String -> String
@@ -375,6 +417,8 @@ handleAction = case _ of
       , rootStyle = input.rootStyle
       , itemIds = input.itemIds
       , labelOutside = input.labelOutside
+      , name = input.name
+      , isFormControl = input.isFormControl
       }
   -- A click both selects the item AND makes it the roving tab stop (it now carries focus).
   Selected value -> do
