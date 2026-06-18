@@ -278,7 +278,7 @@ view c s =
             -- the port's Presence keeps it mounted through the pinned exit (the closing oracle's
             -- lingering node); <style> is in the normalizer SKIP set, so it never diffs.
             "collapsible" -> HH.slot_ _collapsible unit Collapsible.component (collapsibleInput s)
-            "toast" -> HH.slot_ _toast unit Toast.component toastInput
+            "toast" -> HH.slot_ _toast unit Toast.component (toastInput s)
             "tabs" -> HH.slot_ _tabs unit Tabs.component (tabsInput s)
             "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component (toggleGroupInput s)
             "radiogroup" -> formWrap s (HH.slot_ _radiogroup unit RadioGroup.component (radioGroupInput s))
@@ -1092,10 +1092,13 @@ collapsibleInput s = Collapsible.defaultInput
 -- | part text) — supplied here since PlainHTML is not introspectable. Same structure/labels as
 -- | the golden: Title "Scheduled", Description "Friday at 5pm", Action "Undo" (altText="Undo"),
 -- | Close "×" (aria-label "Close").
-toastInput :: Toast.Input
-toastInput = Toast.defaultInput
+toastInput :: String -> Toast.Input
+toastInput s = Toast.defaultInput
   { open = Nothing
   , defaultOpen = true
+  -- `?s=autodismiss` → a finite 400ms auto-dismiss (matches the golden story); any other
+  -- state holds it open (Nothing) for the stable open/closing DOM oracle.
+  , duration = if s == "autodismiss" then Just 1500 else Nothing
   , label = "Notifications (F8)"
   , swipeDirection = "right"
   , announceLabel = "Notification"
@@ -2196,7 +2199,7 @@ dropdownGroupInput = DropdownMenu.defaultInput
 -- | axis is physical-up, so data-swipe-direction=up on the <li> (the stable contract; the
 -- | pointer-drag clamp/CSS-var math is non-deterministic in a headless capture, deferred).
 toastUpInput :: Toast.Input
-toastUpInput = toastInput { swipeDirection = "up" }
+toastUpInput = (toastInput "") { swipeDirection = "up" }
 -- | tabs (vertical) — same anatomy/Style as `tabsInput` but orientation=Vertical: ArrowUp/
 -- | ArrowDown navigate, Left/Right inert, data-orientation=vertical + aria-orientation=vertical.
 tabsVertInput :: Tabs.Input

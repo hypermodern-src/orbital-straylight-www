@@ -947,21 +947,28 @@ const PAGES: Page[] = [
     // li[data-state="closed"] so the CLOSING lifecycle is real and capturable (Presence keeps
     // the li mounted through the exit animation, then unmounts) — otherwise unstyled toast would
     // unmount synchronously like select/tooltip and there would be no closing node to oracle.
-    node: (
-      <>
-        <style>{`@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } }
-          li[data-state="closed"][data-swipe-direction] { animation: toastExit 100ms ease-out; }`}</style>
-        <Toast.Provider duration={1000000} swipeDirection="right">
-          <Toast.Root duration={Infinity}>
-            <Toast.Title>Scheduled</Toast.Title>
-            <Toast.Description>Friday at 5pm</Toast.Description>
-            <Toast.Action altText="Undo">Undo</Toast.Action>
-            <Toast.Close aria-label="Close">×</Toast.Close>
-          </Toast.Root>
-          <Toast.Viewport />
-        </Toast.Provider>
-      </>
-    ),
+    // `?s=autodismiss` → a FINITE duration (400ms): the toast mounts open, then the
+    // auto-dismiss timer fires and it closes itself (no user action) — the defining toast
+    // behavior. Any other state keeps duration={Infinity} (the stable open/closing oracle).
+    node: (() => {
+      const s = currentState();
+      const dur = s === "autodismiss" ? 1500 : Infinity;
+      return (
+        <>
+          <style>{`@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } }
+            li[data-state="closed"][data-swipe-direction] { animation: toastExit 100ms ease-out; }`}</style>
+          <Toast.Provider duration={1000000} swipeDirection="right">
+            <Toast.Root duration={dur}>
+              <Toast.Title>Scheduled</Toast.Title>
+              <Toast.Description>Friday at 5pm</Toast.Description>
+              <Toast.Action altText="Undo">Undo</Toast.Action>
+              <Toast.Close aria-label="Close">×</Toast.Close>
+            </Toast.Root>
+            <Toast.Viewport />
+          </Toast.Provider>
+        </>
+      );
+    })(),
   },
   {
     id: "menubar",

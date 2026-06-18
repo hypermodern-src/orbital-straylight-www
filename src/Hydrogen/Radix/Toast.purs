@@ -60,6 +60,7 @@ import Prelude
 import Data.Array (null)
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Data.String (trim)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -70,6 +71,7 @@ import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
+import Hydrogen.Radix.Foundation.Dom as Dom
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes)
 import Hydrogen.Radix.VisuallyHidden (inlineStyle)
@@ -115,6 +117,8 @@ type Input =
   , announceLabel :: String          -- the announce-node label prefix (default "Notification")
   , open :: Maybe Boolean            -- controlled open (Just true held = no auto-dismiss)
   , defaultOpen :: Boolean           -- uncontrolled initial (default true)
+  , duration :: Maybe Int            -- auto-dismiss after N ms (radix default 5000); Nothing = held open
+                                      -- (the at-rest DOM oracle pins duration=Nothing so it never closes)
   , toastType :: ToastType           -- assertive | polite announce
   , closeOnEscape :: Boolean
   , style :: Style
@@ -138,6 +142,7 @@ defaultInput =
   , announceLabel: "Notification"
   , open: Nothing
   , defaultOpen: true
+  , duration: Nothing
   , toastType: Foreground
   , closeOnEscape: true
   , style: defaultStyle
@@ -183,6 +188,8 @@ type State =
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId
   , animSub :: Maybe H.SubscriptionId
+  , duration :: Maybe Int
+  , durSub :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)  -- the live auto-dismiss timer
   }
 
 data Action
@@ -190,6 +197,7 @@ data Action
   | Receive Input
   | ActionClicked
   | CloseClicked
+  | DurationElapsed   -- the auto-dismiss timer fired → close
   | EscapePressed
   | AfterMount   -- portal the announce node into body after the open render flushed
   | AfterClose   -- arm the exit animation on the closing re-render
@@ -238,6 +246,8 @@ initialState input =
   , escSub: Nothing
   , postSub: Nothing
   , animSub: Nothing
+  , duration: input.duration
+  , durSub: Nothing
   }
   where
   startOpen = case input.open of
@@ -368,6 +378,12 @@ handleAction = case _ of
     -- portal the announce node into body after the first render flushes.
     psid <- scheduleAfter AfterMount
     H.modify_ _ { postSub = Just psid }
+    -- arm the auto-dismiss timer: radix schedules setTimeout(handleClose, duration) on open
+    -- (default 5000ms) — the defining toast behavior. `duration = Nothing` holds it open
+    -- (the controlled/at-rest-oracle path). Manual close/Escape cancels it (`cancelDuration`).
+    when (isRendered st.presence) $ for_ st.duration \ms -> do
+      h <- armTimer ms DurationElapsed
+      H.modify_ _ { durSub = Just h }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -385,9 +401,11 @@ handleAction = case _ of
       , closeLabel = input.closeLabel
       , announceText = input.announceText
       , exitCss = input.exitCss
+      , duration = input.duration
       }
   ActionClicked -> closeToast
   CloseClicked -> closeToast
+  DurationElapsed -> closeToast
   EscapePressed -> do
     st <- H.get
     when st.closeOnEscape do
@@ -421,6 +439,23 @@ handleAction = case _ of
     when (not armed) finishClose
   AnimDone -> finishClose
 
+-- | Arm a one-shot timer: after `ms`, dispatch `act`. Returns the cancel handle (wall-clock id
+-- | + emitter subscription) so the pending auto-dismiss can be torn down on a manual close.
+armTimer :: forall m. MonadEffect m => Int -> Action -> H.HalogenM State Action () Output m (Tuple Dom.TimeoutId H.SubscriptionId)
+armTimer ms act = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (act <$ emitter)
+  tid <- liftEffect (Dom.setTimeout ms (HS.notify listener unit))
+  pure (Tuple tid sid)
+
+-- | Cancel the auto-dismiss timer (clear the clock + drop its subscription) so a toast closed
+-- | manually/by Escape never fires a stale close. Safe when no timer is pending.
+cancelDuration :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+cancelDuration = do
+  st <- H.get
+  for_ st.durSub \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
+  H.modify_ _ { durSub = Nothing }
+
 -- | Dispatch `act` on the next animation frame (after Halogen patches the render).
 scheduleAfter :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m H.SubscriptionId
 scheduleAfter act = do
@@ -434,6 +469,7 @@ scheduleAfter act = do
 -- | schedule AfterClose to arm the exit on the next frame.
 closeToast :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeToast = do
+  cancelDuration
   st <- H.get
   when (current st.ctrl) do
     for_ st.escSub H.unsubscribe

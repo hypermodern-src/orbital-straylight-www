@@ -1449,6 +1449,19 @@ const CHECKS = [
       return !!r && /Notifications \(F8\)/.test(r.getAttribute("aria-label") || "");
     }), 'the toast viewport region must carry the aria-label "Notifications (F8)"');
   }},
+  // Auto-dismiss: a toast with a finite duration mounts open, then closes ITSELF when the
+  // timer fires — no user action, no Escape, no close click. (?s=autodismiss sets duration=
+  // 1500ms.) Assert it is open at first paint, then unmounts on its own once the timer + the
+  // pinned exit animation complete. Non-circular: passes on --golden (the real
+  // @radix-ui/react-toast schedules the same setTimeout(close)). The 1500ms duration leaves
+  // ample margin over page-load latency so the "open at mount" observation is never racy.
+  { id: "toast", state: "autodismiss", apg: "alert", name: "a finite-duration toast auto-dismisses itself when the timer fires", run: async (pg) => {
+    const li = pg.locator('li[data-swipe-direction]').first();
+    await li.waitFor({ timeout: 3000 });
+    ok((await li.getAttribute("data-state")) === "open", "the toast must be open at first paint (not instantly closed)");
+    // no user interaction — the auto-dismiss timer alone must unmount it (duration + exit anim).
+    await li.waitFor({ state: "detached", timeout: 5000 });
+  }},
   // HoverCard — the DEFINING contract vs a tooltip: moving the pointer from the trigger INTO
   // the content keeps the card OPEN (both trigger and content bind onPointerEnter/Leave, so the
   // card survives the cross-move). Hover the trigger link → wait for the content → move the
