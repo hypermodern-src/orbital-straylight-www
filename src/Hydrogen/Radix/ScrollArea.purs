@@ -48,7 +48,15 @@ import Prelude
 
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
-import Data.Int (round)
+import Data.Int (round, toNumber)
+import Data.Foldable (for_)
+import Data.Ord (clamp)
+import Halogen.Query.Event (eventListener)
+import Web.Event.Event (preventDefault, EventType(..))
+import Web.HTML as HTML
+import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.Window as Window
+import Web.UIEvent.MouseEvent as ME
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -128,15 +136,29 @@ type Axis =
 zeroAxis :: Axis
 zeroAxis = { sizePx: 18.0, offsetPx: 0.0, thicknessPx: 0.0 }
 
+-- | A live thumb drag: the axis being dragged, the pointer + scroll position at grab, and the
+-- | scale that maps a pointer delta (px) to a scroll delta (maxScroll / maxThumb).
+type DragInfo =
+  { axis :: Orientation
+  , startPointer :: Number
+  , startScroll :: Number
+  , scale :: Number
+  }
+
 type State =
   { input :: Input
   , vert :: Axis -- vertical bar measurements (thumb height / Y offset)
   , horiz :: Axis -- horizontal bar measurements (thumb width / X offset)
+  , drag :: Maybe DragInfo
+  , dragSubs :: Array H.SubscriptionId
   }
 
 data Action
   = Initialize
   | Scrolled
+  | ThumbDown Orientation ME.MouseEvent  -- pointer-down on a thumb → begin a drag
+  | ThumbMove ME.MouseEvent              -- document pointer-move → scroll the viewport
+  | ThumbUp
 
 viewportRef :: H.RefLabel
 viewportRef = H.RefLabel "scrollarea-viewport"
@@ -150,7 +172,7 @@ hScrollbarRef = H.RefLabel "scrollarea-scrollbar-h"
 component :: forall q o m. MonadEffect m => H.Component q Input o m
 component =
   H.mkComponent
-    { initialState: \input -> { input, vert: zeroAxis, horiz: zeroAxis }
+    { initialState: \input -> { input, vert: zeroAxis, horiz: zeroAxis, drag: Nothing, dragSubs: [] }
     , render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -165,6 +187,52 @@ handleAction = case _ of
   -- min 18, upstream's `getThumbSize`) and offset(s) (0 at the start).
   Initialize -> recompute
   Scrolled -> recompute
+  -- pointer-down on a thumb: measure the axis to derive the pointer→scroll scale
+  -- (maxScroll/maxThumb), then drag the viewport's scroll position (radix Thumb pointer-drag).
+  ThumbDown axis me -> do
+    liftEffect (preventDefault (ME.toEvent me))
+    mvp <- H.getHTMLElementRef viewportRef
+    for_ mvp \vp -> do
+      let vpEl = HTMLElement.toElement vp
+      info <- case axis of
+        Vertical -> do
+          vH <- liftEffect (HTMLElement.offsetHeight vp)
+          cH <- liftEffect (Element.scrollHeight vpEl)
+          sTop <- liftEffect (Element.scrollTop vpEl)
+          track <- trackExtent vScrollbarRef
+          pure { axis, startPointer: toN (ME.clientY me), startScroll: sTop, scale: dragScale (cH - vH) track (max 18.0 (track * ratioOf vH cH)) }
+        Horizontal -> do
+          vW <- liftEffect (HTMLElement.offsetWidth vp)
+          cW <- liftEffect (Element.scrollWidth vpEl)
+          sLeft <- liftEffect (Element.scrollLeft vpEl)
+          track <- trackExtent hScrollbarRef
+          pure { axis, startPointer: toN (ME.clientX me), startScroll: sLeft, scale: dragScale (cW - vW) track (max 18.0 (track * ratioOf vW cW)) }
+      doc <- liftEffect (HTML.window >>= Window.document)
+      let docTarget = HTMLDocument.toEventTarget doc
+      moveSub <- H.subscribe (eventListener (EventType "mousemove") docTarget (map ThumbMove <<< ME.fromEvent))
+      upSub <- H.subscribe (eventListener (EventType "mouseup") docTarget (\_ -> Just ThumbUp))
+      H.modify_ _ { drag = Just info, dragSubs = [ moveSub, upSub ] }
+  ThumbMove me -> do
+    st <- H.get
+    for_ st.drag \info -> do
+      mvp <- H.getHTMLElementRef viewportRef
+      for_ mvp \vp -> do
+        let
+          vpEl = HTMLElement.toElement vp
+          pointer = case info.axis of
+            Vertical -> toN (ME.clientY me)
+            Horizontal -> toN (ME.clientX me)
+          target = info.startScroll + (pointer - info.startPointer) * info.scale
+        case info.axis of
+          Vertical -> liftEffect (Element.setScrollTop (max 0.0 target) vpEl)
+          Horizontal -> liftEffect (Element.setScrollLeft (max 0.0 target) vpEl)
+        -- setScroll* fires a scroll event → Scrolled → recompute; recompute here too so the
+        -- thumb tracks even if the event is coalesced.
+        recompute
+  ThumbUp -> do
+    st <- H.get
+    for_ st.dragSubs H.unsubscribe
+    H.modify_ _ { drag = Nothing, dragSubs = [] }
 
 -- | Measure the laid-out viewport (offset{Height,Width} = viewport, scroll{Height,Width}
 -- | = content, scroll{Top,Left} = position) + each scrollbar (client{Height,Width} =
@@ -219,6 +287,33 @@ measureAxis ref viewport content scrollPos = do
           else (scrollPos / maxScroll) * maxThumb
       pure { sizePx: thumbSize, offsetPx: offset, thicknessPx: thickness }
     Nothing -> pure zeroAxis
+
+toN :: Int -> Number
+toN = toNumber
+
+-- | The scrollbar's track extent ALONG its axis (the larger of its client width/height),
+-- | matching `measureAxis`'s `track = max cw ch`.
+trackExtent :: forall o m. MonadEffect m => H.RefLabel -> H.HalogenM State Action () o m Number
+trackExtent ref = do
+  msb <- H.getHTMLElementRef ref
+  case msb of
+    Just sb -> do
+      let sbEl = HTMLElement.toElement sb
+      cw <- liftEffect (Element.clientWidth sbEl)
+      ch <- liftEffect (Element.clientHeight sbEl)
+      pure (max cw ch)
+    Nothing -> pure 0.0
+
+-- | viewport/content ratio (the thumb-size fraction); 0 when content is unknown.
+ratioOf :: Number -> Number -> Number
+ratioOf viewport content = if content <= 0.0 then 0.0 else viewport / content
+
+-- | The pointer-delta → scroll-delta scale: maxScroll / maxThumb (track − thumbSize). 0 if the
+-- | thumb fills the track (nothing to scroll).
+dragScale :: Number -> Number -> Number -> Number
+dragScale maxScroll track thumbSize =
+  let maxThumb = track - thumbSize
+  in if maxThumb > 0.0 then maxScroll / maxThumb else 0.0
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
@@ -278,6 +373,7 @@ render st =
           [ classes st.input.style.thumb
           , dataState "visible"
           , HP.attr (HH.AttrName "style") thumbStyle
+          , HE.onMouseDown (ThumbDown Vertical)
           ]
           []
       ]
@@ -294,6 +390,7 @@ render st =
           [ classes st.input.style.thumb
           , dataState "visible"
           , HP.attr (HH.AttrName "style") thumbStyle
+          , HE.onMouseDown (ThumbDown Horizontal)
           ]
           []
       ]

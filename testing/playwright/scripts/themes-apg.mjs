@@ -592,6 +592,25 @@ const CHECKS = [
     ok(after > before, `thumb did not re-offset on scroll (stayed ${after})`);
     ok(Math.abs(after - expected) <= 1.5, `thumb translateY ${after} != getThumbOffsetFromScroll ${expected}`);
   }},
+  // ScrollArea thumb-DRAG: grabbing the vertical thumb and dragging it DOWN scrolls the viewport
+  // (radix Thumb pointer-drag maps a pointer delta to a scroll delta = maxScroll/maxThumb).
+  // Non-circular: --golden drags the same. The exact scroll amount is geometry-dependent, so we
+  // assert it scrolled meaningfully down and the thumb followed.
+  { id: "scrollarea", state: "shown", apg: "scrollarea", name: "dragging the thumb scrolls the viewport", run: async (pg) => {
+    const thumb = pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"] .rt-ScrollAreaThumb').first();
+    await thumb.waitFor();
+    await pg.evaluate(() => { document.querySelector(".rt-ScrollAreaViewport").scrollTop = 0; });
+    await pg.waitForTimeout(60);
+    const box = await thumb.boundingBox();
+    ok(!!box, "could not measure the vertical thumb");
+    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await pg.mouse.down();
+    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 30, { steps: 4 });
+    await pg.waitForTimeout(80);
+    const scrolled = await pg.evaluate(() => document.querySelector(".rt-ScrollAreaViewport").scrollTop);
+    ok(scrolled > 5, `dragging the thumb down should scroll the viewport (scrollTop=${scrolled})`);
+    await pg.mouse.up();
+  }},
 
   // Slider — https://www.w3.org/WAI/ARIA/apg/patterns/slider/
   // The thumb is role=slider carrying aria-valuemin/valuemax/valuenow. APG keyboard table:
