@@ -621,6 +621,8 @@ dropdownMenuInput s = DropdownMenu.defaultInput
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
+  -- the SubContent orders pointer-events BEFORE the popper var aliases (a Themes quirk).
+  , subContentStyle = "outline: none; pointer-events: auto; " <> popperContentVars "dropdown-menu"
   , trigger = [ HH.text "Options", chevron ]
   , entries =
       -- `?s=disabled` disables the SECOND item (Duplicate) so the APG disabled-skip
@@ -629,10 +631,47 @@ dropdownMenuInput s = DropdownMenu.defaultInput
       , menuRow "duplicate" "Duplicate" "⌘ D" "" (s == "disabled")
       , DropdownMenu.menuSeparator
       , menuRow "archive" "Archive" "⌘ N" "" false
-      , DropdownMenu.menuSeparator
-      , menuRow "delete" "Delete" "⌘ ⌫" "red" false
       ]
+        -- `?s=submenu` → a SubTrigger ("More") opening a SubContent of 3 plain items.
+        <> (if s == "submenu" then [ submenuEntry ] else [])
+        <> [ DropdownMenu.menuSeparator
+           , menuRow "delete" "Delete" "⌘ ⌫" "red" false
+           ]
   }
+
+-- | The `?s=submenu` submenu: a SubTrigger "More" with three plain (no-shortcut) items.
+submenuEntry :: DropdownMenu.MenuEntry
+submenuEntry = DropdownMenu.menuSub "more" [ HH.text "More" ]
+  [ plainRow "move-project" "Move to project…"
+  , plainRow "move-folder" "Move to folder…"
+  , DropdownMenu.menuSeparator
+  , plainRow "advanced" "Advanced options…"
+  ]
+
+-- | A menu item with NO shortcut (the SubContent items carry no shortcut div, unlike menuRow
+-- | whose `[HH.text ""]` would render an empty one).
+plainRow :: String -> String -> DropdownMenu.MenuEntry
+plainRow value label =
+  DropdownMenu.MenuItemEntry { value, label: [ HH.text label ], shortcut: [], accent: "", disabled: false }
+
+-- | The SubTrigger chevron (right-pointing caret) — the Radix Themes SubTriggerIcon svg.
+subTriggerChevron :: HH.PlainHTML
+subTriggerChevron =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") "rt-BaseMenuSubTriggerIcon rt-DropdownMenuSubtriggerIcon"
+    , HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "d") "M3.23826 0.201711C3.54108 -0.0809141 4.01567 -0.0645489 4.29829 0.238264L7.79829 3.98826C8.06724 4.27642 8.06724 4.72359 7.79829 5.01174L4.29829 8.76174C4.01567 9.06455 3.54108 9.08092 3.23826 8.79829C2.93545 8.51567 2.91909 8.04108 3.20171 7.73826L6.22409 4.5L3.20171 1.26174C2.91909 0.958928 2.93545 0.484337 3.23826 0.201711Z"
+        , HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        ]
+        []
+    ]
 
 -- | One themed menu item: label + right-aligned shortcut + optional accent + disabled.
 menuRow :: String -> String -> String -> String -> Boolean -> DropdownMenu.MenuEntry
@@ -650,6 +689,10 @@ menuStyle :: DropdownMenu.Style
 menuStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
   , content: cn "light radix-themes rt-BaseMenuContent rt-DropdownMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , subTrigger: cn "rt-BaseMenuItem rt-BaseMenuSubTrigger rt-DropdownMenuItem rt-DropdownMenuSubTrigger"
+  , subContent: cn "light radix-themes rt-BaseMenuContent rt-BaseMenuSubContent rt-DropdownMenuContent rt-DropdownMenuSubContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , subContentColor: "indigo"
+  , subIcon: [ subTriggerChevron ]
   , scrollRoot: cn "rt-ScrollAreaRoot"
   , scrollViewport: cn "rt-ScrollAreaViewport"
   , menuViewport: cn "rt-BaseMenuViewport rt-DropdownMenuViewport"

@@ -24,6 +24,7 @@ STATES=(
   "dropdownmenu:open"
   "dropdownmenu:item2"
   "dropdownmenu:disabled"
+  "dropdownmenu:submenu"
   "contextmenu:open"
   "contextmenu:item2"
   "contextmenu:disabled"

@@ -153,6 +153,29 @@ const CHECKS = [
     // ArrowDown from Edit must SKIP the disabled Duplicate and land on Archive.
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Archive");
   }},
+  // Submenu — ArrowRight on a focused SubTrigger OPENS the nested SubContent (a 2nd role=menu)
+  // and focuses its first item; ArrowLeft / Escape close it back to the SubTrigger. Validated on
+  // --golden (real radix does the same) so the key→behavior table is non-circular.
+  { id: "dropdownmenu", state: "submenu", apg: "menu", name: "ArrowRight opens the submenu; ArrowLeft closes it", run: async (pg) => {
+    // keyboard-open (ArrowDown on the trigger) → menu open, first item (Edit) highlighted.
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').first().waitFor();
+    await hlStarts(pg, "Edit");
+    // rove Edit → Duplicate → Archive → More (the SubTrigger); hlStarts waits each settle.
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Duplicate");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Archive");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "More");
+    // ArrowRight opens the submenu (a 2nd role=menu); SubTrigger flips to data-state=open.
+    await pg.keyboard.press("ArrowRight");
+    await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 3000 });
+    ok((await pg.evaluate(() => { const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]'); return t && t.getAttribute("data-state") === "open" && t.getAttribute("aria-expanded") === "true"; })),
+      "ArrowRight must open the submenu (SubTrigger data-state=open, aria-expanded=true)");
+    // ArrowLeft closes the sub and returns to the SubTrigger.
+    await pg.keyboard.press("ArrowLeft");
+    await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length === 1, null, { timeout: 3000 });
+    ok((await pg.evaluate(() => { const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]'); return t && t.getAttribute("data-state") === "closed"; })),
+      "ArrowLeft must close the submenu (SubTrigger data-state=closed)");
+  }},
 
   // Menubar — https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
   // The trigger bar is a horizontal RovingFocus of role=menuitem buttons; each opens a

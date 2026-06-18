@@ -776,7 +776,7 @@ const PAGES: Page[] = [
       // forced open (defaultOpen) so the nested role=menu is captured at rest by the DOM oracle.
       const sub = s === "submenu";
       return (
-        <DropdownMenu.Root defaultOpen={sub}>
+        <DropdownMenu.Root>
           <DropdownMenu.Trigger>
             <Button variant="soft">
               Options
@@ -789,7 +789,7 @@ const PAGES: Page[] = [
             <DropdownMenu.Separator />
             <DropdownMenu.Item shortcut="⌘ N">Archive</DropdownMenu.Item>
             {sub && (
-              <DropdownMenu.Sub defaultOpen>
+              <DropdownMenu.Sub>
                 <DropdownMenu.SubTrigger>More</DropdownMenu.SubTrigger>
                 <DropdownMenu.SubContent>
                   <DropdownMenu.Item>Move to project…</DropdownMenu.Item>

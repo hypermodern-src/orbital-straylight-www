@@ -151,11 +151,11 @@ export const STATES = {
     // ?s=submenu → root + Sub are BOTH defaultOpen, so the nested role=menu (SubContent)
     // renders at rest. No click (that would toggle the root closed) — just wait for both the
     // root menu and the nested submenu to be present.
-    // ?s=submenu → the root menu is defaultOpen; hover the SubTrigger ("More") to open the
-    // nested SubContent (a second role=menu). Same driver runs golden + port, so the open-sub
-    // DOM (SubTrigger aria-expanded/data-state + the nested menu) is oracle'd non-circularly.
+    // ?s=submenu → click the trigger to open the root menu, then hover the SubTrigger ("More")
+    // to open the nested SubContent (a second role=menu). Same driver runs golden + port, so the
+    // open-sub DOM (SubTrigger aria-expanded/data-state + the nested menu) is oracle'd non-circularly.
     submenu: async (pg) => {
-      await pg.locator('[role="menu"]').first().waitFor();
+      await openMenu(pg, () => triggerButton(pg).click());
       await pg.locator('[role="menuitem"][aria-haspopup="menu"]').first().hover();
       await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 5000 });
       await pg.waitForFunction(() => {
