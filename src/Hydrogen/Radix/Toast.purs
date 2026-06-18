@@ -59,8 +59,8 @@ import Prelude
 
 import Data.Array (null)
 import Data.Foldable (for_)
-import Data.Int (round)
-import Data.Maybe (Maybe(..))
+import Data.Int (round, toNumber)
+import Data.Maybe (Maybe(..), isJust)
 import Data.Tuple (Tuple(..))
 import Data.String (trim)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -68,7 +68,11 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Query.Event (eventListener)
 import Halogen.Subscription as HS
+import Web.Event.Event (preventDefault)
+import Web.Event.Event (EventType(..)) as WE
+import Web.UIEvent.MouseEvent as ME
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
@@ -193,6 +197,10 @@ type State =
   , durSub :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)  -- the live auto-dismiss timer
   , durRemaining :: Maybe Int      -- ms left to run (preserved across a hover pause)
   , durStart :: Maybe Number       -- performance.now() when the live timer was last armed
+  , swipeStart :: Maybe { x :: Number, y :: Number }  -- pointer at swipe grab (Nothing = not swiping)
+  , swipeDelta :: Number           -- current swipe distance along the direction (px)
+  , swipeState :: String           -- data-swipe: "" | "move" | "cancel" | "end"
+  , swipeSubs :: Array H.SubscriptionId
   }
 
 data Action
@@ -207,6 +215,9 @@ data Action
   | AfterMount   -- portal the announce node into body after the open render flushed
   | AfterClose   -- arm the exit animation on the closing re-render
   | AnimDone
+  | SwipeStart ME.MouseEvent   -- pointer-down on the toast → begin a swipe
+  | SwipeMove ME.MouseEvent
+  | SwipeEnd
 
 -- | The portaled toast <li> (we keep it under the <ol> in render; no body re-parent needed —
 -- | Halogen owns the ol, the li is its child by construction).
@@ -255,6 +266,10 @@ initialState input =
   , durSub: Nothing
   , durRemaining: Nothing
   , durStart: Nothing
+  , swipeStart: Nothing
+  , swipeDelta: 0.0
+  , swipeState: ""
+  , swipeSubs: []
   }
   where
   startOpen = case input.open of
@@ -333,17 +348,50 @@ render st =
           <> (if hasToasts then [ announceNode st ] else [])
       )
 
+-- | The swipe follow-transform + move var while a swipe is active (empty at rest, so the li's
+-- | inline style is exactly the base string the at-rest oracle pins). The move is clamped to the
+-- | dismiss direction (no rubber-band backwards).
+swipeStyle :: State -> String
+swipeStyle st = case st.swipeStart of
+  Nothing -> ""
+  Just _ ->
+    let d = show (max 0.0 st.swipeDelta)
+    in case st.swipeDirection of
+      "left" -> " transform: translateX(-" <> d <> "px); --radix-toast-swipe-move-x: -" <> d <> "px;"
+      "up" -> " transform: translateY(-" <> d <> "px); --radix-toast-swipe-move-y: -" <> d <> "px;"
+      "down" -> " transform: translateY(" <> d <> "px); --radix-toast-swipe-move-y: " <> d <> "px;"
+      _ -> " transform: translateX(" <> d <> "px); --radix-toast-swipe-move-x: " <> d <> "px;"
+
+-- | The directional swipe distance (px toward dismiss) for the current pointer position.
+swipeDistance :: State -> Number -> Number -> Number
+swipeDistance st x y = case st.swipeStart of
+  Nothing -> 0.0
+  Just s -> case st.swipeDirection of
+    "left" -> s.x - x
+    "up" -> s.y - y
+    "down" -> y - s.y
+    _ -> x - s.x
+
+-- | radix Toast default swipeThreshold (px) past which a release dismisses.
+swipeThreshold :: Number
+swipeThreshold = 50.0
+
 toastLi :: forall m. State -> H.ComponentHTML Action () m
 toastLi st =
   HH.li
-    [ HP.ref liRef
-    , dataAttr' "radix-collection-item" ""
-    , dataState' (dataStateOf st.presence)
-    , dataAttr' "swipe-direction" st.swipeDirection
-    , HP.style "user-select: none; touch-action: none;"
-    , HP.tabIndex 0
-    , classes st.style.root
-    ]
+    ( [ HP.ref liRef
+      , dataAttr' "radix-collection-item" ""
+      , dataState' (dataStateOf st.presence)
+      , dataAttr' "swipe-direction" st.swipeDirection
+      -- pointer-down begins a swipe; while moving, the li carries data-swipe + the move var +
+      -- a follow transform (at rest the style is exactly the base string the oracle pins).
+      , HP.style ("user-select: none; touch-action: none;" <> swipeStyle st)
+      , HP.tabIndex 0
+      , classes st.style.root
+      , HE.onMouseDown SwipeStart
+      ]
+        <> (if st.swipeState == "" then [] else [ dataAttr' "swipe" st.swipeState ])
+    )
     ( [ HH.div [ classes st.style.title ] (map HH.fromPlainHTML st.title)
       , HH.div [ classes st.style.description ] (map HH.fromPlainHTML st.description)
       , HH.button
@@ -472,6 +520,36 @@ handleAction = case _ of
         else pure false
     when (not armed) finishClose
   AnimDone -> finishClose
+  -- swipe-to-dismiss: pointer-down grabs the toast; document move tracks the directional
+  -- distance (data-swipe=move + the move var + a follow transform); release past
+  -- swipeThreshold dismisses (data-swipe=end → close), else snaps back (data-swipe=cancel).
+  SwipeStart me -> do
+    liftEffect (preventDefault (ME.toEvent me))
+    cancelDuration  -- grabbing the toast pauses its auto-dismiss
+    doc <- liftEffect (HTML.window >>= Window.document)
+    let docTarget = HTMLDocument.toEventTarget doc
+    moveSub <- H.subscribe (eventListener (WE.EventType "mousemove") docTarget (map SwipeMove <<< ME.fromEvent))
+    upSub <- H.subscribe (eventListener (WE.EventType "mouseup") docTarget (\_ -> Just SwipeEnd))
+    H.modify_ _
+      { swipeStart = Just { x: toNumber (ME.clientX me), y: toNumber (ME.clientY me) }
+      , swipeDelta = 0.0, swipeState = "", swipeSubs = [ moveSub, upSub ]
+      }
+  SwipeMove me -> do
+    st <- H.get
+    when (isJust st.swipeStart) $
+      H.modify_ _
+        { swipeDelta = swipeDistance st (toNumber (ME.clientX me)) (toNumber (ME.clientY me))
+        , swipeState = "move"
+        }
+  SwipeEnd -> do
+    st <- H.get
+    for_ st.swipeSubs H.unsubscribe
+    if st.swipeDelta >= swipeThreshold
+      then do
+        H.modify_ _ { swipeState = "end", swipeSubs = [] }
+        closeToast
+      else
+        H.modify_ _ { swipeStart = Nothing, swipeDelta = 0.0, swipeState = "", swipeSubs = [] }
 
 -- | Arm a one-shot timer: after `ms`, dispatch `act`. Returns the cancel handle (wall-clock id
 -- | + emitter subscription) so the pending auto-dismiss can be torn down on a manual close.

@@ -1548,6 +1548,20 @@ const CHECKS = [
       return !!r && /Notifications \(F8\)/.test(r.getAttribute("aria-label") || "");
     }), 'the toast viewport region must carry the aria-label "Notifications (F8)"');
   }},
+  // Swipe-to-dismiss: dragging the toast in the swipe direction (right) past swipeThreshold
+  // (50px) dismisses it (radix Toast pointer-swipe → data-swipe=end → onClose). Non-circular:
+  // --golden swipes the same. Asserts the toast unmounts after a >threshold drag.
+  { id: "toast", apg: "alert", name: "swiping the toast past the threshold dismisses it", run: async (pg) => {
+    const li = pg.locator('li[data-swipe-direction]').first();
+    await li.waitFor();
+    const box = await li.boundingBox();
+    ok(!!box, "could not measure the toast");
+    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await pg.mouse.down();
+    await pg.mouse.move(box.x + box.width / 2 + 140, box.y + box.height / 2, { steps: 6 });
+    await pg.mouse.up();
+    await li.waitFor({ state: "detached", timeout: 3000 });
+  }},
   // Auto-dismiss: a toast with a finite duration mounts open, then closes ITSELF when the
   // timer fires — no user action, no Escape, no close click. (?s=autodismiss sets duration=
   // 1500ms.) Assert it is open at first paint, then unmounts on its own once the timer + the
