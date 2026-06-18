@@ -2371,6 +2371,8 @@ const PAGES: Page[] = [
           </DropdownMenu.Group>
         </DropdownMenu.Content>
       </DropdownMenu.Root>
+    ),
+  },
   // ── Wave-D: Toast swipeDirection variant (STR-330) ───────────────────────────
   // The canonical `toast` story is swipeDirection="right" (data-swipe-direction=right).
   // swipeDirection is a PHYSICAL axis (toast.tsx) — "up" changes the data-swipe-direction
@@ -2397,6 +2399,8 @@ const PAGES: Page[] = [
           <Toast.Viewport />
         </Toast.Provider>
       </>
+    ),
+  },
   // ── Wave-D Tabs depth (STR-330) ──────────────────────────────────────────────
   // Vertical orientation: ArrowUp/ArrowDown navigate (Left/Right inert), data-orientation=
   // vertical on root/list/trigger/panel, aria-orientation=vertical on the list. Keyboard-only
@@ -2510,6 +2514,7 @@ const PAGES: Page[] = [
         <Toolbar.Button>Save</Toolbar.Button>
       </Toolbar.Root>
     ),
+  },
   // ── Wave-D: multi-thumb / RANGE slider (value is number[]) ────────────────────
   // Upstream renders one role=slider thumb per value. Two thumbs ⇒ aria-label
   // Minimum/Maximum (radix getLabel); the range spans BETWEEN them (offsetStart =
@@ -2541,6 +2546,9 @@ const PAGES: Page[] = [
         <Box style={{ maxWidth: 320 }}>
           <Slider defaultValue={[25, 75]} />
         </Box>
+      );
+    })(),
+  },
   // ── Wave-D: Label onMouseDown text-selection guard (label.tsx:19-27) ─────────────
   // The bare @radix-ui/react-label primitive carries an onMouseDown that, for a multi-
   // click (event.detail > 1) NOT inside a button/input/select/textarea, calls

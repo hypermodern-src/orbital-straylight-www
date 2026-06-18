@@ -1726,6 +1726,7 @@ const CHECKS = [
     ok(bubble.name === "fruit", `BubbleSelect name must be 'fruit', got ${bubble.name}`);
     ok(bubble.value === "apple", `BubbleSelect value must mirror the selection, got ${bubble.value}`);
     ok(bubble.selectedOption === "apple", "the selected <option> must carry `selected`");
+  } },
   // ── Wave-D nav-group depth checks (STR-330) ──────────────────────────────────
   // Tooltip — ACTIVATING the trigger dismisses the tooltip. Upstream Tooltip.Trigger binds
   // onPointerDown→onClose (when open) and onClick composes onClose (tooltip.tsx:308-319): a
@@ -1761,6 +1762,7 @@ const CHECKS = [
     ok(await activeIsNth(pg, triggers, 1), "RTL: ArrowLeft wrapped (FocusGroup must NOT loop)");
     await press(pg, "ArrowRight");
     ok(await activeIsNth(pg, triggers, 0), "RTL: ArrowRight must move BACKWARD to the previous trigger");
+  } },
   // ── Wave-D roving depth (STR-330) ────────────────────────────────────────────
   // Tabs orientation="vertical": ArrowDown/ArrowUp navigate the roving focus (and, automatic
   // activation, select); ArrowLeft/ArrowRight are INERT (off-axis). aria-orientation/data-
@@ -1867,6 +1869,7 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 0), "ArrowRight must be inert in vertical orientation");
     await press(pg, "ArrowDown");
     ok(await activeIsNth(pg, sel, 1), "ArrowDown did not rove to the next item (vertical axis)");
+  } },
   // ── Wave-D: Form reset clears derived validity ──────────────────────────────────
   // Submit the empty required Control (valueMissing Message mounts, data-invalid stamps,
   // aria-describedby links). Then click Reset: the form-reset path clears the validity, so
@@ -1958,6 +1961,7 @@ const CHECKS = [
     for (let i = 0; i < 25; i++) await press(pg, "ArrowRight");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "50", "lower thumb must park at 50 (10 steps below its neighbour)");
     ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "60", "upper thumb must stay at 60 (untouched by the lower thumb's keys)");
+  } },
   // ── Wave-D: Label onMouseDown text-selection guard (label.tsx:19-27) ─────────────
   // Not an APG keyboard pattern, but a deterministic, non-circular behavior oracle that
   // validates against the real @radix-ui/react-label golden first, then the port. The guard:

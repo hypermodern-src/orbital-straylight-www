@@ -2241,6 +2241,8 @@ toolbarRtlInput = Toolbar.defaultInput
       , separator: cn ""
       , toggleGroup: cn ""
       , toggleItem: cn ""
+      }
+  }
 -- | sliderRange — Wave-D multi-thumb / range slider (Slider.rangeComponent). One role=slider
 -- | thumb per value; ?s=triple → [20,50,80] (3 thumbs, "Value n of m" labels), ?s=minsteps →
 -- | [40,60] with minStepsBetweenThumbs=10 (a keyboard step within 10·step of the neighbour is
