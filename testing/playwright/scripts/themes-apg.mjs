@@ -1247,6 +1247,19 @@ const CHECKS = [
     await press(pg, "Space"); // collapse
     await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "Space did not collapse the disclosure");
   }},
+  // Wave-D: CONTROLLED mode (open owned by the parent, never updated). The page mounts the
+  // collapsible open (open=true); clicking the trigger fires onOpenChange(false) but the
+  // parent ignores it, so the content STAYS open (aria-expanded stays true, content stays
+  // disclosed). Keyed off the open trigger only ⇒ same check runs on golden + port.
+  { id: "collapsible", state: "controlled", apg: "disclosure", name: "controlled mode: clicking the trigger does NOT close the parent-owned content", run: async (pg) => {
+    const trig = pg.locator('#root button[aria-expanded]').first();
+    await trig.waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "controlled collapsible must mount OPEN (open=true)");
+    await trig.click();
+    await pg.waitForTimeout(150);
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "controlled: click must NOT close (parent owns open)");
+    await pg.locator('[data-state="open"]:not([hidden])').first().waitFor();
+  }},
 
   // ── Wave-C modal depth gaps (STR-330) ───────────────────────────────────────
   // Dialog — DialogClose (dialog.tsx:472-492): a button inside content composes its onClick

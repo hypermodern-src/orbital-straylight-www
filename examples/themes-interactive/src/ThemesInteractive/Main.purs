@@ -292,6 +292,9 @@ view c s =
             -- classes: the LOADED steady-state (img mounted, alt, fallback gone, no
             -- data-state on the img). Else the fallback-only Themes Avatar.
             "avatar" | s == "loaded" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedInput
+            -- `?s=loadedattrs` (wave D): the loaded steady-state plus img-attr passthrough
+            -- (referrerPolicy/crossOrigin rest-spread onto the <img>).
+            "avatar" | s == "loadedattrs" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedAttrsInput
             "avatar" -> Avatar.avatar "A" []
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
@@ -954,6 +957,9 @@ progressVariant s = case s of
   -- indeterminate (data-state=indeterminate, NO aria-valuenow/data-value), but the Themes
   -- wrapper still stamps --progress-value from the RAW value (upstream parity).
   "invalid" -> prim (Just 150.0) 100.0 "--progress-value: 150;"
+  -- `?s=accent` — explicit color + radius: the themes wrapper stamps data-accent-color
+  -- + data-radius on the root (the default omits both). Same surface variant + value.
+  "accent" -> primA (Just 25.0) 100.0 "--progress-value: 25;" "cyan" "full"
   _ -> Progress.progress 25 []
   where
   prim mv mx styl = RadixProgress.progress
@@ -962,6 +968,17 @@ progressVariant s = case s of
     , class_: cn "rt-ProgressRoot rt-r-size-2 rt-variant-surface"
     , indicator: cn "rt-ProgressIndicator"
     , rootAttrs: if styl == "" then [] else [ HP.style styl ]
+    }
+  primA mv mx styl accent rad = RadixProgress.progress
+    { value: mv
+    , max: mx
+    , class_: cn "rt-ProgressRoot rt-r-size-2 rt-variant-surface"
+    , indicator: cn "rt-ProgressIndicator"
+    , rootAttrs:
+        [ HP.attr (HH.AttrName "data-accent-color") accent
+        , HP.attr (HH.AttrName "data-radius") rad
+        , HP.style styl
+        ]
     }
 
 -- | scrollarea — the themed Radix ScrollArea (type="always", scrollbars="vertical"): a
@@ -1027,7 +1044,10 @@ accordionInput s = Accordion.defaultInput
 -- | style.content is empty; the rt-Box/rt-Text classes live on the children.
 collapsibleInput :: String -> Collapsible.Input
 collapsibleInput s = Collapsible.defaultInput
-  { open = Nothing
+  -- `?s=controlled` (wave D): the parent OWNS open (open = Just true) and never updates it,
+  -- so clicking the trigger fires onOpenChange but the content STAYS open (controlled-mode
+  -- contract). All other states are uncontrolled (open = Nothing).
+  { open = if s == "controlled" then Just true else Nothing
   , defaultOpen = false
   , disabled = s == "disabled"
   , style =
@@ -2031,6 +2051,9 @@ scrollAreaXInput s = ScrollArea.defaultInput
   { widthPx = 200
   , heightPx = 120
   , scrollbars = if s == "horizontal" then ScrollArea.Horizontal' else ScrollArea.Both
+  -- `?s=radius` exercises the themes `radius` prop: upstream stamps data-radius=full on
+  -- EVERY scrollbar; the other states leave it absent (themes default undefined).
+  , radius = if s == "radius" then "full" else ""
   , style =
       { root: cn "rt-ScrollAreaRoot"
       , viewport: cn "rt-ScrollAreaViewport"
@@ -2065,6 +2088,18 @@ avatarLoadedInput = RadixAvatar.defaultInput
       , image: cn "rt-AvatarImage"
       , fallback: cn "rt-AvatarFallback rt-one-letter"
       }
+  }
+
+-- | Wave-D: the loaded Avatar with img-attr PASSTHROUGH. The themes Avatar.Image
+-- | rest-spreads (...t) referrerPolicy/crossOrigin onto the <img>; this binding exercises
+-- | the port's `imageAttrs` escape hatch so those attributes land on the loaded image
+-- | (matching the golden's ?s=loadedattrs story). Same loaded steady-state otherwise.
+avatarLoadedAttrsInput :: RadixAvatar.Input
+avatarLoadedAttrsInput = avatarLoadedInput
+  { imageAttrs =
+      [ HP.attr (HH.AttrName "referrerpolicy") "no-referrer"
+      , HP.attr (HH.AttrName "crossorigin") "anonymous"
+      ]
   }
 
 -- A 1×1 transparent PNG data-URI (loads synchronously from cache) — the Avatar reaches

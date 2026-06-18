@@ -904,12 +904,16 @@ const PAGES: Page[] = [
     // exit — the lingering closing node the closing-DOM oracle captures (otherwise the bare,
     // unstyled content has animation-name:none and unmounts synchronously, like menubar).
     node: (() => {
-      const disabled = currentState() === "disabled";
+      const s = currentState();
+      const disabled = s === "disabled";
+      // `?s=controlled` — the parent owns `open` (set true, never updated): clicking the
+      // trigger fires onOpenChange but the content stays open (controlled-mode contract).
+      const controlledOpen = s === "controlled" ? true : undefined;
       return (
         <>
           <style>{`@keyframes collapsibleExit { from { opacity: 1 } to { opacity: 0 } }
             div[data-state="closed"][id] { animation: collapsibleExit 100ms ease-out; }`}</style>
-          <Collapsible.Root disabled={disabled}>
+          <Collapsible.Root disabled={disabled} open={controlledOpen}>
             <Collapsible.Trigger asChild>
               <Button variant="soft">Toggle content</Button>
             </Collapsible.Trigger>
@@ -1545,6 +1549,12 @@ const PAGES: Page[] = [
     // alt/accessible-name + loaded-state contract the fallback-only story can't.
     node: (() => {
       const s = currentState();
+      // `?s=loadedattrs` — the themes Avatar.Image rest-spreads (...t) referrerPolicy /
+      // crossOrigin / id onto the <img>, so they land as real attributes on the loaded
+      // image (the plain `loaded` story sets none ⇒ they are absent there).
+      if (s === "loadedattrs")
+        return <Avatar src={ONE_PX_PNG} alt="Profile photo" fallback="A"
+          referrerPolicy="no-referrer" crossOrigin="anonymous" />;
       return s === "loaded"
         ? <Avatar src={ONE_PX_PNG} alt="Profile photo" fallback="A" />
         : <Avatar fallback="A" />;
@@ -1572,6 +1582,10 @@ const PAGES: Page[] = [
         // `?s=invalid` — value=150 > max=100: upstream isValidValueNumber rejects it and
         // coerces to indeterminate (data-state=indeterminate, NO aria-valuenow/data-value).
         s === "invalid" ? <Progress value={150} /> :
+        // `?s=accent` — explicit color + radius: the themes wrapper stamps
+        // data-accent-color=cyan + data-radius=full on the rt-ProgressRoot (the default
+        // is undefined ⇒ both omitted, so the other states show neither attr).
+        s === "accent" ? <Progress value={25} color="cyan" radius="full" /> :
         <Progress value={25} />;
       return <Box style={{ maxWidth: 320 }}>{inner}</Box>;
     })(),
@@ -2255,8 +2269,12 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       const scrollbars = s === "horizontal" ? "horizontal" : "both";
+      // `?s=radius` exercises the themes `radius` prop: upstream stamps data-radius=<radius>
+      // on EVERY scrollbar (the default is undefined ⇒ omitted, so the other states show no
+      // data-radius). radius="full" makes both bars carry data-radius=full.
+      const radius = s === "radius" ? "full" : undefined;
       return (
-        <ScrollArea type="always" scrollbars={scrollbars} style={{ width: 200, height: 120 }}>
+        <ScrollArea type="always" scrollbars={scrollbars} radius={radius} style={{ width: 200, height: 120 }}>
           <Box p="2" style={{ width: 400 }}>
             {Array.from({ length: 12 }, (_, i) => (
               <Text key={i} as="p" size="2" style={{ whiteSpace: "nowrap" }}>

@@ -570,6 +570,13 @@ export const STATES = {
       await root(pg).locator('img.rt-AvatarImage').first().waitFor();
       await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
     },
+    // `?s=loadedattrs` (wave D) — the loaded img PLUS the themes Avatar.Image rest-spread:
+    // referrerPolicy/crossOrigin land as real attributes on the <img>. Keyed off the
+    // UPSTREAM referrerpolicy attr so golden + port share the same wait.
+    loadedattrs: async (pg) => {
+      await root(pg).locator('img.rt-AvatarImage[referrerpolicy="no-referrer"][crossorigin="anonymous"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
+    },
   },
   progress: {
     // Determinate progress bar — STATELESS (no interaction). The `shown` state just
@@ -606,6 +613,14 @@ export const STATES = {
       await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();
       await pg.waitForFunction(() =>
         document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
+    },
+    // `?s=accent` (wave D) — explicit color + radius: the themes wrapper stamps
+    // data-accent-color=cyan + data-radius=full on the rt-ProgressRoot (omitted in the
+    // other states). Keyed off the UPSTREAM data-accent-color so golden + port share it.
+    accent: async (pg) => {
+      await pg.locator('[role="progressbar"][data-accent-color="cyan"][data-radius="full"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
     },
   },
   scrollarea: {
@@ -1099,6 +1114,18 @@ export const STATES = {
       await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
       await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
       await pg.locator('.rt-ScrollAreaCorner').first().waitFor();
+      await pg.waitForFunction(() => {
+        const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
+        return ts.length >= 2 &&
+          [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
+      });
+    },
+    // `?s=radius` (wave D) — the themes `radius` prop stamps data-radius=full on BOTH
+    // scrollbars (the default is undefined ⇒ the attr is absent in the horizontal/both
+    // states). Wait for both bars to carry data-radius=full + measured thumbs.
+    radius: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-radius="full"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-radius="full"][data-state="visible"]').first().waitFor();
       await pg.waitForFunction(() => {
         const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
         return ts.length >= 2 &&

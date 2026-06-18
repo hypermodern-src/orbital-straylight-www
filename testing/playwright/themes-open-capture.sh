@@ -99,6 +99,8 @@ STATES=(
   "progress:indeterminate"
   "progress:complete"
   "progress:custommax"
+  # Wave-D: themes color+radius passthrough (data-accent-color / data-radius on root).
+  "progress:accent"
   "avatar:fallback"
   # Wave-B stateless depth oracles (bare primitives).
   "separatorprim:hsem"
@@ -142,12 +144,16 @@ STATES=(
   # ── Wave-C ScrollArea family depth oracles (STR-330) ─────────────────────────
   "scrollareax:horizontal"
   "scrollareax:both"
+  # ── Wave-D ScrollArea themes `radius` prop oracle (STR-330) ──────────────────
+  "scrollareax:radius"
   # ── Wave-C Collapsible closed-rest DOM oracle (STR-330) ──────────────────────
   "collapsible:rest"
   # ── Wave-C Progress out-of-range validation oracle (STR-330) ─────────────────
   "progress:invalid"
   # ── Wave-C Avatar loaded steady-state DOM oracle (STR-330) ───────────────────
   "avatar:loaded"
+  # ── Wave-D Avatar img-attr passthrough (referrerPolicy/crossOrigin on <img>) ──
+  "avatar:loadedattrs"
   "labelprim:forfocus"
   # Wave-C: Themes.Separator WRAPPER depth oracle.
   "separatorthemes:default"
