@@ -1468,6 +1468,27 @@ const CHECKS = [
     ok(await visible(pg, ".rt-HoverCardContent"), "the card closed when the pointer moved onto its content (hover-card must stay open)");
     ok((await attrOf(pg, ".rt-HoverCardContent", 0, "data-state")) === "open", "the content must remain data-state=open while the pointer is over it");
   }},
+  // Hover DEFERS the open by openDelay (Themes 200ms): brushing past the trigger must not
+  // flash the card. Assert still-closed shortly after pointer-enter, then opens after the
+  // delay. Non-circular: passes on --golden (real Themes HoverCard delays identically).
+  { id: "hovercard", apg: "hover-card", name: "hover defers the open by openDelay (no instant flash)", run: async (pg) => {
+    await pg.locator("#root").getByRole("link").first().hover();
+    await pg.waitForTimeout(60);
+    ok(!(await visible(pg, ".rt-HoverCardContent")), "hover card flashed open before openDelay elapsed");
+    await pg.locator(".rt-HoverCardContent").waitFor({ timeout: 3000 });
+    ok(await visible(pg, ".rt-HoverCardContent"), "hover card never opened after openDelay");
+  }},
+  // Leaving the trigger closes after closeDelay (Themes 150ms), NOT instantly — the grace
+  // window is what lets the pointer travel trigger→content without the card vanishing. Assert
+  // still-open just after leave, then eventually gone. Non-circular (real Themes does the same).
+  { id: "hovercard", apg: "hover-card", name: "leaving closes after closeDelay (not instantly)", run: async (pg) => {
+    await pg.locator("#root").getByRole("link").first().hover();
+    await pg.locator(".rt-HoverCardContent").waitFor({ timeout: 3000 });
+    await pg.mouse.move(0, 0);                  // leave the trigger
+    await pg.waitForTimeout(50);                // inside the closeDelay window
+    ok(await visible(pg, ".rt-HoverCardContent"), "card closed instantly on leave (closeDelay not honored)");
+    await pg.locator(".rt-HoverCardContent").waitFor({ state: "detached", timeout: 3000 });
+  }},
   // NavigationMenu content-link roving — once focus is INSIDE the open content (a separate
   // FocusGroup over the content's links), ArrowRight/ArrowLeft rove between the links and are
   // CLAMPED (non-looping, slice-from-current) just like the trigger bar. The `open` story

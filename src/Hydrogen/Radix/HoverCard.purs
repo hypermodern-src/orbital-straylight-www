@@ -63,6 +63,7 @@ import Hydrogen.Radix.Behavior.FocusScope (tabbables)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Dom as Dom
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName)
 import Web.DOM.Element (setAttribute) as Element
@@ -104,6 +105,8 @@ type Input =
   , contentStyle :: String      -- the content's CONSTANT style (--max-width + var aliases)
   , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
+  , openDelay :: Int             -- hover/focus-enter → open delay (radix default 700; Themes 200)
+  , closeDelay :: Int            -- hover/focus-leave → close delay (radix default 300; Themes 150)
   }
 
 defaultInput :: Input
@@ -124,6 +127,8 @@ defaultInput =
   , contentStyle: ""
   , triggerAttrs: []
   , portalAttrs: []
+  , openDelay: 700
+  , closeDelay: 300
   }
 
 data Output = OpenChanged Boolean
@@ -162,13 +167,19 @@ type State =
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen / AfterClose
   , animSub :: Maybe H.SubscriptionId  -- content `animationend` subscription during exit
   , contentId :: String         -- generated on Initialize (unique content id)
+  , openDelay :: Int
+  , closeDelay :: Int
+  , pendingOpen :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)   -- live open timer (cancel on leave)
+  , pendingClose :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)  -- live close timer (cancel on re-enter)
   }
 
 data Action
   = Initialize
   | Receive Input
-  | Show
-  | Hide
+  | Show                 -- pointer/focus enter → arm the open timer (openDelay)
+  | Hide                 -- pointer/focus leave → arm the close timer (closeDelay)
+  | DoOpen               -- the open timer fired → actually open
+  | DoClose              -- the close timer fired → actually close
   | AfterOpen           -- after the open render flushed: position + portal
   | AfterClose          -- after the closing render flushed: re-portal + arm exit animation
   | AnimDone            -- the content exit animation finished: finishExit + unmount
@@ -225,6 +236,10 @@ initialState input =
   , postSub: Nothing
   , animSub: Nothing
   , contentId: ""
+  , openDelay: input.openDelay
+  , closeDelay: input.closeDelay
+  , pendingOpen: Nothing
+  , pendingClose: Nothing
   }
   where
   startOpen = case input.open of
@@ -316,9 +331,13 @@ handleAction = case _ of
       , contentStyle = input.contentStyle
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
+      , openDelay = input.openDelay
+      , closeDelay = input.closeDelay
       }
-  Show -> openCard
-  Hide -> closeCard
+  Show -> scheduleOpen
+  Hide -> scheduleClose
+  DoOpen -> openCard
+  DoClose -> closeCard
   -- after the open render flushed: position the wrapper, then portal it into body + add the
   -- focus-guard sentinels (HoverCard, like popover, brackets the body). NO focus move.
   AfterOpen -> do
@@ -356,8 +375,61 @@ handleAction = case _ of
     reposition
     finalize false
 
+-- | Arm a one-shot timer: after `ms`, dispatch `act`. Returns the cancel handle (the wall-clock
+-- | id + the emitter subscription) so a pending open/close can be torn down on the opposing intent.
+armTimer :: forall m. MonadEffect m => Int -> Action -> H.HalogenM State Action () Output m (Tuple Dom.TimeoutId H.SubscriptionId)
+armTimer ms act = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (act <$ emitter)
+  tid <- liftEffect (Dom.setTimeout ms (HS.notify listener unit))
+  pure (Tuple tid sid)
+
+cancelOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+cancelOpen = do
+  st <- H.get
+  for_ st.pendingOpen \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
+  H.modify_ _ { pendingOpen = Nothing }
+
+cancelClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+cancelClose = do
+  st <- H.get
+  for_ st.pendingClose \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
+  H.modify_ _ { pendingClose = Nothing }
+
+-- | Pointer/focus ENTER: re-entering cancels any pending close, then arms the open after
+-- | `openDelay` (radix handleOpen). Already-open or already-pending ⇒ no-op; `openDelay <= 0`
+-- | opens synchronously (the deterministic-gate path).
+scheduleOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+scheduleOpen = do
+  cancelClose
+  st <- H.get
+  when (not (current st.ctrl)) $ case st.pendingOpen of
+    Just _ -> pure unit
+    Nothing
+      | st.openDelay <= 0 -> openCard
+      | otherwise -> do
+          h <- armTimer st.openDelay DoOpen
+          H.modify_ _ { pendingOpen = Just h }
+
+-- | Pointer/focus LEAVE: leaving cancels any pending open, then arms the close after
+-- | `closeDelay` (radix handleClose) — so brushing past never opens, and a card whose trigger
+-- | you left but whose content you entered stays open (content onMouseEnter re-`scheduleOpen`s).
+scheduleClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+scheduleClose = do
+  cancelOpen
+  st <- H.get
+  when (current st.ctrl) $ case st.pendingClose of
+    Just _ -> pure unit
+    Nothing
+      | st.closeDelay <= 0 -> closeCard
+      | otherwise -> do
+          h <- armTimer st.closeDelay DoClose
+          H.modify_ _ { pendingClose = Just h }
+
 openCard :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 openCard = do
+  cancelOpen
+  cancelClose
   st <- H.get
   when (not (current st.ctrl)) do
     -- capture the restore target BEFORE opening, so no post-open `modify` is needed for
@@ -416,6 +488,8 @@ finalize _ = do
 -- | animation on the next frame. The actual unmount happens at AnimDone (or immediately, no anim).
 closeCard :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeCard = do
+  cancelOpen
+  cancelClose
   st <- H.get
   when (current st.ctrl) do
     traverse_ H.unsubscribe st.subs
