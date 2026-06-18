@@ -191,6 +191,17 @@ export const STATES = {
         return hl && (hl.textContent || "").startsWith("Delete");
       });
     },
+    // ?s=submenu → right-click open the root, then hover the SubTrigger ("More") to open the
+    // nested SubContent (a second role=menu). Same driver runs golden + port.
+    submenu: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitem"][aria-haspopup="menu"]').first().hover();
+      await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 5000 });
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]');
+        return t && t.getAttribute("data-state") === "open";
+      });
+    },
   },
   menubar: {
     // Menubar is a horizontal roving bar of DropdownMenu-style menus. Open the FIRST menu

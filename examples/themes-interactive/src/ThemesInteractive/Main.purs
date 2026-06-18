@@ -654,11 +654,13 @@ plainRow :: String -> String -> DropdownMenu.MenuEntry
 plainRow value label =
   DropdownMenu.MenuItemEntry { value, label: [ HH.text label ], shortcut: [], accent: "", disabled: false }
 
--- | The SubTrigger chevron (right-pointing caret) — the Radix Themes SubTriggerIcon svg.
-subTriggerChevron :: HH.PlainHTML
-subTriggerChevron =
+-- | The SubTrigger chevron (right-pointing caret) — the Radix Themes SubTriggerIcon svg, with a
+-- | caller-supplied icon class (DropdownMenu uses `rt-DropdownMenuSubtriggerIcon` (lowercase t),
+-- | ContextMenu `rt-ContextMenuSubTriggerIcon` (capital T) — a real Themes inconsistency).
+subTriggerChevron :: String -> HH.PlainHTML
+subTriggerChevron iconClass =
   HH.elementNS svgNS (HH.ElemName "svg")
-    [ HP.attr (HH.AttrName "class") "rt-BaseMenuSubTriggerIcon rt-DropdownMenuSubtriggerIcon"
+    [ HP.attr (HH.AttrName "class") iconClass
     , HP.attr (HH.AttrName "width") "9"
     , HP.attr (HH.AttrName "height") "9"
     , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
@@ -692,7 +694,7 @@ menuStyle =
   , subTrigger: cn "rt-BaseMenuItem rt-BaseMenuSubTrigger rt-DropdownMenuItem rt-DropdownMenuSubTrigger"
   , subContent: cn "light radix-themes rt-BaseMenuContent rt-BaseMenuSubContent rt-DropdownMenuContent rt-DropdownMenuSubContent rt-PopperContent rt-r-size-2 rt-variant-solid"
   , subContentColor: "indigo"
-  , subIcon: [ subTriggerChevron ]
+  , subIcon: [ subTriggerChevron "rt-BaseMenuSubTriggerIcon rt-DropdownMenuSubtriggerIcon" ]
   , scrollRoot: cn "rt-ScrollAreaRoot"
   , scrollViewport: cn "rt-ScrollAreaViewport"
   , menuViewport: cn "rt-BaseMenuViewport rt-DropdownMenuViewport"
@@ -764,6 +766,7 @@ contextMenuInput s = ContextMenu.defaultInput
   , style = contextMenuStyle
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"
+  , subContentStyle = "outline: none; pointer-events: auto; " <> popperContentVars "context-menu"
   -- the trigger AREA is the dashed box itself (rt-Flex classes via style.trigger, size/border
   -- via triggerStyle, the text as its content) — radix's asChild Trigger, one element.
   , triggerStyle = "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);"
@@ -774,9 +777,19 @@ contextMenuInput s = ContextMenu.defaultInput
       [ ctxRow "edit" "Edit" "⌘ E" "" false
       , ctxRow "duplicate" "Duplicate" "⌘ D" "" (s == "disabled")
       , ContextMenu.menuSeparator
-      , ctxRow "delete" "Delete" "⌘ ⌫" "red" false
       ]
+        -- `?s=submenu` → a SubTrigger ("More") opening a SubContent of 3 plain items.
+        <> (if s == "submenu" then [ ctxSubmenuEntry ] else [])
+        <> [ ctxRow "delete" "Delete" "⌘ ⌫" "red" false ]
   }
+
+ctxSubmenuEntry :: ContextMenu.MenuEntry
+ctxSubmenuEntry = ContextMenu.menuSub "more" [ HH.text "More" ]
+  [ ContextMenu.MenuItemEntry { value: "move-project", label: [ HH.text "Move to project…" ], shortcut: [], accent: "", disabled: false }
+  , ContextMenu.MenuItemEntry { value: "move-folder", label: [ HH.text "Move to folder…" ], shortcut: [], accent: "", disabled: false }
+  , ContextMenu.menuSeparator
+  , ContextMenu.MenuItemEntry { value: "advanced", label: [ HH.text "Advanced options…" ], shortcut: [], accent: "", disabled: false }
+  ]
 
 ctxRow :: String -> String -> String -> String -> Boolean -> ContextMenu.MenuEntry
 ctxRow value label shortcut accent disabled =
@@ -800,6 +813,10 @@ contextMenuStyle =
   , indicator: cn "rt-BaseMenuItemIndicator rt-ContextMenuItemIndicator"
   , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
   , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , subTrigger: cn "rt-BaseMenuItem rt-BaseMenuSubTrigger rt-ContextMenuItem rt-ContextMenuSubTrigger"
+  , subContent: cn "light radix-themes rt-BaseMenuContent rt-BaseMenuSubContent rt-ContextMenuContent rt-ContextMenuSubContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , subContentColor: "indigo"
+  , subIcon: [ subTriggerChevron "rt-BaseMenuSubTriggerIcon rt-ContextMenuSubTriggerIcon" ]
   }
 
 -- | The Wave-C ContextMenu-checks story: a right-click menu whose `?s=` selects a CheckboxItem

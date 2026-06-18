@@ -815,7 +815,9 @@ const PAGES: Page[] = [
     // proves roving navigation skips it (menu.tsx:540 filter(!disabled), :720
     // focusable={!disabled}). Every other state renders all enabled.
     node: (() => {
-      const dupDisabled = currentState() === "disabled";
+      const s = currentState();
+      const dupDisabled = s === "disabled";
+      const sub = s === "submenu";
       return (
         <ContextMenu.Root>
           <ContextMenu.Trigger>
@@ -838,6 +840,17 @@ const PAGES: Page[] = [
             <ContextMenu.Item shortcut="⌘ E">Edit</ContextMenu.Item>
             <ContextMenu.Item shortcut="⌘ D" disabled={dupDisabled}>Duplicate</ContextMenu.Item>
             <ContextMenu.Separator />
+            {sub && (
+              <ContextMenu.Sub>
+                <ContextMenu.SubTrigger>More</ContextMenu.SubTrigger>
+                <ContextMenu.SubContent>
+                  <ContextMenu.Item>Move to project…</ContextMenu.Item>
+                  <ContextMenu.Item>Move to folder…</ContextMenu.Item>
+                  <ContextMenu.Separator />
+                  <ContextMenu.Item>Advanced options…</ContextMenu.Item>
+                </ContextMenu.SubContent>
+              </ContextMenu.Sub>
+            )}
             <ContextMenu.Item shortcut="⌘ ⌫" color="red">
               Delete
             </ContextMenu.Item>

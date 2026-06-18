@@ -981,6 +981,23 @@ const CHECKS = [
     ok((await pg.evaluate(() => { const e = [...document.querySelectorAll('[role="menuitem"]')].find((x) => (x.textContent || "").startsWith("Duplicate")); return e && e.hasAttribute("data-disabled") && e.getAttribute("tabindex") === "-1"; })), "disabled item must be data-disabled + tabindex=-1");
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Delete");
   } },
+  // Submenu — ArrowRight on a focused SubTrigger opens the nested SubContent; ArrowLeft closes
+  // it. (?s=submenu inserts a "More" Sub between the separator and Delete.) Non-circular: --golden.
+  { id: "contextmenu", state: "submenu", apg: "menu", name: "ArrowRight opens the submenu; ArrowLeft closes it", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').first().waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Duplicate");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "More");
+    await pg.keyboard.press("ArrowRight");
+    await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 3000 });
+    ok((await pg.evaluate(() => { const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]'); return t && t.getAttribute("data-state") === "open" && t.getAttribute("aria-expanded") === "true"; })),
+      "ArrowRight must open the submenu (SubTrigger data-state=open, aria-expanded=true)");
+    await pg.keyboard.press("ArrowLeft");
+    await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length === 1, null, { timeout: 3000 });
+    ok((await pg.evaluate(() => { const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]'); return t && t.getAttribute("data-state") === "closed"; })),
+      "ArrowLeft must close the submenu (SubTrigger data-state=closed)");
+  }},
   // ── Wave-B nav-group depth checks (STR-330) ──────────────────────────────────
   // HoverCard — https://www.w3.org/WAI/ARIA/apg/ (a hover-card is keyboard-reachable:
   // focusing the trigger link opens it, blur/Escape closes it). The trigger is an inline
