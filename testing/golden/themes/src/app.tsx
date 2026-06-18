@@ -904,12 +904,16 @@ const PAGES: Page[] = [
     // exit — the lingering closing node the closing-DOM oracle captures (otherwise the bare,
     // unstyled content has animation-name:none and unmounts synchronously, like menubar).
     node: (() => {
-      const disabled = currentState() === "disabled";
+      const s = currentState();
+      const disabled = s === "disabled";
+      // `?s=controlled` — the parent owns `open` (set true, never updated): clicking the
+      // trigger fires onOpenChange but the content stays open (controlled-mode contract).
+      const controlledOpen = s === "controlled" ? true : undefined;
       return (
         <>
           <style>{`@keyframes collapsibleExit { from { opacity: 1 } to { opacity: 0 } }
             div[data-state="closed"][id] { animation: collapsibleExit 100ms ease-out; }`}</style>
-          <Collapsible.Root disabled={disabled}>
+          <Collapsible.Root disabled={disabled} open={controlledOpen}>
             <Collapsible.Trigger asChild>
               <Button variant="soft">Toggle content</Button>
             </Collapsible.Trigger>

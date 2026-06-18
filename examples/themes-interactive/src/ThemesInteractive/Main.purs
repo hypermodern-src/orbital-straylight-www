@@ -1006,7 +1006,10 @@ accordionInput s = Accordion.defaultInput
 -- | style.content is empty; the rt-Box/rt-Text classes live on the children.
 collapsibleInput :: String -> Collapsible.Input
 collapsibleInput s = Collapsible.defaultInput
-  { open = Nothing
+  -- `?s=controlled` (wave D): the parent OWNS open (open = Just true) and never updates it,
+  -- so clicking the trigger fires onOpenChange but the content STAYS open (controlled-mode
+  -- contract). All other states are uncontrolled (open = Nothing).
+  { open = if s == "controlled" then Just true else Nothing
   , defaultOpen = false
   , disabled = s == "disabled"
   , style =
