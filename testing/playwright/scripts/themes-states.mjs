@@ -1002,6 +1002,8 @@ export const STATES = {
       await pg.locator('button[data-placeholder]').first().waitFor();
       await pg.locator(".rt-SelectTrigger").click();
       await pg.locator('[role="listbox"]').waitFor();
+    },
+  },
   // Wave-C ScrollArea family (horizontal + both+corner). type="always" mounts the
   // bar(s) unconditionally; content overflows both axes. Keyed off UPSTREAM
   // data-orientation/data-state + the rt-ScrollAreaCorner class, so the SAME driver
