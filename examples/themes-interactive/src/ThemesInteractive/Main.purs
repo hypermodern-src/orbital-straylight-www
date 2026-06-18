@@ -1190,7 +1190,10 @@ switchInput s = Switch.defaultInput
 -- | seeds the disabled (no-op + data-disabled='') variant.
 toggleInput :: String -> Toggle.Input
 toggleInput s = Toggle.defaultInput
-  { pressed = Nothing
+  -- `?s=controlled` (Wave D): a CONTROLLED toggle (pressed pinned true, the parent never
+  -- updates it) — a click fires onPressedChange but must NOT mutate the DOM (data-state /
+  -- aria-pressed stay on). Every other state is uncontrolled (pressed = Nothing).
+  { pressed = if s == "controlled" then Just true else Nothing
   -- `?s=disabledpressed` (Wave C): start pressed AND disabled (the locked-on combination).
   , defaultPressed = s == "disabledpressed"
   , disabled = s == "disabled" || s == "disabledpressed"

@@ -1342,6 +1342,20 @@ const PAGES: Page[] = [
             B
           </Toggle>
         );
+      // `?s=controlled` (Wave D) — a CONTROLLED toggle: `pressed` is pinned true and the
+      // parent supplies NO onPressedChange handler (so it never updates the prop). A click
+      // still fires onPressedChange internally but must NOT mutate the DOM — data-state and
+      // aria-pressed stay `on`/`true`. The DOM-observable half of the controlled contract.
+      if (s === "controlled")
+        return (
+          <Toggle
+            className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+            aria-label="Bold"
+            pressed
+          >
+            B
+          </Toggle>
+        );
       return (
         <Toggle
           className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"

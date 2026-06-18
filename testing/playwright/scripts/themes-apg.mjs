@@ -1081,6 +1081,21 @@ const CHECKS = [
     ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "Enter must NOT unpress a disabled toggle");
     ok((await attrOf(pg, sel, 0, "data-state")) === "on", "data-state must remain on");
   }},
+  // Wave D — a CONTROLLED toggle (pressed pinned true, no parent update): a click fires
+  // onPressedChange but does NOT mutate the DOM (the parent owns the value). The
+  // DOM-observable controlled contract: data-state / aria-pressed stay on after a click.
+  { id: "toggle", state: "controlled", apg: "button", name: "a controlled toggle does NOT mutate the DOM on click (parent owns state)", run: async (pg) => {
+    const sel = 'button[aria-pressed]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "the controlled toggle must start pressed");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "on", "the controlled toggle must start data-state=on");
+    await pg.locator(sel).first().click();
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "controlled: a click must NOT change aria-pressed (parent owns it)");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "on", "controlled: a click must NOT change data-state");
+    await focusFirst(pg, sel);
+    await press(pg, "Space");
+    ok((await attrOf(pg, sel, 0, "aria-pressed")) === "true", "controlled: Space must NOT change the DOM either");
+  }},
 
   // Checkbox — Enter is explicitly preventDefaulted (WAI-ARIA: checkboxes do NOT activate on
   // Enter; only Space toggles). The themed checkbox seed (?s=checked = the bare unchecked
