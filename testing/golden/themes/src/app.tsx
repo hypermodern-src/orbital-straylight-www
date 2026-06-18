@@ -2541,6 +2541,32 @@ const PAGES: Page[] = [
         <Box style={{ maxWidth: 320 }}>
           <Slider defaultValue={[25, 75]} />
         </Box>
+  // ── Wave-D: Label onMouseDown text-selection guard (label.tsx:19-27) ─────────────
+  // The bare @radix-ui/react-label primitive carries an onMouseDown that, for a multi-
+  // click (event.detail > 1) NOT inside a button/input/select/textarea, calls
+  // preventDefault() — suppressing browser text-selection. When the mousedown target IS
+  // inside such a control it RETURNS EARLY (no preventDefault). Neither effect mutates the
+  // DOM, so the snapshot is just <label …>+children (golden==port); the guard is
+  // adjudicated by a driver that dispatches a detail=2 mousedown and reads defaultPrevented.
+  // ?s=plain → bare label (preventDefault on multi-click); ?s=control → label WRAPPING an
+  // input (mousedown on the input early-returns, NO preventDefault).
+  {
+    id: "labelguard",
+    label: "Label (mousedown guard)",
+    interactive: true,
+    node: (() => {
+      const s = currentState();
+      if (s === "control") {
+        return (
+          <LabelPrim.Root htmlFor="lg-input" id="lg-label">
+            Name <input id="lg-input" />
+          </LabelPrim.Root>
+        );
+      }
+      return (
+        <LabelPrim.Root htmlFor="lg-input" id="lg-label">
+          Email
+        </LabelPrim.Root>
       );
     })(),
   },

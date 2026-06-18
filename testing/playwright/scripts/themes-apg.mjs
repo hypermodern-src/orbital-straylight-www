@@ -1958,6 +1958,143 @@ const CHECKS = [
     for (let i = 0; i < 25; i++) await press(pg, "ArrowRight");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "50", "lower thumb must park at 50 (10 steps below its neighbour)");
     ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "60", "upper thumb must stay at 60 (untouched by the lower thumb's keys)");
+  // ── Wave-D: Label onMouseDown text-selection guard (label.tsx:19-27) ─────────────
+  // Not an APG keyboard pattern, but a deterministic, non-circular behavior oracle that
+  // validates against the real @radix-ui/react-label golden first, then the port. The guard:
+  //   plain   → a multi-click (detail>1) mousedown on the label NOT inside a control must be
+  //             preventDefault-ed (suppress text selection).
+  //   control → a mousedown landing inside the wrapped <input> (closest('…input…')) must
+  //             RETURN EARLY → NOT preventDefault-ed.
+  // We dispatch a real MouseEvent({detail:2}) and read event.defaultPrevented after React's
+  // (or the port's) handler ran. A single-click (detail:1) on the plain label must ALSO be
+  // left alone (the detail>1 gate) — checked inline so the oracle pins the gate.
+  { id: "labelguard", state: "plain", apg: "label", name: "guard: multi-click mousedown on bare label is preventDefault-ed; single-click is not", run: async (pg) => {
+    await pg.locator("label[for]").first().waitFor();
+    const multi = await pg.evaluate(() => {
+      const lbl = document.querySelector("label[for]");
+      const ev = new MouseEvent("mousedown", { bubbles: true, cancelable: true, detail: 2 });
+      lbl.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    ok(multi === true, `detail=2 mousedown on bare label must be preventDefault-ed (got ${multi})`);
+    const single = await pg.evaluate(() => {
+      const lbl = document.querySelector("label[for]");
+      const ev = new MouseEvent("mousedown", { bubbles: true, cancelable: true, detail: 1 });
+      lbl.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    ok(single === false, `detail=1 (single) mousedown must NOT be preventDefault-ed (got ${single})`);
+  }},
+  { id: "labelguard", state: "control", apg: "label", name: "guard: multi-click mousedown INSIDE wrapped control early-returns (NOT preventDefault-ed)", run: async (pg) => {
+    await pg.locator("label[for] input").first().waitFor();
+    const onInput = await pg.evaluate(() => {
+      const inp = document.querySelector("label[for] input");
+      const ev = new MouseEvent("mousedown", { bubbles: true, cancelable: true, detail: 2 });
+      inp.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    ok(onInput === false, `detail=2 mousedown on the wrapped input must early-return (NOT preventDefault-ed; got ${onInput})`);
+  }},
+
+  // ── Wave-D: AccessibleIcon a11y contract (accessible-icon.tsx:16-26) ─────────────
+  // The icon SVG itself carries aria-hidden="true" + focusable="false" (injected ONTO the
+  // node, NOT a wrapper span), and a sibling VisuallyHidden span holds the label text in the
+  // a11y tree. Verified against the real golden first. The svg must be hidden; the label span
+  // must NOT be aria-hidden and must contain the label text (announced).
+  { id: "accessibleicon", apg: "structure", name: "icon svg is aria-hidden+focusable=false; label sibling is in the a11y tree", run: async (pg) => {
+    await pg.locator("svg").first().waitFor();
+    const r = await pg.evaluate(() => {
+      const svg = document.querySelector("#root svg");
+      const label = [...document.querySelectorAll("#root span")].find((s) => /overflow|clip/.test(s.getAttribute("style") || ""));
+      return {
+        hidden: svg && svg.getAttribute("aria-hidden"),
+        focusable: svg && svg.getAttribute("focusable"),
+        labelHidden: label ? label.getAttribute("aria-hidden") : "NO-LABEL",
+        labelText: label ? (label.textContent || "").trim() : null,
+      };
+    });
+    ok(r.hidden === "true", `svg must carry aria-hidden="true" (got ${r.hidden})`);
+    ok(r.focusable === "false", `svg must carry focusable="false" (got ${r.focusable})`);
+    ok(r.labelHidden === null, `VisuallyHidden label must NOT be aria-hidden (in a11y tree; got ${r.labelHidden})`);
+    ok(r.labelText === "Settings", `label span must announce "Settings" (got ${JSON.stringify(r.labelText)})`);
+  }},
+
+  // ── Wave-D: VisuallyHidden a11y contract (visually-hidden.tsx) ───────────────────
+  // The sr-only span must remain in the a11y tree — clip/overflow hiding, NEVER aria-hidden
+  // / display:none / visibility:hidden (that is its entire purpose). Verified vs the golden
+  // first. The ?s=plain story renders <VisuallyHidden>required</VisuallyHidden>.
+  { id: "visuallyhiddenprim", state: "plain", apg: "structure", name: "visually-hidden span stays in a11y tree (clip technique, not aria-hidden/display:none)", run: async (pg) => {
+    await pg.locator('span[style*="overflow"]').first().waitFor();
+    const r = await pg.evaluate(() => {
+      const span = document.querySelector('#root span[style*="overflow"]');
+      const st = span ? span.getAttribute("style") || "" : "";
+      return {
+        ariaHidden: span ? span.getAttribute("aria-hidden") : "NONE",
+        text: span ? (span.textContent || "").trim() : null,
+        display: /display:\s*none/.test(st),
+        visibility: /visibility:\s*hidden/.test(st),
+        clip: /clip:\s*rect/.test(st),
+      };
+    });
+    ok(r.ariaHidden === null, `must NOT be aria-hidden (got ${r.ariaHidden})`);
+    ok(r.display === false, "must NOT use display:none");
+    ok(r.visibility === false, "must NOT use visibility:hidden");
+    ok(r.clip === true, "must use the clip:rect(...) hiding technique");
+    ok(r.text === "required", `content must remain present/announced (got ${JSON.stringify(r.text)})`);
+  }},
+
+  // ── Wave-D: Separator a11y-tree switch (separator.tsx:31-38) ─────────────────────
+  // Semantic vertical → role=separator + aria-orientation=vertical; decorative → role=none
+  // (removed from a11y tree), NO aria-orientation. data-orientation is ALWAYS present. This
+  // pins the a11y switch the pixel oracle is blind to. Verified vs the golden primitive page.
+  { id: "separatorprim", state: "vsem", apg: "structure", name: "vertical semantic separator: role=separator + aria-orientation=vertical + data-orientation", run: async (pg) => {
+    await pg.locator("div[data-orientation]").first().waitFor({ state: "attached" });
+    const r = await pg.evaluate(() => {
+      const el = document.querySelector("#root div[data-orientation]");
+      return { role: el.getAttribute("role"), ao: el.getAttribute("aria-orientation"), o: el.getAttribute("data-orientation") };
+    });
+    ok(r.role === "separator", `role must be separator (got ${r.role})`);
+    ok(r.ao === "vertical", `aria-orientation must be vertical (got ${r.ao})`);
+    ok(r.o === "vertical", `data-orientation must be vertical (got ${r.o})`);
+  }},
+  { id: "separatorprim", state: "hdec", apg: "structure", name: "decorative separator: role=none (removed from a11y tree), NO aria-orientation, data-orientation kept", run: async (pg) => {
+    await pg.locator("div[data-orientation]").first().waitFor({ state: "attached" });
+    const r = await pg.evaluate(() => {
+      const el = document.querySelector("#root div[data-orientation]");
+      return { role: el.getAttribute("role"), ao: el.getAttribute("aria-orientation"), o: el.getAttribute("data-orientation") };
+    });
+    ok(r.role === "none", `decorative role must be none (got ${r.role})`);
+    ok(r.ao === null, `decorative must have NO aria-orientation (got ${r.ao})`);
+    ok(r.o === "horizontal", `data-orientation must still be present (got ${r.o})`);
+  }},
+
+  // ── Wave-D: AspectRatio inset-override + inner-prop anatomy (aspect-ratio.tsx:19-43) ─
+  // The inner div merges the caller style FIRST, then position:absolute + inset:0 LAST so the
+  // inset overrides any caller position; caller class/id/data-*/aria land on the INNER div,
+  // the wrapper carries data-radix-aspect-ratio-wrapper="". Verified vs the golden (?s=styled).
+  { id: "aspectratioprim", state: "styled", apg: "structure", name: "aspect-ratio: wrapper marker + inner div carries caller class/id/data-*, inset override present", run: async (pg) => {
+    await pg.locator("[data-radix-aspect-ratio-wrapper]").first().waitFor();
+    const r = await pg.evaluate(() => {
+      const wrap = document.querySelector("#root [data-radix-aspect-ratio-wrapper]");
+      const inner = wrap && wrap.firstElementChild;
+      const st = inner ? inner.getAttribute("style") || "" : "";
+      return {
+        wrapMarker: wrap ? wrap.getAttribute("data-radix-aspect-ratio-wrapper") : "NO-WRAP",
+        innerId: inner ? inner.getAttribute("id") : null,
+        innerClass: inner ? inner.getAttribute("class") : null,
+        innerData: inner ? inner.getAttribute("data-foo") : null,
+        innerAria: inner ? inner.getAttribute("aria-label") : null,
+        absolute: /position:\s*absolute/.test(st),
+        inset: /inset:\s*0px|top:\s*0px/.test(st),
+      };
+    });
+    ok(r.wrapMarker === "", `wrapper must carry data-radix-aspect-ratio-wrapper="" (got ${JSON.stringify(r.wrapMarker)})`);
+    ok(r.innerId === "ar-inner", `caller id must land on the INNER div (got ${r.innerId})`);
+    ok((r.innerClass || "").includes("my-inner"), `caller class must land on the INNER div (got ${r.innerClass})`);
+    ok(r.innerData === "bar", `caller data-foo must land on the INNER div (got ${r.innerData})`);
+    ok(r.innerAria === "cover", `caller aria-label must land on the INNER div (got ${r.innerAria})`);
+    ok(r.absolute === true, "inner div must be position:absolute (inset override)");
+    ok(r.inset === true, "inner div must carry the inset:0 override");
   }},
 ];
 

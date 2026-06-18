@@ -1216,4 +1216,13 @@ export const STATES = {
       });
     },
   },
+  // ── Wave-D: Label onMouseDown guard — DOM snapshot only ──────────────────────────
+  // The guard (preventDefault on multi-click / early-return inside a control) leaves NO
+  // DOM trace, so this driver only settles the static <label>+children for the snapshot
+  // (golden==port). The actual preventDefault behavior is adjudicated in themes-apg.mjs.
+  // Keyed off the UPSTREAM <label for> only, so the same driver runs golden + port.
+  labelguard: {
+    plain: async (pg) => { await pg.locator("label[for]").first().waitFor({ state: "attached" }); },
+    control: async (pg) => { await pg.locator("label[for] input").first().waitFor({ state: "attached" }); },
+  },
 };

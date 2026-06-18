@@ -109,6 +109,7 @@ type Slots =
   , selectform :: Select.Slot Unit
   , dropdownmenugroup :: DropdownMenu.Slot Unit
   , sliderrange :: Slider.RangeSlot Unit
+  , labelguard :: Label.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -219,6 +220,8 @@ _dropdownmenugroup :: Proxy "dropdownmenugroup"
 _dropdownmenugroup = Proxy
 _sliderrange :: Proxy "sliderrange"
 _sliderrange = Proxy
+_labelguard :: Proxy "labelguard"
+_labelguard = Proxy
 
 main :: Effect Unit
 main = do
@@ -356,6 +359,11 @@ view c s =
             -- labelling); ?s=minsteps → minStepsBetweenThumbs keyboard rejection; default
             -- → the 2-thumb [25,75] range (Minimum/Maximum, range between the thumbs).
             "sliderrange" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _sliderrange unit Slider.rangeComponent (sliderRangeInput s) ]
+            -- Wave-D Label depth: the onMouseDown text-selection guard (label.tsx:19-27)
+            -- as a self-contained component. ?s=plain → bare label (detail>1 ⇒ preventDefault);
+            -- ?s=control → label WRAPPING an input (mousedown inside it ⇒ early return, NO
+            -- preventDefault). The DOM is a <label>+children; the guard is driver-adjudicated.
+            "labelguard" -> HH.slot_ _labelguard unit Label.component (labelGuardInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1871,6 +1879,25 @@ separatorThemesPage s
   | s == "accent" = ThemesSeparator.separator [ Color "cyan" ]
   | s == "vertical" = ThemesSeparator.separator [ Class "rt-r-orientation-vertical" ]
   | otherwise = ThemesSeparator.separator []
+
+-- | Label onMouseDown guard (Wave-D). `plain` = a bare label whose text-multi-click
+-- | mousedown is preventDefault-ed (detail>1). `control` = a label wrapping an <input>
+-- | so a mousedown on the input hits the early-return (closest('…input…')) path and is
+-- | NOT preventDefault-ed. Both render a <label for=…> carrying the guard listener.
+labelGuardInput :: String -> Label.Input
+labelGuardInput s
+  | s == "control" =
+      { for: "lg-input"
+      , class_: mempty
+      , attrs: [ HP.id "lg-label" ]
+      , children: [ HH.text "Name ", HH.input [ HP.id "lg-input" ] ]
+      }
+  | otherwise =
+      { for: "lg-input"
+      , class_: mempty
+      , attrs: [ HP.id "lg-label" ]
+      , children: [ HH.text "Email" ]
+      }
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────
 queryParam :: String -> Effect String

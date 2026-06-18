@@ -177,6 +177,9 @@ STATES=(
   "passwordtoggle:formreset"
   # ── Wave-D: Form reset → clears validity (Messages unmount, data-invalid drops) ──
   "form:reset"
+  # Wave-D: Label onMouseDown guard — DOM snapshot (the guard itself is APG-adjudicated).
+  "labelguard:plain"
+  "labelguard:control"
 )
 
 echo "ℵ building golden dist (bun)"
