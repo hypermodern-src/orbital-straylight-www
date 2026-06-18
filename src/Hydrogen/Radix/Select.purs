@@ -120,6 +120,9 @@ type Input =
   , placeholder :: Array HH.PlainHTML   -- shown in the value slot when nothing is selected; gates data-placeholder
   , contentStyle :: String              -- the content's CONSTANT style (box-sizing/flex/outline/pointer-events)
   , portalAttrs :: Array (Tuple String String)  -- data-* on the content (theme re-application)
+  , name :: String      -- form field name; "" ⇒ NO hidden native <select> (BubbleSelect) rendered
+  , required :: Boolean  -- aria-required on the trigger AND `required` on the hidden native select
+  , disabled :: Boolean  -- disabled trigger (button[disabled] + data-disabled); the popup never opens
   }
 
 defaultInput :: Input
@@ -139,6 +142,9 @@ defaultInput =
   , placeholder: []
   , contentStyle: ""
   , portalAttrs: []
+  , name: ""
+  , required: false
+  , disabled: false
   }
 
 data Output
@@ -172,6 +178,9 @@ type State =
   , placeholder :: Array HH.PlainHTML
   , contentStyle :: String
   , portalAttrs :: Array (Tuple String String)
+  , name :: String
+  , required :: Boolean
+  , disabled :: Boolean
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot subscription for AfterOpen
@@ -240,6 +249,9 @@ initialState input =
   , placeholder: input.placeholder
   , contentStyle: input.contentStyle
   , portalAttrs: input.portalAttrs
+  , name: input.name
+  , required: input.required
+  , disabled: input.disabled
   , restoreEl: Nothing
   , subs: []
   , postSub: Nothing
@@ -275,7 +287,7 @@ render st =
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
-      [ HH.button
+      ( [ HH.button
           ( [ HP.type_ HP.ButtonButton
             , HP.ref triggerRef
             , classes st.style.trigger
@@ -287,6 +299,10 @@ render st =
             , HE.onClick \_ -> TriggerClicked
             , HE.onKeyDown TriggerKeyDown
             ]
+              -- aria-required is stamped only when the field is required (upstream forwards
+              -- the Root's `required` to the react-select trigger; unset ⇒ no attribute).
+              <> (if st.required then [ aria "required" "true" ] else [])
+              <> (if st.disabled then [ HP.disabled true, dataAttr "disabled" "" ] else [])
               <> (if open then [ aria "controls" st.contentId ] else [])
               <> (if showPlaceholder st then [ dataAttr "placeholder" "" ] else [])
           )
@@ -344,6 +360,48 @@ render st =
               ]
           ]
       ]
+        -- BubbleSelect: the hidden native <select> form-participation node (react-select
+        -- SelectBubbleInput). Rendered ONLY when a form name is set (the port's analogue of
+        -- upstream's isFormControl gate — the consumer opts in by giving the field a name AND
+        -- wrapping the slot in a <form>). aria-hidden, tabindex=-1, visually-hidden, mirroring
+        -- the selected value via <option selected>. `required`/`disabled` mirror the trigger.
+        <> renderBubbleSelect st
+      )
+
+-- | The hidden native <select> (SelectBubbleInput) — present only when `name` is set.
+-- | Visually-hidden (the upstream VISUALLY_HIDDEN_STYLES), aria-hidden, tabindex=-1, with
+-- | one <option> per item (the selected one carrying `selected`). Mirrors the trigger's
+-- | required/disabled. This is the node that participates in native form submission.
+renderBubbleSelect :: forall m. State -> Array (H.ComponentHTML Action () m)
+renderBubbleSelect st
+  | st.name == "" = []
+  | otherwise =
+      [ HH.select
+          ( [ aria "hidden" "true"
+            , HP.name st.name
+            , HP.tabIndex (-1)
+            , HP.style bubbleSelectStyle
+            ]
+              <> (if st.required then [ HP.required true ] else [])
+              <> (if st.disabled then [ HP.disabled true ] else [])
+          )
+          (map (renderBubbleOption (current st.sel)) st.items)
+      ]
+
+-- | The VISUALLY_HIDDEN_STYLES serialization React emits (px-normalized in the oracle). Order
+-- | and values mirror @radix-ui/react-visually-hidden so the at-rest DOM is byte-identical.
+bubbleSelectStyle :: String
+bubbleSelectStyle =
+  "position: absolute; border: 0px; width: 1px; height: 1px; padding: 0px; margin: -1px; "
+    <> "overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; overflow-wrap: normal;"
+
+renderBubbleOption :: forall m. String -> SelectItem -> H.ComponentHTML Action () m
+renderBubbleOption selected item =
+  HH.option
+    -- the selected option carries a bare `selected` attribute (matching React's
+    -- defaultValue-driven serialization: `selected=`), gating native form value.
+    ([ HP.value item.value ] <> (if item.value == selected then [ HP.attr (HH.AttrName "selected") "" ] else []))
+    (map HH.fromPlainHTML item.label)
 
 -- | A select option is a DIV (role=option) carrying aria-labelledby/aria-selected/data-state,
 -- | a check indicator when selected, and a value span (id only, no class). The SELECTED

@@ -35,12 +35,14 @@ module Hydrogen.Radix.DropdownMenu
   , CheckItem
   , RadioGroupData
   , RadioOption
+  , GroupData
   , MenuEntry(..)
   , CheckState(..)
   , menuItem
   , menuSeparator
   , menuCheckbox
   , menuRadioGroup
+  , menuGroup
   , Input
   , Output(..)
   , Query(..)
@@ -133,11 +135,21 @@ type RadioGroupData =
 -- | skipped (they carry no ref and no role=menuitem). CheckboxItem and RadioItem are
 -- | focusable items too (role=menuitemcheckbox / menuitemradio) — they take roving
 -- | indices alongside plain items.
+-- | A labelled group of plain items (radix `DropdownMenu.Group` + `DropdownMenu.Label`).
+-- | Renders a role=group wrapper whose aria-labelledby points at a NON-interactive Label
+-- | div (NOT a role=menuitem, NOT in the roving order). The inner items DO participate in
+-- | the roving order, sharing the same idx counter as their siblings (like a RadioGroup).
+type GroupData =
+  { label :: Array HH.PlainHTML  -- the Label heading ([] = unlabelled group, aria-labelledby omitted)
+  , items :: Array MenuItem
+  }
+
 data MenuEntry
   = MenuItemEntry MenuItem
   | MenuSeparator
   | MenuCheckboxEntry CheckItem
   | MenuRadioGroupEntry RadioGroupData
+  | MenuGroupEntry GroupData
 
 -- | Smart constructor for a plain item (no shortcut/accent, enabled).
 menuItem :: String -> Array HH.PlainHTML -> MenuEntry
@@ -154,6 +166,10 @@ menuCheckbox value label check = MenuCheckboxEntry { value, label, shortcut: [],
 menuRadioGroup :: String -> Array RadioOption -> MenuEntry
 menuRadioGroup value options = MenuRadioGroupEntry { value, options }
 
+-- | Smart constructor for a labelled item group.
+menuGroup :: Array HH.PlainHTML -> Array MenuItem -> MenuEntry
+menuGroup label items = MenuGroupEntry { label, items }
+
 -- | The number of focusable items in the ROVING order — non-separator AND
 -- | non-disabled (upstream menu.tsx:540 `getItems().filter(!disabled)`, :720
 -- | `focusable={!disabled}`). Disabled items render but are excluded from the roving
@@ -169,6 +185,7 @@ entryFocusables = case _ of
   MenuItemEntry item -> if item.disabled then 0 else 1
   MenuCheckboxEntry item -> if item.disabled then 0 else 1
   MenuRadioGroupEntry grp -> Array.length (Array.filter (not <<< _.disabled) grp.options)
+  MenuGroupEntry grp -> Array.length (Array.filter (not <<< _.disabled) grp.items)
   MenuSeparator -> 0
 
 -- | The enabled focusable value at roving index `n` (the keyboard-selection target).
@@ -181,6 +198,7 @@ enabledValueAt n entries = Array.index (Array.concatMap enabledValues entries) n
     MenuItemEntry item | not item.disabled -> [ item.value ]
     MenuCheckboxEntry item | not item.disabled -> [ item.value ]
     MenuRadioGroupEntry grp -> map _.value (Array.filter (not <<< _.disabled) grp.options)
+    MenuGroupEntry grp -> map _.value (Array.filter (not <<< _.disabled) grp.items)
     _ -> []
 
 type Style =
@@ -197,6 +215,8 @@ type Style =
   , radioGroup :: ClassNames     -- rt-BaseMenuRadioGroup … (role=group wrapper)
   , radioItem :: ClassNames      -- rt-BaseMenuItem rt-BaseMenuRadioItem …
   , indicator :: ClassNames      -- rt-BaseMenuItemIndicator … (the gated indicator span)
+  , group :: ClassNames          -- rt-BaseMenuGroup … (role=group wrapper for a labelled group)
+  , groupLabel :: ClassNames     -- rt-BaseMenuLabel … (the non-interactive labelling div)
   , checkIndicator :: Array HH.PlainHTML  -- the checkbox indicator svg (full <svg>, Themes quirk class)
   , radioIndicator :: Array HH.PlainHTML  -- the radio indicator svg (full <svg>)
   }
@@ -216,6 +236,8 @@ defaultStyle =
   , radioGroup: cn "rdx-dropdown-radio-group"
   , radioItem: cn "rdx-dropdown-radio-item"
   , indicator: cn "rdx-dropdown-indicator"
+  , group: cn "rdx-dropdown-group"
+  , groupLabel: cn "rdx-dropdown-group-label"
   , checkIndicator: []
   , radioIndicator: []
   }
@@ -476,6 +498,27 @@ renderEntries st = _.html (foldl step { idx: 0, html: [] } st.entries)
           { idx = inner.idx
           , html = acc.html <> [ HH.div [ classes st.style.radioGroup, role "group" ] inner.html ]
           }
+    -- A labelled group: a role=group wrapper containing a NON-interactive Label div
+    -- (rendered FIRST) then the group's items. The inner items share the roving idx counter
+    -- (like a radio group), so arrows traverse across group boundaries seamlessly. NOTE:
+    -- Radix THEMES does NOT wire aria-labelledby/id between the group and its label (unlike
+    -- the bare primitive) — the label is purely visual — so neither is emitted, matching the
+    -- captured golden (rt-BaseMenuGroup wrapper, rt-BaseMenuLabel div, no id/aria-labelledby).
+    MenuGroupEntry grp ->
+      let
+        inner = foldl groupItemStep { idx: acc.idx, html: [] } grp.items
+        labelled = if Array.null grp.label then [] else [ HH.div [ classes st.style.groupLabel ] (map HH.fromPlainHTML grp.label) ]
+      in
+        acc
+          { idx = inner.idx
+          , html = acc.html <> [ HH.div [ classes st.style.group, role "group" ] (labelled <> inner.html) ]
+          }
+  groupItemStep innerAcc item
+    | item.disabled = innerAcc { html = innerAcc.html <> [ renderItem st Nothing item ] }
+    | otherwise = innerAcc
+        { idx = innerAcc.idx + 1
+        , html = innerAcc.html <> [ renderItem st (Just innerAcc.idx) item ]
+        }
   radioStep selected innerAcc opt
     | opt.disabled = innerAcc { html = innerAcc.html <> [ renderRadio st selected Nothing opt ] }
     | otherwise = innerAcc
@@ -699,6 +742,7 @@ handleAction = case _ of
         MenuItemEntry it | it.value == value -> Just it.disabled
         MenuCheckboxEntry it | it.value == value -> Just it.disabled
         MenuRadioGroupEntry grp -> map _.disabled (Array.find (\o -> o.value == value) grp.options)
+        MenuGroupEntry grp -> map _.disabled (Array.find (\o -> o.value == value) grp.items)
         _ -> Nothing
       mDisabled = Array.findMap pick st.entries
     when (maybe true not mDisabled) do

@@ -106,6 +106,8 @@ type Slots =
   , menubarchecks :: Menubar.Slot Unit
   , selectplaceholder :: Select.Slot Unit
   , avatarx :: RadixAvatar.Slot Unit
+  , selectform :: Select.Slot Unit
+  , dropdownmenugroup :: DropdownMenu.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -208,6 +210,12 @@ _selectplaceholder :: Proxy "selectplaceholder"
 _selectplaceholder = Proxy
 _avatarx :: Proxy "avatarx"
 _avatarx = Proxy
+
+_selectform :: Proxy "selectform"
+_selectform = Proxy
+
+_dropdownmenugroup :: Proxy "dropdownmenugroup"
+_dropdownmenugroup = Proxy
 
 main :: Effect Unit
 main = do
@@ -320,6 +328,12 @@ view c s =
             -- bars + corner. Same primitive, the `scrollbars` field selects the family.
             "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
             "separatorthemes" -> separatorThemesPage s
+            -- Wave-D menus depth: Select FORM integration. Wrapped in a <form> so the port
+            -- renders the hidden native <select> (BubbleSelect); `?s=required` (aria-required
+            -- + required bubble) / `?s=disabledtrigger` (disabled trigger + disabled bubble).
+            "selectform" -> HH.form [] [ HH.slot_ _selectform unit Select.component (selectFormInput s) ]
+            -- Wave-D menus depth: DropdownMenu Group/Label parts (two labelled groups).
+            "dropdownmenugroup" -> HH.slot_ _dropdownmenugroup unit DropdownMenu.component dropdownGroupInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -607,6 +621,8 @@ menuStyle =
   , radioGroup: cn "rt-BaseMenuRadioGroup rt-DropdownMenuRadioGroup"
   , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-DropdownMenuItem rt-DropdownMenuRadioItem"
   , indicator: cn "rt-BaseMenuItemIndicator rt-DropdownMenuItemIndicator"
+  , group: cn "rt-BaseMenuGroup rt-DropdownMenuGroup"
+  , groupLabel: cn "rt-BaseMenuLabel rt-DropdownMenuLabel"
   -- Radix Themes quirk: the CHECKBOX indicator icon carries `rt-ContextMenuItemIndicatorIcon`
   -- (shared icon styling), while the RADIO indicator icon carries `rt-DropdownMenuItemIndicatorIcon`.
   , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
@@ -1982,3 +1998,52 @@ avatarLoadedInput = RadixAvatar.defaultInput
 -- the LOADED steady-state deterministically, matching the golden story's ONE_PX_PNG.
 onePxPng :: String
 onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+
+-- ── Wave-D menus depth (STR-330) ────────────────────────────────────────────────
+
+-- | The Select FORM-integration story. `?s=required` → aria-required + a required hidden
+-- | native <select> (BubbleSelect); `?s=disabledtrigger` → disabled trigger + disabled
+-- | bubble. The route wraps the slot in a <form> so the BubbleSelect renders. Reuses
+-- | selectStyle so the trigger/content chrome matches the canonical select.
+selectFormInput :: String -> Select.Input
+selectFormInput s = Select.defaultInput
+  { defaultValue = "apple"
+  , name = "fruit"
+  , required = s /= "disabledtrigger"
+  , disabled = s == "disabledtrigger"
+  , style = selectStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"
+  , trigger = [ chevronCls "rt-SelectIcon" ]
+  , groupLabel = [ HH.text "Fruits" ]
+  , checkIcon = [ checkSvg ]
+  , items =
+      [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
+      , { value: "orange", label: [ HH.text "Orange" ], disabled: false }
+      , { value: "grape", label: [ HH.text "Grape" ], disabled: false }
+      ]
+  }
+
+-- | The DropdownMenu GROUP/LABEL story: two labelled groups (File / Edit) separated by a
+-- | Separator. The Group renders a role=group wrapper; the Label is a non-interactive div
+-- | (Radix Themes wires NO aria-labelledby/id between them). Reuses menuStyle + the new
+-- | group/groupLabel class slots.
+dropdownGroupInput :: DropdownMenu.Input
+dropdownGroupInput = DropdownMenu.defaultInput
+  { style = menuStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
+  , trigger = [ HH.text "Actions", chevron ]
+  , entries =
+      [ DropdownMenu.menuGroup [ HH.text "File" ]
+          [ { value: "new", label: [ HH.text "New" ], shortcut: [], accent: "", disabled: false }
+          , { value: "open", label: [ HH.text "Open" ], shortcut: [], accent: "", disabled: false }
+          ]
+      , DropdownMenu.menuSeparator
+      , DropdownMenu.menuGroup [ HH.text "Edit" ]
+          [ { value: "cut", label: [ HH.text "Cut" ], shortcut: [], accent: "", disabled: false }
+          , { value: "copy", label: [ HH.text "Copy" ], shortcut: [], accent: "", disabled: false }
+          ]
+      ]
+  }

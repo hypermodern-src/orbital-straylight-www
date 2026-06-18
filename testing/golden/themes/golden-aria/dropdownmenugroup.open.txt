@@ -1,0 +1,10 @@
+- menu "Actions":
+  - group:
+    - text: File
+    - menuitem "New"
+    - menuitem "Open"
+  - separator
+  - group:
+    - text: Edit
+    - menuitem "Cut"
+    - menuitem "Copy"

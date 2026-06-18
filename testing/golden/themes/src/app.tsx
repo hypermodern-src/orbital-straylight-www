@@ -1965,6 +1965,8 @@ const PAGES: Page[] = [
           </Select.Group>
         </Select.Content>
       </Select.Root>
+    ),
+  },
   // Wave-C: Tabs activationMode="manual" — arrow keys move the roving focus WITHOUT
   // changing selection; Enter/Space on the focused trigger activates it (tabs.tsx:61,
   // 192-202). Keyboard-only APG story (no new DOM golden; the at-rest DOM matches `tabs`).
@@ -2122,6 +2124,8 @@ const PAGES: Page[] = [
           </Box>
         </ScrollArea>
       );
+    })(),
+  },
   // ── Wave-C: Themes.Separator WRAPPER depth oracle (distinct from the primitive) ──
   // The rt-Separator themes wrapper (NOT the bare primitive) has its own contract:
   //   * decorative defaults to TRUE → role is OMITTED ENTIRELY (role={undefined}),
@@ -2143,6 +2147,71 @@ const PAGES: Page[] = [
       if (s === "vertical") return <Separator orientation="vertical" />;
       return <Separator />;
     })(),
+  },
+  // ── Wave-D menus depth (STR-330): Select FORM integration (BubbleSelect) ─────────
+  // A second Select id exercising the missing-in-port FORM surface: Root name="fruit"
+  // required, wrapped in a <form> so @radix-ui/react-select sees isFormControl=true and
+  // renders the hidden native <select> (SelectBubbleInput) — aria-hidden, tabindex=-1,
+  // required, with one <option> per item and the selected one carrying `selected`. That
+  // bubble input is the form-participation node the port must reproduce. The driver OPENS
+  // the select (so the content listbox is mounted in BOTH golden and port — the port keeps
+  // closed content mounted at display:none whereas upstream unmounts it via Presence, a
+  // pre-existing portal-design divergence that only surfaces on a CLOSED select; opening
+  // sidesteps it and still captures the BubbleSelect, which is the new contract here).
+  {
+    id: "selectform",
+    label: "Select — form",
+    interactive: true,
+    node: (
+      <form onSubmit={(e) => e.preventDefault()}>
+        <Select.Root defaultValue="apple" name="fruit" required>
+          <Select.Trigger />
+          <Select.Content>
+            <Select.Group>
+              <Select.Label>Fruits</Select.Label>
+              <Select.Item value="apple">Apple</Select.Item>
+              <Select.Item value="orange">Orange</Select.Item>
+              <Select.Item value="grape">Grape</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+      </form>
+    ),
+  },
+  // ── Wave-D menus depth (STR-330): DropdownMenu Group + Label parts ──────────────
+  // A second dropdown id exercising the missing-in-port Group/Label sub-parts:
+  // DropdownMenu.Group wraps items in role=group, aria-labelledby pointing at a
+  // DropdownMenu.Label (a non-interactive labelling div, NO role=menuitem, NOT in the
+  // roving order). Two labelled groups separated by a Separator. Opened by clicking the
+  // trigger; the open-state DOM is the oracle (group/label structure the port must
+  // reproduce). The driver just opens — no roving needed for the structure snapshot.
+  {
+    id: "dropdownmenugroup",
+    label: "Dropdown Menu — groups",
+    interactive: true,
+    node: (
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <Button variant="soft">
+            Actions
+            <DropdownMenu.TriggerIcon />
+          </Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Group>
+            <DropdownMenu.Label>File</DropdownMenu.Label>
+            <DropdownMenu.Item>New</DropdownMenu.Item>
+            <DropdownMenu.Item>Open</DropdownMenu.Item>
+          </DropdownMenu.Group>
+          <DropdownMenu.Separator />
+          <DropdownMenu.Group>
+            <DropdownMenu.Label>Edit</DropdownMenu.Label>
+            <DropdownMenu.Item>Cut</DropdownMenu.Item>
+            <DropdownMenu.Item>Copy</DropdownMenu.Item>
+          </DropdownMenu.Group>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    ),
   },
 ];
 

@@ -1028,4 +1028,29 @@ export const STATES = {
       });
     },
   },
+  // Wave-D: Select FORM integration. STATELESS at-rest oracle (no popup). `?s=required`
+  // mounts the hidden native <select> (BubbleSelect) sibling + aria-required on the
+  // trigger; `?s=disabledtrigger` makes the trigger a disabled <button>. The driver only
+  // waits for the trigger to be present; keyed off the UPSTREAM rt-SelectTrigger class so
+  // the same wait runs against golden and port.
+  selectform: {
+    // OPEN the select (so the content listbox is mounted in golden + port) AND assert the
+    // hidden native <select> (BubbleSelect) sibling is present — the new form-participation
+    // contract. Keyed off the UPSTREAM rt-SelectTrigger / role=listbox / select[aria-hidden]
+    // selectors so the same driver runs against golden and port.
+    required: async (pg) => {
+      await pg.locator("select[aria-hidden]").first().waitFor({ state: "attached" });
+      await pg.locator(".rt-SelectTrigger").first().click();
+      await pg.locator('[role="listbox"]').waitFor();
+    },
+  },
+  // Wave-D: DropdownMenu Group/Label parts. Open the menu (click the trigger) and wait
+  // for the role=group wrappers + their aria-labelledby Label divs. Keyed off the
+  // UPSTREAM role=group / role=menu selectors so the same driver runs golden + port.
+  dropdownmenugroup: {
+    open: async (pg) => {
+      await openMenu(pg, () => triggerButton(pg).click());
+      await pg.locator('[role="menu"] [role="group"]').first().waitFor();
+    },
+  },
 };

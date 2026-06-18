@@ -154,6 +154,9 @@ STATES=(
   "separatorthemes:size4"
   "separatorthemes:accent"
   "separatorthemes:vertical"
+  # ── Wave-D menus depth (STR-330): Select form integration + DropdownMenu groups ──
+  "selectform:required"
+  "dropdownmenugroup:open"
 )
 
 echo "ℵ building golden dist (bun)"

@@ -1563,6 +1563,61 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
+
+  // ── Wave-D menus depth (STR-330): DropdownMenu Group/Label parts ────────────────
+  // Two labelled groups (File: New/Open, Edit: Cut/Copy) with a Separator between. The
+  // Labels are NON-interactive (no role=menuitem, not in the roving order); ArrowDown roves
+  // the FOUR items ACROSS group boundaries, never landing on a label. Each group is a
+  // role=group; the label is a plain div inside it. Keyed off role/data-highlighted only.
+  { id: "dropdownmenugroup", apg: "menu", name: "two role=group wrappers; labels are NOT menuitems", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.locator('[role="menu"]').waitFor();
+    const groups = await pg.locator('[role="menu"] [role="group"]').count();
+    ok(groups === 2, `expected 2 role=group wrappers, got ${groups}`);
+    const items = await pg.locator('[role="menu"] [role="menuitem"]').count();
+    ok(items === 4, `expected 4 menuitems (labels excluded), got ${items}`);
+    // the Labels (#File / #Edit) must NOT be menuitems
+    const labelIsMenuitem = await pg.evaluate(() =>
+      [...document.querySelectorAll('[role="menu"] [role="menuitem"]')].some((e) => {
+        const t = (e.textContent || "").trim();
+        return t === "File" || t === "Edit";
+      }));
+    ok(!labelIsMenuitem, "a group Label must not be a role=menuitem");
+  }},
+  { id: "dropdownmenugroup", apg: "menu", name: "ArrowDown roves the 4 items ACROSS group boundaries, skipping labels", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "New");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Open");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Cut");   // crosses into the 2nd group
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Copy");
+  }},
+
+  // ── Wave-D menus depth (STR-330): Select FORM integration (BubbleSelect) ────────
+  // The select participates in a form: the trigger carries aria-required=true and a hidden
+  // native <select> (BubbleSelect) mirrors the value for native submission. The bubble is
+  // aria-hidden, tabindex=-1, required, with the selected <option> carrying `selected`.
+  // The driver opens the select; keyed off the UPSTREAM combobox/listbox + select[aria-hidden].
+  { id: "selectform", state: "required", apg: "listbox", name: "trigger is aria-required and a hidden required native <select> mirrors the value", run: async (pg) => {
+    await pg.locator("select[aria-hidden]").first().waitFor({ state: "attached" });
+    ok((await attrOf(pg, '[role="combobox"]', 0, "aria-required")) === "true", "trigger must be aria-required=true");
+    const bubble = await pg.evaluate(() => {
+      const s = document.querySelector("select[aria-hidden]");
+      if (!s) return null;
+      return {
+        required: s.hasAttribute("required"),
+        tabindex: s.getAttribute("tabindex"),
+        name: s.getAttribute("name"),
+        value: s.value,
+        selectedOption: s.querySelector("option[selected]")?.getAttribute("value") ?? null,
+      };
+    });
+    ok(bubble, "hidden native <select> (BubbleSelect) must be present");
+    ok(bubble.required, "BubbleSelect must be required");
+    ok(bubble.tabindex === "-1", "BubbleSelect must be tabindex=-1");
+    ok(bubble.name === "fruit", `BubbleSelect name must be 'fruit', got ${bubble.name}`);
+    ok(bubble.value === "apple", `BubbleSelect value must mirror the selection, got ${bubble.value}`);
+    ok(bubble.selectedOption === "apple", "the selected <option> must carry `selected`");
+  }},
 ];
 
 const b = await chromium.launch();
