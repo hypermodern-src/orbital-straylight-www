@@ -56,10 +56,10 @@ import Prelude
 
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Foldable (for_, minimum, maximum)
+import Data.Foldable (for_, minimum, maximum, foldl)
 import Data.Array (mapWithIndex, length, index, updateAt, (!!))
 import Data.Number.Format (toString) as Num
-import Data.Ord (clamp)
+import Data.Ord (clamp, abs)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -320,6 +320,26 @@ nextValue st value key shiftKey =
       "ArrowRight" -> if horizontal then stepBy 1 else Nothing
       _ -> Nothing
 
+-- | Map a pointer position to a RAW (un-snapped) value via the root's rect, mirroring radix
+-- | `getValueFromPointer`: fraction = (pointer − rect.start)/extent along the active axis
+-- | (horizontal LTR left→right, RTL flipped, vertical bottom→top), then `min + fraction·span`.
+-- | Shared by the single thumb and the range (which then picks the nearest thumb).
+pointerRawValue
+  :: { min :: Int, max :: Int, dir :: Dir, orientation :: Orientation }
+  -> { x :: Number, y :: Number, width :: Number, height :: Number }
+  -> ME.MouseEvent -> Int
+pointerRawValue cfg rect me =
+  let
+    fraction
+      | cfg.orientation == Vertical =
+          if rect.height == 0.0 then 0.0
+          else clamp 0.0 1.0 ((rect.y + rect.height - toNumber (ME.clientY me)) / rect.height)
+      | otherwise =
+          let f = if rect.width == 0.0 then 0.0 else clamp 0.0 1.0 ((toNumber (ME.clientX me) - rect.x) / rect.width)
+          in if cfg.dir == RTL then 1.0 - f else f
+  in
+    round (toNumber cfg.min + fraction * toNumber (cfg.max - cfg.min))
+
 -- | Snap to the step grid relative to `min` (radix `Math.round((v-min)/step)*step+min`),
 -- | then clamp to [min,max].
 snapClamp :: State -> Int -> Int
@@ -403,17 +423,7 @@ commitFromPointer me = do
   mroot <- H.getHTMLElementRef rootRef
   for_ mroot \root -> do
     rect <- liftEffect (Popper.measureRect root)
-    let
-      fraction
-        | st.orientation == Vertical =
-            -- bottom origin: 0 at the bottom edge, 1 at the top
-            if rect.height == 0.0 then 0.0
-            else clamp 0.0 1.0 ((rect.y + rect.height - toNumber (ME.clientY me)) / rect.height)
-        | otherwise =
-            let f = if rect.width == 0.0 then 0.0 else clamp 0.0 1.0 ((toNumber (ME.clientX me) - rect.x) / rect.width)
-            in if st.dir == RTL then 1.0 - f else f
-      raw = toNumber st.min + fraction * toNumber (st.max - st.min)
-    setValue (snapClamp st (round raw))
+    setValue (snapClamp st (pointerRawValue { min: st.min, max: st.max, dir: st.dir, orientation: st.orientation } rect me))
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
@@ -514,16 +524,26 @@ type RangeState =
   , uid :: String
   , name :: String
   , isFormControl :: Boolean
+  , dragging :: Boolean
+  , dragSubs :: Array H.SubscriptionId
+  , dragThumb :: Int     -- the thumb index a pointer drag is moving
   }
 
 data RangeAction
   = RangeInitialize
   | RangeReceive RangeInput
   | RangeThumbKeyDown Int KE.KeyboardEvent
+  | RangeSlideStart ME.MouseEvent  -- pointer-down: pick the nearest thumb + begin dragging it
+  | RangeSlideMove ME.MouseEvent
+  | RangeSlideEnd
 
 -- | A stable ref per thumb index, so the changed thumb keeps focus across re-render.
 rangeThumbRef :: Int -> H.RefLabel
 rangeThumbRef i = H.RefLabel ("slider-range-thumb-" <> show i)
+
+-- | The range root <span> ref — measured to map a pointer to a value.
+rangeRootRef :: H.RefLabel
+rangeRootRef = H.RefLabel "slider-range-root"
 
 rangeComponent :: forall m. MonadEffect m => H.Component RangeQuery RangeInput RangeOutput m
 rangeComponent =
@@ -553,6 +573,9 @@ rangeInitialState input =
   , uid: ""
   , name: input.name
   , isFormControl: input.isFormControl
+  , dragging: false
+  , dragSubs: []
+  , dragThumb: 0
   }
 
 -- | Project the range state onto the single-thumb `State` shape so `percent`, `nextValue`
@@ -597,12 +620,13 @@ rangeRender st =
   in
     HH.span
       ( [ classes st.style.root
+        , HP.ref rangeRootRef
         , aria "disabled" (if st.disabled then "true" else "false")
         , dataOrientation st.orientation
         , HP.attr (HH.AttrName "style") ("--radix-slider-thumb-transform: " <> thumbTransform <> ";")
         ]
           <> (if isVertical then [] else [ HP.attr (HH.AttrName "dir") (dirName st.dir) ])
-          <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+          <> (if st.disabled then [ dataAttr "disabled" "" ] else [ HE.onMouseDown RangeSlideStart ])
       )
       ( [ HH.span
             ( [ classes st.style.track
@@ -748,6 +772,61 @@ rangeHandleAction = case _ of
                         H.modify_ _ { ctrl = (change next' st.ctrl).next }
                         H.raise (RangeValueChanged next')
               rangeFocusThumb idx
+  -- pointer-down: map the pointer to a value, pick the CLOSEST thumb, make it active, and drag
+  -- it (radix multi-thumb handleSlideStart → getClosestValueIndex). Document move/up track it.
+  RangeSlideStart me -> do
+    st <- H.get
+    when (not st.disabled) do
+      liftEffect (preventDefault (ME.toEvent me))
+      mroot <- H.getHTMLElementRef rangeRootRef
+      for_ mroot \root -> do
+        rect <- liftEffect (Popper.measureRect root)
+        let
+          raw = pointerRawValue { min: st.min, max: st.max, dir: st.dir, orientation: st.orientation } rect me
+          idx = closestThumb (current st.ctrl) raw
+        rangeCommitThumb idx raw
+        rangeFocusThumb idx
+        doc <- liftEffect (HTML.window >>= Window.document)
+        let docTarget = HTMLDocument.toEventTarget doc
+        moveSub <- H.subscribe (eventListener (EventType "mousemove") docTarget (map RangeSlideMove <<< ME.fromEvent))
+        upSub <- H.subscribe (eventListener (EventType "mouseup") docTarget (\_ -> Just RangeSlideEnd))
+        H.modify_ _ { dragging = true, dragSubs = [ moveSub, upSub ], dragThumb = idx }
+  RangeSlideMove me -> do
+    st <- H.get
+    when st.dragging do
+      mroot <- H.getHTMLElementRef rangeRootRef
+      for_ mroot \root -> do
+        rect <- liftEffect (Popper.measureRect root)
+        rangeCommitThumb st.dragThumb (pointerRawValue { min: st.min, max: st.max, dir: st.dir, orientation: st.orientation } rect me)
+  RangeSlideEnd -> do
+    st <- H.get
+    for_ st.dragSubs H.unsubscribe
+    H.modify_ _ { dragging = false, dragSubs = [] }
+
+-- | The index of the thumb whose value is closest to `target` (ties → the lower index), radix
+-- | `getClosestValueIndex`.
+closestThumb :: Array Int -> Int -> Int
+closestThumb values target =
+  let
+    dists = mapWithIndex (\i v -> { i, d: abs (v - target) }) values
+    pick best cur = if cur.d < best.d then cur else best
+  in
+    _.i (foldl pick { i: 0, d: top } dists)
+
+-- | Set thumb `idx` to `proposed` (snapped + neighbour-clamped by minStepsBetweenThumbs), commit.
+rangeCommitThumb :: forall m. Int -> Int -> H.HalogenM RangeState RangeAction () RangeOutput m Unit
+rangeCommitThumb idx proposed = do
+  st <- H.get
+  let values = current st.ctrl
+  for_ (index values idx) \cur -> do
+    let snapped = snapClamp (asThumbState st) proposed
+    case rangeClampNeighbour st values idx snapped of
+      Nothing -> pure unit
+      Just v -> when (cur /= v) $ case updateAt idx v values of
+        Nothing -> pure unit
+        Just next' -> do
+          H.modify_ _ { ctrl = (change next' st.ctrl).next }
+          H.raise (RangeValueChanged next')
 
 rangeFocusThumb :: forall m. MonadEffect m => Int -> H.HalogenM RangeState RangeAction () RangeOutput m Unit
 rangeFocusThumb idx = do

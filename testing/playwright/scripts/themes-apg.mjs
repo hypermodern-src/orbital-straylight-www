@@ -2102,6 +2102,26 @@ const CHECKS = [
     await press(pg, "End");
     await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "100", "End did not drive the upper thumb to max");
   }},
+  // Pointer-drag picks the CLOSEST thumb (radix getClosestValueIndex) and drags it. Values
+  // [25,75]; a pointer-down at 40% is nearest the LOWER thumb → it jumps to ≈40 (upper stays
+  // 75); dragging to 10% takes the lower to ≈10. Non-circular: --golden drags identically.
+  { id: "sliderrange", state: "default", apg: "slider", name: "pointer-down picks the nearest thumb and drags it (upper unchanged)", run: async (pg) => {
+    const rootEl = pg.locator(".rt-SliderRoot").first();
+    await rootEl.waitFor();
+    const box = await rootEl.boundingBox();
+    ok(!!box, "could not measure the range slider root");
+    const y = box.y + box.height / 2;
+    await pg.mouse.move(box.x + box.width * 0.40, y);
+    await pg.mouse.down();
+    await pg.waitForTimeout(60);
+    const v1 = await pg.$$eval('[role="slider"]', (els) => els.map((e) => Number(e.getAttribute("aria-valuenow"))));
+    ok(Math.abs(v1[0] - 40) <= 3 && Math.abs(v1[1] - 75) <= 3, `pointer at 40% should move the lower thumb to ≈40, upper stays 75 (got ${v1})`);
+    await pg.mouse.move(box.x + box.width * 0.10, y);
+    await pg.waitForTimeout(60);
+    const v2 = await pg.$$eval('[role="slider"]', (els) => els.map((e) => Number(e.getAttribute("aria-valuenow"))));
+    ok(Math.abs(v2[0] - 10) <= 3 && Math.abs(v2[1] - 75) <= 3, `dragging to 10% should set the lower thumb ≈10 (got ${v2})`);
+    await pg.mouse.up();
+  }},
   // minStepsBetweenThumbs: the lower thumb (starts at 40, neighbour at 60, gap=10·step)
   // cannot step closer than 50. Drive it: ArrowRight 25× — it climbs 40→50 then the
   // constraint REJECTS every further move, parking it at exactly 50 (a no-op clamp).
