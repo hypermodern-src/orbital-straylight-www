@@ -106,6 +106,7 @@ type Slots =
   , menubarchecks :: Menubar.Slot Unit
   , selectplaceholder :: Select.Slot Unit
   , avatarx :: RadixAvatar.Slot Unit
+  , labelguard :: Label.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -208,6 +209,9 @@ _selectplaceholder :: Proxy "selectplaceholder"
 _selectplaceholder = Proxy
 _avatarx :: Proxy "avatarx"
 _avatarx = Proxy
+
+_labelguard :: Proxy "labelguard"
+_labelguard = Proxy
 
 main :: Effect Unit
 main = do
@@ -320,6 +324,11 @@ view c s =
             -- bars + corner. Same primitive, the `scrollbars` field selects the family.
             "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
             "separatorthemes" -> separatorThemesPage s
+            -- Wave-D Label depth: the onMouseDown text-selection guard (label.tsx:19-27)
+            -- as a self-contained component. ?s=plain → bare label (detail>1 ⇒ preventDefault);
+            -- ?s=control → label WRAPPING an input (mousedown inside it ⇒ early return, NO
+            -- preventDefault). The DOM is a <label>+children; the guard is driver-adjudicated.
+            "labelguard" -> HH.slot_ _labelguard unit Label.component (labelGuardInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1762,6 +1771,25 @@ separatorThemesPage s
   | s == "accent" = ThemesSeparator.separator [ Color "cyan" ]
   | s == "vertical" = ThemesSeparator.separator [ Class "rt-r-orientation-vertical" ]
   | otherwise = ThemesSeparator.separator []
+
+-- | Label onMouseDown guard (Wave-D). `plain` = a bare label whose text-multi-click
+-- | mousedown is preventDefault-ed (detail>1). `control` = a label wrapping an <input>
+-- | so a mousedown on the input hits the early-return (closest('…input…')) path and is
+-- | NOT preventDefault-ed. Both render a <label for=…> carrying the guard listener.
+labelGuardInput :: String -> Label.Input
+labelGuardInput s
+  | s == "control" =
+      { for: "lg-input"
+      , class_: mempty
+      , attrs: [ HP.id "lg-label" ]
+      , children: [ HH.text "Name ", HH.input [ HP.id "lg-input" ] ]
+      }
+  | otherwise =
+      { for: "lg-input"
+      , class_: mempty
+      , attrs: [ HP.id "lg-label" ]
+      , children: [ HH.text "Email" ]
+      }
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────
 queryParam :: String -> Effect String

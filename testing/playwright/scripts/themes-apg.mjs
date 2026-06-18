@@ -1563,6 +1563,45 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
+
+  // ── Wave-D: Label onMouseDown text-selection guard (label.tsx:19-27) ─────────────
+  // Not an APG keyboard pattern, but a deterministic, non-circular behavior oracle that
+  // validates against the real @radix-ui/react-label golden first, then the port. The guard:
+  //   plain   → a multi-click (detail>1) mousedown on the label NOT inside a control must be
+  //             preventDefault-ed (suppress text selection).
+  //   control → a mousedown landing inside the wrapped <input> (closest('…input…')) must
+  //             RETURN EARLY → NOT preventDefault-ed.
+  // We dispatch a real MouseEvent({detail:2}) and read event.defaultPrevented after React's
+  // (or the port's) handler ran. A single-click (detail:1) on the plain label must ALSO be
+  // left alone (the detail>1 gate) — checked inline so the oracle pins the gate.
+  { id: "labelguard", state: "plain", apg: "label", name: "guard: multi-click mousedown on bare label is preventDefault-ed; single-click is not", run: async (pg) => {
+    await pg.locator("label[for]").first().waitFor();
+    const multi = await pg.evaluate(() => {
+      const lbl = document.querySelector("label[for]");
+      const ev = new MouseEvent("mousedown", { bubbles: true, cancelable: true, detail: 2 });
+      lbl.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    ok(multi === true, `detail=2 mousedown on bare label must be preventDefault-ed (got ${multi})`);
+    const single = await pg.evaluate(() => {
+      const lbl = document.querySelector("label[for]");
+      const ev = new MouseEvent("mousedown", { bubbles: true, cancelable: true, detail: 1 });
+      lbl.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    ok(single === false, `detail=1 (single) mousedown must NOT be preventDefault-ed (got ${single})`);
+  }},
+  { id: "labelguard", state: "control", apg: "label", name: "guard: multi-click mousedown INSIDE wrapped control early-returns (NOT preventDefault-ed)", run: async (pg) => {
+    await pg.locator("label[for] input").first().waitFor();
+    const onInput = await pg.evaluate(() => {
+      const inp = document.querySelector("label[for] input");
+      const ev = new MouseEvent("mousedown", { bubbles: true, cancelable: true, detail: 2 });
+      inp.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    ok(onInput === false, `detail=2 mousedown on the wrapped input must early-return (NOT preventDefault-ed; got ${onInput})`);
+  }},
+
 ];
 
 const b = await chromium.launch();

@@ -154,6 +154,9 @@ STATES=(
   "separatorthemes:size4"
   "separatorthemes:accent"
   "separatorthemes:vertical"
+  # Wave-D: Label onMouseDown guard — DOM snapshot (the guard itself is APG-adjudicated).
+  "labelguard:plain"
+  "labelguard:control"
 )
 
 echo "ℵ building golden dist (bun)"
