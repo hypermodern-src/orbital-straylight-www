@@ -1552,6 +1552,25 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=formreset` wraps the field in a <form> with a reset button: revealing the
+      // password then clicking Reset must flip the input type=text→password (upstream's
+      // form `reset` listener forces visible=false). The reset button proves the security path.
+      if (s === "formreset") {
+        return (
+          <Box>
+            <form>
+              <label htmlFor="password">Password</label>
+              <PasswordToggleField.Root>
+                <PasswordToggleField.Input id="password" />
+                <PasswordToggleField.Toggle>
+                  <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+                </PasswordToggleField.Toggle>
+              </PasswordToggleField.Root>
+              <button type="reset">Reset</button>
+            </form>
+          </Box>
+        );
+      }
       if (s === "disabled") {
         return (
           <Box>

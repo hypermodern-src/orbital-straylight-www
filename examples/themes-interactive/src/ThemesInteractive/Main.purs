@@ -1388,12 +1388,25 @@ checkboxCardsPage =
 -- | password→text and the Slot text Show→Hide.
 passwordTogglePage :: String -> H.ComponentHTML Void Slots Aff
 passwordTogglePage s =
-  box []
-    [ HH.label
-        [ HP.attr (HH.AttrName "for") "password" ]
-        [ HH.text "Password" ]
-    , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
-    ]
+  -- `?s=formreset` wraps the field in a <form> with a reset button so the port's form
+  -- reset listener (forces visibility→hidden) is exercised; otherwise the bare box.
+  if s == "formreset" then
+    box []
+      [ HH.form_
+          [ HH.label
+              [ HP.attr (HH.AttrName "for") "password" ]
+              [ HH.text "Password" ]
+          , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
+          , HH.button [ HP.type_ HP.ButtonReset ] [ HH.text "Reset" ]
+          ]
+      ]
+  else
+    box []
+      [ HH.label
+          [ HP.attr (HH.AttrName "for") "password" ]
+          [ HH.text "Password" ]
+      , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
+      ]
 
 -- | The icon-only toggle content for `?s=autolabel` — an aria-hidden SVG with no inner text,
 -- | byte-identical to the golden so the auto aria-label ("Show password") is what names the button.

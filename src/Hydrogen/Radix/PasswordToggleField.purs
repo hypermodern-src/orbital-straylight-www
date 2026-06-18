@@ -37,16 +37,21 @@ module Hydrogen.Radix.PasswordToggleField
 import Prelude
 
 import Data.Array (null)
+import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties.ARIA as ARIA
+import Halogen.Query.Event (eventListener)
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes)
+import Web.Event.Event (Event, EventType(..), defaultPrevented)
+import Web.HTML.HTMLInputElement as HTMLInputElement
+import Web.HTML.HTMLFormElement as HTMLFormElement
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -122,6 +127,18 @@ data Action
   = Initialize
   | Toggled
   | Receive Input
+  -- Wave-D: the enclosing form reset/submit forces visibility back to hidden (security:
+  -- never leave the password revealed across a reset, nor let the browser remember it
+  -- across a submit). `reset` is skipped if the event was defaultPrevented (checked in the
+  -- handler, where Effect is available); `submit` always hides. Upstream
+  -- PasswordToggleFieldInput attaches both to inputElement.form.
+  | FormReset Event
+  | FormHide
+
+-- | The input ref — used on Initialize to discover the enclosing <form> and subscribe to
+-- | its reset/submit events (the password-toggle's form-participation contract).
+inputRef :: H.RefLabel
+inputRef = H.RefLabel "password-toggle-input"
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -168,6 +185,7 @@ render st =
       [ HP.style "display:contents" ]
       [ HH.input
           ( [ HP.type_ (if visible then HP.InputText else HP.InputPassword)
+            , HP.ref inputRef
             , HP.id idv
             , HP.attr (HH.AttrName "autocomplete") st.autoComplete
             , HP.attr (HH.AttrName "autocapitalize") "off"
@@ -198,11 +216,26 @@ handleAction = case _ of
       Nothing -> do
         i <- useId
         H.modify_ _ { inputId = Just i }
+    -- Discover the enclosing <form> off the input and subscribe to its reset/submit:
+    -- both drive the field back to hidden (reset only when not defaultPrevented; submit
+    -- unconditionally). No form ⇒ no subscription (the bare/labelled stories are unaffected).
+    mel <- H.getHTMLElementRef inputRef
+    for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> do
+      mform <- liftEffect (HTMLInputElement.form inp)
+      for_ mform \form -> do
+        let target = HTMLFormElement.toEventTarget form
+        void $ H.subscribe (eventListener (EventType "reset") target (Just <<< FormReset))
+        void $ H.subscribe (eventListener (EventType "submit") target \_ -> Just FormHide)
   Toggled -> do
     st <- H.get
     let res = change (not (current st.ctrl)) st.ctrl
     H.modify_ _ { ctrl = res.next }
     H.raise (VisibilityChanged res.emit)
+  FormReset ev -> do
+    -- a reset whose default was prevented is ignored (upstream gates on !defaultPrevented).
+    prevented <- liftEffect (defaultPrevented ev)
+    when (not prevented) hideVisibility
+  FormHide -> hideVisibility
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.visible st.ctrl
@@ -219,6 +252,16 @@ handleAction = case _ of
           Just _ -> input.inputId
           Nothing -> st.inputId
       }
+
+-- | Force visibility to hidden (the form reset/submit security path). A no-op when already
+-- | hidden — change(false) when current is false emits no transition.
+hideVisibility :: forall m. H.HalogenM State Action () Output m Unit
+hideVisibility = do
+  st <- H.get
+  when (current st.ctrl) do
+    let res = change false st.ctrl
+    H.modify_ _ { ctrl = res.next }
+    H.raise (VisibilityChanged res.emit)
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

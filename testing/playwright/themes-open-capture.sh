@@ -160,6 +160,8 @@ STATES=(
   "sliderrange:minsteps"
   # ── Wave-D: OTP paste / autocomplete-dump (value.length>1 ⇒ PASTE reducer) ──
   "otp:paste"
+  # ── Wave-D: PasswordToggleField form-reset → visibility back to hidden ──────
+  "passwordtoggle:formreset"
 )
 
 echo "ℵ building golden dist (bun)"

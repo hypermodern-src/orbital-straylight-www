@@ -706,6 +706,22 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector("input")?.disabled === true && document.querySelector("button")?.disabled === true);
     },
+    // Wave-D form RESET: reveal the password (click the toggle → type=text) then click the
+    // form's Reset button. The enclosing form's `reset` event forces visibility back to hidden
+    // (type=text→password) — the security round-trip. The post-reset DOM (input type=password,
+    // toggle text "Show") is the oracle; keyed off upstream selectors only.
+    formreset: async (pg) => {
+      const toggle = root(pg).getByRole("button", { name: /show|hide/i }).first();
+      await toggle.waitFor();
+      await toggle.click();
+      await pg.locator('input[type="text"]').first().waitFor();
+      await root(pg).locator('button[type="reset"]').click();
+      await pg.locator('input[type="password"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const b = [...document.querySelectorAll("button")].find((x) => x.type !== "reset");
+        return document.querySelector('input[type="password"]') && b?.textContent?.trim() === "Show";
+      });
+    },
   },
   otp: {
     // defaultValue="123" 3-slot at rest: inputs carry value 1/2/3, hidden input value=123, roving

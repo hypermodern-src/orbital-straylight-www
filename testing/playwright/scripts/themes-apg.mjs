@@ -676,6 +676,19 @@ const CHECKS = [
     await press(pg, "Enter");
     ok((await attrOf(pg, inp, 0, "type")) === "password", "Enter did not re-hide the password (type→password)");
   }},
+  // Wave-D: a form RESET forces visibility back to hidden (security — never leave the
+  // password revealed across a reset). Reveal it, then click the form's Reset button.
+  { id: "passwordtoggle", state: "formreset", apg: "button", name: "a form reset re-hides the password (type text→password)", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "input should start hidden (type=password)");
+    await pg.locator('#root button[type="reset"]').waitFor();
+    // reveal via the toggle (the non-reset button)
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    ok((await attrOf(pg, inp, 0, "type")) === "text", "toggle did not reveal the password");
+    await pg.locator('#root button[type="reset"]').click();
+    await attrEq(pg, inp, 0, "type", "password", "form reset did not re-hide the password");
+  }},
 
   { id: "otp", state: "filled", apg: "roving-tabindex", name: "ArrowRight/ArrowLeft rove between slots; the tab stop migrates", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
