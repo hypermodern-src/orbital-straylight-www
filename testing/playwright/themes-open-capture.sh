@@ -71,6 +71,7 @@ STATES=(
   "hovercard:richcontent"
   "navigationmenu:vertical"
   "navigationmenu:clicktoggle"
+  "navigationmenu:rtl"
   # wave-b roving depth gaps (STR-330): new DOM oracles.
   "togglegroup:multiple"
   "accordion:multiple"

@@ -1030,10 +1030,16 @@ const PAGES: Page[] = [
       // the Indicator measures top/height/translateY instead of left/width/translateX). ?s=open
       // and ?s=vertical both open Item One at first paint via defaultValue.
       const vertical = currentState() === "vertical";
+      // Wave-D depth: ?s=rtl → an OPEN nav under dir="rtl". The FocusGroup swaps the horizontal
+      // roving keys (ArrowLeft↔ArrowRight) and the entry key (ArrowDown stays the vertical
+      // entry; the horizontal axis is mirrored). dir=rtl is stamped on nav/list/content. Opens
+      // Item One at first paint via defaultValue (no timer race).
+      const rtl = currentState() === "rtl";
       return (
         <NavigationMenu.Root
-          {...(open || vertical ? { defaultValue: "one" } : {})}
+          {...(open || vertical || rtl ? { defaultValue: "one" } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
+          {...(rtl ? { dir: "rtl" as const } : {})}
         >
           <NavigationMenu.List>
             <NavigationMenu.Item value="one">

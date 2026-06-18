@@ -1578,6 +1578,28 @@ const CHECKS = [
     await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="tooltip"]')), "clicking the trigger must dismiss the open tooltip");
   }},
+
+  // NavigationMenu RTL — the horizontal FocusGroup SWAPS the roving arrow keys under dir="rtl":
+  // ArrowLeft becomes "forward" (toward the logically-next trigger) and ArrowRight "backward",
+  // because in RTL the visual-left direction is the reading-forward direction. Open story is
+  // ?s=rtl (dir=rtl on the nav, OPEN at first paint). Two triggers (Item One / Item Two). Focus
+  // the first → ArrowLeft must land on the second (RTL forward); ArrowRight returns to the
+  // first; a second ArrowRight at the edge stays put (still NON-looping). Keyed off the trigger
+  // bar (button[aria-expanded]) + dir=rtl on the nav, so the same check runs golden + port.
+  { id: "navigationmenu", state: "rtl", apg: "disclosure", name: "RTL: ArrowLeft is forward, ArrowRight is backward (swapped, non-looping)", run: async (pg) => {
+    await pg.locator('#root nav[dir="rtl"]').first().waitFor();
+    const triggers = '#root button[aria-expanded]';
+    await pg.locator(triggers).first().waitFor();
+    await focusFirst(pg, triggers);
+    ok(await activeIsNth(pg, triggers, 0), "could not focus the first trigger");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, triggers, 1), "RTL: ArrowLeft must move FORWARD to the next trigger");
+    // NON-looping at the forward edge: a second ArrowLeft stays on the last.
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, triggers, 1), "RTL: ArrowLeft wrapped (FocusGroup must NOT loop)");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, triggers, 0), "RTL: ArrowRight must move BACKWARD to the previous trigger");
+  }},
 ];
 
 const b = await chromium.launch();

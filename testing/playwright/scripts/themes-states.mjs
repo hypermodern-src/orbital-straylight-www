@@ -272,6 +272,21 @@ export const STATES = {
       await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
       await pg.waitForFunction(() => document.querySelectorAll('button[aria-expanded="true"]').length === 0);
     },
+    // Wave-D: RTL (?s=rtl) — OPEN at first paint (defaultValue="one") under dir="rtl". Same
+    // open-state wait as `open`, plus assert dir=rtl is stamped on the nav. The FocusGroup
+    // then swaps the horizontal roving keys. Keyed off UPSTREAM dir/data-state selectors so
+    // the same driver runs golden + port.
+    rtl: async (pg) => {
+      await root(pg).locator('[dir="rtl"]').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
   },
 
   // ── Interactive (stateful, non-overlay) components ──────────────────────────────

@@ -812,8 +812,11 @@ navigationMenuInput s = NavigationMenu.defaultInput
   -- OPEN at first paint (defaultValue="one") ONLY for the explicit `open` capture (?s=open);
   -- every other path (the `closed`/`rest` capture, the index) renders at rest — mirroring the
   -- golden story's `currentState() === "open"` switch (so the a11y `rest` baseline matches too).
-  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" then "one" else ""
+  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" || s == "rtl" then "one" else ""
   , orientation = if s == "vertical" then Vertical else Horizontal
+  -- Wave-D: ?s=rtl drives dir=RTL (the FocusGroup swaps the horizontal roving keys + the
+  -- dir attribute is stamped on the nav/list/content). Every other path stays LTR.
+  , dir = if s == "rtl" then RTL else LTR
   , items =
       [ { value: "one"
         , trigger: [ HH.text "Item One" ]
