@@ -1028,4 +1028,46 @@ export const STATES = {
       });
     },
   },
+  // ── Wave-D: multi-thumb / RANGE slider (value is number[]) ───────────────────────
+  // Upstream renders one role=slider thumb PER value. Drivers key ONLY off the upstream
+  // role/aria-label selectors so the same driver runs against golden and port.
+  sliderrange: {
+    // default [25,75]: two thumbs labelled Minimum/Maximum; range spans between them
+    // (left:25%; right:25%). No interaction — the at-rest 2-thumb DOM is the oracle.
+    default: async (pg) => {
+      await root(pg).locator('[role="slider"][aria-label="Minimum"]').first().waitFor();
+      await root(pg).locator('[role="slider"][aria-label="Maximum"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a.length === 2
+          && a[0].getAttribute("aria-valuenow") === "25"
+          && a[1].getAttribute("aria-valuenow") === "75";
+      });
+    },
+    // ?s=triple [20,50,80]: three thumbs labelled "Value 1/2/3 of 3"; range left:20%; right:20%.
+    triple: async (pg) => {
+      await root(pg).locator('[role="slider"][aria-label="Value 1 of 3"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a.length === 3
+          && a[2].getAttribute("aria-label") === "Value 3 of 3"
+          && a[1].getAttribute("aria-valuenow") === "50";
+      });
+    },
+    // ?s=minsteps [40,60] minStepsBetweenThumbs=10: focus the LOWER thumb (Minimum, value 40)
+    // and press ArrowRight 25×. Each step is +1 until the thumb is 10 steps below its neighbour
+    // (60-50=10), then the constraint REJECTS further moves — it parks at exactly 50. The landed
+    // value (Minimum=50, Maximum=60) is the deterministic oracle; range becomes left:50%; right:40%.
+    minsteps: async (pg) => {
+      const lo = root(pg).locator('[role="slider"][aria-label="Minimum"]').first();
+      await lo.waitFor();
+      await lo.focus();
+      for (let i = 0; i < 25; i++) await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a[0].getAttribute("aria-valuenow") === "50"
+          && a[1].getAttribute("aria-valuenow") === "60";
+      });
+    },
+  },
 };

@@ -154,6 +154,10 @@ STATES=(
   "separatorthemes:size4"
   "separatorthemes:accent"
   "separatorthemes:vertical"
+  # ── Wave-D: multi-thumb / RANGE slider (value is number[]) ───────────────────
+  "sliderrange:default"
+  "sliderrange:triple"
+  "sliderrange:minsteps"
 )
 
 echo "ℵ building golden dist (bun)"

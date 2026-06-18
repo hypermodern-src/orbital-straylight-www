@@ -1563,6 +1563,57 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
+
+  // ── Wave-D: multi-thumb / RANGE slider (APG slider pattern, per-thumb) ───────────
+  // Two thumbs, each role=slider with its own valuemin/now/max + an aria-label
+  // (Minimum/Maximum) naming it — radix getLabel for a 2-value slider.
+  { id: "sliderrange", state: "default", apg: "slider", name: "two role=slider thumbs labelled Minimum/Maximum, each focusable", run: async (pg) => {
+    const thumbs = pg.locator('[role="slider"]');
+    await thumbs.first().waitFor();
+    ok((await thumbs.count()) === 2, "range slider must render exactly two role=slider thumbs");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-label")) === "Minimum", "thumb 0 aria-label must be Minimum");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-label")) === "Maximum", "thumb 1 aria-label must be Maximum");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuenow")) === "25", "thumb 0 starts at 25");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "75", "thumb 1 starts at 75");
+    ok((await attrOf(pg, '[role="slider"]', 0, "tabindex")) === "0", "thumb 0 must be focusable");
+    ok((await attrOf(pg, '[role="slider"]', 1, "tabindex")) === "0", "thumb 1 must be focusable");
+  }},
+  // Each thumb keyboard-steps its OWN index only: ArrowRight on the lower thumb moves it,
+  // leaving the upper thumb untouched; ArrowLeft on the upper thumb moves only it.
+  { id: "sliderrange", state: "default", apg: "slider", name: "each thumb steps independently (ArrowRight/Left on its own index)", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"][aria-label="Minimum"]');
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "26", "lower thumb ArrowRight did not increment by one step");
+    await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "75", "upper thumb must NOT move when lower thumb is stepped");
+    await pg.locator('[role="slider"][aria-label="Maximum"]').focus();
+    await press(pg, "ArrowLeft");
+    await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "74", "upper thumb ArrowLeft did not decrement by one step");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "26", "lower thumb must NOT move when upper thumb is stepped");
+  }},
+  // Home/End target the focused thumb's index: Home on the lower thumb drives it to min(0),
+  // End on the upper thumb drives it to max(100). (Single-thumb Home/End semantics, per index.)
+  { id: "sliderrange", state: "default", apg: "slider", name: "Home/End drive the focused thumb to min/max", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await pg.locator('[role="slider"][aria-label="Minimum"]').focus();
+    await press(pg, "Home");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "0", "Home did not drive the lower thumb to min");
+    await pg.locator('[role="slider"][aria-label="Maximum"]').focus();
+    await press(pg, "End");
+    await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "100", "End did not drive the upper thumb to max");
+  }},
+  // minStepsBetweenThumbs: the lower thumb (starts at 40, neighbour at 60, gap=10·step)
+  // cannot step closer than 50. Drive it: ArrowRight 25× — it climbs 40→50 then the
+  // constraint REJECTS every further move, parking it at exactly 50 (a no-op clamp).
+  { id: "sliderrange", state: "minsteps", apg: "slider", name: "minStepsBetweenThumbs blocks the thumb at the neighbour boundary", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuenow")) === "40", "lower thumb must start at 40");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "60", "upper thumb must start at 60");
+    await pg.locator('[role="slider"][aria-label="Minimum"]').focus();
+    for (let i = 0; i < 25; i++) await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "50", "lower thumb must park at 50 (10 steps below its neighbour)");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "60", "upper thumb must stay at 60 (untouched by the lower thumb's keys)");
+  }},
 ];
 
 const b = await chromium.launch();

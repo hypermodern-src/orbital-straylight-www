@@ -106,6 +106,7 @@ type Slots =
   , menubarchecks :: Menubar.Slot Unit
   , selectplaceholder :: Select.Slot Unit
   , avatarx :: RadixAvatar.Slot Unit
+  , sliderrange :: Slider.RangeSlot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -208,6 +209,9 @@ _selectplaceholder :: Proxy "selectplaceholder"
 _selectplaceholder = Proxy
 _avatarx :: Proxy "avatarx"
 _avatarx = Proxy
+
+_sliderrange :: Proxy "sliderrange"
+_sliderrange = Proxy
 
 main :: Effect Unit
 main = do
@@ -320,6 +324,10 @@ view c s =
             -- bars + corner. Same primitive, the `scrollbars` field selects the family.
             "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
             "separatorthemes" -> separatorThemesPage s
+            -- Wave-D multi-thumb / range slider: ?s=triple → 3 thumbs (Value n of m
+            -- labelling); ?s=minsteps → minStepsBetweenThumbs keyboard rejection; default
+            -- → the 2-thumb [25,75] range (Minimum/Maximum, range between the thumbs).
+            "sliderrange" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _sliderrange unit Slider.rangeComponent (sliderRangeInput s) ]
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1982,3 +1990,26 @@ avatarLoadedInput = RadixAvatar.defaultInput
 -- the LOADED steady-state deterministically, matching the golden story's ONE_PX_PNG.
 onePxPng :: String
 onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+
+-- | sliderRange — Wave-D multi-thumb / range slider (Slider.rangeComponent). One role=slider
+-- | thumb per value; ?s=triple → [20,50,80] (3 thumbs, "Value n of m" labels), ?s=minsteps →
+-- | [40,60] with minStepsBetweenThumbs=10 (a keyboard step within 10·step of the neighbour is
+-- | rejected), default → [25,75] (Minimum/Maximum, range between the two thumbs). Same rt-Slider*
+-- | class anatomy as the single-thumb slider.
+sliderRangeInput :: String -> Slider.RangeInput
+sliderRangeInput s = Slider.defaultRangeInput
+  { defaultValue =
+      if s == "triple" then [ 20, 50, 80 ]
+      else if s == "minsteps" then [ 40, 60 ]
+      else [ 25, 75 ]
+  , min = 0
+  , max = 100
+  , step = 1
+  , minStepsBetweenThumbs = if s == "minsteps" then 10 else 0
+  , style =
+      { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
+      , track: cn "rt-SliderTrack"
+      , range: cn "rt-SliderRange"
+      , thumb: cn "rt-SliderThumb"
+      }
+  }
