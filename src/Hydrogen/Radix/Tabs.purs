@@ -19,6 +19,7 @@ module Hydrogen.Radix.Tabs
   ( component
   , Tab
   , Input
+  , ActivationMode(..)
   , Output(..)
   , Query(..)
   , Slot
@@ -71,6 +72,13 @@ defaultStyle =
   , content: cn "rdx-tabs-content"
   }
 
+-- | Activation mode (radix `activationMode`). `Automatic` (default): arrow keys move
+-- | focus AND select the focused tab. `Manual`: arrow keys move focus only; Enter/Space
+-- | on the focused trigger activates it. (tabs.tsx:61,73,192-202.)
+data ActivationMode = Automatic | Manual
+
+derive instance eqActivationMode :: Eq ActivationMode
+
 type Input =
   { tabs :: Array Tab
   , value :: Maybe String          -- controlled active value
@@ -78,6 +86,7 @@ type Input =
   , orientation :: Orientation
   , dir :: Dir
   , loop :: Boolean
+  , activationMode :: ActivationMode
   , idPrefix :: String             -- for tab/panel ids (unique per instance)
   , style :: Style
   }
@@ -90,6 +99,7 @@ defaultInput =
   , orientation: Horizontal
   , dir: LTR
   , loop: true
+  , activationMode: Automatic
   , idPrefix: "rdx-tabs"
   , style: defaultStyle
   }
@@ -112,6 +122,7 @@ type State =
   , orientation :: Orientation
   , dir :: Dir
   , loop :: Boolean
+  , activationMode :: ActivationMode
   , idPrefix :: String
   , style :: Style
   , uid :: String       -- generated on Initialize; makes ids unique per instance
@@ -123,6 +134,7 @@ data Action
   | Receive Input
   | Selected String
   | ListKeyDown KE.KeyboardEvent
+  | TriggerKeyDown String KE.KeyboardEvent
   | EntryFocus
 
 -- | The effective, per-instance unique id base: the readable prefix + the id minted
@@ -162,6 +174,7 @@ initialState input =
   , orientation: input.orientation
   , dir: input.dir
   , loop: input.loop
+  , activationMode: input.activationMode
   , idPrefix: input.idPrefix
   , style: input.style
   , uid: ""
@@ -229,6 +242,10 @@ renderTrigger st _ tab =
         , HP.disabled tab.disabled
         , classes st.style.trigger
         , HE.onClick \_ -> Selected tab.value
+        -- Per-trigger Enter/Space activation (tabs.tsx:192-202). In manual mode this is the
+        -- ONLY way to select; in automatic mode it is redundant with arrow-select but matches
+        -- upstream, which always wires the trigger keydown regardless of activationMode.
+        , HE.onKeyDown (TriggerKeyDown tab.value)
         ]
           <> (if tab.disabled then [ dataAttr "disabled" "" ] else [])
       )
@@ -280,6 +297,7 @@ handleAction = case _ of
       , orientation = input.orientation
       , dir = input.dir
       , loop = input.loop
+      , activationMode = input.activationMode
       , idPrefix = input.idPrefix
       , style = input.style
       }
@@ -300,9 +318,13 @@ handleAction = case _ of
       MoveTo idx -> case enabled !! idx of
         Nothing -> pure unit
         Just tab -> do
-          -- focus the target trigger, then (automatic activation) select it
+          -- focus the target trigger; in AUTOMATIC mode also select it. In MANUAL mode
+          -- (tabs.tsx:192-202) the arrow only moves focus — selection waits for Enter/Space.
           focusTabByValue tab.value
-          selectValue tab.value
+          when (st.activationMode == Automatic) (selectValue tab.value)
+  -- Enter/Space on a focused trigger activates it regardless of activationMode (tabs.tsx:192).
+  TriggerKeyDown value ke ->
+    when (KE.key ke == "Enter" || KE.key ke == " ") (selectValue value)
   -- Tab-into-tablist: forward container focus to the active trigger.
   EntryFocus -> do
     st <- H.get

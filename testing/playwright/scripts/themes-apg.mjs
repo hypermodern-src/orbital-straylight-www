@@ -1337,6 +1337,198 @@ const CHECKS = [
     ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "could not focus the first trigger");
     await press(pg, "ArrowUp");
     ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "ArrowUp moved trigger focus (must be a no-op on the horizontal axis)");
+  // Tabs — MANUAL activation (activationMode="manual", tabs.tsx:61,192-202). Arrow keys move
+  // the roving focus WITHOUT changing selection; only Enter/Space on the focused trigger
+  // activates it. Seed: defaultValue="account" (tab[0] selected). The id `tabsmanual` is a
+  // SEPARATE story so the automatic-mode `tabs` golden stays byte-identical.
+  { id: "tabsmanual", state: "manual", apg: "tabs", name: "manual mode: ArrowRight moves focus but does NOT activate (selection unchanged)", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "tab[0] must be selected at rest");
+    await press(pg, "Tab"); // into the tablist, onto the selected tab
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Tab did not focus the selected tab");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '[role="tab"]', 1), "ArrowRight did not move focus to the next tab");
+    ok((await attrOf(pg, '[role="tab"]', 1, "aria-selected")) === "false", "manual mode must NOT activate the focused tab on arrow");
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "the originally selected tab must stay selected in manual mode");
+    const stillHidden = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[1]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && p.hasAttribute("hidden"); });
+    ok(stillHidden, "manual mode: the focused (not activated) tab's panel must stay hidden");
+  }},
+  { id: "tabsmanual", state: "manual", apg: "tabs", name: "manual mode: Enter on the focused trigger activates it (and shows its panel)", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "ArrowRight"); // focus tab[1], NOT selected yet (manual)
+    ok(await activeIsNth(pg, '[role="tab"]', 1), "ArrowRight did not move focus to tab[1]");
+    await press(pg, "Enter"); // activate
+    await attrEq(pg, '[role="tab"]', 1, "aria-selected", "true", "Enter did not activate the focused tab in manual mode");
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "false", "the previously selected tab must deselect after Enter");
+    const shown = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[1]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && !p.hasAttribute("hidden"); });
+    ok(shown, "Enter did not show the newly activated tab's panel");
+  }},
+  { id: "tabsmanual", state: "manual", apg: "tabs", name: "manual mode: Space also activates the focused trigger", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "End"); // focus last, not selected (manual)
+    ok(await activeIsNth(pg, '[role="tab"]', 2), "End did not move focus to the last tab");
+    ok((await attrOf(pg, '[role="tab"]', 2, "aria-selected")) === "false", "End must not activate in manual mode");
+    await press(pg, "Space");
+    await attrEq(pg, '[role="tab"]', 2, "aria-selected", "true", "Space did not activate the focused tab in manual mode");
+  }},
+
+  // ToggleGroup — group-level disabled (Root `disabled` ORs into every item). EVERY item is
+  // a disabled button (non-focusable / non-togglable); the group cannot be entered or toggled.
+  { id: "togglegroupdisabled", state: "disabled", apg: "toolbar", name: "group disabled: every item is a disabled button, none focusable", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    const items = pg.locator('[role="radio"]');
+    ok((await items.count()) === 3, "expected 3 items");
+    for (let i = 0; i < 3; i++) {
+      ok((await attrOf(pg, '[role="radio"]', i, "disabled")) !== null || await items.nth(i).isDisabled(), `item ${i} must be disabled`);
+    }
+    // clicking a disabled item must not change the pressed item (b stays checked)
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "the seeded item must stay checked");
+    await items.nth(0).click({ force: true }).catch(() => {});
+    await attrEq(pg, '[role="radio"]', 0, "aria-checked", "false", "a disabled item must not become checked on click");
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "the seeded item must remain checked after a disabled-item click");
+  }},
+
+  // ToggleGroup — loop={false}: arrow navigation CLAMPS at the ends (no wrap). Seed value="a"
+  // (item[0] is the tab stop). ArrowLeft at the first item stays on it; from the last,
+  // ArrowRight stays on the last.
+  { id: "togglegroupnoloop", state: "noloop", apg: "toolbar", name: "loop=false: ArrowLeft at the first item does NOT wrap to the last", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await press(pg, "Tab"); // enter, onto item[0] (seeded a)
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the first item");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "loop=false: ArrowLeft at the first item must clamp (not wrap to last)");
+    await press(pg, "End"); // jump to last
+    ok(await activeIsNth(pg, sel, 2), "End did not focus the last item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "loop=false: ArrowRight at the last item must clamp (not wrap to first)");
+  }},
+
+  // ToggleGroup — orientation="vertical": ArrowDown/ArrowUp navigate, ArrowLeft/ArrowRight
+  // inert. RovingFocusGroup stamps data-orientation=vertical on the root.
+  { id: "togglegroupvert", state: "vertical", apg: "toolbar", name: "vertical: ArrowDown navigates, ArrowRight is inert", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, '[role="group"]', 0, "data-orientation")) === "vertical", "root must carry data-orientation=vertical");
+    await press(pg, "Tab"); // onto item[0]
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the first item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "vertical: ArrowRight must be inert");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 1), "vertical: ArrowDown must move to the next item");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, sel, 0), "vertical: ArrowUp must move to the previous item");
+  }},
+
+  // ToggleGroup — arrow navigation IGNORES modifier keys (meta/ctrl/alt/shift). Upstream
+  // RovingFocusGroup returns early when any modifier is held (roving-focus-group onKeyDown).
+  { id: "togglegroupnoloop", state: "noloop", apg: "toolbar", name: "Ctrl+ArrowRight does NOT navigate (modifier keys ignored)", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await press(pg, "Tab");
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the first item");
+    await pg.keyboard.down("Control");
+    await pg.keyboard.press("ArrowRight");
+    await pg.keyboard.up("Control");
+    ok(await activeIsNth(pg, sel, 0), "Ctrl+ArrowRight must NOT move focus (modifiers ignored)");
+  }},
+
+  // Accordion — type="single" NON-collapsible: clicking the OPEN trigger does NOT close it
+  // (accordion.tsx the open trigger is aria-disabled). The `single` story opens item-1 at
+  // mount; clicking it leaves it open + aria-expanded=true.
+  { id: "accordion", state: "single", apg: "accordion", name: "single non-collapsible: clicking the open trigger does NOT close it", run: async (pg) => {
+    const t0 = pg.locator('#root button[aria-expanded]').first();
+    await t0.waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must be open at mount");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-disabled")) === "true", "the single open trigger must be aria-disabled (cannot close)");
+    await t0.click({ force: true }).catch(() => {});
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "single non-collapsible: the open item must stay open after clicking its trigger");
+  }},
+  // Accordion — type="single" non-collapsible: clicking ANOTHER trigger swaps the single open
+  // item (item-1 closes, item-2 opens) — set stays size 1.
+  { id: "accordion", state: "single", apg: "accordion", name: "single: clicking another trigger swaps the single open item", run: async (pg) => {
+    const all = pg.locator('#root button[aria-expanded]');
+    await all.first().waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must start open");
+    await all.nth(1).click();
+    await attrEq(pg, '#root button[aria-expanded]', 1, "aria-expanded", "true", "clicking item-2 must open it");
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "opening item-2 must close item-1 (single)");
+    const openCount = await pg.evaluate(() => [...document.querySelectorAll('#root button[aria-expanded]')].filter((b) => b.getAttribute("aria-expanded") === "true").length);
+    ok(openCount === 1, "exactly one item may be open in single mode");
+  }},
+  // Accordion — type="single" COLLAPSIBLE: clicking the open trigger CLOSES it (empty set),
+  // and the open trigger is NOT aria-disabled.
+  { id: "accordioncollapsible", state: "collapsible", apg: "accordion", name: "single collapsible: clicking the open trigger closes it (open trigger NOT aria-disabled)", run: async (pg) => {
+    const t0 = pg.locator('#root button[aria-expanded]').first();
+    await t0.waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must be open at mount");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-disabled")) === null, "collapsible: the open trigger must NOT be aria-disabled");
+    await t0.click();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "collapsible: clicking the open trigger must close it");
+    const openCount = await pg.evaluate(() => [...document.querySelectorAll('#root button[aria-expanded]')].filter((b) => b.getAttribute("aria-expanded") === "true").length);
+    ok(openCount === 0, "collapsible: closing the last open item must leave an empty open set");
+  }},
+
+  // Toolbar — PageUp focuses the FIRST item, PageDown the LAST (MAP_KEY_TO_FOCUS_INTENT maps
+  // them identically to Home/End). The default story has 4 focusable items across the
+  // toggle-group boundary (New, Edit, L, C).
+  { id: "toolbar", state: "default", apg: "toolbar", name: "PageDown focuses the last item, PageUp the first", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first toolbar item");
+    await press(pg, "PageDown");
+    ok(await activeIsNth(pg, sel, 3), "PageDown did not focus the last item");
+    await press(pg, "PageUp");
+    ok(await activeIsNth(pg, sel, 0), "PageUp did not focus the first item");
+  }},
+  // Toolbar — a Toolbar.Link activates on Space (native <a> ignores Space; upstream wires
+  // ' '→currentTarget.click()). We can't observe a navigation here, but we CAN observe that
+  // Space does not throw and the link stays focused (the click is dispatched on it). Roved to
+  // the link (item index 1), Space keeps focus on it.
+  { id: "toolbar", state: "default", apg: "toolbar", name: "ToolbarLink stays focused on Space (Space wired to click)", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowRight"); // onto the Link (Edit, index 1)
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not rove onto the Link");
+    const isLink = await pg.evaluate(() => document.activeElement?.tagName === "A");
+    ok(isLink, "the roved item at index 1 must be the <a> Link");
+    await press(pg, "Space");
+    ok(await activeIsNth(pg, sel, 1), "the Link must remain focused after Space");
+  }},
+
+  // Toolbar — loop={false}: ArrowRight at the last item CLAMPS (no wrap), ArrowLeft at the
+  // first clamps. 3-button toolbar.
+  { id: "toolbarnoloop", state: "noloop", apg: "toolbar", name: "loop=false: ArrowRight at the last item does NOT wrap to the first", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    ok((await pg.locator(sel).count()) === 3, "expected 3 toolbar buttons");
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "loop=false: ArrowLeft at the first item must clamp");
+    await press(pg, "End");
+    ok(await activeIsNth(pg, sel, 2), "End did not focus the last item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "loop=false: ArrowRight at the last item must clamp (not wrap)");
+  }},
+
+  // Toolbar — ToggleGroup type="multiple": items carry aria-pressed (NOT role=radio), two can
+  // be on simultaneously, each toggles independently.
+  { id: "toolbarmultiple", state: "multiple", apg: "toolbar", name: "multiple toggle group: aria-pressed items, two on at once, independent toggle", run: async (pg) => {
+    const items = pg.locator('[role="toolbar"] button[aria-pressed]');
+    await items.first().waitFor();
+    ok((await items.count()) === 3, "expected 3 aria-pressed toggle items (NOT role=radio)");
+    ok((await pg.locator('[role="toolbar"] [role="radio"]').count()) === 0, "multiple mode must NOT use role=radio");
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "true", "Bold must start pressed");
+    await items.nth(1).click(); // press Italic too
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "true", "Bold must STAY pressed (independent)");
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must become pressed");
+    await items.nth(0).click(); // unpress Bold
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
+    ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
 ];
 

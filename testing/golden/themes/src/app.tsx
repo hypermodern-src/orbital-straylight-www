@@ -1819,6 +1819,134 @@ const PAGES: Page[] = [
           </Select.Group>
         </Select.Content>
       </Select.Root>
+  // Wave-C: Tabs activationMode="manual" — arrow keys move the roving focus WITHOUT
+  // changing selection; Enter/Space on the focused trigger activates it (tabs.tsx:61,
+  // 192-202). Keyboard-only APG story (no new DOM golden; the at-rest DOM matches `tabs`).
+  {
+    id: "tabsmanual",
+    label: "Tabs (manual activation)",
+    interactive: true,
+    node: (
+      <Tabs.Root defaultValue="account" activationMode="manual">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="account">
+          <Text size="2">Make changes to your account.</Text>
+        </Tabs.Content>
+        <Tabs.Content value="documents">
+          <Text size="2">Access and update your documents.</Text>
+        </Tabs.Content>
+        <Tabs.Content value="settings">
+          <Text size="2">Edit your profile or update contact information.</Text>
+        </Tabs.Content>
+      </Tabs.Root>
+    ),
+  },
+  // Wave-C: Toolbar loop={false} — arrow navigation clamps at the ends (no wrap).
+  {
+    id: "toolbarnoloop",
+    label: "Toolbar (loop=false)",
+    interactive: true,
+    node: (
+      <Toolbar.Root aria-label="Formatting" loop={false}>
+        <Toolbar.Button>New</Toolbar.Button>
+        <Toolbar.Button>Open</Toolbar.Button>
+        <Toolbar.Button>Save</Toolbar.Button>
+      </Toolbar.Root>
+    ),
+  },
+  // Wave-C: Toolbar ToggleGroup type="multiple" — items keep aria-pressed (NOT role=radio),
+  // two can be on at once, each toggles independently.
+  {
+    id: "toolbarmultiple",
+    label: "Toolbar (multiple toggle group)",
+    interactive: true,
+    node: (
+      <Toolbar.Root aria-label="Formatting">
+        <Toolbar.ToggleGroup type="multiple" defaultValue={["bold"]} aria-label="Text formatting">
+          <Toolbar.ToggleItem value="bold">B</Toolbar.ToggleItem>
+          <Toolbar.ToggleItem value="italic">I</Toolbar.ToggleItem>
+          <Toolbar.ToggleItem value="underline">U</Toolbar.ToggleItem>
+        </Toolbar.ToggleGroup>
+      </Toolbar.Root>
+    ),
+  },
+  // Wave-C: Accordion type="single" COLLAPSIBLE — item-1 open at first paint; clicking the
+  // open trigger CLOSES it (empty open set). With collapsible the open trigger is NOT
+  // aria-disabled (it can be closed), the contrast to the non-collapsible `single` story.
+  {
+    id: "accordioncollapsible",
+    label: "Accordion (single, collapsible)",
+    interactive: true,
+    node: (
+      <Box style={{ maxWidth: 360 }}>
+        <Accordion.Root type="single" defaultValue="item-1" collapsible>
+          <Accordion.Item value="item-1">
+            <Accordion.Header>
+              <Accordion.Trigger>Is it accessible?</Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content>Yes. It adheres to the WAI-ARIA design pattern.</Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-2">
+            <Accordion.Header>
+              <Accordion.Trigger>Is it styled?</Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content>No. It is unstyled by default.</Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-3">
+            <Accordion.Header>
+              <Accordion.Trigger>Is it animated?</Accordion.Trigger>
+            </Accordion.Header>
+            <Accordion.Content>Yes, with CSS.</Accordion.Content>
+          </Accordion.Item>
+        </Accordion.Root>
+      </Box>
+    ),
+  },
+  // Wave-C: ToggleGroup group-level disabled — the Root `disabled` prop ORs into every
+  // item so the WHOLE group is non-focusable/non-togglable (toggle-group.tsx ToggleGroupImpl
+  // disabled flows into context). Single-mode, no item pre-pressed.
+  {
+    id: "togglegroupdisabled",
+    label: "ToggleGroup (group disabled)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="b" disabled aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
+  // Wave-C: ToggleGroup loop={false} — arrow navigation CLAMPS at the ends (no wrap).
+  // Upstream RovingFocusGroup loop default is true; loop=false slices instead of wrapArray.
+  {
+    id: "togglegroupnoloop",
+    label: "ToggleGroup (loop=false)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="a" loop={false} aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
+  // Wave-C: ToggleGroup orientation="vertical" — ArrowUp/ArrowDown navigate, ArrowLeft/Right
+  // inert; RovingFocusGroup stamps data-orientation=vertical on the root + items.
+  {
+    id: "togglegroupvert",
+    label: "ToggleGroup (vertical)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="a" orientation="vertical" aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
     ),
   },
 ];

@@ -384,10 +384,17 @@ handleAction = case _ of
   ListKeyDown ke -> do
     st <- H.get
     let
+      -- upstream MAP_KEY_TO_FOCUS_INTENT maps PageUp→'first', PageDown→'last' identically to
+      -- Home/End (roving-focus-group). The shared focusIntent only knows Home/End, so translate
+      -- PageUp/PageDown LOCALLY here (keeps the closed-form Behavior untouched) before navigate.
+      key = case KE.key ke of
+        "PageUp" -> "Home"
+        "PageDown" -> "End"
+        k -> k
       cfg = { orientation: st.orientation, dir: st.dir, loop: st.loop }
       count = length (focusables st)
       pos = { count, current: st.currentIndex }
-    case navigate cfg pos (KE.key ke) of
+    case navigate cfg pos key of
       Stay -> pure unit
       MoveTo idx -> do
         H.modify_ _ { currentIndex = idx, focusEntered = true }

@@ -289,6 +289,19 @@ view c s =
             "contextmenuchecks" -> HH.slot_ _contextmenuchecks unit ContextMenu.component (contextChecksInput s)
             "menubarchecks" -> HH.slot_ _menubarchecks unit Menubar.component (menubarChecksInput s)
             "selectplaceholder" -> HH.slot_ _selectplaceholder unit Select.component selectPlaceholderInput
+            -- Wave-C: Tabs activationMode="manual" — arrows move focus only, Enter/Space
+            -- activates the focused trigger. Separate route so the existing automatic-mode
+            -- `tabs` story stays byte-identical.
+            "tabsmanual" -> HH.slot_ _tabs unit Tabs.component (tabsManualInput s)
+            -- Wave-C ToggleGroup depth stories: group-disabled, loop=false, vertical.
+            "togglegroupdisabled" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupDisabledInput
+            "togglegroupnoloop" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupNoLoopInput
+            "togglegroupvert" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupVertInput
+            -- Wave-C Accordion: type=single COLLAPSIBLE (open trigger closeable, NOT aria-disabled).
+            "accordioncollapsible" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionCollapsibleInput ]
+            -- Wave-C Toolbar: loop=false end-stop + a type=multiple toggle group (aria-pressed).
+            "toolbarnoloop" -> HH.slot_ _toolbar unit Toolbar.component toolbarNoLoopInput
+            "toolbarmultiple" -> HH.slot_ _toolbar unit Toolbar.component toolbarMultipleInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1693,3 +1706,130 @@ firstJust = case _ of
   isJust = case _ of
     Just _ -> true
     Nothing -> false
+
+-- | tabs (manual activation) — same anatomy as `tabsInput` but activationMode=Manual:
+-- | arrows move the roving focus WITHOUT selecting; Enter/Space on the focused trigger
+-- | activates it (tabs.tsx:61,192-202). Drives the `tabsmanual` route / APG check.
+tabsManualInput :: String -> Tabs.Input
+tabsManualInput s = (tabsInput s) { activationMode = Tabs.Manual }
+
+-- | togglegroup (group disabled) — Root `disabled` ORs into every item; the whole group
+-- | is non-focusable / non-togglable. Single-mode, Center pre-pressed.
+toggleGroupDisabledInput :: ToggleGroup.Input
+toggleGroupDisabledInput = ToggleGroup.defaultInput
+  { single = true
+  , disabled = true
+  , defaultValue = [ "b" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | togglegroup (loop=false) — arrow navigation clamps at the ends (no wrap). Single-mode,
+-- | Left pre-pressed.
+toggleGroupNoLoopInput :: ToggleGroup.Input
+toggleGroupNoLoopInput = ToggleGroup.defaultInput
+  { single = true
+  , loop = false
+  , defaultValue = [ "a" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | togglegroup (vertical) — ArrowUp/ArrowDown navigate; data-orientation=vertical.
+toggleGroupVertInput :: ToggleGroup.Input
+toggleGroupVertInput = ToggleGroup.defaultInput
+  { single = true
+  , orientation = Vertical
+  , explicitOrientation = true
+  , defaultValue = [ "a" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | accordion (single, collapsible) — item-1 open at first paint; clicking the open
+-- | trigger CLOSES it (empty open set). collapsible=true ⇒ the open trigger is NOT
+-- | aria-disabled (the contrast to the non-collapsible `single` story).
+accordionCollapsibleInput :: Accordion.Input
+accordionCollapsibleInput = Accordion.defaultInput
+  { items =
+      [ { value: "item-1", header: [ HH.text "Is it accessible?" ], content: [ HH.text "Yes. It adheres to the WAI-ARIA design pattern." ], disabled: false }
+      , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: false }
+      , { value: "item-3", header: [ HH.text "Is it animated?" ], content: [ HH.text "Yes, with CSS." ], disabled: false }
+      ]
+  , single = true
+  , collapsible = true
+  , defaultValue = [ "item-1" ]
+  , style =
+      { root: cn ""
+      , item: cn ""
+      , header: cn ""
+      , trigger: cn ""
+      , content: cn ""
+      }
+  }
+
+-- | toolbar (loop=false) — 3 buttons; arrow navigation clamps at the ends (no wrap).
+toolbarNoLoopInput :: Toolbar.Input
+toolbarNoLoopInput = Toolbar.defaultInput
+  { orientation = Horizontal
+  , dir = LTR
+  , loop = false
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: false }
+      , Toolbar.Button { value: "open", label: [ HH.text "Open" ], disabled: false }
+      , Toolbar.Button { value: "save", label: [ HH.text "Save" ], disabled: false }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
+      }
+  }
+
+-- | toolbar (multiple toggle group) — a single type=multiple ToggleGroup: items keep
+-- | aria-pressed (NOT role=radio), two can be on at once, each toggles independently.
+toolbarMultipleInput :: Toolbar.Input
+toolbarMultipleInput = Toolbar.defaultInput
+  { orientation = Horizontal
+  , dir = LTR
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.ToggleGroup
+          { items:
+              [ { value: "bold", label: [ HH.text "B" ], disabled: false }
+              , { value: "italic", label: [ HH.text "I" ], disabled: false }
+              , { value: "underline", label: [ HH.text "U" ], disabled: false }
+              ]
+          , single: false
+          , defaultValue: [ "bold" ]
+          , ariaLabel: Just "Text formatting"
+          }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
+      }
+  }
