@@ -101,6 +101,7 @@ type Slots =
   , form :: Form.Slot Unit
   , dropdownmenuchecks :: DropdownMenu.Slot Unit
   , contextmenuchecks :: ContextMenu.Slot Unit
+  , menubarchecks :: Menubar.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -196,6 +197,9 @@ _dropdownmenuchecks = Proxy
 _contextmenuchecks :: Proxy "contextmenuchecks"
 _contextmenuchecks = Proxy
 
+_menubarchecks :: Proxy "menubarchecks"
+_menubarchecks = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -279,6 +283,7 @@ view c s =
             -- oracles are untouched.
             "dropdownmenuchecks" -> HH.slot_ _dropdownmenuchecks unit DropdownMenu.component (dropdownChecksInput s)
             "contextmenuchecks" -> HH.slot_ _contextmenuchecks unit ContextMenu.component (contextChecksInput s)
+            "menubarchecks" -> HH.slot_ _menubarchecks unit Menubar.component (menubarChecksInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -710,6 +715,36 @@ menubarInput s = Menubar.defaultInput
             [ Menubar.menuItem "zoom-in" [ HH.text "Zoom In" ]
             , Menubar.menuItem "zoom-out" [ HH.text "Zoom Out" ]
             ]
+        }
+      ]
+  }
+
+-- | The Wave-C Menubar-checks story: a single "View" menu whose `?s=` selects a CheckboxItem
+-- | pair (one checked) or a RadioGroup (medium selected). Bare primitive ⇒ empty Style classes;
+-- | the ItemIndicator content is a "✓" text child (matching the golden story), gated on checked.
+menubarChecksInput :: String -> Menubar.Input
+menubarChecksInput s = Menubar.defaultInput
+  { align = Start
+  , contentStyle = "outline: none; " <> popperContentVars "menubar"
+  , style = Menubar.defaultStyle { checkIndicator = [ HH.text "✓" ], radioIndicator = [ HH.text "✓" ] }
+  , menus =
+      [ { value: "view"
+        , trigger: [ HH.text "View" ]
+        , entries:
+            if s == "radio" then
+              [ Menubar.MenuRadioGroupEntry
+                  { value: "medium"
+                  , options:
+                      [ { value: "small", label: [ HH.text "Small" ], shortcut: [], disabled: false }
+                      , { value: "medium", label: [ HH.text "Medium" ], shortcut: [], disabled: false }
+                      , { value: "large", label: [ HH.text "Large" ], shortcut: [], disabled: false }
+                      ]
+                  }
+              ]
+            else
+              [ Menubar.MenuCheckboxEntry { value: "toolbar", label: [ HH.text "Show Toolbar" ], shortcut: [], check: Menubar.Checked, disabled: false }
+              , Menubar.MenuCheckboxEntry { value: "sidebar", label: [ HH.text "Show Sidebar" ], shortcut: [], check: Menubar.Unchecked, disabled: false }
+              ]
         }
       ]
   }

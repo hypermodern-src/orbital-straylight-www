@@ -117,6 +117,8 @@ STATES=(
   "dropdownmenuchecks:radio"
   "contextmenuchecks:checkbox"
   "contextmenuchecks:radio"
+  "menubarchecks:checkbox"
+  "menubarchecks:radio"
 )
 
 echo "ℵ building golden dist (bun)"

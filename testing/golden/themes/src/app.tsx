@@ -1734,6 +1734,56 @@ const PAGES: Page[] = [
       );
     })(),
   },
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem + RadioItem ──────────────
+  // Bare @radix-ui/react-menubar (NO rt-* classes). A single "View" menu whose `?s=` selects
+  // a CheckboxItem pair (one checked → ItemIndicator present) or a RadioGroup (medium selected).
+  // The ItemIndicator carries a "✓" text child so the present/absent gating is DOM-visible.
+  {
+    id: "menubarchecks",
+    label: "Menubar — checks",
+    interactive: true,
+    node: (() => {
+      const variant = currentState() || "checkbox";
+      return (
+        <Menubar.Root>
+          <Menubar.Menu value="view">
+            <Menubar.Trigger>View</Menubar.Trigger>
+            <Menubar.Portal>
+              <Menubar.Content align="start">
+                {variant === "radio" ? (
+                  <Menubar.RadioGroup value="medium">
+                    <Menubar.RadioItem value="small">
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Small
+                    </Menubar.RadioItem>
+                    <Menubar.RadioItem value="medium">
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Medium
+                    </Menubar.RadioItem>
+                    <Menubar.RadioItem value="large">
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Large
+                    </Menubar.RadioItem>
+                  </Menubar.RadioGroup>
+                ) : (
+                  <>
+                    <Menubar.CheckboxItem checked>
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Show Toolbar
+                    </Menubar.CheckboxItem>
+                    <Menubar.CheckboxItem checked={false}>
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Show Sidebar
+                    </Menubar.CheckboxItem>
+                  </>
+                )}
+              </Menubar.Content>
+            </Menubar.Portal>
+          </Menubar.Menu>
+        </Menubar.Root>
+      );
+    })(),
+  },
 ];
 
 function currentId(): string {

@@ -817,4 +817,19 @@ export const STATES = {
       await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
     },
   },
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem / RadioItem ───────────────
+  // Click the "View" trigger (role=menuitem) to open the menu (non-modal, no scroll-lock),
+  // then wait for the variant's checked/unchecked pair. Keyed off UPSTREAM role/aria-checked.
+  menubarchecks: {
+    checkbox: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
 };

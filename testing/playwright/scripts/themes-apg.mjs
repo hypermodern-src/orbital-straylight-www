@@ -1165,6 +1165,27 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Medium");
     ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
   }},
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem / RadioItem roving ────────────
+  // Click the View trigger to open, ArrowDown roves the checkbox/radio items; aria-checked
+  // is preserved through roving (bare @radix-ui/react-menubar re-exports react-menu).
+  // NB: a CHECKED item's textContent leads with its ✓ ItemIndicator child, so the highlighted
+  // text for "Show Toolbar" (checked) is "✓Show Toolbar"; "Show Sidebar" (unchecked) has no ✓.
+  { id: "menubarchecks", state: "checkbox", apg: "menu", name: "ArrowDown roves the menubar checkbox items; aria-checked is preserved", run: async (pg) => {
+    await pg.locator("#root").getByRole("menuitem").first().click();
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "✓Show Toolbar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 0, "aria-checked")) === "true", "the checked checkbox must report aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Sidebar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 1, "aria-checked")) === "false", "the unchecked checkbox must report aria-checked=false when highlighted");
+  }},
+  { id: "menubarchecks", state: "radio", apg: "menu", name: "ArrowDown roves the menubar radio items; single-selection aria-checked holds", run: async (pg) => {
+    await pg.locator("#root").getByRole("menuitem").first().click();
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium (selected) must be aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Small");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "✓Medium");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
+  }},
 ];
 
 const b = await chromium.launch();
