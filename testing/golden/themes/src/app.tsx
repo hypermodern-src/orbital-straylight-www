@@ -2148,6 +2148,120 @@ const PAGES: Page[] = [
       return <Separator />;
     })(),
   },
+  // ── Wave-D Tabs depth (STR-330) ──────────────────────────────────────────────
+  // Vertical orientation: ArrowUp/ArrowDown navigate (Left/Right inert), data-orientation=
+  // vertical on root/list/trigger/panel, aria-orientation=vertical on the list. Keyboard-only
+  // APG story (the at-rest themed DOM contract is pinned by `tabs`; this adds the axis oracle).
+  {
+    id: "tabsvert",
+    label: "Tabs (vertical)",
+    interactive: true,
+    node: (
+      <Tabs.Root defaultValue="account" orientation="vertical">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="account"><Text size="2">Make changes to your account.</Text></Tabs.Content>
+        <Tabs.Content value="documents"><Text size="2">Access and update your documents.</Text></Tabs.Content>
+        <Tabs.Content value="settings"><Text size="2">Edit your profile or update contact information.</Text></Tabs.Content>
+      </Tabs.Root>
+    ),
+  },
+  // RTL: in dir=rtl the horizontal arrows are SWAPPED — ArrowLeft moves to the NEXT tab,
+  // ArrowRight to the previous (roving-focus getFocusIntent flips L/R under rtl). Keyboard-only.
+  {
+    id: "tabsrtl",
+    label: "Tabs (rtl)",
+    interactive: true,
+    node: (
+      <Tabs.Root defaultValue="account" dir="rtl">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="account"><Text size="2">Make changes to your account.</Text></Tabs.Content>
+        <Tabs.Content value="documents"><Text size="2">Access and update your documents.</Text></Tabs.Content>
+        <Tabs.Content value="settings"><Text size="2">Edit your profile or update contact information.</Text></Tabs.Content>
+      </Tabs.Root>
+    ),
+  },
+  // Zero-selected: NO defaultValue and an uncontrolled value that matches no tab → upstream
+  // defaults the active value to '' (empty string), so NO tab is aria-selected and NO panel is
+  // visible at rest. DOM golden `tabsnone:none` pins the zero-selected contract.
+  {
+    id: "tabsnone",
+    label: "Tabs (zero-selected)",
+    interactive: true,
+    node: (
+      <Tabs.Root>
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+          <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+        </Tabs.List>
+        <Tabs.Content value="account"><Text size="2">Make changes to your account.</Text></Tabs.Content>
+        <Tabs.Content value="documents"><Text size="2">Access and update your documents.</Text></Tabs.Content>
+        <Tabs.Content value="settings"><Text size="2">Edit your profile or update contact information.</Text></Tabs.Content>
+      </Tabs.Root>
+    ),
+  },
+  // ── Wave-D Accordion depth (STR-330) ─────────────────────────────────────────
+  // Horizontal orientation: ArrowLeft/ArrowRight rove between triggers; ArrowUp/Down inert;
+  // data-orientation=horizontal on the parts. Keyboard-only APG story.
+  {
+    id: "accordionhoriz",
+    label: "Accordion (horizontal)",
+    interactive: true,
+    node: (
+      <Box style={{ maxWidth: 360 }}>
+        <Accordion.Root type="multiple" orientation="horizontal">
+          <Accordion.Item value="item-1">
+            <Accordion.Header><Accordion.Trigger>Is it accessible?</Accordion.Trigger></Accordion.Header>
+            <Accordion.Content>Yes. It adheres to the WAI-ARIA design pattern.</Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-2">
+            <Accordion.Header><Accordion.Trigger>Is it styled?</Accordion.Trigger></Accordion.Header>
+            <Accordion.Content>No. It is unstyled by default.</Accordion.Content>
+          </Accordion.Item>
+          <Accordion.Item value="item-3">
+            <Accordion.Header><Accordion.Trigger>Is it animated?</Accordion.Trigger></Accordion.Header>
+            <Accordion.Content>Yes, with CSS.</Accordion.Content>
+          </Accordion.Item>
+        </Accordion.Root>
+      </Box>
+    ),
+  },
+  // ── Wave-D ToggleGroup depth (STR-330) ───────────────────────────────────────
+  // RTL: dir=rtl flips horizontal arrows (ArrowLeft → next/rightmost, ArrowRight → prev).
+  {
+    id: "togglegrouprtl",
+    label: "ToggleGroup (rtl)",
+    interactive: true,
+    node: (
+      <ToggleGroup.Root type="single" defaultValue="a" dir="rtl" aria-label="Text alignment">
+        <ToggleGroup.Item value="a">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="b">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
+      </ToggleGroup.Root>
+    ),
+  },
+  // ── Wave-D Toolbar depth (STR-330) ───────────────────────────────────────────
+  // RTL: dir=rtl flips horizontal arrows (ArrowLeft → next item, ArrowRight → prev).
+  {
+    id: "toolbarrtl",
+    label: "Toolbar (rtl)",
+    interactive: true,
+    node: (
+      <Toolbar.Root aria-label="Formatting" dir="rtl">
+        <Toolbar.Button>New</Toolbar.Button>
+        <Toolbar.Button>Open</Toolbar.Button>
+        <Toolbar.Button>Save</Toolbar.Button>
+      </Toolbar.Root>
+    ),
+  },
 ];
 
 function currentId(): string {

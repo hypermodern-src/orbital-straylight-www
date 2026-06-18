@@ -154,6 +154,8 @@ STATES=(
   "separatorthemes:size4"
   "separatorthemes:accent"
   "separatorthemes:vertical"
+  # Wave-D Tabs zero-selected (no defaultValue → '' active; no tab selected, all panels hidden).
+  "tabsnone:none"
 )
 
 echo "ℵ building golden dist (bun)"

@@ -1563,6 +1563,114 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
+
+  // ── Wave-D roving depth (STR-330) ────────────────────────────────────────────
+  // Tabs orientation="vertical": ArrowDown/ArrowUp navigate the roving focus (and, automatic
+  // activation, select); ArrowLeft/ArrowRight are INERT (off-axis). aria-orientation/data-
+  // orientation=vertical. (tabs.tsx:96,133,247; orientation drives the roving arrow axis.)
+  { id: "tabsvert", state: "vertical", apg: "tabs", name: "vertical: ArrowDown navigates+activates the next tab; ArrowRight is inert", run: async (pg) => {
+    const sel = '[role="tab"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, '[role="tablist"]', 0, "aria-orientation")) === "vertical", "tablist must be aria-orientation=vertical");
+    await press(pg, "Tab"); // onto the selected tab (Account, idx 0)
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the selected tab");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "ArrowRight must be inert in vertical orientation");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 1), "ArrowDown did not move to the next tab (vertical axis)");
+    await attrEq(pg, sel, 1, "aria-selected", "true", "ArrowDown did not activate the landed tab (automatic activation)");
+  }},
+  // Tabs dir="rtl": the horizontal arrows are SWAPPED — ArrowLeft moves to the NEXT tab,
+  // ArrowRight to the previous (roving-focus getFocusIntent flips L/R under rtl).
+  { id: "tabsrtl", state: "rtl", apg: "tabs", name: "rtl: ArrowLeft moves to the NEXT tab, ArrowRight to the previous", run: async (pg) => {
+    const sel = '[role="tab"]';
+    await pg.locator(sel).first().waitFor();
+    await press(pg, "Tab"); // onto the selected tab (Account, idx 0)
+    ok(await activeIsNth(pg, sel, 0), "Tab did not focus the selected tab");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 1), "rtl: ArrowLeft did not move to the NEXT tab");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "rtl: ArrowRight did not move to the previous tab");
+  }},
+
+  // Accordion horizontal orientation: ArrowLeft/ArrowRight rove between triggers, ArrowUp/Down
+  // INERT; data-orientation=horizontal on the parts. (accordion orientation drives the axis.)
+  { id: "accordionhoriz", state: "horizontal", apg: "accordion", name: "horizontal: ArrowRight roves to the next trigger; ArrowDown is inert", run: async (pg) => {
+    const sel = '#root button[aria-expanded]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, sel, 0, "data-orientation")) === "horizontal", "trigger must be data-orientation=horizontal");
+    await pg.locator(sel).nth(0).focus();
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 0), "ArrowDown must be inert in horizontal orientation");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 1), "ArrowRight did not rove to the next trigger (horizontal axis)");
+  }},
+  // Accordion vertical loop-wrap: ArrowDown on the LAST trigger wraps to the first; ArrowUp on
+  // the first wraps to the last (RovingFocus loop default true).
+  { id: "accordion", state: "open", apg: "accordion", name: "vertical loop: ArrowDown on the last trigger wraps to the first", run: async (pg) => {
+    const sel = '#root button[aria-expanded]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(2).focus();
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 0), "ArrowDown on the last trigger did not wrap to the first");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, sel, 2), "ArrowUp on the first trigger did not wrap to the last");
+  }},
+
+  // ToggleGroup loop (default true): ArrowRight on the last item wraps to the first; ArrowLeft
+  // on the first wraps to the last. (The noloop story already pins the clamp; this pins wrap.)
+  { id: "togglegroup", state: "pressed", apg: "toolbar", name: "loop: ArrowRight on the last item wraps to the first", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(2).focus();
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "ArrowRight on the last item did not wrap to the first");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 2), "ArrowLeft on the first item did not wrap to the last");
+  }},
+  // ToggleGroup native Enter activates the focused item (button activation → onPressedChange),
+  // the same as Space (single-mode radio move).
+  { id: "togglegroup", state: "pressed", apg: "toolbar", name: "Enter activates the focused item (single-mode radio move)", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(2).focus(); // focus the last item (Right)
+    await press(pg, "Enter");
+    await attrEq(pg, sel, 2, "aria-checked", "true", "Enter did not activate the focused item");
+  }},
+  // ToggleGroup dir="rtl": ArrowLeft roves to the NEXT (rightmost) item, ArrowRight to previous.
+  { id: "togglegrouprtl", state: "rtl", apg: "toolbar", name: "rtl: ArrowLeft roves to the NEXT item, ArrowRight to the previous", run: async (pg) => {
+    const sel = '[role="radio"]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(0).focus();
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 1), "rtl: ArrowLeft did not rove to the NEXT item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "rtl: ArrowRight did not rove to the previous item");
+  }},
+
+  // Toolbar dir="rtl": ArrowLeft roves forward (to the NEXT item), ArrowRight backward.
+  { id: "toolbarrtl", state: "rtl", apg: "toolbar", name: "rtl: ArrowLeft roves to the NEXT item, ArrowRight to the previous", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first toolbar item");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 1), "rtl: ArrowLeft did not rove to the NEXT item");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "rtl: ArrowRight did not rove to the previous item");
+  }},
+  // Toolbar orientation="vertical": ArrowDown/ArrowUp rove, ArrowLeft/ArrowRight INERT;
+  // root + items carry data-orientation=vertical.
+  { id: "toolbar", state: "vertical", apg: "toolbar", name: "vertical: ArrowDown roves to the next item; ArrowRight is inert", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, '[role="toolbar"]', 0, "data-orientation")) === "vertical", "toolbar must be data-orientation=vertical");
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "ArrowRight must be inert in vertical orientation");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 1), "ArrowDown did not rove to the next item (vertical axis)");
+  }},
 ];
 
 const b = await chromium.launch();
