@@ -320,6 +320,8 @@ view c s =
             -- bars + corner. Same primitive, the `scrollbars` field selects the family.
             "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
             "separatorthemes" -> separatorThemesPage s
+            -- Wave-D: Toast swipeDirection="up" variant (data-swipe-direction=up).
+            "toast-up" -> HH.slot_ _toast unit Toast.component toastUpInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1982,3 +1984,9 @@ avatarLoadedInput = RadixAvatar.defaultInput
 -- the LOADED steady-state deterministically, matching the golden story's ONE_PX_PNG.
 onePxPng :: String
 onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
+
+-- | Wave-D: Toast swipeDirection="up" variant — identical to `toastInput` but the swipe
+-- | axis is physical-up, so data-swipe-direction=up on the <li> (the stable contract; the
+-- | pointer-drag clamp/CSS-var math is non-deterministic in a headless capture, deferred).
+toastUpInput :: Toast.Input
+toastUpInput = toastInput { swipeDirection = "up" }

@@ -1028,4 +1028,13 @@ export const STATES = {
       });
     },
   },
+
+  // Wave-D: Toast swipeDirection="up" variant — same controlled-open-at-first-paint defusing
+  // as `toast` (duration=Infinity, no queue/timer race). Wait for the open <li>, keyed off
+  // its data-swipe-direction (now "up"). Same driver runs golden + port.
+  "toast-up": {
+    open: async (pg) => {
+      await pg.locator('li[data-state="open"][data-swipe-direction="up"]').first().waitFor();
+    },
+  },
 };

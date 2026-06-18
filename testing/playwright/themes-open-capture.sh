@@ -154,6 +154,7 @@ STATES=(
   "separatorthemes:size4"
   "separatorthemes:accent"
   "separatorthemes:vertical"
+  "toast-up:open"
 )
 
 echo "ℵ building golden dist (bun)"
