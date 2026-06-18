@@ -181,12 +181,14 @@ initialState input =
   , initialValue: firstValue input
   }
 
+-- | The initial active value. Upstream is `value ?? defaultValue ?? ''` (tabs.tsx:80) — a
+-- | controlled `value` wins, else the uncontrolled `defaultValue`, else the EMPTY string
+-- | (zero-selected: no tab aria-selected, no panel visible). We do NOT fall back to tabs[0]:
+-- | that would force a selection upstream never makes when no default is given.
 firstValue :: Input -> String
-firstValue input = case input.defaultValue of
+firstValue input = case input.value of
   Just v -> v
-  Nothing -> case input.tabs !! 0 of
-    Just t -> t.value
-    Nothing -> ""
+  Nothing -> fromMaybe "" input.defaultValue
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
@@ -282,8 +284,12 @@ triggerId st value = base st <> "-trigger-" <> value
 panelId :: State -> String -> String
 panelId st value = base st <> "-content-" <> value
 
+-- | The index of the selected tab, or -1 when the active value matches NO tab (the
+-- | zero-selected state, upstream `value ?? defaultValue ?? ''`). -1 makes `tabIndexFor`
+-- | stamp tabindex=-1 on EVERY trigger (no roving tab stop), matching upstream's null
+-- | currentTabStopId before any focus.
 selectedIndex :: State -> Int
-selectedIndex st = fromMaybe 0 (findIndex (\t -> t.value == current st.ctrl) st.tabs)
+selectedIndex st = fromMaybe (-1) (findIndex (\t -> t.value == current st.ctrl) st.tabs)
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
@@ -325,10 +331,13 @@ handleAction = case _ of
   -- Enter/Space on a focused trigger activates it regardless of activationMode (tabs.tsx:192).
   TriggerKeyDown value ke ->
     when (KE.key ke == "Enter" || KE.key ke == " ") (selectValue value)
-  -- Tab-into-tablist: forward container focus to the active trigger.
+  -- Tab-into-tablist: forward container focus to the active trigger. When nothing is
+  -- selected (selectedIndex = -1, the zero-selected state) upstream focuses the FIRST
+  -- focusable tab instead, so fall back to index 0.
   EntryFocus -> do
     st <- H.get
-    focusTabAt (selectedIndex st)
+    let idx = selectedIndex st
+    focusTabAt (if idx < 0 then 0 else idx)
 
 -- | Focus the trigger at the given index via its existing ref (the same mechanism
 -- | ListKeyDown uses). No-op when the index is out of range.

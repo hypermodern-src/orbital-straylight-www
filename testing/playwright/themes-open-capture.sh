@@ -159,6 +159,8 @@ STATES=(
   "selectform:required"
   "dropdownmenugroup:open"
   "toast-up:open"
+  # Wave-D Tabs zero-selected (no defaultValue → '' active; no tab selected, all panels hidden).
+  "tabsnone:none"
 )
 
 echo "ℵ building golden dist (bun)"

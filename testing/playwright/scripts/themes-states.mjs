@@ -1073,6 +1073,18 @@ export const STATES = {
   "toast-up": {
     open: async (pg) => {
       await pg.locator('li[data-state="open"][data-swipe-direction="up"]').first().waitFor();
+  // Wave-D Tabs zero-selected: NO defaultValue → active value '' (upstream value??default??'').
+  // STATELESS — at rest NO tab is aria-selected and EVERY panel is hidden. Wait for the tablist
+  // with zero selected tabs (the zero-selected DOM is the oracle).
+  tabsnone: {
+    none: async (pg) => {
+      await pg.locator('[role="tablist"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const tabs = [...document.querySelectorAll('[role="tab"]')];
+        const sel = tabs.filter((t) => t.getAttribute("aria-selected") === "true");
+        const panels = [...document.querySelectorAll('[role="tabpanel"]')];
+        return tabs.length === 3 && sel.length === 0 && panels.every((p) => p.hasAttribute("hidden"));
+      });
     },
   },
 };

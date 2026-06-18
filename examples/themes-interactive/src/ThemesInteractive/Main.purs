@@ -336,6 +336,16 @@ view c s =
             "dropdownmenugroup" -> HH.slot_ _dropdownmenugroup unit DropdownMenu.component dropdownGroupInput
             -- Wave-D: Toast swipeDirection="up" variant (data-swipe-direction=up).
             "toast-up" -> HH.slot_ _toast unit Toast.component toastUpInput
+            -- Wave-D Tabs depth: vertical orientation, RTL (swapped horizontal arrows), and the
+            -- zero-selected (no defaultValue → '') contract. All reuse the _tabs slot (one page
+            -- renders at a time), separate routes so the `tabs` story stays byte-identical.
+            "tabsvert" -> HH.slot_ _tabs unit Tabs.component tabsVertInput
+            "tabsrtl" -> HH.slot_ _tabs unit Tabs.component tabsRtlInput
+            "tabsnone" -> HH.slot_ _tabs unit Tabs.component tabsNoneInput
+            -- Wave-D Accordion horizontal, ToggleGroup rtl, Toolbar rtl depth stories.
+            "accordionhoriz" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionHorizInput ]
+            "togglegrouprtl" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupRtlInput
+            "toolbarrtl" -> HH.slot_ _toolbar unit Toolbar.component toolbarRtlInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -2057,3 +2067,59 @@ dropdownGroupInput = DropdownMenu.defaultInput
 -- | pointer-drag clamp/CSS-var math is non-deterministic in a headless capture, deferred).
 toastUpInput :: Toast.Input
 toastUpInput = toastInput { swipeDirection = "up" }
+-- | tabs (vertical) — same anatomy/Style as `tabsInput` but orientation=Vertical: ArrowUp/
+-- | ArrowDown navigate, Left/Right inert, data-orientation=vertical + aria-orientation=vertical.
+tabsVertInput :: Tabs.Input
+tabsVertInput = (tabsInput "") { orientation = Vertical }
+
+-- | tabs (rtl) — same anatomy/Style as `tabsInput` but dir=RTL: the horizontal arrows are
+-- | SWAPPED (ArrowLeft → next, ArrowRight → prev) and the root emits dir=rtl.
+tabsRtlInput :: Tabs.Input
+tabsRtlInput = (tabsInput "") { dir = RTL }
+
+-- | tabs (zero-selected) — NO defaultValue (and uncontrolled value=Nothing) → the active value
+-- | is '' (upstream `value ?? defaultValue ?? ''`): no tab aria-selected, no panel visible.
+tabsNoneInput :: Tabs.Input
+tabsNoneInput = (tabsInput "") { defaultValue = Nothing }
+
+-- | accordion (horizontal) — orientation=Horizontal: ArrowLeft/ArrowRight rove between
+-- | triggers, ArrowUp/Down inert; data-orientation=horizontal on the parts. type=multiple.
+accordionHorizInput :: Accordion.Input
+accordionHorizInput = (accordionInput "") { orientation = Horizontal }
+
+-- | togglegroup (rtl) — single-mode, Left pre-pressed, dir=RTL: ArrowLeft roves to the NEXT
+-- | (rightmost) item, ArrowRight to the previous. Bare ⇒ empty Style.
+toggleGroupRtlInput :: ToggleGroup.Input
+toggleGroupRtlInput = ToggleGroup.defaultInput
+  { single = true
+  , dir = RTL
+  , defaultValue = [ "a" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
+
+-- | toolbar (rtl) — three plain buttons, dir=RTL: ArrowLeft roves to the NEXT item, ArrowRight
+-- | to the previous. Bare ⇒ empty Style (same anatomy as the noloop story).
+toolbarRtlInput :: Toolbar.Input
+toolbarRtlInput = Toolbar.defaultInput
+  { dir = RTL
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: false }
+      , Toolbar.Button { value: "open", label: [ HH.text "Open" ], disabled: false }
+      , Toolbar.Button { value: "save", label: [ HH.text "Save" ], disabled: false }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
+      }
+  }
