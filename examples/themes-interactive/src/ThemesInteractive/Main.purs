@@ -1507,6 +1507,9 @@ otpInput s = Otp.defaultInput
 formInput :: String -> Form.Input
 formInput s = Form.defaultInput
   { submitLabel = [ HH.text "Submit" ]
+  -- `?s=reset` renders a `<button type=reset>Reset</button>` so the form-reset path
+  -- (clears each field's derived validity → Messages unmount) is exercised.
+  , resetLabel = if s == "reset" then [ HH.text "Reset" ] else []
   , fields =
       [ Form.defaultField
           { name = "email"
@@ -1519,6 +1522,10 @@ formInput s = Form.defaultInput
               -- the default built-in message text fallback (radix DEFAULT_BUILT_IN_MESSAGES).
               if s == "defaultMessage" then
                 [ { match: Form.ValueMissing, forceMatch: true, text: [] } ]
+              -- `?s=reset` has a SINGLE (non-forced) valueMissing Message — it mounts on the
+              -- Submit click, then unmounts when the form is reset (matching the golden story).
+              else if s == "reset" then
+                [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "This value is missing" ] } ]
               else
               -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
               -- in registration order (the multi-id describedby contract).

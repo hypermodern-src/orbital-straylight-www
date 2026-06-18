@@ -1577,6 +1577,27 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
 
+  // ── Wave-D: Form reset clears derived validity ──────────────────────────────────
+  // Submit the empty required Control (valueMissing Message mounts, data-invalid stamps,
+  // aria-describedby links). Then click Reset: the form-reset path clears the validity, so
+  // the Message unmounts and data-invalid / aria-describedby are dropped.
+  { id: "form", state: "reset", apg: "form", name: "a form reset clears the field validity (Message unmounts, data-invalid drops)", run: async (pg) => {
+    await pg.locator('#root form').first().waitFor();
+    await pg.locator('#root button[type="submit"]').click();
+    await pg.locator('#root input[data-invalid="true"]').first().waitFor();
+    await pg.waitForFunction(() => {
+      const i = document.querySelector('#root input[name="email"]');
+      const db = i?.getAttribute("aria-describedby");
+      return !!(db && db.split(" ").some((id) => document.getElementById(id)));
+    }, { timeout: 4000 }).catch(() => { throw new Error("submit must link a valueMissing Message via aria-describedby"); });
+    await pg.locator('#root button[type="reset"]').click();
+    await pg.waitForFunction(() => {
+      const i = document.querySelector('#root input[name="email"]');
+      return i && !i.hasAttribute("data-invalid") && !i.hasAttribute("aria-describedby");
+    }, { timeout: 4000 }).catch(() => { throw new Error("reset did not clear data-invalid / aria-describedby"); });
+    ok((await pg.locator('#root input[data-invalid]').count()) === 0, "no control may carry data-invalid after reset");
+  }},
+
   // ── Wave-D: OTP paste / autocomplete-dump fills all slots ───────────────────────
   // An input event whose value is longer than one char (paste or password-manager
   // autofill) fills every slot from the sanitized+sliced code and focuses the last

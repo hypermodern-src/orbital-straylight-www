@@ -162,6 +162,8 @@ STATES=(
   "otp:paste"
   # ── Wave-D: PasswordToggleField form-reset → visibility back to hidden ──────
   "passwordtoggle:formreset"
+  # ── Wave-D: Form reset → clears validity (Messages unmount, data-invalid drops) ──
+  "form:reset"
 )
 
 echo "ℵ building golden dist (bun)"

@@ -921,6 +921,21 @@ export const STATES = {
         return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").trim() === "This value is missing");
       });
     },
+    // Wave-D form RESET: submit the empty required Control (valueMissing Message mounts +
+    // data-invalid stamps + aria-describedby links), THEN click the Reset button. The form
+    // `reset` event clears the field's validity, so the Message UNMOUNTS and data-invalid /
+    // aria-describedby are dropped — the form returns to its pristine rest-valid DOM. That
+    // cleared DOM is the oracle; keyed off upstream selectors only.
+    reset: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await root(pg).locator('button[type="reset"]').click();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i && !i.hasAttribute("data-invalid") && !i.hasAttribute("aria-describedby")
+          && !document.querySelector('input[data-invalid]');
+      });
+    },
   },
   // ── Wave-B stateless depth oracles (bare primitives) ─────────────────────────────
   separatorprim: {

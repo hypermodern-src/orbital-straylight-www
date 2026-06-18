@@ -148,6 +148,9 @@ defaultStyle =
 type Input =
   { fields :: Array Field
   , submitLabel :: Array HH.PlainHTML
+  -- Wave-D: when non-empty, render a `<button type=reset>` after Submit (the form-reset
+  -- path clears each field's validity). Empty ⇒ no reset button (the default stories).
+  , resetLabel :: Array HH.PlainHTML
   , style :: Style
   }
 
@@ -155,6 +158,7 @@ defaultInput :: Input
 defaultInput =
   { fields: []
   , submitLabel: []
+  , resetLabel: []
   , style: defaultStyle
   }
 
@@ -171,6 +175,7 @@ type Slot id = H.Slot Query Output id
 type State =
   { fields :: Array Field
   , submitLabel :: Array HH.PlainHTML
+  , resetLabel :: Array HH.PlainHTML
   , style :: Style
   -- minted ids, keyed by field index
   , controlIds :: Map Int String
@@ -186,6 +191,11 @@ data Action
   | ControlInput Int          -- native input clears the field's failed set (radix re-validates)
   | ControlChange Int         -- native `change` re-reads validity (radix's revalidate trigger)
   | FormSubmit Event.Event
+  -- Wave-D: form reset clears every field's failed-matcher set + validated-valid record
+  -- (radix: each control listens for the form `reset` and clears its validity/customValidity,
+  -- so the Messages unmount and aria-describedby is dropped). The native reset clears the
+  -- input VALUES; this clears the derived validity state the Messages render off.
+  | FormReset
 
 controlRef :: Int -> H.RefLabel
 controlRef i = H.RefLabel ("form-control-" <> show i)
@@ -207,6 +217,7 @@ initialState :: Input -> State
 initialState input =
   { fields: input.fields
   , submitLabel: input.submitLabel
+  , resetLabel: input.resetLabel
   , style: input.style
   , controlIds: Map.empty
   , msgIds: Map.empty
@@ -260,8 +271,12 @@ render st =
   HH.form
     [ classes st.style.root
     , HE.onSubmit FormSubmit
+    , HE.onReset (const FormReset)
     ]
-    (mapWithIndex (renderField st) st.fields <> [ renderSubmit st ])
+    ( mapWithIndex (renderField st) st.fields
+        <> [ renderSubmit st ]
+        <> (if null st.resetLabel then [] else [ renderReset st ])
+    )
 
 renderField :: forall m. State -> Int -> Field -> H.ComponentHTML Action () m
 renderField st i f =
@@ -322,6 +337,15 @@ renderSubmit st =
     ]
     (map HH.fromPlainHTML st.submitLabel)
 
+-- | A native `<button type=reset>`; clicking it fires the form's reset event (handled by
+-- | FormReset, which clears every field's derived validity). Rendered only when resetLabel
+-- | is non-empty.
+renderReset :: forall m. State -> H.ComponentHTML Action () m
+renderReset st =
+  HH.button
+    [ HP.type_ HP.ButtonReset ]
+    (map HH.fromPlainHTML st.resetLabel)
+
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Initialize -> do
@@ -353,6 +377,7 @@ handleAction = case _ of
     H.modify_ \st -> st
       { fields = input.fields
       , submitLabel = input.submitLabel
+      , resetLabel = input.resetLabel
       , style = input.style
       }
   ControlInvalid i -> do
@@ -407,6 +432,10 @@ handleAction = case _ of
     liftEffect (preventDefault ev)
     st <- H.get
     when (Map.isEmpty st.failed) (H.raise Submitted)
+  FormReset ->
+    -- clear all derived validity (failed matchers + validated-valid). The Messages unmount
+    -- and aria-describedby is dropped, returning the form to its pristine rest-valid DOM.
+    H.modify_ _ { failed = Map.empty, validPassed = Map.empty }
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of

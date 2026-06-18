@@ -1665,6 +1665,25 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=reset` adds a reset button: submit the empty required Control (valueMissing
+      // Message mounts + data-invalid stamps), then Reset → upstream's form-reset listener
+      // clears each control's validity, so the Message UNMOUNTS and data-invalid /
+      // aria-describedby are dropped, returning the form to its pristine rest-valid DOM.
+      if (s === "reset") {
+        return (
+          <Box>
+            <Form.Root>
+              <Form.Field name="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" required />
+                <Form.Message match="valueMissing">This value is missing</Form.Message>
+              </Form.Field>
+              <Form.Submit>Submit</Form.Submit>
+              <button type="reset">Reset</button>
+            </Form.Root>
+          </Box>
+        );
+      }
       return (
         <Box>
           <Form.Root>
