@@ -37,7 +37,7 @@ module Hydrogen.Radix.Avatar
 import Prelude
 
 import Data.Maybe (Maybe(..))
-import DOM.HTML.Indexed (HTMLspan)
+import DOM.HTML.Indexed (HTMLspan, HTMLimg)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -82,6 +82,9 @@ type Input =
   , fallback :: Array HH.PlainHTML      -- shown until/unless the image has loaded
   , rootAttrs :: Array (HH.IProp HTMLspan Action) -- escape hatch for preset Root attrs
                                                   -- (data-accent-color/data-radius/…)
+  , imageAttrs :: Array (HH.IProp HTMLimg Action) -- passthrough onto the <img> (themes
+                                                  -- Avatar.Image rest-spreads ...t:
+                                                  -- referrerPolicy/crossOrigin/data-*/…)
   , style :: Style
   }
 
@@ -91,6 +94,7 @@ defaultInput =
   , alt: ""
   , fallback: []
   , rootAttrs: []
+  , imageAttrs: []
   , style: defaultStyle
   }
 
@@ -112,6 +116,7 @@ type State =
   , alt :: String
   , fallback :: Array HH.PlainHTML
   , rootAttrs :: Array (HH.IProp HTMLspan Action)
+  , imageAttrs :: Array (HH.IProp HTMLimg Action)
   , style :: Style
   }
 
@@ -140,6 +145,7 @@ initialState input =
   , alt: input.alt
   , fallback: input.fallback
   , rootAttrs: input.rootAttrs
+  , imageAttrs: input.imageAttrs
   , style: input.style
   }
 
@@ -157,12 +163,12 @@ renderImage st =
   -- @radix-ui/themes AvatarImage — emit NO data-state on the img; data-state is a Root-only
   -- concern). Parity: the img carries only src/alt/class (+ the load handlers).
   HH.img
-    [ HP.src st.src
-    , HP.alt st.alt
-    , classes st.style.image
-    , HE.onLoad \_ -> StatusChanged' Loaded
-    , HE.onError \_ -> StatusChanged' Errored
-    ]
+    ( [ HP.src st.src
+      , HP.alt st.alt
+      , classes st.style.image
+      , HE.onLoad \_ -> StatusChanged' Loaded
+      , HE.onError \_ -> StatusChanged' Errored
+      ] <> st.imageAttrs )
 
 renderFallback :: forall m. State -> H.ComponentHTML Action () m
 renderFallback st =
@@ -191,6 +197,7 @@ handleAction = case _ of
       , alt = input.alt
       , fallback = input.fallback
       , rootAttrs = input.rootAttrs
+      , imageAttrs = input.imageAttrs
       , style = input.style
       }
     when (next /= st.status) (H.raise (StatusChanged next))

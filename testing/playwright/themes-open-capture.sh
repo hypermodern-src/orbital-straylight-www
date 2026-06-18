@@ -151,6 +151,8 @@ STATES=(
   "progress:invalid"
   # ── Wave-C Avatar loaded steady-state DOM oracle (STR-330) ───────────────────
   "avatar:loaded"
+  # ── Wave-D Avatar img-attr passthrough (referrerPolicy/crossOrigin on <img>) ──
+  "avatar:loadedattrs"
   "labelprim:forfocus"
   # Wave-C: Themes.Separator WRAPPER depth oracle.
   "separatorthemes:default"

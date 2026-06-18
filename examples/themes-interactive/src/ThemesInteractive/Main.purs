@@ -281,6 +281,9 @@ view c s =
             -- classes: the LOADED steady-state (img mounted, alt, fallback gone, no
             -- data-state on the img). Else the fallback-only Themes Avatar.
             "avatar" | s == "loaded" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedInput
+            -- `?s=loadedattrs` (wave D): the loaded steady-state plus img-attr passthrough
+            -- (referrerPolicy/crossOrigin rest-spread onto the <img>).
+            "avatar" | s == "loadedattrs" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedAttrsInput
             "avatar" -> Avatar.avatar "A" []
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
@@ -1993,6 +1996,18 @@ avatarLoadedInput = RadixAvatar.defaultInput
       , image: cn "rt-AvatarImage"
       , fallback: cn "rt-AvatarFallback rt-one-letter"
       }
+  }
+
+-- | Wave-D: the loaded Avatar with img-attr PASSTHROUGH. The themes Avatar.Image
+-- | rest-spreads (...t) referrerPolicy/crossOrigin onto the <img>; this binding exercises
+-- | the port's `imageAttrs` escape hatch so those attributes land on the loaded image
+-- | (matching the golden's ?s=loadedattrs story). Same loaded steady-state otherwise.
+avatarLoadedAttrsInput :: RadixAvatar.Input
+avatarLoadedAttrsInput = avatarLoadedInput
+  { imageAttrs =
+      [ HP.attr (HH.AttrName "referrerpolicy") "no-referrer"
+      , HP.attr (HH.AttrName "crossorigin") "anonymous"
+      ]
   }
 
 -- A 1×1 transparent PNG data-URI (loads synchronously from cache) — the Avatar reaches

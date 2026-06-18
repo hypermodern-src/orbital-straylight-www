@@ -546,6 +546,13 @@ export const STATES = {
       await root(pg).locator('img.rt-AvatarImage').first().waitFor();
       await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
     },
+    // `?s=loadedattrs` (wave D) — the loaded img PLUS the themes Avatar.Image rest-spread:
+    // referrerPolicy/crossOrigin land as real attributes on the <img>. Keyed off the
+    // UPSTREAM referrerpolicy attr so golden + port share the same wait.
+    loadedattrs: async (pg) => {
+      await root(pg).locator('img.rt-AvatarImage[referrerpolicy="no-referrer"][crossorigin="anonymous"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
+    },
   },
   progress: {
     // Determinate progress bar — STATELESS (no interaction). The `shown` state just

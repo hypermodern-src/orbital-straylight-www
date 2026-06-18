@@ -1442,6 +1442,12 @@ const PAGES: Page[] = [
     // alt/accessible-name + loaded-state contract the fallback-only story can't.
     node: (() => {
       const s = currentState();
+      // `?s=loadedattrs` — the themes Avatar.Image rest-spreads (...t) referrerPolicy /
+      // crossOrigin / id onto the <img>, so they land as real attributes on the loaded
+      // image (the plain `loaded` story sets none ⇒ they are absent there).
+      if (s === "loadedattrs")
+        return <Avatar src={ONE_PX_PNG} alt="Profile photo" fallback="A"
+          referrerPolicy="no-referrer" crossOrigin="anonymous" />;
       return s === "loaded"
         ? <Avatar src={ONE_PX_PNG} alt="Profile photo" fallback="A" />
         : <Avatar fallback="A" />;
