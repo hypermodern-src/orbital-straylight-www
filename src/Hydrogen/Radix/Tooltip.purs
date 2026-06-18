@@ -224,6 +224,10 @@ render st =
             , HE.onMouseLeave \_ -> Hide
             , HE.onFocus \_ -> FocusShow
             , HE.onBlur \_ -> Hide
+            -- ACTIVATING the trigger dismisses the tooltip: upstream onPointerDown→onClose
+            -- (when open) and onClick composes onClose (tooltip.tsx:308-319) — a tooltip is a
+            -- transient hint, so committing to the trigger (clicking it) hides it.
+            , HE.onClick \_ -> Hide
             ] <> portalData st.triggerAttrs
             -- aria-describedby points at the content id ONLY while open (upstream:
             -- `context.open ? contentId : undefined`); when closed the attr is absent.

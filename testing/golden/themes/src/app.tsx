@@ -1965,6 +1965,8 @@ const PAGES: Page[] = [
           </Select.Group>
         </Select.Content>
       </Select.Root>
+    ),
+  },
   // Wave-C: Tabs activationMode="manual" — arrow keys move the roving focus WITHOUT
   // changing selection; Enter/Space on the focused trigger activates it (tabs.tsx:61,
   // 192-202). Keyboard-only APG story (no new DOM golden; the at-rest DOM matches `tabs`).
@@ -2122,6 +2124,8 @@ const PAGES: Page[] = [
           </Box>
         </ScrollArea>
       );
+    })(),
+  },
   // ── Wave-C: Themes.Separator WRAPPER depth oracle (distinct from the primitive) ──
   // The rt-Separator themes wrapper (NOT the bare primitive) has its own contract:
   //   * decorative defaults to TRUE → role is OMITTED ENTIRELY (role={undefined}),

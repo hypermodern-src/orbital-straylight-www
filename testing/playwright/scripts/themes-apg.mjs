@@ -1563,6 +1563,21 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 0, "aria-pressed")) === "false", "Bold must unpress independently");
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
+
+  // ── Wave-D nav-group depth checks (STR-330) ──────────────────────────────────
+  // Tooltip — ACTIVATING the trigger dismisses the tooltip. Upstream Tooltip.Trigger binds
+  // onPointerDown→onClose (when open) and onClick composes onClose (tooltip.tsx:308-319): a
+  // tooltip is a transient hint, so the moment the user commits to the trigger (clicks it) the
+  // hint goes away. Open via FOCUS (instant-open, no delay race), then click the trigger and
+  // assert role=tooltip is gone. Keyed off role=tooltip only, so the same check runs golden+port.
+  { id: "tooltip", apg: "tooltip", name: "clicking the trigger dismisses an open tooltip", run: async (pg) => {
+    await triggerBtn(pg).focus();
+    await pg.getByRole("tooltip").waitFor({ timeout: 3000 });
+    ok(await visible(pg, '[role="tooltip"]'), "tooltip did not open on focus (precondition)");
+    await triggerBtn(pg).click();
+    await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="tooltip"]')), "clicking the trigger must dismiss the open tooltip");
+  }},
 ];
 
 const b = await chromium.launch();
