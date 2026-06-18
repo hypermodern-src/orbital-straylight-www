@@ -770,9 +770,13 @@ const PAGES: Page[] = [
     // proves roving navigation + click skip it (menu.tsx:540 filter(!disabled), :720
     // focusable={!disabled}, :639 select guard). Every other path renders all enabled.
     node: (() => {
-      const dupDisabled = currentState() === "disabled";
+      const s = currentState();
+      const dupDisabled = s === "disabled";
+      // `?s=submenu` → a Sub (SubTrigger "More" + SubContent), with BOTH the root and the sub
+      // forced open (defaultOpen) so the nested role=menu is captured at rest by the DOM oracle.
+      const sub = s === "submenu";
       return (
-        <DropdownMenu.Root>
+        <DropdownMenu.Root defaultOpen={sub}>
           <DropdownMenu.Trigger>
             <Button variant="soft">
               Options
@@ -784,6 +788,17 @@ const PAGES: Page[] = [
             <DropdownMenu.Item shortcut="⌘ D" disabled={dupDisabled}>Duplicate</DropdownMenu.Item>
             <DropdownMenu.Separator />
             <DropdownMenu.Item shortcut="⌘ N">Archive</DropdownMenu.Item>
+            {sub && (
+              <DropdownMenu.Sub defaultOpen>
+                <DropdownMenu.SubTrigger>More</DropdownMenu.SubTrigger>
+                <DropdownMenu.SubContent>
+                  <DropdownMenu.Item>Move to project…</DropdownMenu.Item>
+                  <DropdownMenu.Item>Move to folder…</DropdownMenu.Item>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Item>Advanced options…</DropdownMenu.Item>
+                </DropdownMenu.SubContent>
+              </DropdownMenu.Sub>
+            )}
             <DropdownMenu.Separator />
             <DropdownMenu.Item shortcut="⌘ ⌫" color="red">
               Delete
