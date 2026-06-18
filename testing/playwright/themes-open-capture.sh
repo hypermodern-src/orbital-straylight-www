@@ -119,6 +119,7 @@ STATES=(
   "contextmenuchecks:radio"
   "menubarchecks:checkbox"
   "menubarchecks:radio"
+  "selectplaceholder:placeholder"
 )
 
 echo "ℵ building golden dist (bun)"

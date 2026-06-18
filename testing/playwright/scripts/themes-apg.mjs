@@ -1186,6 +1186,17 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "✓Medium");
     ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
   }},
+  // ── Wave-C menus depth (STR-330): Select placeholder (combobox) ──────────────────
+  // APG listbox/combobox: with NO value the trigger reports data-placeholder and (per the
+  // Select pattern) keyboard-opens. On open NO option is aria-selected (nothing chosen yet).
+  { id: "selectplaceholder", state: "placeholder", apg: "listbox", name: "placeholder trigger reports data-placeholder and keyboard-opens with no selection", run: async (pg) => {
+    const trig = pg.locator('.rt-SelectTrigger').first(); await trig.waitFor();
+    ok((await attrOf(pg, '.rt-SelectTrigger', 0, "data-placeholder")) === "", "trigger must carry data-placeholder while unselected");
+    await trig.focus(); await press(pg, "ArrowDown");
+    await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
+    const sel = await pg.evaluate(() => [...document.querySelectorAll('[role="option"]')].some((o) => o.getAttribute("aria-selected") === "true"));
+    ok(!sel, "no option may be aria-selected when the placeholder (no value) is showing");
+  }},
 ];
 
 const b = await chromium.launch();

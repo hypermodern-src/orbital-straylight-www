@@ -1784,6 +1784,28 @@ const PAGES: Page[] = [
       );
     })(),
   },
+  // ── Wave-C menus depth (STR-330): Select placeholder ────────────────────────────
+  // A Select with NO defaultValue and a Select.Value placeholder: the trigger shows the
+  // placeholder text and carries `data-placeholder`. STATELESS (?s=placeholder) — the at-rest
+  // trigger IS the oracle (shouldShowPlaceholder('' | undefined)).
+  {
+    id: "selectplaceholder",
+    label: "Select — placeholder",
+    interactive: true,
+    node: (
+      <Select.Root>
+        <Select.Trigger placeholder="Pick a fruit…" />
+        <Select.Content>
+          <Select.Group>
+            <Select.Label>Fruits</Select.Label>
+            <Select.Item value="apple">Apple</Select.Item>
+            <Select.Item value="orange">Orange</Select.Item>
+            <Select.Item value="grape">Grape</Select.Item>
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+    ),
+  },
 ];
 
 function currentId(): string {

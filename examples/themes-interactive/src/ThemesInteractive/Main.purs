@@ -102,6 +102,7 @@ type Slots =
   , dropdownmenuchecks :: DropdownMenu.Slot Unit
   , contextmenuchecks :: ContextMenu.Slot Unit
   , menubarchecks :: Menubar.Slot Unit
+  , selectplaceholder :: Select.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -200,6 +201,9 @@ _contextmenuchecks = Proxy
 _menubarchecks :: Proxy "menubarchecks"
 _menubarchecks = Proxy
 
+_selectplaceholder :: Proxy "selectplaceholder"
+_selectplaceholder = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -284,6 +288,7 @@ view c s =
             "dropdownmenuchecks" -> HH.slot_ _dropdownmenuchecks unit DropdownMenu.component (dropdownChecksInput s)
             "contextmenuchecks" -> HH.slot_ _contextmenuchecks unit ContextMenu.component (contextChecksInput s)
             "menubarchecks" -> HH.slot_ _menubarchecks unit Menubar.component (menubarChecksInput s)
+            "selectplaceholder" -> HH.slot_ _selectplaceholder unit Select.component selectPlaceholderInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -791,6 +796,24 @@ selectInput = Select.defaultInput
   , trigger = [ chevronCls "rt-SelectIcon" ]
   , groupLabel = [ HH.text "Fruits" ]
   , checkIcon = [ checkSvg ]
+  , items =
+      [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
+      , { value: "orange", label: [ HH.text "Orange" ], disabled: false }
+      , { value: "grape", label: [ HH.text "Grape" ], disabled: false }
+      ]
+  }
+
+-- | The Wave-C Select-placeholder story: NO defaultValue + a placeholder, so the at-rest
+-- | trigger shows "Pick a fruit…" and carries data-placeholder. Reuses selectStyle.
+selectPlaceholderInput :: Select.Input
+selectPlaceholderInput = Select.defaultInput
+  { style = selectStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"
+  , trigger = [ chevronCls "rt-SelectIcon" ]
+  , groupLabel = [ HH.text "Fruits" ]
+  , checkIcon = [ checkSvg ]
+  , placeholder = [ HH.text "Pick a fruit…" ]
   , items =
       [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
       , { value: "orange", label: [ HH.text "Orange" ], disabled: false }

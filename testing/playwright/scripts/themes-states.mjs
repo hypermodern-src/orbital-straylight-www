@@ -832,4 +832,18 @@ export const STATES = {
       await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
     },
   },
+  // ── Wave-C menus depth (STR-330): Select placeholder ─────────────────────────────
+  // No defaultValue + a placeholder. OPEN the listbox (click the trigger) so the oracle is the
+  // open-state DOM: the trigger keeps `data-placeholder` (nothing selected), and every option is
+  // aria-selected=false (no checked item). Click-open avoids the closed-Select content-mount
+  // strategy divergence (the port always mounts the wrapper; upstream mounts content on open),
+  // which is an orthogonal Select-architecture gap tracked separately. Keyed off UPSTREAM
+  // role=listbox + data-placeholder only, so the same driver runs golden + port.
+  selectplaceholder: {
+    placeholder: async (pg) => {
+      await pg.locator('button[data-placeholder]').first().waitFor();
+      await pg.locator(".rt-SelectTrigger").click();
+      await pg.locator('[role="listbox"]').waitFor();
+    },
+  },
 };
