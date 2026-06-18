@@ -1,0 +1,4 @@
+- tablist:
+  - tab "Account"
+  - tab "Documents"
+  - tab "Settings"
