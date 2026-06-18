@@ -115,6 +115,8 @@ STATES=(
   # ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
   "dropdownmenuchecks:checkbox"
   "dropdownmenuchecks:radio"
+  "contextmenuchecks:checkbox"
+  "contextmenuchecks:radio"
 )
 
 echo "ℵ building golden dist (bun)"

@@ -100,6 +100,7 @@ type Slots =
   , otp :: Otp.Slot Unit
   , form :: Form.Slot Unit
   , dropdownmenuchecks :: DropdownMenu.Slot Unit
+  , contextmenuchecks :: ContextMenu.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -192,6 +193,9 @@ _form = Proxy
 _dropdownmenuchecks :: Proxy "dropdownmenuchecks"
 _dropdownmenuchecks = Proxy
 
+_contextmenuchecks :: Proxy "contextmenuchecks"
+_contextmenuchecks = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -274,6 +278,7 @@ view c s =
             -- (defaultOpen, ?s=checkbox|radio). Distinct slot/id so the existing dropdownmenu
             -- oracles are untouched.
             "dropdownmenuchecks" -> HH.slot_ _dropdownmenuchecks unit DropdownMenu.component (dropdownChecksInput s)
+            "contextmenuchecks" -> HH.slot_ _contextmenuchecks unit ContextMenu.component (contextChecksInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -635,6 +640,39 @@ contextMenuStyle =
   , item: cn "rt-BaseMenuItem rt-ContextMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-ContextMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"
+  , checkboxItem: cn "rt-BaseMenuCheckboxItem rt-BaseMenuItem rt-ContextMenuCheckboxItem rt-ContextMenuItem"
+  , radioGroup: cn "rt-BaseMenuRadioGroup rt-ContextMenuRadioGroup"
+  , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-ContextMenuItem rt-ContextMenuRadioItem"
+  , indicator: cn "rt-BaseMenuItemIndicator rt-ContextMenuItemIndicator"
+  , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  }
+
+-- | The Wave-C ContextMenu-checks story: a right-click menu whose `?s=` selects a CheckboxItem
+-- | pair or a RadioGroup. Reuses contextMenuStyle so the chrome matches the canonical contextmenu.
+contextChecksInput :: String -> ContextMenu.Input
+contextChecksInput s = ContextMenu.defaultInput
+  { side = Right
+  , style = contextMenuStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"
+  , triggerStyle = "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);"
+  , trigger = [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
+  , entries =
+      if s == "radio" then
+        [ ContextMenu.MenuRadioGroupEntry
+            { value: "medium"
+            , options:
+                [ { value: "small", label: [ HH.text "Small" ], shortcut: [], disabled: false }
+                , { value: "medium", label: [ HH.text "Medium" ], shortcut: [], disabled: false }
+                , { value: "large", label: [ HH.text "Large" ], shortcut: [], disabled: false }
+                ]
+            }
+        ]
+      else
+        [ ContextMenu.MenuCheckboxEntry { value: "toolbar", label: [ HH.text "Show Toolbar" ], shortcut: [], check: ContextMenu.Checked, disabled: false }
+        , ContextMenu.MenuCheckboxEntry { value: "sidebar", label: [ HH.text "Show Sidebar" ], shortcut: [], check: ContextMenu.Unchecked, disabled: false }
+        ]
   }
 
 -- | menubar — the bare @radix-ui Menubar primitive (Radix Themes ships none, so NO rt-*

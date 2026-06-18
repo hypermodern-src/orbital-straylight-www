@@ -802,4 +802,19 @@ export const STATES = {
       await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
     },
   },
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem / RadioItem ───────────
+  // RIGHT-CLICK-open (point-anchored) then wait for the variant's checked/unchecked pair.
+  // Keyed off UPSTREAM role/aria-checked only, so the same driver runs golden + port.
+  contextmenuchecks: {
+    checkbox: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
 };

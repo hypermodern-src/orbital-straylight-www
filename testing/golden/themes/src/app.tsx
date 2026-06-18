@@ -1688,6 +1688,52 @@ const PAGES: Page[] = [
       );
     })(),
   },
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem + RadioItem ──────────
+  // A second context-menu page (distinct id) exercising the item variants: `?s=checkbox`
+  // (one checked, one unchecked CheckboxItem) and `?s=radio` (a RadioGroup, medium selected).
+  // Opened by right-clicking the trigger.
+  {
+    id: "contextmenuchecks",
+    label: "Context Menu — checks",
+    interactive: true,
+    node: (() => {
+      const variant = currentState() || "checkbox";
+      return (
+        <ContextMenu.Root>
+          <ContextMenu.Trigger>
+            <Flex
+              align="center"
+              justify="center"
+              style={{
+                width: 240,
+                height: 120,
+                border: "1px dashed var(--gray-6)",
+                borderRadius: "var(--radius-3)",
+              }}
+            >
+              <Text size="2" color="gray">
+                Right-click here
+              </Text>
+            </Flex>
+          </ContextMenu.Trigger>
+          <ContextMenu.Content>
+            {variant === "radio" ? (
+              <ContextMenu.RadioGroup value="medium">
+                <ContextMenu.RadioItem value="small">Small</ContextMenu.RadioItem>
+                <ContextMenu.RadioItem value="medium">Medium</ContextMenu.RadioItem>
+                <ContextMenu.RadioItem value="large">Large</ContextMenu.RadioItem>
+              </ContextMenu.RadioGroup>
+            ) : (
+              <>
+                <ContextMenu.CheckboxItem checked>Show Toolbar</ContextMenu.CheckboxItem>
+                <ContextMenu.CheckboxItem checked={false}>Show Sidebar</ContextMenu.CheckboxItem>
+              </>
+            )}
+          </ContextMenu.Content>
+        </ContextMenu.Root>
+      );
+    })(),
+  },
 ];
 
 function currentId(): string {

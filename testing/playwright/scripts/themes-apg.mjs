@@ -1146,6 +1146,25 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Large");
     ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
   }},
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem / RadioItem roving ───────
+  // Right-click open (point-anchored), then ArrowDown roves the checkbox/radio items —
+  // aria-checked is preserved through roving exactly as for the dropdown menu.
+  { id: "contextmenuchecks", state: "checkbox", apg: "menu", name: "ArrowDown roves the context checkbox items; aria-checked is preserved", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Toolbar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 0, "aria-checked")) === "true", "the checked checkbox must report aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Sidebar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 1, "aria-checked")) === "false", "the unchecked checkbox must report aria-checked=false when highlighted");
+  }},
+  { id: "contextmenuchecks", state: "radio", apg: "menu", name: "ArrowDown roves the context radio items; single-selection aria-checked holds", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium (selected) must be aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Small");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Medium");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
+  }},
 ];
 
 const b = await chromium.launch();
