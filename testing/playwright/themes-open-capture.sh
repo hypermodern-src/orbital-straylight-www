@@ -71,6 +71,7 @@ STATES=(
   "hovercard:richcontent"
   "navigationmenu:vertical"
   "navigationmenu:clicktoggle"
+  "navigationmenu:rtl"
   # wave-b roving depth gaps (STR-330): new DOM oracles.
   "togglegroup:multiple"
   "accordion:multiple"
@@ -157,6 +158,7 @@ STATES=(
   # ── Wave-D menus depth (STR-330): Select form integration + DropdownMenu groups ──
   "selectform:required"
   "dropdownmenugroup:open"
+  "toast-up:open"
 )
 
 echo "ℵ building golden dist (bun)"

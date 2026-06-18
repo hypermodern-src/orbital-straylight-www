@@ -334,6 +334,8 @@ view c s =
             "selectform" -> HH.form [] [ HH.slot_ _selectform unit Select.component (selectFormInput s) ]
             -- Wave-D menus depth: DropdownMenu Group/Label parts (two labelled groups).
             "dropdownmenugroup" -> HH.slot_ _dropdownmenugroup unit DropdownMenu.component dropdownGroupInput
+            -- Wave-D: Toast swipeDirection="up" variant (data-swipe-direction=up).
+            "toast-up" -> HH.slot_ _toast unit Toast.component toastUpInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -826,8 +828,11 @@ navigationMenuInput s = NavigationMenu.defaultInput
   -- OPEN at first paint (defaultValue="one") ONLY for the explicit `open` capture (?s=open);
   -- every other path (the `closed`/`rest` capture, the index) renders at rest — mirroring the
   -- golden story's `currentState() === "open"` switch (so the a11y `rest` baseline matches too).
-  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" then "one" else ""
+  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" || s == "rtl" then "one" else ""
   , orientation = if s == "vertical" then Vertical else Horizontal
+  -- Wave-D: ?s=rtl drives dir=RTL (the FocusGroup swaps the horizontal roving keys + the
+  -- dir attribute is stamped on the nav/list/content). Every other path stays LTR.
+  , dir = if s == "rtl" then RTL else LTR
   , items =
       [ { value: "one"
         , trigger: [ HH.text "Item One" ]
@@ -2047,3 +2052,8 @@ dropdownGroupInput = DropdownMenu.defaultInput
           ]
       ]
   }
+-- | Wave-D: Toast swipeDirection="up" variant — identical to `toastInput` but the swipe
+-- | axis is physical-up, so data-swipe-direction=up on the <li> (the stable contract; the
+-- | pointer-drag clamp/CSS-var math is non-deterministic in a headless capture, deferred).
+toastUpInput :: Toast.Input
+toastUpInput = toastInput { swipeDirection = "up" }

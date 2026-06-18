@@ -1030,10 +1030,16 @@ const PAGES: Page[] = [
       // the Indicator measures top/height/translateY instead of left/width/translateX). ?s=open
       // and ?s=vertical both open Item One at first paint via defaultValue.
       const vertical = currentState() === "vertical";
+      // Wave-D depth: ?s=rtl → an OPEN nav under dir="rtl". The FocusGroup swaps the horizontal
+      // roving keys (ArrowLeft↔ArrowRight) and the entry key (ArrowDown stays the vertical
+      // entry; the horizontal axis is mirrored). dir=rtl is stamped on nav/list/content. Opens
+      // Item One at first paint via defaultValue (no timer race).
+      const rtl = currentState() === "rtl";
       return (
         <NavigationMenu.Root
-          {...(open || vertical ? { defaultValue: "one" } : {})}
+          {...(open || vertical || rtl ? { defaultValue: "one" } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
+          {...(rtl ? { dir: "rtl" as const } : {})}
         >
           <NavigationMenu.List>
             <NavigationMenu.Item value="one">
@@ -2211,6 +2217,32 @@ const PAGES: Page[] = [
           </DropdownMenu.Group>
         </DropdownMenu.Content>
       </DropdownMenu.Root>
+  // ── Wave-D: Toast swipeDirection variant (STR-330) ───────────────────────────
+  // The canonical `toast` story is swipeDirection="right" (data-swipe-direction=right).
+  // swipeDirection is a PHYSICAL axis (toast.tsx) — "up" changes the data-swipe-direction
+  // attr (and, under a real pointer swipe, the clamp/isDeltaInDirection math + the
+  // --radix-toast-swipe-move/end-Y vars). The pointer-drag itself is non-deterministic in a
+  // headless capture, but the attribute IS the stable contract the port must reproduce.
+  // Same determinism defusing as `toast`: ONE toast, defaultOpen, duration={Infinity}, a huge
+  // Provider duration, and the exit keyframe so the closing lifecycle stays capturable.
+  {
+    id: "toast-up",
+    label: "Toast (swipe up)",
+    interactive: true,
+    node: (
+      <>
+        <style>{`@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } }
+          li[data-state="closed"][data-swipe-direction] { animation: toastExit 100ms ease-out; }`}</style>
+        <Toast.Provider duration={1000000} swipeDirection="up">
+          <Toast.Root duration={Infinity}>
+            <Toast.Title>Scheduled</Toast.Title>
+            <Toast.Description>Friday at 5pm</Toast.Description>
+            <Toast.Action altText="Undo">Undo</Toast.Action>
+            <Toast.Close aria-label="Close">×</Toast.Close>
+          </Toast.Root>
+          <Toast.Viewport />
+        </Toast.Provider>
+      </>
     ),
   },
 ];
