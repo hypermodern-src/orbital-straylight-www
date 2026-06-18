@@ -114,6 +114,14 @@ STATES=(
   "labelprim:forattrs"
   # Wave-C modal depth gaps (STR-330): PopoverClose variant (a Popover.Close submit button).
   "popover:close"
+  # ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
+  "dropdownmenuchecks:checkbox"
+  "dropdownmenuchecks:radio"
+  "contextmenuchecks:checkbox"
+  "contextmenuchecks:radio"
+  "menubarchecks:checkbox"
+  "menubarchecks:radio"
+  "selectplaceholder:placeholder"
 )
 
 echo "ℵ building golden dist (bun)"

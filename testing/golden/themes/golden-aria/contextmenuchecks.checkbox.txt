@@ -1,0 +1,5 @@
+- menu:
+  - menuitemcheckbox "Show Toolbar" [checked]:
+    - text: Show Toolbar
+    - img
+  - menuitemcheckbox "Show Sidebar"

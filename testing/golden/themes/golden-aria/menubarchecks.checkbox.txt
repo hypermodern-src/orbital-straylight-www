@@ -1,0 +1,5 @@
+- menubar:
+  - menuitem "View" [expanded]
+- menu "View":
+  - menuitemcheckbox "✓Show Toolbar" [checked]
+  - menuitemcheckbox "Show Sidebar"

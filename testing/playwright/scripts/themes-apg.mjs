@@ -1166,6 +1166,81 @@ const CHECKS = [
     await pg.locator(".rt-PopoverContent").getByRole("button", { name: "Comment" }).click(); await pg.waitForTimeout(220);
     ok(!(await visible(pg, '.rt-PopoverContent')), "PopoverClose did not close the popover");
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after PopoverClose");
+  // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem roving ───────
+  // Menu pattern (https://www.w3.org/WAI/ARIA/apg/patterns/menu/): a menuitemcheckbox carries
+  // role + aria-checked and participates in the roving order exactly like a menuitem. Open via
+  // ArrowDown (keyboard-open highlights the first item), then ArrowDown roves to the second —
+  // and the items keep their aria-checked (toolbar=true, sidebar=false) regardless of highlight.
+  { id: "dropdownmenuchecks", state: "checkbox", apg: "menu", name: "ArrowDown roves the checkbox items; aria-checked is preserved", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "Show Toolbar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 0, "aria-checked")) === "true", "the checked checkbox must report aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Sidebar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 1, "aria-checked")) === "false", "the unchecked checkbox must report aria-checked=false even when highlighted");
+  }},
+  // RadioGroup of menuitemradio: single-selection aria-checked (medium=true, others=false). The
+  // three options rove like menuitems; the selected one keeps aria-checked=true through roving.
+  { id: "dropdownmenuchecks", state: "radio", apg: "menu", name: "ArrowDown roves the radio items; single-selection aria-checked holds", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "Small");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 0, "aria-checked")) === "false", "Small must be aria-checked=false");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium (selected) must be aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Medium");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Large");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
+  }},
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem / RadioItem roving ───────
+  // Right-click open (point-anchored), then ArrowDown roves the checkbox/radio items —
+  // aria-checked is preserved through roving exactly as for the dropdown menu.
+  { id: "contextmenuchecks", state: "checkbox", apg: "menu", name: "ArrowDown roves the context checkbox items; aria-checked is preserved", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Toolbar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 0, "aria-checked")) === "true", "the checked checkbox must report aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Sidebar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 1, "aria-checked")) === "false", "the unchecked checkbox must report aria-checked=false when highlighted");
+  }},
+  { id: "contextmenuchecks", state: "radio", apg: "menu", name: "ArrowDown roves the context radio items; single-selection aria-checked holds", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium (selected) must be aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Small");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Medium");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
+  }},
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem / RadioItem roving ────────────
+  // Click the View trigger to open, ArrowDown roves the checkbox/radio items; aria-checked
+  // is preserved through roving (bare @radix-ui/react-menubar re-exports react-menu).
+  // NB: a CHECKED item's textContent leads with its ✓ ItemIndicator child, so the highlighted
+  // text for "Show Toolbar" (checked) is "✓Show Toolbar"; "Show Sidebar" (unchecked) has no ✓.
+  { id: "menubarchecks", state: "checkbox", apg: "menu", name: "ArrowDown roves the menubar checkbox items; aria-checked is preserved", run: async (pg) => {
+    await pg.locator("#root").getByRole("menuitem").first().click();
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "✓Show Toolbar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 0, "aria-checked")) === "true", "the checked checkbox must report aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Show Sidebar");
+    ok((await attrOf(pg, '[role="menuitemcheckbox"]', 1, "aria-checked")) === "false", "the unchecked checkbox must report aria-checked=false when highlighted");
+  }},
+  { id: "menubarchecks", state: "radio", apg: "menu", name: "ArrowDown roves the menubar radio items; single-selection aria-checked holds", run: async (pg) => {
+    await pg.locator("#root").getByRole("menuitem").first().click();
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium (selected) must be aria-checked=true");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Small");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "✓Medium");
+    ok((await attrOf(pg, '[role="menuitemradio"]', 1, "aria-checked")) === "true", "Medium must REMAIN the single selected radio after roving");
+  }},
+  // ── Wave-C menus depth (STR-330): Select placeholder (combobox) ──────────────────
+  // APG listbox/combobox: with NO value the trigger reports data-placeholder and (per the
+  // Select pattern) keyboard-opens. On open NO option is aria-selected (nothing chosen yet).
+  { id: "selectplaceholder", state: "placeholder", apg: "listbox", name: "placeholder trigger reports data-placeholder and keyboard-opens with no selection", run: async (pg) => {
+    const trig = pg.locator('.rt-SelectTrigger').first(); await trig.waitFor();
+    ok((await attrOf(pg, '.rt-SelectTrigger', 0, "data-placeholder")) === "", "trigger must carry data-placeholder while unselected");
+    await trig.focus(); await press(pg, "ArrowDown");
+    await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
+    const sel = await pg.evaluate(() => [...document.querySelectorAll('[role="option"]')].some((o) => o.getAttribute("aria-selected") === "true"));
+    ok(!sel, "no option may be aria-selected when the placeholder (no value) is showing");
   }},
 ];
 

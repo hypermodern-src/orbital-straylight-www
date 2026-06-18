@@ -117,6 +117,7 @@ type Input =
   , trigger :: Array HH.PlainHTML       -- rendered AFTER the value slot (e.g. the chevron)
   , groupLabel :: Array HH.PlainHTML    -- optional label heading the option group
   , checkIcon :: Array HH.PlainHTML     -- placed in the indicator slot of the selected item
+  , placeholder :: Array HH.PlainHTML   -- shown in the value slot when nothing is selected; gates data-placeholder
   , contentStyle :: String              -- the content's CONSTANT style (box-sizing/flex/outline/pointer-events)
   , portalAttrs :: Array (Tuple String String)  -- data-* on the content (theme re-application)
   }
@@ -135,6 +136,7 @@ defaultInput =
   , trigger: []
   , groupLabel: []
   , checkIcon: []
+  , placeholder: []
   , contentStyle: ""
   , portalAttrs: []
   }
@@ -167,6 +169,7 @@ type State =
   , trigger :: Array HH.PlainHTML
   , groupLabel :: Array HH.PlainHTML
   , checkIcon :: Array HH.PlainHTML
+  , placeholder :: Array HH.PlainHTML
   , contentStyle :: String
   , portalAttrs :: Array (Tuple String String)
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -234,6 +237,7 @@ initialState input =
   , trigger: input.trigger
   , groupLabel: input.groupLabel
   , checkIcon: input.checkIcon
+  , placeholder: input.placeholder
   , contentStyle: input.contentStyle
   , portalAttrs: input.portalAttrs
   , restoreEl: Nothing
@@ -250,12 +254,19 @@ selectedIndex :: State -> Int
 selectedIndex st =
   fromMaybe 0 (findIndex (\item -> item.value == current st.sel) st.items)
 
+-- | True when nothing is selected — the trigger shows the placeholder + carries
+-- | data-placeholder (upstream shouldShowPlaceholder: value is '' or no matching item).
+showPlaceholder :: State -> Boolean
+showPlaceholder st = case find (\item -> item.value == current st.sel) st.items of
+  Just _ -> false
+  Nothing -> true
+
 -- | The selected item's LABEL (what radix shows in the trigger), not the raw value;
--- | empty when nothing is selected (the preset's placeholder, if any, would show).
+-- | the placeholder when nothing is selected (matches upstream Select.Value placeholder).
 selectedLabel :: forall m. State -> Array (H.ComponentHTML Action () m)
 selectedLabel st = case find (\item -> item.value == current st.sel) st.items of
   Just item -> map HH.fromPlainHTML item.label
-  Nothing -> []
+  Nothing -> map HH.fromPlainHTML st.placeholder
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
@@ -277,6 +288,7 @@ render st =
             , HE.onKeyDown TriggerKeyDown
             ]
               <> (if open then [ aria "controls" st.contentId ] else [])
+              <> (if showPlaceholder st then [ dataAttr "placeholder" "" ] else [])
           )
           -- the value slot (rt-SelectTriggerInner) wraps the selected value; the trigger
           -- PlainHTML (e.g. the chevron) renders after it.
@@ -382,6 +394,7 @@ handleAction = case _ of
       , trigger = input.trigger
       , groupLabel = input.groupLabel
       , checkIcon = input.checkIcon
+      , placeholder = input.placeholder
       , contentStyle = input.contentStyle
       , portalAttrs = input.portalAttrs
       }

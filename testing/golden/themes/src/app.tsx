@@ -1664,6 +1664,163 @@ const PAGES: Page[] = [
       </Box>
     ),
   },
+  // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem + RadioItem ──────────
+  // A SECOND dropdown-menu page (distinct id so the existing dropdownmenu oracles are
+  // untouched) exercising the item variants the flat-item story can't: CheckboxItem
+  // (role=menuitemcheckbox, aria-checked, data-state, ItemIndicator) and a RadioGroup of
+  // RadioItems (role=menuitemradio, single-selection aria-checked). `?s=checkbox` shows the
+  // checkbox group (one checked, one unchecked); `?s=radio` shows the radio group (one
+  // selected). The ItemIndicator span renders ONLY for a checked/selected item (Presence).
+  {
+    id: "dropdownmenuchecks",
+    label: "Dropdown Menu — checks",
+    interactive: true,
+    node: (() => {
+      const variant = currentState() || "checkbox";
+      return (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="soft">
+              View
+              <DropdownMenu.TriggerIcon />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            {variant === "radio" ? (
+              <DropdownMenu.RadioGroup value="medium">
+                <DropdownMenu.RadioItem value="small">Small</DropdownMenu.RadioItem>
+                <DropdownMenu.RadioItem value="medium">Medium</DropdownMenu.RadioItem>
+                <DropdownMenu.RadioItem value="large">Large</DropdownMenu.RadioItem>
+              </DropdownMenu.RadioGroup>
+            ) : (
+              <>
+                <DropdownMenu.CheckboxItem checked>Show Toolbar</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem checked={false}>Show Sidebar</DropdownMenu.CheckboxItem>
+              </>
+            )}
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      );
+    })(),
+  },
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem + RadioItem ──────────
+  // A second context-menu page (distinct id) exercising the item variants: `?s=checkbox`
+  // (one checked, one unchecked CheckboxItem) and `?s=radio` (a RadioGroup, medium selected).
+  // Opened by right-clicking the trigger.
+  {
+    id: "contextmenuchecks",
+    label: "Context Menu — checks",
+    interactive: true,
+    node: (() => {
+      const variant = currentState() || "checkbox";
+      return (
+        <ContextMenu.Root>
+          <ContextMenu.Trigger>
+            <Flex
+              align="center"
+              justify="center"
+              style={{
+                width: 240,
+                height: 120,
+                border: "1px dashed var(--gray-6)",
+                borderRadius: "var(--radius-3)",
+              }}
+            >
+              <Text size="2" color="gray">
+                Right-click here
+              </Text>
+            </Flex>
+          </ContextMenu.Trigger>
+          <ContextMenu.Content>
+            {variant === "radio" ? (
+              <ContextMenu.RadioGroup value="medium">
+                <ContextMenu.RadioItem value="small">Small</ContextMenu.RadioItem>
+                <ContextMenu.RadioItem value="medium">Medium</ContextMenu.RadioItem>
+                <ContextMenu.RadioItem value="large">Large</ContextMenu.RadioItem>
+              </ContextMenu.RadioGroup>
+            ) : (
+              <>
+                <ContextMenu.CheckboxItem checked>Show Toolbar</ContextMenu.CheckboxItem>
+                <ContextMenu.CheckboxItem checked={false}>Show Sidebar</ContextMenu.CheckboxItem>
+              </>
+            )}
+          </ContextMenu.Content>
+        </ContextMenu.Root>
+      );
+    })(),
+  },
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem + RadioItem ──────────────
+  // Bare @radix-ui/react-menubar (NO rt-* classes). A single "View" menu whose `?s=` selects
+  // a CheckboxItem pair (one checked → ItemIndicator present) or a RadioGroup (medium selected).
+  // The ItemIndicator carries a "✓" text child so the present/absent gating is DOM-visible.
+  {
+    id: "menubarchecks",
+    label: "Menubar — checks",
+    interactive: true,
+    node: (() => {
+      const variant = currentState() || "checkbox";
+      return (
+        <Menubar.Root>
+          <Menubar.Menu value="view">
+            <Menubar.Trigger>View</Menubar.Trigger>
+            <Menubar.Portal>
+              <Menubar.Content align="start">
+                {variant === "radio" ? (
+                  <Menubar.RadioGroup value="medium">
+                    <Menubar.RadioItem value="small">
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Small
+                    </Menubar.RadioItem>
+                    <Menubar.RadioItem value="medium">
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Medium
+                    </Menubar.RadioItem>
+                    <Menubar.RadioItem value="large">
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Large
+                    </Menubar.RadioItem>
+                  </Menubar.RadioGroup>
+                ) : (
+                  <>
+                    <Menubar.CheckboxItem checked>
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Show Toolbar
+                    </Menubar.CheckboxItem>
+                    <Menubar.CheckboxItem checked={false}>
+                      <Menubar.ItemIndicator>✓</Menubar.ItemIndicator>
+                      Show Sidebar
+                    </Menubar.CheckboxItem>
+                  </>
+                )}
+              </Menubar.Content>
+            </Menubar.Portal>
+          </Menubar.Menu>
+        </Menubar.Root>
+      );
+    })(),
+  },
+  // ── Wave-C menus depth (STR-330): Select placeholder ────────────────────────────
+  // A Select with NO defaultValue and a Select.Value placeholder: the trigger shows the
+  // placeholder text and carries `data-placeholder`. STATELESS (?s=placeholder) — the at-rest
+  // trigger IS the oracle (shouldShowPlaceholder('' | undefined)).
+  {
+    id: "selectplaceholder",
+    label: "Select — placeholder",
+    interactive: true,
+    node: (
+      <Select.Root>
+        <Select.Trigger placeholder="Pick a fruit…" />
+        <Select.Content>
+          <Select.Group>
+            <Select.Label>Fruits</Select.Label>
+            <Select.Item value="apple">Apple</Select.Item>
+            <Select.Item value="orange">Orange</Select.Item>
+            <Select.Item value="grape">Grape</Select.Item>
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+    ),
+  },
 ];
 
 function currentId(): string {

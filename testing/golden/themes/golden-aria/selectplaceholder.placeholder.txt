@@ -1,0 +1,6 @@
+- listbox:
+  - group "Fruits":
+    - text: Fruits
+    - option "Apple"
+    - option "Orange"
+    - option "Grape"

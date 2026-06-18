@@ -99,6 +99,10 @@ type Slots =
   , toolbar :: Toolbar.Slot Unit
   , otp :: Otp.Slot Unit
   , form :: Form.Slot Unit
+  , dropdownmenuchecks :: DropdownMenu.Slot Unit
+  , contextmenuchecks :: ContextMenu.Slot Unit
+  , menubarchecks :: Menubar.Slot Unit
+  , selectplaceholder :: Select.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -188,6 +192,18 @@ _otp = Proxy
 _form :: Proxy "form"
 _form = Proxy
 
+_dropdownmenuchecks :: Proxy "dropdownmenuchecks"
+_dropdownmenuchecks = Proxy
+
+_contextmenuchecks :: Proxy "contextmenuchecks"
+_contextmenuchecks = Proxy
+
+_menubarchecks :: Proxy "menubarchecks"
+_menubarchecks = Proxy
+
+_selectplaceholder :: Proxy "selectplaceholder"
+_selectplaceholder = Proxy
+
 main :: Effect Unit
 main = do
   c <- queryParam "c"
@@ -266,6 +282,13 @@ view c s =
             "aspectratioprim" -> aspectRatioPrimPage s
             "visuallyhiddenprim" -> visuallyHiddenPrimPage s
             "labelprim" -> labelPrimPage
+            -- Wave-C menus depth: a SECOND DropdownMenu exercising CheckboxItem / RadioItem
+            -- (defaultOpen, ?s=checkbox|radio). Distinct slot/id so the existing dropdownmenu
+            -- oracles are untouched.
+            "dropdownmenuchecks" -> HH.slot_ _dropdownmenuchecks unit DropdownMenu.component (dropdownChecksInput s)
+            "contextmenuchecks" -> HH.slot_ _contextmenuchecks unit ContextMenu.component (contextChecksInput s)
+            "menubarchecks" -> HH.slot_ _menubarchecks unit Menubar.component (menubarChecksInput s)
+            "selectplaceholder" -> HH.slot_ _selectplaceholder unit Select.component selectPlaceholderInput
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -549,6 +572,55 @@ menuStyle =
   , item: cn "rt-BaseMenuItem rt-DropdownMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-DropdownMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-DropdownMenuSeparator"
+  , checkboxItem: cn "rt-BaseMenuCheckboxItem rt-BaseMenuItem rt-DropdownMenuCheckboxItem rt-DropdownMenuItem"
+  , radioGroup: cn "rt-BaseMenuRadioGroup rt-DropdownMenuRadioGroup"
+  , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-DropdownMenuItem rt-DropdownMenuRadioItem"
+  , indicator: cn "rt-BaseMenuItemIndicator rt-DropdownMenuItemIndicator"
+  -- Radix Themes quirk: the CHECKBOX indicator icon carries `rt-ContextMenuItemIndicatorIcon`
+  -- (shared icon styling), while the RADIO indicator icon carries `rt-DropdownMenuItemIndicatorIcon`.
+  , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-DropdownMenuItemIndicatorIcon" ]
+  }
+
+-- | The ItemIndicator icon svg (the check mark) with a caller-supplied class. No data-state
+-- | / style on the svg itself — the gated wrapper <span> carries data-state (matches the golden).
+menuIndicatorIcon :: String -> HH.PlainHTML
+menuIndicatorIcon iconClass =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") iconClass
+    , HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ thickCheckPath ]
+
+-- | The Wave-C DropdownMenu-checks story: a defaultOpen menu whose `?s=` selects a CheckboxItem
+-- | pair (one checked, one unchecked) or a RadioGroup (medium selected). Reuses menuStyle so the
+-- | content/trigger chrome matches the canonical dropdownmenu; only the entries differ.
+dropdownChecksInput :: String -> DropdownMenu.Input
+dropdownChecksInput s = DropdownMenu.defaultInput
+  { style = menuStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
+  , trigger = [ HH.text "View", chevron ]
+  , entries =
+      if s == "radio" then
+        [ DropdownMenu.MenuRadioGroupEntry
+            { value: "medium"
+            , options:
+                [ { value: "small", label: [ HH.text "Small" ], shortcut: [], disabled: false }
+                , { value: "medium", label: [ HH.text "Medium" ], shortcut: [], disabled: false }
+                , { value: "large", label: [ HH.text "Large" ], shortcut: [], disabled: false }
+                ]
+            }
+        ]
+      else
+        [ DropdownMenu.MenuCheckboxEntry { value: "toolbar", label: [ HH.text "Show Toolbar" ], shortcut: [], check: DropdownMenu.Checked, disabled: false }
+        , DropdownMenu.MenuCheckboxEntry { value: "sidebar", label: [ HH.text "Show Sidebar" ], shortcut: [], check: DropdownMenu.Unchecked, disabled: false }
+        ]
   }
 
 -- | The themed ContextMenu: a dashed right-click area opening a solid menu panel. The
@@ -592,6 +664,39 @@ contextMenuStyle =
   , item: cn "rt-BaseMenuItem rt-ContextMenuItem rt-reset"
   , shortcut: cn "rt-BaseMenuShortcut rt-ContextMenuShortcut"
   , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"
+  , checkboxItem: cn "rt-BaseMenuCheckboxItem rt-BaseMenuItem rt-ContextMenuCheckboxItem rt-ContextMenuItem"
+  , radioGroup: cn "rt-BaseMenuRadioGroup rt-ContextMenuRadioGroup"
+  , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-ContextMenuItem rt-ContextMenuRadioItem"
+  , indicator: cn "rt-BaseMenuItemIndicator rt-ContextMenuItemIndicator"
+  , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  }
+
+-- | The Wave-C ContextMenu-checks story: a right-click menu whose `?s=` selects a CheckboxItem
+-- | pair or a RadioGroup. Reuses contextMenuStyle so the chrome matches the canonical contextmenu.
+contextChecksInput :: String -> ContextMenu.Input
+contextChecksInput s = ContextMenu.defaultInput
+  { side = Right
+  , style = contextMenuStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"
+  , triggerStyle = "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);"
+  , trigger = [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
+  , entries =
+      if s == "radio" then
+        [ ContextMenu.MenuRadioGroupEntry
+            { value: "medium"
+            , options:
+                [ { value: "small", label: [ HH.text "Small" ], shortcut: [], disabled: false }
+                , { value: "medium", label: [ HH.text "Medium" ], shortcut: [], disabled: false }
+                , { value: "large", label: [ HH.text "Large" ], shortcut: [], disabled: false }
+                ]
+            }
+        ]
+      else
+        [ ContextMenu.MenuCheckboxEntry { value: "toolbar", label: [ HH.text "Show Toolbar" ], shortcut: [], check: ContextMenu.Checked, disabled: false }
+        , ContextMenu.MenuCheckboxEntry { value: "sidebar", label: [ HH.text "Show Sidebar" ], shortcut: [], check: ContextMenu.Unchecked, disabled: false }
+        ]
   }
 
 -- | menubar — the bare @radix-ui Menubar primitive (Radix Themes ships none, so NO rt-*
@@ -629,6 +734,36 @@ menubarInput s = Menubar.defaultInput
             [ Menubar.menuItem "zoom-in" [ HH.text "Zoom In" ]
             , Menubar.menuItem "zoom-out" [ HH.text "Zoom Out" ]
             ]
+        }
+      ]
+  }
+
+-- | The Wave-C Menubar-checks story: a single "View" menu whose `?s=` selects a CheckboxItem
+-- | pair (one checked) or a RadioGroup (medium selected). Bare primitive ⇒ empty Style classes;
+-- | the ItemIndicator content is a "✓" text child (matching the golden story), gated on checked.
+menubarChecksInput :: String -> Menubar.Input
+menubarChecksInput s = Menubar.defaultInput
+  { align = Start
+  , contentStyle = "outline: none; " <> popperContentVars "menubar"
+  , style = Menubar.defaultStyle { checkIndicator = [ HH.text "✓" ], radioIndicator = [ HH.text "✓" ] }
+  , menus =
+      [ { value: "view"
+        , trigger: [ HH.text "View" ]
+        , entries:
+            if s == "radio" then
+              [ Menubar.MenuRadioGroupEntry
+                  { value: "medium"
+                  , options:
+                      [ { value: "small", label: [ HH.text "Small" ], shortcut: [], disabled: false }
+                      , { value: "medium", label: [ HH.text "Medium" ], shortcut: [], disabled: false }
+                      , { value: "large", label: [ HH.text "Large" ], shortcut: [], disabled: false }
+                      ]
+                  }
+              ]
+            else
+              [ Menubar.MenuCheckboxEntry { value: "toolbar", label: [ HH.text "Show Toolbar" ], shortcut: [], check: Menubar.Checked, disabled: false }
+              , Menubar.MenuCheckboxEntry { value: "sidebar", label: [ HH.text "Show Sidebar" ], shortcut: [], check: Menubar.Unchecked, disabled: false }
+              ]
         }
       ]
   }
@@ -675,6 +810,24 @@ selectInput = Select.defaultInput
   , trigger = [ chevronCls "rt-SelectIcon" ]
   , groupLabel = [ HH.text "Fruits" ]
   , checkIcon = [ checkSvg ]
+  , items =
+      [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
+      , { value: "orange", label: [ HH.text "Orange" ], disabled: false }
+      , { value: "grape", label: [ HH.text "Grape" ], disabled: false }
+      ]
+  }
+
+-- | The Wave-C Select-placeholder story: NO defaultValue + a placeholder, so the at-rest
+-- | trigger shows "Pick a fruit…" and carries data-placeholder. Reuses selectStyle.
+selectPlaceholderInput :: Select.Input
+selectPlaceholderInput = Select.defaultInput
+  { style = selectStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"
+  , trigger = [ chevronCls "rt-SelectIcon" ]
+  , groupLabel = [ HH.text "Fruits" ]
+  , checkIcon = [ checkSvg ]
+  , placeholder = [ HH.text "Pick a fruit…" ]
   , items =
       [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
       , { value: "orange", label: [ HH.text "Orange" ], disabled: false }

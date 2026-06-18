@@ -783,4 +783,71 @@ export const STATES = {
     // STATELESS: wait for the <label> carrying the for-association attribute.
     forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
   },
+  // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
+  // The story is defaultOpen, so the menu is mounted open at first paint — NO click. Wait for
+  // the role=menu, then for the variant's items: checkbox → a role=menuitemcheckbox carrying
+  // aria-checked=true (the checked ItemIndicator present); radio → a role=menuitemradio with
+  // aria-checked=true (the selected indicator). Keyed off UPSTREAM role/aria-checked only, so
+  // the same driver runs against golden and port.
+  dropdownmenuchecks: {
+    // CLICK-open (no defaultOpen) so the open→portal→scroll-lock lifecycle runs and the
+    // content lands in body with no item highlighted (pointer-open) — same path as
+    // dropdownmenu:open. Then wait for the variant's checked/unchecked item pair.
+    checkbox: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem / RadioItem ───────────
+  // RIGHT-CLICK-open (point-anchored) then wait for the variant's checked/unchecked pair.
+  // Keyed off UPSTREAM role/aria-checked only, so the same driver runs golden + port.
+  contextmenuchecks: {
+    checkbox: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem / RadioItem ───────────────
+  // Click the "View" trigger (role=menuitem) to open the menu (non-modal, no scroll-lock),
+  // then wait for the variant's checked/unchecked pair. Keyed off UPSTREAM role/aria-checked.
+  menubarchecks: {
+    checkbox: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
+  // ── Wave-C menus depth (STR-330): Select placeholder ─────────────────────────────
+  // No defaultValue + a placeholder. OPEN the listbox (click the trigger) so the oracle is the
+  // open-state DOM: the trigger keeps `data-placeholder` (nothing selected), and every option is
+  // aria-selected=false (no checked item). Click-open avoids the closed-Select content-mount
+  // strategy divergence (the port always mounts the wrapper; upstream mounts content on open),
+  // which is an orthogonal Select-architecture gap tracked separately. Keyed off UPSTREAM
+  // role=listbox + data-placeholder only, so the same driver runs golden + port.
+  selectplaceholder: {
+    placeholder: async (pg) => {
+      await pg.locator('button[data-placeholder]').first().waitFor();
+      await pg.locator(".rt-SelectTrigger").click();
+      await pg.locator('[role="listbox"]').waitFor();
+    },
+  },
 };

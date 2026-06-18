@@ -25,9 +25,15 @@
 module Hydrogen.Radix.ContextMenu
   ( component
   , MenuItem
+  , CheckItem
+  , RadioGroupData
+  , RadioOption
   , MenuEntry(..)
+  , CheckState(..)
   , menuItem
   , menuSeparator
+  , menuCheckbox
+  , menuRadioGroup
   , Input
   , Output(..)
   , Query(..)
@@ -83,11 +89,39 @@ type MenuItem =
   , disabled :: Boolean
   }
 
+-- | Tri-state check status for a CheckboxItem (mirrors DropdownMenu.CheckState).
+data CheckState = Checked | Unchecked | Indeterminate
+
+derive instance eqCheckState :: Eq CheckState
+
+type CheckItem =
+  { value :: String
+  , label :: Array HH.PlainHTML
+  , shortcut :: Array HH.PlainHTML
+  , check :: CheckState
+  , disabled :: Boolean
+  }
+
+type RadioOption =
+  { value :: String
+  , label :: Array HH.PlainHTML
+  , shortcut :: Array HH.PlainHTML
+  , disabled :: Boolean
+  }
+
+type RadioGroupData =
+  { value :: String
+  , options :: Array RadioOption
+  }
+
 -- | A menu is a list of ENTRIES: focusable items interleaved with non-focusable
--- | separators (roving focus navigates the items only).
+-- | separators (roving focus navigates the items only). CheckboxItem / RadioItem are
+-- | focusable items (role=menuitemcheckbox / menuitemradio).
 data MenuEntry
   = MenuItemEntry MenuItem
   | MenuSeparator
+  | MenuCheckboxEntry CheckItem
+  | MenuRadioGroupEntry RadioGroupData
 
 menuItem :: String -> Array HH.PlainHTML -> MenuEntry
 menuItem value label = MenuItemEntry { value, label, shortcut: [], accent: "", disabled: false }
@@ -95,23 +129,36 @@ menuItem value label = MenuItemEntry { value, label, shortcut: [], accent: "", d
 menuSeparator :: MenuEntry
 menuSeparator = MenuSeparator
 
+menuCheckbox :: String -> Array HH.PlainHTML -> CheckState -> MenuEntry
+menuCheckbox value label check = MenuCheckboxEntry { value, label, shortcut: [], check, disabled: false }
+
+menuRadioGroup :: String -> Array RadioOption -> MenuEntry
+menuRadioGroup value options = MenuRadioGroupEntry { value, options }
+
 -- | The number of focusable (non-separator) items — the roving-focus modulus.
 -- | The roving order counts only ENABLED items (upstream menu.tsx:540
 -- | `getItems().filter(!disabled)`, :720 `focusable={!disabled}`). A disabled item
 -- | renders but is excluded from the roving order entirely, so arrows skip OVER it.
 itemCount :: Array MenuEntry -> Int
-itemCount = Array.length <<< Array.filter case _ of
-  MenuItemEntry item -> not item.disabled
-  MenuSeparator -> false
+itemCount = foldl (\n e -> n + entryFocusables e) 0
+
+entryFocusables :: MenuEntry -> Int
+entryFocusables = case _ of
+  MenuItemEntry item -> if item.disabled then 0 else 1
+  MenuCheckboxEntry item -> if item.disabled then 0 else 1
+  MenuRadioGroupEntry grp -> Array.length (Array.filter (not <<< _.disabled) grp.options)
+  MenuSeparator -> 0
 
 -- | The enabled MenuItem at roving index `n` (the keyboard-selection target). Mirrors
 -- | the same enabled-only ordering `renderEntries` assigns refs/tabindex over.
-enabledItemAt :: Int -> Array MenuEntry -> Maybe MenuItem
-enabledItemAt n entries = Array.index (Array.mapMaybe enabled entries) n
+enabledValueAt :: Int -> Array MenuEntry -> Maybe String
+enabledValueAt n entries = Array.index (Array.concatMap enabledValues entries) n
   where
-  enabled = case _ of
-    MenuItemEntry item | not item.disabled -> Just item
-    _ -> Nothing
+  enabledValues = case _ of
+    MenuItemEntry item | not item.disabled -> [ item.value ]
+    MenuCheckboxEntry item | not item.disabled -> [ item.value ]
+    MenuRadioGroupEntry grp -> map _.value (Array.filter (not <<< _.disabled) grp.options)
+    _ -> []
 
 type Style =
   { trigger :: ClassNames
@@ -123,6 +170,12 @@ type Style =
   , item :: ClassNames
   , shortcut :: ClassNames    -- the right-aligned shortcut span
   , separator :: ClassNames
+  , checkboxItem :: ClassNames
+  , radioGroup :: ClassNames
+  , radioItem :: ClassNames
+  , indicator :: ClassNames
+  , checkIndicator :: Array HH.PlainHTML
+  , radioIndicator :: Array HH.PlainHTML
   }
 
 defaultStyle :: Style
@@ -136,6 +189,12 @@ defaultStyle =
   , item: cn "rdx-context-menu-item"
   , shortcut: cn "rdx-context-menu-shortcut"
   , separator: cn "rdx-context-menu-separator"
+  , checkboxItem: cn "rdx-context-menu-checkbox-item"
+  , radioGroup: cn "rdx-context-menu-radio-group"
+  , radioItem: cn "rdx-context-menu-radio-item"
+  , indicator: cn "rdx-context-menu-indicator"
+  , checkIndicator: []
+  , radioIndicator: []
   }
 
 type Input =
@@ -378,6 +437,26 @@ renderEntries st = _.html (foldl step { idx: 0, html: [] } st.entries)
           { idx = acc.idx + 1
           , html = acc.html <> [ renderItem st (Just acc.idx) item ]
           }
+    MenuCheckboxEntry item
+      | item.disabled -> acc { html = acc.html <> [ renderCheckbox st Nothing item ] }
+      | otherwise -> acc
+          { idx = acc.idx + 1
+          , html = acc.html <> [ renderCheckbox st (Just acc.idx) item ]
+          }
+    MenuRadioGroupEntry grp ->
+      let
+        inner = foldl (radioStep grp.value) { idx: acc.idx, html: [] } grp.options
+      in
+        acc
+          { idx = inner.idx
+          , html = acc.html <> [ HH.div [ classes st.style.radioGroup, role "group" ] inner.html ]
+          }
+  radioStep selected innerAcc opt
+    | opt.disabled = innerAcc { html = innerAcc.html <> [ renderRadio st selected Nothing opt ] }
+    | otherwise = innerAcc
+        { idx = innerAcc.idx + 1
+        , html = innerAcc.html <> [ renderRadio st selected (Just innerAcc.idx) opt ]
+        }
 
 -- | A menu item is a DIV (radix uses generic elements) with role=menuitem, a roving tab
 -- | stop, optional per-item accent, and an optional right-aligned shortcut.
@@ -410,6 +489,72 @@ renderSep st =
     , aria "orientation" "horizontal"
     ]
     []
+
+checkAria :: CheckState -> String
+checkAria = case _ of
+  Checked -> "true"
+  Unchecked -> "false"
+  Indeterminate -> "mixed"
+
+checkData :: CheckState -> String
+checkData = case _ of
+  Checked -> "checked"
+  Unchecked -> "unchecked"
+  Indeterminate -> "indeterminate"
+
+renderIndicator :: forall m. State -> Array HH.PlainHTML -> CheckState -> Array (H.ComponentHTML Action () m)
+renderIndicator st icon cs
+  | cs == Unchecked = []
+  | otherwise =
+      [ HH.span
+          [ classes st.style.indicator, dataState (checkData cs) ]
+          (map HH.fromPlainHTML icon)
+      ]
+
+renderCheckbox :: forall m. State -> Maybe Int -> CheckItem -> H.ComponentHTML Action () m
+renderCheckbox st mIdx item =
+  HH.div
+    ( [ role "menuitemcheckbox"
+      , classes st.style.checkboxItem
+      , aria "checked" (checkAria item.check)
+      , dataState (checkData item.check)
+      , HP.tabIndex (maybe (-1) (tabIndexFor st.focused) mIdx)
+      , dataAttr "radix-collection-item" ""
+      , dataAttr "orientation" "vertical"
+      , HE.onClick \_ -> ItemClicked item.value
+      ]
+        <> maybe [] (\i -> [ HP.ref (itemRef st.idPrefix i) ]) mIdx
+        <> (if mIdx == Just st.focused then [ dataAttr "highlighted" "" ] else [])
+        <> (if item.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
+    )
+    ( map HH.fromPlainHTML item.label
+        <> renderIndicator st st.style.checkIndicator item.check
+        <> (if Array.null item.shortcut then [] else [ HH.div [ classes st.style.shortcut ] (map HH.fromPlainHTML item.shortcut) ])
+    )
+
+renderRadio :: forall m. State -> String -> Maybe Int -> RadioOption -> H.ComponentHTML Action () m
+renderRadio st selected mIdx opt =
+  let
+    cs = if selected == opt.value then Checked else Unchecked
+  in
+    HH.div
+      ( [ role "menuitemradio"
+        , classes st.style.radioItem
+        , aria "checked" (checkAria cs)
+        , dataState (checkData cs)
+        , HP.tabIndex (maybe (-1) (tabIndexFor st.focused) mIdx)
+        , dataAttr "radix-collection-item" ""
+        , dataAttr "orientation" "vertical"
+        , HE.onClick \_ -> ItemClicked opt.value
+        ]
+          <> maybe [] (\i -> [ HP.ref (itemRef st.idPrefix i) ]) mIdx
+          <> (if mIdx == Just st.focused then [ dataAttr "highlighted" "" ] else [])
+          <> (if opt.disabled then [ dataAttr "disabled" "", aria "disabled" "true" ] else [])
+      )
+      ( map HH.fromPlainHTML opt.label
+          <> renderIndicator st st.style.radioIndicator cs
+          <> (if Array.null opt.shortcut then [] else [ HH.div [ classes st.style.shortcut ] (map HH.fromPlainHTML opt.shortcut) ])
+      )
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
@@ -488,10 +633,9 @@ handleAction = case _ of
     if (key == "Enter" || key == " ")
       && st.focused >= 0 then do
       liftEffect (preventDefault (KE.toEvent ke))
-      for_ (enabledItemAt st.focused st.entries) \it ->
-        when (not it.disabled) do
-          H.raise (ItemSelected it.value)
-          closeMenu
+      for_ (enabledValueAt st.focused st.entries) \v -> do
+        H.raise (ItemSelected v)
+        closeMenu
     else case navigate cfg pos key of
       Stay -> pure unit
       MoveTo idx -> do
@@ -509,10 +653,12 @@ handleAction = case _ of
     -- guard) — clicking it neither selects nor closes the menu.
     let
       pick = case _ of
-        MenuItemEntry it | it.value == value -> Just it
+        MenuItemEntry it | it.value == value -> Just it.disabled
+        MenuCheckboxEntry it | it.value == value -> Just it.disabled
+        MenuRadioGroupEntry grp -> map _.disabled (Array.find (\o -> o.value == value) grp.options)
         _ -> Nothing
-      mItem = Array.findMap pick st.entries
-    when (maybe true (not <<< _.disabled) mItem) do
+      mDisabled = Array.findMap pick st.entries
+    when (maybe true not mDisabled) do
       H.raise (ItemSelected value)
       closeMenu
   -- scroll/resize: just re-place. NOT re-adopt — the wrapper stays in body across renders
