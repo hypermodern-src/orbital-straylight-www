@@ -898,6 +898,9 @@ export const STATES = {
     wide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
     tall: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
     styled: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    // Wave-C edge ratio: 21/9 → padding-bottom:42.857142857142854% (pins the non-terminating
+    // decimal serialization — exercises the 100/ratio number formatting at a non-round ratio).
+    verywide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
   },
   visuallyhiddenprim: {
     // STATELESS: wait for the sr-only span (clip-based hiding ⇒ overflow:hidden in inline style).
@@ -908,6 +911,31 @@ export const STATES = {
   labelprim: {
     // STATELESS: wait for the <label> carrying the for-association attribute.
     forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
+    // Wave-C runtime contract: clicking the label FOCUSES the for-associated control
+    // (native <label for=…> behavior the port's for attribute must enable). Click the
+    // label text, then assert document.activeElement is the input#email — the gate is the
+    // waitForFunction (throws/times out if focus didn't transfer); the post-click DOM is
+    // unchanged (focus isn't in the normalized snapshot) so golden==port DOM trivially.
+    forfocus: async (pg) => {
+      const lbl = pg.locator("label[for]").first();
+      await lbl.waitFor({ state: "attached" });
+      await lbl.click();
+      await pg.waitForFunction(() => {
+        const a = document.activeElement;
+        return a && a.tagName === "INPUT" && a.id === "email";
+      });
+    },
+  },
+  // ── Wave-C: Themes.Separator WRAPPER (rt-Separator) depth oracle ─────────────────
+  // STATELESS: wait for the rt-Separator span (present in every state). The contract
+  // (role omitted when decorative-default, data-accent-color, size class, orientation
+  // class) is judged by the DOM snapshot, not the wait.
+  separatorthemes: {
+    default: async (pg) => { await pg.locator("span.rt-Separator").first().waitFor({ state: "attached" }); },
+    semantic: async (pg) => { await pg.locator('span.rt-Separator[role="separator"]').first().waitFor({ state: "attached" }); },
+    size4: async (pg) => { await pg.locator("span.rt-Separator.rt-r-size-4").first().waitFor({ state: "attached" }); },
+    accent: async (pg) => { await pg.locator('span.rt-Separator[data-accent-color="cyan"]').first().waitFor({ state: "attached" }); },
+    vertical: async (pg) => { await pg.locator("span.rt-Separator.rt-r-orientation-vertical").first().waitFor({ state: "attached" }); },
   },
   // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
   // The story is defaultOpen, so the menu is mounted open at first paint — NO click. Wait for

@@ -64,6 +64,7 @@ import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
 import Hydrogen.Themes.TextField (textField, textFieldValue)
 import Hydrogen.Themes.Typography (textAs)
+import Hydrogen.Themes.Separator (separator) as ThemesSeparator
 import Type.Proxy (Proxy(..))
 import Web.DOM.ParentNode (QuerySelector(..))
 import Web.HTML as HTML
@@ -318,6 +319,7 @@ view c s =
             -- Wave-C ScrollArea family: ?s=horizontal → one horizontal bar; ?s=both → two
             -- bars + corner. Same primitive, the `scrollbars` field selects the family.
             "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
+            "separatorthemes" -> separatorThemesPage s
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1702,7 +1704,7 @@ aspectRatioPrimPage s
   | otherwise =
       AspectRatio.aspectRatio_ ratio [ HH.span_ [ HH.text "X" ] ]
       where
-      ratio = if s == "wide" then 16.0 / 9.0 else if s == "tall" then 1.0 / 2.0 else 1.0
+      ratio = if s == "wide" then 16.0 / 9.0 else if s == "tall" then 1.0 / 2.0 else if s == "verywide" then 21.0 / 9.0 else 1.0
 
 -- | VisuallyHidden: plain (canonical clip style + text), props (id/aria-*/data-*
 -- | passthrough), stylemerge (caller style overrides one default key in place + appends).
@@ -1747,6 +1749,19 @@ labelPrimPage =
         [ HH.text "Email" ]
     , HH.input [ HP.id "email" ]
     ]
+
+-- | Themes.Separator WRAPPER (distinct from the bare primitive): decorative defaults
+-- | TRUE → role OMITTED (not role=none); color → data-accent-color (default gray);
+-- | size → rt-r-size-N (default 1); orientation is class-only (no data-orientation).
+-- | The semantic case mirrors upstream's role={decorative?undefined:'separator'} by
+-- | adding role=separator; vertical replaces the orientation class (engine last-wins).
+separatorThemesPage :: forall w i. String -> HH.HTML w i
+separatorThemesPage s
+  | s == "semantic" = ThemesSeparator.separator [ RawAttr "role" "separator" ]
+  | s == "size4" = ThemesSeparator.separator [ Size "4" ]
+  | s == "accent" = ThemesSeparator.separator [ Color "cyan" ]
+  | s == "vertical" = ThemesSeparator.separator [ Class "rt-r-orientation-vertical" ]
+  | otherwise = ThemesSeparator.separator []
 
 -- ── ?c=<id> query param ─────────────────────────────────────────────────────────
 queryParam :: String -> Effect String

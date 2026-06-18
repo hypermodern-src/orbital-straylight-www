@@ -108,6 +108,7 @@ STATES=(
   "aspectratioprim:wide"
   "aspectratioprim:tall"
   "aspectratioprim:styled"
+  "aspectratioprim:verywide"
   "visuallyhiddenprim:plain"
   "visuallyhiddenprim:props"
   "visuallyhiddenprim:stylemerge"
@@ -146,6 +147,13 @@ STATES=(
   "progress:invalid"
   # ── Wave-C Avatar loaded steady-state DOM oracle (STR-330) ───────────────────
   "avatar:loaded"
+  "labelprim:forfocus"
+  # Wave-C: Themes.Separator WRAPPER depth oracle.
+  "separatorthemes:default"
+  "separatorthemes:semantic"
+  "separatorthemes:size4"
+  "separatorthemes:accent"
+  "separatorthemes:vertical"
 )
 
 echo "ℵ building golden dist (bun)"

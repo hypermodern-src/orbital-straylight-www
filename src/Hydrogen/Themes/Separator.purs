@@ -15,15 +15,27 @@ module Hydrogen.Themes.Separator
 
 import Prelude
 
+import Data.Array (any)
+import Data.String (Pattern(..), stripPrefix) as Str
+import Data.Maybe (isJust)
 import Halogen.HTML as HH
 import Hydrogen.Themes.Prop (Prop(..), el)
 
--- | `separator [ Size "4" ] `. Caller props override the defaults because the
--- | engine's single-value axes are last-wins; the leading `Class` orientation
--- | token is the horizontal default and is replaced when the caller passes their
--- | own `Class "rt-r-orientation-vertical"`.
+-- | `separator [ Size "4" ] `. Caller props override the defaults: the engine's
+-- | single-value styling axes (Size, Color) are last-wins, but `orientation` is a
+-- | raw `Class` token (the engine has no orientation axis), so we mirror upstream's
+-- | single `rt-r-orientation-*` class by OMITTING the horizontal default when the
+-- | caller supplies their own `Class "rt-r-orientation-…"` (otherwise Halogen would
+-- | emit BOTH classes, unlike React, which only ever renders the resolved one).
 separator :: forall w i. Array Prop -> HH.HTML w i
 separator props =
   el "span" [ "rt-Separator" ]
-    ([ Class "rt-r-orientation-horizontal", Size "1", Color "gray" ] <> props)
+    (orientationDefault <> [ Size "1", Color "gray" ] <> props)
     []
+  where
+  orientationDefault =
+    if any callerOrientation props then []
+    else [ Class "rt-r-orientation-horizontal" ]
+  callerOrientation = case _ of
+    Class c -> isJust (Str.stripPrefix (Str.Pattern "rt-r-orientation-") c)
+    _ -> false

@@ -1690,7 +1690,7 @@ const PAGES: Page[] = [
     // data-radix-aspect-ratio-wrapper="" and the relative/padding-bottom box geometry.
     node: (() => {
       const s = currentState();
-      const ratio = s === "wide" ? 16 / 9 : s === "tall" ? 1 / 2 : undefined;
+      const ratio = s === "wide" ? 16 / 9 : s === "tall" ? 1 / 2 : s === "verywide" ? 21 / 9 : undefined;
       if (s === "styled") {
         return (
           <AspectRatioPrim.Root
@@ -2122,6 +2122,26 @@ const PAGES: Page[] = [
           </Box>
         </ScrollArea>
       );
+  // ── Wave-C: Themes.Separator WRAPPER depth oracle (distinct from the primitive) ──
+  // The rt-Separator themes wrapper (NOT the bare primitive) has its own contract:
+  //   * decorative defaults to TRUE → role is OMITTED ENTIRELY (role={undefined}),
+  //     distinct from the primitive's role="none";
+  //   * color renders as data-accent-color (default "gray");
+  //   * size renders the rt-r-size-N class (default rt-r-size-1);
+  //   * orientation is class-only (rt-r-orientation-*), NO data-orientation.
+  // ?s= drives: default (decorative gray size1) / semantic (role=separator) /
+  // size4 (rt-r-size-4) / accent (data-accent-color=cyan) / vertical (orientation class).
+  {
+    id: "separatorthemes",
+    label: "Separator (themes)",
+    interactive: true,
+    node: (() => {
+      const s = currentState();
+      if (s === "semantic") return <Separator decorative={false} />;
+      if (s === "size4") return <Separator size="4" />;
+      if (s === "accent") return <Separator color="cyan" />;
+      if (s === "vertical") return <Separator orientation="vertical" />;
+      return <Separator />;
     })(),
   },
 ];
