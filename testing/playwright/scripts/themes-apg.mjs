@@ -1462,6 +1462,20 @@ const CHECKS = [
     // no user interaction — the auto-dismiss timer alone must unmount it (duration + exit anim).
     await li.waitFor({ state: "detached", timeout: 5000 });
   }},
+  // Pause/resume: pointer over the viewport PAUSES the auto-dismiss (radix preserves the
+  // remaining time); leaving RESUMES it. Hover immediately, hold past the full duration — the
+  // toast must NOT dismiss while paused — then leave and watch it dismiss on its own. The
+  // remaining-time preservation is measured with performance.now() (Dom.now). Non-circular:
+  // passes on --golden (the real @radix-ui/react-toast pauses on viewport pointer-enter too).
+  { id: "toast", state: "autodismiss", apg: "alert", name: "hovering the viewport pauses the auto-dismiss; leaving resumes it", run: async (pg) => {
+    const li = pg.locator('li[data-swipe-direction]').first();
+    await li.waitFor({ timeout: 3000 });
+    await li.hover();                            // pointer into the viewport → pause
+    await pg.waitForTimeout(2000);               // longer than the full 1500ms duration
+    ok((await li.getAttribute("data-state")) === "open", "the toast dismissed while the pointer was paused over it");
+    await pg.mouse.move(0, 0);                   // leave → resume the remaining time
+    await li.waitFor({ state: "detached", timeout: 5000 });
+  }},
   // HoverCard — the DEFINING contract vs a tooltip: moving the pointer from the trigger INTO
   // the content keeps the card OPEN (both trigger and content bind onPointerEnter/Leave, so the
   // card survives the cross-move). Hover the trigger link → wait for the content → move the

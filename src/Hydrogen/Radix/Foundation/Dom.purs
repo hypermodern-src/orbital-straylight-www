@@ -38,6 +38,7 @@ module Hydrogen.Radix.Foundation.Dom
   , TimeoutId
   , setTimeout
   , clearTimeout
+  , now
   ) where
 
 import Data.Unit (Unit)
@@ -96,3 +97,8 @@ foreign import setTimeout :: Int -> Effect Unit -> Effect TimeoutId
 -- | `window.clearTimeout(id)`: cancel a timer scheduled by `setTimeout`. A no-op if it has
 -- | already fired, so it is always safe to call on a stored handle.
 foreign import clearTimeout :: TimeoutId -> Effect Unit
+
+-- | `performance.now()`: a monotonic high-resolution timestamp in milliseconds. Used to
+-- | measure elapsed time across a timer pause/resume (Toast pauses its auto-dismiss on hover
+-- | and resumes with the REMAINING time) — independent of wall-clock jumps. Not `Date.now`.
+foreign import now :: Effect Number

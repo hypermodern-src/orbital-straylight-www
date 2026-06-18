@@ -59,6 +59,7 @@ import Prelude
 
 import Data.Array (null)
 import Data.Foldable (for_)
+import Data.Int (round)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Data.String (trim)
@@ -190,6 +191,8 @@ type State =
   , animSub :: Maybe H.SubscriptionId
   , duration :: Maybe Int
   , durSub :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)  -- the live auto-dismiss timer
+  , durRemaining :: Maybe Int      -- ms left to run (preserved across a hover pause)
+  , durStart :: Maybe Number       -- performance.now() when the live timer was last armed
   }
 
 data Action
@@ -198,6 +201,8 @@ data Action
   | ActionClicked
   | CloseClicked
   | DurationElapsed   -- the auto-dismiss timer fired → close
+  | PauseTimer        -- pointer/focus entered the viewport → pause auto-dismiss, keep remaining
+  | ResumeTimer       -- pointer/focus left the viewport → resume with the remaining time
   | EscapePressed
   | AfterMount   -- portal the announce node into body after the open render flushed
   | AfterClose   -- arm the exit animation on the closing re-render
@@ -248,6 +253,8 @@ initialState input =
   , animSub: Nothing
   , duration: input.duration
   , durSub: Nothing
+  , durRemaining: Nothing
+  , durStart: Nothing
   }
   where
   startOpen = case input.open of
@@ -305,7 +312,17 @@ render st =
             , classes st.style.wrapper
             ]
             ( (if hasToasts then [ focusProxy ] else [])
-                <> [ HH.ol [ HP.tabIndex (-1), classes st.style.viewport ]
+                <> [ HH.ol
+                       [ HP.tabIndex (-1)
+                       , classes st.style.viewport
+                       -- pointer/focus over the viewport pauses the auto-dismiss; leaving
+                       -- resumes with the remaining time (radix pauses on the viewport, not
+                       -- the li, so the whole region — incl. the close button — is a pause zone).
+                       , HE.onMouseEnter \_ -> PauseTimer
+                       , HE.onMouseLeave \_ -> ResumeTimer
+                       , HE.onFocusIn \_ -> PauseTimer
+                       , HE.onFocusOut \_ -> ResumeTimer
+                       ]
                        (if hasToasts then [ toastLi st ] else [])
                    ]
                 <> (if hasToasts then [ focusProxy ] else [])
@@ -381,9 +398,7 @@ handleAction = case _ of
     -- arm the auto-dismiss timer: radix schedules setTimeout(handleClose, duration) on open
     -- (default 5000ms) — the defining toast behavior. `duration = Nothing` holds it open
     -- (the controlled/at-rest-oracle path). Manual close/Escape cancels it (`cancelDuration`).
-    when (isRendered st.presence) $ for_ st.duration \ms -> do
-      h <- armTimer ms DurationElapsed
-      H.modify_ _ { durSub = Just h }
+    when (isRendered st.presence) $ for_ st.duration \ms -> armDuration ms
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -406,6 +421,25 @@ handleAction = case _ of
   ActionClicked -> closeToast
   CloseClicked -> closeToast
   DurationElapsed -> closeToast
+  -- Pause the auto-dismiss while the pointer/focus is over the viewport: kill the live timer
+  -- and bank the REMAINING time (radix toast.tsx pause). No live timer ⇒ already paused/no
+  -- duration ⇒ no-op.
+  PauseTimer -> do
+    st <- H.get
+    for_ st.durSub \(Tuple tid sid) -> do
+      liftEffect (Dom.clearTimeout tid)
+      H.unsubscribe sid
+      elapsed <- liftEffect Dom.now
+      let ran = round (elapsed - maybeNum st.durStart)
+          rem = maybeInt st.durRemaining - ran
+      H.modify_ _ { durSub = Nothing, durRemaining = Just (max 0 rem) }
+  -- Resume on leave with the banked remaining time (radix toast.tsx resume). Only when paused
+  -- (no live sub) but a finite duration was running.
+  ResumeTimer -> do
+    st <- H.get
+    case st.durSub, st.duration, st.durRemaining of
+      Nothing, Just _, Just rem | rem > 0 -> armDuration rem
+      _, _, _ -> pure unit
   EscapePressed -> do
     st <- H.get
     when st.closeOnEscape do
@@ -448,13 +482,34 @@ armTimer ms act = do
   tid <- liftEffect (Dom.setTimeout ms (HS.notify listener unit))
   pure (Tuple tid sid)
 
--- | Cancel the auto-dismiss timer (clear the clock + drop its subscription) so a toast closed
--- | manually/by Escape never fires a stale close. Safe when no timer is pending.
+-- | Arm (or re-arm) the auto-dismiss timer for `ms`, stamping `performance.now()` so a later
+-- | pause can compute how much of `ms` has elapsed. Used on open (full duration) and on resume
+-- | (the banked remaining time).
+armDuration :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+armDuration ms = do
+  start <- liftEffect Dom.now
+  h <- armTimer ms DurationElapsed
+  H.modify_ _ { durSub = Just h, durRemaining = Just ms, durStart = Just start }
+
+-- | Cancel the auto-dismiss timer (clear the clock + drop its subscription + forget the
+-- | remaining/start bookkeeping) so a toast closed manually/by Escape never fires a stale
+-- | close or resumes a dead timer. Safe when no timer is pending.
 cancelDuration :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 cancelDuration = do
   st <- H.get
   for_ st.durSub \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
-  H.modify_ _ { durSub = Nothing }
+  H.modify_ _ { durSub = Nothing, durRemaining = Nothing, durStart = Nothing }
+
+-- | `Maybe Number`/`Maybe Int` readers defaulting to 0 — for the pause-elapsed arithmetic.
+maybeNum :: Maybe Number -> Number
+maybeNum = case _ of
+  Just n -> n
+  Nothing -> 0.0
+
+maybeInt :: Maybe Int -> Int
+maybeInt = case _ of
+  Just n -> n
+  Nothing -> 0
 
 -- | Dispatch `act` on the next animation frame (after Halogen patches the render).
 scheduleAfter :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m H.SubscriptionId

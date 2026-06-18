@@ -45,3 +45,7 @@ export const setTimeout = ms => eff => () => window.setTimeout(eff, ms);
 
 // window.clearTimeout(id): cancel a pending timer; a no-op once it has fired.
 export const clearTimeout = id => () => { window.clearTimeout(id); };
+
+// performance.now(): a monotonic high-resolution millisecond timestamp — used to measure how
+// much of a timer's duration elapsed before a pause, so resume can arm the REMAINING time.
+export const now = () => performance.now();
