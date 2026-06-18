@@ -316,6 +316,30 @@ const CHECKS = [
     const linked = await pg.evaluate((id) => { const e = document.getElementById(id); return !!(e && e.getAttribute("role") === "tooltip"); }, db);
     ok(linked, `aria-describedby (${db}) must reference the role=tooltip content`);
   }},
+  // Hover DEFERS the open: radix waits delayDuration (DEFAULT_DELAY_DURATION=700ms) before
+  // showing on pointer, so a glance that brushes past the trigger never flashes the tooltip.
+  // Assert it is STILL closed shortly after pointer-enter, then opens once the delay elapses.
+  // Non-circular: validated on --golden (real radix delays identically); the port realises it
+  // via Tooltip's delayMs Input + a cancellable setTimeout (cleared on early pointer-leave).
+  { id: "tooltip", apg: "tooltip", name: "hover defers the open by the delay (no instant flash)", run: async (pg) => {
+    await triggerBtn(pg).waitFor();
+    await triggerBtn(pg).hover();
+    await pg.waitForTimeout(80);
+    ok(!(await visible(pg, '[role="tooltip"]')), "tooltip flashed open before the hover delay elapsed");
+    await pg.getByRole("tooltip").waitFor({ timeout: 3000 });
+    ok(await visible(pg, '[role="tooltip"], .rt-TooltipContent'), "tooltip never opened after the hover delay");
+  }},
+  // A pointer-leave DURING the delay window CANCELS the pending open (clearTimeout) — the
+  // tooltip must never appear for a transient hover. Hover, leave before the delay, then wait
+  // past it and assert still-closed. Non-circular (real radix cancels the same way).
+  { id: "tooltip", apg: "tooltip", name: "leaving during the delay cancels the pending open", run: async (pg) => {
+    await triggerBtn(pg).waitFor();
+    await triggerBtn(pg).hover();
+    await pg.waitForTimeout(80);
+    await pg.mouse.move(0, 0);                 // leave the trigger before the delay elapses
+    await pg.waitForTimeout(900);              // wait well past DEFAULT_DELAY_DURATION
+    ok(!(await visible(pg, '[role="tooltip"]')), "a cancelled hover still opened the tooltip");
+  }},
 
   // Radio Group — https://www.w3.org/WAI/ARIA/apg/patterns/radio/
   // Keyboard table: Tab moves focus into the group, onto the checked radio (or first if none

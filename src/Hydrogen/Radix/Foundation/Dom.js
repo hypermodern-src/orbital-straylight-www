@@ -37,3 +37,11 @@ export const offsetMetrics = el => () => ({
   left: el.offsetLeft,
   top: el.offsetTop,
 });
+
+// window.setTimeout(eff, ms): the cancellable open/close delay timer. Returns the numeric
+// id so a pending open can be cleared if the pointer leaves first. js-timers is not in the
+// closure and no web-* binding exposes a cancellable timer, so it lives here.
+export const setTimeout = ms => eff => () => window.setTimeout(eff, ms);
+
+// window.clearTimeout(id): cancel a pending timer; a no-op once it has fired.
+export const clearTimeout = id => () => { window.clearTimeout(id); };

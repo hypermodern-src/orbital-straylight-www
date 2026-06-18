@@ -35,6 +35,9 @@ module Hydrogen.Radix.Foundation.Dom
   , queueMicrotask
   , OffsetMetrics
   , offsetMetrics
+  , TimeoutId
+  , setTimeout
+  , clearTimeout
   ) where
 
 import Data.Unit (Unit)
@@ -78,3 +81,18 @@ type OffsetMetrics = { width :: Number, height :: Number, left :: Number, top ::
 -- | so the indicator/viewport numbers match upstream's structurally (both then normalize to
 -- | `<px>` in the DOM oracle). Observing-only: retains nothing, mutates nothing.
 foreign import offsetMetrics :: HTMLElement -> Effect OffsetMetrics
+
+-- | An opaque handle for a scheduled `setTimeout`, passed back to `clearTimeout`
+-- | to cancel it before it fires (window.setTimeout's numeric id).
+foreign import data TimeoutId :: Type
+
+-- | `window.setTimeout(eff, ms)`: run `eff` after at least `ms` milliseconds, returning a
+-- | handle to cancel it. The port's open/close *delay* primitive — a tooltip waits
+-- | `delayMs` before opening on hover, and a pending open is cancelled (`clearTimeout`) if
+-- | the pointer leaves first. No web-* binding exposes a cancellable timer; `js-timers` is
+-- | not in the closure, so this is the one place the port schedules wall-clock work.
+foreign import setTimeout :: Int -> Effect Unit -> Effect TimeoutId
+
+-- | `window.clearTimeout(id)`: cancel a timer scheduled by `setTimeout`. A no-op if it has
+-- | already fired, so it is always safe to call on a stored handle.
+foreign import clearTimeout :: TimeoutId -> Effect Unit

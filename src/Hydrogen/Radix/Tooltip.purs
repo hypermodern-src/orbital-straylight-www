@@ -48,6 +48,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Float.Popper as Popper
+import Hydrogen.Radix.Foundation.Dom as Dom
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), cn, classes, dataState, dataAttr, sideName, alignName, aria, role)
 import Web.Event.Event (EventType(..))
@@ -85,6 +86,7 @@ type Input =
   , arrow :: Array HH.PlainHTML  -- optional arrow svg, positioned at the content edge
   , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
+  , delayMs :: Int               -- hover-open delay (radix DEFAULT_DELAY_DURATION=700); focus opens instantly
   }
 
 defaultInput :: Input
@@ -102,6 +104,7 @@ defaultInput =
   , arrow: []
   , triggerAttrs: []
   , portalAttrs: []
+  , delayMs: 700
   }
 
 data Output = OpenChanged Boolean
@@ -136,12 +139,16 @@ type State =
   , postSub :: Maybe H.SubscriptionId  -- one-shot rAF subscription for AfterOpen
   , contentId :: String         -- generated on Initialize; trigger aria-describedby → content id
   , wasDelayed :: Boolean       -- the open path: hover (delayed-open) vs focus (instant-open)
+  , delayMs :: Int              -- hover-open delay
+  , pendingOpen :: Maybe Dom.TimeoutId       -- the live hover-open timer (cancel on early leave)
+  , pendingSub :: Maybe H.SubscriptionId     -- the emitter subscription feeding `Opened` from that timer
   }
 
 data Action
   = Initialize
   | Receive Input
-  | Show         -- pointer/hover open → delayed-open stateAttribute
+  | Show         -- pointer/hover enter → arm the delay timer (delayed-open after delayMs)
+  | Opened       -- the hover-delay timer fired → actually open (delayed-open stateAttribute)
   | FocusShow    -- focus open → instant-open stateAttribute (wasOpenDelayedRef=false)
   | Hide
   | AfterOpen           -- after the open render flushed: position + portal
@@ -201,6 +208,9 @@ initialState input =
   , postSub: Nothing
   , contentId: ""
   , wasDelayed: false
+  , delayMs: input.delayMs
+  , pendingOpen: Nothing
+  , pendingSub: Nothing
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -279,10 +289,12 @@ handleAction = case _ of
       , arrow = input.arrow
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
+      , delayMs = input.delayMs
       }
-  Show -> openTooltip true
-  FocusShow -> openTooltip false
-  Hide -> closeTooltip
+  Show -> scheduleOpen
+  FocusShow -> cancelPending *> openTooltip false
+  Opened -> openTooltip true
+  Hide -> cancelPending *> closeTooltip
   -- after the open render flushed (content ref live): measure+place, then on the NEXT
   -- frame (after the placement modify's re-render) portal the content into body. A
   -- tooltip never takes focus, so finalize never focuses.
@@ -296,8 +308,37 @@ handleAction = case _ of
     reposition
     finalize false
 
+-- | Hover-enter: arm the open. radix waits `delayMs` (DEFAULT_DELAY_DURATION=700) before
+-- | showing on pointer, so a glance that brushes past the trigger never flashes the tooltip.
+-- | `delayMs <= 0` opens synchronously (used by the deterministic gates). A re-entry while a
+-- | timer is already pending is a no-op; an early leave cancels it (`cancelPending`).
+scheduleOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+scheduleOpen = do
+  st <- H.get
+  when (not (current st.ctrl)) do
+    case st.pendingOpen of
+      Just _ -> pure unit            -- a timer is already counting down; leave it
+      Nothing
+        | st.delayMs <= 0 -> openTooltip true
+        | otherwise -> do
+            { emitter, listener } <- liftEffect HS.create
+            sid <- H.subscribe (Opened <$ emitter)
+            tid <- liftEffect (Dom.setTimeout st.delayMs (HS.notify listener unit))
+            H.modify_ _ { pendingOpen = Just tid, pendingSub = Just sid }
+
+-- | Cancel a pending hover-open: clear the wall-clock timer and drop its emitter subscription.
+-- | Safe to call when nothing is pending (both refs `Nothing`). Run on every leave/focus/close
+-- | so a timer can never fire after the intent that armed it is gone.
+cancelPending :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+cancelPending = do
+  st <- H.get
+  for_ st.pendingOpen (liftEffect <<< Dom.clearTimeout)
+  for_ st.pendingSub H.unsubscribe
+  H.modify_ _ { pendingOpen = Nothing, pendingSub = Nothing }
+
 openTooltip :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
 openTooltip delayed = do
+  cancelPending
   st <- H.get
   when (not (current st.ctrl)) do
     -- capture the restore target (the focused trigger) BEFORE opening, so no post-open
