@@ -1120,21 +1120,38 @@ radioGroupInput :: String -> RadioGroup.Input
 radioGroupInput s = RadioGroup.defaultInput
   { items =
       -- `?s=keys`/`?s=mixed` → the 3-item disabled-skip fixture (middle item disabled);
+      -- `?s=loopoff`/`?s=rtl` → 3-item groups (all enabled) for end-stop / RTL roving;
+      -- `?s=alldisabled` → 2-item group with EVERY item disabled (root tabindex=-1);
       -- otherwise the committed 2-item group the `checked` driver exercises.
       if s == "keys" || s == "mixed" then
         [ { value: "1", label: [ HH.text " Default" ], disabled: false }
         , { value: "2", label: [ HH.text " Comfortable" ], disabled: true }
         , { value: "3", label: [ HH.text " Compact" ], disabled: false }
         ]
+      else if s == "loopoff" || s == "rtl" then
+        [ { value: "1", label: [ HH.text " Default" ], disabled: false }
+        , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
+        , { value: "3", label: [ HH.text " Compact" ], disabled: false }
+        ]
+      else if s == "alldisabled" then
+        [ { value: "1", label: [ HH.text " Default" ], disabled: true }
+        , { value: "2", label: [ HH.text " Comfortable" ], disabled: true }
+        ]
       else
         [ { value: "1", label: [ HH.text " Default" ], disabled: false }
         , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
         ]
   , defaultValue = Just "1"
-  -- `?s=disabledgroup` → the whole group disabled; `?s=horizontal` → explicit horizontal.
+  -- `?s=disabledgroup` → the whole group disabled; `?s=horizontal`/`?s=rtl` → horizontal.
   , disabled = s == "disabledgroup"
-  , orientation = if s == "horizontal" then Horizontal else Vertical
-  , explicitOrientation = s == "horizontal"
+  -- `?s=rtl` is a horizontal group under dir=rtl (the live arrows swap); `?s=loopoff`
+  -- stays vertical (Up/Down clamp). `?s=alldisabled` is the default vertical orientation.
+  , orientation = if s == "horizontal" || s == "rtl" then Horizontal else Vertical
+  , explicitOrientation = s == "horizontal" || s == "rtl"
+  -- `?s=rtl` → dir=rtl so RovingFocus swaps the horizontal arrows.
+  , dir = if s == "rtl" then RTL else LTR
+  -- `?s=loopoff` → loop disabled: arrow keys clamp at the ends instead of wrapping.
+  , loop = s /= "loopoff"
   , itemIds = false
   , labelOutside = true
   -- `?s=form` (Wave C): name + required, inside a <form> → per-item hidden bubble inputs.
@@ -1157,7 +1174,11 @@ radioGroupInput s = RadioGroup.defaultInput
 -- | `?s=disabled` → checked + disabled (the indicator carries data-disabled='' too).
 checkboxInput :: String -> Checkbox.Input
 checkboxInput s = Checkbox.defaultInput
-  { defaultChecked = case s of
+  -- `?s=controlled` (Wave D): a CONTROLLED checkbox (checked pinned Checked, no parent
+  -- update) — a click/Space fires onCheckedChange but must NOT mutate the DOM (aria-checked
+  -- / data-state stay checked, the indicator stays mounted). Other states are uncontrolled.
+  { checked = if s == "controlled" then Just Checkbox.Checked else Nothing
+  , defaultChecked = case s of
       "indeterminate" -> Checkbox.Indeterminate
       "disabled" -> Checkbox.Checked
       -- `?s=form` (Wave C): checked + required, inside a <form> → the hidden bubble input.
@@ -1179,6 +1200,8 @@ checkboxInput s = Checkbox.defaultInput
   , children = case s of
       "indeterminate" -> [ checkIndicatorWith "indeterminate" false dividerPath ]
       "disabled" -> [ checkIndicatorWith "checked" true thickCheckPath ]
+      -- controlled is checked-at-rest, so the indicator is mounted with data-state=checked.
+      "controlled" -> [ checkIndicatorWith "checked" false thickCheckPath ]
       "form" -> [ thickCheckIconPlain ]
       _ -> [ thickCheckIconPlain ]
   }
@@ -1187,8 +1210,11 @@ checkboxInput s = Checkbox.defaultInput
 -- | seeds the disabled no-op variant; `?s=required` documents aria-required=true.
 switchInput :: String -> Switch.Input
 switchInput s = Switch.defaultInput
+  -- `?s=controlled` (Wave D): a CONTROLLED switch (checked pinned true, no parent update) —
+  -- a click fires onCheckedChange but must NOT mutate the DOM (data-state stays checked).
+  { checked = if s == "controlled" then Just true else Nothing
   -- `?s=form` (Wave C): a checked + required switch inside a <form> → the hidden bubble input.
-  { defaultChecked = s == "form"
+  , defaultChecked = s == "form"
   , disabled = s == "disabled"
   , required = s == "required" || s == "form"
   , name = if s == "form" then "notify" else ""
@@ -1204,7 +1230,10 @@ switchInput s = Switch.defaultInput
 -- | seeds the disabled (no-op + data-disabled='') variant.
 toggleInput :: String -> Toggle.Input
 toggleInput s = Toggle.defaultInput
-  { pressed = Nothing
+  -- `?s=controlled` (Wave D): a CONTROLLED toggle (pressed pinned true, the parent never
+  -- updates it) — a click fires onPressedChange but must NOT mutate the DOM (data-state /
+  -- aria-pressed stay on). Every other state is uncontrolled (pressed = Nothing).
+  { pressed = if s == "controlled" then Just true else Nothing
   -- `?s=disabledpressed` (Wave C): start pressed AND disabled (the locked-on combination).
   , defaultPressed = s == "disabledpressed"
   , disabled = s == "disabled" || s == "disabledpressed"

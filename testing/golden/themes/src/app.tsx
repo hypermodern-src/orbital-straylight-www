@@ -1185,6 +1185,80 @@ const PAGES: Page[] = [
           </RadioGroup.Root>
         );
       }
+      // `?s=loopoff` (Wave D) — loop={false}: ArrowUp on the FIRST radio does NOT wrap
+      // to the last (clamps at first); ArrowDown on the LAST clamps at last. The
+      // canonical no-wrap end-stop fixture (3-item group, first checked at rest).
+      if (s === "loopoff") {
+        return (
+          <RadioGroup.Root defaultValue="1" loop={false}>
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" /> Comfortable
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="3" /> Compact
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
+      // `?s=rtl` (Wave D) — horizontal orientation under dir="rtl": the live horizontal
+      // arrows SWAP (ArrowLeft⇒Next, ArrowRight⇒Prev). RovingFocus reads direction; the
+      // root carries dir=rtl + aria-orientation/data-orientation=horizontal.
+      if (s === "rtl") {
+        return (
+          <RadioGroup.Root defaultValue="1" orientation="horizontal" dir="rtl">
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" /> Comfortable
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="3" /> Compact
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
+      // `?s=alldisabled` (Wave D) — EVERY item disabled (but the group itself NOT
+      // disabled): focusableItemsCount===0 ⇒ the root drops to tabindex=-1 (the group is
+      // not tabbable). Each item carries disabled + data-disabled=''. Distinct from
+      // `disabledgroup` (where the Root has the `disabled` prop → data-disabled on root).
+      if (s === "alldisabled") {
+        return (
+          <RadioGroup.Root defaultValue="1">
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" disabled /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" disabled /> Comfortable
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
       return (
         <RadioGroup.Root defaultValue="1">
           <Flex direction="column" gap="2">
@@ -1214,6 +1288,11 @@ const PAGES: Page[] = [
       const s = currentState();
       if (s === "indeterminate") return <Checkbox defaultChecked="indeterminate" />;
       if (s === "disabled") return <Checkbox disabled defaultChecked />;
+      // `?s=controlled` (Wave D) — a CONTROLLED checkbox: `checked` is pinned true with NO
+      // onCheckedChange handler (the parent never updates it). A click/Space fires
+      // onCheckedChange internally but must NOT mutate the DOM — aria-checked / data-state
+      // stay checked and the indicator stays mounted.
+      if (s === "controlled") return <Checkbox checked />;
       // `?s=form` — the checkbox inside a <form> (Wave C). Post-mount `isFormControl`
       // resolves TRUE (control.closest("form")), so radix renders the hidden bubble
       // <input type=checkbox aria-hidden tabindex=-1> sibling for native form
@@ -1238,6 +1317,10 @@ const PAGES: Page[] = [
       const s = currentState();
       if (s === "disabled") return <Switch disabled />;
       if (s === "required") return <Switch required />;
+      // `?s=controlled` (Wave D) — a CONTROLLED switch: `checked` is pinned true with NO
+      // onCheckedChange handler (the parent never updates it). A click fires onCheckedChange
+      // internally but must NOT mutate the DOM — data-state stays checked / aria-checked=true.
+      if (s === "controlled") return <Switch checked />;
       // `?s=form` — the switch inside a <form> (Wave C). Post-mount `isFormControl`
       // is TRUE so radix renders the hidden bubble <input type=checkbox aria-hidden
       // tabindex=-1> sibling carrying name/value/required for native form submission.
@@ -1270,6 +1353,20 @@ const PAGES: Page[] = [
             aria-label="Bold"
             defaultPressed
             disabled
+          >
+            B
+          </Toggle>
+        );
+      // `?s=controlled` (Wave D) — a CONTROLLED toggle: `pressed` is pinned true and the
+      // parent supplies NO onPressedChange handler (so it never updates the prop). A click
+      // still fires onPressedChange internally but must NOT mutate the DOM — data-state and
+      // aria-pressed stay `on`/`true`. The DOM-observable half of the controlled contract.
+      if (s === "controlled")
+        return (
+          <Toggle
+            className="rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+            aria-label="Bold"
+            pressed
           >
             B
           </Toggle>

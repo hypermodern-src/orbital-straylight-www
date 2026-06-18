@@ -380,6 +380,18 @@ itemId st value = base st <> "-item-" <> value
 selectedIndex :: State -> Int
 selectedIndex st = fromMaybe 0 (findIndex (\i -> i.value == current st.ctrl) st.items)
 
+-- | The navigation ORIGIN for an arrow/Home/End keydown: the currently FOCUSED item
+-- | (the roving tab stop), falling back to the selected item when focus has not yet
+-- | moved (entry). Radix's RovingFocus navigates relative to `currentTabStopId`, NOT
+-- | the selected value — so after Home/End (which move focus but do NOT select) a
+-- | subsequent arrow must step from the FOCUSED index, and `loop=false` clamps at the
+-- | true end. Deriving the origin from selection alone broke that (an End→ArrowDown at
+-- | the last item wrapped because selection was still the first item).
+rovingIndex :: State -> Int
+rovingIndex st = case st.tabStop of
+  Just v -> fromMaybe (selectedIndex st) (findIndex (\i -> i.value == v) st.items)
+  Nothing -> selectedIndex st
+
 -- | Whether the group has ANY focusable (enabled) item. When false (every item
 -- | disabled, or the whole group disabled) the root drops to tabindex=-1.
 anyFocusable :: State -> Boolean
@@ -432,7 +444,7 @@ handleAction = case _ of
       -- focusable mask = per-item enabled flag (radix navigates the FOCUSABLE items only,
       -- skipping disabled neighbours; a whole-group disable masks everything out).
       mask = map (\i -> not (i.disabled || st.disabled)) st.items
-      pos = { mask, current: selectedIndex st }
+      pos = { mask, current: rovingIndex st }
       -- selection-follows-focus is gated on a physical ARROW key (upstream
       -- radio-group.tsx:182-225 isArrowKeyPressedRef: onFocus clicks only when an arrow
       -- is held). ARROW_KEYS excludes Home/End, so Home/End MOVE focus but do NOT check.
