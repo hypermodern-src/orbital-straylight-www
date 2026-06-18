@@ -128,6 +128,15 @@ STATES=(
   "radiogroup:form"
   # Wave-C Toggle — the disabled-AND-pressed edge state-variant (STR-330).
   "toggle:disabledpressed"
+  # ── Wave-C inputs depth-audit additions (STR-330) ────────────────────────────
+  "slider:vertical"
+  "otp:password"
+  "otp:disabled"
+  "otp:readonly"
+  "passwordtoggle:autolabel"
+  "passwordtoggle:disabled"
+  "form:validValid"
+  "form:defaultMessage"
 )
 
 echo "ℵ building golden dist (bun)"

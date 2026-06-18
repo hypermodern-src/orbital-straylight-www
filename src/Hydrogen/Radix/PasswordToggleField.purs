@@ -66,6 +66,11 @@ type Input =
   , autoComplete :: String                -- input autocomplete (default "current-password")
   , showLabel :: String                   -- aria-label when toggle has no inner text (hidden)
   , hideLabel :: String                   -- aria-label when toggle has no inner text (visible)
+  , disabled :: Boolean                   -- pass-through native disabled on BOTH input + toggle
+  , iconOnly :: Boolean                    -- the toggle content is icon-only (empty textContent):
+                                           -- upstream's MutationObserver applies the auto aria-label
+                                           -- when textContent is empty; the consumer declares it here
+                                           -- (the DOM outcome is identical + deterministic).
   , toggleVisible :: Array HH.PlainHTML    -- toggle content shown when password is VISIBLE (e.g. "Hide")
   , toggleHidden :: Array HH.PlainHTML     -- toggle content shown when password is HIDDEN (e.g. "Show")
   , style :: Style
@@ -79,6 +84,8 @@ defaultInput =
   , autoComplete: "current-password"
   , showLabel: "Show password"
   , hideLabel: "Hide password"
+  , disabled: false
+  , iconOnly: false
   , toggleVisible: []
   , toggleHidden: []
   , style: defaultStyle
@@ -104,6 +111,8 @@ type State =
   , autoComplete :: String
   , showLabel :: String
   , hideLabel :: String
+  , disabled :: Boolean
+  , iconOnly :: Boolean
   , toggleVisible :: Array HH.PlainHTML
   , toggleHidden :: Array HH.PlainHTML
   , style :: Style
@@ -134,6 +143,8 @@ initialState input =
   , autoComplete: input.autoComplete
   , showLabel: input.showLabel
   , hideLabel: input.hideLabel
+  , disabled: input.disabled
+  , iconOnly: input.iconOnly
   , toggleVisible: input.toggleVisible
   , toggleHidden: input.toggleHidden
   , style: input.style
@@ -145,7 +156,9 @@ render st =
     visible = current st.ctrl
     idv = fromMaybe "" st.inputId
     toggleKids = if visible then st.toggleVisible else st.toggleHidden
-    hasText = not (null toggleKids)
+    -- "has visible text" mirrors upstream's textContent check: an icon-only toggle has empty
+    -- textContent (so the auto aria-label applies) even though it has child elements.
+    hasText = not (null toggleKids) && not st.iconOnly
     autoLabel = if visible then st.hideLabel else st.showLabel
   in
     -- `display:contents` wrapper: the upstream Root renders no element, so the
@@ -154,13 +167,15 @@ render st =
     HH.div
       [ HP.style "display:contents" ]
       [ HH.input
-          [ HP.type_ (if visible then HP.InputText else HP.InputPassword)
-          , HP.id idv
-          , HP.attr (HH.AttrName "autocomplete") st.autoComplete
-          , HP.attr (HH.AttrName "autocapitalize") "off"
-          , HP.attr (HH.AttrName "spellcheck") "false"
-          , classes st.style.input
-          ]
+          ( [ HP.type_ (if visible then HP.InputText else HP.InputPassword)
+            , HP.id idv
+            , HP.attr (HH.AttrName "autocomplete") st.autoComplete
+            , HP.attr (HH.AttrName "autocapitalize") "off"
+            , HP.attr (HH.AttrName "spellcheck") "false"
+            , classes st.style.input
+            ]
+              <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
+          )
       , HH.button
           ( [ HP.type_ HP.ButtonButton
             , ARIA.controls idv
@@ -169,6 +184,7 @@ render st =
             , HE.onClick \_ -> Toggled
             ]
               <> (if hasText then [] else [ ARIA.label autoLabel ])
+              <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
           )
           (map HH.fromPlainHTML toggleKids)
       ]
@@ -193,6 +209,8 @@ handleAction = case _ of
       , autoComplete = input.autoComplete
       , showLabel = input.showLabel
       , hideLabel = input.hideLabel
+      , disabled = input.disabled
+      , iconOnly = input.iconOnly
       , toggleVisible = input.toggleVisible
       , toggleHidden = input.toggleHidden
       , style = input.style

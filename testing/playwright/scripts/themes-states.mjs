@@ -608,6 +608,14 @@ export const STATES = {
       await pg.waitForFunction(() =>
         !document.querySelector('[role="slider"]')?.hasAttribute("tabindex"));
     },
+    // `?s=vertical` → orientation flip: data-orientation=vertical on root/track/range/thumb,
+    // --radix-slider-thumb-transform: translateY(50%), range uses bottom/top edges, thumb wrapper
+    // uses `bottom: calc(40% + <px>)`. No interaction; the at-rest vertical DOM is the oracle.
+    vertical: async (pg) => {
+      await root(pg).locator('[role="slider"][data-orientation="vertical"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-orientation") === "vertical");
+    },
   },
 
   // ── Bare @radix-ui/react-* primitives (toolbar / passwordtoggle / otp / form) ─────────
@@ -662,6 +670,19 @@ export const STATES = {
       await pg.locator('input[type="text"]').first().waitFor();
       await pg.waitForFunction(() => document.querySelector("button")?.textContent?.trim() === "Hide");
     },
+    // `?s=autolabel` → icon-only toggle (no inner text): the auto aria-label "Show password"
+    // names the button. No interaction; the post-hydration DOM is the oracle.
+    autolabel: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector("button")?.getAttribute("aria-label") === "Show password");
+    },
+    // `?s=disabled` → native disabled passed through to BOTH the input and the toggle button.
+    disabled: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector("input")?.disabled === true && document.querySelector("button")?.disabled === true);
+    },
   },
   otp: {
     // defaultValue="123" 3-slot at rest: inputs carry value 1/2/3, hidden input value=123, roving
@@ -704,6 +725,32 @@ export const STATES = {
         const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
         return a.length === 3 && a.every((i) => i.getAttribute("pattern") === "[a-zA-Z]{1}" && i.getAttribute("inputmode") === "text")
           && document.querySelector('input[type="hidden"]')?.value === "abc";
+      });
+    },
+    // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
+    password: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("type") === "password")
+          && document.querySelector('input[type="hidden"]')?.value === "123";
+      });
+    },
+    // `?s=disabled` → every slot carries the disabled attr and is dropped from the roving
+    // order (tabindex=-1 on all; no slot is the tab stop). At rest.
+    disabled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.disabled && i.getAttribute("tabindex") === "-1");
+      });
+    },
+    // `?s=readonly` → every slot carries the readonly attr. At rest.
+    readonly: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.readOnly);
       });
     },
   },
@@ -782,6 +829,34 @@ export const STATES = {
         // registration order: first id's span is the valueMissing text, second the typeMismatch.
         return (els[0].textContent || "").includes("missing")
           && (els[1].textContent || "").includes("valid email");
+      });
+    },
+    // Event-gated data-valid: fill a VALID email into the required Control + fire native `change`
+    // → validity.valid===true → the field/label/control stamp data-valid="true" (radix
+    // getValidAttribute). Proves the validated-and-valid branch. Wait until data-valid resolves.
+    validValid: async (pg) => {
+      const email = root(pg).locator('input[name="email"]');
+      await email.waitFor();
+      await email.fill("a@b.com");
+      // dispatch a real `change` (blur-equivalent) so the field records validity===valid.
+      await pg.evaluate(() => {
+        const i = document.querySelector('input[name="email"]');
+        i.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i?.getAttribute("data-valid") === "true" && !i.hasAttribute("data-invalid");
+      });
+    },
+    // `?s=defaultMessage` forceMatches a childless valueMissing Message → the span shows the
+    // default built-in text "This value is missing". No interaction; first paint is the oracle.
+    defaultMessage: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
+        return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").trim() === "This value is missing");
       });
     },
   },

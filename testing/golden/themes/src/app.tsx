@@ -1380,8 +1380,20 @@ const PAGES: Page[] = [
     interactive: true,
     // `?s=disabled` renders the disabled slider (aria-disabled + data-disabled on root/track/
     // range/thumb, thumb tabindex dropped). Default (rest/stepped) is the enabled single thumb.
+    // `?s=vertical` renders the vertical-orientation slider (data-orientation=vertical,
+    // translateY thumb-transform, bottom/top edges on range+thumb). The vertical box gets a
+    // fixed height so the track has extent.
     node: (() => {
-      const disabled = currentState() === "disabled";
+      const s = currentState();
+      const disabled = s === "disabled";
+      const vertical = s === "vertical";
+      if (vertical) {
+        return (
+          <Box style={{ height: 160 }}>
+            <Slider defaultValue={[40]} orientation="vertical" />
+          </Box>
+        );
+      }
       return (
         <Box style={{ maxWidth: 320 }}>
           <Slider defaultValue={[40]} {...(disabled ? { disabled: true } : {})} />
@@ -1504,17 +1516,51 @@ const PAGES: Page[] = [
     // Text Slot (Show/Hide) so the button has inner text → the auto aria-label (MutationObserver
     // + hydration timing) is SUPPRESSED; explicit input id="password" so inputId is literal (no
     // useId) and the toggle's id/aria-controls don't even need the id normalizer.
-    node: (
-      <Box>
-        <label htmlFor="password">Password</label>
-        <PasswordToggleField.Root>
-          <PasswordToggleField.Input id="password" />
-          <PasswordToggleField.Toggle>
-            <PasswordToggleField.Slot visible="Hide" hidden="Show" />
-          </PasswordToggleField.Toggle>
-        </PasswordToggleField.Root>
-      </Box>
-    ),
+    // `?s=autolabel` renders an ICON-ONLY toggle (no inner text) → the auto aria-label
+    // ("Show password"/"Hide password") is applied post-hydration. `?s=disabled` passes the
+    // native disabled through to BOTH the input and the toggle button.
+    node: (() => {
+      const s = currentState();
+      if (s === "autolabel") {
+        return (
+          <Box>
+            <label htmlFor="password">Password</label>
+            <PasswordToggleField.Root>
+              <PasswordToggleField.Input id="password" />
+              <PasswordToggleField.Toggle>
+                <svg width="15" height="15" viewBox="0 0 15 15" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="7.5" cy="7.5" r="2" fill="currentColor" />
+                </svg>
+              </PasswordToggleField.Toggle>
+            </PasswordToggleField.Root>
+          </Box>
+        );
+      }
+      if (s === "disabled") {
+        return (
+          <Box>
+            <label htmlFor="password">Password</label>
+            <PasswordToggleField.Root>
+              <PasswordToggleField.Input id="password" disabled />
+              <PasswordToggleField.Toggle disabled>
+                <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+              </PasswordToggleField.Toggle>
+            </PasswordToggleField.Root>
+          </Box>
+        );
+      }
+      return (
+        <Box>
+          <label htmlFor="password">Password</label>
+          <PasswordToggleField.Root>
+            <PasswordToggleField.Input id="password" />
+            <PasswordToggleField.Toggle>
+              <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+            </PasswordToggleField.Toggle>
+          </PasswordToggleField.Root>
+        </Box>
+      );
+    })(),
   },
   {
     id: "otp",
@@ -1529,11 +1575,19 @@ const PAGES: Page[] = [
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
+      // `?s=password` masks each slot (type=password); `?s=disabled` disables every slot
+      // (disabled attr + dropped from the roving order); `?s=readonly` stamps readonly.
+      const password = s === "password";
+      const disabled = s === "disabled";
+      const readonly = s === "readonly";
       return (
         <Box>
           <OneTimePasswordField.Root
             {...(empty ? {} : { defaultValue: alpha ? "abc" : "123" })}
             {...(alpha ? { validationType: "alpha" as const } : {})}
+            {...(password ? { type: "password" as const } : {})}
+            {...(disabled ? { disabled: true } : {})}
+            {...(readonly ? { readOnly: true } : {})}
             autoFocus={false}
           >
             <OneTimePasswordField.Input />
@@ -1559,6 +1613,22 @@ const PAGES: Page[] = [
       // `?s=multiMessage` forceMatches BOTH messages at once → aria-describedby must list
       // BOTH ids, space-joined in registration order (the multi-id describedby contract).
       const multi = s === "multiMessage";
+      // `?s=defaultMessage` forceMatches a Message with NO children → renders the
+      // DEFAULT_BUILT_IN_MESSAGES[valueMissing] fallback text.
+      if (s === "defaultMessage") {
+        return (
+          <Box>
+            <Form.Root>
+              <Form.Field name="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" required />
+                <Form.Message match="valueMissing" forceMatch />
+              </Form.Field>
+              <Form.Submit>Submit</Form.Submit>
+            </Form.Root>
+          </Box>
+        );
+      }
       return (
         <Box>
           <Form.Root>

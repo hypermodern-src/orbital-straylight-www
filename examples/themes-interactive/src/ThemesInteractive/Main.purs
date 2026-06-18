@@ -244,7 +244,12 @@ view c s =
             "menubar" -> HH.slot_ _menubar unit Menubar.component (menubarInput s)
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
             "select" -> HH.slot_ _select unit Select.component selectInput
-            "slider" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
+            "slider" ->
+              -- `?s=vertical` swaps the wrapper to a fixed-height box (matching the golden's
+              -- height:160 box) and drives the vertical-orientation slider; otherwise the
+              -- horizontal max-width:320 box.
+              if s == "vertical" then box [ StyleProp "height" "160px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
+              else box [ StyleProp "max-width" "320px" ] [ HH.slot_ _slider unit Slider.component (sliderInput s) ]
             "accordion" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component (accordionInput s) ]
             -- `?s=disabled` renders the Root disabled (data-disabled stamping). The primitive
             -- injects (via exitCss) the golden story's exit keyframe on the closing content so
@@ -271,7 +276,7 @@ view c s =
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
             "tabnav" -> tabNavPage
-            "passwordtoggle" -> passwordTogglePage
+            "passwordtoggle" -> passwordTogglePage s
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
             "otp" -> box [] [ HH.slot_ _otp unit Otp.component (otpInput s) ]
             "form" -> box [] [ HH.slot_ _form unit Form.component (formInput s) ]
@@ -873,6 +878,7 @@ sliderInput s = Slider.defaultInput
   , max = 100
   , step = 1
   , disabled = s == "disabled"
+  , orientation = if s == "vertical" then Vertical else Horizontal
   , style =
       { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
       , track: cn "rt-SliderTrack"
@@ -1354,20 +1360,44 @@ checkboxCardsPage =
 -- | useId) so the toggle's id/aria-controls don't even need the id normalizer; a text Slot
 -- | (Show/Hide) suppresses the auto aria-label. The driver clicks the toggle → type flips
 -- | password→text and the Slot text Show→Hide.
-passwordTogglePage :: H.ComponentHTML Void Slots Aff
-passwordTogglePage =
+passwordTogglePage :: String -> H.ComponentHTML Void Slots Aff
+passwordTogglePage s =
   box []
     [ HH.label
         [ HP.attr (HH.AttrName "for") "password" ]
         [ HH.text "Password" ]
-    , HH.slot_ _passwordtoggle unit PasswordToggleField.component passwordToggleInput
+    , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
     ]
 
-passwordToggleInput :: PasswordToggleField.Input
-passwordToggleInput = PasswordToggleField.defaultInput
+-- | The icon-only toggle content for `?s=autolabel` — an aria-hidden SVG with no inner text,
+-- | byte-identical to the golden so the auto aria-label ("Show password") is what names the button.
+passwordToggleIcon :: HH.PlainHTML
+passwordToggleIcon =
+  HH.elementNS (HH.Namespace "http://www.w3.org/2000/svg") (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "width") "15"
+    , HP.attr (HH.AttrName "height") "15"
+    , HP.attr (HH.AttrName "viewBox") "0 0 15 15"
+    , HP.attr (HH.AttrName "aria-hidden") "true"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS (HH.Namespace "http://www.w3.org/2000/svg") (HH.ElemName "circle")
+        [ HP.attr (HH.AttrName "cx") "7.5"
+        , HP.attr (HH.AttrName "cy") "7.5"
+        , HP.attr (HH.AttrName "r") "2"
+        , HP.attr (HH.AttrName "fill") "currentColor"
+        ]
+        []
+    ]
+
+passwordToggleInput :: String -> PasswordToggleField.Input
+passwordToggleInput s = PasswordToggleField.defaultInput
   { inputId = Just "password"
-  , toggleVisible = [ HH.text "Hide" ]
-  , toggleHidden = [ HH.text "Show" ]
+  -- `?s=autolabel` → icon-only toggle (no text) so the auto aria-label applies; otherwise the
+  -- text Slot (Show/Hide). `?s=disabled` → native disabled on both input + toggle.
+  , toggleVisible = if s == "autolabel" then [ passwordToggleIcon ] else [ HH.text "Hide" ]
+  , toggleHidden = if s == "autolabel" then [ passwordToggleIcon ] else [ HH.text "Show" ]
+  , iconOnly = s == "autolabel"
+  , disabled = s == "disabled"
   , style = { input: cn "", toggle: cn "" }
   }
 
@@ -1418,6 +1448,11 @@ otpInput s = Otp.defaultInput
       else "123"
   -- `?s=alpha` exercises the Alpha validation set (inputmode=text, pattern=[a-zA-Z]{1}).
   , validation = if s == "alpha" then Otp.Alpha else Otp.Numeric
+  -- Wave-C state-variants: password masks slots, disabled drops them from the roving
+  -- order + stamps disabled, readonly stamps readonly.
+  , password = s == "password"
+  , disabled = s == "disabled"
+  , readOnly = s == "readonly"
   , style = { root: cn "", input: cn "" }
   }
 
@@ -1439,6 +1474,11 @@ formInput s = Form.defaultInput
           , required = true
           , serverInvalid = s == "serverInvalid"
           , messages =
+              -- `?s=defaultMessage` forceMatches a single valueMissing Message with EMPTY text →
+              -- the default built-in message text fallback (radix DEFAULT_BUILT_IN_MESSAGES).
+              if s == "defaultMessage" then
+                [ { match: Form.ValueMissing, forceMatch: true, text: [] } ]
+              else
               -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
               -- in registration order (the multi-id describedby contract).
               [ { match: Form.ValueMissing
