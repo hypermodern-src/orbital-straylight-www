@@ -161,6 +161,16 @@ STATES=(
   "toast-up:open"
   # Wave-D Tabs zero-selected (no defaultValue → '' active; no tab selected, all panels hidden).
   "tabsnone:none"
+  # ── Wave-D: multi-thumb / RANGE slider (value is number[]) ───────────────────
+  "sliderrange:default"
+  "sliderrange:triple"
+  "sliderrange:minsteps"
+  # ── Wave-D: OTP paste / autocomplete-dump (value.length>1 ⇒ PASTE reducer) ──
+  "otp:paste"
+  # ── Wave-D: PasswordToggleField form-reset → visibility back to hidden ──────
+  "passwordtoggle:formreset"
+  # ── Wave-D: Form reset → clears validity (Messages unmount, data-invalid drops) ──
+  "form:reset"
 )
 
 echo "ℵ building golden dist (bun)"

@@ -730,6 +730,22 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector("input")?.disabled === true && document.querySelector("button")?.disabled === true);
     },
+    // Wave-D form RESET: reveal the password (click the toggle → type=text) then click the
+    // form's Reset button. The enclosing form's `reset` event forces visibility back to hidden
+    // (type=text→password) — the security round-trip. The post-reset DOM (input type=password,
+    // toggle text "Show") is the oracle; keyed off upstream selectors only.
+    formreset: async (pg) => {
+      const toggle = root(pg).getByRole("button", { name: /show|hide/i }).first();
+      await toggle.waitFor();
+      await toggle.click();
+      await pg.locator('input[type="text"]').first().waitFor();
+      await root(pg).locator('button[type="reset"]').click();
+      await pg.locator('input[type="password"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const b = [...document.querySelectorAll("button")].find((x) => x.type !== "reset");
+        return document.querySelector('input[type="password"]') && b?.textContent?.trim() === "Show";
+      });
+    },
   },
   otp: {
     // defaultValue="123" 3-slot at rest: inputs carry value 1/2/3, hidden input value=123, roving
@@ -798,6 +814,29 @@ export const STATES = {
       await pg.waitForFunction(() => {
         const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
         return a.length === 3 && a.every((i) => i.readOnly);
+      });
+    },
+    // Wave-D PASTE: drive the EMPTY field (?s=empty) and dump a full code "456" into the
+    // first slot as ONE input event (value.length>1 ⇒ radix dispatches PASTE: sanitize +
+    // slice to size, fill from index 0, focus the last filled slot). Set the slot's value
+    // then fire a native `input` so BOTH golden and port take the same code path. The
+    // deterministic outcome — slots 4/5/6, hidden input "456", roving tab stop on slot 2 —
+    // is the oracle; keyed off upstream selectors only.
+    paste: async (pg) => {
+      const first = root(pg).locator('input[data-radix-otp-input][data-radix-index="0"]');
+      await first.waitFor();
+      await first.focus();
+      await pg.evaluate(() => {
+        const el = document.querySelector('input[data-radix-otp-input][data-radix-index="0"]');
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        setter.call(el, "456");
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "4" && a[1].value === "5" && a[2].value === "6"
+          && document.querySelector('input[type="hidden"]')?.value === "456"
+          && a[2].getAttribute("tabindex") === "0";
       });
     },
   },
@@ -904,6 +943,21 @@ export const STATES = {
         const db = i?.getAttribute("aria-describedby");
         if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
         return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").trim() === "This value is missing");
+      });
+    },
+    // Wave-D form RESET: submit the empty required Control (valueMissing Message mounts +
+    // data-invalid stamps + aria-describedby links), THEN click the Reset button. The form
+    // `reset` event clears the field's validity, so the Message UNMOUNTS and data-invalid /
+    // aria-describedby are dropped — the form returns to its pristine rest-valid DOM. That
+    // cleared DOM is the oracle; keyed off upstream selectors only.
+    reset: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await root(pg).locator('button[type="reset"]').click();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i && !i.hasAttribute("data-invalid") && !i.hasAttribute("aria-describedby")
+          && !document.querySelector('input[data-invalid]');
       });
     },
   },
@@ -1093,6 +1147,45 @@ export const STATES = {
         const sel = tabs.filter((t) => t.getAttribute("aria-selected") === "true");
         const panels = [...document.querySelectorAll('[role="tabpanel"]')];
         return tabs.length === 3 && sel.length === 0 && panels.every((p) => p.hasAttribute("hidden"));
+  // ── Wave-D: multi-thumb / RANGE slider (value is number[]) ───────────────────────
+  // Upstream renders one role=slider thumb PER value. Drivers key ONLY off the upstream
+  // role/aria-label selectors so the same driver runs against golden and port.
+  sliderrange: {
+    // default [25,75]: two thumbs labelled Minimum/Maximum; range spans between them
+    // (left:25%; right:25%). No interaction — the at-rest 2-thumb DOM is the oracle.
+    default: async (pg) => {
+      await root(pg).locator('[role="slider"][aria-label="Minimum"]').first().waitFor();
+      await root(pg).locator('[role="slider"][aria-label="Maximum"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a.length === 2
+          && a[0].getAttribute("aria-valuenow") === "25"
+          && a[1].getAttribute("aria-valuenow") === "75";
+      });
+    },
+    // ?s=triple [20,50,80]: three thumbs labelled "Value 1/2/3 of 3"; range left:20%; right:20%.
+    triple: async (pg) => {
+      await root(pg).locator('[role="slider"][aria-label="Value 1 of 3"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a.length === 3
+          && a[2].getAttribute("aria-label") === "Value 3 of 3"
+          && a[1].getAttribute("aria-valuenow") === "50";
+      });
+    },
+    // ?s=minsteps [40,60] minStepsBetweenThumbs=10: focus the LOWER thumb (Minimum, value 40)
+    // and press ArrowRight 25×. Each step is +1 until the thumb is 10 steps below its neighbour
+    // (60-50=10), then the constraint REJECTS further moves — it parks at exactly 50. The landed
+    // value (Minimum=50, Maximum=60) is the deterministic oracle; range becomes left:50%; right:40%.
+    minsteps: async (pg) => {
+      const lo = root(pg).locator('[role="slider"][aria-label="Minimum"]').first();
+      await lo.waitFor();
+      await lo.focus();
+      for (let i = 0; i < 25; i++) await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a[0].getAttribute("aria-valuenow") === "50"
+          && a[1].getAttribute("aria-valuenow") === "60";
       });
     },
   },

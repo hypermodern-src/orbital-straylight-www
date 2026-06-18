@@ -36,8 +36,10 @@ module Hydrogen.Radix.OneTimePasswordField
 
 import Prelude
 
-import Data.Array (length, mapWithIndex, replicate, take, updateAt, (!!))
+import Data.Array (length, mapWithIndex, replicate, take, updateAt, filter, (!!))
+import Data.Ord (clamp)
 import Data.Foldable (for_)
+import Data.FoldableWithIndex (forWithIndex_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (joinWith, trim)
 import Data.String.CodeUnits (toCharArray)
@@ -52,6 +54,7 @@ import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataOrientation, dataAttr, orientationName, role)
 import Web.HTML.HTMLElement as HTMLElement
+import Web.HTML.HTMLInputElement as HTMLInputElement
 import Web.UIEvent.KeyboardEvent as KE
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -292,19 +295,40 @@ handleAction = case _ of
     H.modify_ _ { cursor = idx, focusEntered = true }
   SlotInput idx raw -> do
     st <- H.get
-    -- Take the LAST typed char (handles the slot already holding a value), accept it
-    -- only if valid; fill the slot and auto-advance focus to the next slot. A disabled or
-    -- read-only field never mutates (radix gates the SET_CHAR dispatch on both).
-    let
-      typed = lastChar raw
-    when (not st.disabled && not st.readOnly && typed /= "" && accepts st.validation typed) do
+    -- An input event delivering MORE THAN ONE char is a paste / password-manager autofill
+    -- (radix onInput: `value.length > 1` ⇒ dispatch PASTE). The PASTE reducer sanitizes the
+    -- whole pasted string (strip whitespace + chars the validation set rejects), slices it to
+    -- the slot count, REPLACES the value from index 0, and focuses the last filled slot. This
+    -- runs regardless of WHICH slot received the dump (radix sets value3 directly, not offset).
+    if (not st.disabled && not st.readOnly && length (toCharArray raw) > 1) then do
       let
-        cur = current st.chars
-        next = fromMaybe cur (updateAt idx typed cur)
-        nextCursor = min (idx + 1) (st.len - 1)
-      H.modify_ \s -> s { chars = (change next s.chars).next, cursor = nextCursor, focusEntered = true }
-      H.raise (ValueChanged (trim (joinWith "" next)))
-      focusAt nextCursor
+        sanitized = sanitizePaste st.validation raw
+        next = toSlots st.len sanitized
+        filled = length (filter (_ /= "") next)
+        focusIdx = clampIdx st.len (filled - 1)
+      when (sanitized /= "") do
+        H.modify_ \s -> s { chars = (change next s.chars).next, cursor = focusIdx, focusEntered = true }
+        H.raise (ValueChanged (trim (joinWith "" next)))
+        -- The pasted dump left a DIRTY value property on the receiving <input> (the browser
+        -- keeps "456" on slot 0). Upstream's controlled React value resets each slot's property
+        -- to its single char; mirror that imperatively so the property matches the per-slot
+        -- char (the value ATTRIBUTE the DOM oracle reads is already correct via render).
+        syncSlotValues next
+        focusAt focusIdx
+    else do
+      -- Single-char input: take the LAST typed char (handles the slot already holding a value),
+      -- accept it only if valid; fill the slot and auto-advance focus to the next slot. A disabled
+      -- or read-only field never mutates (radix gates the SET_CHAR dispatch on both).
+      let
+        typed = lastChar raw
+      when (not st.disabled && not st.readOnly && typed /= "" && accepts st.validation typed) do
+        let
+          cur = current st.chars
+          next = fromMaybe cur (updateAt idx typed cur)
+          nextCursor = min (idx + 1) (st.len - 1)
+        H.modify_ \s -> s { chars = (change next s.chars).next, cursor = nextCursor, focusEntered = true }
+        H.raise (ValueChanged (trim (joinWith "" next)))
+        focusAt nextCursor
   SlotKeyDown idx ke -> do
     st <- H.get
     let key = KE.key ke
@@ -331,12 +355,34 @@ handleAction = case _ of
             H.modify_ _ { cursor = target, focusEntered = true }
             focusAt target
 
+-- | radix PASTE sanitize: strip whitespace, drop every char the validation set rejects,
+-- | and re-join. (Mirrors `sanitizeValue`: remove `\s`, then `replace(validation.regexp,"")`
+-- | which is the INVERSE — here expressed as keep-only-accepted.)
+sanitizePaste :: Validation -> String -> String
+sanitizePaste v s =
+  joinWith "" (filter keep (map SCU.singleton (toCharArray s)))
+  where
+  keep c = c /= " " && c /= "\t" && c /= "\n" && c /= "\r" && accepts v c
+
+-- | clamp an index into [0, len-1] (a paste of zero accepted chars never reaches here).
+clampIdx :: Int -> Int -> Int
+clampIdx len i = clamp 0 (max 0 (len - 1)) i
+
 lastChar :: String -> String
 lastChar s = case length cs of
   0 -> ""
   n -> fromMaybe "" (cs !! (n - 1))
   where
   cs = map SCU.singleton (toCharArray s)
+
+-- | Imperatively set each slot input's `value` PROPERTY to its per-slot char (after a paste
+-- | dump the receiving input holds the full string as a dirty property; the per-slot value
+-- | attribute is correct via render but the property must be reset to match React).
+syncSlotValues :: forall m. MonadEffect m => Array String -> H.HalogenM State Action () Output m Unit
+syncSlotValues slots =
+  forWithIndex_ slots \i ch -> do
+    mel <- H.getHTMLElementRef (slotRef i)
+    for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.setValue ch)
 
 focusAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
 focusAt idx = do

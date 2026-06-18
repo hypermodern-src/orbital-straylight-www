@@ -691,6 +691,19 @@ const CHECKS = [
     await press(pg, "Enter");
     ok((await attrOf(pg, inp, 0, "type")) === "password", "Enter did not re-hide the password (type→password)");
   }},
+  // Wave-D: a form RESET forces visibility back to hidden (security — never leave the
+  // password revealed across a reset). Reveal it, then click the form's Reset button.
+  { id: "passwordtoggle", state: "formreset", apg: "button", name: "a form reset re-hides the password (type text→password)", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "input should start hidden (type=password)");
+    await pg.locator('#root button[type="reset"]').waitFor();
+    // reveal via the toggle (the non-reset button)
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    ok((await attrOf(pg, inp, 0, "type")) === "text", "toggle did not reveal the password");
+    await pg.locator('#root button[type="reset"]').click();
+    await attrEq(pg, inp, 0, "type", "password", "form reset did not re-hide the password");
+  }},
 
   { id: "otp", state: "filled", apg: "roving-tabindex", name: "ArrowRight/ArrowLeft rove between slots; the tab stop migrates", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
@@ -1841,6 +1854,97 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 0), "ArrowRight must be inert in vertical orientation");
     await press(pg, "ArrowDown");
     ok(await activeIsNth(pg, sel, 1), "ArrowDown did not rove to the next item (vertical axis)");
+  // ── Wave-D: Form reset clears derived validity ──────────────────────────────────
+  // Submit the empty required Control (valueMissing Message mounts, data-invalid stamps,
+  // aria-describedby links). Then click Reset: the form-reset path clears the validity, so
+  // the Message unmounts and data-invalid / aria-describedby are dropped.
+  { id: "form", state: "reset", apg: "form", name: "a form reset clears the field validity (Message unmounts, data-invalid drops)", run: async (pg) => {
+    await pg.locator('#root form').first().waitFor();
+    await pg.locator('#root button[type="submit"]').click();
+    await pg.locator('#root input[data-invalid="true"]').first().waitFor();
+    await pg.waitForFunction(() => {
+      const i = document.querySelector('#root input[name="email"]');
+      const db = i?.getAttribute("aria-describedby");
+      return !!(db && db.split(" ").some((id) => document.getElementById(id)));
+    }, { timeout: 4000 }).catch(() => { throw new Error("submit must link a valueMissing Message via aria-describedby"); });
+    await pg.locator('#root button[type="reset"]').click();
+    await pg.waitForFunction(() => {
+      const i = document.querySelector('#root input[name="email"]');
+      return i && !i.hasAttribute("data-invalid") && !i.hasAttribute("aria-describedby");
+    }, { timeout: 4000 }).catch(() => { throw new Error("reset did not clear data-invalid / aria-describedby"); });
+    ok((await pg.locator('#root input[data-invalid]').count()) === 0, "no control may carry data-invalid after reset");
+  }},
+
+  // ── Wave-D: OTP paste / autocomplete-dump fills all slots ───────────────────────
+  // An input event whose value is longer than one char (paste or password-manager
+  // autofill) fills every slot from the sanitized+sliced code and focuses the last
+  // filled slot — radix's PASTE reducer. Drive the empty field, dump "456" into slot 0.
+  { id: "otp", state: "paste", apg: "roving-tabindex", name: "a multi-char input dump fills all slots and lands on the last filled slot", run: async (pg) => {
+    await pg.locator('input[data-radix-otp-input]').first().waitFor();
+    await pg.locator('input[data-radix-otp-input][data-radix-index="0"]').focus();
+    await pg.evaluate(() => {
+      const el = document.querySelector('input[data-radix-otp-input][data-radix-index="0"]');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      setter.call(el, "456");
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await attrEq(pg, 'input[data-radix-otp-input]', 0, "value", "4", "paste did not fill slot 0");
+    ok((await attrOf(pg, 'input[data-radix-otp-input]', 1, "value")) === "5", "paste did not fill slot 1");
+    ok((await attrOf(pg, 'input[data-radix-otp-input]', 2, "value")) === "6", "paste did not fill slot 2");
+    ok((await attrOf(pg, 'input[type="hidden"]', 0, "value")) === "456", "hidden input must aggregate the pasted code");
+    await attrEq(pg, 'input[data-radix-otp-input]', 2, "tabindex", "0", "the last filled slot must hold the roving tab stop");
+    ok(await activeIsNth(pg, 'input[data-radix-otp-input]', 2), "focus must land on the last filled slot");
+  }},
+
+  // ── Wave-D: multi-thumb / RANGE slider (APG slider pattern, per-thumb) ───────────
+  // Two thumbs, each role=slider with its own valuemin/now/max + an aria-label
+  // (Minimum/Maximum) naming it — radix getLabel for a 2-value slider.
+  { id: "sliderrange", state: "default", apg: "slider", name: "two role=slider thumbs labelled Minimum/Maximum, each focusable", run: async (pg) => {
+    const thumbs = pg.locator('[role="slider"]');
+    await thumbs.first().waitFor();
+    ok((await thumbs.count()) === 2, "range slider must render exactly two role=slider thumbs");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-label")) === "Minimum", "thumb 0 aria-label must be Minimum");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-label")) === "Maximum", "thumb 1 aria-label must be Maximum");
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuenow")) === "25", "thumb 0 starts at 25");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "75", "thumb 1 starts at 75");
+    ok((await attrOf(pg, '[role="slider"]', 0, "tabindex")) === "0", "thumb 0 must be focusable");
+    ok((await attrOf(pg, '[role="slider"]', 1, "tabindex")) === "0", "thumb 1 must be focusable");
+  }},
+  // Each thumb keyboard-steps its OWN index only: ArrowRight on the lower thumb moves it,
+  // leaving the upper thumb untouched; ArrowLeft on the upper thumb moves only it.
+  { id: "sliderrange", state: "default", apg: "slider", name: "each thumb steps independently (ArrowRight/Left on its own index)", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"][aria-label="Minimum"]');
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "26", "lower thumb ArrowRight did not increment by one step");
+    await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "75", "upper thumb must NOT move when lower thumb is stepped");
+    await pg.locator('[role="slider"][aria-label="Maximum"]').focus();
+    await press(pg, "ArrowLeft");
+    await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "74", "upper thumb ArrowLeft did not decrement by one step");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "26", "lower thumb must NOT move when upper thumb is stepped");
+  }},
+  // Home/End target the focused thumb's index: Home on the lower thumb drives it to min(0),
+  // End on the upper thumb drives it to max(100). (Single-thumb Home/End semantics, per index.)
+  { id: "sliderrange", state: "default", apg: "slider", name: "Home/End drive the focused thumb to min/max", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await pg.locator('[role="slider"][aria-label="Minimum"]').focus();
+    await press(pg, "Home");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "0", "Home did not drive the lower thumb to min");
+    await pg.locator('[role="slider"][aria-label="Maximum"]').focus();
+    await press(pg, "End");
+    await attrEq(pg, '[role="slider"]', 1, "aria-valuenow", "100", "End did not drive the upper thumb to max");
+  }},
+  // minStepsBetweenThumbs: the lower thumb (starts at 40, neighbour at 60, gap=10·step)
+  // cannot step closer than 50. Drive it: ArrowRight 25× — it climbs 40→50 then the
+  // constraint REJECTS every further move, parking it at exactly 50 (a no-op clamp).
+  { id: "sliderrange", state: "minsteps", apg: "slider", name: "minStepsBetweenThumbs blocks the thumb at the neighbour boundary", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    ok((await attrOf(pg, '[role="slider"]', 0, "aria-valuenow")) === "40", "lower thumb must start at 40");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "60", "upper thumb must start at 60");
+    await pg.locator('[role="slider"][aria-label="Minimum"]').focus();
+    for (let i = 0; i < 25; i++) await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", "50", "lower thumb must park at 50 (10 steps below its neighbour)");
+    ok((await attrOf(pg, '[role="slider"]', 1, "aria-valuenow")) === "60", "upper thumb must stay at 60 (untouched by the lower thumb's keys)");
   }},
 ];
 

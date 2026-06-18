@@ -108,6 +108,7 @@ type Slots =
   , avatarx :: RadixAvatar.Slot Unit
   , selectform :: Select.Slot Unit
   , dropdownmenugroup :: DropdownMenu.Slot Unit
+  , sliderrange :: Slider.RangeSlot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -216,6 +217,8 @@ _selectform = Proxy
 
 _dropdownmenugroup :: Proxy "dropdownmenugroup"
 _dropdownmenugroup = Proxy
+_sliderrange :: Proxy "sliderrange"
+_sliderrange = Proxy
 
 main :: Effect Unit
 main = do
@@ -346,6 +349,10 @@ view c s =
             "accordionhoriz" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionHorizInput ]
             "togglegrouprtl" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupRtlInput
             "toolbarrtl" -> HH.slot_ _toolbar unit Toolbar.component toolbarRtlInput
+            -- Wave-D multi-thumb / range slider: ?s=triple → 3 thumbs (Value n of m
+            -- labelling); ?s=minsteps → minStepsBetweenThumbs keyboard rejection; default
+            -- → the 2-thumb [25,75] range (Minimum/Maximum, range between the thumbs).
+            "sliderrange" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _sliderrange unit Slider.rangeComponent (sliderRangeInput s) ]
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -1440,12 +1447,25 @@ checkboxCardsPage =
 -- | password→text and the Slot text Show→Hide.
 passwordTogglePage :: String -> H.ComponentHTML Void Slots Aff
 passwordTogglePage s =
-  box []
-    [ HH.label
-        [ HP.attr (HH.AttrName "for") "password" ]
-        [ HH.text "Password" ]
-    , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
-    ]
+  -- `?s=formreset` wraps the field in a <form> with a reset button so the port's form
+  -- reset listener (forces visibility→hidden) is exercised; otherwise the bare box.
+  if s == "formreset" then
+    box []
+      [ HH.form_
+          [ HH.label
+              [ HP.attr (HH.AttrName "for") "password" ]
+              [ HH.text "Password" ]
+          , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
+          , HH.button [ HP.type_ HP.ButtonReset ] [ HH.text "Reset" ]
+          ]
+      ]
+  else
+    box []
+      [ HH.label
+          [ HP.attr (HH.AttrName "for") "password" ]
+          [ HH.text "Password" ]
+      , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
+      ]
 
 -- | The icon-only toggle content for `?s=autolabel` — an aria-hidden SVG with no inner text,
 -- | byte-identical to the golden so the auto aria-label ("Show password") is what names the button.
@@ -1521,7 +1541,9 @@ otpInput :: String -> Otp.Input
 otpInput s = Otp.defaultInput
   { length = 3
   , defaultValue =
-      if s == "empty" || s == "typed" then ""
+      -- `?s=paste` starts EMPTY (like empty/typed) so the Wave-D paste driver can dump a
+      -- full code into the first slot and exercise the PASTE reducer.
+      if s == "empty" || s == "typed" || s == "paste" then ""
       else if s == "alpha" then "abc"
       else "123"
   -- `?s=alpha` exercises the Alpha validation set (inputmode=text, pattern=[a-zA-Z]{1}).
@@ -1544,6 +1566,9 @@ otpInput s = Otp.defaultInput
 formInput :: String -> Form.Input
 formInput s = Form.defaultInput
   { submitLabel = [ HH.text "Submit" ]
+  -- `?s=reset` renders a `<button type=reset>Reset</button>` so the form-reset path
+  -- (clears each field's derived validity → Messages unmount) is exercised.
+  , resetLabel = if s == "reset" then [ HH.text "Reset" ] else []
   , fields =
       [ Form.defaultField
           { name = "email"
@@ -1556,6 +1581,10 @@ formInput s = Form.defaultInput
               -- the default built-in message text fallback (radix DEFAULT_BUILT_IN_MESSAGES).
               if s == "defaultMessage" then
                 [ { match: Form.ValueMissing, forceMatch: true, text: [] } ]
+              -- `?s=reset` has a SINGLE (non-forced) valueMissing Message — it mounts on the
+              -- Submit click, then unmounts when the form is reset (matching the golden story).
+              else if s == "reset" then
+                [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "This value is missing" ] } ]
               else
               -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
               -- in registration order (the multi-id describedby contract).
@@ -2150,5 +2179,25 @@ toolbarRtlInput = Toolbar.defaultInput
       , separator: cn ""
       , toggleGroup: cn ""
       , toggleItem: cn ""
+-- | sliderRange — Wave-D multi-thumb / range slider (Slider.rangeComponent). One role=slider
+-- | thumb per value; ?s=triple → [20,50,80] (3 thumbs, "Value n of m" labels), ?s=minsteps →
+-- | [40,60] with minStepsBetweenThumbs=10 (a keyboard step within 10·step of the neighbour is
+-- | rejected), default → [25,75] (Minimum/Maximum, range between the two thumbs). Same rt-Slider*
+-- | class anatomy as the single-thumb slider.
+sliderRangeInput :: String -> Slider.RangeInput
+sliderRangeInput s = Slider.defaultRangeInput
+  { defaultValue =
+      if s == "triple" then [ 20, 50, 80 ]
+      else if s == "minsteps" then [ 40, 60 ]
+      else [ 25, 75 ]
+  , min = 0
+  , max = 100
+  , step = 1
+  , minStepsBetweenThumbs = if s == "minsteps" then 10 else 0
+  , style =
+      { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
+      , track: cn "rt-SliderTrack"
+      , range: cn "rt-SliderRange"
+      , thumb: cn "rt-SliderThumb"
       }
   }

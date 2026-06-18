@@ -1655,6 +1655,25 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=formreset` wraps the field in a <form> with a reset button: revealing the
+      // password then clicking Reset must flip the input type=text→password (upstream's
+      // form `reset` listener forces visible=false). The reset button proves the security path.
+      if (s === "formreset") {
+        return (
+          <Box>
+            <form>
+              <label htmlFor="password">Password</label>
+              <PasswordToggleField.Root>
+                <PasswordToggleField.Input id="password" />
+                <PasswordToggleField.Toggle>
+                  <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+                </PasswordToggleField.Toggle>
+              </PasswordToggleField.Root>
+              <button type="reset">Reset</button>
+            </form>
+          </Box>
+        );
+      }
       if (s === "disabled") {
         return (
           <Box>
@@ -1690,7 +1709,8 @@ const PAGES: Page[] = [
     // oracle is value-derived, not focus-derived). validationType defaults to numeric.
     node: (() => {
       const s = currentState();
-      const empty = s === "empty" || s === "typed";
+      // `?s=paste` starts empty so the Wave-D paste driver can dump a full code.
+      const empty = s === "empty" || s === "typed" || s === "paste";
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
@@ -1744,6 +1764,25 @@ const PAGES: Page[] = [
                 <Form.Message match="valueMissing" forceMatch />
               </Form.Field>
               <Form.Submit>Submit</Form.Submit>
+            </Form.Root>
+          </Box>
+        );
+      }
+      // `?s=reset` adds a reset button: submit the empty required Control (valueMissing
+      // Message mounts + data-invalid stamps), then Reset → upstream's form-reset listener
+      // clears each control's validity, so the Message UNMOUNTS and data-invalid /
+      // aria-describedby are dropped, returning the form to its pristine rest-valid DOM.
+      if (s === "reset") {
+        return (
+          <Box>
+            <Form.Root>
+              <Form.Field name="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" required />
+                <Form.Message match="valueMissing">This value is missing</Form.Message>
+              </Form.Field>
+              <Form.Submit>Submit</Form.Submit>
+              <button type="reset">Reset</button>
             </Form.Root>
           </Box>
         );
@@ -2453,6 +2492,39 @@ const PAGES: Page[] = [
         <Toolbar.Button>Save</Toolbar.Button>
       </Toolbar.Root>
     ),
+  // ── Wave-D: multi-thumb / RANGE slider (value is number[]) ────────────────────
+  // Upstream renders one role=slider thumb per value. Two thumbs ⇒ aria-label
+  // Minimum/Maximum (radix getLabel); the range spans BETWEEN them (offsetStart =
+  // min(pcts), offsetEnd = 100 - max(pcts)). `?s=triple` proves the >2 "Value n of m"
+  // labelling + 3-thumb geometry; `?s=minsteps` proves minStepsBetweenThumbs keyboard
+  // rejection (a thumb cannot step within N·step of its neighbour). Each thumb is
+  // independently focusable + keyboard-steppable (fully deterministic, no pointer).
+  {
+    id: "sliderrange",
+    label: "Slider (range / multi-thumb)",
+    interactive: true,
+    node: (() => {
+      const s = currentState();
+      if (s === "triple") {
+        return (
+          <Box style={{ maxWidth: 320 }}>
+            <Slider defaultValue={[20, 50, 80]} />
+          </Box>
+        );
+      }
+      if (s === "minsteps") {
+        return (
+          <Box style={{ maxWidth: 320 }}>
+            <Slider defaultValue={[40, 60]} minStepsBetweenThumbs={10} />
+          </Box>
+        );
+      }
+      return (
+        <Box style={{ maxWidth: 320 }}>
+          <Slider defaultValue={[25, 75]} />
+        </Box>
+      );
+    })(),
   },
 ];
 

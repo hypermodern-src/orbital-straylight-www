@@ -43,13 +43,21 @@ module Hydrogen.Radix.Slider
   , Style
   , defaultStyle
   , defaultInput
+  -- Wave-D: multi-thumb / range variant (value is an Array Int).
+  , rangeComponent
+  , RangeInput
+  , RangeOutput(..)
+  , RangeQuery(..)
+  , RangeSlot
+  , defaultRangeInput
   ) where
 
 import Prelude
 
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Foldable (for_)
+import Data.Foldable (for_, minimum, maximum)
+import Data.Array (mapWithIndex, length, index, updateAt, (!!))
 import Data.Number.Format (toString) as Num
 import Data.Ord (clamp)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -354,5 +362,299 @@ handleQuery = case _ of
     setValue (snapClamp st v)
     pure (Just a)
   GetValue reply -> do
+    st <- H.get
+    pure (Just (reply (current st.ctrl)))
+
+-- ═════════════════════════════════════════════════════════════════════════════
+-- Wave-D: multi-thumb / RANGE slider (radix Slider with value: number[])
+-- ═════════════════════════════════════════════════════════════════════════════
+-- |
+-- | Upstream renders ONE `role=slider` thumb PER value. The structural deltas vs the
+-- | single-thumb variant (all DOM-observable, all deterministic, all keyboard-drivable):
+-- |
+-- |   * Range geometry (radix SliderRange): with N>1 thumbs the range spans BETWEEN the
+-- |     thumbs — `offsetStart = min(percentages)`, `offsetEnd = 100 - max(percentages)`,
+-- |     so the range `style` is `{startEdge}: {min}%; {endEdge}: {100-max}%`. (Single-thumb
+-- |     pins offsetStart=0; this variant pins it to the lower thumb.)
+-- |   * Per-thumb aria-label (radix getLabel): exactly 2 thumbs ⇒ ["Minimum","Maximum"][i];
+-- |     >2 thumbs ⇒ "Value {i+1} of {N}". (Single thumb ⇒ no aria-label, as in `component`.)
+-- |   * Each thumb wrapper stamps `{startEdge}: calc({pct_i}% + 0px)` for ITS value.
+-- |   * Each thumb is INDEPENDENTLY focusable (tabindex=0) and keyboard-steps ITS OWN index;
+-- |     on focus radix sets `valueIndexToChangeRef = index` so the arrows drive that thumb.
+-- |   * minStepsBetweenThumbs (radix `hasMinStepsBetweenValues`): a keyboard step that would
+-- |     bring two adjacent thumbs closer than `minStepsBetweenThumbs * step` is REJECTED
+-- |     (the value update is a no-op). With the default 0 thumbs may meet but the sorted
+-- |     order is preserved (a thumb cannot keyboard past its neighbour).
+-- |
+-- | Keyboard semantics per-thumb are otherwise identical to the single-thumb `nextValue`
+-- | (Home→min, End→max, Page/Shift ±10·step, arrows ±step, RTL/vertical axis swap), reused
+-- | verbatim by constructing a transient single-thumb `State` view.
+
+type RangeInput =
+  { value :: Maybe (Array Int)   -- controlled
+  , defaultValue :: Array Int     -- uncontrolled initial (one entry per thumb)
+  , min :: Int
+  , max :: Int
+  , step :: Int
+  , minStepsBetweenThumbs :: Int
+  , orientation :: Orientation
+  , dir :: Dir
+  , disabled :: Boolean
+  , idPrefix :: String
+  , style :: Style
+  }
+
+defaultRangeInput :: RangeInput
+defaultRangeInput =
+  { value: Nothing
+  , defaultValue: [ 25, 75 ]
+  , min: 0
+  , max: 100
+  , step: 1
+  , minStepsBetweenThumbs: 0
+  , orientation: Horizontal
+  , dir: LTR
+  , disabled: false
+  , idPrefix: "rdx-slider-range"
+  , style: defaultStyle
+  }
+
+data RangeOutput = RangeValueChanged (Array Int)
+
+data RangeQuery a
+  = SetRangeValue (Array Int) a
+  | GetRangeValue (Array Int -> a)
+
+type RangeSlot id = H.Slot RangeQuery RangeOutput id
+
+type RangeState =
+  { ctrl :: Controllable (Array Int)
+  , min :: Int
+  , max :: Int
+  , step :: Int
+  , minStepsBetweenThumbs :: Int
+  , orientation :: Orientation
+  , dir :: Dir
+  , disabled :: Boolean
+  , idPrefix :: String
+  , style :: Style
+  , uid :: String
+  }
+
+data RangeAction
+  = RangeInitialize
+  | RangeReceive RangeInput
+  | RangeThumbKeyDown Int KE.KeyboardEvent
+
+-- | A stable ref per thumb index, so the changed thumb keeps focus across re-render.
+rangeThumbRef :: Int -> H.RefLabel
+rangeThumbRef i = H.RefLabel ("slider-range-thumb-" <> show i)
+
+rangeComponent :: forall m. MonadEffect m => H.Component RangeQuery RangeInput RangeOutput m
+rangeComponent =
+  H.mkComponent
+    { initialState: rangeInitialState
+    , render: rangeRender
+    , eval: H.mkEval H.defaultEval
+        { handleAction = rangeHandleAction
+        , handleQuery = rangeHandleQuery
+        , receive = Just <<< RangeReceive
+        , initialize = Just RangeInitialize
+        }
+    }
+
+rangeInitialState :: RangeInput -> RangeState
+rangeInitialState input =
+  { ctrl: controllable input.value input.defaultValue
+  , min: input.min
+  , max: input.max
+  , step: input.step
+  , minStepsBetweenThumbs: input.minStepsBetweenThumbs
+  , orientation: input.orientation
+  , dir: input.dir
+  , disabled: input.disabled
+  , idPrefix: input.idPrefix
+  , style: input.style
+  , uid: ""
+  }
+
+-- | Project the range state onto the single-thumb `State` shape so `percent`, `nextValue`
+-- | and `snapClamp` are reused VERBATIM (one keyboard/geometry implementation, no drift).
+asThumbState :: RangeState -> State
+asThumbState st =
+  { ctrl: controllable Nothing 0   -- unused: callers pass the explicit value
+  , min: st.min
+  , max: st.max
+  , step: st.step
+  , orientation: st.orientation
+  , dir: st.dir
+  , disabled: st.disabled
+  , idPrefix: st.idPrefix
+  , style: st.style
+  , uid: st.uid
+  }
+
+-- | radix getLabel(index, total): 2 thumbs ⇒ Minimum/Maximum; >2 ⇒ "Value n of m"; 1 ⇒ none.
+thumbLabel :: Int -> Int -> Maybe String
+thumbLabel idx total
+  | total > 2 = Just ("Value " <> show (idx + 1) <> " of " <> show total)
+  | total == 2 = index [ "Minimum", "Maximum" ] idx
+  | otherwise = Nothing
+
+rangeRender :: forall m. RangeState -> H.ComponentHTML RangeAction () m
+rangeRender st =
+  let
+    ts = asThumbState st
+    values = current st.ctrl
+    total = length values
+    pcts = map (percent ts) values
+    isVertical = st.orientation == Vertical
+    startEdge = if isVertical then "bottom" else "left"
+    endEdge = if isVertical then "top" else "right"
+    thumbTransform = if isVertical then "translateY(50%)" else "translateX(-50%)"
+    -- range spans between the extreme thumbs (radix offsetStart/offsetEnd).
+    offsetStart = fromMaybe 0.0 (minimum pcts)
+    offsetEnd = 100.0 - fromMaybe 0.0 (maximum pcts)
+  in
+    HH.span
+      ( [ classes st.style.root
+        , aria "disabled" (if st.disabled then "true" else "false")
+        , dataOrientation st.orientation
+        , HP.attr (HH.AttrName "style") ("--radix-slider-thumb-transform: " <> thumbTransform <> ";")
+        ]
+          <> (if isVertical then [] else [ HP.attr (HH.AttrName "dir") (dirName st.dir) ])
+          <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+      )
+      ( [ HH.span
+            ( [ classes st.style.track
+              , dataOrientation st.orientation
+              ]
+                <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+            )
+            [ HH.span
+                ( [ classes st.style.range
+                  , dataOrientation st.orientation
+                  , HP.attr (HH.AttrName "style") (startEdge <> ": " <> fmtPct offsetStart <> "%; " <> endEdge <> ": " <> fmtPct offsetEnd <> "%;")
+                  ]
+                    <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+                )
+                []
+            ]
+        ]
+          <> mapWithIndex (rangeThumb st ts total startEdge) values
+      )
+
+rangeThumb :: forall m. RangeState -> State -> Int -> String -> Int -> Int -> H.ComponentHTML RangeAction () m
+rangeThumb st ts total startEdge idx value =
+  let
+    pct = percent ts value
+    mlabel = thumbLabel idx total
+    -- radix getThumbInBoundsOffset(width,left,dir): for horizontal LTR the in-bounds
+    -- offset is halfWidth·(1 − pct/50)·dir, i.e. POSITIVE when the thumb sits left of
+    -- centre (pct < 50), zero at 50, NEGATIVE past centre (pct > 50). The magnitude is a
+    -- post-measure px the DOM oracle normalizes to `<px>`, but the SIGN/operator is part of
+    -- the serialized `calc()` and is deterministic from pct — so it must be reproduced.
+    op = if pct > 50.0 then "-" else "+"
+  in
+    HH.span
+      [ HP.attr (HH.AttrName "style")
+          ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> fmtPct pct <> "% " <> op <> " 0px);")
+      ]
+      [ HH.span
+          ( [ classes st.style.thumb
+            , HP.ref (rangeThumbRef idx)
+            , role "slider"
+            ]
+              <> (case mlabel of
+                    Just l -> [ aria "label" l ]
+                    Nothing -> [])
+              <>
+                [ aria "valuemin" (show st.min)
+                , aria "valuenow" (show value)
+                , aria "valuemax" (show st.max)
+                , aria "orientation" (orientationName st.orientation)
+                , dataOrientation st.orientation
+                , dataAttr "radix-collection-item" ""
+                , HP.attr (HH.AttrName "style") ""
+                , HE.onKeyDown (RangeThumbKeyDown idx)
+                ]
+              <> (if st.disabled then [] else [ HP.tabIndex 0 ])
+              <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+          )
+          []
+      ]
+
+-- | Clamp a proposed new value for thumb `idx` so it never crosses (or comes within
+-- | minStepsBetweenThumbs·step of) its neighbours — radix `hasMinStepsBetweenValues`.
+-- | If the constraint is violated the update is rejected (Nothing).
+rangeClampNeighbour :: RangeState -> Array Int -> Int -> Int -> Maybe Int
+rangeClampNeighbour st values idx proposed =
+  let
+    gap = st.minStepsBetweenThumbs * st.step
+    lower = values !! (idx - 1)
+    upper = values !! (idx + 1)
+    okLower = case lower of
+      Just lo -> proposed - lo >= gap
+      Nothing -> true
+    okUpper = case upper of
+      Just hi -> hi - proposed >= gap
+      Nothing -> true
+  in
+    if okLower && okUpper then Just proposed else Nothing
+
+rangeHandleAction :: forall m. MonadEffect m => RangeAction -> H.HalogenM RangeState RangeAction () RangeOutput m Unit
+rangeHandleAction = case _ of
+  RangeInitialize -> do
+    uid <- useId
+    H.modify_ _ { uid = uid }
+  RangeReceive input ->
+    H.modify_ \st -> st
+      { ctrl = sync input.value st.ctrl
+      , min = input.min
+      , max = input.max
+      , step = input.step
+      , minStepsBetweenThumbs = input.minStepsBetweenThumbs
+      , orientation = input.orientation
+      , dir = input.dir
+      , disabled = input.disabled
+      , idPrefix = input.idPrefix
+      , style = input.style
+      }
+  RangeThumbKeyDown idx ke -> do
+    st <- H.get
+    when (not st.disabled) do
+      let values = current st.ctrl
+      case index values idx of
+        Nothing -> pure unit
+        Just cur ->
+          case nextValue (asThumbState st) cur (KE.key ke) (KE.shiftKey ke) of
+            Nothing -> liftEffect (preventDefault (KE.toEvent ke))
+            Just proposed -> do
+              liftEffect (preventDefault (KE.toEvent ke))
+              case rangeClampNeighbour st values idx proposed of
+                Nothing -> pure unit   -- minStepsBetweenThumbs rejected the move
+                Just v ->
+                  when (cur /= v) $
+                    case updateAt idx v values of
+                      Nothing -> pure unit
+                      Just next' -> do
+                        H.modify_ _ { ctrl = (change next' st.ctrl).next }
+                        H.raise (RangeValueChanged next')
+              rangeFocusThumb idx
+
+rangeFocusThumb :: forall m. MonadEffect m => Int -> H.HalogenM RangeState RangeAction () RangeOutput m Unit
+rangeFocusThumb idx = do
+  mel <- H.getHTMLElementRef (rangeThumbRef idx)
+  for_ mel (liftEffect <<< HTMLElement.focus)
+
+rangeHandleQuery :: forall m a. MonadEffect m => RangeQuery a -> H.HalogenM RangeState RangeAction () RangeOutput m (Maybe a)
+rangeHandleQuery = case _ of
+  SetRangeValue vs a -> do
+    st <- H.get
+    when (current st.ctrl /= vs) do
+      H.modify_ _ { ctrl = (change vs st.ctrl).next }
+      H.raise (RangeValueChanged vs)
+    pure (Just a)
+  GetRangeValue reply -> do
     st <- H.get
     pure (Just (reply (current st.ctrl)))
