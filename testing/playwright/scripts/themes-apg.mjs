@@ -674,6 +674,27 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "vertical ArrowLeft/ArrowRight must be no-ops");
   }},
+  // Pointer-drag: a pointer-down on the track jumps the value to the pointer (radix
+  // handleSlideStart → getValueFromPointer maps (x − rect.left)/width → [min,max]); dragging
+  // moves it. Asserts value ≈ the clicked fraction (±3 for sub-pixel/step). Non-circular:
+  // validated on --golden (real radix slider drags identically). [Slider 0–100, step 1.]
+  { id: "slider", state: "stepped", apg: "slider", name: "pointer-down on the track jumps the value; dragging follows the pointer", run: async (pg) => {
+    const rootEl = pg.locator(".rt-SliderRoot").first();
+    await rootEl.waitFor();
+    const box = await rootEl.boundingBox();
+    ok(!!box, "could not measure the slider root");
+    const y = box.y + box.height / 2;
+    await pg.mouse.move(box.x + box.width * 0.75, y);
+    await pg.mouse.down();
+    await pg.waitForTimeout(60);
+    const v1 = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    ok(Math.abs(v1 - 75) <= 3, `pointer-down at 75% should set value ≈75 (got ${v1})`);
+    await pg.mouse.move(box.x + box.width * 0.25, y);
+    await pg.waitForTimeout(60);
+    const v2 = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    ok(Math.abs(v2 - 25) <= 3, `dragging to 25% should set value ≈25 (got ${v2})`);
+    await pg.mouse.up();
+  }},
 
   // Toolbar — https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/
   // Roving tabindex over the focusable items (button New, link Edit, toggle items L/C — each a

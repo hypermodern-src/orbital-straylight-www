@@ -69,9 +69,15 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.Direction (Dir(..), dirName)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), classes, cn, dataAttr, dataOrientation, orientationName, role, aria)
-import Web.Event.Event (preventDefault)
+import Hydrogen.Radix.Float.Popper as Popper
+import Halogen.Query.Event (eventListener)
+import Web.Event.Event (preventDefault, EventType(..))
+import Web.HTML as HTML
+import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
+import Web.HTML.Window as Window
 import Web.UIEvent.KeyboardEvent as KE
+import Web.UIEvent.MouseEvent as ME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -142,17 +148,26 @@ type State =
   , idPrefix :: String
   , style :: Style
   , uid :: String        -- minted on Initialize (parity with the other primitives)
+  , dragging :: Boolean  -- a pointer slide is in progress
+  , dragSubs :: Array H.SubscriptionId  -- the document mousemove/up subscriptions during a drag
   }
 
 data Action
   = Initialize
   | Receive Input
   | ThumbKeyDown KE.KeyboardEvent
+  | SlideStart ME.MouseEvent   -- pointer-down on the track: jump the thumb + begin dragging
+  | SlideMove ME.MouseEvent    -- document pointer-move while dragging
+  | SlideEnd                   -- document pointer-up: end the drag
 
 -- | The thumb ref — component-internal, keyed off a stable label (never serialized; the
 -- | per-mount `uid` is minted after first render, so it must NOT key the ref).
 thumbRef :: H.RefLabel
 thumbRef = H.RefLabel "slider-thumb"
+
+-- | The root <span> ref — measured (getBoundingClientRect) to map a pointer X/Y to a value.
+rootRef :: H.RefLabel
+rootRef = H.RefLabel "slider-root"
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -179,6 +194,8 @@ initialState input =
   , idPrefix: input.idPrefix
   , style: input.style
   , uid: ""
+  , dragging: false
+  , dragSubs: []
   }
 
 -- | value→percentage, pure and clamped to [0,100] — radix `convertValueToPercentage`.
@@ -214,13 +231,14 @@ render st =
   in
     HH.span
       ( [ classes st.style.root
+        , HP.ref rootRef
         , aria "disabled" (if st.disabled then "true" else "false")
         , dataOrientation st.orientation
         , HP.attr (HH.AttrName "style") ("--radix-slider-thumb-transform: " <> thumbTransform <> ";")
         ]
           -- only SliderHorizontal forwards `dir` to SliderImpl (radix); SliderVertical omits it.
           <> (if isVertical then [] else [ HP.attr (HH.AttrName "dir") (dirName st.dir) ])
-          <> (if st.disabled then [ dataAttr "disabled" "" ] else [])
+          <> (if st.disabled then [ dataAttr "disabled" "" ] else [ HE.onMouseDown SlideStart ])
       )
       [ HH.span
           ( [ classes st.style.track
@@ -341,6 +359,27 @@ handleAction = case _ of
           setValue v
           -- keep focus on the thumb (radix re-focuses the active thumb on every change)
           focusThumb
+  -- pointer-down anywhere on the slider: jump the value to the pointer, focus the thumb, and
+  -- begin a drag (radix handleSlideStart). Document-level move/up subscriptions track the drag
+  -- past the thumb's bounds (setPointerCapture-equivalent).
+  SlideStart me -> do
+    st <- H.get
+    when (not st.disabled) do
+      liftEffect (preventDefault (ME.toEvent me))
+      commitFromPointer me
+      focusThumb
+      doc <- liftEffect (HTML.window >>= Window.document)
+      let docTarget = HTMLDocument.toEventTarget doc
+      moveSub <- H.subscribe (eventListener (EventType "mousemove") docTarget (map SlideMove <<< ME.fromEvent))
+      upSub <- H.subscribe (eventListener (EventType "mouseup") docTarget (\_ -> Just SlideEnd))
+      H.modify_ _ { dragging = true, dragSubs = [ moveSub, upSub ] }
+  SlideMove me -> do
+    st <- H.get
+    when st.dragging (commitFromPointer me)
+  SlideEnd -> do
+    st <- H.get
+    for_ st.dragSubs H.unsubscribe
+    H.modify_ _ { dragging = false, dragSubs = [] }
 
 -- | Commit a new value (uncontrolled advances; controlled reports only) and emit it.
 setValue :: forall m. Int -> H.HalogenM State Action () Output m Unit
@@ -354,6 +393,27 @@ focusThumb :: forall m. MonadEffect m => H.HalogenM State Action () Output m Uni
 focusThumb = do
   mel <- H.getHTMLElementRef thumbRef
   for_ mel (liftEffect <<< HTMLElement.focus)
+
+-- | Map the pointer position to a snapped value (the root's getBoundingClientRect → fraction
+-- | along the active axis → value), then commit it. Horizontal LTR runs left→right; RTL flips;
+-- | vertical runs bottom→top. Mirrors radix `getValueFromPointer` + the orientation's edge map.
+commitFromPointer :: forall m. MonadEffect m => ME.MouseEvent -> H.HalogenM State Action () Output m Unit
+commitFromPointer me = do
+  st <- H.get
+  mroot <- H.getHTMLElementRef rootRef
+  for_ mroot \root -> do
+    rect <- liftEffect (Popper.measureRect root)
+    let
+      fraction
+        | st.orientation == Vertical =
+            -- bottom origin: 0 at the bottom edge, 1 at the top
+            if rect.height == 0.0 then 0.0
+            else clamp 0.0 1.0 ((rect.y + rect.height - toNumber (ME.clientY me)) / rect.height)
+        | otherwise =
+            let f = if rect.width == 0.0 then 0.0 else clamp 0.0 1.0 ((toNumber (ME.clientX me) - rect.x) / rect.width)
+            in if st.dir == RTL then 1.0 - f else f
+      raw = toNumber st.min + fraction * toNumber (st.max - st.min)
+    setValue (snapClamp st (round raw))
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
@@ -509,6 +569,8 @@ asThumbState st =
   , idPrefix: st.idPrefix
   , style: st.style
   , uid: st.uid
+  , dragging: false   -- unused in the projection (range thumbs don't share the single drag state)
+  , dragSubs: []
   }
 
 -- | radix getLabel(index, total): 2 thumbs ⇒ Minimum/Maximum; >2 ⇒ "Value n of m"; 1 ⇒ none.
