@@ -1196,6 +1196,7 @@ const CHECKS = [
     await pg.locator(".rt-PopoverContent").getByRole("button", { name: "Comment" }).click(); await pg.waitForTimeout(220);
     ok(!(await visible(pg, '.rt-PopoverContent')), "PopoverClose did not close the popover");
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after PopoverClose");
+  } },
   // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem roving ───────
   // Menu pattern (https://www.w3.org/WAI/ARIA/apg/patterns/menu/): a menuitemcheckbox carries
   // role + aria-checked and participates in the roving order exactly like a menuitem. Open via
@@ -1271,6 +1272,7 @@ const CHECKS = [
     await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     const sel = await pg.evaluate(() => [...document.querySelectorAll('[role="option"]')].some((o) => o.getAttribute("aria-selected") === "true"));
     ok(!sel, "no option may be aria-selected when the placeholder (no value) is showing");
+  } },
   // ── Wave-C nav-group depth checks (STR-330) ──────────────────────────────────
   // Tooltip a11y invariants the open golden only INCIDENTALLY covered — promoted to explicit
   // checked invariants (no port change; the port already satisfies both):
@@ -1367,6 +1369,7 @@ const CHECKS = [
     ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "could not focus the first trigger");
     await press(pg, "ArrowUp");
     ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "ArrowUp moved trigger focus (must be a no-op on the horizontal axis)");
+  } },
   // Tabs — MANUAL activation (activationMode="manual", tabs.tsx:61,192-202). Arrow keys move
   // the roving focus WITHOUT changing selection; only Enter/Space on the focused trigger
   // activates it. Seed: defaultValue="account" (tab[0] selected). The id `tabsmanual` is a
