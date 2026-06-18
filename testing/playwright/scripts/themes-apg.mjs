@@ -1241,6 +1241,102 @@ const CHECKS = [
     await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     const sel = await pg.evaluate(() => [...document.querySelectorAll('[role="option"]')].some((o) => o.getAttribute("aria-selected") === "true"));
     ok(!sel, "no option may be aria-selected when the placeholder (no value) is showing");
+  // ── Wave-C nav-group depth checks (STR-330) ──────────────────────────────────
+  // Tooltip a11y invariants the open golden only INCIDENTALLY covered — promoted to explicit
+  // checked invariants (no port change; the port already satisfies both):
+  //  (1) the VisuallyHidden role=tooltip copy (the trigger's aria-describedby target, the
+  //      accessible name) carries NO arrow/svg — upstream suppresses the Arrow inside the
+  //      VisuallyHidden subtree (VisuallyHiddenContentContext isInside ⇒ Arrow returns null),
+  //      so the SR copy never duplicates the decorative arrow (tooltip.tsx:483-484,596-604).
+  //  (2) the trigger button has NO type attribute — deliberate upstream (triggers are often
+  //      anchors; tooltip.tsx:287-289). A regression adding type=button would now be caught.
+  // Open via focus (instant-open) so the role=tooltip copy is present, then assert both.
+  { id: "tooltip", apg: "tooltip", name: "the VisuallyHidden role=tooltip copy has no arrow, and the trigger has no type attr", run: async (pg) => {
+    await triggerBtn(pg).focus();
+    await pg.getByRole("tooltip").waitFor({ timeout: 3000 });
+    // (1) no svg/arrow inside the role=tooltip accessible-name copy.
+    ok(await pg.evaluate(() => {
+      const sr = document.querySelector('[role="tooltip"]');
+      return !!sr && sr.querySelector("svg") === null;
+    }), "the role=tooltip accessible-name copy must NOT contain the decorative arrow svg");
+    // (2) the trigger button carries no `type` attribute (triggers may be anchors).
+    ok((await attrOf(pg, "#root button", 0, "type")) === null, "the tooltip trigger must have NO type attribute");
+  }},
+  // Toast — the SR announce node + the viewport landmark, the two a11y contracts the DOM/ARIA
+  // oracles can't pin (the DOM oracle strips role=status; the ARIA snapshot doesn't expose
+  // aria-live polarity). Append-only, no story/port change (the port already satisfies both):
+  //  (1) the announce node is role=status with aria-live=assertive for a FOREGROUND toast
+  //      (background ⇒ polite; toast.tsx:564-566). The golden story is Foreground.
+  //  (2) the viewport region carries the hotkey aria-label "Notifications (F8)" (the {hotkey}
+  //      placeholder substituted into the label; toast.tsx:293). Port hardcodes this label.
+  // The toast is rendered controlled-open at first paint (duration=Infinity), so just wait for
+  // the open <li>, then read the sibling role=status + the region aria-label.
+  { id: "toast", apg: "alert", name: "foreground toast announces assertively; viewport carries the F8 hotkey label", run: async (pg) => {
+    await pg.locator('li[data-state="open"][data-swipe-direction]').first().waitFor();
+    // (1) role=status announce node, aria-live=assertive (foreground polarity).
+    ok(await pg.evaluate(() => {
+      const s = document.querySelector('[role="status"]');
+      return !!s && s.getAttribute("aria-live") === "assertive";
+    }), "the foreground announce node must be role=status with aria-live=assertive");
+    // (2) the viewport landmark carries the hotkey-substituted aria-label.
+    ok(await pg.evaluate(() => {
+      const r = document.querySelector('[role="region"]');
+      return !!r && /Notifications \(F8\)/.test(r.getAttribute("aria-label") || "");
+    }), 'the toast viewport region must carry the aria-label "Notifications (F8)"');
+  }},
+  // HoverCard — the DEFINING contract vs a tooltip: moving the pointer from the trigger INTO
+  // the content keeps the card OPEN (both trigger and content bind onPointerEnter/Leave, so the
+  // card survives the cross-move). Hover the trigger link → wait for the content → move the
+  // pointer onto the content's box → assert it is STILL open (data-state=open, not closing).
+  // Keyed off the upstream .rt-HoverCardContent + data-state only, so the same check runs on
+  // golden and port. (Wave-A/B verified focus-open + Escape; this pins the hover-card-vs-tooltip
+  // distinction the existing oracles never exercised.)
+  { id: "hovercard", apg: "hover-card", name: "pointer over the content keeps the card open (hover-card, not tooltip)", run: async (pg) => {
+    await pg.locator("#root").getByRole("link").first().hover();
+    const content = pg.locator(".rt-HoverCardContent").first();
+    await content.waitFor({ timeout: 3000 });
+    // move the pointer onto the content's center — the cross-move must NOT close it.
+    const box = await content.boundingBox();
+    ok(!!box, "could not measure the hover-card content box");
+    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await pg.waitForTimeout(150);
+    ok(await visible(pg, ".rt-HoverCardContent"), "the card closed when the pointer moved onto its content (hover-card must stay open)");
+    ok((await attrOf(pg, ".rt-HoverCardContent", 0, "data-state")) === "open", "the content must remain data-state=open while the pointer is over it");
+  }},
+  // NavigationMenu content-link roving — once focus is INSIDE the open content (a separate
+  // FocusGroup over the content's links), ArrowRight/ArrowLeft rove between the links and are
+  // CLAMPED (non-looping, slice-from-current) just like the trigger bar. The `open` story
+  // (defaultValue="one") opens Item One whose content has TWO links (Content One / Content Two).
+  // ArrowDown from the open trigger enters the content (lands on the first link); ArrowRight
+  // then moves to the second; a second ArrowRight stays put (clamp); ArrowLeft returns to the
+  // first. Keyed off role=link inside the open content (aria-labelledby), same on the port.
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "content-link roving: Arrow keys move between content links (CLAMPED, non-looping)", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded="true"]');
+    await press(pg, "ArrowDown"); // enter the content → first link
+    ok(await activeWithin(pg, '[aria-labelledby]'), "ArrowDown did not move focus into the content");
+    const links = '[aria-labelledby] a[href]';
+    await pg.locator(links).first().waitFor();
+    ok((await pg.locator(links).count()) >= 2, "the open content must expose at least two links to rove");
+    ok(await activeIsNth(pg, links, 0), "entry did not land on the FIRST content link");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, links, 1), "ArrowRight did not move to the second content link");
+    // CLAMP: a second ArrowRight at the last link stays put (NavigationMenu content FocusGroup must NOT loop).
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, links, 1), "ArrowRight wrapped (content FocusGroup must clamp, not loop)");
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, links, 0), "ArrowLeft did not move back to the first content link");
+  }},
+  // NavigationMenu HORIZONTAL roving no-ops: on a trigger, ArrowUp does NOTHING (vertical axis,
+  // not in the horizontal FocusGroup's plane), and ArrowDown on the open trigger is the ENTRY
+  // key (handled above) — it never roves the trigger bar. This pins the axis-restriction: a
+  // stray ArrowUp must not move trigger focus. Keyed off the trigger bar (button[aria-expanded]).
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "ArrowUp on a trigger is a no-op (horizontal axis only)", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded]');
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "could not focus the first trigger");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, '#root button[aria-expanded]', 0), "ArrowUp moved trigger focus (must be a no-op on the horizontal axis)");
   }},
 ];
 
