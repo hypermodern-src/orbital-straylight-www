@@ -2578,6 +2578,27 @@ const PAGES: Page[] = [
       );
     })(),
   },
+  // ── STR-330 (parity): multi-thumb Slider FORM participation (SliderBubbleInput) ──
+  // A named range Slider wrapped in a <form>. Each thumb's SliderThumbProvider resolves
+  // isFormControl=true (closest('form')) and renders a hidden SliderBubbleInput — one per
+  // thumb, as a SIBLING of the thumb-trigger wrapper span (Root > Track, [wrapper,bubble]…).
+  // The bubble is a bare `<input style="display:none">` (NOT type=hidden, so FormData reads
+  // it), name = context.name + (values.length>1 ? "[]" : ""), defaultValue = the thumb's
+  // value, form = undefined. With 2 thumbs ⇒ two `<input name="band[]">` at values 25 / 75.
+  // No type attr, no aria-hidden, no tabindex (verbatim from primitives slider.tsx). The
+  // driver waits for the thumbs AND the bubble inputs; the at-rest DOM is the oracle.
+  {
+    id: "sliderrangeform",
+    label: "Slider (range) — form",
+    interactive: true,
+    node: (
+      <form onSubmit={(e) => e.preventDefault()}>
+        <Box style={{ maxWidth: 320 }}>
+          <Slider defaultValue={[25, 75]} name="band" />
+        </Box>
+      </form>
+    ),
+  },
 ];
 
 function currentId(): string {

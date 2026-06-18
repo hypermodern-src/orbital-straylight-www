@@ -1223,6 +1223,21 @@ export const STATES = {
       });
     },
   },
+  // ── STR-330: multi-thumb Slider FORM participation (SliderBubbleInput) ────────────
+  // The named range slider inside a <form>: each thumb renders a hidden SliderBubbleInput
+  // sibling (a bare `<input style="display:none" name="band[]">`, NO type/aria-hidden/
+  // tabindex, defaultValue = the thumb's value). At rest [25,75] ⇒ two thumbs + two bubble
+  // inputs. Wait for the thumbs AND both bubble inputs before snapshotting (golden==port).
+  sliderrangeform: {
+    default: async (pg) => {
+      await root(pg).locator('form [role="slider"][aria-label="Minimum"]').first().waitFor();
+      await root(pg).locator('form [role="slider"][aria-label="Maximum"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const inputs = [...document.querySelectorAll('form input[name="band[]"]')];
+        return inputs.length === 2 && inputs.every((i) => i.style.display === "none");
+      });
+    },
+  },
   // ── Wave-D: Label onMouseDown guard — DOM snapshot only ──────────────────────────
   // The guard (preventDefault on multi-click / early-return inside a control) leaves NO
   // DOM trace, so this driver only settles the static <label>+children for the snapshot

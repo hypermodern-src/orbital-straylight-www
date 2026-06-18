@@ -109,6 +109,7 @@ type Slots =
   , selectform :: Select.Slot Unit
   , dropdownmenugroup :: DropdownMenu.Slot Unit
   , sliderrange :: Slider.RangeSlot Unit
+  , sliderrangeform :: Slider.RangeSlot Unit
   , labelguard :: Label.Slot Unit
   )
 
@@ -220,6 +221,8 @@ _dropdownmenugroup :: Proxy "dropdownmenugroup"
 _dropdownmenugroup = Proxy
 _sliderrange :: Proxy "sliderrange"
 _sliderrange = Proxy
+_sliderrangeform :: Proxy "sliderrangeform"
+_sliderrangeform = Proxy
 _labelguard :: Proxy "labelguard"
 _labelguard = Proxy
 
@@ -359,6 +362,9 @@ view c s =
             -- labelling); ?s=minsteps → minStepsBetweenThumbs keyboard rejection; default
             -- → the 2-thumb [25,75] range (Minimum/Maximum, range between the thumbs).
             "sliderrange" -> box [ StyleProp "max-width" "320px" ] [ HH.slot_ _sliderrange unit Slider.rangeComponent (sliderRangeInput s) ]
+            -- STR-330: named range slider inside a <form> → one hidden SliderBubbleInput
+            -- (`<input style=display:none name="band[]">`) per thumb, sibling of each thumb.
+            "sliderrangeform" -> HH.form [] [ box [ StyleProp "max-width" "320px" ] [ HH.slot_ _sliderrangeform unit Slider.rangeComponent (sliderRangeFormInput s) ] ]
             -- Wave-D Label depth: the onMouseDown text-selection guard (label.tsx:19-27)
             -- as a self-contained component. ?s=plain → bare label (detail>1 ⇒ preventDefault);
             -- ?s=control → label WRAPPING an input (mousedown inside it ⇒ early return, NO
@@ -2258,6 +2264,26 @@ sliderRangeInput s = Slider.defaultRangeInput
   , max = 100
   , step = 1
   , minStepsBetweenThumbs = if s == "minsteps" then 10 else 0
+  , style =
+      { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
+      , track: cn "rt-SliderTrack"
+      , range: cn "rt-SliderRange"
+      , thumb: cn "rt-SliderThumb"
+      }
+  }
+
+-- | sliderRangeForm (STR-330) — the named [25,75] range slider for the `sliderrangeform`
+-- | page: isFormControl=true (the route wraps it in a <form>) + name="band", so each thumb
+-- | renders a hidden SliderBubbleInput sibling (`<input style=display:none name="band[]">`,
+-- | defaultValue = the thumb's value). Same rt-Slider* class anatomy as `sliderRangeInput`.
+sliderRangeFormInput :: String -> Slider.RangeInput
+sliderRangeFormInput _ = Slider.defaultRangeInput
+  { defaultValue = [ 25, 75 ]
+  , min = 0
+  , max = 100
+  , step = 1
+  , name = "band"
+  , isFormControl = true
   , style =
       { root: cn "rt-SliderRoot rt-r-size-2 rt-variant-surface"
       , track: cn "rt-SliderTrack"

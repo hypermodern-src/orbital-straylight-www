@@ -171,6 +171,8 @@ STATES=(
   "sliderrange:default"
   "sliderrange:triple"
   "sliderrange:minsteps"
+  # ── STR-330 (parity): multi-thumb Slider FORM participation (SliderBubbleInput) ──
+  "sliderrangeform:default"
   # ── Wave-D: OTP paste / autocomplete-dump (value.length>1 ⇒ PASTE reducer) ──
   "otp:paste"
   # ── Wave-D: PasswordToggleField form-reset → visibility back to hidden ──────

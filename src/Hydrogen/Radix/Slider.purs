@@ -402,6 +402,17 @@ type RangeInput =
   , disabled :: Boolean
   , idPrefix :: String
   , style :: Style
+  -- | The form field name. When set AND the slider sits inside a `<form>`, each thumb's
+  -- | SliderThumbProvider resolves `isFormControl` true and renders a hidden
+  -- | SliderBubbleInput SIBLING (a bare `<input style="display:none">`, NO type/aria-hidden/
+  -- | tabindex; radix slider.tsx:790-799). The bubble's name is `name <> "[]"` for a
+  -- | multi-thumb slider (radix resolvedName, slider.tsx:610-611). `""` ⇒ no bubble.
+  , name :: String
+  -- | Whether a `<form>` ancestor exists (resolved post-mount in upstream). The port has no
+  -- | DOM ancestry at gen time, so the example route sets this explicitly — mirroring the
+  -- | Checkbox/Switch/RadioGroup `isFormControl` pattern (Wave C). Bubble inputs render only
+  -- | when `isFormControl && name /= ""`.
+  , isFormControl :: Boolean
   }
 
 defaultRangeInput :: RangeInput
@@ -417,6 +428,8 @@ defaultRangeInput =
   , disabled: false
   , idPrefix: "rdx-slider-range"
   , style: defaultStyle
+  , name: ""
+  , isFormControl: false
   }
 
 data RangeOutput = RangeValueChanged (Array Int)
@@ -439,6 +452,8 @@ type RangeState =
   , idPrefix :: String
   , style :: Style
   , uid :: String
+  , name :: String
+  , isFormControl :: Boolean
   }
 
 data RangeAction
@@ -476,6 +491,8 @@ rangeInitialState input =
   , idPrefix: input.idPrefix
   , style: input.style
   , uid: ""
+  , name: input.name
+  , isFormControl: input.isFormControl
   }
 
 -- | Project the range state onto the single-thumb `State` shape so `percent`, `nextValue`
@@ -541,22 +558,48 @@ rangeRender st =
                 []
             ]
         ]
-          <> mapWithIndex (rangeThumb st ts total startEdge) values
+          <> join (mapWithIndex (rangeThumb st ts total startEdge) values)
       )
 
-rangeThumb :: forall m. RangeState -> State -> Int -> String -> Int -> Int -> H.ComponentHTML RangeAction () m
+-- | The hidden SliderBubbleInput (radix slider.tsx:790-799): a bare `<input
+-- | style="display:none">` carrying the thumb's value via `defaultValue` (→ the `value`
+-- | attribute) and the resolved form name. Crucially it has NO `type` (defaults to text so
+-- | FormData reads it — upstream explicitly avoids type=hidden), NO aria-hidden, and NO
+-- | tabindex (unlike the Checkbox/Switch bubbles). Rendered as a SIBLING of the thumb
+-- | wrapper, only when the slider is a form control with a name.
+rangeBubbleInput :: forall m. String -> Int -> H.ComponentHTML RangeAction () m
+rangeBubbleInput nm value =
+  HH.input
+    [ HP.name nm
+    , HP.style "display: none;"
+    -- upstream `defaultValue={value}` ⇒ the `value` HTML ATTRIBUTE (not the live property);
+    -- emit it as a literal attribute so the DOM serializer shows it (HP.value sets the prop).
+    , HP.attr (HH.AttrName "value") (show value)
+    ]
+
+-- | Render one thumb as [wrapperSpan] plus, when the slider is a form control with a name,
+-- | its hidden SliderBubbleInput SIBLING — both direct children of Root (radix renders the
+-- | thumb-trigger wrapper then the bubble input as a fragment, slider.tsx:726-740).
+rangeThumb :: forall m. RangeState -> State -> Int -> String -> Int -> Int -> Array (H.ComponentHTML RangeAction () m)
 rangeThumb st ts total startEdge idx value =
-  let
-    pct = percent ts value
-    mlabel = thumbLabel idx total
-    -- radix getThumbInBoundsOffset(width,left,dir): for horizontal LTR the in-bounds
-    -- offset is halfWidth·(1 − pct/50)·dir, i.e. POSITIVE when the thumb sits left of
-    -- centre (pct < 50), zero at 50, NEGATIVE past centre (pct > 50). The magnitude is a
-    -- post-measure px the DOM oracle normalizes to `<px>`, but the SIGN/operator is part of
-    -- the serialized `calc()` and is deterministic from pct — so it must be reproduced.
-    op = if pct > 50.0 then "-" else "+"
-  in
-    HH.span
+  [ wrapper ] <> bubble
+  where
+  bubble =
+    if st.isFormControl && st.name /= "" then
+      [ rangeBubbleInput (if length (current st.ctrl) > 1 then st.name <> "[]" else st.name) value ]
+    else []
+  wrapper =
+    let
+      pct = percent ts value
+      mlabel = thumbLabel idx total
+      -- radix getThumbInBoundsOffset(width,left,dir): for horizontal LTR the in-bounds
+      -- offset is halfWidth·(1 − pct/50)·dir, i.e. POSITIVE when the thumb sits left of
+      -- centre (pct < 50), zero at 50, NEGATIVE past centre (pct > 50). The magnitude is a
+      -- post-measure px the DOM oracle normalizes to `<px>`, but the SIGN/operator is part of
+      -- the serialized `calc()` and is deterministic from pct — so it must be reproduced.
+      op = if pct > 50.0 then "-" else "+"
+    in
+      HH.span
       [ HP.attr (HH.AttrName "style")
           ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> fmtPct pct <> "% " <> op <> " 0px);")
       ]
@@ -619,6 +662,8 @@ rangeHandleAction = case _ of
       , disabled = input.disabled
       , idPrefix = input.idPrefix
       , style = input.style
+      , name = input.name
+      , isFormControl = input.isFormControl
       }
   RangeThumbKeyDown idx ke -> do
     st <- H.get
