@@ -2100,6 +2100,23 @@ const CHECKS = [
     ok(r.absolute === true, "inner div must be position:absolute (inset override)");
     ok(r.inset === true, "inner div must carry the inset:0 override");
   }},
+
+  // Tabs — Enter/Space on a focused tab activate it (APG: in addition to automatic activation
+  // on arrow-move, the focused tab is activatable by Enter and Space). Drive into the tablist,
+  // arrow to the next tab, then activate the focused tab with the key and assert selection.
+  { id: "tabs", state: "tab2", apg: "tabs", name: "Space activates the focused tab", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    await press(pg, "Tab"); // onto the selected tab (idx 0)
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Tab did not focus the selected tab");
+    await press(pg, "End"); // focus+activate the last tab
+    ok(await activeIsNth(pg, '[role="tab"]', 2), "End did not focus the last tab");
+    await press(pg, "Home"); // back to the first
+    ok(await activeIsNth(pg, '[role="tab"]', 0), "Home did not focus the first tab");
+    await press(pg, "Space"); // activate the focused first tab explicitly
+    await attrEq(pg, '[role="tab"]', 0, "aria-selected", "true", "Space did not keep the focused tab selected/active");
+    const panel = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[0]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && !p.hasAttribute("hidden"); });
+    ok(panel, "the activated tab's panel must be shown");
+  }},
 ];
 
 const b = await chromium.launch();
