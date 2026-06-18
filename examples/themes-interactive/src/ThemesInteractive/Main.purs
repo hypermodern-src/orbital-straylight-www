@@ -1469,7 +1469,9 @@ otpInput :: String -> Otp.Input
 otpInput s = Otp.defaultInput
   { length = 3
   , defaultValue =
-      if s == "empty" || s == "typed" then ""
+      -- `?s=paste` starts EMPTY (like empty/typed) so the Wave-D paste driver can dump a
+      -- full code into the first slot and exercise the PASTE reducer.
+      if s == "empty" || s == "typed" || s == "paste" then ""
       else if s == "alpha" then "abc"
       else "123"
   -- `?s=alpha` exercises the Alpha validation set (inputmode=text, pattern=[a-zA-Z]{1}).

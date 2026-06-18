@@ -776,6 +776,29 @@ export const STATES = {
         return a.length === 3 && a.every((i) => i.readOnly);
       });
     },
+    // Wave-D PASTE: drive the EMPTY field (?s=empty) and dump a full code "456" into the
+    // first slot as ONE input event (value.length>1 ⇒ radix dispatches PASTE: sanitize +
+    // slice to size, fill from index 0, focus the last filled slot). Set the slot's value
+    // then fire a native `input` so BOTH golden and port take the same code path. The
+    // deterministic outcome — slots 4/5/6, hidden input "456", roving tab stop on slot 2 —
+    // is the oracle; keyed off upstream selectors only.
+    paste: async (pg) => {
+      const first = root(pg).locator('input[data-radix-otp-input][data-radix-index="0"]');
+      await first.waitFor();
+      await first.focus();
+      await pg.evaluate(() => {
+        const el = document.querySelector('input[data-radix-otp-input][data-radix-index="0"]');
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        setter.call(el, "456");
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "4" && a[1].value === "5" && a[2].value === "6"
+          && document.querySelector('input[type="hidden"]')?.value === "456"
+          && a[2].getAttribute("tabindex") === "0";
+      });
+    },
   },
   form: {
     // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true

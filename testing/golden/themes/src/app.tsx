@@ -1587,7 +1587,8 @@ const PAGES: Page[] = [
     // oracle is value-derived, not focus-derived). validationType defaults to numeric.
     node: (() => {
       const s = currentState();
-      const empty = s === "empty" || s === "typed";
+      // `?s=paste` starts empty so the Wave-D paste driver can dump a full code.
+      const empty = s === "empty" || s === "typed" || s === "paste";
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";

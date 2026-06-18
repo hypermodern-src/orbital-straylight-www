@@ -158,6 +158,8 @@ STATES=(
   "sliderrange:default"
   "sliderrange:triple"
   "sliderrange:minsteps"
+  # ── Wave-D: OTP paste / autocomplete-dump (value.length>1 ⇒ PASTE reducer) ──
+  "otp:paste"
 )
 
 echo "ℵ building golden dist (bun)"

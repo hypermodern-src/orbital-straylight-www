@@ -1564,6 +1564,27 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"] button[aria-pressed]', 1, "aria-pressed")) === "true", "Italic must remain pressed");
   }},
 
+  // ── Wave-D: OTP paste / autocomplete-dump fills all slots ───────────────────────
+  // An input event whose value is longer than one char (paste or password-manager
+  // autofill) fills every slot from the sanitized+sliced code and focuses the last
+  // filled slot — radix's PASTE reducer. Drive the empty field, dump "456" into slot 0.
+  { id: "otp", state: "paste", apg: "roving-tabindex", name: "a multi-char input dump fills all slots and lands on the last filled slot", run: async (pg) => {
+    await pg.locator('input[data-radix-otp-input]').first().waitFor();
+    await pg.locator('input[data-radix-otp-input][data-radix-index="0"]').focus();
+    await pg.evaluate(() => {
+      const el = document.querySelector('input[data-radix-otp-input][data-radix-index="0"]');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      setter.call(el, "456");
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await attrEq(pg, 'input[data-radix-otp-input]', 0, "value", "4", "paste did not fill slot 0");
+    ok((await attrOf(pg, 'input[data-radix-otp-input]', 1, "value")) === "5", "paste did not fill slot 1");
+    ok((await attrOf(pg, 'input[data-radix-otp-input]', 2, "value")) === "6", "paste did not fill slot 2");
+    ok((await attrOf(pg, 'input[type="hidden"]', 0, "value")) === "456", "hidden input must aggregate the pasted code");
+    await attrEq(pg, 'input[data-radix-otp-input]', 2, "tabindex", "0", "the last filled slot must hold the roving tab stop");
+    ok(await activeIsNth(pg, 'input[data-radix-otp-input]', 2), "focus must land on the last filled slot");
+  }},
+
   // ── Wave-D: multi-thumb / RANGE slider (APG slider pattern, per-thumb) ───────────
   // Two thumbs, each role=slider with its own valuemin/now/max + an aria-label
   // (Minimum/Maximum) naming it — radix getLabel for a 2-value slider.
