@@ -440,6 +440,21 @@ const CHECKS = [
     await press(pg, "Enter");
     await attrEq(pg, '[role="switch"]', 0, "aria-checked", "true", "Enter did not turn the switch on");
   }},
+  // Wave D — a CONTROLLED switch (checked pinned true, no parent update): a click/Space
+  // fires onCheckedChange but does NOT mutate the DOM (the parent owns the value). The
+  // DOM-observable controlled contract: data-state / aria-checked stay checked.
+  { id: "switch", state: "controlled", apg: "switch", name: "a controlled switch does NOT mutate the DOM on click (parent owns state)", run: async (pg) => {
+    const sel = '[role="switch"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "true", "the controlled switch must start on");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "checked", "the controlled switch must start data-state=checked");
+    await pg.locator(sel).first().click();
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "true", "controlled: a click must NOT change aria-checked (parent owns it)");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "checked", "controlled: a click must NOT change data-state");
+    await focusFirst(pg, sel);
+    await press(pg, "Space");
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "true", "controlled: Space must NOT change the DOM either");
+  }},
 
   // ToggleGroup (single) — toolbar/roving + radiogroup semantics.
   // https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/  (radix single-mode items are role=radio

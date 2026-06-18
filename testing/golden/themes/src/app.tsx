@@ -1306,6 +1306,10 @@ const PAGES: Page[] = [
       const s = currentState();
       if (s === "disabled") return <Switch disabled />;
       if (s === "required") return <Switch required />;
+      // `?s=controlled` (Wave D) — a CONTROLLED switch: `checked` is pinned true with NO
+      // onCheckedChange handler (the parent never updates it). A click fires onCheckedChange
+      // internally but must NOT mutate the DOM — data-state stays checked / aria-checked=true.
+      if (s === "controlled") return <Switch checked />;
       // `?s=form` — the switch inside a <form> (Wave C). Post-mount `isFormControl`
       // is TRUE so radix renders the hidden bubble <input type=checkbox aria-hidden
       // tabindex=-1> sibling carrying name/value/required for native form submission.

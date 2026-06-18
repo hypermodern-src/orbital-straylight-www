@@ -1173,8 +1173,11 @@ checkboxInput s = Checkbox.defaultInput
 -- | seeds the disabled no-op variant; `?s=required` documents aria-required=true.
 switchInput :: String -> Switch.Input
 switchInput s = Switch.defaultInput
+  -- `?s=controlled` (Wave D): a CONTROLLED switch (checked pinned true, no parent update) —
+  -- a click fires onCheckedChange but must NOT mutate the DOM (data-state stays checked).
+  { checked = if s == "controlled" then Just true else Nothing
   -- `?s=form` (Wave C): a checked + required switch inside a <form> → the hidden bubble input.
-  { defaultChecked = s == "form"
+  , defaultChecked = s == "form"
   , disabled = s == "disabled"
   , required = s == "required" || s == "form"
   , name = if s == "form" then "notify" else ""
