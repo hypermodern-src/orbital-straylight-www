@@ -1282,6 +1282,11 @@ const PAGES: Page[] = [
       const s = currentState();
       if (s === "indeterminate") return <Checkbox defaultChecked="indeterminate" />;
       if (s === "disabled") return <Checkbox disabled defaultChecked />;
+      // `?s=controlled` (Wave D) — a CONTROLLED checkbox: `checked` is pinned true with NO
+      // onCheckedChange handler (the parent never updates it). A click/Space fires
+      // onCheckedChange internally but must NOT mutate the DOM — aria-checked / data-state
+      // stay checked and the indicator stays mounted.
+      if (s === "controlled") return <Checkbox checked />;
       // `?s=form` — the checkbox inside a <form> (Wave C). Post-mount `isFormControl`
       // resolves TRUE (control.closest("form")), so radix renders the hidden bubble
       // <input type=checkbox aria-hidden tabindex=-1> sibling for native form

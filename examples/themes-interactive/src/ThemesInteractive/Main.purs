@@ -1143,7 +1143,11 @@ radioGroupInput s = RadioGroup.defaultInput
 -- | `?s=disabled` → checked + disabled (the indicator carries data-disabled='' too).
 checkboxInput :: String -> Checkbox.Input
 checkboxInput s = Checkbox.defaultInput
-  { defaultChecked = case s of
+  -- `?s=controlled` (Wave D): a CONTROLLED checkbox (checked pinned Checked, no parent
+  -- update) — a click/Space fires onCheckedChange but must NOT mutate the DOM (aria-checked
+  -- / data-state stay checked, the indicator stays mounted). Other states are uncontrolled.
+  { checked = if s == "controlled" then Just Checkbox.Checked else Nothing
+  , defaultChecked = case s of
       "indeterminate" -> Checkbox.Indeterminate
       "disabled" -> Checkbox.Checked
       -- `?s=form` (Wave C): checked + required, inside a <form> → the hidden bubble input.
@@ -1165,6 +1169,8 @@ checkboxInput s = Checkbox.defaultInput
   , children = case s of
       "indeterminate" -> [ checkIndicatorWith "indeterminate" false dividerPath ]
       "disabled" -> [ checkIndicatorWith "checked" true thickCheckPath ]
+      -- controlled is checked-at-rest, so the indicator is mounted with data-state=checked.
+      "controlled" -> [ checkIndicatorWith "checked" false thickCheckPath ]
       "form" -> [ thickCheckIconPlain ]
       _ -> [ thickCheckIconPlain ]
   }

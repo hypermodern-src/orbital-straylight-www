@@ -1125,6 +1125,21 @@ const CHECKS = [
     ok((await attrOf(pg, sel, 0, "aria-checked")) === "false", "Enter must NOT toggle the checkbox");
     ok((await attrOf(pg, sel, 0, "data-state")) === "unchecked", "Enter must NOT change data-state");
   }},
+  // Wave D — a CONTROLLED checkbox (checked pinned true, no parent update): a click/Space
+  // fires onCheckedChange but does NOT mutate the DOM (the parent owns the value). The
+  // DOM-observable controlled contract: aria-checked / data-state stay checked.
+  { id: "checkbox", state: "controlled", apg: "checkbox", name: "a controlled checkbox does NOT mutate the DOM on click (parent owns state)", run: async (pg) => {
+    const sel = '[role="checkbox"]';
+    await pg.locator(sel).first().waitFor();
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "true", "the controlled checkbox must start checked");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "checked", "the controlled checkbox must start data-state=checked");
+    await pg.locator(sel).first().click();
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "true", "controlled: a click must NOT change aria-checked (parent owns it)");
+    ok((await attrOf(pg, sel, 0, "data-state")) === "checked", "controlled: a click must NOT change data-state");
+    await focusFirst(pg, sel);
+    await press(pg, "Space");
+    ok((await attrOf(pg, sel, 0, "aria-checked")) === "true", "controlled: Space must NOT change the DOM either");
+  }},
 
   // RadioGroup — additional keyboard conformance (3-item seed via `?s=keys`).
   // Enter does NOT activate a radio (WAI-ARIA radio semantics). A disabled radio is SKIPPED
