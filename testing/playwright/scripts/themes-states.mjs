@@ -374,6 +374,15 @@ export const STATES = {
       await pg.locator('form [role="radio"][value="1"][data-state="checked"]').first().waitFor();
       await pg.locator('form input[type="radio"][aria-hidden="true"][name="plan"][value="1"]').first().waitFor({ state: "attached" });
     },
+    // ?s=alldisabled seed (Wave D) — every ITEM disabled but the group NOT disabled:
+    // focusableItemsCount===0 ⇒ the root drops to tabindex=-1 (not tabbable). Each item
+    // carries disabled + data-disabled=''; the root has NO data-disabled (distinct from
+    // disabledgroup, where the Root.disabled prop stamps data-disabled on the root).
+    alldisabled: async (pg) => {
+      await pg.locator('[role="radiogroup"][tabindex="-1"]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+    },
   },
   checkbox: {
     checked: async (pg) => {

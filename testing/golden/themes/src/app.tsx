@@ -1179,6 +1179,80 @@ const PAGES: Page[] = [
           </RadioGroup.Root>
         );
       }
+      // `?s=loopoff` (Wave D) — loop={false}: ArrowUp on the FIRST radio does NOT wrap
+      // to the last (clamps at first); ArrowDown on the LAST clamps at last. The
+      // canonical no-wrap end-stop fixture (3-item group, first checked at rest).
+      if (s === "loopoff") {
+        return (
+          <RadioGroup.Root defaultValue="1" loop={false}>
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" /> Comfortable
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="3" /> Compact
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
+      // `?s=rtl` (Wave D) — horizontal orientation under dir="rtl": the live horizontal
+      // arrows SWAP (ArrowLeft⇒Next, ArrowRight⇒Prev). RovingFocus reads direction; the
+      // root carries dir=rtl + aria-orientation/data-orientation=horizontal.
+      if (s === "rtl") {
+        return (
+          <RadioGroup.Root defaultValue="1" orientation="horizontal" dir="rtl">
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" /> Comfortable
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="3" /> Compact
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
+      // `?s=alldisabled` (Wave D) — EVERY item disabled (but the group itself NOT
+      // disabled): focusableItemsCount===0 ⇒ the root drops to tabindex=-1 (the group is
+      // not tabbable). Each item carries disabled + data-disabled=''. Distinct from
+      // `disabledgroup` (where the Root has the `disabled` prop → data-disabled on root).
+      if (s === "alldisabled") {
+        return (
+          <RadioGroup.Root defaultValue="1">
+            <Flex direction="column" gap="2">
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="1" disabled /> Default
+                </Flex>
+              </Text>
+              <Text as="label" size="2">
+                <Flex gap="2" align="center">
+                  <RadioGroup.Item value="2" disabled /> Comfortable
+                </Flex>
+              </Text>
+            </Flex>
+          </RadioGroup.Root>
+        );
+      }
       return (
         <RadioGroup.Root defaultValue="1">
           <Flex direction="column" gap="2">
@@ -1965,6 +2039,8 @@ const PAGES: Page[] = [
           </Select.Group>
         </Select.Content>
       </Select.Root>
+    ),
+  },
   // Wave-C: Tabs activationMode="manual" — arrow keys move the roving focus WITHOUT
   // changing selection; Enter/Space on the focused trigger activates it (tabs.tsx:61,
   // 192-202). Keyboard-only APG story (no new DOM golden; the at-rest DOM matches `tabs`).
@@ -2122,6 +2198,8 @@ const PAGES: Page[] = [
           </Box>
         </ScrollArea>
       );
+    })(),
+  },
   // ── Wave-C: Themes.Separator WRAPPER depth oracle (distinct from the primitive) ──
   // The rt-Separator themes wrapper (NOT the bare primitive) has its own contract:
   //   * decorative defaults to TRUE → role is OMITTED ENTIRELY (role={undefined}),

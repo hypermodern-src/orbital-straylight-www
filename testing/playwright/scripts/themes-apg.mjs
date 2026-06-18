@@ -1127,6 +1127,44 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "End must NOT check the focused radio");
     ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked after End");
   } },
+  // Wave D — loop={false}: arrow keys CLAMP at the ends (no wrap). 3-item group, value=1 checked.
+  { id: "radiogroup", state: "loopoff", apg: "radio", name: "loop=false: ArrowUp at the first radio does NOT wrap to the last", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    ok((await pg.locator('[role="radio"]').count()) === 3, "expected 3 radios in the loopoff seed");
+    await press(pg, "Tab"); // onto the checked radio (value=1, index 0)
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not land on the checked radio");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "loop=false: ArrowUp at the first radio must CLAMP (not wrap to last)");
+    await attrEq(pg, '[role="radio"]', 0, "aria-checked", "true", "the first radio stays checked after a clamped ArrowUp");
+    ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "the last radio must NOT become checked (no wrap)");
+  } },
+  { id: "radiogroup", state: "loopoff", apg: "radio", name: "loop=false: ArrowDown at the last radio does NOT wrap to the first", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "End"); // focus moves to last (Home/End jump but do not check)
+    ok(await activeIsNth(pg, '[role="radio"]', 2), "End did not focus the last radio");
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, '[role="radio"]', 2), "loop=false: ArrowDown at the last radio must CLAMP (not wrap to first)");
+  } },
+  // Wave D — horizontal + dir=rtl: the live horizontal arrows SWAP (ArrowLeft⇒Next, ArrowRight⇒Prev).
+  { id: "radiogroup", state: "rtl", apg: "radio", name: "RTL horizontal: ArrowLeft moves to the NEXT radio (direction-swapped)", run: async (pg) => {
+    await pg.locator('[role="radiogroup"][dir="rtl"]').first().waitFor();
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab"); // onto the checked radio (value=1, index 0)
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "Tab did not land on the checked radio");
+    await press(pg, "ArrowLeft"); // RTL: ArrowLeft is Next
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "RTL: ArrowLeft must move to the NEXT radio");
+    await attrEq(pg, '[role="radio"]', 1, "aria-checked", "true", "the next radio must be checked (selection-follows-focus)");
+  } },
+  { id: "radiogroup", state: "rtl", apg: "radio", name: "RTL horizontal: ArrowRight moves to the PREVIOUS radio (direction-swapped)", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    await press(pg, "Tab");
+    await press(pg, "ArrowLeft"); // to index 1 (Next in RTL)
+    ok(await activeIsNth(pg, '[role="radio"]', 1), "ArrowLeft did not advance to index 1");
+    await press(pg, "ArrowRight"); // RTL: ArrowRight is Prev
+    ok(await activeIsNth(pg, '[role="radio"]', 0), "RTL: ArrowRight must move to the PREVIOUS radio");
+    await attrEq(pg, '[role="radio"]', 0, "aria-checked", "true", "the previous radio must be checked after the RTL ArrowRight");
+  } },
   // Disclosure (Collapsible) — https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/
   // The trigger is a native type=button, so Enter and Space both fire `click` → onOpenToggle.
   // APG: activating the trigger toggles aria-expanded and shows/hides the content; while closed

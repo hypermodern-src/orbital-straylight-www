@@ -1089,21 +1089,38 @@ radioGroupInput :: String -> RadioGroup.Input
 radioGroupInput s = RadioGroup.defaultInput
   { items =
       -- `?s=keys`/`?s=mixed` → the 3-item disabled-skip fixture (middle item disabled);
+      -- `?s=loopoff`/`?s=rtl` → 3-item groups (all enabled) for end-stop / RTL roving;
+      -- `?s=alldisabled` → 2-item group with EVERY item disabled (root tabindex=-1);
       -- otherwise the committed 2-item group the `checked` driver exercises.
       if s == "keys" || s == "mixed" then
         [ { value: "1", label: [ HH.text " Default" ], disabled: false }
         , { value: "2", label: [ HH.text " Comfortable" ], disabled: true }
         , { value: "3", label: [ HH.text " Compact" ], disabled: false }
         ]
+      else if s == "loopoff" || s == "rtl" then
+        [ { value: "1", label: [ HH.text " Default" ], disabled: false }
+        , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
+        , { value: "3", label: [ HH.text " Compact" ], disabled: false }
+        ]
+      else if s == "alldisabled" then
+        [ { value: "1", label: [ HH.text " Default" ], disabled: true }
+        , { value: "2", label: [ HH.text " Comfortable" ], disabled: true }
+        ]
       else
         [ { value: "1", label: [ HH.text " Default" ], disabled: false }
         , { value: "2", label: [ HH.text " Comfortable" ], disabled: false }
         ]
   , defaultValue = Just "1"
-  -- `?s=disabledgroup` → the whole group disabled; `?s=horizontal` → explicit horizontal.
+  -- `?s=disabledgroup` → the whole group disabled; `?s=horizontal`/`?s=rtl` → horizontal.
   , disabled = s == "disabledgroup"
-  , orientation = if s == "horizontal" then Horizontal else Vertical
-  , explicitOrientation = s == "horizontal"
+  -- `?s=rtl` is a horizontal group under dir=rtl (the live arrows swap); `?s=loopoff`
+  -- stays vertical (Up/Down clamp). `?s=alldisabled` is the default vertical orientation.
+  , orientation = if s == "horizontal" || s == "rtl" then Horizontal else Vertical
+  , explicitOrientation = s == "horizontal" || s == "rtl"
+  -- `?s=rtl` → dir=rtl so RovingFocus swaps the horizontal arrows.
+  , dir = if s == "rtl" then RTL else LTR
+  -- `?s=loopoff` → loop disabled: arrow keys clamp at the ends instead of wrapping.
+  , loop = s /= "loopoff"
   , itemIds = false
   , labelOutside = true
   -- `?s=form` (Wave C): name + required, inside a <form> → per-item hidden bubble inputs.
