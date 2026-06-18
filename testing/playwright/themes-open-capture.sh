@@ -141,6 +141,8 @@ STATES=(
   # ── Wave-C ScrollArea family depth oracles (STR-330) ─────────────────────────
   "scrollareax:horizontal"
   "scrollareax:both"
+  # ── Wave-D ScrollArea themes `radius` prop oracle (STR-330) ──────────────────
+  "scrollareax:radius"
   # ── Wave-C Collapsible closed-rest DOM oracle (STR-330) ──────────────────────
   "collapsible:rest"
   # ── Wave-C Progress out-of-range validation oracle (STR-330) ─────────────────

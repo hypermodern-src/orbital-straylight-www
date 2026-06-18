@@ -1942,6 +1942,9 @@ scrollAreaXInput s = ScrollArea.defaultInput
   { widthPx = 200
   , heightPx = 120
   , scrollbars = if s == "horizontal" then ScrollArea.Horizontal' else ScrollArea.Both
+  -- `?s=radius` exercises the themes `radius` prop: upstream stamps data-radius=full on
+  -- EVERY scrollbar; the other states leave it absent (themes default undefined).
+  , radius = if s == "radius" then "full" else ""
   , style =
       { root: cn "rt-ScrollAreaRoot"
       , viewport: cn "rt-ScrollAreaViewport"

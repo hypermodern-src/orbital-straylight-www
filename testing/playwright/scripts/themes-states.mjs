@@ -1027,5 +1027,17 @@ export const STATES = {
           [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
       });
     },
+    // `?s=radius` (wave D) — the themes `radius` prop stamps data-radius=full on BOTH
+    // scrollbars (the default is undefined ⇒ the attr is absent in the horizontal/both
+    // states). Wait for both bars to carry data-radius=full + measured thumbs.
+    radius: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-radius="full"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-radius="full"][data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
+        return ts.length >= 2 &&
+          [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
+      });
+    },
   },
 };

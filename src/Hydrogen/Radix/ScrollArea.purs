@@ -94,6 +94,11 @@ type Input =
   , widthPx :: Int
   , heightPx :: Int
   , scrollbars :: Scrollbars
+  -- the themes `radius` prop: stamped as `data-radius` on EVERY scrollbar (upstream
+  -- scroll-area.tsx stamps `data-radius={radius}` on both ScrollAreaScrollbar nodes).
+  -- The themes default is `undefined` (React omits the attr), so "" ⇒ no data-radius —
+  -- matching the existing scrollbars goldens; a non-empty value stamps it on each bar.
+  , radius :: String
   , style :: Style
   }
 
@@ -103,6 +108,7 @@ defaultInput =
   , widthPx: 200
   , heightPx: 120
   , scrollbars: Vertical'
+  , radius: ""
   , style: defaultStyle
   }
 
@@ -254,14 +260,20 @@ render st =
     (if hasHoriz then [ horizScrollbar ] else [])
       <> (if hasVert then [ vertScrollbar ] else [])
 
+  -- upstream stamps `data-radius={radius}` on every scrollbar; the themes default
+  -- (undefined) omits it, so only a non-empty `radius` Input adds the attribute.
+  radiusAttr =
+    if st.input.radius == "" then []
+    else [ dataAttr "radius" st.input.radius ]
+
   vertScrollbar =
     HH.div
-      [ classes st.input.style.scrollbar
-      , HP.ref vScrollbarRef
-      , dataOrientation Vertical
-      , dataState "visible"
-      , HP.attr (HH.AttrName "style") vScrollbarStyle
-      ]
+      ( [ classes st.input.style.scrollbar
+        , HP.ref vScrollbarRef
+        , dataOrientation Vertical
+        , dataState "visible"
+        , HP.attr (HH.AttrName "style") vScrollbarStyle
+        ] <> radiusAttr )
       [ HH.div
           [ classes st.input.style.thumb
           , dataState "visible"
@@ -272,12 +284,12 @@ render st =
 
   horizScrollbar =
     HH.div
-      [ classes st.input.style.scrollbar
-      , HP.ref hScrollbarRef
-      , dataOrientation Horizontal
-      , dataState "visible"
-      , HP.attr (HH.AttrName "style") hScrollbarStyle
-      ]
+      ( [ classes st.input.style.scrollbar
+        , HP.ref hScrollbarRef
+        , dataOrientation Horizontal
+        , dataState "visible"
+        , HP.attr (HH.AttrName "style") hScrollbarStyle
+        ] <> radiusAttr )
       [ HH.div
           [ classes st.input.style.thumb
           , dataState "visible"
