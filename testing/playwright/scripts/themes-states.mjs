@@ -583,6 +583,14 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
     },
+    // `?s=accent` (wave D) — explicit color + radius: the themes wrapper stamps
+    // data-accent-color=cyan + data-radius=full on the rt-ProgressRoot (omitted in the
+    // other states). Keyed off the UPSTREAM data-accent-color so golden + port share it.
+    accent: async (pg) => {
+      await pg.locator('[role="progressbar"][data-accent-color="cyan"][data-radius="full"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
+    },
   },
   scrollarea: {
     // type="always" renders the scrollbar at rest — no click/hover/scroll needed. The

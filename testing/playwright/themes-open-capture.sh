@@ -98,6 +98,8 @@ STATES=(
   "progress:indeterminate"
   "progress:complete"
   "progress:custommax"
+  # Wave-D: themes color+radius passthrough (data-accent-color / data-radius on root).
+  "progress:accent"
   "avatar:fallback"
   # Wave-B stateless depth oracles (bare primitives).
   "separatorprim:hsem"

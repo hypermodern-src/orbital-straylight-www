@@ -916,6 +916,9 @@ progressVariant s = case s of
   -- indeterminate (data-state=indeterminate, NO aria-valuenow/data-value), but the Themes
   -- wrapper still stamps --progress-value from the RAW value (upstream parity).
   "invalid" -> prim (Just 150.0) 100.0 "--progress-value: 150;"
+  -- `?s=accent` — explicit color + radius: the themes wrapper stamps data-accent-color
+  -- + data-radius on the root (the default omits both). Same surface variant + value.
+  "accent" -> primA (Just 25.0) 100.0 "--progress-value: 25;" "cyan" "full"
   _ -> Progress.progress 25 []
   where
   prim mv mx styl = RadixProgress.progress
@@ -924,6 +927,17 @@ progressVariant s = case s of
     , class_: cn "rt-ProgressRoot rt-r-size-2 rt-variant-surface"
     , indicator: cn "rt-ProgressIndicator"
     , rootAttrs: if styl == "" then [] else [ HP.style styl ]
+    }
+  primA mv mx styl accent rad = RadixProgress.progress
+    { value: mv
+    , max: mx
+    , class_: cn "rt-ProgressRoot rt-r-size-2 rt-variant-surface"
+    , indicator: cn "rt-ProgressIndicator"
+    , rootAttrs:
+        [ HP.attr (HH.AttrName "data-accent-color") accent
+        , HP.attr (HH.AttrName "data-radius") rad
+        , HP.style styl
+        ]
     }
 
 -- | scrollarea — the themed Radix ScrollArea (type="always", scrollbars="vertical"): a

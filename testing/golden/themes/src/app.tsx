@@ -1469,6 +1469,10 @@ const PAGES: Page[] = [
         // `?s=invalid` — value=150 > max=100: upstream isValidValueNumber rejects it and
         // coerces to indeterminate (data-state=indeterminate, NO aria-valuenow/data-value).
         s === "invalid" ? <Progress value={150} /> :
+        // `?s=accent` — explicit color + radius: the themes wrapper stamps
+        // data-accent-color=cyan + data-radius=full on the rt-ProgressRoot (the default
+        // is undefined ⇒ both omitted, so the other states show neither attr).
+        s === "accent" ? <Progress value={25} color="cyan" radius="full" /> :
         <Progress value={25} />;
       return <Box style={{ maxWidth: 320 }}>{inner}</Box>;
     })(),
