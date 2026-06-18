@@ -56,6 +56,7 @@ import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
 import Hydrogen.Themes.AccessibleIcon (accessibleIcon) as AccessibleIcon
 import Hydrogen.Themes.Avatar (avatar) as Avatar
+import Hydrogen.Radix.Avatar as RadixAvatar
 import Hydrogen.Themes.Progress (progress) as Progress
 import Hydrogen.Radix.Progress (progress) as RadixProgress
 import Hydrogen.Themes.Prop (Prop(..))
@@ -103,6 +104,7 @@ type Slots =
   , contextmenuchecks :: ContextMenu.Slot Unit
   , menubarchecks :: Menubar.Slot Unit
   , selectplaceholder :: Select.Slot Unit
+  , avatarx :: RadixAvatar.Slot Unit
   )
 
 _dialog :: Proxy "dialog"
@@ -203,6 +205,8 @@ _menubarchecks = Proxy
 
 _selectplaceholder :: Proxy "selectplaceholder"
 _selectplaceholder = Proxy
+_avatarx :: Proxy "avatarx"
+_avatarx = Proxy
 
 main :: Effect Unit
 main = do
@@ -272,6 +276,10 @@ view c s =
             "accessibleicon" -> flex [ Class "rt-r-ai-center" ] (AccessibleIcon.accessibleIcon "Settings" gearIcon)
             -- fallback-only avatar (no src): the at-rest error/fallback branch — a single
             -- rt-AvatarFallback span, NO <img>. Matches `<Avatar fallback="A" />`.
+            -- `?s=loaded` swaps to the Radix Avatar primitive with a data-URI src + rt-*
+            -- classes: the LOADED steady-state (img mounted, alt, fallback gone, no
+            -- data-state on the img). Else the fallback-only Themes Avatar.
+            "avatar" | s == "loaded" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedInput
             "avatar" -> Avatar.avatar "A" []
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
             "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
@@ -307,6 +315,9 @@ view c s =
             -- Wave-C Toolbar: loop=false end-stop + a type=multiple toggle group (aria-pressed).
             "toolbarnoloop" -> HH.slot_ _toolbar unit Toolbar.component toolbarNoLoopInput
             "toolbarmultiple" -> HH.slot_ _toolbar unit Toolbar.component toolbarMultipleInput
+            -- Wave-C ScrollArea family: ?s=horizontal → one horizontal bar; ?s=both → two
+            -- bars + corner. Same primitive, the `scrollbars` field selects the family.
+            "scrollareax" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaXInput s)
             _ -> HH.div_ [ HH.text "pick a ?c=<component> (e.g. ?c=dialog)" ]
         ]
     ]
@@ -899,6 +910,10 @@ progressVariant s = case s of
   "indeterminate" -> prim Nothing 100.0 ""
   "complete" -> prim (Just 100.0) 100.0 "--progress-value: 100;"
   "custommax" -> prim (Just 50.0) 200.0 "--progress-value: 50; --progress-max: 200;"
+  -- `?s=invalid` — value=150 > max=100: the primitive's validValue clamps the ARIA to
+  -- indeterminate (data-state=indeterminate, NO aria-valuenow/data-value), but the Themes
+  -- wrapper still stamps --progress-value from the RAW value (upstream parity).
+  "invalid" -> prim (Just 150.0) 100.0 "--progress-value: 150;"
   _ -> Progress.progress 25 []
   where
   prim mv mx styl = RadixProgress.progress
@@ -924,6 +939,7 @@ scrollAreaInput = ScrollArea.defaultInput
       , focusRing: cn "rt-ScrollAreaViewportFocusRing"
       , scrollbar: cn "rt-ScrollAreaScrollbar rt-r-size-1"
       , thumb: cn "rt-ScrollAreaThumb"
+      , corner: cn "rt-ScrollAreaCorner"
       }
   , content =
       [ box [ P "2", Width "160px" ]
@@ -1899,3 +1915,55 @@ formWrap :: String -> H.ComponentHTML Void Slots Aff -> H.ComponentHTML Void Slo
 formWrap s content
   | s == "form" = HH.form [] [ content ]
   | otherwise = content
+-- ── Wave-C ScrollArea family input (horizontal + both+corner) ───────────────────
+-- | The themed Radix ScrollArea exercising the MISSING-IN-PORT scrollbar family.
+-- | `?s=horizontal` → scrollbars=Horizontal' (one horizontal bar, overflow scroll
+-- | hidden, --thumb-width, translate3d X). Else `?s=both` → scrollbars=Both (TWO
+-- | bars in upstream order horizontal-then-vertical, overflow:scroll, + a
+-- | rt-ScrollAreaCorner with non-zero --radix-scroll-area-corner-{width,height}).
+-- | Content is wide+tall (width:400 nowrap rows) so BOTH axes overflow at rest.
+scrollAreaXInput :: String -> ScrollArea.Input
+scrollAreaXInput s = ScrollArea.defaultInput
+  { widthPx = 200
+  , heightPx = 120
+  , scrollbars = if s == "horizontal" then ScrollArea.Horizontal' else ScrollArea.Both
+  , style =
+      { root: cn "rt-ScrollAreaRoot"
+      , viewport: cn "rt-ScrollAreaViewport"
+      , focusRing: cn "rt-ScrollAreaViewportFocusRing"
+      , scrollbar: cn "rt-ScrollAreaScrollbar rt-r-size-1"
+      , thumb: cn "rt-ScrollAreaThumb"
+      , corner: cn "rt-ScrollAreaCorner"
+      }
+  , content =
+      [ box [ P "2", Width "400px" ]
+          ( map
+              ( \n -> textAs "p" [ Size "2", StyleProp "white-space" "nowrap" ]
+                  [ HH.text "Line ", HH.text (show n), HH.text " — a long row that overflows horizontally as well" ] )
+              (Array.range 1 12)
+          )
+      ]
+  }
+
+-- ── Wave-C Avatar loaded-state input (Radix Avatar primitive, themed) ───────────
+-- | The themed Radix Avatar primitive at the LOADED steady-state: a data-URI src that
+-- | loads synchronously, so the img mounts (rt-AvatarImage, alt, NO data-state) and the
+-- | fallback drops out. The Root span carries rt-reset/rt-AvatarRoot + the size/variant
+-- | classes and the always-present empty `data-accent-color` (upstream Themes parity).
+avatarLoadedInput :: RadixAvatar.Input
+avatarLoadedInput = RadixAvatar.defaultInput
+  { src = onePxPng
+  , alt = "Profile photo"
+  , fallback = [ HH.text "A" ]
+  , rootAttrs = [ dataAttr "accent-color" "" ]
+  , style =
+      { root: cn "rt-reset rt-AvatarRoot rt-r-size-3 rt-variant-soft"
+      , image: cn "rt-AvatarImage"
+      , fallback: cn "rt-AvatarFallback rt-one-letter"
+      }
+  }
+
+-- A 1×1 transparent PNG data-URI (loads synchronously from cache) — the Avatar reaches
+-- the LOADED steady-state deterministically, matching the golden story's ONE_PX_PNG.
+onePxPng :: String
+onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC"

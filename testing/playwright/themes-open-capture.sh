@@ -137,6 +137,15 @@ STATES=(
   "passwordtoggle:disabled"
   "form:validValid"
   "form:defaultMessage"
+  # ── Wave-C ScrollArea family depth oracles (STR-330) ─────────────────────────
+  "scrollareax:horizontal"
+  "scrollareax:both"
+  # ── Wave-C Collapsible closed-rest DOM oracle (STR-330) ──────────────────────
+  "collapsible:rest"
+  # ── Wave-C Progress out-of-range validation oracle (STR-330) ─────────────────
+  "progress:invalid"
+  # ── Wave-C Avatar loaded steady-state DOM oracle (STR-330) ───────────────────
+  "avatar:loaded"
 )
 
 echo "ℵ building golden dist (bun)"

@@ -315,6 +315,13 @@ export const STATES = {
     disabled: async (pg) => {
       await root(pg).locator('button[disabled][data-state="closed"]').first().waitFor();
     },
+    // `?s=rest` — the at-rest CLOSED disclosure (NO interaction). The oracle pins the
+    // closed-DOM contract: trigger aria-expanded=false with NO aria-controls, and (per
+    // upstream Presence) the content node ABSENT from the document while closed. Keyed
+    // off the UPSTREAM closed trigger only, so the same driver runs golden + port.
+    rest: async (pg) => {
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+    },
   },
   tabs: {
     tab2: async (pg) => {
@@ -531,6 +538,14 @@ export const STATES = {
       await root(pg).locator('.rt-AvatarFallback').first().waitFor();
       await pg.waitForFunction(() => document.querySelector('#root img') === null);
     },
+    // `?s=loaded` — a data-URI src loads instantly; the LOADED steady-state is the oracle:
+    // the <img> is mounted (rt-AvatarImage, alt present, NO data-state — the primitive img
+    // carries none) and the fallback is GONE. Keyed off the UPSTREAM rt-AvatarImage only,
+    // so the same driver runs golden + port.
+    loaded: async (pg) => {
+      await root(pg).locator('img.rt-AvatarImage').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
+    },
   },
   progress: {
     // Determinate progress bar — STATELESS (no interaction). The `shown` state just
@@ -559,6 +574,14 @@ export const STATES = {
       await pg.locator('[role="progressbar"][aria-valuemax="200"]').first().waitFor();
       await pg.waitForFunction(() =>
         document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuetext") === "25%");
+    },
+    // `?s=invalid` — value=150 > max=100: upstream clamps to indeterminate. The oracle
+    // pins data-state=indeterminate + the ABSENCE of aria-valuenow/data-value (the
+    // value/max validation gap). Keyed off the UPSTREAM indeterminate state.
+    invalid: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
     },
   },
   scrollarea: {
@@ -951,6 +974,28 @@ export const STATES = {
       await pg.locator('button[data-placeholder]').first().waitFor();
       await pg.locator(".rt-SelectTrigger").click();
       await pg.locator('[role="listbox"]').waitFor();
+  // Wave-C ScrollArea family (horizontal + both+corner). type="always" mounts the
+  // bar(s) unconditionally; content overflows both axes. Keyed off UPSTREAM
+  // data-orientation/data-state + the rt-ScrollAreaCorner class, so the SAME driver
+  // runs against golden and port; wait until the thumb(s) are measured (height/width
+  // ratio applied) so the post-measure DOM has settled before the snapshot.
+  scrollareax: {
+    horizontal: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('.rt-ScrollAreaThumb');
+        return t && t.getBoundingClientRect().width > 1;
+      });
+    },
+    both: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaCorner').first().waitFor();
+      await pg.waitForFunction(() => {
+        const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
+        return ts.length >= 2 &&
+          [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
+      });
     },
   },
 };

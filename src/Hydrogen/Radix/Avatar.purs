@@ -23,6 +23,7 @@
 module Hydrogen.Radix.Avatar
   ( component
   , Input
+  , Action
   , Output(..)
   , Query(..)
   , Slot
@@ -36,11 +37,12 @@ module Hydrogen.Radix.Avatar
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import DOM.HTML.Indexed (HTMLspan)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes, dataState)
+import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes)
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -78,6 +80,8 @@ type Input =
   { src :: String                      -- image source ("" = no image, fallback only)
   , alt :: String                      -- alt text for the image
   , fallback :: Array HH.PlainHTML      -- shown until/unless the image has loaded
+  , rootAttrs :: Array (HH.IProp HTMLspan Action) -- escape hatch for preset Root attrs
+                                                  -- (data-accent-color/data-radius/…)
   , style :: Style
   }
 
@@ -86,6 +90,7 @@ defaultInput =
   { src: ""
   , alt: ""
   , fallback: []
+  , rootAttrs: []
   , style: defaultStyle
   }
 
@@ -106,6 +111,7 @@ type State =
   , src :: String
   , alt :: String
   , fallback :: Array HH.PlainHTML
+  , rootAttrs :: Array (HH.IProp HTMLspan Action)
   , style :: Style
   }
 
@@ -133,24 +139,27 @@ initialState input =
   , src: input.src
   , alt: input.alt
   , fallback: input.fallback
+  , rootAttrs: input.rootAttrs
   , style: input.style
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   HH.span
-    [ classes st.style.root ]
+    ([ classes st.style.root ] <> st.rootAttrs)
     ( (if st.src == "" then [] else [ renderImage st ])
         <> (if st.status == Loaded then [] else [ renderFallback st ])
     )
 
 renderImage :: forall m. State -> H.ComponentHTML Action () m
 renderImage st =
+  -- upstream avatar.tsx mounts a bare `<Primitive.img>` (the radix-ui PRIMITIVE — and the
+  -- @radix-ui/themes AvatarImage — emit NO data-state on the img; data-state is a Root-only
+  -- concern). Parity: the img carries only src/alt/class (+ the load handlers).
   HH.img
     [ HP.src st.src
     , HP.alt st.alt
     , classes st.style.image
-    , dataState (statusName st.status)
     , HE.onLoad \_ -> StatusChanged' Loaded
     , HE.onError \_ -> StatusChanged' Errored
     ]
@@ -181,6 +190,7 @@ handleAction = case _ of
       , src = input.src
       , alt = input.alt
       , fallback = input.fallback
+      , rootAttrs = input.rootAttrs
       , style = input.style
       }
     when (next /= st.status) (H.raise (StatusChanged next))

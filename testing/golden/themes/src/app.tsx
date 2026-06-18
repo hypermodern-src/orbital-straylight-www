@@ -87,6 +87,11 @@ import {
 
 type Page = { id: string; label: string; node: React.ReactNode; interactive?: boolean };
 
+// A 1×1 transparent PNG data-URI — loads synchronously from cache, so an Avatar with
+// this src reaches the LOADED steady-state deterministically (no network).
+const ONE_PX_PNG =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
+
 const PAGES: Page[] = [
   {
     id: "button",
@@ -1432,7 +1437,15 @@ const PAGES: Page[] = [
     // immediately, so the at-rest DOM is the FALLBACK branch — a single rt-AvatarFallback
     // span, the <img> ABSENT. The oracle pins: img absent, fallback present, accessible
     // name on the fallback, and (themes-a11y) zero axe violations on a fallback-only avatar.
-    node: <Avatar fallback="A" />,
+    // `?s=loaded` swaps to a data-URI src that loads instantly: the LOADED steady-state
+    // (img mounted, data-state=loaded, alt present, fallback absent) — verifies the
+    // alt/accessible-name + loaded-state contract the fallback-only story can't.
+    node: (() => {
+      const s = currentState();
+      return s === "loaded"
+        ? <Avatar src={ONE_PX_PNG} alt="Profile photo" fallback="A" />
+        : <Avatar fallback="A" />;
+    })(),
   },
   {
     id: "progress",
@@ -1453,6 +1466,9 @@ const PAGES: Page[] = [
         s === "indeterminate" ? <Progress /> :
         s === "complete" ? <Progress value={100} /> :
         s === "custommax" ? <Progress value={50} max={200} /> :
+        // `?s=invalid` — value=150 > max=100: upstream isValidValueNumber rejects it and
+        // coerces to indeterminate (data-state=indeterminate, NO aria-valuenow/data-value).
+        s === "invalid" ? <Progress value={150} /> :
         <Progress value={25} />;
       return <Box style={{ maxWidth: 320 }}>{inner}</Box>;
     })(),
@@ -2078,6 +2094,35 @@ const PAGES: Page[] = [
         <ToggleGroup.Item value="c">Right</ToggleGroup.Item>
       </ToggleGroup.Root>
     ),
+  },
+  // ── Wave-C ScrollArea family: horizontal + both(+corner) ─────────────────────
+  // The canonical `scrollarea` story is scrollbars="vertical" (one bar, no corner).
+  // This second id exercises the MISSING-IN-PORT scrollbar family: `?s=horizontal`
+  // → type=always scrollbars="horizontal" (ONE horizontal bar: data-orientation=
+  // horizontal, bottom/left/right inline style, --radix-scroll-area-thumb-width,
+  // translate3d on X); `?s=both` → scrollbars="both" ⇒ TWO scrollbars (X+Y) AND a
+  // rt-ScrollAreaCorner, with non-zero --radix-scroll-area-corner-{width,height} on
+  // Root. Content overflows on BOTH axes (wide+tall). All px-normalized — the oracle
+  // tests the scrollbar/corner STRUCTURE the port must reproduce.
+  {
+    id: "scrollareax",
+    label: "Scroll Area (family)",
+    interactive: true,
+    node: (() => {
+      const s = currentState();
+      const scrollbars = s === "horizontal" ? "horizontal" : "both";
+      return (
+        <ScrollArea type="always" scrollbars={scrollbars} style={{ width: 200, height: 120 }}>
+          <Box p="2" style={{ width: 400 }}>
+            {Array.from({ length: 12 }, (_, i) => (
+              <Text key={i} as="p" size="2" style={{ whiteSpace: "nowrap" }}>
+                Line {i + 1} — a long row that overflows horizontally as well
+              </Text>
+            ))}
+          </Box>
+        </ScrollArea>
+      );
+    })(),
   },
 ];
 

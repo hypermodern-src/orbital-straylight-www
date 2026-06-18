@@ -1,0 +1,60 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-ScrollAreaRoot" dir=ltr style=position: relative; --radix-scroll-area-corner-width: <px>; --radix-scroll-area-corner-height: <px>; width: <px>; height: <px>;>
+          <div class="rt-ScrollAreaViewport" data-radix-scroll-area-viewport= style=overflow: scroll hidden;>
+            <div style=min-width: 100%; display: table;>
+              <div class="rt-Box rt-r-p-2" style=width: <px>;>
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #1
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #2
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #3
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #4
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #5
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #6
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #7
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #8
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #9
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #10
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #11
+                  #— a long row that overflows horizontally as well
+                <p class="rt-Text rt-r-size-2" style=white-space: nowrap;>
+                  #Line
+                  #12
+                  #— a long row that overflows horizontally as well
+          <div class="rt-ScrollAreaViewportFocusRing">
+          <div class="rt-ScrollAreaScrollbar rt-r-size-1" data-orientation=horizontal data-state=visible style=position: absolute; bottom: <px>; left: <px>; right: var(--radix-scroll-area-corner-width); --radix-scroll-area-thumb-width: <px>;>
+            <div class="rt-ScrollAreaThumb" data-state=visible style=width: var(--radix-scroll-area-thumb-width); height: var(--radix-scroll-area-thumb-height); transform: translate3d(<px>, <px>, <px>);>
