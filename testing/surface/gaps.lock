@@ -14,7 +14,9 @@
     "presets_gated": 1,
     "presets_required": 4,
     "coverage_preset_pct": 25,
-    "binding_violations": 0
+    "binding_violations": 0,
+    "enumerated_components": 1,
+    "named_open_cells": 20
   },
   "per_component": {
     "AlertDialog": {

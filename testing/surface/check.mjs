@@ -9,7 +9,7 @@
 //
 // This is the recorded, measurable, hard-gated burndown. `git log -p gaps.lock` IS the
 // monotone progress history — no prose, no hand-edited counts.
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, readdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { derive } from "./derive.mjs";
@@ -21,8 +21,36 @@ const UPDATE = process.argv.includes("--update");
 const req = JSON.parse(await readFile(join(HERE, "required.json"), "utf8"));
 const { cells, unbound, gatedCount } = await derive();
 
-// ---- behavioral surface: numerator = gated cells; open debt = open core gaps (DEPTH-AUDIT)
-const openCore = Object.values(req.components).reduce((n, c) => n + (c.core_gaps_open ?? 0), 0);
+// ---- enumerated per-component cell files (STR-381 template, e.g. cells/Dialog.json).
+// Where present, they REPLACE the scalar core_gaps_open with itemized cells: each
+// status=gated cell must exist on disk (else a binding violation), each status=open
+// core cell is named debt. Components migrate scalar→enumerated one at a time.
+const enumerated = {}; // Component -> { coreOpen, namedOpen, gatedClaims:[ids] }
+try {
+  for (const f of await readdir(join(HERE, "cells"))) {
+    if (!f.endsWith(".json")) continue;
+    const cf = JSON.parse(await readFile(join(HERE, "cells", f), "utf8"));
+    const comp = cf.component;
+    let coreOpen = 0, namedOpen = 0; const gatedClaims = [];
+    for (const c of cf.cells) {
+      if (c.status === "gated") gatedClaims.push(c.id);
+      else if (c.status === "open") { namedOpen++; if (c.importance === "core") coreOpen++; }
+    }
+    enumerated[comp] = { coreOpen, namedOpen, gatedClaims };
+  }
+} catch { /* no cells/ dir yet */ }
+
+// A gated CLAIM in an enumerated file with no committed golden = binding violation.
+const gatedOnDisk = new Set(cells.keys());
+for (const [comp, e] of Object.entries(enumerated))
+  for (const id of e.gatedClaims)
+    if (!gatedOnDisk.has(id)) unbound.push(`${comp}:${id} (enumerated gated, no golden)`);
+
+// ---- behavioral surface: numerator = gated cells; open debt = open core gaps.
+// Enumerated components contribute their itemized core-open count; the rest the scalar.
+const openCore = Object.entries(req.components).reduce(
+  (n, [comp, c]) => n + (enumerated[comp] ? enumerated[comp].coreOpen : (c.core_gaps_open ?? 0)), 0);
+const namedOpenCells = Object.values(enumerated).reduce((n, e) => n + e.namedOpen, 0);
 const requiredBehavioral = gatedCount + openCore; // cells we hold + core cells we still owe
 const covBehavioral = gatedCount / requiredBehavioral;
 
@@ -56,6 +84,8 @@ const current = {
     presets_required: presetsRequired,
     coverage_preset_pct: +(covPreset * 100).toFixed(1),
     binding_violations: unbound.length,
+    enumerated_components: Object.keys(enumerated).length,
+    named_open_cells: namedOpenCells,
   },
   per_component: Object.fromEntries(
     Object.entries(perComponent).sort((a, b) => b[1].core_open - a[1].core_open)
@@ -69,6 +99,7 @@ const t = current.totals;
 console.log(`ℵ surface ledger — upstream primitives@${req.upstream.primitives_sha} themes@${req.upstream.radix_themes}`);
 console.log(`  behavioral: ${t.gated_cells} gated / ${t.required_behavioral} required  (${t.coverage_behavioral_pct}%)  · open core debt: ${t.open_core_gaps}`);
 console.log(`  preset matrix: ${t.presets_gated}/${t.presets_required} presets  (${t.coverage_preset_pct}%)  [unstyled·themes·shadcn·daisy; orbital last]`);
+console.log(`  enumerated: ${t.enumerated_components}/32 components itemized · ${t.named_open_cells} named open cells (STR-381 template)`);
 console.log(`  binding violations (drivers with no committed golden): ${t.binding_violations}`);
 if (current.unmapped_idgroups.length)
   console.log(`  ⚠ unmapped golden id-groups (add to required.json id_groups): ${current.unmapped_idgroups.join(", ")}`);
@@ -90,6 +121,7 @@ if (C.gated_cells < L.gated_cells) regressions.push(`gated_cells fell ${L.gated_
 if (C.open_core_gaps > L.open_core_gaps) regressions.push(`open_core_gaps rose ${L.open_core_gaps} → ${C.open_core_gaps} (debt added)`);
 if (C.binding_violations > L.binding_violations) regressions.push(`binding_violations rose ${L.binding_violations} → ${C.binding_violations} (a driver lost its golden)`);
 if (C.presets_gated < L.presets_gated) regressions.push(`presets_gated fell ${L.presets_gated} → ${C.presets_gated}`);
+if ((C.enumerated_components ?? 0) < (L.enumerated_components ?? 0)) regressions.push(`enumerated_components fell ${L.enumerated_components} → ${C.enumerated_components} (a cell file was lost)`);
 
 if (regressions.length) {
   console.error(`\n✘ RATCHET REGRESSION — progress is monotone; these moved the wrong way:`);
