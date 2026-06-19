@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "upstream": {
+    "primitives_sha": "45f8b34",
+    "radix_themes": "3",
+    "captured": "2026-06-19",
+    "note": "Goldens are only trustworthy against a fixed upstream. Bumping either value here is a deliberate re-baseline (regenerate goldens, review the diff)."
+  },
+  "totals": {
+    "gated_cells": 195,
+    "open_core_gaps": 110,
+    "required_behavioral": 305,
+    "coverage_behavioral_pct": 63.9,
+    "presets_gated": 1,
+    "presets_required": 4,
+    "coverage_preset_pct": 25,
+    "binding_violations": 0
+  },
+  "per_component": {
+    "AlertDialog": {
+      "gated": 3,
+      "core_open": 9
+    },
+    "NavigationMenu": {
+      "gated": 6,
+      "core_open": 6
+    },
+    "Form": {
+      "gated": 10,
+      "core_open": 6
+    },
+    "DropdownMenu": {
+      "gated": 11,
+      "core_open": 5
+    },
+    "PasswordToggleField": {
+      "gated": 6,
+      "core_open": 5
+    },
+    "Toggle": {
+      "gated": 4,
+      "core_open": 5
+    },
+    "ContextMenu": {
+      "gated": 9,
+      "core_open": 4
+    },
+    "HoverCard": {
+      "gated": 4,
+      "core_open": 4
+    },
+    "Popover": {
+      "gated": 4,
+      "core_open": 4
+    },
+    "Progress": {
+      "gated": 7,
+      "core_open": 4
+    },
+    "RadioGroup": {
+      "gated": 10,
+      "core_open": 4
+    },
+    "Accordion": {
+      "gated": 4,
+      "core_open": 4
+    },
+    "ScrollArea": {
+      "gated": 6,
+      "core_open": 4
+    },
+    "Switch": {
+      "gated": 5,
+      "core_open": 4
+    },
+    "Toast": {
+      "gated": 5,
+      "core_open": 4
+    },
+    "AccessibleIcon": {
+      "gated": 2,
+      "core_open": 3
+    },
+    "OneTimePasswordField": {
+      "gated": 9,
+      "core_open": 3
+    },
+    "Separator": {
+      "gated": 11,
+      "core_open": 3
+    },
+    "AspectRatio": {
+      "gated": 6,
+      "core_open": 3
+    },
+    "Avatar": {
+      "gated": 4,
+      "core_open": 3
+    },
+    "Checkbox": {
+      "gated": 9,
+      "core_open": 3
+    },
+    "Collapsible": {
+      "gated": 4,
+      "core_open": 3
+    },
+    "Select": {
+      "gated": 6,
+      "core_open": 3
+    },
+    "VisuallyHidden": {
+      "gated": 4,
+      "core_open": 3
+    },
+    "Label": {
+      "gated": 6,
+      "core_open": 2
+    },
+    "Slider": {
+      "gated": 10,
+      "core_open": 2
+    },
+    "ToggleGroup": {
+      "gated": 5,
+      "core_open": 2
+    },
+    "Toolbar": {
+      "gated": 5,
+      "core_open": 2
+    },
+    "Menubar": {
+      "gated": 8,
+      "core_open": 1
+    },
+    "Dialog": {
+      "gated": 3,
+      "core_open": 1
+    },
+    "Tooltip": {
+      "gated": 3,
+      "core_open": 1
+    },
+    "Tabs": {
+      "gated": 6,
+      "core_open": 0
+    }
+  },
+  "binding_violations": [],
+  "unmapped_idgroups": []
+}

@@ -38,4 +38,10 @@ if [ ! -d node_modules ]; then
   echo "ℵ installing harness deps (bun, frozen lockfile)"
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 nix shell nixpkgs#bun --command bun install --frozen-lockfile
 fi
+# The surface ratchet (STR-385): the gate that closes behind us. Fails if the gated-cell
+# count regressed, open core debt rose, or a state-driver lost its committed golden. Runs
+# BEFORE the pixel/DOM suite so a lost golden is caught fast and unambiguously.
+echo "ℵ surface ratchet"
+nix shell nixpkgs#nodejs --command node "$HYDROGEN/testing/surface/check.mjs"
+
 exec nix shell nixpkgs#bun nixpkgs#python3 --command bun run test "$@"

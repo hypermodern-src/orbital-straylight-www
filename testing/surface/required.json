@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "purpose": "The completeness denominator + per-component face/preset declaration for the TOTAL-PARITY gate (STR-381). The numerator (gated cells) is DERIVED from the committed goldens by derive.mjs — never hand-edited. This file declares only what the surface SHOULD be: the open behavioral debt (core_gaps_open, from DEPTH-AUDIT) and the preset matrix that is not yet built. check.mjs ratchets the two together.",
+  "upstream": {
+    "primitives_sha": "45f8b34",
+    "radix_themes": "3",
+    "captured": "2026-06-19",
+    "note": "Goldens are only trustworthy against a fixed upstream. Bumping either value here is a deliberate re-baseline (regenerate goldens, review the diff)."
+  },
+  "presets": {
+    "required": ["unstyled", "themes", "shadcn", "daisy"],
+    "deferred_last": ["orbital"],
+    "native_preset_by_face": { "themed": "themes", "bare": "unstyled" },
+    "note": "Today every committed golden is its component's NATIVE preset only (themed→themes vs @radix-ui/themes; bare→unstyled vs @radix-ui/react-*). The other presets are open until STR-383 lands the preset layer + behavioral-invariance gate."
+  },
+  "components": {
+    "AlertDialog":          { "face": "themed", "core_gaps_open": 9, "id_groups": ["alertdialog"] },
+    "NavigationMenu":       { "face": "themed", "core_gaps_open": 6, "id_groups": ["navigationmenu", "tabnav"] },
+    "Form":                 { "face": "bare",   "core_gaps_open": 6, "id_groups": ["form"] },
+    "DropdownMenu":         { "face": "themed", "core_gaps_open": 5, "id_groups": ["dropdownmenu", "dropdownmenuchecks", "dropdownmenugroup"] },
+    "PasswordToggleField":  { "face": "bare",   "core_gaps_open": 5, "id_groups": ["passwordtoggle"] },
+    "Toggle":               { "face": "themed", "core_gaps_open": 5, "id_groups": ["toggle"] },
+    "ContextMenu":          { "face": "themed", "core_gaps_open": 4, "id_groups": ["contextmenu", "contextmenuchecks"] },
+    "HoverCard":            { "face": "themed", "core_gaps_open": 4, "id_groups": ["hovercard"] },
+    "Popover":              { "face": "themed", "core_gaps_open": 4, "id_groups": ["popover"] },
+    "Progress":             { "face": "themed", "core_gaps_open": 4, "id_groups": ["progress"] },
+    "RadioGroup":           { "face": "themed", "core_gaps_open": 4, "id_groups": ["radiogroup", "radiocards"] },
+    "Accordion":            { "face": "themed", "core_gaps_open": 4, "id_groups": ["accordion"] },
+    "ScrollArea":           { "face": "themed", "core_gaps_open": 4, "id_groups": ["scrollarea", "scrollareax"] },
+    "Switch":               { "face": "themed", "core_gaps_open": 4, "id_groups": ["switch"] },
+    "Toast":                { "face": "themed", "core_gaps_open": 4, "id_groups": ["toast", "toast-up"] },
+    "AccessibleIcon":       { "face": "bare",   "core_gaps_open": 3, "id_groups": ["accessibleicon"] },
+    "OneTimePasswordField": { "face": "bare",   "core_gaps_open": 3, "id_groups": ["otp"] },
+    "Separator":            { "face": "themed", "core_gaps_open": 3, "id_groups": ["separatorthemes", "separatorprim"] },
+    "AspectRatio":          { "face": "bare",   "core_gaps_open": 3, "id_groups": ["aspectratioprim"] },
+    "Avatar":               { "face": "themed", "core_gaps_open": 3, "id_groups": ["avatar"] },
+    "Checkbox":             { "face": "themed", "core_gaps_open": 3, "id_groups": ["checkbox", "checkboxgroup", "checkboxcards"] },
+    "Collapsible":          { "face": "themed", "core_gaps_open": 3, "id_groups": ["collapsible"] },
+    "Select":               { "face": "themed", "core_gaps_open": 3, "id_groups": ["select", "selectform", "selectplaceholder"] },
+    "VisuallyHidden":       { "face": "bare",   "core_gaps_open": 3, "id_groups": ["visuallyhiddenprim"] },
+    "Label":                { "face": "bare",   "core_gaps_open": 2, "id_groups": ["labelprim", "labelguard"] },
+    "Slider":               { "face": "themed", "core_gaps_open": 2, "id_groups": ["slider", "sliderrange", "sliderrangeform"] },
+    "ToggleGroup":          { "face": "themed", "core_gaps_open": 2, "id_groups": ["togglegroup", "segmentedcontrol"] },
+    "Toolbar":              { "face": "bare",   "core_gaps_open": 2, "id_groups": ["toolbar"] },
+    "Menubar":              { "face": "themed", "core_gaps_open": 1, "id_groups": ["menubar", "menubarchecks"] },
+    "Dialog":               { "face": "themed", "core_gaps_open": 1, "id_groups": ["dialog"] },
+    "Tooltip":              { "face": "themed", "core_gaps_open": 1, "id_groups": ["tooltip"] },
+    "Tabs":                 { "face": "themed", "core_gaps_open": 0, "id_groups": ["tabs", "tabsnone", "tabnav"] }
+  }
+}
