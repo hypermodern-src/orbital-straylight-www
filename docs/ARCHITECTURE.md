@@ -402,4 +402,32 @@ Still open **[?]** (decide on the spot, when the code forces it):
 
 ---
 
+## Round update — 2026-06-19: the port is built; verification is the work now
+
+**Where we actually are.** All **32** user-facing radix primitives are ported and
+compile; the substrate (7 behaviors), the native closed-form `Float`/`Popper`
+engine, and the Themes (`rt-*`) preset are in tree. **Breadth is done.** What is
+*not* done is proving behavioral parity — and we now measure that distance instead
+of asserting it:
+
+- `src/Hydrogen/Radix/DEPTH-AUDIT.md` — **585 gaps / 32 components** (110 core /
+  250 common / 225 edge; 288 missing-in-port / 199 in-port-but-unverified / 98 partial).
+- `src/Hydrogen/Radix/ARIA-AUDIT.md` — **58 blocking ARIA divergences / 14 primitives**.
+- **APG keyboard** conformance exists for only ~9 of 32 components.
+
+**The discipline that makes this non-circular.** Three CI-gated oracles diff the
+port against the *real upstream React render*: golden-dom (DOM-identical), golden-aria
+(ARIA tree + axe), themes-apg (WAI-ARIA APG keyboard). The rule: **close a gap = add
+the oracle state that exercises it; the golden adjudicates — never blind-fix from
+prose.** The reverted hand-rolled Themes layer + its self-gating `*-interaction.mjs`
+tests (STR-330's "wrong turn") are exactly the anti-pattern this replaces.
+
+**Reified.** The audits are the source-of-truth backlog; Linear **STR-330** is the
+projection — `Verify+close: <Component>` per primitive (STR-349…STR-380), the TIER-1
+bug epic (STR-344), and oracle-infra issues (STR-345 APG expansion, STR-346
+Presence/closing, STR-347 pointer-drag, STR-348 ARIA regression-gate). Operational
+detail (build, test, oracle model, conventions) lives in `CLAUDE.md`.
+
+---
+
 _Generated as a starting point for argument. Edit aggressively._

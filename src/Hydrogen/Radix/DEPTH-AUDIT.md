@@ -6,6 +6,16 @@
 **585 gaps across 32 components.** importance: 110 core / 250 common / 225 edge — 
 portStatus: 288 missing-in-port / 199 in-port-but-unverified / 98 partial.
 
+> **STATUS (2026-06-19) — this document IS the source-of-truth backlog; Linear is its projection.**
+> Every component section below is now a Linear issue under **STR-330**:
+> `Verify+close: <Component>` (STR-349…STR-380), each embedding that component's
+> core-gap checklist. The 14 ★ TIER-1 bugs are epic **STR-344**. Cross-cutting oracle
+> work: APG-keyboard expansion **STR-345**, Presence/closing oracle **STR-346**,
+> pointer-drag harness **STR-347**, ARIA-AUDIT regression-gate **STR-348**.
+> When a core gap is closed (its oracle is committed + green), tick it in the issue
+> **and decrement that component's `(N core)` header count here.** This file and the
+> issues must not drift.
+
 **Method:** close a gap = add the oracle state that exercises it (golden-first, self-stable); the gate adjudicates — confirms the port (coverage) or reveals a diff (fix). Never blind-fix from this prose; the golden is truth.
 
 ## ★ TIER 1 — core 'partial' gaps (existing behavior likely WRONG = bugs to verify+fix first)

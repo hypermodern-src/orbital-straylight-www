@@ -6,6 +6,21 @@ through `purescript-web-*` with thin DOM shims only where unavoidable). Referenc
 sources are read-only at `~/src/vendor/{primitives,colors,icons,themes}` — never
 npm deps.
 
+> **Status (2026-06-19).** All **32** user-facing primitives are ported and compile
+> (this guide predates several — the substrate, Float engine, and the 32 are all in
+> tree now). Breadth is complete; the target is **TOTAL PARITY** (STR-330): the
+> *entire* upstream radix surface tied out DOM-identical under Playwright, every
+> primitive skinnable by any preset, the Storybook the single source. Remaining work
+> is measured in `DEPTH-AUDIT.md` (585 behavioral gaps — a lower bound) and
+> `ARIA-AUDIT.md` (58 ARIA divergences). The backbone is the five keystones:
+> **STR-381** surface manifest (the completeness denominator) · **STR-382** dual-render
+> tie-out (port vs real upstream) · **STR-383** the preset layer + behavioral-invariance
+> gate (Unstyled/Themes/shadcn/daisyUI, ORBITAL last) · **STR-384** Storybook = single
+> source · **STR-385** the ratchet (monotone, hard-gated, recorded; the zero-compromise
+> predicate as CI). See `CLAUDE.md`. **The rule: close a gap = add the oracle state
+> that exercises it; the golden adjudicates. Never blind-fix from prose. Presets only
+> supply classes — behavior lives in the primitive, and the invariance gate proves it.**
+
 `buck = namespace = disk`, 1:1: everything here is `Hydrogen.Radix.*` at
 `hydrogen/src/Hydrogen/Radix/`, covered by `hydrogen//:lib`.
 

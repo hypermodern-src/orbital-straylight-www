@@ -13,7 +13,25 @@ A PureScript/Halogen web framework for building robust web applications.
 
 > *The most fundamental element. The foundation everything else builds on.*
 
-## Features
+Hydrogen is two things that share a repo:
+
+1. **A component library** — a hand-written port of **[`radix-ui/primitives`](src/Hydrogen/Radix/PORTING.md)**
+   to native PureScript/Halogen. All 32 user-facing primitives are ported (Dialog,
+   Select, Slider, Menubar, Toast, …), with **no radix npm dependency and no
+   external-JS FFI** — even the floating-ui positioning engine is ported native.
+   This is where the active work is. radix-ui is vendored read-only as the reference
+   spec; the port is diffed against the *real upstream React render* via a three-oracle
+   verification gate (DOM / ARIA / WAI-ARIA-APG keyboard).
+2. **An application framework** — Query, Router, API Client, SSG, RemoteData, UI
+   primitives (the "Features" below). The original seed; stable.
+
+**Status:** breadth is complete (every primitive ported + compiling); behavioral
+parity is mid-verification and explicitly tracked — see
+[`src/Hydrogen/Radix/DEPTH-AUDIT.md`](src/Hydrogen/Radix/DEPTH-AUDIT.md),
+[`ARIA-AUDIT.md`](src/Hydrogen/Radix/ARIA-AUDIT.md), and Linear epic **STR-330**.
+Build & contributor guide: [`CLAUDE.md`](CLAUDE.md).
+
+## Framework features
 
 - **[Query](docs/query.md)** - Data fetching with caching, deduplication, stale-while-revalidate
 - **[Router](docs/router.md)** - Type-safe routing with custom ADTs and metadata
@@ -94,6 +112,25 @@ render = RD.fold
 | `Hydrogen.UI.Error` | Error cards, empty states |
 | `Hydrogen.Data.Format` | Byte/duration/number formatting |
 | `Hydrogen.HTML.Renderer` | Render Halogen HTML to strings |
+
+## Component library (`Hydrogen.Radix`)
+
+The radix-ui port. 32 primitives across a layered substrate — see
+**[`src/Hydrogen/Radix/PORTING.md`](src/Hydrogen/Radix/PORTING.md)** for the porting
+contract and **[`CLAUDE.md`](CLAUDE.md)** for build/test/verification.
+
+| Layer | Modules |
+|-------|---------|
+| `Hydrogen.Radix.Behavior.*` | ControllableState, Presence, DismissableLayer, FocusScope, RovingFocus, Direction, ScrollLock, Id |
+| `Hydrogen.Radix.Float.*` | Compute, Popper — native closed-form floating-ui port |
+| `Hydrogen.Radix.Foundation.*` | Color, Style, Portal, Dom, Envelope |
+| `Hydrogen.Radix.*` | 32 primitives: Dialog, AlertDialog, Popover, Tooltip, HoverCard, DropdownMenu, ContextMenu, Menubar, Select, Tabs, Accordion, Collapsible, RadioGroup, Checkbox, Switch, Toggle, ToggleGroup, Toolbar, Slider, ScrollArea, NavigationMenu, Toast, Progress, Avatar, Form, OneTimePasswordField, PasswordToggleField, Label, Separator, AspectRatio, AccessibleIcon, VisuallyHidden |
+| `Hydrogen.Themes.*` | the radix-themes preset (`rt-*` classes) over the primitives |
+
+Verified against the real upstream React render through three CI-gated oracles
+(DOM-identical / ARIA-tree / WAI-ARIA-APG keyboard) in
+[`testing/playwright/`](testing/playwright/). The remaining verification backlog is
+in [`DEPTH-AUDIT.md`](src/Hydrogen/Radix/DEPTH-AUDIT.md) and Linear **STR-330**.
 
 ## Documentation
 
