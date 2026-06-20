@@ -1,0 +1,33 @@
+{
+  "component": "Tabs",
+  "primitive": "Hydrogen.Radix.Tabs",
+  "face": "themed",
+  "upstream": "primitives packages/react/tabs/src/tabs.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger: every cell tying Tabs out against upstream. status=gated have committed goldens; status=open are named debt. 0 open-core cells — all open cells are common/edge.",
+  "cells": [
+    { "id": "tabs.tab2",      "state": "tab2",   "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "after clicking tab index 1: selected trigger + shown panel, roving tabindex" },
+    { "id": "tabs.rest",      "state": "rest",   "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (tablist>tab, tabpanel)" },
+    { "id": "tabsnone.none",  "state": "none",   "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "zero-selected default: no tab selected, no panel shown" },
+    { "id": "tabsnone.rest",  "state": "rest",   "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "zero-selected at-rest a11y tree" },
+    { "id": "tabnav.active",  "state": "active", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "themes TabNav active link DOM + aria" },
+    { "id": "tabnav.rest",    "state": "rest",   "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "TabNav at-rest a11y tree" },
+
+    { "id": "tabs.manual-mode",     "state": "open", "importance": "common", "status": "open", "oracle": ["aria", "apg"], "ref": "tabs.tsx:61,192-202 activationMode=manual: arrows move focus without selecting; Enter/Space activates. No manual story." },
+    { "id": "tabs.disabled-skip",   "state": "open", "importance": "common", "status": "open", "oracle": ["dom", "apg"], "ref": "tabs.tsx:168-169 disabled tab skipped by arrow nav (port no-ops/stalls); never tabbable" },
+    { "id": "tabs.space-enter",     "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "tabs.tsx:192-194 Space/Enter on focused trigger activates it; port has no per-trigger keydown handler" },
+    { "id": "tabs.vertical",        "state": "open", "importance": "common", "status": "open", "oracle": ["dom", "apg"], "ref": "tabs.tsx:96,133,247 orientation=vertical: ArrowUp/Down nav, data/aria-orientation; no vertical story" },
+    { "id": "tabs.controlled",      "state": "open", "importance": "common", "status": "open", "oracle": ["none"],       "ref": "tabs.tsx:77-82 controlled value drives selection; internal clicks raise onValueChange without changing selection" },
+    { "id": "tabs.disabled-attr",   "state": "open", "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "tabs.tsx:177 data-disabled empty-string only when disabled; no disabled tab in any story" },
+
+    { "id": "tabs.mousedown-activate", "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: activation on mousedown (left button only, ctrlKey guard)" },
+    { "id": "tabs.rtl",                "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: RTL swaps horizontal arrows (ArrowLeft→next)" },
+    { "id": "tabs.dir-autodetect",     "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: ambient dir auto-detection via useDirection" },
+    { "id": "tabs.empty-default",      "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: empty/zero-selected initial state with no defaultValue" },
+    { "id": "tabs.forcemount",         "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on TabsContent keeps inactive panel mounted" },
+    { "id": "tabs.presence-exit",      "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Presence / exit animation on panel show/hide" },
+    { "id": "tabs.multi-instance",     "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: multi-instance id uniqueness (two Tabs on one page)" },
+    { "id": "tabs.mount-anim-prevent", "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: mount-animation-prevention on panel selected at mount" },
+    { "id": "tabs.prop-passthru",      "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: passthrough props & composed event handlers" },
+    { "id": "tabs.entry-focus",        "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: onEntryFocus / roving-focus tab-stop tracking" }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "component": "Label",
+  "primitive": "Hydrogen.Radix.Label",
+  "face": "primitive",
+  "upstream": "primitives packages/react/label/src/label.tsx",
+  "note": "STR-381 ledger for Label: 8 gaps (2 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    { "id": "labelprim.forattrs",  "state": "forattrs",  "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "label[for=...] attribute emitted on render" },
+    { "id": "labelprim.forfocus",  "state": "forfocus",  "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "click label focuses associated control by id" },
+    { "id": "labelprim.rest",      "state": "rest",      "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "at-rest label a11y tree" },
+    { "id": "labelguard.control",  "state": "control",   "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "label wrapping interactive control render" },
+    { "id": "labelguard.plain",    "state": "plain",     "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "plain label render (no inner control)" },
+    { "id": "labelguard.rest",     "state": "rest",      "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "label guard at-rest a11y tree" },
+
+    { "id": "labelprim.dblclick-noselect",        "state": "open",      "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "label.tsx:19-27,25-26 onMouseDown preventDefault when detail>1 stops text selection on multi-click — the bespoke behavior; port has no handler" },
+    { "id": "labelprim.wrapped-control-passthrough","state": "control", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "label.tsx:21-22 mousedown target.closest(button,input,select,textarea) returns early — inner control interaction unaltered" },
+    { "id": "labelprim.passthrough-attrs",        "state": "open",      "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "label.tsx:11-12,17 {...props} spread id/data-*/aria-*/title/style/handlers; port hard-codes only for+class_" },
+    { "id": "labelprim.for-focuses-control",      "state": "forfocus",  "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "label.tsx for association: click label focuses control whose id==for; only for:'' story exists, behavior untested" },
+
+    { "id": "labelprim.composed-mousedown", "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"],  "ref": "edge: user-supplied onMouseDown invoked (composed) on non-early-return path" },
+    { "id": "labelprim.aschild-merge",      "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Primitive identity / asChild merge semantics" },
+    { "id": "labelprim.ref-forward",        "state": "open", "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: ref forwarding to underlying LabelElement" },
+    { "id": "labelprim.rtl",                "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: native label direction-agnostic, at-rest render under rtl" }
+  ]
+}

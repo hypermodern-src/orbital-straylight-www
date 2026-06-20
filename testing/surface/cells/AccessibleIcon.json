@@ -1,0 +1,21 @@
+{
+  "component": "AccessibleIcon",
+  "primitive": "Hydrogen.Radix.AccessibleIcon",
+  "face": "themed",
+  "upstream": "primitives accessible-icon.tsx + @radix-ui/themes@3",
+  "note": "The STR-381 template: every cell that ties AccessibleIcon out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt. Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
+  "cells": [
+    { "id": "accessibleicon.shown", "state": "shown", "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "at-rest icon+label render: gear svg + visually-hidden label" },
+    { "id": "accessibleicon.rest",  "state": "rest",  "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree" },
+
+    { "id": "accessibleicon.aria-hidden",     "state": "shown", "importance": "core",   "status": "open", "oracle": ["aria", "dom"], "ref": "accessible-icon.tsx:18-21 cloneElement aria-hidden=true ONTO the svg; port wraps in extra inner span instead" },
+    { "id": "accessibleicon.focusable-false", "state": "shown", "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "accessible-icon.tsx:21 focusable=false on the svg (allyjs SVG bug); neither port emits it" },
+    { "id": "accessibleicon.label-in-a11y",   "state": "shown", "importance": "core",   "status": "open", "oracle": ["aria"],        "ref": "accessible-icon.tsx:23 VisuallyHidden label must be IN the a11y tree (announced); pixel oracle is blind to it" },
+    { "id": "accessibleicon.no-wrapper",      "state": "shown", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "accessible-icon.tsx:16-26 Fragment (icon+label siblings, no enclosing node); Radix port adds outer span" },
+    { "id": "accessibleicon.attr-passthrough","state": "shown", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "accessible-icon.tsx:18 cloneElement preserves child props (width/viewBox/fill); port re-parents under span" },
+
+    { "id": "accessibleicon.children-only",   "state": "shown", "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: React.Children.only — upstream THROWS on multiple children" },
+    { "id": "accessibleicon.label-required",  "state": "shown", "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: label is a required string prop on both ports" },
+    { "id": "accessibleicon.displayname",     "state": "shown", "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: displayName='AccessibleIcon' — no DOM/a11y bearing" }
+  ]
+}

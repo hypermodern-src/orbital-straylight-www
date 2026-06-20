@@ -1,0 +1,36 @@
+{
+  "component": "Progress",
+  "primitive": "Hydrogen.Radix.Progress",
+  "face": "themed",
+  "upstream": "primitives progress.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Progress. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 17 gaps / 4 core per DEPTH-AUDIT.md:355. Non-interactive progressbar; all debt is declarative.",
+  "cells": [
+    { "id": "progress.shown",         "state": "shown",         "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "role=progressbar at a concrete value: aria-valuenow/valuemax, indicator data-state" },
+    { "id": "progress.indeterminate", "state": "indeterminate", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "value=null: data-state=indeterminate, no aria-valuenow/valuetext/data-value" },
+    { "id": "progress.complete",      "state": "complete",      "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "value=max=100: data-state=complete on root AND indicator" },
+    { "id": "progress.custommax",     "state": "custommax",     "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "max=200 value=50: aria-valuemax=200, aria-valuetext=25%, data-max=200" },
+    { "id": "progress.invalid",       "state": "invalid",       "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "out-of-range value clamp-to-indeterminate + DEFAULT_MAX fallback" },
+    { "id": "progress.accent",        "state": "accent",        "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "Themes layer data-accent-color/data-radius on root" },
+    { "id": "progress.rest",          "state": "rest",          "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest progressbar a11y tree" },
+
+    { "id": "progress.valuenow-int",  "state": "shown",         "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "progress.tsx:58 PS show 25.0→aria-valuenow='25.0' vs React '25'; integer formatting divergence" },
+    { "id": "progress.valuetext",     "state": "shown",         "importance": "core",   "status": "open", "oracle": ["aria", "dom"],"ref": "progress.tsx:36,59 aria-valuetext=getValueLabel(round %); primitive emits none" },
+    { "id": "progress.indeterminate-attr","state": "indeterminate","importance": "core","status": "open", "oracle": ["dom", "aria"],"ref": "progress.tsx:50,108 value=Nothing: data-state=indeterminate, no valuenow/valuetext/data-value; unverified, Themes never exercises" },
+    { "id": "progress.unwired",       "state": "shown",         "importance": "core",   "status": "open", "oracle": ["none"],       "ref": "Progress.purs dead/unwired: Themes.Progress hand-rolls DOM, never calls primitive — drift risk" },
+
+    { "id": "progress.indicator-data","state": "shown",         "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "progress.tsx:88-92 indicator emits data-value+data-max; port indicator has only data-state" },
+    { "id": "progress.data-value-omit","state": "indeterminate","importance": "common", "status": "open", "oracle": ["dom"],        "ref": "progress.tsx:62 data-value omitted-when-null on root; verify ABSENCE in indeterminate" },
+    { "id": "progress.complete-eq",   "state": "complete",      "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "progress.tsx:108 strict value===max; port uses >= — comparator divergence for value>max" },
+    { "id": "progress.custom-max",    "state": "custommax",     "importance": "common", "status": "open", "oracle": ["dom", "aria"],"ref": "progress.tsx:44,104 max=200 value=50: valuetext=25%, valuemax/data-max=200, scaleX ratio" },
+    { "id": "progress.passthrough",   "state": "shown",         "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "progress.tsx:64,92 ...props spread + ref on root/indicator; port Input is a closed record" },
+    { "id": "progress.themes-variants","state": "accent",       "importance": "common", "status": "open", "oracle": ["none"],       "ref": "progress.props.tsx:7-12 size/variant/radius/highContrast pixel coverage gaps" },
+    { "id": "progress.accent-attrs",  "state": "accent",        "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "themes/progress.tsx:32-33 data-accent-color/data-radius DOM (only pixel-checked today)" },
+
+    { "id": "progress.value-label-cb","state": "shown",         "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: getValueLabel customization prop" },
+    { "id": "progress.value-validate","state": "invalid",       "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: value validation + clamp-to-indeterminate (isValid)" },
+    { "id": "progress.max-validate",  "state": "invalid",       "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: max validation + DEFAULT_MAX fallback (isValidMaxNumber)" },
+    { "id": "progress.duration-var",  "state": "accent",        "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Themes duration prop + --progress-duration var" },
+    { "id": "progress.scope",         "state": "shown",         "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: createProgressScope / scoped multi-instance context" },
+    { "id": "progress.indicator-part","state": "shown",         "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Indicator as a distinct sub-part / asChild composition" }
+  ]
+}

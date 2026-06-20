@@ -1,0 +1,33 @@
+{
+  "component": "Checkbox",
+  "primitive": "Hydrogen.Radix.Checkbox",
+  "face": "themed",
+  "upstream": "primitives packages/react/checkbox/src/checkbox.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Checkbox: 14 gaps (3 core). status=gated cells have a committed golden (derive.mjs cross-checks); status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    { "id": "checkbox.checked",        "state": "checked",        "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "checked render: button[role=checkbox] aria-checked=true data-state=checked + svg indicator" },
+    { "id": "checkbox.indeterminate",  "state": "indeterminate",  "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "indeterminate: aria-checked=mixed data-state=indeterminate, indicator shown" },
+    { "id": "checkbox.disabled",       "state": "disabled",       "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "disabled button + data-disabled='' on root+indicator, click no-op" },
+    { "id": "checkbox.form",           "state": "form",           "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "in-form: hidden bubble input present, name/value submit" },
+    { "id": "checkbox.rest",           "state": "rest",           "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest checkbox a11y tree" },
+    { "id": "checkboxgroup.checked",   "state": "checked",        "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "checkbox group: checked member render" },
+    { "id": "checkboxgroup.rest",      "state": "rest",           "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "checkbox group at-rest a11y tree" },
+    { "id": "checkboxcards.selected",  "state": "selected",       "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "checkbox cards: selected card render" },
+    { "id": "checkboxcards.rest",      "state": "rest",           "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "checkbox cards at-rest a11y tree" },
+
+    { "id": "checkbox.bubble-input",       "state": "form",  "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "checkbox.tsx:240-245,302-372 CheckboxBubbleInput hidden input (name/value/required, aria-hidden, tabindex=-1, sized opacity:0) — port renders NO input ever" },
+    { "id": "checkbox.bubble-dispatch",    "state": "form",  "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "checkbox.tsx:323-341,175-183 bubble fires real click/change so form listeners + native validation see updates; stopPropagation suppression" },
+    { "id": "checkbox.indeterminate-resolve","state": "indeterminate","importance": "core","status": "open","oracle": ["dom", "aria"], "ref": "checkbox.tsx:386-388,161,174 indeterminate->checked resolution + aria-checked=mixed unverified (port logic exists, no driver)" },
+    { "id": "checkbox.form-reset",         "state": "form",  "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "checkbox.tsx:147-155 reset listener on control.form restores initial checked" },
+    { "id": "checkbox.enter-preventdefault","state": "open", "importance": "common", "status": "open", "oracle": ["apg"],       "ref": "checkbox.tsx:169-172 Enter preventDefault (checkboxes don't activate on Enter); port has no keydown, Enter submits enclosing form" },
+    { "id": "checkbox.controlled-no-toggle","state": "open","importance": "common", "status": "open", "oracle": ["apg"],        "ref": "checkbox.tsx:74-79 controlled: no toggle on click unless parent updates checked; CheckedChange still fires" },
+    { "id": "checkbox.indicator-aschild",  "state": "open",  "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "checkbox.tsx:279-285 indicator stamps data-state/data-disabled/pointer-events onto asChild child; port bakes into children (circular)" },
+
+    { "id": "checkbox.indicator-data-disabled", "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: CheckboxIndicator carries data-disabled='' mirroring disabled root" },
+    { "id": "checkbox.indicator-presence",      "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: indicator visibility governed by Presence (forceMount/exit anim)" },
+    { "id": "checkbox.aria-required",           "state": "open", "importance": "edge", "status": "open", "oracle": ["aria"], "ref": "edge: aria-required reflects required prop (aria-required=true)" },
+    { "id": "checkbox.value-default-on",        "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: default value of value is 'on' (HTML checkbox default)" },
+    { "id": "checkbox.composed-handlers",       "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: composed consumer onClick/onKeyDown run before internal" },
+    { "id": "checkbox.rtl",                     "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: checkbox no direction-specific behavior, render under rtl" }
+  ]
+}

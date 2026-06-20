@@ -1,0 +1,30 @@
+{
+  "component": "Switch",
+  "primitive": "Hydrogen.Radix.Switch",
+  "face": "themed",
+  "upstream": "primitives packages/react/switch/src/switch.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Switch. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:475-496 — 14 gaps (4 core).",
+  "cells": [
+    { "id": "switch.on",       "state": "on",       "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "checked: button[role=switch][aria-checked=true][data-state=checked] + thumb data-state=checked" },
+    { "id": "switch.rest",     "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (switch, axe button-name)" },
+    { "id": "switch.disabled", "state": "disabled", "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "disabled: button[disabled][data-disabled] + thumb data-disabled, click no-op" },
+    { "id": "switch.required", "state": "required", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "required: button[aria-required=true] (port omits when false — divergent)" },
+    { "id": "switch.form",     "state": "form",     "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "inside <form>: hidden bubble input type=checkbox aria-hidden tabindex=-1 name/value" },
+
+    { "id": "switch.bubble-input",  "state": "form",     "importance": "core",   "status": "open", "oracle": ["dom"],  "ref": "switch.tsx:213-218,306-330 hidden bubble input for native form submission (FormData name=value when checked). MISSING in port." },
+    { "id": "switch.disabled-noop", "state": "disabled", "importance": "core",   "status": "open", "oracle": ["dom"],  "ref": "switch.tsx:141,245 disabled root+thumb data-disabled, click keeps data-state unchecked — unverified" },
+    { "id": "switch.rest-dom",      "state": "rest",     "importance": "core",   "status": "open", "oracle": ["dom"],  "ref": "switch.tsx:138-140,244 unchecked DOM surface (data-state=unchecked, aria-checked=false root+thumb); only on.txt exists" },
+    { "id": "switch.space-enter",   "state": "on",       "importance": "core",   "status": "open", "oracle": ["apg"],  "ref": "switch.tsx native button: Space AND Enter toggle (Enter radix-specific). Covered by APG, listed for confidence." },
+    { "id": "switch.form-event",    "state": "form",     "importance": "common", "status": "open", "oracle": ["none"], "ref": "switch.tsx:285-302 toggle dispatches bubbling click/change to enclosing form via prototype setter (runtime)" },
+    { "id": "switch.name-attr",     "state": "form",     "importance": "common", "status": "open", "oracle": ["dom"],  "ref": "switch.tsx:46,313 name surfaced on bubble input; port stores name as dead state" },
+    { "id": "switch.required-aria", "state": "required", "importance": "common", "status": "open", "oracle": ["aria"], "ref": "switch.tsx:139 aria-required={required} always; port emits only when true — divergence" },
+    { "id": "switch.controlled",    "state": "on",       "importance": "common", "status": "open", "oracle": ["none"], "ref": "switch.tsx:68-73 controlled checked: internal toggle no-op unless parent updates; onCheckedChange still fires (runtime)" },
+    { "id": "switch.change-output",  "state": "on",      "importance": "common", "status": "open", "oracle": ["none"], "ref": "switch.tsx:147 CheckedChanged Output on every user toggle incl. controlled (runtime)" },
+
+    { "id": "switch.form-prop",     "state": "form", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: form prop associates hidden input with a form by id" },
+    { "id": "switch.passthrough",   "state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: arbitrary button prop passthrough (id, aria-label, aria-labelledby, onFocus, style)" },
+    { "id": "switch.thumb-props",   "state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Thumb accepts arbitrary span props passthrough" },
+    { "id": "switch.rtl",           "state": "on",   "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: RTL rendering — thumb slides direction-sensitively" },
+    { "id": "switch.form-reset",    "state": "form", "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: uncontrolled form reset restores defaultChecked via bubble input" }
+  ]
+}

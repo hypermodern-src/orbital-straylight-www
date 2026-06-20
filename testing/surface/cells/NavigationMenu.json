@@ -1,0 +1,43 @@
+{
+  "component": "NavigationMenu",
+  "primitive": "Hydrogen.Radix.NavigationMenu",
+  "face": "themed",
+  "upstream": "primitives packages/react/navigation-menu/src/navigation-menu.tsx + @radix-ui/themes@3",
+  "note": "Per-component surface ledger for NavigationMenu. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 28 gaps (6 core).",
+  "cells": [
+    { "id": "navigationmenu.open",        "state": "open",        "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "defaultValue open: trigger aria-expanded, FocusProxy span, Indicator translateX, Viewport vars, proxied Content" },
+    { "id": "navigationmenu.closed",      "state": "closed",      "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "both triggers data-state=closed/aria-expanded=false, no content/viewport/indicator" },
+    { "id": "navigationmenu.clicktoggle", "state": "clicktoggle", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "navigation-menu.tsx:199-201 root toggle: click open trigger closes (aria-expanded=false)" },
+    { "id": "navigationmenu.rtl",         "state": "open",        "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "dir=rtl on nav/list/content, arrow swap, motion values reversed" },
+    { "id": "navigationmenu.vertical",    "state": "open",        "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "data-orientation=vertical, indicator top/height/translateY, ArrowDown roves" },
+    { "id": "navigationmenu.rest",        "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (FocusProxy aria-hidden-focus)" },
+
+    { "id": "navigationmenu.hoveropen",      "state": "open", "importance": "core", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:106 delayDuration=200 handleDelayedOpen; port has NO pointer open at all" },
+    { "id": "navigationmenu.closetimer",     "state": "open", "importance": "core", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:142-198 150ms startCloseTimer on leave; onContentEnter cancels" },
+    { "id": "navigationmenu.inline",         "state": "open", "importance": "core", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:772-789 non-viewport mode: per-Item DismissableLayer Content; port false path renders nothing" },
+    { "id": "navigationmenu.datamotion",     "state": "open", "importance": "core", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:890-925 data-motion to-start/to-end/from-start/from-end; port emits none" },
+    { "id": "navigationmenu.tab-order-proxy","state": "open", "importance": "core", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:1194-1205 removeFromTabOrder tabindex=-1 on content tabbables until entry; port no management" },
+    { "id": "navigationmenu.focusproxy",     "state": "open", "importance": "core", "status": "open", "oracle": ["apg"], "ref": "navigation-menu.tsx:554-568 FocusProxy onFocus bridges tab order; port wires no onFocus" },
+
+    { "id": "navigationmenu.skipdelay",      "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:107 skipDelayDuration=300 re-enter opens immediately (isOpenDelayed=false)" },
+    { "id": "navigationmenu.clickclose-latch","state": "open","importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:490-535 wasClickCloseRef: click-close then pointer-move stays closed until re-enter" },
+    { "id": "navigationmenu.escclose-latch", "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:430-516 wasEscapeCloseRef: Escape-close then pointer-move stays closed until re-enter" },
+    { "id": "navigationmenu.sub",            "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:222-272 NavigationMenuSub nested provider (isRootMenu=false), immediate open on trigger-enter" },
+    { "id": "navigationmenu.viewport-multi", "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:1037-1083 viewport keeps last-active mounted + registers all items; port renders single open content" },
+    { "id": "navigationmenu.content-tab",    "state": "open", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "navigation-menu.tsx:949-971 Content Tab/Shift+Tab walks candidates, exits via proxy; port LinkKeyDown arrows only" },
+    { "id": "navigationmenu.link-select",    "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:584-630 Link onSelect + ROOT_CONTENT_DISMISS closes menu; port renderLink no onClick" },
+    { "id": "navigationmenu.link-active",    "state": "open", "importance": "common", "status": "open", "oracle": ["aria"],"ref": "navigation-menu.tsx:589-604 active→data-active/aria-current=page; no top-level Link variant in port" },
+    { "id": "navigationmenu.disabled",       "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:482-500 disabled trigger data-disabled, skipped by pointer-open + roving; port no support" },
+    { "id": "navigationmenu.controlled",     "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:82-140 controlled value + onValueChange; port supports but no oracle drives it" },
+    { "id": "navigationmenu.dismissable",    "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:937-948 onPointerDownOutside/onFocusOutside with trigger/viewport guards; port Escape only" },
+    { "id": "navigationmenu.home-end",       "state": "open", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "navigation-menu.tsx:1130-1135 Home→first / End→last trigger roving; APG tests only arrows" },
+    { "id": "navigationmenu.content-roving", "state": "open", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "navigation-menu.tsx:921-1149 content links FocusGroup arrows clamped non-loop; only trigger roving APG-tested" },
+
+    { "id": "navigationmenu.forcemount",     "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on Content/Viewport/Indicator" },
+    { "id": "navigationmenu.clear-restore",  "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: value-clear focus restore only when focus is inside content" },
+    { "id": "navigationmenu.aria-owns",      "state": "open", "importance": "edge", "status": "open", "oracle": ["aria"],"ref": "edge: aria-owns span only in VIEWPORT mode (restructures)" },
+    { "id": "navigationmenu.indicator-hidden","state": "open","importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Indicator data-state=hidden while value empty but forceMount" },
+    { "id": "navigationmenu.single-item",    "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: single-item/empty-list roving (one trigger, End)" },
+    { "id": "navigationmenu.arrow-noop",     "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: ArrowUp/ArrowDown in horizontal roving are no-ops on trigger" }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "component": "Separator",
+  "primitive": "Hydrogen.Radix.Separator",
+  "face": "themed",
+  "upstream": "primitives separator.tsx + @radix-ui/themes@3",
+  "note": "The STR-381 template: every cell that ties Separator out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt. Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
+  "cells": [
+    { "id": "separatorthemes.default",  "state": "default",  "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "themes wrapper at-rest: rt-Separator default size 1" },
+    { "id": "separatorthemes.vertical", "state": "vertical", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "themes wrapper vertical orientation" },
+    { "id": "separatorthemes.accent",   "state": "accent",   "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "themes data-accent-color fill" },
+    { "id": "separatorthemes.semantic", "state": "semantic", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "themes decorative=false → role=separator" },
+    { "id": "separatorthemes.size4",    "state": "size4",    "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "themes rt-r-size-4" },
+    { "id": "separatorthemes.rest",     "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "themes at-rest a11y tree" },
+    { "id": "separatorprim.hsem",       "state": "hsem",     "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "primitive horizontal-semantic: role=separator, data-orientation=horizontal, no aria-orientation" },
+    { "id": "separatorprim.hdec",       "state": "hdec",     "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "primitive horizontal-decorative: role=none, no aria-orientation" },
+    { "id": "separatorprim.vsem",       "state": "vsem",     "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "primitive vertical-semantic: role=separator, aria-orientation=vertical" },
+    { "id": "separatorprim.vdec",       "state": "vdec",     "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "primitive vertical-decorative: role=none, data-orientation=vertical" },
+    { "id": "separatorprim.rest",       "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "primitive at-rest a11y tree" },
+
+    { "id": "separatorprim.role-switch",      "state": "rest", "importance": "core",   "status": "open", "oracle": ["dom", "aria"], "ref": "separator.tsx:31-34 role=separator vs role=none switch on decorative; verified by NOTHING (pixel blind)" },
+    { "id": "separatorprim.data-orientation", "state": "rest", "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "separator.tsx:38 data-orientation always emitted in all 4 combos" },
+    { "id": "separatorprim.decorative-a11y",  "state": "rest", "importance": "core",   "status": "open", "oracle": ["aria"],        "ref": "separator.tsx:32-33 decorative=true removes element from a11y tree (role=none); axe/aria-tree check" },
+    { "id": "separatorprim.prop-passthrough", "state": "rest", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "separator.tsx:28,40 ...domProps spread (id/style/data-*/aria-*); port Input closed record" },
+    { "id": "separatorprim.classname-merge",  "state": "rest", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "separator.tsx:40 className merge vs port wholesale replace via class_; themes prepends rt-Separator" },
+    { "id": "separatorthemes.size-axis",      "state": "rest", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "separator.props.tsx size 1-4 → rt-r-size-N; rendered/verified nowhere (golden uses primitive)" },
+    { "id": "separatorthemes.accent-axis",    "state": "rest", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "themes separator.tsx:23 data-accent-color (default gray) → --accent-a6 fill; never in golden" },
+    { "id": "separatorthemes.decorative-default","state": "rest", "importance": "common", "status": "open", "oracle": ["aria"],     "ref": "themes separator.tsx:22 decorative default TRUE → role omitted entirely (not role=none)" },
+
+    { "id": "separator.invalid-orientation",  "state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: invalid-orientation fallback via isValidOrientation()" },
+    { "id": "separator.prop-precedence",      "state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: prop precedence — caller spread overrides computed role/aria" },
+    { "id": "separator.aschild",              "state": "rest", "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: asChild / polymorphic element (Slot merging) — no Halogen equivalent" },
+    { "id": "separator.themes-margin",        "state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: themes margin props m/mx/my/... → rt-r-m*-N" },
+    { "id": "separator.responsive-props",     "state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: responsive prop objects for orientation & size" },
+    { "id": "separator.themes-data-orientation","state": "rest", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: data-orientation presence on the THEMES wrapper" }
+  ]
+}

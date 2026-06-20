@@ -1,0 +1,26 @@
+{
+  "component": "AspectRatio",
+  "primitive": "Hydrogen.Radix.AspectRatio",
+  "face": "themed",
+  "upstream": "primitives aspect-ratio.tsx + @radix-ui/themes@3",
+  "note": "The STR-381 template: every cell that ties AspectRatio out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt. Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
+  "cells": [
+    { "id": "aspectratioprim.default",  "state": "default",  "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "at-rest two-div structure, default ratio" },
+    { "id": "aspectratioprim.wide",     "state": "wide",     "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "ratio=16/9 padding-bottom:56.25%" },
+    { "id": "aspectratioprim.tall",     "state": "tall",     "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "ratio=1/2 padding-bottom:200%" },
+    { "id": "aspectratioprim.verywide", "state": "verywide", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "wide ratio padding-bottom math" },
+    { "id": "aspectratioprim.styled",   "state": "styled",   "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "class_ on inner absolute div" },
+    { "id": "aspectratioprim.rest",     "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree" },
+
+    { "id": "aspectratioprim.wrapper-marker",  "state": "default", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:28 data-radix-aspect-ratio-wrapper='' marker on wrapper; port omits" },
+    { "id": "aspectratioprim.padding-math",    "state": "wide",    "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:26 padding-bottom exactly `${100/ratio}%`; PS show formatting risk (200.0% vs 200%)" },
+    { "id": "aspectratioprim.two-div",         "state": "default", "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:19-43 relative wrapper + absolute inset:0 inner holding children" },
+    { "id": "aspectratioprim.inner-style",     "state": "default", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:33-41 user style merged on inner, position/inset overrides win; port has no inner-style prop" },
+    { "id": "aspectratioprim.passthrough",     "state": "default", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:31 arbitrary DOM props (id/aria-*/data-*/role/handlers) to inner; port accepts only class_" },
+    { "id": "aspectratioprim.default-ratio",   "state": "default", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:18 default ratio=1/1 when omitted → padding-bottom:100%; port makes ratio mandatory" },
+    { "id": "aspectratioprim.class-placement", "state": "styled",  "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "aspect-ratio.tsx:30-31 className lands on INNER styled div, not wrapper; unverified" },
+    { "id": "aspectratioprim.axe-clean",       "state": "default", "importance": "common", "status": "open", "oracle": ["aria"],        "ref": "aspect-ratio.test.tsx:24-26 populated AspectRatio axe clean (regression guard)" },
+
+    { "id": "aspectratioprim.fractional-ratio", "state": "default", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: fractional/edge ratio (very small ratio → very large padding)" }
+  ]
+}

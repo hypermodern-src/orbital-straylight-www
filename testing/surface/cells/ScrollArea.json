@@ -1,0 +1,35 @@
+{
+  "component": "ScrollArea",
+  "primitive": "Hydrogen.Radix.ScrollArea",
+  "face": "themed",
+  "upstream": "primitives packages/react/scroll-area/src/scroll-area.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for ScrollArea. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:448-473 — 19 gaps (4 core).",
+  "cells": [
+    { "id": "scrollarea.shown",        "state": "shown",      "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "type=always vertical LTR anatomy: Root>Viewport>content, Scrollbar[data-state=visible]>Thumb translate3d" },
+    { "id": "scrollarea.rest",         "state": "rest",       "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (structurally mirrors shown; no DOM rest exists)" },
+    { "id": "scrollareax.both",        "state": "both",       "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "scrollbars=both (Themes default): TWO scrollbars X+Y + Corner" },
+    { "id": "scrollareax.horizontal",  "state": "horizontal", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "horizontal scrollbar: data-orientation=horizontal, X inline style, thumb translate3d X" },
+    { "id": "scrollareax.radius",      "state": "radius",     "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "data-radius attribute on scrollbar (Themes radius prop)" },
+    { "id": "scrollareax.rest",        "state": "rest",       "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "ScrollAreaX at-rest a11y tree" },
+
+    { "id": "scrollarea.hover",          "state": "hover",      "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "scroll-area.tsx:228-287 type=hover: hidden at rest, pointerenter→data-state=visible (Presence mount), leave→hide. MISSING in port." },
+    { "id": "scrollarea.nothumb",        "state": "fit",        "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "scroll-area.tsx:419,426,770 hasThumb gate: no overflow (ratio>=1) → Thumb Presence-absent; port always emits thumb. PORT FIX." },
+    { "id": "scrollarea.thumb-raf",      "state": "shown",      "importance": "core",   "status": "open", "oracle": ["none"],       "ref": "scroll-area.tsx:780-819 rAF unlinked-scroll listener; verify post-scroll thumb translate3d Y matches getThumbOffsetFromScroll (runtime)" },
+    { "id": "scrollarea.thumb-math",     "state": "shown",      "importance": "core",   "status": "open", "oracle": ["none"],       "ref": "scroll-area.tsx:916-957 linearScale/clamp/getThumbOffsetFromScroll incl min-18 floor + RTL neg range (pure-fn unit)" },
+    { "id": "scrollarea.scroll-machine", "state": "scroll",     "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "scroll-area.tsx:294-359 type=scroll state machine hidden→scrolling→idle→hidden; at-rest hidden DOM deterministic. MISSING in port." },
+    { "id": "scrollarea.auto-overflow",  "state": "auto",       "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "scroll-area.tsx:366-394 type=auto: visible only when viewport overflows (ResizeObserver); shown variant" },
+    { "id": "scrollarea.auto-fit",       "state": "auto",       "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "scroll-area.tsx:366-394 type=auto: content fits → NO scrollbar; covers hasThumb gate" },
+    { "id": "scrollarea.thumb-drag",     "state": "shown",      "importance": "common", "status": "open", "oracle": ["none"],       "ref": "scroll-area.tsx:677-744 thumb drag: pointerdown→capture, linear-scale pointer→scroll, release+restore (runtime). MISSING in port." },
+    { "id": "scrollarea.axe-focusable",  "state": "rest",       "importance": "common", "status": "open", "oracle": ["aria"],       "ref": "axe scrollable-region-focusable: both ARIA goldens FLAG it; decide tabindex vs baseline (parity = inherited violation)" },
+    { "id": "scrollarea.keyboard-scroll","state": "shown",      "importance": "common", "status": "open", "oracle": ["none"],       "ref": "scroll-area.tsx:807-816 focus viewport, PageDown → scrollTop>0 + thumb tracks (runtime)" },
+
+    { "id": "scrollarea.corner",        "state": "both",       "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Corner rendered iff type!=='scroll' && both scrollbars present (hasSize gate)" },
+    { "id": "scrollarea.rtl",           "state": "rtl",        "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: dir=rtl flips vertical scrollbar to left:0, horizontal/corner side, scroll-range sign" },
+    { "id": "scrollarea.viewport-style","state": "shown",      "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Viewport injects <style> hiding native scrollbar (scrollbar-width:none) + nonce" },
+    { "id": "scrollarea.forcemount",    "state": "shown",      "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on Scrollbar/Thumb (force-present even when hidden)" },
+    { "id": "scrollarea.wheel",         "state": "shown",      "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: wheel-scroll on scrollbar: document-level passive:false wheel listener" },
+    { "id": "scrollarea.radius-attr",   "state": "shown",      "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: data-radius attribute on Scrollbar (Themes radius)" },
+    { "id": "scrollarea.size",          "state": "shown",      "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: size prop (rt-r-size-1|2|3, responsive) on scrollbar" },
+    { "id": "scrollarea.hide-delay",    "state": "shown",      "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: scrollHideDelay prop (Themes overrides to 0 unless type=scroll)" }
+  ]
+}

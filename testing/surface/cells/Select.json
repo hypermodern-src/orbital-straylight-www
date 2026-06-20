@@ -1,0 +1,38 @@
+{
+  "component": "Select",
+  "primitive": "Hydrogen.Radix.Select",
+  "face": "themed",
+  "upstream": "primitives packages/react/select/src/select.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Select: 21 gaps (3 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    { "id": "select.open",                    "state": "open",        "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "open listbox: group Fruits, Apple selected/highlighted, modal envelope" },
+    { "id": "select.rest",                     "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest combobox a11y tree (Apple)" },
+    { "id": "selectform.required",             "state": "required",    "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "form/required: aria-required on trigger render" },
+    { "id": "selectform.rest",                 "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "form select at-rest a11y tree" },
+    { "id": "selectplaceholder.placeholder",   "state": "placeholder", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "placeholder: trigger data-placeholder + placeholder text render" },
+    { "id": "selectplaceholder.rest",          "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "placeholder select at-rest a11y tree" },
+
+    { "id": "select.trigger-keyboard-open",  "state": "open", "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "select.tsx:31,380-389,703-714 OPEN_KEYS Space/Enter/ArrowUp/Down open + preventDefault, focus selected item; port trigger has only onClick — keyboard cannot open" },
+    { "id": "select.open-focus-selected",    "state": "open", "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "select.tsx:683-714 on open focus lands on SELECTED option (focusSelectedItem); port focuses content/listbox — wrong roving origin" },
+    { "id": "select.typeahead",              "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "select.tsx:307,768,1834-1883 typeahead 1-char search focuses next match (cycling, 1s reset); entirely absent from port" },
+    { "id": "select.home-end-tab",           "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "select.tsx:882-910 Home/End + ArrowUp edge over enabled items; Tab preventDefault; port lacks Home/End + Tab guard" },
+    { "id": "select.disabled-item-skip",     "state": "open", "importance": "common", "status": "open", "oracle": ["apg", "dom"], "ref": "select.tsx:308,769,891,1375 disabled items skipped by all nav + not selectable; port roves through disabled" },
+    { "id": "select.placeholder",            "state": "placeholder", "importance": "core", "status": "open", "oracle": ["dom", "aria"], "ref": "select.tsx:344,423-435,1830 placeholder text + data-placeholder when value ''/undefined; port has no placeholder concept (blank trigger)" },
+    { "id": "select.aria-required",          "state": "required", "importance": "common", "status": "open", "oracle": ["aria", "dom"], "ref": "select.tsx:338,1803 aria-required on trigger + required on native select; port has neither" },
+    { "id": "select.native-bubble-select",   "state": "form", "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "select.tsx:1780-1822,189,1483-1496 hidden native <select> BubbleSelect for submit/autofill; entirely absent from port" },
+    { "id": "select.disabled-trigger",       "state": "disabled", "importance": "common", "status": "open", "oracle": ["dom", "apg"], "ref": "select.tsx:299-302,342-343 disabled trigger: button disabled + data-disabled, does not open; port has no disabled prop" },
+    { "id": "select.aria-selected-focus-gated","state": "open", "importance": "common", "status": "open", "oracle": ["aria"],     "ref": "select.tsx:1404 aria-selected gated on isFocused (VoiceOver fix); port emits unconditionally" },
+    { "id": "select.pointer-hover-focus",    "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "select.tsx:1413-1440,792 pointer hover focuses item, leave returns to content, pointerup commits for mouse; port plain onClick only" },
+    { "id": "select.multi-group-separator",  "state": "open", "importance": "common", "status": "open", "oracle": ["dom", "aria"], "ref": "select.tsx:1285-1330,1696-1707 SelectSeparator + multiple groups/labels; port hard-codes one group, one label, flat array" },
+    { "id": "select.close-autofocus-trap",   "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "select.tsx:846-862 onCloseAutoFocus restores trigger preventScroll + real focus trap; port uses focus() + envelope guards, no re-trap" },
+
+    { "id": "select.trigger-pointer-policy", "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: trigger opens on mouse pointerdown (button 0)" },
+    { "id": "select.scroll-buttons",         "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: SelectScrollUpButton/SelectScrollDownButton + viewport auto-scroll" },
+    { "id": "select.rtl",                    "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: dir=rtl flips arrow semantics + item-aligned horizontal" },
+    { "id": "select.item-aligned-position",  "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: item-aligned positioning aligns selected item TEXT" },
+    { "id": "select.popper-position",        "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: position='popper' (non-item-aligned) mode" },
+    { "id": "select.empty-string-clearable", "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: empty-string value as clearable selection (#2706)" },
+    { "id": "select.typeahead-space-swallow","state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: space mid-typeahead swallowed (does not commit) on trigger + content" },
+    { "id": "select.forcemount",             "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on Portal/Content keeps content mounted while closed" }
+  ]
+}

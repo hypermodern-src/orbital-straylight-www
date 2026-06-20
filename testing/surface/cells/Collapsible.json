@@ -1,0 +1,24 @@
+{
+  "component": "Collapsible",
+  "primitive": "Hydrogen.Radix.Collapsible",
+  "face": "themed",
+  "upstream": "primitives packages/react/collapsible/src/collapsible.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Collapsible: 9 gaps (3 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    { "id": "collapsible.open",     "state": "open",    "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "open render: trigger aria-expanded=true + content div data-state=open" },
+    { "id": "collapsible.closing",  "state": "closing", "importance": "common", "status": "gated", "oracle": ["dom"],          "ref": "Presence exit: lingering content data-state=closed through pinned anim" },
+    { "id": "collapsible.disabled", "state": "disabled","importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "disabled surface: root/trigger/content data-disabled, button disabled" },
+    { "id": "collapsible.rest",     "state": "rest",    "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "closed at-rest a11y tree" },
+
+    { "id": "collapsible.root-data-disabled", "state": "disabled", "importance": "common", "status": "open", "oracle": ["dom"],       "ref": "collapsible.tsx:67-72 root div data-disabled='' when disabled; port root emits only classes+data-state" },
+    { "id": "collapsible.disabled-non-interactive", "state": "disabled", "importance": "common", "status": "open", "oracle": ["dom", "aria"], "ref": "collapsible.tsx:69,100-101,209 whole disabled surface never exercised; click disabled trigger does not open" },
+    { "id": "collapsible.rest-dom",           "state": "rest",     "importance": "core",   "status": "open", "oracle": ["dom"],       "ref": "collapsible.tsx:97 closed DOM: aria-expanded=false, NO aria-controls, content absent from document" },
+    { "id": "collapsible.closing-empty",      "state": "closing",  "importance": "common", "status": "open", "oracle": ["dom"],       "ref": "collapsible.tsx:165,211,215-220 closing frame: empty container, kept size vars; port keeps children + drops vars" },
+    { "id": "collapsible.keyboard-toggle",    "state": "open",     "importance": "core",   "status": "open", "oracle": ["apg"],       "ref": "collapsible.tsx:95-105 Enter/Space on trigger toggle with aria-expanded/aria-controls round-trip" },
+    { "id": "collapsible.controlled-no-close","state": "open",     "importance": "core",   "status": "open", "oracle": ["apg"],       "ref": "collapsible.test.tsx:105-131 controlled: click fires onOpenChange(false) but does NOT close (parent owns open)" },
+    { "id": "collapsible.unique-content-id",  "state": "open",     "importance": "common", "status": "open", "oracle": ["dom"],       "ref": "collapsible.tsx:63 unique contentId per instance, aria-controls/id stability across multiple" },
+
+    { "id": "collapsible.forcemount",   "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on CollapsibleContent keeps content mounted while closed" },
+    { "id": "collapsible.prop-passthrough", "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Trigger/Content accept and pass through arbitrary props" }
+  ]
+}

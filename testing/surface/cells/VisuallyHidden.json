@@ -1,0 +1,22 @@
+{
+  "component": "VisuallyHidden",
+  "primitive": "Hydrogen.Radix.VisuallyHidden",
+  "face": "primitive",
+  "upstream": "primitives packages/react/visually-hidden/src/visually-hidden.tsx",
+  "note": "STR-381 ledger for VisuallyHidden: 7 gaps (3 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    { "id": "visuallyhiddenprim.plain",      "state": "plain",      "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "plain span with fixed clip style emitted" },
+    { "id": "visuallyhiddenprim.props",      "state": "props",      "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "pass-through props land on emitted span" },
+    { "id": "visuallyhiddenprim.stylemerge", "state": "stylemerge", "importance": "common", "status": "gated", "oracle": ["dom"],          "ref": "caller style merged over default clip styles" },
+    { "id": "visuallyhiddenprim.rest",       "state": "rest",       "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "at-rest a11y tree (text in tree, not aria-hidden)" },
+
+    { "id": "visuallyhiddenprim.aschild",       "state": "plain",      "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "visually-hidden.tsx Primitive.span asChild merges clip style+props onto child (no wrapper span); port can only emit a <span>" },
+    { "id": "visuallyhiddenprim.props-passthrough","state": "props",   "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "visually-hidden.tsx {...props} spread id/aria-*/data-*/title/handlers; port accepts only ClassNames+children — blocks aria-labelledby wiring" },
+    { "id": "visuallyhiddenprim.user-style-merge","state": "stylemerge","importance": "common","status": "open", "oracle": ["dom"],        "ref": "visually-hidden.tsx style={{...VISUALLY_HIDDEN_STYLES, ...props.style}} caller override; port emits hardcoded immutable inlineStyle" },
+    { "id": "visuallyhiddenprim.style-string",  "state": "rest",       "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "visually-hidden.tsx clip:rect(0, 0, 0, 0) spaced + numeric units; port hardcodes no-space, no oracle pins string" },
+    { "id": "visuallyhiddenprim.a11y-exposed",  "state": "rest",       "importance": "core",   "status": "open", "oracle": ["aria"],       "ref": "visually-hidden.tsx clip technique keeps node in a11y tree (not aria-hidden/display:none); no a11y oracle asserts exposed + zero size" },
+
+    { "id": "visuallyhiddenprim.ref-forward",   "state": "rest",       "importance": "edge",   "status": "open", "oracle": ["none"],       "ref": "edge: ref forwarding (VisuallyHiddenElement ComponentRef) — idiom-dependent in Halogen" },
+    { "id": "visuallyhiddenprim.styles-export", "state": "rest",       "importance": "edge",   "status": "open", "oracle": ["none"],       "ref": "edge: VISUALLY_HIDDEN_STYLES is a public export consumed by other modules" }
+  ]
+}
