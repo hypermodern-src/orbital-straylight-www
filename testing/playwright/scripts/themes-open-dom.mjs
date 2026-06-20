@@ -26,7 +26,9 @@ if (!spec) { console.error(`no state script for id '${ID}'`); closeSrv(); proces
 const step = spec[STATE];
 if (!step) { console.error(`id '${ID}' has no state '${STATE}' (have: ${Object.keys(spec).join(", ")})`); process.exit(2); }
 
-const b = await chromium.launch();
+// CHROMIUM_BIN overrides executablePath where the nix browser set isn't materialized
+// (e.g. a sandbox with a system chromium); no-op in CI (version-matched nix browsers).
+const b = await chromium.launch(process.env.CHROMIUM_BIN ? { executablePath: process.env.CHROMIUM_BIN } : {});
 // Fixed, roomy viewport so the default `open` state never flips near an edge
 // (collision-flip is its own state to add later). deviceScaleFactor irrelevant for DOM.
 const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
