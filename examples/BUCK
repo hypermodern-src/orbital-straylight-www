@@ -26,6 +26,7 @@ purescript_app(
         "src/Gallery/Story/Switch.purs",
         "src/Gallery/Story/Toggle.purs",
         "src/Gallery/Story/TogglePresets.purs",
+        "src/Gallery/Story/Presets.purs",
     ],
     main = "Gallery.Main",
     deps = ["//:lib"],

@@ -57,8 +57,8 @@ function EXTRACTOR(root) {
   return fmt(root, 0, true);
 }
 
-async function extractByPreset(pg) {
-  const handles = await pg.$$("[data-preset]");
+async function extractByPreset(scope) {
+  const handles = await scope.$$("[data-preset]");
   const out = [];
   for (const h of handles) {
     const preset = await h.evaluate((e) => e.getAttribute("data-preset"));
@@ -66,6 +66,28 @@ async function extractByPreset(pg) {
     out.push({ preset, dom });
   }
   return out;
+}
+
+// A page may carry several `[data-invariance="<component>"]` groups, each with its own
+// `[data-preset]` variants — so many components prove in one page/build. Returns
+// [{ group, variants }]. With no groups, the whole page is one group (named `fallback`).
+async function extractGroups(pg, fallback) {
+  const groups = await pg.$$("[data-invariance]");
+  if (groups.length === 0) return [{ group: fallback, variants: await extractByPreset(pg) }];
+  const out = [];
+  for (const g of groups) {
+    const name = await g.evaluate((e) => e.getAttribute("data-invariance"));
+    out.push({ group: name, variants: await extractByPreset(g) });
+  }
+  return out;
+}
+
+// Returns true iff every group is preset-invariant.
+function gateGroups(groupResults) {
+  let allOk = true;
+  for (const { group, variants } of groupResults)
+    if (!reportAndExit(variants, group)) allOk = false;
+  return allOk;
 }
 
 function reportAndExit(variants, label) {
@@ -136,7 +158,7 @@ if (process.argv.includes("--selftest")) {
   const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
   await pg.goto(`http://127.0.0.1:${port}/?story=${encodeURIComponent(STORY)}`);
   await pg.waitForTimeout(300);
-  const ok = reportAndExit(await extractByPreset(pg), STORY);
+  const ok = gateGroups(await extractGroups(pg, STORY));
   await b.close(); close();
   process.exit(ok ? 0 : 1);
 }
