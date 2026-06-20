@@ -35,9 +35,19 @@ behaviorally invariant.
 ## Baseline (2026-06-19)
 
 195 gated cells / 305 required = **63.9% behavioral**; preset matrix **1/4 (25%)**, native
-only; **0 binding violations**; open core debt **110**. As STR-382 expands the dual-render
-surface and STR-383 lands non-native presets (each adding committed goldens), `derive.mjs`
-picks them up automatically and the coverage rises — recorded in `gaps.lock`.
+only; **0 binding violations**; open core debt **110**. All **32/32** components are itemized
+in `cells/` — **758 total rows** (195 gated + 563 open: 110 core / 230 common / 223 edge),
+each open cell a named, trackable parity item. As STR-382 expands the dual-render surface and
+STR-383 lands non-native presets (each adding committed goldens), `derive.mjs` picks them up
+automatically and coverage rises — recorded in `gaps.lock`.
+
+## Four enforced invariants
+
+`check.mjs` fails the build on any of:
+1. **Ratchet** — gated cells fell · open core debt rose · binding violations rose · presets-gated fell · enumerated components fell (vs `gaps.lock`).
+2. **Binding** — a `themes-states.mjs` driver state, or an enumerated `status:gated` cell, with no committed golden (the self-gate anti-pattern). Exit 1.
+3. **Drift guard** — any component's enumerated open-core count ≠ its `DEPTH-AUDIT.md` `(C core)` header. The ledger and the audit are mutually pinned; neither drifts silently. Exit 3.
+4. **Mapping** — a committed golden whose id-group isn't mapped to a component in `required.json` (warns).
 
 ## What's still coarse (honest notes, tightened by STR-381 proper)
 

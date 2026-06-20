@@ -40,6 +40,20 @@ try {
   }
 } catch { /* no cells/ dir yet */ }
 
+// ---- drift guard (STR-381 DoD): the ledger and DEPTH-AUDIT.md must stay mutually
+// pinned. Parse the audit's `### <Name> — <N> gaps (<C> core)` headers and assert each
+// component's enumerated open-core count equals the audit's C. Either both move or neither.
+const auditCore = {};
+{
+  const audit = await readFile(join(HERE, "..", "..", "src", "Hydrogen", "Radix", "DEPTH-AUDIT.md"), "utf8");
+  for (const m of audit.matchAll(/^### (\w+) — \d+ gaps \((\d+) core\)/gm)) auditCore[m[1]] = +m[2];
+}
+const driftErrors = [];
+for (const [comp, e] of Object.entries(enumerated)) {
+  if (comp in auditCore && auditCore[comp] !== e.coreOpen)
+    driftErrors.push(`${comp}: ledger open-core ${e.coreOpen} ≠ DEPTH-AUDIT ${auditCore[comp]}`);
+}
+
 // A gated CLAIM in an enumerated file with no committed golden = binding violation.
 const gatedOnDisk = new Set(cells.keys());
 for (const [comp, e] of Object.entries(enumerated))
@@ -103,6 +117,14 @@ console.log(`  enumerated: ${t.enumerated_components}/32 components itemized · 
 console.log(`  binding violations (drivers with no committed golden): ${t.binding_violations}`);
 if (current.unmapped_idgroups.length)
   console.log(`  ⚠ unmapped golden id-groups (add to required.json id_groups): ${current.unmapped_idgroups.join(", ")}`);
+
+// Drift guard fails hard regardless of --update: the ledger may never disagree with the audit.
+if (driftErrors.length) {
+  console.error(`\n✘ LEDGER ↔ DEPTH-AUDIT DRIFT — these must move together:`);
+  for (const d of driftErrors) console.error(`    · ${d}`);
+  console.error(`  Update both the cell file and the DEPTH-AUDIT header in the same commit.`);
+  process.exit(3);
+}
 
 if (UPDATE) {
   await writeFile(LOCK, JSON.stringify(current, null, 2) + "\n");
