@@ -13,7 +13,7 @@ module Gallery.Main where
 
 import Prelude
 
-import Data.Array (find)
+import Data.Array (filter, find)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (drop, indexOf, splitAt) as Str
 import Data.String.Pattern (Pattern(..))
@@ -35,6 +35,7 @@ import Gallery.Story.Tooltip as Tooltip
 import Gallery.Story.Separator as Separator
 import Gallery.Story.Switch as Switch
 import Gallery.Story.Toggle as Toggle
+import Gallery.Story.TogglePresets as TogglePresets
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -64,7 +65,14 @@ stories =
   , DropdownMenu.story
   , ContextMenu.story
   , Select.story
+  , TogglePresets.story
   ]
+
+-- | Stories that are NOT pixel-diffed (no golden png) — reachable by id for non-pixel
+-- | gates only (e.g. the behavioral-invariance gate drives `?story=toggle-presets`).
+-- | Excluded from the manifest the pixel spec enumerates.
+nonPixel :: Array String
+nonPixel = [ "toggle-presets" ]
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Mount: route on ?story=<id>, else render the manifest index
@@ -140,8 +148,14 @@ manifest =
             HH.li [ HP.attr (HH.AttrName "data-story") s.id ]
               [ HH.a [ HP.href ("?story=" <> s.id) ] [ HH.text s.id ] ]
         )
-        stories
+        (filter (\s -> not (elemStr s.id nonPixel)) stories)
     )
+
+elemStr :: String -> Array String -> Boolean
+elemStr x = case _ of
+  xs -> case find (_ == x) xs of
+    Just _ -> true
+    Nothing -> false
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Tiny pure string helpers (kept local; not worth a dependency)

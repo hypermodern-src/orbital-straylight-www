@@ -72,6 +72,7 @@ const covBehavioral = gatedCount / requiredBehavioral;
 const presetsRequired = req.presets.required.length; // unstyled, themes, shadcn, daisy
 const presetsGated = 1; // native only; rises as STR-383 lands non-native presets + goldens
 const covPreset = presetsGated / presetsRequired;
+const invarianceSubjects = (req.presets.invariance_subjects ?? []).length; // STR-383: proven preset-invariant
 
 // ---- per-component gated cell tally (group golden ids back to components)
 const idgroupToComp = {};
@@ -100,6 +101,7 @@ const current = {
     binding_violations: unbound.length,
     enumerated_components: Object.keys(enumerated).length,
     named_open_cells: namedOpenCells,
+    invariance_subjects: invarianceSubjects,
   },
   per_component: Object.fromEntries(
     Object.entries(perComponent).sort((a, b) => b[1].core_open - a[1].core_open)
@@ -113,6 +115,7 @@ const t = current.totals;
 console.log(`ℵ surface ledger — upstream primitives@${req.upstream.primitives_sha} themes@${req.upstream.radix_themes}`);
 console.log(`  behavioral: ${t.gated_cells} gated / ${t.required_behavioral} required  (${t.coverage_behavioral_pct}%)  · open core debt: ${t.open_core_gaps}`);
 console.log(`  preset matrix: ${t.presets_gated}/${t.presets_required} presets  (${t.coverage_preset_pct}%)  [unstyled·themes·shadcn·daisy; orbital last]`);
+console.log(`  preset-invariance proven: ${t.invariance_subjects}/32 components (behavioral DOM identical across all presets)`);
 console.log(`  enumerated: ${t.enumerated_components}/32 components itemized · ${t.named_open_cells} named open cells (STR-381 template)`);
 console.log(`  binding violations (drivers with no committed golden): ${t.binding_violations}`);
 if (current.unmapped_idgroups.length)
@@ -144,6 +147,7 @@ if (C.open_core_gaps > L.open_core_gaps) regressions.push(`open_core_gaps rose $
 if (C.binding_violations > L.binding_violations) regressions.push(`binding_violations rose ${L.binding_violations} → ${C.binding_violations} (a driver lost its golden)`);
 if (C.presets_gated < L.presets_gated) regressions.push(`presets_gated fell ${L.presets_gated} → ${C.presets_gated}`);
 if ((C.enumerated_components ?? 0) < (L.enumerated_components ?? 0)) regressions.push(`enumerated_components fell ${L.enumerated_components} → ${C.enumerated_components} (a cell file was lost)`);
+if ((C.invariance_subjects ?? 0) < (L.invariance_subjects ?? 0)) regressions.push(`invariance_subjects fell ${L.invariance_subjects} → ${C.invariance_subjects} (a preset-invariance proof was dropped)`);
 
 if (regressions.length) {
   console.error(`\n✘ RATCHET REGRESSION — progress is monotone; these moved the wrong way:`);

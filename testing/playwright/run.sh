@@ -44,4 +44,12 @@ fi
 echo "ℵ surface ratchet"
 nix shell nixpkgs#nodejs --command node "$HYDROGEN/testing/surface/check.mjs"
 
+# Behavioral-invariance gate (STR-383): the SAME primitive under every preset must have
+# byte-identical behavioral DOM (only class/style differ) — the "drop any skin on" proof.
+# One line per invariance subject story; the gate exits nonzero on any divergence.
+echo "ℵ behavioral-invariance gate"
+for s in toggle-presets; do
+  nix shell nixpkgs#bun --command bun "$HERE/scripts/invariance.mjs" "$HERE/.gallery-dist" "$s"
+done
+
 exec nix shell nixpkgs#bun nixpkgs#python3 --command bun run test "$@"
