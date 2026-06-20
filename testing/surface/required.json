@@ -12,7 +12,7 @@
     "deferred_last": ["orbital"],
     "native_preset_by_face": { "themed": "themes", "bare": "unstyled" },
     "note": "Today every committed golden is its component's NATIVE preset only (themed→themes vs @radix-ui/themes; bare→unstyled vs @radix-ui/react-*). The other presets are open until STR-383 lands the preset layer + behavioral-invariance gate.",
-    "invariance_subjects": ["Toggle", "Switch", "Checkbox", "Separator", "AspectRatio", "Progress", "Label"],
+    "invariance_subjects": ["Toggle", "Switch", "Checkbox", "Separator", "AspectRatio", "Progress", "Label", "VisuallyHidden", "Avatar", "Slider", "RadioGroup", "ToggleGroup", "Tabs", "Accordion", "Collapsible", "Toolbar", "OneTimePasswordField", "PasswordToggleField", "ScrollArea", "Toast"],
     "invariance_note": "Components proven behaviorally preset-invariant across {unstyled,themes,shadcn,daisy} by testing/playwright/scripts/invariance.mjs (a [data-preset] subject story in the gallery, run by run.sh). The list only grows; each is a green 'drop any skin on' proof. Per-preset FIDELITY (each skin matches its own ground-truth golden) is a separate axis, still native-only."
   },
   "components": {
