@@ -17,8 +17,12 @@ import Gallery.Story (Story, StoryComponent)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Hydrogen.Radix.AspectRatio as AspectRatio
 import Hydrogen.Radix.Checkbox as Checkbox
 import Hydrogen.Radix.Foundation.Style (cn)
+import Hydrogen.Radix.Label as Label
+import Hydrogen.Radix.Progress as Progress
+import Hydrogen.Radix.Separator as Separator
 import Hydrogen.Radix.Switch as Switch
 import Hydrogen.Radix.Toggle as Toggle
 import Type.Proxy (Proxy(..))
@@ -68,6 +72,10 @@ view =
     [ group "Toggle" (mapWithIndex toggleCell skins)
     , group "Switch" (mapWithIndex switchCell skins)
     , group "Checkbox" (mapWithIndex checkboxCell skins)
+    , group "Separator" (mapWithIndex separatorCell skins)
+    , group "AspectRatio" (mapWithIndex aspectRatioCell skins)
+    , group "Progress" (mapWithIndex progressCell skins)
+    , group "Label" (mapWithIndex labelCell skins)
     ]
   where
   group name kids = HH.div [ HP.attr (HH.AttrName "data-invariance") name ] kids
@@ -89,3 +97,19 @@ view =
   checkboxCell i s = preset s $
     HH.slot_ _checkbox i Checkbox.component
       (Checkbox.defaultInput { style = { root: cn s.a, indicator: cn s.b } })
+
+  -- Stateless render-fn primitives (no slots): their behavioral surface
+  -- (role / aria-* / data-*) is class-independent, so invariance must hold.
+  separatorCell _ s = preset s $
+    Separator.separator (Separator.defaultInput { class_ = cn s.a })
+
+  aspectRatioCell _ s = preset s $
+    AspectRatio.aspectRatio (AspectRatio.defaultInput { class_ = cn s.a }) [ HH.text "A" ]
+
+  progressCell _ s = preset s $
+    Progress.progress { value: Just 25.0, max: 100.0, class_: cn s.a, indicator: cn s.b, rootAttrs: [] }
+
+  -- same `for` across all skins — the variants differ ONLY in class (per-instance ids
+  -- would be radix-generated and normalized; a hand-set `for` must be constant).
+  labelCell _ s = preset s $
+    Label.label { for: "demo-label", class_: cn s.a } [ HH.text "L" ]
