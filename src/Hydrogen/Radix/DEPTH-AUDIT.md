@@ -929,7 +929,7 @@ _Coverage today:_ Oracles today cover a narrow happy path. DOM goldens: dialog.o
   - dialog.tsx:61-66 (useControllableState prop/onChange) → Runtime: mount with open=Just true and a parent that ignores OpenChanged; press Escape; assert dialog stays open (controlled). Needs a controlled demo harness slot.
 - _edge (11):_ Right-click / ctrl-left-click outside does NOT dismiss (moda; onOpenAutoFocus / onCloseAutoFocus / onPointerDownOutside / ; onFocusOutside is preventDefaulted in modal mode (a focusout; Trigger re-click while open / clicking trigger as 'outside':; forceMount on Portal/Overlay/Content — keep mounted regardle; Portal container prop — portal content into a caller-specifi; Nested / overlapping modal dialogs — body pointer-events:non; RTL — dialog content/overlay carry no dir-specific logic ups; Dev-time warnings: missing DialogTitle (accessibility) and m; Overlay registers as a dismiss surface so consumer stopPropa; RemoveScroll allowPinchZoom + shards=[contentRef] so the ove
 
-### Tooltip — 22 gaps (1 core) · gaps-core
+### Tooltip — 22 gaps (0 core) · gaps-core
 _Port-code needed:_ PORT-CODE genuinely missing (not just unverified):
 1. aria-describedby should be conditional on open (tooltip.tsx:290). Port emits it always (Tooltip.purs:215) — closed trigger wrongly references a hidden id. CORE a11y bug.
 2. data-state tri-state. Port hardcodes 'delayed-open' for every open path (Tooltip.purs:216,237). Focus-open must be 'instant-open'; pointer-open is 'delayed-open' only after a real delay. Currently semantically wrong on focus.
