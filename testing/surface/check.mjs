@@ -31,12 +31,13 @@ try {
     if (!f.endsWith(".json")) continue;
     const cf = JSON.parse(await readFile(join(HERE, "cells", f), "utf8"));
     const comp = cf.component;
-    let coreOpen = 0, namedOpen = 0; const gatedClaims = [];
+    let coreOpen = 0, namedOpen = 0, closed = 0, total = 0; const gatedClaims = [];
     for (const c of cf.cells) {
-      if (c.status === "gated") gatedClaims.push(c.id);
+      total++;
+      if (c.status === "gated") { closed++; gatedClaims.push(c.oracle_file ?? c.id); } // bound golden basename (co-coverage via oracle_file)
       else if (c.status === "open") { namedOpen++; if (c.importance === "core") coreOpen++; }
     }
-    enumerated[comp] = { coreOpen, namedOpen, gatedClaims };
+    enumerated[comp] = { coreOpen, namedOpen, gatedClaims, closed, total };
   }
 } catch { /* no cells/ dir yet */ }
 
@@ -57,8 +58,13 @@ for (const [comp, e] of Object.entries(enumerated)) {
 // A gated CLAIM in an enumerated file with no committed golden = binding violation.
 const gatedOnDisk = new Set(cells.keys());
 for (const [comp, e] of Object.entries(enumerated))
-  for (const id of e.gatedClaims)
-    if (!gatedOnDisk.has(id)) unbound.push(`${comp}:${id} (enumerated gated, no golden)`);
+  for (const bound of e.gatedClaims)
+    if (!gatedOnDisk.has(bound)) unbound.push(`${comp}:${bound} (enumerated gated, no committed golden)`);
+
+// cell-based coverage (the true measure): closed = enumerated gated cells (each bound to a
+// committed golden, possibly shared via oracle_file); total = all enumerated cells.
+const closedCells = Object.values(enumerated).reduce((n, e) => n + e.closed, 0);
+const totalCells = Object.values(enumerated).reduce((n, e) => n + e.total, 0);
 
 // ---- behavioral surface: numerator = gated cells; open debt = open core gaps.
 // Enumerated components contribute their itemized core-open count; the rest the scalar.
@@ -101,6 +107,9 @@ const current = {
     binding_violations: unbound.length,
     enumerated_components: Object.keys(enumerated).length,
     named_open_cells: namedOpenCells,
+    closed_cells: closedCells,
+    total_cells: totalCells,
+    coverage_cells_pct: +((closedCells / totalCells) * 100).toFixed(1),
     invariance_subjects: invarianceSubjects,
   },
   per_component: Object.fromEntries(
@@ -116,7 +125,7 @@ console.log(`ℵ surface ledger — upstream primitives@${req.upstream.primitive
 console.log(`  behavioral: ${t.gated_cells} gated / ${t.required_behavioral} required  (${t.coverage_behavioral_pct}%)  · open core debt: ${t.open_core_gaps}`);
 console.log(`  preset matrix: ${t.presets_gated}/${t.presets_required} presets  (${t.coverage_preset_pct}%)  [unstyled·themes·shadcn·daisy; orbital last]`);
 console.log(`  preset-invariance proven: ${t.invariance_subjects}/32 components (behavioral DOM identical across all presets)`);
-console.log(`  enumerated: ${t.enumerated_components}/32 components itemized · ${t.named_open_cells} named open cells (STR-381 template)`);
+console.log(`  cells: ${t.closed_cells}/${t.total_cells} closed  (${t.coverage_cells_pct}%)  · ${t.named_open_cells} open · ${t.enumerated_components}/32 components itemized`);
 console.log(`  binding violations (drivers with no committed golden): ${t.binding_violations}`);
 if (current.unmapped_idgroups.length)
   console.log(`  ⚠ unmapped golden id-groups (add to required.json id_groups): ${current.unmapped_idgroups.join(", ")}`);
@@ -148,6 +157,7 @@ if (C.binding_violations > L.binding_violations) regressions.push(`binding_viola
 if (C.presets_gated < L.presets_gated) regressions.push(`presets_gated fell ${L.presets_gated} → ${C.presets_gated}`);
 if ((C.enumerated_components ?? 0) < (L.enumerated_components ?? 0)) regressions.push(`enumerated_components fell ${L.enumerated_components} → ${C.enumerated_components} (a cell file was lost)`);
 if ((C.invariance_subjects ?? 0) < (L.invariance_subjects ?? 0)) regressions.push(`invariance_subjects fell ${L.invariance_subjects} → ${C.invariance_subjects} (a preset-invariance proof was dropped)`);
+if ((C.closed_cells ?? 0) < (L.closed_cells ?? 0)) regressions.push(`closed_cells fell ${L.closed_cells} → ${C.closed_cells} (a cell was un-closed)`);
 
 if (regressions.length) {
   console.error(`\n✘ RATCHET REGRESSION — progress is monotone; these moved the wrong way:`);

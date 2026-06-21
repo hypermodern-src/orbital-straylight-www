@@ -107,6 +107,8 @@ export const STATES = {
     // driver is the same (click the trigger); the snapshot pins the extra close-button markup.
     // Keyed off rt-PopoverContent, so the same driver runs golden + port.
     close: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
+    // at-rest CLOSED trigger: aria-controls absent when closed (present only when open).
+    "closed-attr": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
   },
   tooltip: {
     open: async (pg) => { await triggerButton(pg).hover(); await pg.getByRole("tooltip").waitFor(); },

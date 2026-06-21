@@ -29,7 +29,7 @@
     { "id": "slider.fractional-step",    "state": "open",     "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "slider.tsx:147-149,900-923 fractional/scientific step (0.1, 1e-7) via roundValue precision; port is Int-only" },
     { "id": "slider.disabled-track-range","state": "disabled","importance": "common", "status": "open", "oracle": ["dom"],        "ref": "slider.tsx:181-182,506,543 disabled DOM: data-disabled missing on track+range in port, no disabled golden" },
     { "id": "slider.aria-label",         "state": "open",     "importance": "common", "status": "open", "oracle": ["aria"],       "ref": "slider.tsx:681,823-831 aria-label fallback/passthrough clears axe aria-input-field-name; port has no aria-label wiring" },
-    { "id": "slider.rest-dom",           "state": "rest",     "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "slider.tsx:534-552,670-700 no at-rest DOM golden: value 40, range right:60%, thumb left:calc(40%+<px>) unverified" },
+    { "id": "slider.rest-dom",           "state": "rest",     "importance": "common", "status": "gated", "oracle": ["dom"], "oracle_file": "slider.rest", "ref": "at-rest DOM (value 40, range right:60%, thumb left:calc(40%+<px>)) — co-covered by golden-dom/slider.rest.txt; port==upstream (verified)" },
     { "id": "slider.clamp-grid-snap",    "state": "open",     "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "slider.tsx:147-151,276-283 clamp + grid-snap on overshoot; port does it but no oracle presses past boundary" },
 
     { "id": "slider.inverted",           "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: inverted prop flips slide direction (start/end edge, scale)" },
