@@ -40,6 +40,7 @@ module Hydrogen.Radix.Select
 import Prelude
 
 import Data.Array (find, findIndex, index, length, mapWithIndex, null)
+import Data.Array as Array
 import Data.Foldable (for_, traverse_)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Data.Traversable (traverse)
@@ -56,12 +57,13 @@ import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate)
+import Hydrogen.Radix.Behavior.Typeahead (nextMatch, isTypeaheadChar) as Typeahead
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Dom as Dom
 import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, role, aria)
-import Web.DOM.Node (Node)
+import Web.DOM.Node (Node, textContent)
 import Web.Event.Event (Event, EventType(..), preventDefault)
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -185,6 +187,9 @@ type State =
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot subscription for AfterOpen
   , contentNode :: Maybe Node
+  -- ── typeahead (type-to-focus option; radix useTypeahead) ──
+  , search :: String   -- the accumulated search buffer (reset lazily after ~1s of no input)
+  , lastKey :: Number  -- performance.now() of the last typeahead key; the idle-reset clock
   , contentId :: String   -- generated on Initialize; trigger aria-controls target + content id (= <id0>)
   , labelId :: String     -- generated on Initialize; group aria-labelledby + label id (= <id1>)
   , itemIds :: Array String  -- generated on Initialize; per-option value-span ids (= <id2>…)
@@ -256,6 +261,8 @@ initialState input =
   , subs: []
   , postSub: Nothing
   , contentNode: Nothing
+  , search: ""
+  , lastKey: 0.0
   , contentId: ""
   , labelId: ""
   , itemIds: []
@@ -494,12 +501,19 @@ handleAction = case _ of
       -- focus to the trigger (via closeMenu's restoreEl). preventDefault so the synthesized
       -- activation does NOT click-through to the (now refocused) trigger and re-open.
       "Enter" -> liftEffect (preventDefault (KE.toEvent ke)) *> commitFocused
-      " " -> liftEffect (preventDefault (KE.toEvent ke)) *> commitFocused
-      _ -> case navigate cfg pos (KE.key ke) of
-        Stay -> pure unit
-        MoveTo idx -> do
-          H.modify_ _ { focused = idx }
-          focusItem st.idPrefix idx
+      " " | st.search == "" -> liftEffect (preventDefault (KE.toEvent ke)) *> commitFocused
+      key
+        -- Typeahead (radix useTypeahead): a printable character (and Space mid-search — the
+        -- space-guard, handled by the guard above falling through) focuses the next matching
+        -- option before navigation.
+        | Typeahead.isTypeaheadChar key (st.search /= "") -> do
+            liftEffect (preventDefault (KE.toEvent ke))
+            typeaheadList key
+        | otherwise -> case navigate cfg pos key of
+            Stay -> pure unit
+            MoveTo idx -> do
+              H.modify_ _ { focused = idx }
+              focusItem st.idPrefix idx
   ItemChosen value -> do
     st <- H.get
     let res = change value st.sel
@@ -580,13 +594,42 @@ closeMenu = do
     -- tear down the modal envelope + restore focus to the trigger captured on open
     liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing }
+    H.modify_ _ { ctrl = (change false st.ctrl).next, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, search = "" }
     H.raise (OpenChanged false)
 
 focusItem :: forall m. MonadEffect m => String -> Int -> H.HalogenM State Action () Output m Unit
 focusItem pfx idx = do
   mel <- H.getHTMLElementRef (itemRef pfx idx)
   for_ mel (liftEffect <<< HTMLElement.focus)
+
+-- | Read the option labels (textContent — radix `textValue`) over the option index space, so
+-- | the pure matcher works on the same indices `focused` uses.
+readItemTexts :: forall m. MonadEffect m => String -> Int -> H.HalogenM State Action () Output m (Array String)
+readItemTexts pfx count =
+  traverse
+    ( \i -> do
+        mel <- H.getHTMLElementRef (itemRef pfx i)
+        case mel of
+          Just el -> liftEffect (textContent (HTMLElement.toNode el))
+          Nothing -> pure ""
+    )
+    (Array.range 0 (count - 1))
+
+-- | One typeahead keystroke over the listbox options (radix useTypeahead). Lazy
+-- | `performance.now()` reset (no idle timer → no spurious re-render): >1s starts fresh,
+-- | else extends the buffer.
+typeaheadList :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+typeaheadList key = do
+  st <- H.get
+  now <- liftEffect Dom.now
+  let
+    expired = now - st.lastKey > 1000.0
+    search' = (if expired then "" else st.search) <> key
+  texts <- readItemTexts st.idPrefix (length st.items)
+  for_ (Typeahead.nextMatch search' texts st.focused) \idx -> do
+    H.modify_ _ { focused = idx }
+    focusItem st.idPrefix idx
+  H.modify_ _ { search = search', lastKey = now }
 
 -- | Commit the currently-highlighted option (the roving `focused` index): set the value,
 -- | raise ValueChanged, and close (restoring focus to the trigger). The keyboard analogue

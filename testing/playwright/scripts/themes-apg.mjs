@@ -211,6 +211,16 @@ const CHECKS = [
     ok(await activeWithin(pg, '[role="menu"]'), "Enter did not move focus into the opened menu");
     await hlStarts(pg, "New Tab");
   }},
+  { id: "menubar", apg: "menubar", name: "typeahead: a letter focuses the next matching item in the open menu, repeats cycle", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(150);
+    await hlStarts(pg, "New Tab"); // items: New Tab, New Window, Print
+    await pg.keyboard.press("n"); await hlStarts(pg, "New Window");
+    await pg.keyboard.press("n"); await hlStarts(pg, "New Tab"); // repeated char cycles the n-items
+    await pg.waitForTimeout(1100);
+    await pg.keyboard.press("p"); await hlStarts(pg, "Print"); // fresh search
+  }},
   { id: "menubar", apg: "menubar", name: "Space on a trigger opens the menu and highlights the first item", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().focus();
     await pg.keyboard.press("Space");
@@ -294,6 +304,13 @@ const CHECKS = [
   { id: "select", apg: "listbox", name: "ArrowDown roves to the next option", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Orange");
+  }},
+  { id: "select", apg: "listbox", name: "typeahead: a letter focuses the matching option (idle reset)", run: async (pg) => {
+    await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
+    await hlStarts(pg, "Apple"); // options: Apple, Orange, Grape
+    await pg.keyboard.press("g"); await hlStarts(pg, "Grape");
+    await pg.waitForTimeout(1100); await pg.keyboard.press("o"); await hlStarts(pg, "Orange"); // fresh search after reset
+    await pg.waitForTimeout(1100); await pg.keyboard.press("a"); await hlStarts(pg, "Apple");
   }},
   // On open, DOM focus lands on the SELECTED option (upstream focusSelectedItem,
   // select.tsx:683-714 focusFirst([selectedItem, content])), not the content/listbox —
@@ -1028,6 +1045,13 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
     await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
     await pg.keyboard.press("Home"); await hlStarts(pg, "Edit");
+  }},
+  { id: "contextmenu", apg: "menu", name: "typeahead: a letter focuses the next matching item, repeats cycle", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(150);
+    await pg.keyboard.press("d"); await hlStarts(pg, "Duplicate"); // items: Edit, Duplicate, Delete
+    await pg.keyboard.press("d"); await hlStarts(pg, "Delete");    // repeated char cycles
+    await pg.waitForTimeout(1100); await pg.keyboard.press("e"); await hlStarts(pg, "Edit"); // fresh search
   }},
   { id: "contextmenu", apg: "menu", name: "Enter selects the highlighted item and closes the menu", run: async (pg) => {
     await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
