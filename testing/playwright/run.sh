@@ -47,9 +47,18 @@ nix shell nixpkgs#nodejs --command node "$HYDROGEN/testing/surface/check.mjs"
 # Behavioral-invariance gate (STR-383): the SAME primitive under every preset must have
 # byte-identical behavioral DOM (only class/style differ) — the "drop any skin on" proof.
 # One line per invariance subject story; the gate exits nonzero on any divergence.
-echo "ℵ behavioral-invariance gate"
+echo "ℵ behavioral-invariance gate (at-rest)"
 for s in toggle-presets presets inv-a inv-b inv-c inv-d inv-e inv-f; do
   nix shell nixpkgs#bun --command bun "$HERE/scripts/invariance.mjs" "$HERE/.gallery-dist" "$s"
+done
+
+# Overlay open-state invariance: each overlay opened under every preset (one per page),
+# behavioral DOM of the open overlay diffed across presets. Spec: "<baseId> <waitRole> <gesture>".
+echo "ℵ behavioral-invariance gate (overlay open-state)"
+for spec in "ovl-dialog dialog click"; do
+  set -- $spec
+  nix shell nixpkgs#bun --command bun "$HERE/scripts/invariance.mjs" "$HERE/.gallery-dist" \
+    --overlay "$1" unstyled,themes,shadcn,daisy "$2" "$3"
 done
 
 exec nix shell nixpkgs#bun nixpkgs#python3 --command bun run test "$@"

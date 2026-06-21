@@ -43,6 +43,7 @@ import Gallery.Story.InvC as InvC
 import Gallery.Story.InvD as InvD
 import Gallery.Story.InvE as InvE
 import Gallery.Story.InvF as InvF
+import Gallery.Story.OvlDialog as OvlDialog
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -80,13 +81,13 @@ stories =
   , InvD.story
   , InvE.story
   , InvF.story
-  ]
+  ] <> OvlDialog.stories
 
 -- | Stories that are NOT pixel-diffed (no golden png) — reachable by id for non-pixel
 -- | gates only (e.g. the behavioral-invariance gate drives `?story=presets`). Excluded
 -- | from the manifest the pixel spec enumerates.
 nonPixel :: Array String
-nonPixel = [ "toggle-presets", "presets", "inv-a", "inv-b", "inv-c", "inv-d", "inv-e", "inv-f" ]
+nonPixel = [ "toggle-presets", "presets", "inv-a", "inv-b", "inv-c", "inv-d", "inv-e", "inv-f" ] <> OvlDialog.ids
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Mount: route on ?story=<id>, else render the manifest index

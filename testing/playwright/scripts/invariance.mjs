@@ -16,7 +16,7 @@
 // node carrying `data-preset="<name>"`. The gate extracts each subtree's behavioral DOM
 // and asserts they are all equal to the first.
 import { chromium } from "@playwright/test";
-import { serve } from "./themes-states.mjs";
+import { serve, settle } from "./themes-states.mjs";
 
 // In CI the version-matched nix browser set (PLAYWRIGHT_BROWSERS_PATH, set by run.sh) is
 // used. CHROMIUM_BIN overrides executablePath for environments where that set isn't
@@ -147,9 +147,52 @@ async function selftest() {
   process.exit(ok ? 0 : 1);
 }
 
+// OVERLAY mode: prove an overlay's OPEN-state behavioral DOM is preset-invariant.
+// Each preset is a SEPARATE page (`<baseId>-<preset>`), so the body-portaled content is
+// unambiguous — no pairing. Opens via a generic gesture on the trigger, waits for the
+// overlay's role, snapshots the whole <body>, diffs across presets. Self-contained (no
+// #root / STATES coupling — the gallery mounts to body).
+//   node invariance.mjs <dist> --overlay <baseId> <preset1,..> <waitRole> [click|rightclick|hover]
+async function overlay(DIR, baseId, presetCsv, waitRole, gesture = "click") {
+  const presets = presetCsv.split(",");
+  const { port, close } = await serve(DIR);
+  const b = await launch();
+  const variants = [];
+  for (const p of presets) {
+    const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
+    await pg.goto(`http://127.0.0.1:${port}/?story=${encodeURIComponent(`${baseId}-${p}`)}`);
+    await pg.waitForTimeout(250);
+    try {
+      const trig = pg.getByRole("button").first();
+      if (gesture === "rightclick") await trig.click({ button: "right" });
+      else if (gesture === "hover") await trig.hover();
+      else await trig.click();
+      await pg.locator(`[role="${waitRole}"]`).first().waitFor({ timeout: 8000 });
+      await settle(pg);
+    } catch (e) {
+      console.error(`✘ ${baseId}-${p}: open (${gesture} → role=${waitRole}) failed — ${e.message.split("\n")[0]}`);
+      await b.close(); close(); process.exit(1);
+    }
+    const dom = await (await pg.$("body")).evaluate(EXTRACTOR);
+    variants.push({ preset: p, dom });
+    await pg.close();
+  }
+  await b.close(); close();
+  const ok = reportAndExit(variants, `${baseId} (open)`);
+  process.exit(ok ? 0 : 1);
+}
+
 // ── main ──────────────────────────────────────────────────────────────────────
 if (process.argv.includes("--selftest")) {
   await selftest();
+} else if (process.argv.includes("--overlay")) {
+  const i = process.argv.indexOf("--overlay");
+  const DIR = process.argv[2];
+  const [baseId, presetCsv, waitRole, gesture] = process.argv.slice(i + 1);
+  if (!DIR || !baseId || !presetCsv || !waitRole) {
+    console.error("usage: invariance.mjs <dist> --overlay <baseId> <preset1,...> <waitRole> [click|rightclick|hover]"); process.exit(2);
+  }
+  await overlay(DIR, baseId, presetCsv, waitRole, gesture);
 } else {
   const [DIR, STORY] = process.argv.slice(2);
   if (!DIR || !STORY) { console.error("usage: invariance.mjs <dist> <story-id>  |  invariance.mjs --selftest"); process.exit(2); }
