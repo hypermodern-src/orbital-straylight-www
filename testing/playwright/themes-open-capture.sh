@@ -17,6 +17,7 @@ GD="$HY/testing/golden/themes"; OUT="$GD/golden-dom"; mkdir -p "$OUT"
 # id:state matrix — extend as states/components are added.
 STATES=(
   "dialog:open"
+  "dialog:closed-attr"
   "alertdialog:open"
   "popover:open"
   "tooltip:open"
