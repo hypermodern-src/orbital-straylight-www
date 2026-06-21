@@ -488,22 +488,27 @@ render st =
             , aria "expanded" (if open then "true" else "false")
             , aria "haspopup" "menu"
             , dataState (if open then "open" else "closed")
-            , dataAttr "radix-popper-side" (sideName st.placedSide)
-            , dataAttr "radix-popper-align" (alignName st.placedAlign)
             , HE.onClick \_ -> TriggerClicked
             , HE.onKeyDown TriggerKeyDown
             ]
               <> (if open then [ aria "controls" st.contentId ] else [])
+              -- popper-side/align stamped on the trigger only while the Popper subtree is mounted
+              -- (rendered = Open OR Closing); absent at closed-rest, matching upstream.
+              <> (if rendered then [ dataAttr "radix-popper-side" (sideName st.placedSide), dataAttr "radix-popper-align" (alignName st.placedAlign) ] else [])
               <> portalData st.triggerAttrs
           )
           (map HH.fromPlainHTML st.trigger)
-      -- the popper WRAPPER (portal root) — position:fixed up front (shrink-to-fit measure);
-      -- the rest of its style is FFI (positionWrapper).
-      , HH.div
+      ]
+      -- the popper WRAPPER (portal root) renders ONLY while mounted (Open OR exiting Closing);
+      -- fully UNMOUNTED at Closed, matching upstream (no content node at closed-rest). finalize
+      -- re-adopts the freshly-mounted wrapper into body on each open. position:fixed up front
+      -- (shrink-to-fit measure); the rest of its style is FFI (positionWrapper).
+      <> ( if rendered then
+      [ HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
           , dir "ltr"
-          , HP.style (if rendered then "position: fixed;" else "display:none;")
+          , HP.style "position: fixed;"
           ]
           [ HH.div
               ( [ HP.ref contentRef
@@ -542,7 +547,7 @@ render st =
                   ]
               ]
           ]
-      ]
+      ] else [] )
         -- the open SUBMENU layer: a separate popper-content-wrapper, portal-adopted into body
         -- (SubAfterOpen), anchored to the open SubTrigger. Rendered only while a sub is open.
         <> maybe [] (\sub -> [ renderSubContent st sub ]) (st.subOpen >>= \v -> findSub v st.entries)

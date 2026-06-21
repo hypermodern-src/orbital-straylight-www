@@ -6,6 +6,7 @@
   "note": "Per-component surface ledger for DropdownMenu (incl. checks + group sub-primitives). status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 29 gaps (5 core).",
   "cells": [
     { "id": "dropdownmenu.open",        "state": "open",      "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "open content: role=menu, 3 menuitems, modal envelope (scroll-lock, focus guards, hideOthers)" },
+    { "id": "dropdownmenu.closed-rest", "state": "closed-rest", "importance": "common", "status": "gated", "oracle": ["dom"], "ref": "FIXED (2026-06-21): wrapper gated on isRendered → content UNMOUNTED at closed-rest (was display:none always-mounted); trigger popper-side/align also gated. golden-dom/dropdownmenu.closed-rest.txt; open/item2/disabled/submenu/closing no regression. (systemic popper-overlay closed-rest bug)" },
     { "id": "dropdownmenu.item2",       "state": "item2",     "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "ArrowDown×2 → Duplicate data-highlighted + tabindex=0, roving tabindex=-1 elsewhere" },
     { "id": "dropdownmenu.disabled",    "state": "disabled",  "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "disabled item data-disabled+aria-disabled, corrected roving tabindex distribution" },
     { "id": "dropdownmenu.submenu",     "state": "submenu",   "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "ArrowRight on SubTrigger → nested role=menu + aria-expanded/aria-controls" },

@@ -137,6 +137,7 @@ export const STATES = {
     },
   },
   dropdownmenu: {
+    "closed-rest": async (pg) => { await root(pg).getByRole("button").first().waitFor(); },
     open: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
     item2: async (pg) => {
       await openMenu(pg, () => triggerButton(pg).click());
