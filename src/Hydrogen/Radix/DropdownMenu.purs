@@ -881,9 +881,11 @@ handleAction = case _ of
   -- ArrowUp opens + highlights the LAST. (When open, the content owns key handling.)
   TriggerKeyDown ke -> do
     st <- H.get
+    -- dropdown-menu.tsx:127-134: ONLY ArrowDown opens from the trigger (Enter/Space open via
+    -- the native button click → TriggerClicked). ArrowUp does NOT open (that is a Menubar-only
+    -- behavior); opening on it was a port deviation.
     when (not (current st.ctrl)) case KE.key ke of
       "ArrowDown" -> liftEffect (preventDefault (KE.toEvent ke)) *> openMenuAt 0
-      "ArrowUp" -> liftEffect (preventDefault (KE.toEvent ke)) *> openMenuAt (itemCount st.entries - 1)
       _ -> pure unit
   -- after the open render flushed (content ref live): measure+place, then on the NEXT
   -- frame (after the placement modify's re-render) portal the content into body + focus

@@ -1045,6 +1045,11 @@ const CHECKS = [
     await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
   }},
+  // Trigger keys: Enter/Space/ArrowDown open (dropdown-menu.tsx:127-134); ArrowUp does NOT.
+  { id: "dropdownmenu", apg: "menu-button", name: "ArrowUp on the closed trigger does NOT open the menu", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowUp"); await pg.waitForTimeout(150);
+    ok(!(await visible(pg, '[role="menu"]')), "ArrowUp must not open the dropdown menu (only Enter/Space/ArrowDown)");
+  }},
   // Tab is preventDefault-ed inside an open menu (menu.tsx:531-532): focus cannot tab out.
   { id: "dropdownmenu", apg: "menu", name: "Tab is prevented (focus stays in the menu)", run: async (pg) => {
     await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
