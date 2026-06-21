@@ -394,7 +394,9 @@ initialState input =
   { ctrl: controllable input.value input.defaultValue
   , presence: if startVal /= "" then Open else Closed
   , menus: input.menus
-  , triggerFocus: 0
+  , triggerFocus: -1  -- no trigger is the tab stop until focus enters (root holds tabindex=0,
+                      -- all triggers -1, matching upstream RovingFocus entry semantics); a
+                      -- click/arrow/keyboard interaction migrates the tab stop onto a trigger.
   , itemFocus: 0
   , side: input.side
   , align: input.align
