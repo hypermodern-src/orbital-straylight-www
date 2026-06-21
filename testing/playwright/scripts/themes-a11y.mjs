@@ -39,7 +39,9 @@ const shown = (id) => Object.keys(STATES[id]).includes("open") ? "open" : Object
 const MATRIX = Object.keys(STATES).flatMap((id) => [{ id, state: "rest" }, { id, state: shown(id) }]);
 
 const { port: PORT, close: closeSrv } = await serve(DIR);
-const b = await chromium.launch();
+// CHROMIUM_BIN overrides executablePath where the nix browser set isn't materialized
+// (sandbox with a system chromium); no-op in CI (version-matched nix browsers).
+const b = await chromium.launch(process.env.CHROMIUM_BIN ? { executablePath: process.env.CHROMIUM_BIN } : {});
 let pass = 0, fail = 0;
 
 for (const { id, state } of MATRIX) {

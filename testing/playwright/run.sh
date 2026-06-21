@@ -78,8 +78,12 @@ done
 # pinned-animation oracle). Hard step: a divergence aborts via set -euo pipefail.
 echo "ℵ themes parity: port DOM == upstream (@radix-ui/themes)"
 "$HERE/themes-open-verify.sh"
-# NOTE: themes-a11y.sh (ARIA tree + axe) and themes-apg.sh (WAI-ARIA keyboard) join here once
-# their last stragglers are green (apg: 1 known fail; a11y: pending full re-verify). Wiring a
-# RED verify would block all merges, so they are added only when confirmed green.
+# WAI-ARIA APG keyboard conformance — port behavior == the spec tables (validated against the
+# real @radix-ui/themes golden). Full suite green (184/0).
+echo "ℵ themes parity: WAI-ARIA APG keyboard conformance"
+"$HERE/themes-apg.sh"
+# ARIA accessibility tree + axe fingerprint == upstream. Full suite green (100/0).
+echo "ℵ themes parity: ARIA tree + axe == upstream"
+"$HERE/themes-a11y.sh"
 
 exec nix shell nixpkgs#bun nixpkgs#python3 --command bun run test "$@"
