@@ -98,6 +98,8 @@ export const STATES = {
   },
   alertdialog: {
     open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("alertdialog").waitFor(); },
+    // at-rest CLOSED disclosure: aria-controls present only when open, aria-expanded=false.
+    "aria-controls": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
   },
   popover: {
     open: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },

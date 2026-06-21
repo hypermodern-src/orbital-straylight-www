@@ -22,7 +22,7 @@
     { "id": "alertdialog.controlled",   "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "alert-dialog.tsx:22-23 controlled open via inherited DialogProps; sync()/OpenChanged path unverified" },
     { "id": "alertdialog.defaultopen",  "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "AlertDialog.purs:198-221 startOpen; AfterOpen portal/envelope scheduled only from openDialog — defaultOpen likely un-portaled (port bug)" },
     { "id": "alertdialog.haspopup",     "state": "open", "importance": "common", "status": "open", "oracle": ["aria"],"ref": "alert-dialog.tsx:46 aria-haspopup=dialog (inherited, not alertdialog); covered by golden-dom" },
-    { "id": "alertdialog.aria-controls","state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "AlertDialog.purs:243-249 aria-controls only when open, aria-expanded always; covered by open/closing" },
+    { "id": "alertdialog.aria-controls","state": "aria-controls", "importance": "common", "status": "gated", "oracle": ["dom"], "ref": "AlertDialog.purs:243-249 aria-controls only when open — golden-dom/alertdialog.aria-controls.txt (closed trigger: aria-expanded=false, NO aria-controls); port==upstream" },
     { "id": "alertdialog.presence",     "state": "closing", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "AlertDialog.purs:352-378 Presence; no-animation immediate-unmount branch not separately verified" },
 
     { "id": "alertdialog.no-escape-close", "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: closeOnEscape=false — Escape does NOT close (port-only knob)" },

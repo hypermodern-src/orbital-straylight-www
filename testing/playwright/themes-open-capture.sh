@@ -19,6 +19,7 @@ STATES=(
   "dialog:open"
   "dialog:closed-attr"
   "alertdialog:open"
+  "alertdialog:aria-controls"
   "popover:open"
   "tooltip:open"
   "hovercard:open"
