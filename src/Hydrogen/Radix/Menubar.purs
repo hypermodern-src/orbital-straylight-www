@@ -320,6 +320,7 @@ data Action
   | TriggerClicked Int
   | TriggerKeyDown Int KE.KeyboardEvent
   | TriggerPointerEnter Int
+  | TriggerFocused Int
   | AfterOpen
   | AfterClose
   | AnimDone
@@ -498,6 +499,10 @@ renderTrigger st mOpenI i menu =
         , HP.tabIndex (tabIndexFor st.triggerFocus i)
         , HE.onClick \_ -> TriggerClicked i
         , HE.onKeyDown (TriggerKeyDown i)
+        -- focus syncs the roving index onto this trigger (Tab/.focus()/arrow entry), so the
+        -- bar tab stop migrates off the root and ArrowLeft/Right rove from here. At rest (no
+        -- focus) triggerFocus stays -1 → all triggers tabindex=-1, root=0 (upstream parity).
+        , HE.onFocus \_ -> TriggerFocused i
         , HE.onMouseEnter \_ -> TriggerPointerEnter i
         ]
           <> (if open then [ aria "controls" (contentIdAt st i) ] else [])
@@ -798,6 +803,7 @@ handleAction = case _ of
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
       }
+  TriggerFocused i -> H.modify_ _ { triggerFocus = i }
   TriggerClicked i -> do
     st <- H.get
     -- the trigger that was clicked becomes the bar tab stop; toggle/switch its menu.
