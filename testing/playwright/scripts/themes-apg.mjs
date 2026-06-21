@@ -221,6 +221,14 @@ const CHECKS = [
     await pg.waitForTimeout(1100);
     await pg.keyboard.press("p"); await hlStarts(pg, "Print"); // fresh search
   }},
+  { id: "menubar", apg: "menubar", name: "loop off (default): ArrowDown on the last menu item does NOT wrap", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "New Tab"); // File: New Tab, New Window, Print
+    await pg.keyboard.press("End"); await hlStarts(pg, "Print");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Print"); // last item: no wrap
+  }},
   { id: "menubar", apg: "menubar", name: "Space on a trigger opens the menu and highlights the first item", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().focus();
     await pg.keyboard.press("Space");

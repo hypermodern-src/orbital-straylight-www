@@ -876,7 +876,9 @@ handleAction = case _ of
   MenuKeyDown ke -> do
     st <- H.get
     let
-      cfg = { orientation: Vertical, dir: st.dir, loop: st.loop }
+      -- the open menu's VERTICAL item roving does not wrap (menu.tsx:362 loop default false);
+      -- st.loop is the menubar's HORIZONTAL trigger-bar loop (cross-menu), a separate axis.
+      cfg = { orientation: Vertical, dir: st.dir, loop: false }
       pos = { count: itemCount (openEntries st), current: st.itemFocus }
       -- the focused entry's value IF it is a SubTrigger: ArrowRight (and Enter/Space) must OPEN
       -- the sub, NOT switch to the adjacent top menu (the cross-menu vs sub guard).
