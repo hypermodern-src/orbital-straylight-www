@@ -30,14 +30,14 @@
     { "id": "navigationmenu.disabled",       "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:482-500 disabled trigger data-disabled, skipped by pointer-open + roving; port no support" },
     { "id": "navigationmenu.controlled",     "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:82-140 controlled value + onValueChange; port supports but no oracle drives it" },
     { "id": "navigationmenu.dismissable",    "state": "open", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "navigation-menu.tsx:937-948 onPointerDownOutside/onFocusOutside with trigger/viewport guards; port Escape only" },
-    { "id": "navigationmenu.home-end",       "state": "open", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "navigation-menu.tsx:1130-1135 Home→first / End→last trigger roving; APG tests only arrows" },
-    { "id": "navigationmenu.content-roving", "state": "open", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "navigation-menu.tsx:921-1149 content links FocusGroup arrows clamped non-loop; only trigger roving APG-tested" },
+    { "id": "navigationmenu.home-end",       "state": "open", "importance": "common", "status": "gated", "oracle": ["apg"], "apg_check": "Home/End jump trigger roving to first/last", "ref": "navigation-menu.tsx:1130-1135 Home→first / End→last trigger roving; APG tests only arrows" },
+    { "id": "navigationmenu.content-roving", "state": "open", "importance": "common", "status": "gated", "oracle": ["apg"], "apg_check": "content-link roving: Arrow keys move between content links (CLAMPED, non-looping)", "ref": "navigation-menu.tsx:921-1149 content links FocusGroup arrows clamped non-loop; only trigger roving APG-tested" },
 
     { "id": "navigationmenu.forcemount",     "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on Content/Viewport/Indicator" },
     { "id": "navigationmenu.clear-restore",  "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: value-clear focus restore only when focus is inside content" },
     { "id": "navigationmenu.aria-owns",      "state": "open", "importance": "edge", "status": "open", "oracle": ["aria"],"ref": "edge: aria-owns span only in VIEWPORT mode (restructures)" },
     { "id": "navigationmenu.indicator-hidden","state": "open","importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Indicator data-state=hidden while value empty but forceMount" },
     { "id": "navigationmenu.single-item",    "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: single-item/empty-list roving (one trigger, End)" },
-    { "id": "navigationmenu.arrow-noop",     "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: ArrowUp/ArrowDown in horizontal roving are no-ops on trigger" }
+    { "id": "navigationmenu.arrow-noop",     "state": "open", "importance": "edge", "status": "gated", "oracle": ["apg"], "apg_check": "ArrowUp on a trigger is a no-op (horizontal axis only)", "ref": "edge: ArrowUp/ArrowDown in horizontal roving are no-ops on trigger" }
   ]
 }

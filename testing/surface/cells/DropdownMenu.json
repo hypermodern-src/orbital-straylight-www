@@ -20,8 +20,8 @@
 
     { "id": "dropdownmenu.checkboxitem-core","state": "checkbox","importance": "core","status": "open", "oracle": ["dom"], "ref": "menu.tsx:782-804 CheckboxItem+ItemIndicator, onCheckedChange does NOT close menu; new port part" },
     { "id": "dropdownmenu.radioitem-core","state": "radio",   "importance": "core",   "status": "open", "oracle": ["dom"], "ref": "menu.tsx:823-872 RadioGroup/RadioItem value-based single selection without close; new port parts" },
-    { "id": "dropdownmenu.disabled-skip","state": "disabled", "importance": "core",   "status": "open", "oracle": ["apg"], "ref": "menu.tsx:540 items.filter(!disabled); PORT BUG itemCount counts disabled → roving lands on it" },
-    { "id": "dropdownmenu.space-enter",  "state": "open",     "importance": "core",   "status": "open", "oracle": ["apg"], "ref": "menu.tsx:667-680 Space/Enter selects focused item + close; port MenuKeyDown only navigates" },
+    { "id": "dropdownmenu.disabled-skip","state": "disabled", "importance": "core",   "status": "gated", "oracle": ["apg"], "apg_check": "ArrowDown SKIPS a disabled item to the next enabled one", "ref": "menu.tsx:540 items.filter(!disabled); PORT BUG itemCount counts disabled → roving lands on it" },
+    { "id": "dropdownmenu.space-enter",  "state": "open",     "importance": "core",   "status": "gated", "oracle": ["apg"], "apg_check": "Space selects the highlighted item and closes the menu", "ref": "menu.tsx:667-680 Space/Enter selects focused item + close; port MenuKeyDown only navigates" },
     { "id": "dropdownmenu.aria-controls","state": "open",     "importance": "core",   "status": "open", "oracle": ["aria"],"ref": "dropdown-menu.tsx:109-114 aria-controls only when open, aria-labelledby↔trigger round-trip" },
 
     { "id": "dropdownmenu.typeahead",    "state": "open", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "menu.tsx:411-434 typeahead getNextMatch cycling, 1s reset, space-guard while typing" },

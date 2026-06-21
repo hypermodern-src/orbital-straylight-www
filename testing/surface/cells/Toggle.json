@@ -11,9 +11,9 @@
     { "id": "toggle.disabledpressed", "state": "disabledpressed", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "disabled+pressed combo: data-state=on AND data-disabled=''" },
 
     { "id": "toggle.rest-dom",        "state": "rest",            "importance": "core",   "status": "open", "oracle": ["dom"],      "ref": "toggle.tsx:44-45 data-state=off/aria-pressed=false at-rest DOM (unpressed half)" },
-    { "id": "toggle.roundtrip",       "state": "pressed",         "importance": "core",   "status": "open", "oracle": ["apg"],      "ref": "toggle.tsx:49-53 click OFF→ON→OFF uncontrolled; 2nd activation returns to off" },
-    { "id": "toggle.key-activate",    "state": "pressed",         "importance": "core",   "status": "open", "oracle": ["apg"],      "ref": "toggle.tsx:42 native button Space+Enter→click; no onKeyDown bound" },
-    { "id": "toggle.disabled-noop",   "state": "disabled",        "importance": "core",   "status": "open", "oracle": ["dom", "apg"], "ref": "toggle.tsx:46,50 disabled click no-op + disabled/data-disabled='' present" },
+    { "id": "toggle.roundtrip",       "state": "pressed",         "importance": "core",   "status": "gated", "oracle": ["apg"],      "apg_check": "Space activates the toggle (off→on→off round-trip)", "ref": "toggle.tsx:49-53 click OFF→ON→OFF uncontrolled; 2nd activation returns to off" },
+    { "id": "toggle.key-activate",    "state": "pressed",         "importance": "core",   "status": "gated", "oracle": ["apg"],      "apg_check": "Enter activates the toggle (native button key)", "ref": "toggle.tsx:42 native button Space+Enter→click; no onKeyDown bound" },
+    { "id": "toggle.disabled-noop",   "state": "disabled",        "importance": "core",   "status": "gated", "oracle": ["dom", "apg"], "apg_check": "a disabled toggle does NOT activate on Space", "ref": "toggle.tsx:46,50 disabled click no-op + disabled/data-disabled='' present" },
     { "id": "toggle.off-baseline",    "state": "rest",            "importance": "core",   "status": "open", "oracle": ["dom"],      "ref": "toggle.tsx:37 defaultPressed??false: off render is baseline; off DOM/pixel golden" },
 
     { "id": "toggle.controlled",      "state": "pressed",         "importance": "common", "status": "open", "oracle": ["none"],     "ref": "toggle.tsx:34-39 controlled: click leaves DOM, fires onPressedChange(!pressed) once" },

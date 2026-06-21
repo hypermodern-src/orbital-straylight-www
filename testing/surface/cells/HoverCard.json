@@ -11,8 +11,8 @@
     { "id": "hovercard.rest",        "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest trigger link a11y tree (link-in-text-block)" },
 
     { "id": "hovercard.delays",          "state": "open",        "importance": "core",   "status": "open", "oracle": ["none"],       "ref": "hover-card.tsx:58-84 openDelay/closeDelay timers (200/150 themes); v1 skips them — timer/runtime" },
-    { "id": "hovercard.focus-open",      "state": "open",        "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "hover-card.tsx:137-138 onFocus→open / onBlur→close; keyboard reachability unverified" },
-    { "id": "hovercard.escape",          "state": "closing",     "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "hover-card.tsx:323-332 DismissableLayer Escape→dismiss; no oracle presses Escape" },
+    { "id": "hovercard.focus-open",      "state": "open",        "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "focus on the trigger shows the card", "ref": "hover-card.tsx:137-138 onFocus→open / onBlur→close; keyboard reachability unverified" },
+    { "id": "hovercard.escape",          "state": "closing",     "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "Escape hides the card", "ref": "hover-card.tsx:323-332 DismissableLayer Escape→dismiss; no oracle presses Escape" },
     { "id": "hovercard.pointer-stays",   "state": "open",        "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:217-218 move trigger→content keeps open; defining hover-card contract unverified" },
 
     { "id": "hovercard.controlled",      "state": "open",        "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:67-72 controlled open + onOpenChange round-trip; SetOpen/GetOpen Query" },

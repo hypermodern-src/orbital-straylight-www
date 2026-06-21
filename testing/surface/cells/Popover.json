@@ -13,7 +13,7 @@
     { "id": "popover.modal",            "state": "open",   "importance": "core",   "status": "open", "oracle": ["dom", "apg"], "ref": "popover.tsx:229-299 modal=true: RemoveScroll, hideOthers aria-hidden, trapFocus, disableOutsidePointerEvents" },
     { "id": "popover.reopen-guard",     "state": "open",   "importance": "core",   "status": "open", "oracle": ["none"],       "ref": "popover.tsx:335-340 trigger re-open guard (targetIsTrigger→preventDefault); port dismiss+toggle both fire — bug" },
     { "id": "popover.focusscope-loop",  "state": "open",   "importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "popover.tsx:404-407 FocusScope loop=true: Tab wraps within content; zero APG entries today" },
-    { "id": "popover.escape-apg",       "state": "closing","importance": "core",   "status": "open", "oracle": ["apg"],        "ref": "popover.tsx:411-418 Escape closes + restores focus to trigger; only runtime smoke, no APG gate" },
+    { "id": "popover.escape-apg",       "state": "closing","importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "Escape closes the popover and returns focus to the trigger", "ref": "popover.tsx:411-418 Escape closes + restores focus to trigger; only runtime smoke, no APG gate" },
 
     { "id": "popover.close-part",       "state": "close",  "importance": "common", "status": "open", "oracle": ["none"],       "ref": "popover.tsx:450-470 PopoverClose button calls onOpenChange(false); content opaque, no Close wiring" },
     { "id": "popover.anchor-part",      "state": "open",   "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "popover.tsx:107-123 PopoverAnchor decouples position from trigger (hasCustomAnchor) absent" },
