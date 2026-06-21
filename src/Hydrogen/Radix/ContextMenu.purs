@@ -440,15 +440,17 @@ render st =
           , HE.handler (EventType "contextmenu") Opened
           ]
           (map HH.fromPlainHTML st.trigger)
-      -- the popper WRAPPER (portal root) — position:fixed up front (shrink-to-fit measure);
-      -- the rest of its style is FFI (positionWrapperAt) and PERSISTS across the exit (the node
-      -- is never unmounted while Closing, so the positioned left/top/transform linger). The
-      -- wrapper is in the tree while `rendered` (Open OR Closing); hidden only when fully Closed.
-      , HH.div
+      ]
+      -- the popper WRAPPER (portal root) renders ONLY while `rendered` (Open OR exiting Closing);
+      -- fully UNMOUNTED at Closed, matching upstream (no content node at closed-rest). finalize
+      -- re-adopts the freshly-mounted wrapper into body on each open. position:fixed up front
+      -- (shrink-to-fit measure); the rest of its style is FFI (positionWrapperAt).
+      <> ( if rendered then
+      [ HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
           , dir "ltr"
-          , HP.style (if rendered then "position: fixed;" else "display:none;")
+          , HP.style "position: fixed;"
           ]
           [ HH.div
               ( [ HP.ref contentRef
@@ -485,7 +487,7 @@ render st =
                   ]
               ]
           ]
-      ]
+      ] else [] )
         -- the open SUBMENU layer: a separate popper-content-wrapper, portal-adopted into body.
         <> maybe [] (\sub -> [ renderSubContent st sub ]) (st.subOpen >>= \v -> findSub v st.entries)
       )

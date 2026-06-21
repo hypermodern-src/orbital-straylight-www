@@ -6,6 +6,7 @@
   "note": "STR-381 ledger: every cell tying Menubar out against upstream. status=gated have committed goldens; status=open are named debt. 1 open-core cell.",
   "cells": [
     { "id": "menubar.open",            "state": "open",     "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "File menu open: trigger bar role=menuitem, aria-expanded/controls/haspopup, role=menu with entries + separator" },
+    { "id": "menubar.closed-rest-tabindex", "state": "closed-rest", "importance": "common", "status": "open", "oracle": ["dom"], "ref": "PARTIAL (2026-06-21): wrapper unmount FIXED (no phantom content at closed-rest); RESIDUAL divergence newly exposed — first menubar trigger tabindex=0, upstream=-1 (roving-focus init at rest; separate from the wrapper). Fix: roving tab-stop at closed-rest. Then capture menubar.closed-rest golden." },
     { "id": "menubar.item1",           "state": "item1",    "importance": "core",   "status": "gated", "oracle": ["dom"],         "ref": "ArrowDown highlights first item → data-highlighted + roving tabindex=0" },
     { "id": "menubar.disabled",        "state": "disabled", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "disabled trigger: disabled + data-disabled, tabindex=-1, skipped by roving" },
     { "id": "menubar.submenu",         "state": "submenu",  "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "SubTrigger data-state=open aria-expanded + nested role=menu" },

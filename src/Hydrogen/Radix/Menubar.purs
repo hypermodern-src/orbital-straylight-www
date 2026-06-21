@@ -457,18 +457,22 @@ render st =
           , HP.tabIndex 0
           ]
           (Array.mapWithIndex (renderTrigger st mOpenI) st.menus)
-      -- exactly ONE popper wrapper/content — the open menu's (or a hidden placeholder when none).
-      , HH.div
+      ]
+      -- the popper WRAPPER renders ONLY while `rendered` (a menu Open OR exiting Closing); fully
+      -- UNMOUNTED at Closed, matching upstream (no wrapper at closed-rest). finalize re-adopts the
+      -- freshly-mounted wrapper into body on each open. position:fixed up front (shrink-to-fit).
+      <> ( if rendered then
+      [ HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
           , dir "ltr"
-          , HP.style (if rendered then "position: fixed;" else "display:none;")
+          , HP.style "position: fixed;"
           ]
           ( case mOpenI of
               Nothing -> []
               Just i -> [ renderContent st i ]
           )
-      ]
+      ] else [] )
         -- the open SUBMENU layer (anchored to the SubTrigger inside the active menu's content).
         <> maybe [] (\sub -> [ renderSubContent st sub ]) (st.subOpen >>= \v -> findSub v (openEntries st))
       )

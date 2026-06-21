@@ -31,6 +31,7 @@ STATES=(
   "dropdownmenu:disabled"
   "dropdownmenu:submenu"
   "contextmenu:open"
+  "contextmenu:closed-rest"
   "contextmenu:item2"
   "contextmenu:disabled"
   "contextmenu:submenu"
