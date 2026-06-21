@@ -222,14 +222,12 @@ render st =
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
-      [ HH.button
+      ( [ HH.button
           -- NOTE: the tooltip trigger has NO type=button and its open state is "delayed-open"
           -- (radix Tooltip shows after a delay), matching the golden.
           ( [ HP.ref triggerRef
             , classes st.style.trigger
             , dataState stateAttr
-            , dataAttr "radix-popper-side" (sideName st.placedSide)
-            , dataAttr "radix-popper-align" (alignName st.placedAlign)
             , HE.onMouseEnter \_ -> Show
             , HE.onMouseLeave \_ -> Hide
             , HE.onFocus \_ -> FocusShow
@@ -242,15 +240,21 @@ render st =
             -- aria-describedby points at the content id ONLY while open (upstream:
             -- `context.open ? contentId : undefined`); when closed the attr is absent.
             <> (if open then [ aria "describedby" st.contentId ] else [])
+            -- data-radix-popper-side/align are stamped by Popper.Anchor while the Popper subtree
+            -- is mounted (open); absent at closed-rest, matching upstream's unmounted Popper.
+            <> (if open then [ dataAttr "radix-popper-side" (sideName st.placedSide), dataAttr "radix-popper-align" (alignName st.placedAlign) ] else [])
           )
           (map HH.fromPlainHTML st.trigger)
-      -- the popper WRAPPER (portal root) — always mounted, positioned out-of-band by Popper.
-      , HH.div
+      ]
+      -- the popper WRAPPER (portal root) renders ONLY while open (Tooltip unmounts synchronously
+      -- on hide — no exit linger), so at closed-rest there is no content node, matching upstream
+      -- (which unmounts the Popper). finalize re-adopts the freshly-mounted wrapper on each open.
+      <> ( if open then
+      [ HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
-          -- position:fixed up front so the content shrink-wraps (max-content) at flip-measure
-          -- time; the rest of the wrapper style is FFI (positionWrapper).
-          , HP.style (if open then "position: fixed;" else "display:none;")
+          -- position:fixed up front so the content shrink-wraps (max-content) at flip-measure.
+          , HP.style "position: fixed;"
           ]
           [ HH.div
               ( [ HP.ref contentRef
@@ -268,7 +272,8 @@ render st =
                   <> [ HH.span [ HP.id st.contentId, role "tooltip", HP.style visuallyHiddenStyle ] (map HH.fromPlainHTML st.content) ]
               )
           ]
-      ]
+      ] else [] )
+      )
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of

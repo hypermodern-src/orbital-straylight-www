@@ -111,6 +111,7 @@ export const STATES = {
     "closed-attr": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
   },
   tooltip: {
+    "closed-rest": async (pg) => { await root(pg).getByRole("button").first().waitFor(); },
     open: async (pg) => { await triggerButton(pg).hover(); await pg.getByRole("tooltip").waitFor(); },
     // FOCUS-open path: upstream `onFocus → onOpen → handleOpen` sets wasOpenDelayedRef=false,
     // so the stateAttribute is "instant-open" (NOT the hover path's "delayed-open"). Keyed off

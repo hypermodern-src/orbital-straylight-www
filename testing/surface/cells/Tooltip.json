@@ -9,7 +9,7 @@
     { "id": "tooltip.focusopen", "state": "focusopen", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "focus-open: data-state=instant-open on trigger+content (vs delayed-open hover)" },
     { "id": "tooltip.rest",      "state": "rest",      "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (button only)" },
 
-    { "id": "tooltip.aria-describedby-closed", "state": "open", "importance": "core",   "status": "open", "oracle": ["dom", "aria"], "ref": "tooltip.tsx:290 aria-describedby set on trigger ONLY while open; port sets it unconditionally — closed trigger references hidden id. CORE a11y bug." },
+    { "id": "tooltip.aria-describedby-closed", "state": "closed-rest", "importance": "core",   "status": "gated", "oracle": ["dom"], "oracle_file": "tooltip.closed-rest", "ref": "VERIFIED (2026-06-21): describedby already gated on open; closed-rest trigger has NO aria-describedby (and no popper-side/align) — golden-dom/tooltip.closed-rest.txt; port==upstream." },
     { "id": "tooltip.delay",                   "state": "open", "importance": "common", "status": "open", "oracle": ["none"],        "ref": "tooltip.tsx:29,207-214 delayDuration 700ms timer; port opens synchronously on mouseenter" },
     { "id": "tooltip.touch-guard",             "state": "open", "importance": "common", "status": "open", "oracle": ["none"],        "ref": "tooltip.tsx:294-307 onPointerMove early-returns on touch; port uses mouseenter, touch wrongly opens" },
     { "id": "tooltip.pointerdown-suppress",    "state": "open", "importance": "common", "status": "open", "oracle": ["none"],        "ref": "tooltip.tsx:308-317 pointerdown suppresses focus-open flash; port has no such guard" },
@@ -18,7 +18,7 @@
     { "id": "tooltip.scroll-close",            "state": "open", "importance": "common", "status": "open", "oracle": ["none"],        "ref": "tooltip.tsx:530-540 trigger-scroll closes; port repositions instead" },
     { "id": "tooltip.pointerdown-outside",     "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],         "ref": "tooltip.tsx:543-549 pointerdown-outside dismiss; port is Escape-only (deliberate divergence to confirm)" },
     { "id": "tooltip.aria-label",              "state": "open", "importance": "common", "status": "open", "oracle": ["aria"],        "ref": "tooltip.tsx:493,570-572 aria-label overrides VisuallyHidden accessible name; port always duplicates visible content" },
-    { "id": "tooltip.forcemount-unmount",      "state": "open", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "tooltip.tsx:350,358 closed-state: port keeps mounted display:none node where upstream UNMOUNTS" },
+    { "id": "tooltip.forcemount-unmount",      "state": "closed-rest", "importance": "common", "status": "gated", "oracle": ["dom"], "oracle_file": "tooltip.closed-rest", "ref": "FIXED (2026-06-21): wrapper gated on open → content UNMOUNTED at closed-rest (was display:none always-mounted). golden-dom/tooltip.closed-rest.txt; open/focusopen no regression." },
     { "id": "tooltip.controlled",              "state": "open", "importance": "common", "status": "open", "oracle": ["none"],        "ref": "tooltip.tsx:173-189 controlled open/defaultOpen/onOpenChange fires on every path; suppresses hover toggle" },
 
     { "id": "tooltip.skip-delay",          "state": "open", "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: skipDelayDuration window (default 300) after a close" },
