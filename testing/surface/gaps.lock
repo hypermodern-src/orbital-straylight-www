@@ -17,7 +17,7 @@
     "binding_violations": 0,
     "enumerated_components": 32,
     "named_open_cells": 563,
-    "invariance_subjects": 20
+    "invariance_subjects": 22
   },
   "per_component": {
     "AlertDialog": {

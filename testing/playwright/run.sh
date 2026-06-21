@@ -48,7 +48,7 @@ nix shell nixpkgs#nodejs --command node "$HYDROGEN/testing/surface/check.mjs"
 # byte-identical behavioral DOM (only class/style differ) — the "drop any skin on" proof.
 # One line per invariance subject story; the gate exits nonzero on any divergence.
 echo "ℵ behavioral-invariance gate"
-for s in toggle-presets presets inv-a inv-b inv-c inv-d inv-e; do
+for s in toggle-presets presets inv-a inv-b inv-c inv-d inv-e inv-f; do
   nix shell nixpkgs#bun --command bun "$HERE/scripts/invariance.mjs" "$HERE/.gallery-dist" "$s"
 done
 

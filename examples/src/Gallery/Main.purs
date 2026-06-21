@@ -42,6 +42,7 @@ import Gallery.Story.InvB as InvB
 import Gallery.Story.InvC as InvC
 import Gallery.Story.InvD as InvD
 import Gallery.Story.InvE as InvE
+import Gallery.Story.InvF as InvF
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -78,13 +79,14 @@ stories =
   , InvC.story
   , InvD.story
   , InvE.story
+  , InvF.story
   ]
 
 -- | Stories that are NOT pixel-diffed (no golden png) — reachable by id for non-pixel
 -- | gates only (e.g. the behavioral-invariance gate drives `?story=presets`). Excluded
 -- | from the manifest the pixel spec enumerates.
 nonPixel :: Array String
-nonPixel = [ "toggle-presets", "presets", "inv-a", "inv-b", "inv-c", "inv-d", "inv-e" ]
+nonPixel = [ "toggle-presets", "presets", "inv-a", "inv-b", "inv-c", "inv-d", "inv-e", "inv-f" ]
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Mount: route on ?story=<id>, else render the manifest index

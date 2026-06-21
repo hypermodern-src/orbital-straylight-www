@@ -32,6 +32,7 @@ purescript_app(
         "src/Gallery/Story/InvC.purs",
         "src/Gallery/Story/InvD.purs",
         "src/Gallery/Story/InvE.purs",
+        "src/Gallery/Story/InvF.purs",
     ],
     main = "Gallery.Main",
     deps = ["//:lib"],
