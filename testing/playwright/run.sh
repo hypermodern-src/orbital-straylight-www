@@ -55,10 +55,20 @@ done
 # Overlay open-state invariance: each overlay opened under every preset (one per page),
 # behavioral DOM of the open overlay diffed across presets. Spec: "<baseId> <waitRole> <gesture>".
 echo "ℵ behavioral-invariance gate (overlay open-state)"
-for spec in "ovl-dialog dialog click"; do
-  set -- $spec
+# spec: baseId | open-detect (role:X | text:Y) | gesture (click|rightclick|hover) | trigger selector
+for spec in \
+  "ovl-dialog|role:dialog|click|button" \
+  "ovl-alertdialog|role:alertdialog|click|button" \
+  "ovl-popover|text:OVLOPEN|click|button" \
+  "ovl-tooltip|role:tooltip|hover|button" \
+  "ovl-hovercard|text:OVLOPEN|hover|a" \
+  "ovl-dropdownmenu|role:menu|click|button" \
+  "ovl-contextmenu|role:menu|rightclick|text=Right-click here" \
+  "ovl-menubar|role:menu|click|button" \
+  "ovl-select|role:listbox|click|button" ; do
+  IFS='|' read -r base wait gesture trig <<< "$spec"
   nix shell nixpkgs#bun --command bun "$HERE/scripts/invariance.mjs" "$HERE/.gallery-dist" \
-    --overlay "$1" unstyled,themes,shadcn,daisy "$2" "$3"
+    --overlay "$base" unstyled,themes,shadcn,daisy "$wait" "$gesture" "$trig"
 done
 
 exec nix shell nixpkgs#bun nixpkgs#python3 --command bun run test "$@"

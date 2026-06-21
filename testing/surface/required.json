@@ -12,13 +12,14 @@
     "deferred_last": ["orbital"],
     "native_preset_by_face": { "themed": "themes", "bare": "unstyled" },
     "note": "Today every committed golden is its component's NATIVE preset only (themed→themes vs @radix-ui/themes; bare→unstyled vs @radix-ui/react-*). The other presets are open until STR-383 lands the preset layer + behavioral-invariance gate.",
-    "invariance_subjects": ["Toggle", "Switch", "Checkbox", "Separator", "AspectRatio", "Progress", "Label", "VisuallyHidden", "Avatar", "Slider", "RadioGroup", "ToggleGroup", "Tabs", "Accordion", "Collapsible", "Toolbar", "OneTimePasswordField", "PasswordToggleField", "ScrollArea", "Toast", "Form", "NavigationMenu", "Dialog"],
+    "invariance_subjects": ["Toggle", "Switch", "Checkbox", "Separator", "AspectRatio", "Progress", "Label", "VisuallyHidden", "Avatar", "Slider", "RadioGroup", "ToggleGroup", "Tabs", "Accordion", "Collapsible", "Toolbar", "OneTimePasswordField", "PasswordToggleField", "ScrollArea", "Toast", "Form", "NavigationMenu", "Dialog", "AlertDialog", "Popover", "Tooltip", "HoverCard", "DropdownMenu", "ContextMenu", "Menubar", "Select"],
     "invariance_note": "Components proven behaviorally preset-invariant across {unstyled,themes,shadcn,daisy} by testing/playwright/scripts/invariance.mjs (a [data-preset] subject story in the gallery, run by run.sh). The list only grows; each is a green 'drop any skin on' proof. Per-preset FIDELITY (each skin matches its own ground-truth golden) is a separate axis, still native-only.",
     "no_preset_surface": ["AccessibleIcon"],
     "no_preset_surface_note": "AccessibleIcon takes only { label } + icon children — it has NO Style/class hook (behavior-only: injects aria-hidden + a VisuallyHidden label). There is no preset axis to vary, so it is preset-agnostic by construction, not an invariance gap.",
     "remaining_at_rest": [],
     "remaining_at_rest_note": "The at-rest non-overlay axis is COMPLETE: 22 proven + AccessibleIcon (no preset surface) = all 23 non-overlay primitives. Only the 9 overlays remain, which need open-state invariance (fork #2).",
-    "remaining_open_state": ["Dialog", "AlertDialog", "Popover", "Tooltip", "HoverCard", "DropdownMenu", "ContextMenu", "Menubar", "Select"]
+    "remaining_open_state": [],
+    "remaining_open_state_note": "All 9 overlays proven open-state preset-invariant (invariance.mjs --overlay: one overlay per page per preset, driven open, whole-body DOM diffed). Behavioral-invariance is COMPLETE: 31/32 + AccessibleIcon (no preset surface) = the entire surface."
   },
   "components": {
     "AlertDialog":          { "face": "themed", "core_gaps_open": 9, "id_groups": ["alertdialog"] },

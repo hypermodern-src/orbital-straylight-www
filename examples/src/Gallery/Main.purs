@@ -44,6 +44,14 @@ import Gallery.Story.InvD as InvD
 import Gallery.Story.InvE as InvE
 import Gallery.Story.InvF as InvF
 import Gallery.Story.OvlDialog as OvlDialog
+import Gallery.Story.OvlAlertDialog as OvlAlertDialog
+import Gallery.Story.OvlPopover as OvlPopover
+import Gallery.Story.OvlTooltip as OvlTooltip
+import Gallery.Story.OvlHoverCard as OvlHoverCard
+import Gallery.Story.OvlDropdownMenu as OvlDropdownMenu
+import Gallery.Story.OvlContextMenu as OvlContextMenu
+import Gallery.Story.OvlMenubar as OvlMenubar
+import Gallery.Story.OvlSelect as OvlSelect
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -81,13 +89,17 @@ stories =
   , InvD.story
   , InvE.story
   , InvF.story
-  ] <> OvlDialog.stories
+  ] <> OvlDialog.stories <> OvlAlertDialog.stories <> OvlPopover.stories
+    <> OvlTooltip.stories <> OvlHoverCard.stories <> OvlDropdownMenu.stories
+    <> OvlContextMenu.stories <> OvlMenubar.stories <> OvlSelect.stories
 
 -- | Stories that are NOT pixel-diffed (no golden png) — reachable by id for non-pixel
 -- | gates only (e.g. the behavioral-invariance gate drives `?story=presets`). Excluded
 -- | from the manifest the pixel spec enumerates.
 nonPixel :: Array String
-nonPixel = [ "toggle-presets", "presets", "inv-a", "inv-b", "inv-c", "inv-d", "inv-e", "inv-f" ] <> OvlDialog.ids
+nonPixel = [ "toggle-presets", "presets", "inv-a", "inv-b", "inv-c", "inv-d", "inv-e", "inv-f" ] <> OvlDialog.ids <> OvlAlertDialog.ids <> OvlPopover.ids
+  <> OvlTooltip.ids <> OvlHoverCard.ids <> OvlDropdownMenu.ids <> OvlContextMenu.ids
+  <> OvlMenubar.ids <> OvlSelect.ids
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Mount: route on ?story=<id>, else render the manifest index
