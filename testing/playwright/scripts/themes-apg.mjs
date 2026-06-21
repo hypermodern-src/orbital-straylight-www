@@ -998,6 +998,17 @@ const CHECKS = [
     await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
   }},
+  // Typeahead (APG menu: "type a character → focus the next item whose label starts with it";
+  // a repeated character cycles among matches). Items: Edit, Duplicate, Archive, Delete.
+  { id: "dropdownmenu", apg: "menu", name: "typeahead: a letter focuses the next matching item, repeats cycle", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.waitForTimeout(150); // let the just-opened menu's keydown listener attach (first key is dropped otherwise)
+    await pg.keyboard.press("d"); await hlStarts(pg, "Duplicate");
+    await pg.keyboard.press("d"); await hlStarts(pg, "Delete"); // repeated char cycles to the next match
+    await pg.waitForTimeout(1100); // typeahead buffer resets after ~1s of no input
+    await pg.keyboard.press("a"); await hlStarts(pg, "Archive"); // fresh single-char search
+  }},
 
   // Context Menu — https://www.w3.org/WAI/ARIA/apg/patterns/menu/
   // A ContextMenu is a DropdownMenu point-anchored at the cursor: right-click the trigger

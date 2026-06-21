@@ -12,6 +12,7 @@ purescript_library(
         "Presence.purs",
         "RovingFocus.purs",
         "ScrollLock.purs",
+        "Typeahead.purs",
     ],
     deps = ["//src/Hydrogen/Radix/Foundation:foundation"],
     visibility = ["PUBLIC"],

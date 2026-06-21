@@ -59,6 +59,7 @@ import Prelude
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
 import Data.Maybe (Maybe(..), maybe, isJust, fromMaybe)
+import Data.Traversable (for)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -73,12 +74,13 @@ import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Behavior.Typeahead (nextMatch, isTypeaheadChar) as Typeahead
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Dom as Dom
 import Hydrogen.Radix.Foundation.Envelope as Envelope
 import Hydrogen.Radix.Foundation.Portal as Portal
 import Hydrogen.Radix.Foundation.Style (ClassNames, Side(..), Align(..), Orientation(..), cn, classes, dataState, dataAttr, sideName, alignName, role, aria)
-import Web.DOM.Node (Node)
+import Web.DOM.Node (Node, textContent)
 import Web.Event.Event (Event, EventType(..), preventDefault)
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument
@@ -348,6 +350,9 @@ type State =
   , triggerId :: String   -- generated on Initialize; the content's aria-labelledby source
   , contentId :: String   -- generated on Initialize; the trigger's aria-controls target + content id
   , openFocus :: Maybe Int  -- post-open focus target: Nothing = the content (click-open), Just i = item i (keyboard-open)
+  -- ── typeahead (type-to-focus; radix useTypeahead) ──
+  , search :: String   -- the accumulated search buffer (reset lazily after ~1s of no input)
+  , lastKey :: Number  -- performance.now() of the last typeahead key; the idle-reset clock
   -- ── submenu (one open at a time) ──
   , subOpen :: Maybe String   -- the open sub's value (Nothing = none)
   , subFocused :: Int         -- roving tab stop within the open SubContent
@@ -453,6 +458,8 @@ initialState input =
   , triggerId: ""
   , contentId: ""
   , openFocus: Nothing
+  , search: ""
+  , lastKey: 0.0
   , subOpen: Nothing
   , subFocused: -1
   , subAnchorIdx: -1
@@ -938,25 +945,24 @@ handleAction = case _ of
         liftEffect (preventDefault (KE.toEvent ke))
         openSub v st.focused (Just 0)
       _ ->
+        -- Typeahead (radix useTypeahead): a printable character (and Space WHILE a search is
+        -- already running — the space-guard) feeds the search buffer and moves focus to the
+        -- next matching item, BEFORE the Enter/Space activation path. preventDefault stops a
+        -- buffered Space from also scrolling/selecting.
+        if Typeahead.isTypeaheadChar key (st.search /= "") then do
+          liftEffect (preventDefault (KE.toEvent ke))
+          typeahead key
         -- Enter/Space SELECT the focused item (upstream menu.tsx:667-680 SELECTION_KEYS →
         -- currentTarget.click() + preventDefault). Keyboard activation of items, previously
         -- impossible (navigate returned Stay for these keys).
-        if (key == "Enter" || key == " ") && st.focused >= 0 then do
+        else if (key == "Enter" || key == " ") && st.focused >= 0 then do
           liftEffect (preventDefault (KE.toEvent ke))
           for_ (enabledValueAt st.focused st.entries) \v -> do
             H.raise (ItemSelected v)
             closeMenu
         else case navigate cfg pos key of
           Stay -> pure unit
-          MoveTo idx -> do
-            H.modify_ _ { focused = idx }
-            -- the focused-state re-render re-parents the wrapper out of body; on the next frame
-            -- re-adopt it (before the trailing guard, preserving order) then focus the item.
-            mwrap <- H.getHTMLElementRef wrapperRef
-            mitem <- H.getHTMLElementRef (itemRef st.idPrefix idx)
-            liftEffect $ Dom.queueMicrotask do
-              for_ mwrap Envelope.reAdoptBeforeTrail
-              for_ mitem HTMLElement.focus
+          MoveTo idx -> focusItem idx
   ItemClicked value -> do
     st <- H.get
     -- a disabled item is non-interactive (upstream menu.tsx:639 handleSelect disabled
@@ -1128,10 +1134,51 @@ closeMenu = do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
     for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing, subOpen = Nothing, subFocused = -1 }
+    H.modify_ _ { ctrl = (change false st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing, search = "", subOpen = Nothing, subFocused = -1 }
     H.raise (OpenChanged false)
     psid <- scheduleAfterClose
     H.modify_ _ { postSub = Just psid }
+
+-- | Move the roving tab stop to item `idx` and focus it. The focused-state re-render
+-- | re-parents the wrapper out of body; on the next microtask re-adopt it (before the
+-- | trailing guard, preserving order) then focus the item. Shared by arrow navigation
+-- | (RovingFocus) and typeahead.
+focusItem :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+focusItem idx = do
+  st <- H.get
+  H.modify_ _ { focused = idx }
+  mwrap <- H.getHTMLElementRef wrapperRef
+  mitem <- H.getHTMLElementRef (itemRef st.idPrefix idx)
+  liftEffect $ Dom.queueMicrotask do
+    for_ mwrap Envelope.reAdoptBeforeTrail
+    for_ mitem HTMLElement.focus
+
+-- | Read the rendered item labels (textContent, incl. the shortcut suffix — exactly as radix's
+-- | collection captures `textValue`) over the navigable index space, so the pure matcher works
+-- | on the same indices `focused` uses.
+readItemTexts :: forall m. MonadEffect m => String -> Int -> H.HalogenM State Action () Output m (Array String)
+readItemTexts pfx count =
+  for (Array.range 0 (count - 1)) \i -> do
+    mel <- H.getHTMLElementRef (itemRef pfx i)
+    case mel of
+      Just el -> liftEffect (textContent (HTMLElement.toNode el))
+      Nothing -> pure ""
+
+-- | One typeahead keystroke (radix useTypeahead). The buffer resets lazily: if more than 1s
+-- | has elapsed since the last key, the new character starts a fresh search; otherwise it
+-- | extends the buffer (so "dd" cycles, "ad" refines). Using a `performance.now()` clock
+-- | instead of a wall-clock timer avoids an idle re-render — the only re-render is on the key
+-- | itself, which already moves focus via `focusItem`.
+typeahead :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+typeahead key = do
+  st <- H.get
+  now <- liftEffect Dom.now
+  let
+    expired = now - st.lastKey > 1000.0
+    search' = (if expired then "" else st.search) <> key
+  texts <- readItemTexts st.idPrefix (itemCount st.entries)
+  for_ (Typeahead.nextMatch search' texts st.focused) focusItem
+  H.modify_ _ { search = search', lastKey = now }
 
 -- | Dispatch `AfterClose` on the next microtask (after the closing render flushes).
 scheduleAfterClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m H.SubscriptionId

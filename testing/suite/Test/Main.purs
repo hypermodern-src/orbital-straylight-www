@@ -22,6 +22,7 @@ import Test.Prop.Router as PropRouter
 import Test.Prop.Style as PropStyle
 import Test.Router as Router
 import Test.Style as Style
+import Test.Typeahead as Typeahead
 
 main :: Effect Unit
 main = runSuite "hydrogen" do
@@ -31,6 +32,7 @@ main = runSuite "hydrogen" do
   Style.suite
   Router.suite
   Color.suite
+  Typeahead.suite
   PropRemoteData.suite
   PropFormat.suite
   PropCompute.suite

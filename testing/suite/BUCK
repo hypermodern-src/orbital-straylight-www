@@ -19,6 +19,7 @@ purescript_test(
         "Test/RemoteData.purs",
         "Test/Router.purs",
         "Test/Style.purs",
+        "Test/Typeahead.purs",
     ],
     main = "Test.Main",
     deps = [
