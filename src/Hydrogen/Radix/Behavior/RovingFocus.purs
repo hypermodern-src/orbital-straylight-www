@@ -17,6 +17,7 @@ module Hydrogen.Radix.Behavior.RovingFocus
   , move
   , moveMask
   , navigate
+  , navigatePaged
   , navigateMask
   , tabIndexFor
   ) where
@@ -79,6 +80,20 @@ navigate
 navigate cfg st key = case focusIntent cfg.orientation cfg.dir key of
   Nothing -> Stay
   Just intent -> MoveTo (move cfg.loop st.count st.current intent)
+
+-- | Like `navigate`, but PageUp/PageDown also jump to first/last. radix menus put the Page
+-- | keys in FIRST_KEYS/LAST_KEYS (menu.tsx:28-30) alongside Home/End; the plain `navigate`
+-- | is for components where Page is NOT a navigation key (Slider uses it for ±10 steps), so
+-- | this is opt-in — only the menu/listbox patterns call it.
+navigatePaged
+  :: { orientation :: Orientation, dir :: Dir, loop :: Boolean }
+  -> { count :: Int, current :: Int }
+  -> String
+  -> Move
+navigatePaged cfg st key = navigate cfg st case key of
+  "PageUp" -> "Home"
+  "PageDown" -> "End"
+  k -> k
 
 -- | The roving tabindex value for item `idx` given the current tab stop.
 tabIndexFor :: Int -> Int -> Int

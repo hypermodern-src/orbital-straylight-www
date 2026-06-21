@@ -70,7 +70,7 @@ import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
-import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, navigatePaged, tabIndexFor)
 import Hydrogen.Radix.Behavior.Typeahead (nextMatch, isTypeaheadChar) as Typeahead
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Dom as Dom
@@ -907,7 +907,7 @@ handleAction = case _ of
         | Typeahead.isTypeaheadChar key (st.search /= "") -> do
             liftEffect (preventDefault (KE.toEvent ke))
             typeaheadMenu key
-        | otherwise -> case navigate cfg pos key of
+        | otherwise -> case navigatePaged cfg pos key of
             Stay -> pure unit
             MoveTo idx -> focusMenuItem idx
   -- ── submenu ──
@@ -938,7 +938,7 @@ handleAction = case _ of
         | (key == "Enter" || key == " ") && st.subFocused >= 0 -> do
             liftEffect (preventDefault (KE.toEvent ke))
             for_ (enabledValueAt st.subFocused subEntries) \v -> handleAction (SubItemClicked v)
-        | otherwise -> case navigate cfg pos key of
+        | otherwise -> case navigatePaged cfg pos key of
             Stay -> pure unit
             MoveTo idx -> do
               H.modify_ _ { subFocused = idx }

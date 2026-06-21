@@ -221,6 +221,14 @@ const CHECKS = [
     await pg.waitForTimeout(1100);
     await pg.keyboard.press("p"); await hlStarts(pg, "Print"); // fresh search
   }},
+  { id: "menubar", apg: "menubar", name: "PageDown focuses the last menu item, PageUp the first", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "New Tab");
+    await pg.keyboard.press("PageDown"); await hlStarts(pg, "Print");
+    await pg.keyboard.press("PageUp"); await hlStarts(pg, "New Tab");
+  }},
   { id: "menubar", apg: "menubar", name: "loop off (default): ArrowDown on the last menu item does NOT wrap", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().focus();
     await pg.keyboard.press("Enter");
@@ -1029,6 +1037,13 @@ const CHECKS = [
     await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
   }},
+  // Page keys: PageDown ≡ last, PageUp ≡ first (menu.tsx:28-30 FIRST/LAST_KEYS include Page).
+  { id: "dropdownmenu", apg: "menu", name: "PageDown focuses the last item, PageUp the first", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("PageDown"); await hlStarts(pg, "Delete");
+    await pg.keyboard.press("PageUp"); await hlStarts(pg, "Edit");
+  }},
   // Loop default is FALSE (menu.tsx:362): ArrowDown on the last item stays put (no wrap).
   { id: "dropdownmenu", apg: "menu", name: "loop off (default): ArrowDown on the last item does NOT wrap", run: async (pg) => {
     await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
@@ -1066,6 +1081,13 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
     await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
     await pg.keyboard.press("Home"); await hlStarts(pg, "Edit");
+  }},
+  { id: "contextmenu", apg: "menu", name: "PageDown focuses the last item, PageUp the first", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("PageDown"); await hlStarts(pg, "Delete");
+    await pg.keyboard.press("PageUp"); await hlStarts(pg, "Edit");
   }},
   { id: "contextmenu", apg: "menu", name: "loop off (default): ArrowDown on the last item does NOT wrap", run: async (pg) => {
     await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });

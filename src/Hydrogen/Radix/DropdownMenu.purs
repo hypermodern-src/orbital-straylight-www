@@ -73,7 +73,7 @@ import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
-import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigatePaged, tabIndexFor)
 import Hydrogen.Radix.Behavior.Typeahead (nextMatch, isTypeaheadChar) as Typeahead
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Dom as Dom
@@ -960,7 +960,7 @@ handleAction = case _ of
           for_ (enabledValueAt st.focused st.entries) \v -> do
             H.raise (ItemSelected v)
             closeMenu
-        else case navigate cfg pos key of
+        else case navigatePaged cfg pos key of
           Stay -> pure unit
           MoveTo idx -> focusItem idx
   ItemClicked value -> do
@@ -1023,7 +1023,7 @@ handleAction = case _ of
             for_ (enabledValueAt st.subFocused subEntries) \v -> do
               H.raise (ItemSelected v)
               closeMenuAndSub
-        | otherwise -> case navigate cfg pos key of
+        | otherwise -> case navigatePaged cfg pos key of
             Stay -> pure unit
             MoveTo idx -> do
               H.modify_ _ { subFocused = idx }
