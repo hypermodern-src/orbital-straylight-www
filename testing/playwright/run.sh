@@ -78,6 +78,11 @@ done
 # pinned-animation oracle). Hard step: a divergence aborts via set -euo pipefail.
 echo "ℵ themes parity: port DOM == upstream (@radix-ui/themes)"
 "$HERE/themes-open-verify.sh"
+# CLOSING-state DOM (STR-335): the open-verify above skips *.closing (those are the Presence
+# exit-animation lifecycle); this drives each overlay open→Escape→snapshot and diffs the
+# lingering data-state="closed" node against the pinned-animation oracle. Hard step.
+echo "ℵ themes parity: CLOSING-state DOM == upstream (Presence exit lifecycle)"
+"$HERE/themes-closing-verify.sh"
 # WAI-ARIA APG keyboard conformance — port behavior == the spec tables (validated against the
 # real @radix-ui/themes golden). Full suite green (184/0).
 echo "ℵ themes parity: WAI-ARIA APG keyboard conformance"

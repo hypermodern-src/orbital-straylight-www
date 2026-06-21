@@ -83,7 +83,9 @@ const normalize = (raw) => {
     .replace(/-?\d+(?:\.\d+)?px/g, "<px>");
 };
 
-const b = await chromium.launch();
+// CHROMIUM_BIN overrides executablePath where the nix browser set isn't materialized
+// (sandbox with a system chromium); no-op in CI (version-matched nix browsers).
+const b = await chromium.launch(process.env.CHROMIUM_BIN ? { executablePath: process.env.CHROMIUM_BIN } : {});
 const pg = await b.newPage({ viewport: { width: 1200, height: 800 } });
 await pg.goto(`http://127.0.0.1:${PORT}/?c=${ID}&s=open`);
 await pg.waitForTimeout(250);
