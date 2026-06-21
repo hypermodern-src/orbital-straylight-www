@@ -21,7 +21,7 @@ DIST="$HERE/.themes-closing-dist"; rm -rf "$DIST"
 ( cd "$HY" && nix develop -c buck2 build //examples/themes-interactive:app --out "$DIST" >/tmp/themes-closing-build.log 2>&1 ) \
   || { echo "BUILD FAILED:"; grep -nE 'Error|in module|not in scope' /tmp/themes-closing-build.log | grep -v Compiling | head; exit 1; }
 
-export PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
+source "$HERE/pinned-browsers.sh"  # pinned, version-matched browser set (see that file)
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 cd "$HERE"
 

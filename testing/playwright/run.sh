@@ -18,9 +18,10 @@ rm -rf "$HERE/.gallery-dist"
 ( cd "$HYDROGEN" && nix develop -c buck2 build //examples:gallery \
     --out "$HERE/.gallery-dist" >/dev/null )
 
-# version-matched browser set (must match @playwright/test in package.json)
-PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
-export PLAYWRIGHT_BROWSERS_PATH
+# version-matched browser set — PINNED to match @playwright/test in package.json
+# (NOT the floating nixpkgs# registry, which drifts and breaks both the launch and the
+# pixel goldens). See pinned-browsers.sh for the rev + how to bump.
+source "$HERE/pinned-browsers.sh"
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 
 # free the port hard: any orphaned http.server (e.g. from a killed run) would,

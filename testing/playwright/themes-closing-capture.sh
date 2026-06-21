@@ -25,7 +25,7 @@ if [ "$#" -gt 0 ]; then STATES=("$@"); else STATES=(dialog alertdialog popover d
 echo "ℵ building golden dist (bun)"
 ( cd "$GD" && rm -rf dist && mkdir dist && nix shell nixpkgs#bun -c bun build ./src/app.tsx --outdir dist --minify >/dev/null && cp index.html dist/ )
 
-export PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
+source "$HERE/pinned-browsers.sh"  # pinned, version-matched browser set (see that file)
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 cd "$HERE"
 

@@ -29,7 +29,7 @@ else
     || { echo "BUILD FAILED:"; grep -nE 'Error|in module|not in scope' /tmp/themes-a11y-build.log | grep -v Compiling | head; exit 1; }
 fi
 
-export PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
+source "$HERE/pinned-browsers.sh"  # pinned, version-matched browser set (see that file)
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 cd "$HERE"
 exec nix develop "$HY" -c node scripts/themes-a11y.mjs "$DIST" "$MODE" "$@"

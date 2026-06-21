@@ -29,7 +29,8 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:3940",
     launchOptions: {
-      // nix sandbox-less env; matched Chromium from PLAYWRIGHT_BROWSERS_PATH.
+      // nix sandbox-less env; PINNED version-matched Chromium from PLAYWRIGHT_BROWSERS_PATH
+      // (run.sh sources pinned-browsers.sh so the revision matches @playwright/test).
       args: ["--no-sandbox", "--disable-dev-shm-usage"],
     },
     viewport: { width: 900, height: 600 },
