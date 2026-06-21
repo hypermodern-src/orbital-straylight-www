@@ -221,6 +221,14 @@ const CHECKS = [
     await pg.waitForTimeout(1100);
     await pg.keyboard.press("p"); await hlStarts(pg, "Print"); // fresh search
   }},
+  { id: "menubar", apg: "menubar", name: "Tab is prevented (focus stays in the open menu)", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(120);
+    await hlStarts(pg, "New Tab");
+    await pg.keyboard.press("Tab"); await pg.waitForTimeout(100);
+    ok(await activeWithin(pg, '[role="menu"]'), "Tab escaped the open menu");
+  }},
   { id: "menubar", apg: "menubar", name: "PageDown focuses the last menu item, PageUp the first", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().focus();
     await pg.keyboard.press("Enter");
@@ -1037,6 +1045,15 @@ const CHECKS = [
     await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
   }},
+  // Tab is preventDefault-ed inside an open menu (menu.tsx:531-532): focus cannot tab out.
+  { id: "dropdownmenu", apg: "menu", name: "Tab is prevented (focus stays in the menu)", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Tab"); await pg.waitForTimeout(100);
+    ok(await activeWithin(pg, '[role="menu"]'), "Tab escaped the menu (should be preventDefault-ed)");
+    await pg.keyboard.press("Shift+Tab"); await pg.waitForTimeout(100);
+    ok(await activeWithin(pg, '[role="menu"]'), "Shift+Tab escaped the menu");
+  }},
   // Page keys: PageDown ≡ last, PageUp ≡ first (menu.tsx:28-30 FIRST/LAST_KEYS include Page).
   { id: "dropdownmenu", apg: "menu", name: "PageDown focuses the last item, PageUp the first", run: async (pg) => {
     await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
@@ -1081,6 +1098,13 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
     await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
     await pg.keyboard.press("Home"); await hlStarts(pg, "Edit");
+  }},
+  { id: "contextmenu", apg: "menu", name: "Tab is prevented (focus stays in the menu)", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Tab"); await pg.waitForTimeout(100);
+    ok(await activeWithin(pg, '[role="menu"]'), "Tab escaped the menu");
   }},
   { id: "contextmenu", apg: "menu", name: "PageDown focuses the last item, PageUp the first", run: async (pg) => {
     await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });

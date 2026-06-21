@@ -860,6 +860,8 @@ handleAction = case _ of
           for_ (enabledValueAt st.focused st.entries) \v -> do
             H.raise (ItemSelected v)
             closeMenu
+        -- Tab/Shift+Tab preventDefault inside the menu (menu.tsx:531-532): focus stays trapped.
+        else if key == "Tab" then liftEffect (preventDefault (KE.toEvent ke))
         else case navigatePaged cfg pos key of
           Stay -> pure unit
           MoveTo idx -> focusItem idx

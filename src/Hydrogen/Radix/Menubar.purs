@@ -907,6 +907,8 @@ handleAction = case _ of
         | Typeahead.isTypeaheadChar key (st.search /= "") -> do
             liftEffect (preventDefault (KE.toEvent ke))
             typeaheadMenu key
+        -- Tab/Shift+Tab preventDefault inside the open menu (menu.tsx:531-532): focus trapped.
+        | key == "Tab" -> liftEffect (preventDefault (KE.toEvent ke))
         | otherwise -> case navigatePaged cfg pos key of
             Stay -> pure unit
             MoveTo idx -> focusMenuItem idx
