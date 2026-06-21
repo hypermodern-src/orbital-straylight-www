@@ -494,7 +494,7 @@ handleAction = case _ of
   ListKeyDown ke -> do
     st <- H.get
     let
-      cfg = { orientation: Vertical, dir: LTR, loop: true }
+      cfg = { orientation: Vertical, dir: LTR, loop: false } -- select.tsx roving loop default false (no wrap)
       pos = { count: length st.items, current: st.focused }
     case KE.key ke of
       -- APG listbox: Enter/Space commits the highlighted option, closes, and restores

@@ -305,6 +305,12 @@ const CHECKS = [
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Orange");
   }},
+  { id: "select", apg: "listbox", name: "loop off (default): ArrowDown on the last option does NOT wrap", run: async (pg) => {
+    await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
+    await hlStarts(pg, "Apple");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Grape");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Grape");
+  }},
   { id: "select", apg: "listbox", name: "typeahead: a letter focuses the matching option (idle reset)", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
     await hlStarts(pg, "Apple"); // options: Apple, Orange, Grape
@@ -1015,6 +1021,13 @@ const CHECKS = [
     await pg.keyboard.press("Space"); await pg.waitForTimeout(150);
     ok(!(await visible(pg, '[role="menu"]')), "Space did not close the menu after selecting");
   }},
+  // Loop default is FALSE (menu.tsx:362): ArrowDown on the last item stays put (no wrap).
+  { id: "dropdownmenu", apg: "menu", name: "loop off (default): ArrowDown on the last item does NOT wrap", run: async (pg) => {
+    await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown");
+    await pg.locator('[role="menu"]').waitFor(); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Delete");
+  }},
   // Typeahead (APG menu: "type a character → focus the next item whose label starts with it";
   // a repeated character cycles among matches). Items: Edit, Duplicate, Archive, Delete.
   { id: "dropdownmenu", apg: "menu", name: "typeahead: a letter focuses the next matching item, repeats cycle", run: async (pg) => {
@@ -1045,6 +1058,13 @@ const CHECKS = [
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
     await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
     await pg.keyboard.press("Home"); await hlStarts(pg, "Edit");
+  }},
+  { id: "contextmenu", apg: "menu", name: "loop off (default): ArrowDown on the last item does NOT wrap", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor();
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("End"); await hlStarts(pg, "Delete");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Delete");
   }},
   { id: "contextmenu", apg: "menu", name: "typeahead: a letter focuses the next matching item, repeats cycle", run: async (pg) => {
     await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });

@@ -836,7 +836,7 @@ handleAction = case _ of
     st <- H.get
     let
       key = KE.key ke
-      cfg = { orientation: Vertical, dir: LTR, loop: true }
+      cfg = { orientation: Vertical, dir: LTR, loop: false } -- menu.tsx:362 loop default false (no wrap)
       pos = { count: itemCount st.entries, current: st.focused }
       mFocusedSub = do
         v <- enabledValueAt st.focused st.entries
@@ -900,7 +900,7 @@ handleAction = case _ of
     let
       key = KE.key ke
       subEntries = fromMaybe [] (map _.entries (st.subOpen >>= \v -> findSub v st.entries))
-      cfg = { orientation: Vertical, dir: LTR, loop: true }
+      cfg = { orientation: Vertical, dir: LTR, loop: false } -- menu.tsx:362 loop default false (no wrap)
       pos = { count: itemCount subEntries, current: st.subFocused }
     case key of
       "ArrowLeft" -> liftEffect (preventDefault (KE.toEvent ke)) *> closeSub
