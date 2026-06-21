@@ -2324,7 +2324,9 @@ const CHECKS = [
   }},
 ];
 
-const b = await chromium.launch();
+// CHROMIUM_BIN overrides executablePath where the nix browser set isn't materialized
+// (sandbox with a system chromium); no-op in CI (version-matched nix browsers).
+const b = await chromium.launch(process.env.CHROMIUM_BIN ? { executablePath: process.env.CHROMIUM_BIN } : {});
 let pass = 0, fail = 0; let lastApg = "";
 for (const c of CHECKS) {
   if (ONLY.length && !ONLY.includes(c.id)) continue;

@@ -31,13 +31,19 @@ try {
     if (!f.endsWith(".json")) continue;
     const cf = JSON.parse(await readFile(join(HERE, "cells", f), "utf8"));
     const comp = cf.component;
-    let coreOpen = 0, namedOpen = 0, closed = 0, total = 0; const gatedClaims = [];
+    let coreOpen = 0, namedOpen = 0, closed = 0, total = 0; const gatedClaims = []; const apgClaims = [];
     for (const c of cf.cells) {
       total++;
-      if (c.status === "gated") { closed++; gatedClaims.push(c.oracle_file ?? c.id); } // bound golden basename (co-coverage via oracle_file)
+      if (c.status === "gated") {
+        closed++;
+        // APG-axis cells bind to a themes-apg.mjs check (by apg_check substring), not a golden;
+        // DOM/ARIA cells bind to a committed golden basename (oracle_file enables co-coverage).
+        if (c.apg_check) apgClaims.push(c.apg_check);
+        else gatedClaims.push(c.oracle_file ?? c.id);
+      }
       else if (c.status === "open") { namedOpen++; if (c.importance === "core") coreOpen++; }
     }
-    enumerated[comp] = { coreOpen, namedOpen, gatedClaims, closed, total };
+    enumerated[comp] = { coreOpen, namedOpen, gatedClaims, apgClaims, closed, total };
   }
 } catch { /* no cells/ dir yet */ }
 
@@ -57,9 +63,16 @@ for (const [comp, e] of Object.entries(enumerated)) {
 
 // A gated CLAIM in an enumerated file with no committed golden = binding violation.
 const gatedOnDisk = new Set(cells.keys());
-for (const [comp, e] of Object.entries(enumerated))
+// the APG harness source — APG-gated cells must name a check that exists in it (and run.sh
+// runs themes-apg, so existence here + green there = the cell is enforced).
+let apgSrc = "";
+try { apgSrc = await readFile(join(HERE, "..", "playwright", "scripts", "themes-apg.mjs"), "utf8"); } catch { /* */ }
+for (const [comp, e] of Object.entries(enumerated)) {
   for (const bound of e.gatedClaims)
     if (!gatedOnDisk.has(bound)) unbound.push(`${comp}:${bound} (enumerated gated, no committed golden)`);
+  for (const chk of e.apgClaims)
+    if (!apgSrc.includes(chk)) unbound.push(`${comp}:apg "${chk}" (enumerated gated, no themes-apg check)`);
+}
 
 // cell-based coverage (the true measure): closed = enumerated gated cells (each bound to a
 // committed golden, possibly shared via oracle_file); total = all enumerated cells.
