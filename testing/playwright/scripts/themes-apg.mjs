@@ -329,6 +329,13 @@ const CHECKS = [
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(120);
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Orange");
   }},
+  // ?s=disabled disables the middle option (Orange); ArrowDown must skip it (select.tsx
+  // focusable={!disabled}). Validated on the golden first.
+  { id: "select", apg: "listbox", state: "disabled", name: "ArrowDown SKIPS a disabled option to the next enabled one", run: async (pg) => {
+    await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
+    await hlStarts(pg, "Apple");
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Grape");
+  }},
   { id: "select", apg: "listbox", name: "loop off (default): ArrowDown on the last option does NOT wrap", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
     await hlStarts(pg, "Apple");

@@ -56,7 +56,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.Id (useId)
-import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate)
+import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigateMask)
 import Hydrogen.Radix.Behavior.Typeahead (nextMatch, isTypeaheadChar) as Typeahead
 import Hydrogen.Radix.Float.Popper as Popper
 import Hydrogen.Radix.Foundation.Dom as Dom
@@ -495,7 +495,8 @@ handleAction = case _ of
     st <- H.get
     let
       cfg = { orientation: Vertical, dir: LTR, loop: false } -- select.tsx roving loop default false (no wrap)
-      pos = { count: length st.items, current: st.focused }
+      -- focusable mask: arrows SKIP disabled options (select.tsx focusable={!disabled}).
+      mask = map (not <<< _.disabled) st.items
     case KE.key ke of
       -- APG listbox: Enter/Space commits the highlighted option, closes, and restores
       -- focus to the trigger (via closeMenu's restoreEl). preventDefault so the synthesized
@@ -509,7 +510,7 @@ handleAction = case _ of
         | Typeahead.isTypeaheadChar key (st.search /= "") -> do
             liftEffect (preventDefault (KE.toEvent ke))
             typeaheadList key
-        | otherwise -> case navigate cfg pos key of
+        | otherwise -> case navigateMask cfg { mask, current: st.focused } key of
             Stay -> pure unit
             MoveTo idx -> do
               H.modify_ _ { focused = idx }

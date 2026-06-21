@@ -265,7 +265,7 @@ view c s =
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component (contextMenuInput s)
             "menubar" -> HH.slot_ _menubar unit Menubar.component (menubarInput s)
             "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component (navigationMenuInput s)
-            "select" -> HH.slot_ _select unit Select.component selectInput
+            "select" -> HH.slot_ _select unit Select.component (selectInput s)
             "slider" ->
               -- `?s=vertical` swaps the wrapper to a fixed-height box (matching the golden's
               -- height:160 box) and drives the vertical-orientation slider; otherwise the
@@ -962,8 +962,10 @@ navigationMenuInput s = NavigationMenu.defaultInput
 -- | The themed Select: a surface trigger showing the selected value + chevron, opening a
 -- | solid listbox with a "Fruits" group and a check indicator on the selected option.
 -- | Apple is the default value. Listbox positions via Popper, so the driver clicks open.
-selectInput :: Select.Input
-selectInput = Select.defaultInput
+-- `?s=disabled` disables the MIDDLE option (Orange) so the APG disabled-skip check proves
+-- ArrowDown roves Apple→Grape OVER it (select.tsx focusable={!disabled}). Default: all enabled.
+selectInput :: String -> Select.Input
+selectInput s = Select.defaultInput
   { defaultValue = "apple"
   , style = selectStyle
   , portalAttrs = portalThemeAttrs
@@ -973,7 +975,7 @@ selectInput = Select.defaultInput
   , checkIcon = [ checkSvg ]
   , items =
       [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
-      , { value: "orange", label: [ HH.text "Orange" ], disabled: false }
+      , { value: "orange", label: [ HH.text "Orange" ], disabled: s == "disabled" }
       , { value: "grape", label: [ HH.text "Grape" ], disabled: false }
       ]
   }

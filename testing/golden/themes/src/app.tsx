@@ -862,19 +862,26 @@ const PAGES: Page[] = [
   {
     id: "select",
     label: "Select",
-    node: (
-      <Select.Root defaultValue="apple">
-        <Select.Trigger />
-        <Select.Content>
-          <Select.Group>
-            <Select.Label>Fruits</Select.Label>
-            <Select.Item value="apple">Apple</Select.Item>
-            <Select.Item value="orange">Orange</Select.Item>
-            <Select.Item value="grape">Grape</Select.Item>
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
-    ),
+    interactive: true,
+    // `?s=disabled` disables the MIDDLE option (Orange) so the APG disabled-skip check can
+    // assert ArrowDown roves Apple→Grape OVER it. The default (rest/open) render is unchanged
+    // (all enabled), so the existing pixel + open-state goldens are untouched.
+    node: (() => {
+      const middleDisabled = currentState() === "disabled";
+      return (
+        <Select.Root defaultValue="apple">
+          <Select.Trigger />
+          <Select.Content>
+            <Select.Group>
+              <Select.Label>Fruits</Select.Label>
+              <Select.Item value="apple">Apple</Select.Item>
+              <Select.Item value="orange" disabled={middleDisabled}>Orange</Select.Item>
+              <Select.Item value="grape">Grape</Select.Item>
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+      );
+    })(),
   },
   // ── Interactive (stateful, non-overlay) components — open-state DOM oracle ──────
   // Driven into a post-interaction state (checked / active / pressed / open / selected)
