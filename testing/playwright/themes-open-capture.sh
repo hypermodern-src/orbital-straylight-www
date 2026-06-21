@@ -36,6 +36,7 @@ STATES=(
   "contextmenu:disabled"
   "contextmenu:submenu"
   "select:open"
+  "select:closed-rest"
   # Interactive (stateful, non-overlay) components — STR (13 new oracles).
   "accordion:open"
   "collapsible:open"

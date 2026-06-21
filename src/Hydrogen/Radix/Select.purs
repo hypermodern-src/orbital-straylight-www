@@ -312,12 +312,15 @@ render st =
                 [ HH.span [ HP.style "pointer-events: none;" ] (selectedLabel st) ]
             ] <> map HH.fromPlainHTML st.trigger
           )
-      -- the POSITION WRAPPER (portal root) — a plain div whose whole style is written by
-      -- positionItemAligned (display:flex; position:fixed; left/top/height/max-height …).
-      -- ALWAYS mounted; display:none when closed so Halogen only patches it.
-      , HH.div
+      ]
+      -- the POSITION WRAPPER (portal root) renders ONLY while open; fully UNMOUNTED when closed,
+      -- matching upstream (no listbox node at closed-rest). finalize re-adopts it into body on
+      -- each open. (Select unmounts synchronously on close — no exit linger.) Its whole style is
+      -- written out-of-band by positionItemAligned after mount (display:flex; position:fixed; …).
+      <> ( if open then
+      [ HH.div
           [ HP.ref wrapperRef
-          , HP.style (if open then "" else "display:none;")
+          , HP.style ""
           ]
           [ HH.div
               ( [ HP.ref contentRef
@@ -359,7 +362,7 @@ render st =
                   ]
               ]
           ]
-      ]
+      ] else [] )
         -- BubbleSelect: the hidden native <select> form-participation node (react-select
         -- SelectBubbleInput). Rendered ONLY when a form name is set (the port's analogue of
         -- upstream's isFormControl gate — the consumer opts in by giving the field a name AND

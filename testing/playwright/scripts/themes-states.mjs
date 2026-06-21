@@ -254,6 +254,7 @@ export const STATES = {
     },
   },
   select: {
+    "closed-rest": async (pg) => { await pg.locator(".rt-SelectTrigger").first().waitFor(); },
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
   },
   toast: {

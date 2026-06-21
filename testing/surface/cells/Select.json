@@ -6,6 +6,7 @@
   "note": "STR-381 ledger for Select: 21 gaps (3 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
   "cells": [
     { "id": "select.open",                    "state": "open",        "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "open listbox: group Fruits, Apple selected/highlighted, modal envelope" },
+    { "id": "select.closed-rest",             "state": "closed-rest", "importance": "common", "status": "gated", "oracle": ["dom"], "ref": "FIXED (2026-06-21): position wrapper gated on open → listbox UNMOUNTED at closed-rest (was display:none always-mounted). golden-dom/select.closed-rest.txt; select.open no regression. (systemic popper-overlay closed-rest bug — 6th & last)" },
     { "id": "select.rest",                     "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest combobox a11y tree (Apple)" },
     { "id": "selectform.required",             "state": "required",    "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "form/required: aria-required on trigger render" },
     { "id": "selectform.rest",                 "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "form select at-rest a11y tree" },
