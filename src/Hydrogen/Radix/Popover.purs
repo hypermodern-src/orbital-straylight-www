@@ -229,7 +229,7 @@ render st =
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
-      [ HH.button
+      ( [ HH.button
           ( [ HP.type_ HP.ButtonButton
             , HP.ref triggerRef
             , classes st.style.trigger
@@ -255,19 +255,20 @@ render st =
               <> portalData st.triggerAttrs
           )
           (map HH.fromPlainHTML st.trigger)
-      -- The popper WRAPPER (the portal root) is ALWAYS mounted (hidden when closed) so
-      -- Halogen never removes it — only patches it — which makes adopting it into body safe.
-      -- Its style is set out-of-band by Popper.positionWrapper; the rendered string stays
-      -- CONSTANT (only the display toggle) so Halogen never clobbers the FFI writes. While
-      -- `isRendered presence` (Open OR Closing) it carries `position: fixed;` and the FFI
-      -- coords linger through the exit animation; only at Closed does it drop to display:none.
-      , HH.div
+      ]
+      -- The popper WRAPPER (the portal root) renders ONLY while the Popper subtree is mounted —
+      -- Open OR exiting (Closing) — and is fully UNMOUNTED at Closed, matching upstream (which
+      -- renders no content node at closed-rest) AND the Dialog primitive. finalize() re-adopts
+      -- the freshly-mounted wrapper into body on each open. (Previously it was always-mounted
+      -- with a display:none toggle at Closed — a closed-rest DOM divergence the gate caught.)
+      <> ( if isRendered st.presence then
+      [ HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
           -- position:fixed from the start so the content is shrink-to-fit (max-content) when
-          -- Popper measures it for the flip; the rest of the style is FFI (and position:fixed
-          -- stays first in the serialization, matching upstream's order).
-          , HP.style (if isRendered st.presence then "position: fixed;" else "display:none;")
+          -- Popper measures it for the flip; the rest of the style is FFI (position:fixed stays
+          -- first in the serialization, matching upstream's order).
+          , HP.style "position: fixed;"
           ]
           [ HH.div
               ( [ HP.ref contentRef
@@ -289,7 +290,8 @@ render st =
               )
               (map HH.fromPlainHTML st.content)
           ]
-      ]
+      ] else [] )
+      )
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of

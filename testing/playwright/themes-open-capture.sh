@@ -21,6 +21,7 @@ STATES=(
   "alertdialog:open"
   "alertdialog:aria-controls"
   "popover:open"
+  "popover:closed-attr"
   "tooltip:open"
   "hovercard:open"
   "dropdownmenu:open"
