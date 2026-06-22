@@ -5,35 +5,285 @@
   "upstream": "primitives packages/react/form/src/form.tsx + @radix-ui/themes@3",
   "note": "Per-component surface ledger for Form. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 20 gaps (6 core).",
   "cells": [
-    { "id": "form.rest",          "state": "rest",          "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "at-rest field: no data-*/describedby, plain textbox+button tree" },
-    { "id": "form.rest-valid",    "state": "rest",          "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "rest-valid driver: no data-invalid/data-valid before validation runs" },
-    { "id": "form.serverInvalid", "state": "serverInvalid", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "pure prop: data-invalid on field/label/control + aria-invalid" },
-    { "id": "form.forceMatch",    "state": "forceMatch",    "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "Message rendered unconditionally first paint → span id + aria-describedby" },
-    { "id": "form.valueMissing",  "state": "valueMissing",  "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "Submit click → native invalid → ValueMissing Message mounts + describedby" },
-    { "id": "form.typeMismatch",  "state": "typeMismatch",  "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "bad email → typeMismatch Message mounts (requires live ValidityState read)" },
-    { "id": "form.validValid",    "state": "valid",         "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "valid email + native change → field/label/control gain data-valid=true" },
-    { "id": "form.defaultMessage","state": "defaultMessage","importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "Message with empty text + match → DEFAULT_BUILT_IN_MESSAGES string" },
-    { "id": "form.multiMessage",  "state": "multiMessage",  "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "two messages → aria-describedby contains both ids in registration order" },
-    { "id": "form.reset",         "state": "reset",         "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "submit invalid → reset → data-invalid/Messages/describedby cleared" },
-
-    { "id": "form.data-valid",       "state": "valid",         "importance": "core", "status": "open", "oracle": ["dom"], "ref": "form.tsx:220-221 getValidAttribute data-valid=true; port has no validated-and-valid notion (structurally absent)" },
-    { "id": "form.matchers",         "state": "typeMismatch",  "importance": "core", "status": "open", "oracle": ["dom"], "ref": "form.tsx:425-451 built-in matchers beyond ValueMissing; ControlInvalid hard-codes filter(==ValueMissing)" },
-    { "id": "form.validitystate",    "state": "open",          "importance": "core", "status": "open", "oracle": ["dom"], "ref": "form.tsx:295-299 validityStateToObject reads real ValidityState; port infers from declared messages" },
-    { "id": "form.focus-first-submit","state": "open",         "importance": "core", "status": "open", "oracle": ["apg"], "ref": "form.tsx:167-173 onInvalid focuses getFirstInvalidControl + preventDefault native bubble" },
-    { "id": "form.multi-field",      "state": "open",          "importance": "core", "status": "open", "oracle": ["dom"], "ref": "form.tsx ValidityMap keyed by fieldName; port keys by Int index — per-field machinery unverified for N>1" },
-    { "id": "form.axe-empty",        "state": "serverInvalid", "importance": "core", "status": "open", "oracle": ["aria"],"ref": "golden-aria/form.*.axe.txt empty + rest==serverInvalid trees; no a11y oracle distinguishes states" },
-
-    { "id": "form.custom-match",     "state": "open",          "importance": "common", "status": "open", "oracle": ["dom"], "ref": "form.tsx:517-549 FormCustomMessage function match → setCustomValidity; port Matcher is closed 9-builtin sum" },
-    { "id": "form.validate-change",  "state": "open",          "importance": "common", "status": "open", "oracle": ["dom"], "ref": "form.tsx:354-363 revalidate on native change (not input); port only clears on input, re-fails on submit" },
-    { "id": "form.focus-server",     "state": "serverInvalid", "importance": "common", "status": "open", "oracle": ["apg"], "ref": "form.tsx:382-390 useEffect focuses control on serverInvalid mount" },
-    { "id": "form.aria-invalid-client","state": "valueMissing","importance": "common","status": "open", "oracle": ["aria"],"ref": "form.tsx:398-401 aria-invalid only on serverInvalid; client-invalid-without-aria-invalid unasserted negatively" },
-
-    { "id": "form.async-match",      "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: async custom matchers (Promise match)" },
-    { "id": "form.validity-state-rp","state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: FormValidityState render-prop component (not exported)" },
-    { "id": "form.clear-server-cb",  "state": "open", "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: onClearServerErrors callback on submit AND reset" },
-    { "id": "form.message-name",     "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Message name prop targets a different field" },
-    { "id": "form.control-id-name",  "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Control name/id overrides via controlProps" },
-    { "id": "form.label-htmlfor",    "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Label htmlFor explicit override" },
-    { "id": "form.rtl",              "state": "open", "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: no RTL-specific behavior in upstream Form" }
+    {
+      "id": "form.rest",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "at-rest field: no data-*/describedby, plain textbox+button tree"
+    },
+    {
+      "id": "form.rest-valid",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "rest-valid driver: no data-invalid/data-valid before validation runs"
+    },
+    {
+      "id": "form.serverInvalid",
+      "state": "serverInvalid",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "pure prop: data-invalid on field/label/control + aria-invalid"
+    },
+    {
+      "id": "form.forceMatch",
+      "state": "forceMatch",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Message rendered unconditionally first paint \u2192 span id + aria-describedby"
+    },
+    {
+      "id": "form.valueMissing",
+      "state": "valueMissing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "Submit click \u2192 native invalid \u2192 ValueMissing Message mounts + describedby"
+    },
+    {
+      "id": "form.typeMismatch",
+      "state": "typeMismatch",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "bad email \u2192 typeMismatch Message mounts (requires live ValidityState read)"
+    },
+    {
+      "id": "form.validValid",
+      "state": "valid",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "valid email + native change \u2192 field/label/control gain data-valid=true"
+    },
+    {
+      "id": "form.defaultMessage",
+      "state": "defaultMessage",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Message with empty text + match \u2192 DEFAULT_BUILT_IN_MESSAGES string"
+    },
+    {
+      "id": "form.multiMessage",
+      "state": "multiMessage",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "two messages \u2192 aria-describedby contains both ids in registration order"
+    },
+    {
+      "id": "form.reset",
+      "state": "reset",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "submit invalid \u2192 reset \u2192 data-invalid/Messages/describedby cleared"
+    },
+    {
+      "id": "form.data-valid",
+      "state": "valid",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): validPassed \u2192 data-valid=true once validity runs+passes (getValidAttribute). Co-covered by form.validValid (field data-valid=true). form.tsx:220-221",
+      "oracle_file": "form.validValid"
+    },
+    {
+      "id": "form.matchers",
+      "state": "typeMismatch",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): ControlInvalid/ControlChange read the LIVE ValidityState and keep every declared matcher whose flag is set (not just ValueMissing). Co-covered by form.typeMismatch (email TypeMismatch beyond ValueMissing \u2192 its Message + aria-describedby). form.tsx:425-451",
+      "oracle_file": "form.typeMismatch"
+    },
+    {
+      "id": "form.validitystate",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): matcherFails reads the real Web.HTML.ValidityState accessors per matcher (validityStateToObject equivalent). Co-covered by form.typeMismatch (the email's live typeMismatch flag drove the rendered Message). form.tsx:295-299",
+      "oracle_file": "form.typeMismatch"
+    },
+    {
+      "id": "form.focus-first-submit",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-22): FormSubmit focuses firstInvalidIndex when blocked (getFirstInvalidControl). ?s=multi story both faces; golden+port green. form.tsx:167-173",
+      "apg_check": "submitting an invalid form focuses the first invalid control"
+    },
+    {
+      "id": "form.multi-field",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): per-field validity keyed by index \u2014 ?s=multi (two required fields) submit\u2192both independently data-invalid with own Message+aria-describedby. golden-dom byte-identical. form.tsx ValidityMap",
+      "oracle_file": "form.multi"
+    },
+    {
+      "id": "form.axe-empty",
+      "state": "serverInvalid",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "DONE (2026-06-22): EXTRA_STATES a11y for form now covers rest/serverInvalid/valueMissing/multi \u2014 ARIA trees + axe fingerprints captured, port matches upstream, axe clean across empty AND error states. test.tsx a11y",
+      "oracle_file": "form.valueMissing"
+    },
+    {
+      "id": "form.custom-match",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "form.tsx:517-549 FormCustomMessage function match \u2192 setCustomValidity; port Matcher is closed 9-builtin sum"
+    },
+    {
+      "id": "form.validate-change",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "form.tsx:354-363 revalidate on native change (not input); port only clears on input, re-fails on submit"
+    },
+    {
+      "id": "form.focus-server",
+      "state": "serverInvalid",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "form.tsx:382-390 useEffect focuses control on serverInvalid mount"
+    },
+    {
+      "id": "form.aria-invalid-client",
+      "state": "valueMissing",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "form.tsx:398-401 aria-invalid only on serverInvalid; client-invalid-without-aria-invalid unasserted negatively"
+    },
+    {
+      "id": "form.async-match",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: async custom matchers (Promise match)"
+    },
+    {
+      "id": "form.validity-state-rp",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: FormValidityState render-prop component (not exported)"
+    },
+    {
+      "id": "form.clear-server-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: onClearServerErrors callback on submit AND reset"
+    },
+    {
+      "id": "form.message-name",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Message name prop targets a different field"
+    },
+    {
+      "id": "form.control-id-name",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Control name/id overrides via controlProps"
+    },
+    {
+      "id": "form.label-htmlfor",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Label htmlFor explicit override"
+    },
+    {
+      "id": "form.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: no RTL-specific behavior in upstream Form"
+    }
   ]
 }

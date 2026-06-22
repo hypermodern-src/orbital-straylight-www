@@ -2527,6 +2527,14 @@ const CHECKS = [
   // Submit the empty required Control (valueMissing Message mounts, data-invalid stamps,
   // aria-describedby links). Then click Reset: the form-reset path clears the validity, so
   // the Message unmounts and data-invalid / aria-describedby are dropped.
+  // Submitting an invalid form focuses the FIRST invalid control (form.tsx:167-173). On the
+  // two-field story (both empty/required), focus must land on the first field (email).
+  { id: "form", state: "multi", apg: "form", name: "submitting an invalid form focuses the first invalid control", run: async (pg) => {
+    await pg.locator('#root form input').first().waitFor();
+    await pg.locator('#root button[type="submit"]').click();
+    await pg.waitForTimeout(120);
+    ok(await pg.evaluate(() => document.activeElement === document.querySelectorAll("#root form input")[0]), "submit did not focus the first invalid control");
+  }},
   { id: "form", state: "reset", apg: "form", name: "a form reset clears the field validity (Message unmounts, data-invalid drops)", run: async (pg) => {
     await pg.locator('#root form').first().waitFor();
     await pg.locator('#root button[type="submit"]').click();

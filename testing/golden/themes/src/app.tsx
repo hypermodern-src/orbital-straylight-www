@@ -1965,6 +1965,27 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=multi` — TWO required fields: submitting empty marks BOTH invalid independently
+      // (per-field validity) and focuses the FIRST invalid control (email).
+      if (s === "multi") {
+        return (
+          <Box>
+            <Form.Root>
+              <Form.Field name="email">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" required />
+                <Form.Message match="valueMissing">Email is missing</Form.Message>
+              </Form.Field>
+              <Form.Field name="name">
+                <Form.Label>Name</Form.Label>
+                <Form.Control type="text" required />
+                <Form.Message match="valueMissing">Name is missing</Form.Message>
+              </Form.Field>
+              <Form.Submit>Submit</Form.Submit>
+            </Form.Root>
+          </Box>
+        );
+      }
       return (
         <Box>
           <Form.Root>

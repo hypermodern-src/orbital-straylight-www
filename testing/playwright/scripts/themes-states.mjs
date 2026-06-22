@@ -1020,6 +1020,18 @@ export const STATES = {
     },
   },
   form: {
+    // `?s=multi` — TWO required fields, submit empty → BOTH controls independently data-invalid
+    // with their own valueMissing Message + aria-describedby (per-field validity, no cross-talk).
+    multi: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("form input")];
+        return a.length === 2 && a.every((i) => {
+          const db = i.getAttribute("aria-describedby");
+          return i.getAttribute("data-invalid") === "true" && db && document.getElementById(db.split(" ")[0]);
+        });
+      });
+    },
     // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true
     // and the control carries aria-invalid=true. NOTE — a bare match="valueMissing" Message does NOT
     // render here (validity.valueMissing is false; serverInvalid is a separate flag), so there is no

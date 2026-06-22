@@ -1761,6 +1761,18 @@ formInput s = Form.defaultInput
   -- (clears each field's derived validity → Messages unmount) is exercised.
   , resetLabel = if s == "reset" then [ HH.text "Reset" ] else []
   , fields =
+    if s == "multi" then
+      -- TWO required fields: submit empty → both invalid independently, focus the first (email).
+      [ Form.defaultField
+          { name = "email", label = [ HH.text "Email" ], inputType = "email", required = true
+          , messages = [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "Email is missing" ] } ]
+          }
+      , Form.defaultField
+          { name = "name", label = [ HH.text "Name" ], inputType = "text", required = true
+          , messages = [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "Name is missing" ] } ]
+          }
+      ]
+    else
       [ Form.defaultField
           { name = "email"
           , label = [ HH.text "Email" ]

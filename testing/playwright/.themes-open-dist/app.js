@@ -17569,6 +17569,7 @@
   var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
   var map42 = /* @__PURE__ */ map(functorArray);
   var lookup6 = /* @__PURE__ */ lookup(ordInt);
+  var identity12 = /* @__PURE__ */ identity(categoryFn);
   var bind27 = /* @__PURE__ */ bind(bindHalogenM);
   var get10 = /* @__PURE__ */ get(monadStateHalogenM);
   var fromFoldable4 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
@@ -17586,7 +17587,6 @@
   var filterA3 = /* @__PURE__ */ filterA(applicativeEffect);
   var insert5 = /* @__PURE__ */ insert(ordInt);
   var $$delete3 = /* @__PURE__ */ $$delete(ordInt);
-  var when15 = /* @__PURE__ */ when(applicativeHalogenM);
   var append19 = /* @__PURE__ */ append(semigroupArray);
   var Submitted = /* @__PURE__ */ function() {
     function Submitted2() {
@@ -17798,6 +17798,13 @@
       };
     };
   };
+  var firstInvalidIndex = function(st) {
+    return findIndex(identity12)(mapWithIndex2(function(i2) {
+      return function(f) {
+        return fieldInvalid(st)(i2)(f);
+      };
+    })(st.fields));
+  };
   var handleQuery9 = function(dictMonadEffect) {
     return function(v) {
       return bind27(get10)(function(st) {
@@ -17855,6 +17862,14 @@
   };
   var elem6 = /* @__PURE__ */ elem2(eqMatcher);
   var eq6 = /* @__PURE__ */ eq(eqMatcher);
+  var defaultField = {
+    name: "",
+    label: [],
+    inputType: "text",
+    required: false,
+    serverInvalid: false,
+    messages: []
+  };
   var defaultBuiltInMessage = function(v) {
     if (v instanceof ValueMissing) {
       return "This value is missing";
@@ -17892,7 +17907,7 @@
       return "This value is not valid";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 258, column 25 - line 267, column 40): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 263, column 25 - line 272, column 40): " + [v.constructor.name]);
   };
   var visibleMessages = function(st) {
     return function(i2) {
@@ -18063,11 +18078,11 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 393, column 9 - line 397, column 77): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 398, column 9 - line 402, column 77): " + [v2.constructor.name]);
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 389, column 14 - line 397, column 77): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 394, column 14 - line 402, column 77): " + [v1.constructor.name]);
           }())(function(fails) {
             return modify_11(function(v1) {
               var $100 = {};
@@ -18158,39 +18173,50 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 413, column 9 - line 428, column 18): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 418, column 9 - line 433, column 18): " + [v2.constructor.name]);
             });
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 409, column 5 - line 428, column 18): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 414, column 5 - line 433, column 18): " + [v1.constructor.name]);
         });
       }
       ;
       if (v instanceof FormSubmit) {
         return discard16(liftEffect7(preventDefault(v.value0)))(function() {
           return bind27(get10)(function(st) {
-            return when15(isEmpty(st.failed))(raise(Submitted.value));
+            var $120 = isEmpty(st.failed);
+            if ($120) {
+              return raise(Submitted.value);
+            }
+            ;
+            return for_23(firstInvalidIndex(st))(function(i2) {
+              return bind27(getHTMLElementRef(controlRef(i2)))(function(mel) {
+                return for_23(mel)(function($131) {
+                  return liftEffect7(focus($131));
+                });
+              });
+            });
           });
         });
       }
       ;
       if (v instanceof FormReset) {
         return modify_11(function(v1) {
-          var $121 = {};
-          for (var $122 in v1) {
-            if ({}.hasOwnProperty.call(v1, $122)) {
-              $121[$122] = v1[$122];
+          var $122 = {};
+          for (var $123 in v1) {
+            if ({}.hasOwnProperty.call(v1, $123)) {
+              $122[$123] = v1[$123];
             }
             ;
           }
           ;
-          $121.failed = empty2;
-          $121.validPassed = empty2;
-          return $121;
+          $122.failed = empty2;
+          $122.validPassed = empty2;
+          return $122;
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 350, column 16 - line 438, column 64): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 355, column 16 - line 448, column 64): " + [v.constructor.name]);
     };
   };
   var renderField = function(st) {
@@ -18234,8 +18260,8 @@
           ;
           return [];
         }())(function() {
-          var $128 = describedBy !== "";
-          if ($128) {
+          var $129 = describedBy !== "";
+          if ($129) {
             return [aria("describedby")(describedBy)];
           }
           ;
@@ -18246,8 +18272,8 @@
   };
   var render9 = function(st) {
     return form2([classes2(st.style.root), onSubmit(FormSubmit.create), onReset($$const(FormReset.value))])(append19(mapWithIndex2(renderField(st))(st.fields))(append19([renderSubmit(st)])(function() {
-      var $129 = $$null(st.resetLabel);
-      if ($129) {
+      var $130 = $$null(st.resetLabel);
+      if ($130) {
         return [];
       }
       ;
@@ -18262,8 +18288,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction9(dictMonadEffect),
         handleQuery: handleQuery9(dictMonadEffect),
-        receive: function($130) {
-          return Just.create(Receive10.create($130));
+        receive: function($132) {
+          return Just.create(Receive10.create($132));
         },
         initialize: new Just(Initialize8.value)
       })
@@ -18283,7 +18309,7 @@
   var for_24 = /* @__PURE__ */ for_11(foldableArray);
   var append110 = /* @__PURE__ */ append(semigroupArray);
   var applySecond8 = /* @__PURE__ */ applySecond(applyHalogenM);
-  var when16 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when15 = /* @__PURE__ */ when(applicativeHalogenM);
   var traverse_11 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
   var bind114 = /* @__PURE__ */ bind(bindEffect);
   var SetOpen6 = /* @__PURE__ */ function() {
@@ -18666,7 +18692,7 @@
     return discard17(cancelOpen(dictMonadEffect))(function() {
       return discard17(cancelClose1)(function() {
         return bind28(get11)(function(st) {
-          return when16(current(st.ctrl))(discard17(traverse_11(unsubscribe2)(st.subs))(function() {
+          return when15(current(st.ctrl))(discard17(traverse_11(unsubscribe2)(st.subs))(function() {
             return discard17(for_15(st.postSub)(unsubscribe2))(function() {
               return discard17(for_15(st.restoreEl)(function($202) {
                 return liftEffect7(focus($202));
@@ -18718,7 +18744,7 @@
     return discard17(cancelOpen(dictMonadEffect))(function() {
       return discard17(cancelClose1)(function() {
         return bind28(get11)(function(st) {
-          return when16(!current(st.ctrl))(bind28(liftEffect7(bind114(windowImpl)(document)))(function(doc) {
+          return when15(!current(st.ctrl))(bind28(liftEffect7(bind114(windowImpl)(document)))(function(doc) {
             return bind28(liftEffect7(activeElement(doc)))(function(mprev) {
               return discard17(for_15(st.animSub)(unsubscribe2))(function() {
                 return discard17(modify_12(function(v) {
@@ -18818,7 +18844,7 @@
     var armTimer1 = armTimer(dictMonadEffect);
     return discard17(cancelOpen(dictMonadEffect))(function() {
       return bind28(get11)(function(st) {
-        return when16(current(st.ctrl))(function() {
+        return when15(current(st.ctrl))(function() {
           if (st.pendingClose instanceof Just) {
             return pure27(unit);
           }
@@ -18857,7 +18883,7 @@
     var armTimer1 = armTimer(dictMonadEffect);
     return discard17(cancelClose(dictMonadEffect))(function() {
       return bind28(get11)(function(st) {
-        return when16(!current(st.ctrl))(function() {
+        return when15(!current(st.ctrl))(function() {
           if (st.pendingOpen instanceof Just) {
             return pure27(unit);
           }
@@ -19064,8 +19090,8 @@
   var bind29 = /* @__PURE__ */ bind(bindHalogenM);
   var bind115 = /* @__PURE__ */ bind(bindMaybe);
   var pure28 = /* @__PURE__ */ pure(applicativeEffect);
-  var when17 = /* @__PURE__ */ when(applicativeHalogenM);
-  var identity12 = /* @__PURE__ */ identity(categoryFn);
+  var when16 = /* @__PURE__ */ when(applicativeHalogenM);
+  var identity13 = /* @__PURE__ */ identity(categoryFn);
   var MouseDown = /* @__PURE__ */ function() {
     function MouseDown2(value0) {
       this.value0 = value0;
@@ -19108,14 +19134,14 @@
         ;
         throw new Error("Failed pattern match at Hydrogen.Radix.Label (line 118, column 29 - line 122, column 28): " + [v1.constructor.name]);
       }()))(function(inControl) {
-        return when17(!inControl)(bind29(liftEffect7(defaultPrevented(ev)))(function(already) {
+        return when16(!inControl)(bind29(liftEffect7(defaultPrevented(ev)))(function(already) {
           var multi = detail(toUIEvent(v.value0)) > 1;
-          return when17(!already && multi)(liftEffect7(preventDefault(ev)));
+          return when16(!already && multi)(liftEffect7(preventDefault(ev)));
         }));
       });
     };
     return mkComponent({
-      initialState: identity12,
+      initialState: identity13,
       render: render27,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
@@ -19140,7 +19166,7 @@
   var map45 = /* @__PURE__ */ map(functorArray);
   var foldl4 = /* @__PURE__ */ foldl(foldableArray);
   var get12 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when18 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when17 = /* @__PURE__ */ when(applicativeHalogenM);
   var eqMaybe1 = /* @__PURE__ */ eqMaybe(eqString);
   var notEq15 = /* @__PURE__ */ notEq(eqMaybe1);
   var modify_13 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -19153,7 +19179,7 @@
   var for_16 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var for_17 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var not6 = /* @__PURE__ */ not(heytingAlgebraBoolean);
-  var when19 = /* @__PURE__ */ when(applicativeEffect);
+  var when18 = /* @__PURE__ */ when(applicativeEffect);
   var bind210 = /* @__PURE__ */ bind(bindEffect);
   var map118 = /* @__PURE__ */ map(functorHalogenM);
   var map212 = /* @__PURE__ */ map(functorMaybe);
@@ -19603,7 +19629,7 @@
       return function(idx) {
         return function(focus3) {
           return bind30(get12)(function(st) {
-            return when18(current(st.ctrl) !== "" && notEq15(st.subOpen)(new Just(value17)))(discard19(modify_13(function(v) {
+            return when17(current(st.ctrl) !== "" && notEq15(st.subOpen)(new Just(value17)))(discard19(modify_13(function(v) {
               var $239 = {};
               for (var $240 in v) {
                 if ({}.hasOwnProperty.call(v, $240)) {
@@ -19818,7 +19844,7 @@
                 offset: 0,
                 padding: st.padding
               })))(function(placed) {
-                return when18(notEq24(placed.placement.side)(st.subPlacedSide) || notEq32(placed.placement.align)(st.subPlacedAlign))(modify_13(function(v) {
+                return when17(notEq24(placed.placement.side)(st.subPlacedSide) || notEq32(placed.placement.align)(st.subPlacedAlign))(modify_13(function(v) {
                   var $261 = {};
                   for (var $262 in v) {
                     if ({}.hasOwnProperty.call(v, $262)) {
@@ -20172,7 +20198,7 @@
               if (mbody instanceof Just && mwrap instanceof Just) {
                 return liftEffect7(function __do12() {
                   adopt(mbody.value0)(toElement(mwrap.value0))();
-                  return when19(focusToo)(function __do13() {
+                  return when18(focusToo)(function __do13() {
                     addFocusGuards();
                     return for_16(mfocus)(focus)();
                   })();
@@ -20194,7 +20220,7 @@
         return function(openFocus) {
           return bind30(get12)(function(st) {
             return for_17(index(st.menus)(i2))(function(menu2) {
-              return when18(current(st.ctrl) !== menu2.value)(bind30(liftEffect7(bind210(windowImpl)(document)))(function(doc) {
+              return when17(current(st.ctrl) !== menu2.value)(bind30(liftEffect7(bind210(windowImpl)(document)))(function(doc) {
                 return bind30(liftEffect7(activeElement(doc)))(function(mprev) {
                   return discard19(for_17(st.animSub)(unsubscribe2))(function() {
                     return discard19(modify_13(function(v) {
@@ -20281,7 +20307,7 @@
                   offset: st.offset,
                   padding: st.padding
                 })))(function(placed) {
-                  return when18(notEq24(placed.placement.side)(st.placedSide) || notEq32(placed.placement.align)(st.placedAlign))(modify_13(function(v1) {
+                  return when17(notEq24(placed.placement.side)(st.placedSide) || notEq32(placed.placement.align)(st.placedAlign))(modify_13(function(v1) {
                     var $316 = {};
                     for (var $317 in v1) {
                       if ({}.hasOwnProperty.call(v1, $317)) {
@@ -20314,7 +20340,7 @@
         return function(openFocus) {
           return bind30(get12)(function(st) {
             return for_17(index(st.menus)(i2))(function(menu2) {
-              return when18(current(st.ctrl) !== menu2.value)(function() {
+              return when17(current(st.ctrl) !== menu2.value)(function() {
                 var $323 = $$null(st.subs);
                 if ($323) {
                   return openMenuAt1(i2)(focusedIdx)(openFocus);
@@ -20410,7 +20436,7 @@
   var closeSub3 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind30(get12)(function(st) {
-      return when18(isJust(st.subOpen))(discard19(for_17(st.subPostSub)(unsubscribe2))(function() {
+      return when17(isJust(st.subOpen))(discard19(for_17(st.subPostSub)(unsubscribe2))(function() {
         return discard19(modify_13(function(v) {
           var $334 = {};
           for (var $335 in v) {
@@ -20441,7 +20467,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfterClose1 = scheduleAfterClose4(dictMonadEffect);
     return bind30(get12)(function(st) {
-      return when18(current(st.ctrl) !== "")(discard19(traverse_14(unsubscribe2)(st.subs))(function() {
+      return when17(current(st.ctrl) !== "")(discard19(traverse_14(unsubscribe2)(st.subs))(function() {
         return discard19(for_17(st.postSub)(unsubscribe2))(function() {
           return discard19(for_17(st.restoreEl)(function($466) {
             return liftEffect7(focus($466));
@@ -20826,7 +20852,7 @@
         if (v instanceof Just) {
           var n = length(st.menus);
           var j = mod4(mod4(v.value0 + delta | 0)(n) + n | 0)(n);
-          return when18(j !== v.value0)(discard19(modify_13(function(v1) {
+          return when17(j !== v.value0)(discard19(modify_13(function(v1) {
             var $379 = {};
             for (var $380 in v1) {
               if ({}.hasOwnProperty.call(v1, $380)) {
@@ -20965,7 +20991,7 @@
       ;
       if (v instanceof TriggerKeyDown2) {
         return bind30(get12)(function(st) {
-          return when18(current(st.ctrl) === "")(function() {
+          return when17(current(st.ctrl) === "")(function() {
             var v1 = key(v.value1);
             if (v1 === "ArrowDown") {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value1))))(applySecond9(modify_13(function(v22) {
@@ -21070,7 +21096,7 @@
       ;
       if (v instanceof TriggerPointerEnter) {
         return bind30(get12)(function(st) {
-          return when18(current(st.ctrl) !== "" && notEq5(openIndex(st))(new Just(v.value0)))(discard19(modify_13(function(v1) {
+          return when17(current(st.ctrl) !== "" && notEq5(openIndex(st))(new Just(v.value0)))(discard19(modify_13(function(v1) {
             var $421 = {};
             for (var $422 in v1) {
               if ({}.hasOwnProperty.call(v1, $422)) {
@@ -21158,7 +21184,7 @@
         return bind30(get12)(function(st) {
           return for_17(st.contentNode)(function(node) {
             return bind30(liftEffect7(isOutside(node)(v.value0)))(function(outside) {
-              return when18(outside)(closeMenu1);
+              return when17(outside)(closeMenu1);
             });
           });
         });
@@ -21373,7 +21399,7 @@
             return Nothing.value;
           };
           var mDisabled = findMap(pick)(subEntries);
-          return when18(maybe(true)(not6)(mDisabled))(discard19(for_17(bind116(openIndex(st))(index(st.menus)))(function(menu2) {
+          return when17(maybe(true)(not6)(mDisabled))(discard19(for_17(bind116(openIndex(st))(index(st.menus)))(function(menu2) {
             return raise(new ItemSelected3({
               menu: menu2.value,
               item: v.value0
@@ -21410,7 +21436,7 @@
             return Nothing.value;
           };
           var mDisabled = findMap(pick)(openEntries(st));
-          return when18(maybe(true)(not6)(mDisabled))(discard19(for_17(bind116(openIndex(st))(index(st.menus)))(function(menu2) {
+          return when17(maybe(true)(not6)(mDisabled))(discard19(for_17(bind116(openIndex(st))(index(st.menus)))(function(menu2) {
             return raise(new ItemSelected3({
               menu: menu2.value,
               item: v.value0
@@ -21461,7 +21487,7 @@
   var for_19 = /* @__PURE__ */ for_18(foldableMaybe);
   var get13 = /* @__PURE__ */ get(monadStateHalogenM);
   var modify_14 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var when20 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when19 = /* @__PURE__ */ when(applicativeHalogenM);
   var for_25 = /* @__PURE__ */ for_18(foldableArray);
   var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorMaybe);
   var bind211 = /* @__PURE__ */ bind(bindMaybe);
@@ -21808,7 +21834,7 @@
     var focusInside1 = focusInside(dictMonadEffect);
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind31(get13)(function(st) {
-      return when20(openValue(st) !== "")(bind31(function() {
+      return when19(openValue(st) !== "")(bind31(function() {
         var v = openIndex2(st);
         if (v instanceof Just) {
           return getHTMLElementRef(triggerRef6(v.value0));
@@ -21839,7 +21865,7 @@
               return $116;
             }))(function() {
               return discard20(raise(new ValueChanged2("")))(function() {
-                return when20(insideContent)(for_19(mtrig)(function($173) {
+                return when19(insideContent)(for_19(mtrig)(function($173) {
                   return liftEffect7(focus($173));
                 }));
               });
@@ -22115,7 +22141,7 @@
     var scheduleAfterOpen1 = scheduleAfterOpen5(dictMonadEffect);
     return function(value17) {
       return bind31(get13)(function(st) {
-        return when20(openValue(st) !== value17)(function() {
+        return when19(openValue(st) !== value17)(function() {
           var already = openValue(st) !== "";
           return discard20(modify_14(function(v) {
             var $147 = {};
@@ -22131,7 +22157,7 @@
             return $147;
           }))(function() {
             return discard20(raise(new ValueChanged2(value17)))(function() {
-              return discard20(when20(!already)(armOpen1))(function() {
+              return discard20(when19(!already)(armOpen1))(function() {
                 return scheduleAfterOpen1;
               });
             });
@@ -22166,7 +22192,7 @@
             return $151;
           }))(function() {
             return bind31(get13)(function(st) {
-              return when20(openValue(st) !== "")(discard20(armOpen1)(function() {
+              return when19(openValue(st) !== "")(discard20(armOpen1)(function() {
                 return measure1;
               }));
             });
@@ -22303,7 +22329,7 @@
   var for_20 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var bind118 = /* @__PURE__ */ bind(bindMaybe);
   var get14 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when21 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when20 = /* @__PURE__ */ when(applicativeHalogenM);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
   var discard110 = /* @__PURE__ */ discard21(bindHalogenM);
   var max10 = /* @__PURE__ */ max(ordInt);
@@ -22520,7 +22546,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(next) {
       return bind32(get14)(function(st) {
-        return when21(st.autoSubmit && (length(next) === st.len && length(filter(function(v) {
+        return when20(st.autoSubmit && (length(next) === st.len && length(filter(function(v) {
           return v !== "";
         })(next)) === st.len))(discard110(raise(new AutoSubmitted(joinWith("")(next))))(function() {
           return withForm1(function($184) {
@@ -22571,7 +22597,7 @@
       return function(retreat) {
         return bind32(get14)(function(st) {
           var cur = current(st.chars);
-          return when21(fromMaybe("")(index(cur)(idx)) !== "")(function() {
+          return when20(fromMaybe("")(index(cur)(idx)) !== "")(function() {
             var next = append8(fromMaybe(cur)(deleteAt(idx)(cur)))([""]);
             var focusIdx = function() {
               if (retreat) {
@@ -22953,7 +22979,7 @@
               return v1 !== "";
             })(next));
             var focusIdx = clampIdx(st.len)(filled - 1 | 0);
-            return when21(sanitized !== "")(discard110(modify_15(function(s) {
+            return when20(sanitized !== "")(discard110(modify_15(function(s) {
               var $155 = {};
               for (var $156 in s) {
                 if ({}.hasOwnProperty.call(s, $156)) {
@@ -23071,7 +23097,7 @@
           ;
           if (key2 === "Delete" && editable) {
             return discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
-              return when21(atIdx !== "")(clearCharCompact1(v.value0)(false));
+              return when20(atIdx !== "")(clearCharCompact1(v.value0)(false));
             });
           }
           ;
@@ -23089,7 +23115,7 @@
                 return bind32(liftEffect7(selectionStart(inp)))(function(selStart) {
                   return bind32(liftEffect7(selectionEnd(inp)))(function(selEnd) {
                     var fullySelected = selStart === 0 && selEnd >= 1;
-                    return when21(!fullySelected)(discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
+                    return when20(!fullySelected)(discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
                       var targetIdx = function() {
                         var $171 = selStart === 0;
                         if ($171) {
@@ -23145,7 +23171,7 @@
           ;
           if (v1 instanceof MoveTo) {
             var clamped = min7(v1.value0)(lastSelectable);
-            return when21(clamped !== v.value0)(discard110(modify_15(function(v2) {
+            return when20(clamped !== v.value0)(discard110(modify_15(function(v2) {
               var $176 = {};
               for (var $177 in v2) {
                 if ({}.hasOwnProperty.call(v2, $177)) {
@@ -23212,7 +23238,7 @@
   var map48 = /* @__PURE__ */ map(functorArray);
   var bind33 = /* @__PURE__ */ bind(bindHalogenM);
   var get15 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when22 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when21 = /* @__PURE__ */ when(applicativeHalogenM);
   var discard23 = /* @__PURE__ */ discard(discardUnit);
   var discard111 = /* @__PURE__ */ discard23(bindHalogenM);
   var modify_16 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -23388,7 +23414,7 @@
     };
   };
   var hideVisibility = /* @__PURE__ */ bind33(get15)(function(st) {
-    return when22(current(st.ctrl))(function() {
+    return when21(current(st.ctrl))(function() {
       var res = change2(false)(st.ctrl);
       return discard111(modify_16(function(v) {
         var $51 = {};
@@ -23556,7 +23582,7 @@
               return $77;
             }))(function() {
               return discard111(raise(new VisibilityChanged(res.emit)))(function() {
-                return discard111(when22(st.clickTriggered)(bind33(getHTMLElementRef(inputRef))(function(mel) {
+                return discard111(when21(st.clickTriggered)(bind33(getHTMLElementRef(inputRef))(function(mel) {
                   return for_21(bind119(mel)(fromHTMLElement))(function(inp) {
                     return liftEffect7(function __do12() {
                       focus(toHTMLElement(inp))();
@@ -23585,7 +23611,7 @@
       ;
       if (v instanceof FormReset3) {
         return bind33(liftEffect7(defaultPrevented(v.value0)))(function(prevented) {
-          return when22(!prevented)(hideVisibility);
+          return when21(!prevented)(hideVisibility);
         });
       }
       ;
@@ -23681,7 +23707,7 @@
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
   var for_26 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var when23 = /* @__PURE__ */ when(applicativeEffect);
+  var when22 = /* @__PURE__ */ when(applicativeEffect);
   var for_110 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var $$void14 = /* @__PURE__ */ $$void(functorEffect);
   var when111 = /* @__PURE__ */ when(applicativeHalogenM);
@@ -23932,7 +23958,7 @@
             if (mbody instanceof Just && mwrap instanceof Just) {
               return liftEffect7(afterFrame(function __do12() {
                 adopt(mbody.value0)(toElement(mwrap.value0))();
-                return when23(focusToo)(function __do13() {
+                return when22(focusToo)(function __do13() {
                   addFocusGuards();
                   return for_110(mc)(function(content3) {
                     return $$void14(captureFocus(content3));
@@ -24469,7 +24495,7 @@
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Hydrogen.Radix.RadioGroup/index.js
   var bind35 = /* @__PURE__ */ bind(bindHalogenM);
   var get17 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when24 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when23 = /* @__PURE__ */ when(applicativeHalogenM);
   var discard25 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_18 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var append10 = /* @__PURE__ */ append(semigroupArray);
@@ -24564,7 +24590,7 @@
   };
   var selectValue = function(value17) {
     return bind35(get17)(function(st) {
-      return when24(current(st.ctrl) !== value17)(discard25(modify_18(function(v) {
+      return when23(current(st.ctrl) !== value17)(discard25(modify_18(function(v) {
         var $53 = {};
         for (var $54 in v) {
           if ({}.hasOwnProperty.call(v, $54)) {
@@ -24807,7 +24833,7 @@
             }
             ;
             if (v2 instanceof Just) {
-              return when24(!(v2.value0.disabled || st.disabled))(discard25(modify_18(function(v3) {
+              return when23(!(v2.value0.disabled || st.disabled))(discard25(modify_18(function(v3) {
                 var $84 = {};
                 for (var $85 in v3) {
                   if ({}.hasOwnProperty.call(v3, $85)) {
@@ -24820,7 +24846,7 @@
                 return $84;
               }))(function() {
                 return discard25(focusItemAt1(v1.value0))(function() {
-                  return when24(isArrow)(selectValue(v2.value0.value));
+                  return when23(isArrow)(selectValue(v2.value0.value));
                 });
               }));
             }
@@ -25597,7 +25623,7 @@
   var get19 = /* @__PURE__ */ get(monadStateHalogenM);
   var modify_20 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var for_112 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
-  var when25 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when24 = /* @__PURE__ */ when(applicativeHalogenM);
   var bind122 = /* @__PURE__ */ bind(bindEffect);
   var map124 = /* @__PURE__ */ map(functorHalogenM);
   var map214 = /* @__PURE__ */ map(functorMaybe);
@@ -26056,7 +26082,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfterOpen1 = scheduleAfterOpen6(dictMonadEffect);
     return bind37(get19)(function(st) {
-      return when25(!current(st.ctrl))(function() {
+      return when24(!current(st.ctrl))(function() {
         var start2 = selectedIndex3(st);
         return bind37(liftEffect7(bind122(windowImpl)(document)))(function(doc) {
           return bind37(liftEffect7(activeElement(doc)))(function(mprev) {
@@ -26142,7 +26168,7 @@
   var closeMenu5 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind37(get19)(function(st) {
-      return when25(current(st.ctrl))(discard113(traverse_16(unsubscribe2)(st.subs))(function() {
+      return when24(current(st.ctrl))(discard113(traverse_16(unsubscribe2)(st.subs))(function() {
         return discard113(for_30(st.postSub)(unsubscribe2))(function() {
           return discard113(liftEffect7(applySecond11(applySecond11(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
             return discard113(for_30(st.restoreEl)(function($211) {
@@ -26278,7 +26304,7 @@
       if (v instanceof TriggerKeyDown4) {
         return bind37(get19)(function(st) {
           var key2 = key(v.value0);
-          return when25((key2 === " " || (key2 === "Enter" || (key2 === "ArrowUp" || key2 === "ArrowDown"))) && !current(st.ctrl))(discard113(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
+          return when24((key2 === " " || (key2 === "Enter" || (key2 === "ArrowUp" || key2 === "ArrowDown"))) && !current(st.ctrl))(discard113(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
             return openMenu1;
           }));
         });
@@ -26298,7 +26324,7 @@
         return bind37(get19)(function(st) {
           return for_30(st.contentNode)(function(node) {
             return bind37(liftEffect7(isOutside(node)(v.value0)))(function(outside) {
-              return when25(outside)(closeMenu1);
+              return when24(outside)(closeMenu1);
             });
           });
         });
@@ -26594,7 +26620,7 @@
   var clamp4 = /* @__PURE__ */ clamp(ordInt);
   var bind38 = /* @__PURE__ */ bind(bindHalogenM);
   var get20 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when26 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when25 = /* @__PURE__ */ when(applicativeHalogenM);
   var discard28 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_21 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var notEq16 = /* @__PURE__ */ notEq(/* @__PURE__ */ eqArray(eqInt));
@@ -26825,7 +26851,7 @@
   };
   var setValue12 = function(v) {
     return bind38(get20)(function(st) {
-      return when26(current(st.ctrl) !== v)(discard28(modify_21(function(v1) {
+      return when25(current(st.ctrl) !== v)(discard28(modify_21(function(v1) {
         var $110 = {};
         for (var $111 in v1) {
           if ({}.hasOwnProperty.call(v1, $111)) {
@@ -26870,7 +26896,7 @@
     return function(v) {
       if (v instanceof SetRangeValue) {
         return bind38(get20)(function(st) {
-          return discard28(when26(notEq16(current(st.ctrl))(v.value0))(discard28(modify_21(function(v1) {
+          return discard28(when25(notEq16(current(st.ctrl))(v.value0))(discard28(modify_21(function(v1) {
             var $114 = {};
             for (var $115 in v1) {
               if ({}.hasOwnProperty.call(v1, $115)) {
@@ -27384,7 +27410,7 @@
       ;
       if (v instanceof ThumbKeyDown) {
         return bind38(get20)(function(st) {
-          return when26(!st.disabled)(function() {
+          return when25(!st.disabled)(function() {
             var v1 = nextValue(st)(current(st.ctrl))(key(v.value0))(shiftKey(v.value0));
             if (v1 instanceof Nothing) {
               return pure37(unit);
@@ -27405,7 +27431,7 @@
       ;
       if (v instanceof SlideStart) {
         return bind38(get20)(function(st) {
-          return when26(!st.disabled)(discard28(liftEffect7(preventDefault(toEvent2(v.value0))))(function() {
+          return when25(!st.disabled)(discard28(liftEffect7(preventDefault(toEvent2(v.value0))))(function() {
             return discard28(commitFromPointer1(v.value0))(function() {
               return discard28(focusThumb1)(function() {
                 return bind38(liftEffect7(bind123(windowImpl)(document)))(function(doc) {
@@ -27443,7 +27469,7 @@
       ;
       if (v instanceof SlideMove) {
         return bind38(get20)(function(st) {
-          return when26(st.dragging)(commitFromPointer1(v.value0));
+          return when25(st.dragging)(commitFromPointer1(v.value0));
         });
       }
       ;
@@ -27541,7 +27567,7 @@
           }
           ;
           if (v instanceof Just) {
-            return when26(cur !== v.value0)(function() {
+            return when25(cur !== v.value0)(function() {
               var v2 = updateAt(idx)(v.value0)(values);
               if (v2 instanceof Nothing) {
                 return pure37(unit);
@@ -27624,7 +27650,7 @@
       ;
       if (v instanceof RangeThumbKeyDown) {
         return bind38(get20)(function(st) {
-          return when26(!st.disabled)(function() {
+          return when25(!st.disabled)(function() {
             var values = current(st.ctrl);
             var v1 = index(values)(v.value0);
             if (v1 instanceof Nothing) {
@@ -27646,7 +27672,7 @@
                     }
                     ;
                     if (v3 instanceof Just) {
-                      return when26(v1.value0 !== v3.value0)(function() {
+                      return when25(v1.value0 !== v3.value0)(function() {
                         var v5 = updateAt(v.value0)(v3.value0)(values);
                         if (v5 instanceof Nothing) {
                           return pure37(unit);
@@ -27690,7 +27716,7 @@
       ;
       if (v instanceof RangeSlideStart) {
         return bind38(get20)(function(st) {
-          return when26(!st.disabled)(discard28(liftEffect7(preventDefault(toEvent2(v.value0))))(function() {
+          return when25(!st.disabled)(discard28(liftEffect7(preventDefault(toEvent2(v.value0))))(function() {
             return bind38(getHTMLElementRef(rangeRootRef))(function(mroot) {
               return for_113(mroot)(function(root2) {
                 return bind38(liftEffect7(measureRect(root2)))(function(rect) {
@@ -27742,7 +27768,7 @@
       ;
       if (v instanceof RangeSlideMove) {
         return bind38(get20)(function(st) {
-          return when26(st.dragging)(bind38(getHTMLElementRef(rangeRootRef))(function(mroot) {
+          return when25(st.dragging)(bind38(getHTMLElementRef(rangeRootRef))(function(mroot) {
             return for_113(mroot)(function(root2) {
               return bind38(liftEffect7(measureRect(root2)))(function(rect) {
                 return rangeCommitThumb(st.dragThumb)(pointerRawValue({
@@ -27863,7 +27889,7 @@
   var pure38 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind39 = /* @__PURE__ */ bind(bindHalogenM);
   var get21 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when27 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when26 = /* @__PURE__ */ when(applicativeHalogenM);
   var append21 = /* @__PURE__ */ append(semigroupArray);
   var type_32 = /* @__PURE__ */ type_17(isPropInputType);
   var value16 = /* @__PURE__ */ value12(isPropString);
@@ -27960,7 +27986,7 @@
   var handleAction20 = function(v) {
     if (v instanceof Clicked2) {
       return bind39(get21)(function(st) {
-        return when27(!st.disabled)(function() {
+        return when26(!st.disabled)(function() {
           var res = change2(!current(st.ctrl))(st.ctrl);
           return discard29(modify_22(function(v1) {
             var $30 = {};
@@ -28104,7 +28130,7 @@
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Hydrogen.Radix.Tabs/index.js
   var bind40 = /* @__PURE__ */ bind(bindHalogenM);
   var get22 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when28 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when27 = /* @__PURE__ */ when(applicativeHalogenM);
   var discard30 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_23 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var pure39 = /* @__PURE__ */ pure(applicativeHalogenM);
@@ -28239,7 +28265,7 @@
   };
   var selectValue2 = function(value17) {
     return bind40(get22)(function(st) {
-      return when28(current(st.ctrl) !== value17)(discard30(modify_23(function(v) {
+      return when27(current(st.ctrl) !== value17)(discard30(modify_23(function(v) {
         var $58 = {};
         for (var $59 in v) {
           if ({}.hasOwnProperty.call(v, $59)) {
@@ -28415,7 +28441,7 @@
           $83.focusEntered = true;
           return $83;
         }))(function() {
-          return when28(button2(v.value1) === 0 && !ctrlKey2(v.value1))(selectValue2(v.value0));
+          return when27(button2(v.value1) === 0 && !ctrlKey2(v.value1))(selectValue2(v.value0));
         });
       }
       ;
@@ -28450,7 +28476,7 @@
               dir: st.dir,
               loop: st.loop
             };
-            return when28(length(enabled) > 0)(function() {
+            return when27(length(enabled) > 0)(function() {
               var v1 = navigate(cfg)(pos)(key(v.value0));
               if (v1 instanceof Stay) {
                 return pure39(unit);
@@ -28464,7 +28490,7 @@
                 ;
                 if (v2 instanceof Just) {
                   return discard30(focusTabByValue1(v2.value0.value))(function() {
-                    return when28(eq26(st.activationMode)(Automatic.value))(selectValue2(v2.value0.value));
+                    return when27(eq26(st.activationMode)(Automatic.value))(selectValue2(v2.value0.value));
                   });
                 }
                 ;
@@ -28490,7 +28516,7 @@
           $96.focusEntered = true;
           return $96;
         }))(function() {
-          return when28(key(v.value1) === "Enter" || key(v.value1) === " ")(selectValue2(v.value0));
+          return when27(key(v.value1) === "Enter" || key(v.value1) === " ")(selectValue2(v.value0));
         });
       }
       ;
@@ -28742,7 +28768,7 @@
   var for_114 = /* @__PURE__ */ for_33(foldableMaybe);
   var modify_24 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var applySecond14 = /* @__PURE__ */ applySecond(applyHalogenM);
-  var when29 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when28 = /* @__PURE__ */ when(applicativeHalogenM);
   var append119 = /* @__PURE__ */ append(semigroupArray);
   var map57 = /* @__PURE__ */ map(functorArray);
   var type_34 = /* @__PURE__ */ type_17(isPropButtonType);
@@ -29136,7 +29162,7 @@
     var scheduleAfter1 = scheduleAfter4(dictMonadEffect);
     return discard31(cancelDuration(dictMonadEffect))(function() {
       return bind41(get23)(function(st) {
-        return when29(current(st.ctrl))(discard31(for_114(st.escSub)(unsubscribe2))(function() {
+        return when28(current(st.ctrl))(discard31(for_114(st.escSub)(unsubscribe2))(function() {
           return discard31(modify_24(function(v) {
             var $120 = {};
             for (var $121 in v) {
@@ -29176,7 +29202,7 @@
     var closeToast1 = closeToast(dictMonadEffect);
     return function(v) {
       if (v instanceof SetOpen10) {
-        return discard31(when29(!v.value0)(closeToast1))(function() {
+        return discard31(when28(!v.value0)(closeToast1))(function() {
           return pure40(new Just(v.value1));
         });
       }
@@ -29269,7 +29295,7 @@
     return function(v) {
       if (v instanceof Initialize20) {
         return bind41(get23)(function(st) {
-          return discard31(when29(isRendered(st.presence) && st.closeOnEscape)(bind41(liftEffect7(bind124(windowImpl)(document)))(function(doc) {
+          return discard31(when28(isRendered(st.presence) && st.closeOnEscape)(bind41(liftEffect7(bind124(windowImpl)(document)))(function(doc) {
             return bind41(subscribe2($$escape(toEventTarget(doc))(EscapePressed10.value)))(function(sub22) {
               return modify_24(function(v1) {
                 var $139 = {};
@@ -29298,7 +29324,7 @@
                 $142.postSub = new Just(psid);
                 return $142;
               }))(function() {
-                return when29(isRendered(st.presence))(for_114(st.duration)(function(ms) {
+                return when28(isRendered(st.presence))(for_114(st.duration)(function(ms) {
                   return armDuration1(ms);
                 }));
               });
@@ -29389,7 +29415,7 @@
       ;
       if (v instanceof EscapePressed10) {
         return bind41(get23)(function(st) {
-          return when29(st.closeOnEscape)(discard31(raise(Escaped.value))(function() {
+          return when28(st.closeOnEscape)(discard31(raise(Escaped.value))(function() {
             return closeToast1;
           }));
         });
@@ -29450,7 +29476,7 @@
                   ;
                   throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 511, column 14 - line 519, column 24): " + [mnode.constructor.name]);
                 }())(function(armed) {
-                  return when29(!armed)(finishClose1);
+                  return when28(!armed)(finishClose1);
                 });
               });
             });
@@ -29503,7 +29529,7 @@
       ;
       if (v instanceof SwipeMove) {
         return bind41(get23)(function(st) {
-          return when29(isJust(st.swipeStart))(modify_24(function(v1) {
+          return when28(isJust(st.swipeStart))(modify_24(function(v1) {
             var $178 = {};
             for (var $179 in v1) {
               if ({}.hasOwnProperty.call(v1, $179)) {
@@ -29649,7 +29675,7 @@
   var pure41 = /* @__PURE__ */ pure(applicativeHalogenM);
   var bind42 = /* @__PURE__ */ bind(bindHalogenM);
   var get24 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when30 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when29 = /* @__PURE__ */ when(applicativeHalogenM);
   var SetPressed = /* @__PURE__ */ function() {
     function SetPressed2(value0, value1) {
       this.value0 = value0;
@@ -29766,7 +29792,7 @@
   var handleAction23 = function(v) {
     if (v instanceof Clicked3) {
       return bind42(get24)(function(st) {
-        return when30(!st.disabled)(function() {
+        return when29(!st.disabled)(function() {
           var res = change2(!current(st.ctrl))(st.ctrl);
           return discard32(modify_25(function(v1) {
             var $32 = {};
@@ -29827,7 +29853,7 @@
   var elem8 = /* @__PURE__ */ elem2(eqString);
   var bind43 = /* @__PURE__ */ bind(bindHalogenM);
   var get25 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when31 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when30 = /* @__PURE__ */ when(applicativeHalogenM);
   var notEq4 = /* @__PURE__ */ notEq(/* @__PURE__ */ eqArray(eqString));
   var discard33 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_26 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -29937,7 +29963,7 @@
   };
   var setValue13 = function(value17) {
     return bind43(get25)(function(st) {
-      return when31(notEq4(current(st.ctrl))(value17))(discard33(modify_26(function(v) {
+      return when30(notEq4(current(st.ctrl))(value17))(discard33(modify_26(function(v) {
         var $52 = {};
         for (var $53 in v) {
           if ({}.hasOwnProperty.call(v, $53)) {
@@ -30112,7 +30138,7 @@
       ;
       if (v instanceof Toggled2) {
         return bind43(get25)(function(st) {
-          return when31(!st.disabled)(function() {
+          return when30(!st.disabled)(function() {
             var cur = current(st.ctrl);
             var next = function() {
               var $74 = elem8(v.value0)(cur);
@@ -30167,7 +30193,7 @@
             dir: st.dir,
             loop: st.loop
           };
-          return when31(!modified && length(enabled) > 0)(function() {
+          return when30(!modified && length(enabled) > 0)(function() {
             var v1 = navigate(cfg)(pos)(key(v.value0));
             if (v1 instanceof Stay) {
               return pure42(unit);
@@ -30325,7 +30351,7 @@
   var elem9 = /* @__PURE__ */ elem2(eqString);
   var append121 = /* @__PURE__ */ append(semigroupArray);
   var for_35 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
-  var when32 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when31 = /* @__PURE__ */ when(applicativeHalogenM);
   var GetCurrent = /* @__PURE__ */ function() {
     function GetCurrent2(value0) {
       this.value0 = value0;
@@ -30808,7 +30834,7 @@
       }
       ;
       if (v instanceof LinkKeyDown2) {
-        return when32(key(v.value1) === " ")(bind44(getHTMLElementRef(itemRef7(v.value0)))(function(mel) {
+        return when31(key(v.value1) === " ")(bind44(getHTMLElementRef(itemRef7(v.value0)))(function(mel) {
           return for_35(mel)(function($139) {
             return liftEffect7(click($139));
           });
@@ -31043,7 +31069,7 @@
   var pure44 = /* @__PURE__ */ pure(applicativeHalogenM);
   var map61 = /* @__PURE__ */ map(functorArray);
   var get27 = /* @__PURE__ */ get(monadStateHalogenM);
-  var when33 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when32 = /* @__PURE__ */ when(applicativeHalogenM);
   var traverse_17 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
   var for_36 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var modify_28 = /* @__PURE__ */ modify_2(monadStateHalogenM);
@@ -31231,7 +31257,7 @@
   var closeTooltip = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind45(get27)(function(st) {
-      return when33(current(st.ctrl))(discard35(traverse_17(unsubscribe2)(st.subs))(function() {
+      return when32(current(st.ctrl))(discard35(traverse_17(unsubscribe2)(st.subs))(function() {
         return discard35(for_36(st.postSub)(unsubscribe2))(function() {
           return discard35(for_36(st.restoreEl)(function($139) {
             return liftEffect7(focus($139));
@@ -31289,7 +31315,7 @@
     return function(delayed) {
       return discard35(cancelPending1)(function() {
         return bind45(get27)(function(st) {
-          return when33(!current(st.ctrl))(bind45(liftEffect7(bind125(windowImpl)(document)))(function(doc) {
+          return when32(!current(st.ctrl))(bind45(liftEffect7(bind125(windowImpl)(document)))(function(doc) {
             return bind45(liftEffect7(activeElement(doc)))(function(mprev) {
               return discard35(modify_28(function(v) {
                 var $97 = {};
@@ -31371,7 +31397,7 @@
     var openTooltip1 = openTooltip(dictMonadEffect);
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind45(get27)(function(st) {
-      return when33(!current(st.ctrl))(function() {
+      return when32(!current(st.ctrl))(function() {
         if (st.pendingOpen instanceof Just) {
           return pure44(unit);
         }
@@ -32473,7 +32499,7 @@
   var append31 = /* @__PURE__ */ append(semigroupArray);
   var map64 = /* @__PURE__ */ map(functorArray);
   var show21 = /* @__PURE__ */ show(showInt);
-  var identity13 = /* @__PURE__ */ identity(categoryFn);
+  var identity14 = /* @__PURE__ */ identity(categoryFn);
   var bind46 = /* @__PURE__ */ bind(bindEffect);
   var slot_2 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_2({
@@ -32722,7 +32748,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1991, column 1 - line 1991, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2003, column 1 - line 2003, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32824,8 +32850,8 @@
     return {
       loop: defaultInput23.loop,
       orientation: function() {
-        var $237 = s === "vertical";
-        if ($237) {
+        var $239 = s === "vertical";
+        if ($239) {
           return Vertical.value;
         }
         ;
@@ -32869,8 +32895,8 @@
   var toggleInput = function(s) {
     return {
       pressed: function() {
-        var $238 = s === "controlled";
-        if ($238) {
+        var $240 = s === "controlled";
+        if ($240) {
           return new Just(true);
         }
         ;
@@ -33096,8 +33122,8 @@
       open: Nothing.value,
       defaultOpen: true,
       duration: function() {
-        var $241 = s === "autodismiss";
-        if ($241) {
+        var $243 = s === "autodismiss";
+        if ($243) {
           return new Just(1500);
         }
         ;
@@ -33188,8 +33214,8 @@
         disabled: false
       }],
       value: function() {
-        var $244 = s === "controlled";
-        if ($244) {
+        var $246 = s === "controlled";
+        if ($246) {
           return new Just("account");
         }
         ;
@@ -33266,8 +33292,8 @@
     return {
       children: defaultInput19.children,
       checked: function() {
-        var $245 = s === "controlled";
-        if ($245) {
+        var $247 = s === "controlled";
+        if ($247) {
           return new Just(true);
         }
         ;
@@ -33277,8 +33303,8 @@
       disabled: s === "disabled",
       required: s === "required" || s === "form",
       name: function() {
-        var $246 = s === "form";
-        if ($246) {
+        var $248 = s === "form";
+        if ($248) {
           return "notify";
         }
         ;
@@ -33313,7 +33339,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2083, column 17 - line 2085, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2095, column 17 - line 2097, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33326,13 +33352,13 @@
       name: defaultRangeInput.name,
       isFormControl: defaultRangeInput.isFormControl,
       defaultValue: function() {
-        var $249 = s === "triple";
-        if ($249) {
+        var $251 = s === "triple";
+        if ($251) {
           return [20, 50, 80];
         }
         ;
-        var $250 = s === "minsteps";
-        if ($250) {
+        var $252 = s === "minsteps";
+        if ($252) {
           return [40, 60];
         }
         ;
@@ -33342,8 +33368,8 @@
       max: 100,
       step: 1,
       minStepsBetweenThumbs: function() {
-        var $251 = s === "minsteps";
-        if ($251) {
+        var $253 = s === "minsteps";
+        if ($253) {
           return 10;
         }
         ;
@@ -33390,8 +33416,8 @@
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $252 = s === "vertical";
-        if ($252) {
+        var $254 = s === "vertical";
+        if ($254) {
           return Vertical.value;
         }
         ;
@@ -33426,12 +33452,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2038, column 1 - line 2038, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2050, column 1 - line 2050, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $254 = s === "vsem" || s === "vdec";
-      if ($254) {
+      var $256 = s === "vsem" || s === "vdec";
+      if ($256) {
         return Vertical.value;
       }
       ;
@@ -33491,16 +33517,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $255 = s === "horizontal";
-        if ($255) {
+        var $257 = s === "horizontal";
+        if ($257) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $256 = s === "radius";
-        if ($256) {
+        var $258 = s === "radius";
+        if ($258) {
           return "full";
         }
         ;
@@ -33544,8 +33570,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $257 = s === "keys" || s === "mixed";
-        if ($257) {
+        var $259 = s === "keys" || s === "mixed";
+        if ($259) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33561,8 +33587,8 @@
           }];
         }
         ;
-        var $258 = s === "loopoff" || s === "rtl";
-        if ($258) {
+        var $260 = s === "loopoff" || s === "rtl";
+        if ($260) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33578,8 +33604,8 @@
           }];
         }
         ;
-        var $259 = s === "alldisabled";
-        if ($259) {
+        var $261 = s === "alldisabled";
+        if ($261) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33604,8 +33630,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $260 = s === "horizontal" || s === "rtl";
-        if ($260) {
+        var $262 = s === "horizontal" || s === "rtl";
+        if ($262) {
           return Horizontal.value;
         }
         ;
@@ -33613,8 +33639,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $261 = s === "rtl";
-        if ($261) {
+        var $263 = s === "rtl";
+        if ($263) {
           return RTL.value;
         }
         ;
@@ -33624,8 +33650,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $262 = s === "form";
-        if ($262) {
+        var $264 = s === "form";
+        if ($264) {
           return "plan";
         }
         ;
@@ -33709,8 +33735,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $263 = styl === "";
-              if ($263) {
+              var $265 = styl === "";
+              if ($265) {
                 return [];
               }
               ;
@@ -33784,16 +33810,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $265 = s === "close";
-        if ($265) {
+        var $267 = s === "close";
+        if ($267) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $266 = s === "close";
-        if ($266) {
+        var $268 = s === "close";
+        if ($268) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -33821,24 +33847,24 @@
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
       inputId: function() {
-        var $267 = s === "multi";
-        if ($267) {
+        var $269 = s === "multi";
+        if ($269) {
           return Nothing.value;
         }
         ;
         return new Just("password");
       }(),
       toggleVisible: function() {
-        var $268 = s === "autolabel";
-        if ($268) {
+        var $270 = s === "autolabel";
+        if ($270) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $269 = s === "autolabel";
-        if ($269) {
+        var $271 = s === "autolabel";
+        if ($271) {
           return [passwordToggleIcon];
         }
         ;
@@ -33847,8 +33873,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $270 = s === "passthrough";
-        if ($270) {
+        var $272 = s === "passthrough";
+        if ($272) {
           return new Just("pw");
         }
         ;
@@ -33856,16 +33882,16 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $271 = s === "passthrough";
-        if ($271) {
+        var $273 = s === "passthrough";
+        if ($273) {
           return new Just("Enter password");
         }
         ;
         return Nothing.value;
       }(),
       visible: function() {
-        var $272 = s === "controlled";
-        if ($272) {
+        var $274 = s === "controlled";
+        if ($274) {
           return new Just(false);
         }
         ;
@@ -33899,24 +33925,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $275 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($275) {
+        var $277 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($277) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $276 = s === "vertical";
-        if ($276) {
+        var $278 = s === "vertical";
+        if ($278) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $277 = s === "rtl";
-        if ($277) {
+        var $279 = s === "rtl";
+        if ($279) {
           return RTL.value;
         }
         ;
@@ -33971,8 +33997,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $278 = s === "submenu";
-          if ($278) {
+          var $280 = s === "submenu";
+          if ($280) {
             return [menubarSubEntry];
           }
           ;
@@ -34024,8 +34050,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $279 = s === "radio";
-          if ($279) {
+          var $281 = s === "radio";
+          if ($281) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34131,84 +34157,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2050, column 1 - line 2050, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2062, column 1 - line 2062, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $332 = filter(function(c) {
+    var $335 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($333) {
-      return fromCharArray($332(toCharArray($333)));
+    return function($336) {
+      return fromCharArray($335(toCharArray($336)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $281 = s === "controlled";
-        if ($281) {
+        var $283 = s === "controlled";
+        if ($283) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $282 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($282) {
+        var $284 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($284) {
           return "";
         }
         ;
-        var $283 = s === "alpha";
-        if ($283) {
+        var $285 = s === "alpha";
+        if ($285) {
           return "abc";
         }
         ;
-        var $284 = s === "alphanumeric";
-        if ($284) {
+        var $286 = s === "alphanumeric";
+        if ($286) {
           return "a1b";
         }
         ;
-        var $285 = s === "revalidate";
-        if ($285) {
+        var $287 = s === "revalidate";
+        if ($287) {
           return "a1b2c";
         }
         ;
-        var $286 = s === "sanitizevalue";
-        if ($286) {
+        var $288 = s === "sanitizevalue";
+        if ($288) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $287 = s === "alpha" || s === "revalidate";
-        if ($287) {
+        var $289 = s === "alpha" || s === "revalidate";
+        if ($289) {
           return Alpha.value;
         }
         ;
-        var $288 = s === "alphanumeric";
-        if ($288) {
+        var $290 = s === "alphanumeric";
+        if ($290) {
           return Alphanumeric.value;
         }
         ;
-        var $289 = s === "novalidation" || s === "sanitizevalue";
-        if ($289) {
+        var $291 = s === "novalidation" || s === "sanitizevalue";
+        if ($291) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $290 = s === "sanitizevalue";
-        if ($290) {
+        var $292 = s === "sanitizevalue";
+        if ($292) {
           return keepDigitsOnly;
         }
         ;
-        return identity13;
+        return identity14;
       }(),
       placeholder: function() {
-        var $291 = s === "placeholder";
-        if ($291) {
+        var $293 = s === "placeholder";
+        if ($293) {
           return new Just("\u25CB");
         }
         ;
@@ -34218,24 +34244,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $292 = s === "vertical";
-        if ($292) {
+        var $294 = s === "vertical";
+        if ($294) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $293 = s === "rtl";
-        if ($293) {
+        var $295 = s === "rtl";
+        if ($295) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $294 = s === "named";
-        if ($294) {
+        var $296 = s === "named";
+        if ($296) {
           return new Just("otp-code");
         }
         ;
@@ -34273,8 +34299,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $295 = s === "richcontent";
-        if ($295) {
+        var $297 = s === "richcontent";
+        if ($297) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34293,56 +34319,85 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2228, column 1 - line 2228, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2240, column 1 - line 2240, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $298 = s === "reset";
-        if ($298) {
+        var $300 = s === "reset";
+        if ($300) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
-      fields: [{
-        name: "email",
-        label: [text5("Email")],
-        inputType: "email",
-        required: true,
-        serverInvalid: s === "serverInvalid",
-        messages: function() {
-          var $299 = s === "defaultMessage";
-          if ($299) {
-            return [{
-              match: ValueMissing.value,
-              forceMatch: true,
-              text: []
-            }];
-          }
-          ;
-          var $300 = s === "reset";
-          if ($300) {
-            return [{
+      fields: function() {
+        var $301 = s === "multi";
+        if ($301) {
+          return [{
+            serverInvalid: defaultField.serverInvalid,
+            name: "email",
+            label: [text5("Email")],
+            inputType: "email",
+            required: true,
+            messages: [{
               match: ValueMissing.value,
               forceMatch: false,
-              text: [text5("This value is missing")]
-            }];
-          }
-          ;
-          return [{
-            match: ValueMissing.value,
-            forceMatch: s === "forceMatch" || s === "multiMessage",
-            text: [text5("This value is missing")]
+              text: [text5("Email is missing")]
+            }]
           }, {
-            match: TypeMismatch2.value,
-            forceMatch: s === "multiMessage",
-            text: [text5("Provide a valid email")]
+            serverInvalid: defaultField.serverInvalid,
+            name: "name",
+            label: [text5("Name")],
+            inputType: "text",
+            required: true,
+            messages: [{
+              match: ValueMissing.value,
+              forceMatch: false,
+              text: [text5("Name is missing")]
+            }]
           }];
-        }()
-      }],
+        }
+        ;
+        return [{
+          name: "email",
+          label: [text5("Email")],
+          inputType: "email",
+          required: true,
+          serverInvalid: s === "serverInvalid",
+          messages: function() {
+            var $302 = s === "defaultMessage";
+            if ($302) {
+              return [{
+                match: ValueMissing.value,
+                forceMatch: true,
+                text: []
+              }];
+            }
+            ;
+            var $303 = s === "reset";
+            if ($303) {
+              return [{
+                match: ValueMissing.value,
+                forceMatch: false,
+                text: [text5("This value is missing")]
+              }];
+            }
+            ;
+            return [{
+              match: ValueMissing.value,
+              forceMatch: s === "forceMatch" || s === "multiMessage",
+              text: [text5("This value is missing")]
+            }, {
+              match: TypeMismatch2.value,
+              forceMatch: s === "multiMessage",
+              text: [text5("Provide a valid email")]
+            }];
+          }()
+        }];
+      }(),
       style: {
         root: cn(""),
         field: cn(""),
@@ -34363,7 +34418,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2094, column 12 - line 2096, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2106, column 12 - line 2108, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34384,8 +34439,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $308 = kv.before === key2;
-          if ($308) {
+          var $311 = kv.before === key2;
+          if ($311) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34396,7 +34451,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2076, column 15 - line 2078, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2088, column 15 - line 2090, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34512,8 +34567,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $310 = s === "submenu";
-        if ($310) {
+        var $313 = s === "submenu";
+        if ($313) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34537,8 +34592,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $311 = s === "radio";
-        if ($311) {
+        var $314 = s === "radio";
+        if ($314) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34579,8 +34634,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $312 = s === "controlled";
-        if ($312) {
+        var $315 = s === "controlled";
+        if ($315) {
           return new Just(true);
         }
         ;
@@ -34601,8 +34656,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $313 = klass === "";
-      if ($313) {
+      var $316 = klass === "";
+      if ($316) {
         return [];
       }
       ;
@@ -34626,8 +34681,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $314 = s === "radio";
-        if ($314) {
+        var $317 = s === "radio";
+        if ($317) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34723,8 +34778,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $315 = s === "submenu";
-        if ($315) {
+        var $318 = s === "submenu";
+        if ($318) {
           return [submenuEntry];
         }
         ;
@@ -34887,8 +34942,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $317 = s === "controlled";
-        if ($317) {
+        var $320 = s === "controlled";
+        if ($320) {
           return new Just(Checked.value);
         }
         ;
@@ -34912,16 +34967,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $319 = s === "form";
-        if ($319) {
+        var $322 = s === "form";
+        if ($322) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $320 = s === "form";
-        if ($320) {
+        var $323 = s === "form";
+        if ($323) {
           return "yes";
         }
         ;
@@ -34989,18 +35044,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $323 = s === "wide";
-        if ($323) {
+        var $326 = s === "wide";
+        if ($326) {
           return 16 / 9;
         }
         ;
-        var $324 = s === "tall";
-        if ($324) {
+        var $327 = s === "tall";
+        if ($327) {
           return 1 / 2;
         }
         ;
-        var $325 = s === "verywide";
-        if ($325) {
+        var $328 = s === "verywide";
+        if ($328) {
           return 21 / 9;
         }
         ;
@@ -35009,7 +35064,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1968, column 1 - line 1968, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1980, column 1 - line 1980, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -35063,8 +35118,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $326 = s === "single";
-        if ($326) {
+        var $329 = s === "single";
+        if ($329) {
           return ["item-1"];
         }
         ;
@@ -35195,18 +35250,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $327 = s === "formreset";
-    if ($327) {
+    var $330 = s === "formreset";
+    if ($330) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $328 = s === "multi";
-    if ($328) {
+    var $331 = s === "multi";
+    if ($331) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $329 = s === "formsubmit";
-    if ($329) {
+    var $332 = s === "formsubmit";
+    if ($332) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -35326,8 +35381,8 @@
         }
         ;
         if (c === "slider") {
-          var $331 = s === "vertical";
-          if ($331) {
+          var $334 = s === "vertical";
+          if ($334) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

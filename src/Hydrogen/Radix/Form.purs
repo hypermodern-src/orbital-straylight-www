@@ -43,7 +43,7 @@ module Hydrogen.Radix.Form
 
 import Prelude
 
-import Data.Array (elem, filter, mapWithIndex, null, (!!))
+import Data.Array (elem, filter, findIndex, mapWithIndex, null, (!!))
 import Data.Array (filterA) as Array
 import Data.Foldable (for_)
 import Effect (Effect)
@@ -228,6 +228,11 @@ initialState input =
 -- | Failed matchers for field index `i`.
 failedOf :: State -> Int -> Array Matcher
 failedOf st i = fromMaybe [] (Map.lookup i st.failed)
+
+-- | The lowest field index that is currently invalid (serverInvalid or a failed matcher) — the
+-- | "first invalid control" focused on a blocked submit (form.tsx getFirstInvalidControl).
+firstInvalidIndex :: State -> Maybe Int
+firstInvalidIndex st = findIndex identity (mapWithIndex (\i f -> fieldInvalid st i f) st.fields)
 
 -- | Does field `i` count as invalid? (serverInvalid OR any failed matcher.)
 fieldInvalid :: State -> Int -> Field -> Boolean
@@ -431,7 +436,12 @@ handleAction = case _ of
     -- native `invalid` events (bound above) fire BEFORE submit for invalid controls.
     liftEffect (preventDefault ev)
     st <- H.get
-    when (Map.isEmpty st.failed) (H.raise Submitted)
+    if Map.isEmpty st.failed then H.raise Submitted
+    else
+      -- onInvalid focuses the FIRST invalid control (form.tsx:167-173 getFirstInvalidControl).
+      for_ (firstInvalidIndex st) \i -> do
+        mel <- H.getHTMLElementRef (controlRef i)
+        for_ mel (liftEffect <<< HTMLElement.focus)
   FormReset ->
     -- clear all derived validity (failed matchers + validated-valid). The Messages unmount
     -- and aria-describedby is dropped, returning the form to its pristine rest-valid DOM.
