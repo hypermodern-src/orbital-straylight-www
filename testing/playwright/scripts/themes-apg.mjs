@@ -1986,11 +1986,12 @@ const CHECKS = [
     await pg.locator("#root").getByRole("link").first().hover();
     const content = pg.locator(".rt-HoverCardContent").first();
     await content.waitFor({ timeout: 3000 });
-    // move the pointer onto the content's center — the cross-move must NOT close it.
-    const box = await content.boundingBox();
-    ok(!!box, "could not measure the hover-card content box");
-    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await pg.waitForTimeout(150);
+    // Move the pointer onto the content — the cross-move must NOT close it. Use locator.hover()
+    // (auto-waits for the content to be stable and re-resolves its center) instead of a one-shot
+    // boundingBox + mouse.move: under load the box could be read mid-reposition, landing the move
+    // off-content → the trigger-leave closeDelay fires → flaky close. hover() re-enters reliably.
+    await content.hover();
+    await pg.waitForTimeout(200);   // comfortably past the 150ms closeDelay; pointer stays on content
     ok(await visible(pg, ".rt-HoverCardContent"), "the card closed when the pointer moved onto its content (hover-card must stay open)");
     ok((await attrOf(pg, ".rt-HoverCardContent", 0, "data-state")) === "open", "the content must remain data-state=open while the pointer is over it");
   }},
