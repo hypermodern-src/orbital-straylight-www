@@ -100,6 +100,7 @@ type Slots =
   , checkboxcards :: Checkbox.Slot Unit
   , scrollarea :: ScrollArea.Slot Unit
   , passwordtoggle :: PasswordToggleField.Slot Unit
+  , passwordtoggleB :: PasswordToggleField.Slot Unit
   , toolbar :: Toolbar.Slot Unit
   , otp :: Otp.Slot Unit
   , form :: Form.Slot Unit
@@ -195,6 +196,9 @@ _scrollarea = Proxy
 
 _passwordtoggle :: Proxy "passwordtoggle"
 _passwordtoggle = Proxy
+
+_passwordtoggleB :: Proxy "passwordtoggleB"
+_passwordtoggleB = Proxy
 
 _toolbar :: Proxy "toolbar"
 _toolbar = Proxy
@@ -1585,6 +1589,12 @@ passwordTogglePage s =
           , HH.button [ HP.type_ HP.ButtonReset ] [ HH.text "Reset" ]
           ]
       ]
+  else if s == "multi" then
+    -- two no-id fields → each mints a distinct input id (id-fallback + multi-instance).
+    box []
+      [ HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
+      , HH.slot_ _passwordtoggleB unit PasswordToggleField.component (passwordToggleInput s)
+      ]
   else if s == "formsubmit" then
     box []
       [ HH.form_
@@ -1625,7 +1635,9 @@ passwordToggleIcon =
 
 passwordToggleInput :: String -> PasswordToggleField.Input
 passwordToggleInput s = PasswordToggleField.defaultInput
-  { inputId = Just "password"
+  -- `?s=multi` uses NO explicit id so the input id is MINTED (useId → baseId-input), proving the
+  -- id-fallback + multi-instance (two minted, distinct) contract; other states pin an explicit id.
+  { inputId = if s == "multi" then Nothing else Just "password"
   -- `?s=autolabel` → icon-only toggle (no text) so the auto aria-label applies; otherwise the
   -- text Slot (Show/Hide). `?s=disabled` → native disabled on both input + toggle.
   , toggleVisible = if s == "autolabel" then [ passwordToggleIcon ] else [ HH.text "Hide" ]

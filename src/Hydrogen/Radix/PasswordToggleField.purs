@@ -244,8 +244,9 @@ handleAction = case _ of
     case st.inputId of
       Just _ -> pure unit
       Nothing -> do
+        -- minted input id is `${baseId}-input` (password-toggle-field.tsx:62-70), not the raw useId.
         i <- useId
-        H.modify_ _ { inputId = Just i }
+        H.modify_ _ { inputId = Just (i <> "-input") }
     -- Discover the enclosing <form> off the input and subscribe to its reset/submit:
     -- both drive the field back to hidden (reset only when not defaultPrevented; submit
     -- unconditionally). No form ⇒ no subscription (the bare/labelled stories are unaffected).

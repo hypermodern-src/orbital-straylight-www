@@ -114,6 +114,7 @@ STATES=(
   "tabs:disabled-skip"
   "tabsmulti:multi"
   "passwordtoggle:passthrough"
+  "passwordtoggle:multi"
   "form:multiMessage"
   # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
   "collapsible:disabled"

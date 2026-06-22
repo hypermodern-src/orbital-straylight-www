@@ -821,6 +821,14 @@ export const STATES = {
         return i && i.getAttribute("name") === "pw" && i.hasAttribute("required") && i.getAttribute("placeholder") === "Enter password";
       });
     },
+    // `?s=multi` → two no-id fields; each mints a distinct input id (id-fallback + multi-instance).
+    multi: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() => {
+        const ins = [...document.querySelectorAll("#root input")];
+        return ins.length === 2 && ins[0].id && ins[1].id && ins[0].id !== ins[1].id;
+      });
+    },
     // `?s=disabled` → native disabled passed through to BOTH the input and the toggle button.
     disabled: async (pg) => {
       await root(pg).locator("input").first().waitFor();

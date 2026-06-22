@@ -1768,6 +1768,22 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=multi` renders two fields with NO explicit id → each mints a distinct input id
+      // (useId baseId-input), proving id-fallback + multi-instance uniqueness.
+      if (s === "multi") {
+        return (
+          <Box>
+            {[0, 1].map((n) => (
+              <PasswordToggleField.Root key={n}>
+                <PasswordToggleField.Input />
+                <PasswordToggleField.Toggle>
+                  <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+                </PasswordToggleField.Toggle>
+              </PasswordToggleField.Root>
+            ))}
+          </Box>
+        );
+      }
       // `?s=controlled` drives a fixed controlled visible=false (no-op onVisibilityChange):
       // clicking the toggle raises the callback but cannot reveal the password.
       if (s === "controlled") {

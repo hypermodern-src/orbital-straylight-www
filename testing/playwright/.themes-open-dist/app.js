@@ -4179,9 +4179,21 @@
       return input3.selectionEnd;
     };
   }
+  function setSelectionRange(start2) {
+    return function(end) {
+      return function(direction) {
+        return function(input3) {
+          return function() {
+            input3.setSelectionRange(start2, end, direction, input3);
+          };
+        };
+      };
+    };
+  }
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Web.HTML.HTMLInputElement/index.js
   var map11 = /* @__PURE__ */ map(functorEffect);
+  var toHTMLElement = unsafeCoerce2;
   var fromHTMLElement = /* @__PURE__ */ unsafeReadProtoTagged("HTMLInputElement");
   var form = /* @__PURE__ */ function() {
     var $4 = map11(toMaybe);
@@ -23201,12 +23213,14 @@
   var bind33 = /* @__PURE__ */ bind(bindHalogenM);
   var get15 = /* @__PURE__ */ get(monadStateHalogenM);
   var when22 = /* @__PURE__ */ when(applicativeHalogenM);
-  var discard23 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard23 = /* @__PURE__ */ discard(discardUnit);
+  var discard111 = /* @__PURE__ */ discard23(bindHalogenM);
   var modify_16 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var pure32 = /* @__PURE__ */ pure(applicativeHalogenM);
   var for_21 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var bind119 = /* @__PURE__ */ bind(bindMaybe);
   var $$void13 = /* @__PURE__ */ $$void(functorHalogenM);
+  var when110 = /* @__PURE__ */ when(applicativeEffect);
   var SetVisible = /* @__PURE__ */ function() {
     function SetVisible2(value0, value1) {
       this.value0 = value0;
@@ -23248,11 +23262,28 @@
     return Initialize23;
   }();
   var Toggled = /* @__PURE__ */ function() {
-    function Toggled3() {
+    function Toggled3(value0) {
+      this.value0 = value0;
     }
     ;
-    Toggled3.value = new Toggled3();
+    Toggled3.create = function(value0) {
+      return new Toggled3(value0);
+    };
     return Toggled3;
+  }();
+  var ToggleDown = /* @__PURE__ */ function() {
+    function ToggleDown2() {
+    }
+    ;
+    ToggleDown2.value = new ToggleDown2();
+    return ToggleDown2;
+  }();
+  var InputBlur = /* @__PURE__ */ function() {
+    function InputBlur2() {
+    }
+    ;
+    InputBlur2.value = new InputBlur2();
+    return InputBlur2;
   }();
   var Receive15 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -23306,7 +23337,7 @@
       }
       ;
       return InputPassword.value;
-    }()), ref2(inputRef), id2(idv), attr2("autocomplete")(st.autoComplete), attr2("autocapitalize")("off"), attr2("spellcheck")("false"), classes2(st.style.input)])(append9(function() {
+    }()), ref2(inputRef), id2(idv), attr2("autocomplete")(st.autoComplete), attr2("autocapitalize")("off"), attr2("spellcheck")("false"), onBlur($$const(InputBlur.value)), classes2(st.style.input)])(append9(function() {
       if (st.disabled) {
         return [attr2("disabled")("")];
       }
@@ -23322,9 +23353,7 @@
       return [];
     }())(maybe([])(function(p2) {
       return [attr2("placeholder")(p2)];
-    })(st.placeholder)))))), button(append9([type_110(ButtonButton.value), controls2(idv), id2(idv), classes2(st.style.toggle), onClick(function(v) {
-      return Toggled.value;
-    })])(append9(function() {
+    })(st.placeholder)))))), button(append9([type_110(ButtonButton.value), controls2(idv), id2(idv), classes2(st.style.toggle), onMouseDown($$const(ToggleDown.value)), onClick(Toggled.create)])(append9(function() {
       if (hasText) {
         return [];
       }
@@ -23352,23 +23381,26 @@
       iconOnly: input3.iconOnly,
       toggleVisible: input3.toggleVisible,
       toggleHidden: input3.toggleHidden,
-      style: input3.style
+      style: input3.style,
+      selStart: -1 | 0,
+      selEnd: -1 | 0,
+      clickTriggered: false
     };
   };
   var hideVisibility = /* @__PURE__ */ bind33(get15)(function(st) {
     return when22(current(st.ctrl))(function() {
       var res = change2(false)(st.ctrl);
-      return discard23(modify_16(function(v) {
-        var $43 = {};
-        for (var $44 in v) {
-          if ({}.hasOwnProperty.call(v, $44)) {
-            $43[$44] = v[$44];
+      return discard111(modify_16(function(v) {
+        var $51 = {};
+        for (var $52 in v) {
+          if ({}.hasOwnProperty.call(v, $52)) {
+            $51[$52] = v[$52];
           }
           ;
         }
         ;
-        $43.ctrl = res.next;
-        return $43;
+        $51.ctrl = res.next;
+        return $51;
       }))(function() {
         return raise(new VisibilityChanged(res.emit));
       });
@@ -23377,17 +23409,17 @@
   var handleQuery14 = function(dictMonadEffect) {
     return function(v) {
       if (v instanceof SetVisible) {
-        return discard23(modify_16(function(st) {
-          var $47 = {};
-          for (var $48 in st) {
-            if ({}.hasOwnProperty.call(st, $48)) {
-              $47[$48] = st[$48];
+        return discard111(modify_16(function(st) {
+          var $55 = {};
+          for (var $56 in st) {
+            if ({}.hasOwnProperty.call(st, $56)) {
+              $55[$56] = st[$56];
             }
             ;
           }
           ;
-          $47.ctrl = change2(v.value0)(st.ctrl).next;
-          return $47;
+          $55.ctrl = change2(v.value0)(st.ctrl).next;
+          return $55;
         }))(function() {
           return pure32(new Just(v.value1));
         });
@@ -23399,7 +23431,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 286, column 15 - line 292, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 324, column 15 - line 330, column 42): " + [v.constructor.name]);
     };
   };
   var handleAction14 = function(dictMonadEffect) {
@@ -23409,7 +23441,7 @@
     return function(v) {
       if (v instanceof Initialize13) {
         return bind33(get15)(function(st) {
-          return discard23(function() {
+          return discard111(function() {
             if (st.inputId instanceof Just) {
               return pure32(unit);
             }
@@ -23417,29 +23449,29 @@
             if (st.inputId instanceof Nothing) {
               return bind33(useId2)(function(i2) {
                 return modify_16(function(v1) {
-                  var $56 = {};
-                  for (var $57 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $57)) {
-                      $56[$57] = v1[$57];
+                  var $64 = {};
+                  for (var $65 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $65)) {
+                      $64[$65] = v1[$65];
                     }
                     ;
                   }
                   ;
-                  $56.inputId = new Just(i2);
-                  return $56;
+                  $64.inputId = new Just(i2 + "-input");
+                  return $64;
                 });
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 230, column 5 - line 234, column 41): " + [st.inputId.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 244, column 5 - line 249, column 55): " + [st.inputId.constructor.name]);
           }())(function() {
             return bind33(getHTMLElementRef(inputRef))(function(mel) {
               return for_21(bind119(mel)(fromHTMLElement))(function(inp) {
                 return bind33(liftEffect7(form(inp)))(function(mform) {
                   return for_21(mform)(function(form3) {
                     var target6 = toEventTarget3(form3);
-                    return discard23($$void13(subscribe2(eventListener2("reset")(target6)(function($69) {
-                      return Just.create(FormReset3.create($69));
+                    return discard111($$void13(subscribe2(eventListener2("reset")(target6)(function($91) {
+                      return Just.create(FormReset3.create($91));
                     }))))(function() {
                       return $$void13(subscribe2(eventListener2("submit")(target6)(function(v1) {
                         return new Just(FormHide.value);
@@ -23453,22 +23485,100 @@
         });
       }
       ;
-      if (v instanceof Toggled) {
-        return bind33(get15)(function(st) {
-          var res = change2(!current(st.ctrl))(st.ctrl);
-          return discard23(modify_16(function(v1) {
-            var $59 = {};
-            for (var $60 in v1) {
-              if ({}.hasOwnProperty.call(v1, $60)) {
-                $59[$60] = v1[$60];
-              }
-              ;
+      if (v instanceof ToggleDown) {
+        return modify_16(function(v1) {
+          var $67 = {};
+          for (var $68 in v1) {
+            if ({}.hasOwnProperty.call(v1, $68)) {
+              $67[$68] = v1[$68];
             }
             ;
-            $59.ctrl = res.next;
-            return $59;
-          }))(function() {
-            return raise(new VisibilityChanged(res.emit));
+          }
+          ;
+          $67.clickTriggered = true;
+          return $67;
+        });
+      }
+      ;
+      if (v instanceof InputBlur) {
+        return bind33(getHTMLElementRef(inputRef))(function(mel) {
+          return for_21(bind119(mel)(fromHTMLElement))(function(inp) {
+            return bind33(liftEffect7(selectionStart(inp)))(function(ss) {
+              return bind33(liftEffect7(selectionEnd(inp)))(function(se) {
+                return modify_16(function(v1) {
+                  var $70 = {};
+                  for (var $71 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $71)) {
+                      $70[$71] = v1[$71];
+                    }
+                    ;
+                  }
+                  ;
+                  $70.selStart = ss;
+                  $70.selEnd = se;
+                  return $70;
+                });
+              });
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof Toggled) {
+        return bind33(liftEffect7(defaultPrevented(toEvent2(v.value0))))(function(prevented) {
+          if (prevented) {
+            return modify_16(function(v1) {
+              var $74 = {};
+              for (var $75 in v1) {
+                if ({}.hasOwnProperty.call(v1, $75)) {
+                  $74[$75] = v1[$75];
+                }
+                ;
+              }
+              ;
+              $74.clickTriggered = false;
+              return $74;
+            });
+          }
+          ;
+          return bind33(get15)(function(st) {
+            var res = change2(!current(st.ctrl))(st.ctrl);
+            return discard111(modify_16(function(v1) {
+              var $77 = {};
+              for (var $78 in v1) {
+                if ({}.hasOwnProperty.call(v1, $78)) {
+                  $77[$78] = v1[$78];
+                }
+                ;
+              }
+              ;
+              $77.ctrl = res.next;
+              return $77;
+            }))(function() {
+              return discard111(raise(new VisibilityChanged(res.emit)))(function() {
+                return discard111(when22(st.clickTriggered)(bind33(getHTMLElementRef(inputRef))(function(mel) {
+                  return for_21(bind119(mel)(fromHTMLElement))(function(inp) {
+                    return liftEffect7(function __do12() {
+                      focus(toHTMLElement(inp))();
+                      return when110(st.selStart >= 0 && st.selEnd >= 0)(setSelectionRange(st.selStart)(st.selEnd)("none")(inp))();
+                    });
+                  });
+                })))(function() {
+                  return modify_16(function(v1) {
+                    var $80 = {};
+                    for (var $81 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $81)) {
+                        $80[$81] = v1[$81];
+                      }
+                      ;
+                    }
+                    ;
+                    $80.clickTriggered = false;
+                    return $80;
+                  });
+                });
+              });
+            });
           });
         });
       }
@@ -23485,27 +23595,27 @@
       ;
       if (v instanceof Receive15) {
         return modify_16(function(st) {
-          var $65 = {};
-          for (var $66 in st) {
-            if ({}.hasOwnProperty.call(st, $66)) {
-              $65[$66] = st[$66];
+          var $87 = {};
+          for (var $88 in st) {
+            if ({}.hasOwnProperty.call(st, $88)) {
+              $87[$88] = st[$88];
             }
             ;
           }
           ;
-          $65.ctrl = sync(v.value0.visible)(st.ctrl);
-          $65.autoComplete = v.value0.autoComplete;
-          $65.showLabel = v.value0.showLabel;
-          $65.hideLabel = v.value0.hideLabel;
-          $65.disabled = v.value0.disabled;
-          $65.name = v.value0.name;
-          $65.required = v.value0.required;
-          $65.placeholder = v.value0.placeholder;
-          $65.iconOnly = v.value0.iconOnly;
-          $65.toggleVisible = v.value0.toggleVisible;
-          $65.toggleHidden = v.value0.toggleHidden;
-          $65.style = v.value0.style;
-          $65.inputId = function() {
+          $87.ctrl = sync(v.value0.visible)(st.ctrl);
+          $87.autoComplete = v.value0.autoComplete;
+          $87.showLabel = v.value0.showLabel;
+          $87.hideLabel = v.value0.hideLabel;
+          $87.disabled = v.value0.disabled;
+          $87.name = v.value0.name;
+          $87.required = v.value0.required;
+          $87.placeholder = v.value0.placeholder;
+          $87.iconOnly = v.value0.iconOnly;
+          $87.toggleVisible = v.value0.toggleVisible;
+          $87.toggleHidden = v.value0.toggleHidden;
+          $87.style = v.value0.style;
+          $87.inputId = function() {
             if (v.value0.inputId instanceof Just) {
               return v.value0.inputId;
             }
@@ -23514,13 +23624,13 @@
               return st.inputId;
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 270, column 19 - line 272, column 32): " + [v.value0.inputId.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 308, column 19 - line 310, column 32): " + [v.value0.inputId.constructor.name]);
           }();
-          return $65;
+          return $87;
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 227, column 16 - line 273, column 8): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 241, column 16 - line 311, column 8): " + [v.constructor.name]);
     };
   };
   var defaultStyle11 = {
@@ -23553,8 +23663,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction14(dictMonadEffect),
         handleQuery: handleQuery14(dictMonadEffect),
-        receive: function($70) {
-          return Just.create(Receive15.create($70));
+        receive: function($92) {
+          return Just.create(Receive15.create($92));
         },
         initialize: new Just(Initialize13.value)
       })
@@ -23565,7 +23675,7 @@
   var bind34 = /* @__PURE__ */ bind(bindHalogenM);
   var voidRight9 = /* @__PURE__ */ voidRight(functorEmitter);
   var discard24 = /* @__PURE__ */ discard(discardUnit);
-  var discard111 = /* @__PURE__ */ discard24(bindHalogenM);
+  var discard112 = /* @__PURE__ */ discard24(bindHalogenM);
   var pure33 = /* @__PURE__ */ pure(applicativeHalogenM);
   var map49 = /* @__PURE__ */ map(functorArray);
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
@@ -23574,7 +23684,7 @@
   var when23 = /* @__PURE__ */ when(applicativeEffect);
   var for_110 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var $$void14 = /* @__PURE__ */ $$void(functorEffect);
-  var when110 = /* @__PURE__ */ when(applicativeHalogenM);
+  var when111 = /* @__PURE__ */ when(applicativeHalogenM);
   var bind120 = /* @__PURE__ */ bind(bindEffect);
   var map121 = /* @__PURE__ */ map(functorHalogenM);
   var map213 = /* @__PURE__ */ map(functorMaybe);
@@ -23713,7 +23823,7 @@
     return function(act) {
       return bind34(liftEffect7(create3))(function(v) {
         return bind34(subscribe2(voidRight9(act)(v.emitter)))(function(sid) {
-          return discard111(liftEffect7(afterFrame(notify(v.listener)(unit))))(function() {
+          return discard112(liftEffect7(afterFrame(notify(v.listener)(unit))))(function() {
             return pure33(sid);
           });
         });
@@ -23768,9 +23878,9 @@
   var finishClose7 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind34(get16)(function(st) {
-      return discard111(for_26(st.animSub)(unsubscribe2))(function() {
-        return discard111(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard111(liftEffect7(removeFocusGuards))(function() {
+      return discard112(for_26(st.animSub)(unsubscribe2))(function() {
+        return discard112(for_26(st.postSub)(unsubscribe2))(function() {
+          return discard112(liftEffect7(removeFocusGuards))(function() {
             return modify_17(function(v) {
               var $95 = {};
               for (var $96 in v) {
@@ -23841,9 +23951,9 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfter1 = scheduleAfter3(dictMonadEffect);
     return bind34(get16)(function(st) {
-      return when110(!current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
+      return when111(!current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
         return bind34(liftEffect7(activeElement(doc)))(function(mprev) {
-          return discard111(modify_17(function(v) {
+          return discard112(modify_17(function(v) {
             var $102 = {};
             for (var $103 in v) {
               if ({}.hasOwnProperty.call(v, $103)) {
@@ -23856,7 +23966,7 @@
             $102.restoreEl = mprev;
             return $102;
           }))(function() {
-            return discard111(raise(new OpenChanged8(true)))(function() {
+            return discard112(raise(new OpenChanged8(true)))(function() {
               return bind34(map121(map213(toNode))(getHTMLElementRef(contentRef9)))(function(mcNode) {
                 return bind34(liftEffect7(windowTarget))(function(win) {
                   var docTarget = toEventTarget(doc);
@@ -23868,7 +23978,7 @@
                         return bind34(subscribe2(eventListener2("resize")(win)(function(v) {
                           return new Just(Reposition5.value);
                         })))(function(resizeSub) {
-                          return discard111(for_26(st.animSub)(unsubscribe2))(function() {
+                          return discard112(for_26(st.animSub)(unsubscribe2))(function() {
                             return bind34(scheduleAfter1(AfterOpen8.value))(function(psid) {
                               return modify_17(function(v) {
                                 var $105 = {};
@@ -23980,12 +24090,12 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfter1 = scheduleAfter3(dictMonadEffect);
     return bind34(get16)(function(st) {
-      return when110(current(st.ctrl))(discard111(traverse_15(unsubscribe2)(st.subs))(function() {
-        return discard111(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard111(for_26(st.restoreEl)(function($160) {
+      return when111(current(st.ctrl))(discard112(traverse_15(unsubscribe2)(st.subs))(function() {
+        return discard112(for_26(st.postSub)(unsubscribe2))(function() {
+          return discard112(for_26(st.restoreEl)(function($160) {
             return liftEffect7(focus($160));
           }))(function() {
-            return discard111(modify_17(function(v) {
+            return discard112(modify_17(function(v) {
               var $122 = {};
               for (var $123 in v) {
                 if ({}.hasOwnProperty.call(v, $123)) {
@@ -24001,7 +24111,7 @@
               $122.contentNode = Nothing.value;
               return $122;
             }))(function() {
-              return discard111(raise(new OpenChanged8(false)))(function() {
+              return discard112(raise(new OpenChanged8(false)))(function() {
                 return bind34(scheduleAfter1(AfterClose7.value))(function(psid) {
                   return modify_17(function(v) {
                     var $125 = {};
@@ -24028,7 +24138,7 @@
     var closePopover1 = closePopover(dictMonadEffect);
     return function(v) {
       if (v instanceof SetOpen8) {
-        return discard111(function() {
+        return discard112(function() {
           if (v.value0) {
             return openPopover1;
           }
@@ -24168,10 +24278,10 @@
       ;
       if (v instanceof ContentClicked3) {
         return bind34(get16)(function(st) {
-          return when110(!$$null(st.closeLabels))(bind34(getHTMLElementRef(contentRef9))(function(mc) {
+          return when111(!$$null(st.closeLabels))(bind34(getHTMLElementRef(contentRef9))(function(mc) {
             return for_26(mc)(function(content3) {
               return bind34(liftEffect7(closeLabelHit3(toNode(content3))(st.closeLabels)(toEvent2(v.value0))))(function(hit) {
-                return when110(hit)(closePopover1);
+                return when111(hit)(closePopover1);
               });
             });
           }));
@@ -24179,7 +24289,7 @@
       }
       ;
       if (v instanceof AfterOpen8) {
-        return discard111(reposition1)(function() {
+        return discard112(reposition1)(function() {
           return finalize1(true);
         });
       }
@@ -24195,7 +24305,7 @@
               return bind34(liftEffect7(hasAnimation(mnode.value0)))(function(animates) {
                 if (animates) {
                   return bind34(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone8.value)))(function(sub3) {
-                    return discard111(modify_17(function(v1) {
+                    return discard112(modify_17(function(v1) {
                       var $153 = {};
                       for (var $154 in v1) {
                         if ({}.hasOwnProperty.call(v1, $154)) {
@@ -24243,7 +24353,7 @@
         return bind34(get16)(function(st) {
           return for_26(st.contentNode)(function(node) {
             return bind34(liftEffect7(isOutside(node)(v.value0)))(function(outside) {
-              return when110(outside)(closePopover1);
+              return when111(outside)(closePopover1);
             });
           });
         });
@@ -24253,14 +24363,14 @@
         return bind34(getHTMLElementRef(contentRef9))(function(mnode) {
           return for_26(mnode)(function(node) {
             return bind34(liftEffect7(tabLoop(true)(node)(v.value0)))(function(handled) {
-              return when110(handled)(liftEffect7(preventDefault(toEvent(v.value0))));
+              return when111(handled)(liftEffect7(preventDefault(toEvent(v.value0))));
             });
           });
         });
       }
       ;
       if (v instanceof Reposition5) {
-        return discard111(reposition1)(function() {
+        return discard112(reposition1)(function() {
           return finalize1(false);
         });
       }
@@ -25477,7 +25587,7 @@
   var bind37 = /* @__PURE__ */ bind(bindHalogenM);
   var voidRight10 = /* @__PURE__ */ voidRight(functorEmitter);
   var discard27 = /* @__PURE__ */ discard(discardUnit);
-  var discard112 = /* @__PURE__ */ discard27(bindHalogenM);
+  var discard113 = /* @__PURE__ */ discard27(bindHalogenM);
   var pure36 = /* @__PURE__ */ pure(applicativeHalogenM);
   var append11 = /* @__PURE__ */ append(semigroupArray);
   var value15 = /* @__PURE__ */ value12(isPropString);
@@ -25685,7 +25795,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind37(liftEffect7(create3))(function(v) {
       return bind37(subscribe2(voidRight10(AfterOpen9.value)(v.emitter)))(function(sid) {
-        return discard112(liftEffect7(queueMicrotask2(notify(v.listener)(unit))))(function() {
+        return discard113(liftEffect7(queueMicrotask2(notify(v.listener)(unit))))(function() {
           return pure36(sid);
         });
       });
@@ -25831,8 +25941,8 @@
             return st.search;
           }() + key2;
           return bind37(readItemTexts1(st.idPrefix)(length(st.items)))(function(texts) {
-            return discard112(for_30(nextMatch(search$prime)(texts)(st.focused))(function(idx) {
-              return discard112(modify_20(function(v) {
+            return discard113(for_30(nextMatch(search$prime)(texts)(st.focused))(function(idx) {
+              return discard113(modify_20(function(v) {
                 var $130 = {};
                 for (var $131 in v) {
                   if ({}.hasOwnProperty.call(v, $131)) {
@@ -25950,7 +26060,7 @@
         var start2 = selectedIndex3(st);
         return bind37(liftEffect7(bind122(windowImpl)(document)))(function(doc) {
           return bind37(liftEffect7(activeElement(doc)))(function(mprev) {
-            return discard112(modify_20(function(v) {
+            return discard113(modify_20(function(v) {
               var $143 = {};
               for (var $144 in v) {
                 if ({}.hasOwnProperty.call(v, $144)) {
@@ -25964,7 +26074,7 @@
               $143.restoreEl = mprev;
               return $143;
             }))(function() {
-              return discard112(raise(new OpenChanged9(true)))(function() {
+              return discard113(raise(new OpenChanged9(true)))(function() {
                 return bind37(map124(map214(toNode))(getHTMLElementRef(contentRef10)))(function(mcNode) {
                   return bind37(liftEffect7(windowTarget))(function(win) {
                     var docTarget = toEventTarget(doc);
@@ -26032,13 +26142,13 @@
   var closeMenu5 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind37(get19)(function(st) {
-      return when25(current(st.ctrl))(discard112(traverse_16(unsubscribe2)(st.subs))(function() {
-        return discard112(for_30(st.postSub)(unsubscribe2))(function() {
-          return discard112(liftEffect7(applySecond11(applySecond11(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
-            return discard112(for_30(st.restoreEl)(function($211) {
+      return when25(current(st.ctrl))(discard113(traverse_16(unsubscribe2)(st.subs))(function() {
+        return discard113(for_30(st.postSub)(unsubscribe2))(function() {
+          return discard113(liftEffect7(applySecond11(applySecond11(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
+            return discard113(for_30(st.restoreEl)(function($211) {
               return liftEffect7(focus($211));
             }))(function() {
-              return discard112(modify_20(function(v) {
+              return discard113(modify_20(function(v) {
                 var $157 = {};
                 for (var $158 in v) {
                   if ({}.hasOwnProperty.call(v, $158)) {
@@ -26069,7 +26179,7 @@
       var v = index(st.items)(st.focused);
       if (v instanceof Just && !v.value0.disabled) {
         var res = change2(v.value0.value)(st.sel);
-        return discard112(modify_20(function(v1) {
+        return discard113(modify_20(function(v1) {
           var $161 = {};
           for (var $162 in v1) {
             if ({}.hasOwnProperty.call(v1, $162)) {
@@ -26081,7 +26191,7 @@
           $161.sel = res.next;
           return $161;
         }))(function() {
-          return discard112(raise(new ValueChanged5(res.emit)))(function() {
+          return discard113(raise(new ValueChanged5(res.emit)))(function() {
             return closeMenu1;
           });
         });
@@ -26168,14 +26278,14 @@
       if (v instanceof TriggerKeyDown4) {
         return bind37(get19)(function(st) {
           var key2 = key(v.value0);
-          return when25((key2 === " " || (key2 === "Enter" || (key2 === "ArrowUp" || key2 === "ArrowDown"))) && !current(st.ctrl))(discard112(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
+          return when25((key2 === " " || (key2 === "Enter" || (key2 === "ArrowUp" || key2 === "ArrowDown"))) && !current(st.ctrl))(discard113(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
             return openMenu1;
           }));
         });
       }
       ;
       if (v instanceof AfterOpen9) {
-        return discard112(reposition1)(function() {
+        return discard113(reposition1)(function() {
           return finalize1;
         });
       }
@@ -26216,7 +26326,7 @@
           }
           ;
           if (isTypeaheadChar(v1)(st.search !== "")) {
-            return discard112(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
+            return discard113(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
               return typeaheadList1(v1);
             });
           }
@@ -26231,7 +26341,7 @@
             }
             ;
             if (v2 instanceof MoveTo) {
-              return discard112(modify_20(function(v3) {
+              return discard113(modify_20(function(v3) {
                 var $178 = {};
                 for (var $179 in v3) {
                   if ({}.hasOwnProperty.call(v3, $179)) {
@@ -26257,7 +26367,7 @@
       if (v instanceof ItemChosen) {
         return bind37(get19)(function(st) {
           var res = change2(v.value0)(st.sel);
-          return discard112(modify_20(function(v1) {
+          return discard113(modify_20(function(v1) {
             var $183 = {};
             for (var $184 in v1) {
               if ({}.hasOwnProperty.call(v1, $184)) {
@@ -26269,7 +26379,7 @@
             $183.sel = res.next;
             return $183;
           }))(function() {
-            return discard112(raise(new ValueChanged5(res.emit)))(function() {
+            return discard113(raise(new ValueChanged5(res.emit)))(function() {
               return closeMenu1;
             });
           });
@@ -26288,7 +26398,7 @@
     var closeMenu1 = closeMenu5(dictMonadEffect);
     return function(v) {
       if (v instanceof SetOpen9) {
-        return discard112(function() {
+        return discard113(function() {
           if (v.value0) {
             return openMenu1;
           }
@@ -26308,7 +26418,7 @@
       if (v instanceof SetValue5) {
         return bind37(get19)(function(st) {
           var res = change2(v.value0)(st.sel);
-          return discard112(modify_20(function(v2) {
+          return discard113(modify_20(function(v2) {
             var $192 = {};
             for (var $193 in v2) {
               if ({}.hasOwnProperty.call(v2, $193)) {
@@ -26320,7 +26430,7 @@
             $192.sel = res.next;
             return $192;
           }))(function() {
-            return discard112(raise(new ValueChanged5(res.emit)))(function() {
+            return discard113(raise(new ValueChanged5(res.emit)))(function() {
               return pure36(new Just(v.value1));
             });
           });
@@ -32373,210 +32483,215 @@
   })(ordUnit);
   var component28 = /* @__PURE__ */ component15(monadEffectAff);
   var type_38 = /* @__PURE__ */ type_17(isPropButtonType);
-  var component1 = /* @__PURE__ */ component4(monadEffectAff);
   var slot_22 = /* @__PURE__ */ slot_2({
+    reflectSymbol: function() {
+      return "passwordtoggleB";
+    }
+  })(ordUnit);
+  var component1 = /* @__PURE__ */ component4(monadEffectAff);
+  var slot_3 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "dialog";
     }
   })(ordUnit);
   var component29 = /* @__PURE__ */ component7(monadEffectAff);
-  var slot_3 = /* @__PURE__ */ slot_2({
+  var slot_4 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "alertdialog";
     }
   })(ordUnit);
   var component32 = /* @__PURE__ */ component2(monadEffectAff);
-  var slot_4 = /* @__PURE__ */ slot_2({
+  var slot_5 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "popover";
     }
   })(ordUnit);
   var component42 = /* @__PURE__ */ component16(monadEffectAff);
-  var slot_5 = /* @__PURE__ */ slot_2({
+  var slot_6 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "tooltip";
     }
   })(ordUnit);
   var component52 = /* @__PURE__ */ component27(monadEffectAff);
-  var slot_6 = /* @__PURE__ */ slot_2({
+  var slot_7 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "hovercard";
     }
   })(ordUnit);
   var component62 = /* @__PURE__ */ component10(monadEffectAff);
-  var slot_7 = /* @__PURE__ */ slot_2({
+  var slot_8 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "dropdownmenu";
     }
   })(ordUnit);
   var component72 = /* @__PURE__ */ component8(monadEffectAff);
-  var slot_8 = /* @__PURE__ */ slot_2({
+  var slot_9 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "contextmenu";
     }
   })(ordUnit);
   var component82 = /* @__PURE__ */ component6(monadEffectAff);
-  var slot_9 = /* @__PURE__ */ slot_2({
+  var slot_10 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "menubar";
     }
   })(ordUnit);
   var component92 = /* @__PURE__ */ component12(monadEffectAff);
-  var slot_10 = /* @__PURE__ */ slot_2({
+  var slot_11 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "navigationmenu";
     }
   })(ordUnit);
   var component102 = /* @__PURE__ */ component13(monadEffectAff);
-  var slot_11 = /* @__PURE__ */ slot_2({
+  var slot_12 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "select";
     }
   })(ordUnit);
   var component112 = /* @__PURE__ */ component19(monadEffectAff);
-  var slot_12 = /* @__PURE__ */ slot_2({
+  var slot_13 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "slider";
     }
   })(ordUnit);
   var component122 = /* @__PURE__ */ component20(monadEffectAff);
-  var slot_13 = /* @__PURE__ */ slot_2({
+  var slot_14 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "accordion";
     }
   })(ordUnit);
   var component132 = /* @__PURE__ */ component(monadEffectAff);
-  var slot_14 = /* @__PURE__ */ slot_2({
+  var slot_15 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "collapsible";
     }
   })(ordUnit);
   var component142 = /* @__PURE__ */ component5(monadEffectAff);
-  var slot_15 = /* @__PURE__ */ slot_2({
+  var slot_16 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "toast";
     }
   })(ordUnit);
   var component152 = /* @__PURE__ */ component23(monadEffectAff);
-  var slot_16 = /* @__PURE__ */ slot_2({
+  var slot_17 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "tabs";
     }
   })(ordUnit);
   var component162 = /* @__PURE__ */ component22(monadEffectAff);
-  var slot_17 = /* @__PURE__ */ slot_2({
+  var slot_18 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "togglegroup";
     }
   })(ordUnit);
   var component172 = /* @__PURE__ */ component25(monadEffectAff);
-  var slot_18 = /* @__PURE__ */ slot_2({
+  var slot_19 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "radiogroup";
     }
   })(ordUnit);
   var component182 = /* @__PURE__ */ component17(monadEffectAff);
-  var slot_19 = /* @__PURE__ */ slot_2({
+  var slot_20 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "checkbox";
     }
   })(ordUnit);
-  var slot_20 = /* @__PURE__ */ slot_2({
+  var slot_21 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "switch";
     }
   })(ordUnit);
-  var slot_21 = /* @__PURE__ */ slot_2({
+  var slot_222 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "toggle";
     }
   })(ordUnit);
-  var slot_222 = /* @__PURE__ */ slot_2({
+  var slot_23 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "segmentedcontrol";
     }
   })(ordUnit);
-  var slot_23 = /* @__PURE__ */ slot_2({
+  var slot_24 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "radiocards";
     }
   })(ordUnit);
-  var slot_24 = /* @__PURE__ */ slot_2({
+  var slot_25 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "avatarx";
     }
   })(ordUnit);
-  var slot_25 = /* @__PURE__ */ slot_2({
+  var slot_26 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "scrollarea";
     }
   })(ordUnit);
   var component192 = /* @__PURE__ */ component18(monadEffectAff);
-  var slot_26 = /* @__PURE__ */ slot_2({
+  var slot_27 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "toolbar";
     }
   })(ordUnit);
   var component202 = /* @__PURE__ */ component26(monadEffectAff);
-  var slot_27 = /* @__PURE__ */ slot_2({
+  var slot_28 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "otp";
     }
   })(ordUnit);
   var component212 = /* @__PURE__ */ component14(monadEffectAff);
-  var slot_28 = /* @__PURE__ */ slot_2({
+  var slot_29 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "form";
     }
   })(ordUnit);
   var component222 = /* @__PURE__ */ component9(monadEffectAff);
-  var slot_29 = /* @__PURE__ */ slot_2({
+  var slot_30 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "dropdownmenuchecks";
     }
   })(ordUnit);
-  var slot_30 = /* @__PURE__ */ slot_2({
+  var slot_31 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "contextmenuchecks";
     }
   })(ordUnit);
-  var slot_31 = /* @__PURE__ */ slot_2({
+  var slot_32 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "menubarchecks";
     }
   })(ordUnit);
-  var slot_32 = /* @__PURE__ */ slot_2({
+  var slot_33 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "selectplaceholder";
     }
   })(ordUnit);
-  var slot_33 = /* @__PURE__ */ slot_2({
+  var slot_34 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "selectform";
     }
   })(ordUnit);
-  var slot_34 = /* @__PURE__ */ slot_2({
+  var slot_35 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "dropdownmenugroup";
     }
   })(ordUnit);
-  var slot_35 = /* @__PURE__ */ slot_2({
+  var slot_36 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "tabsB";
     }
   })(ordUnit);
-  var slot_36 = /* @__PURE__ */ slot_2({
+  var slot_37 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "sliderrange";
     }
   })(ordUnit);
   var rangeComponent2 = /* @__PURE__ */ rangeComponent(monadEffectAff);
-  var slot_37 = /* @__PURE__ */ slot_2({
+  var slot_38 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "sliderrangeform";
     }
   })(ordUnit);
-  var slot_38 = /* @__PURE__ */ slot_2({
+  var slot_39 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "labelguard";
     }
@@ -32607,7 +32722,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1976, column 1 - line 1976, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1991, column 1 - line 1991, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32709,8 +32824,8 @@
     return {
       loop: defaultInput23.loop,
       orientation: function() {
-        var $234 = s === "vertical";
-        if ($234) {
+        var $237 = s === "vertical";
+        if ($237) {
           return Vertical.value;
         }
         ;
@@ -32754,8 +32869,8 @@
   var toggleInput = function(s) {
     return {
       pressed: function() {
-        var $235 = s === "controlled";
-        if ($235) {
+        var $238 = s === "controlled";
+        if ($238) {
           return new Just(true);
         }
         ;
@@ -32940,7 +33055,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1385, column 1 - line 1385, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1389, column 1 - line 1389, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -32981,8 +33096,8 @@
       open: Nothing.value,
       defaultOpen: true,
       duration: function() {
-        var $238 = s === "autodismiss";
-        if ($238) {
+        var $241 = s === "autodismiss";
+        if ($241) {
           return new Just(1500);
         }
         ;
@@ -33073,8 +33188,8 @@
         disabled: false
       }],
       value: function() {
-        var $241 = s === "controlled";
-        if ($241) {
+        var $244 = s === "controlled";
+        if ($244) {
           return new Just("account");
         }
         ;
@@ -33151,8 +33266,8 @@
     return {
       children: defaultInput19.children,
       checked: function() {
-        var $242 = s === "controlled";
-        if ($242) {
+        var $245 = s === "controlled";
+        if ($245) {
           return new Just(true);
         }
         ;
@@ -33162,8 +33277,8 @@
       disabled: s === "disabled",
       required: s === "required" || s === "form",
       name: function() {
-        var $243 = s === "form";
-        if ($243) {
+        var $246 = s === "form";
+        if ($246) {
           return "notify";
         }
         ;
@@ -33198,7 +33313,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2068, column 17 - line 2070, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2083, column 17 - line 2085, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33211,13 +33326,13 @@
       name: defaultRangeInput.name,
       isFormControl: defaultRangeInput.isFormControl,
       defaultValue: function() {
-        var $246 = s === "triple";
-        if ($246) {
+        var $249 = s === "triple";
+        if ($249) {
           return [20, 50, 80];
         }
         ;
-        var $247 = s === "minsteps";
-        if ($247) {
+        var $250 = s === "minsteps";
+        if ($250) {
           return [40, 60];
         }
         ;
@@ -33227,8 +33342,8 @@
       max: 100,
       step: 1,
       minStepsBetweenThumbs: function() {
-        var $248 = s === "minsteps";
-        if ($248) {
+        var $251 = s === "minsteps";
+        if ($251) {
           return 10;
         }
         ;
@@ -33275,8 +33390,8 @@
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $249 = s === "vertical";
-        if ($249) {
+        var $252 = s === "vertical";
+        if ($252) {
           return Vertical.value;
         }
         ;
@@ -33311,12 +33426,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2023, column 1 - line 2023, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2038, column 1 - line 2038, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $251 = s === "vsem" || s === "vdec";
-      if ($251) {
+      var $254 = s === "vsem" || s === "vdec";
+      if ($254) {
         return Vertical.value;
       }
       ;
@@ -33376,16 +33491,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $252 = s === "horizontal";
-        if ($252) {
+        var $255 = s === "horizontal";
+        if ($255) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $253 = s === "radius";
-        if ($253) {
+        var $256 = s === "radius";
+        if ($256) {
           return "full";
         }
         ;
@@ -33429,8 +33544,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $254 = s === "keys" || s === "mixed";
-        if ($254) {
+        var $257 = s === "keys" || s === "mixed";
+        if ($257) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33446,8 +33561,8 @@
           }];
         }
         ;
-        var $255 = s === "loopoff" || s === "rtl";
-        if ($255) {
+        var $258 = s === "loopoff" || s === "rtl";
+        if ($258) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33463,8 +33578,8 @@
           }];
         }
         ;
-        var $256 = s === "alldisabled";
-        if ($256) {
+        var $259 = s === "alldisabled";
+        if ($259) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33489,8 +33604,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $257 = s === "horizontal" || s === "rtl";
-        if ($257) {
+        var $260 = s === "horizontal" || s === "rtl";
+        if ($260) {
           return Horizontal.value;
         }
         ;
@@ -33498,8 +33613,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $258 = s === "rtl";
-        if ($258) {
+        var $261 = s === "rtl";
+        if ($261) {
           return RTL.value;
         }
         ;
@@ -33509,8 +33624,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $259 = s === "form";
-        if ($259) {
+        var $262 = s === "form";
+        if ($262) {
           return "plan";
         }
         ;
@@ -33594,8 +33709,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $260 = styl === "";
-              if ($260) {
+              var $263 = styl === "";
+              if ($263) {
                 return [];
               }
               ;
@@ -33669,16 +33784,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $262 = s === "close";
-        if ($262) {
+        var $265 = s === "close";
+        if ($265) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $263 = s === "close";
-        if ($263) {
+        var $266 = s === "close";
+        if ($266) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -33701,23 +33816,29 @@
   var passwordToggleIcon = /* @__PURE__ */ elementNS("http://www.w3.org/2000/svg")("svg")([/* @__PURE__ */ attr2("width")("15"), /* @__PURE__ */ attr2("height")("15"), /* @__PURE__ */ attr2("viewBox")("0 0 15 15"), /* @__PURE__ */ attr2("aria-hidden")("true"), /* @__PURE__ */ attr2("xmlns")("http://www.w3.org/2000/svg")])([/* @__PURE__ */ elementNS("http://www.w3.org/2000/svg")("circle")([/* @__PURE__ */ attr2("cx")("7.5"), /* @__PURE__ */ attr2("cy")("7.5"), /* @__PURE__ */ attr2("r")("2"), /* @__PURE__ */ attr2("fill")("currentColor")])([])]);
   var passwordToggleInput = function(s) {
     return {
-      visible: defaultInput12.visible,
       defaultVisible: defaultInput12.defaultVisible,
       autoComplete: defaultInput12.autoComplete,
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
-      inputId: new Just("password"),
+      inputId: function() {
+        var $267 = s === "multi";
+        if ($267) {
+          return Nothing.value;
+        }
+        ;
+        return new Just("password");
+      }(),
       toggleVisible: function() {
-        var $264 = s === "autolabel";
-        if ($264) {
+        var $268 = s === "autolabel";
+        if ($268) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $265 = s === "autolabel";
-        if ($265) {
+        var $269 = s === "autolabel";
+        if ($269) {
           return [passwordToggleIcon];
         }
         ;
@@ -33726,8 +33847,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $266 = s === "passthrough";
-        if ($266) {
+        var $270 = s === "passthrough";
+        if ($270) {
           return new Just("pw");
         }
         ;
@@ -33735,9 +33856,17 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $267 = s === "passthrough";
-        if ($267) {
+        var $271 = s === "passthrough";
+        if ($271) {
           return new Just("Enter password");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      visible: function() {
+        var $272 = s === "controlled";
+        if ($272) {
+          return new Just(false);
         }
         ;
         return Nothing.value;
@@ -33758,7 +33887,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1730, column 1 - line 1730, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1745, column 1 - line 1745, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -33770,24 +33899,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $270 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($270) {
+        var $275 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($275) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $271 = s === "vertical";
-        if ($271) {
+        var $276 = s === "vertical";
+        if ($276) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $272 = s === "rtl";
-        if ($272) {
+        var $277 = s === "rtl";
+        if ($277) {
           return RTL.value;
         }
         ;
@@ -33842,8 +33971,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $273 = s === "submenu";
-          if ($273) {
+          var $278 = s === "submenu";
+          if ($278) {
             return [menubarSubEntry];
           }
           ;
@@ -33895,8 +34024,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $274 = s === "radio";
-          if ($274) {
+          var $279 = s === "radio";
+          if ($279) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34002,84 +34131,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2035, column 1 - line 2035, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2050, column 1 - line 2050, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $326 = filter(function(c) {
+    var $332 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($327) {
-      return fromCharArray($326(toCharArray($327)));
+    return function($333) {
+      return fromCharArray($332(toCharArray($333)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $276 = s === "controlled";
-        if ($276) {
+        var $281 = s === "controlled";
+        if ($281) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $277 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($277) {
+        var $282 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($282) {
           return "";
         }
         ;
-        var $278 = s === "alpha";
-        if ($278) {
+        var $283 = s === "alpha";
+        if ($283) {
           return "abc";
         }
         ;
-        var $279 = s === "alphanumeric";
-        if ($279) {
+        var $284 = s === "alphanumeric";
+        if ($284) {
           return "a1b";
         }
         ;
-        var $280 = s === "revalidate";
-        if ($280) {
+        var $285 = s === "revalidate";
+        if ($285) {
           return "a1b2c";
         }
         ;
-        var $281 = s === "sanitizevalue";
-        if ($281) {
+        var $286 = s === "sanitizevalue";
+        if ($286) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $282 = s === "alpha" || s === "revalidate";
-        if ($282) {
+        var $287 = s === "alpha" || s === "revalidate";
+        if ($287) {
           return Alpha.value;
         }
         ;
-        var $283 = s === "alphanumeric";
-        if ($283) {
+        var $288 = s === "alphanumeric";
+        if ($288) {
           return Alphanumeric.value;
         }
         ;
-        var $284 = s === "novalidation" || s === "sanitizevalue";
-        if ($284) {
+        var $289 = s === "novalidation" || s === "sanitizevalue";
+        if ($289) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $285 = s === "sanitizevalue";
-        if ($285) {
+        var $290 = s === "sanitizevalue";
+        if ($290) {
           return keepDigitsOnly;
         }
         ;
         return identity13;
       }(),
       placeholder: function() {
-        var $286 = s === "placeholder";
-        if ($286) {
+        var $291 = s === "placeholder";
+        if ($291) {
           return new Just("\u25CB");
         }
         ;
@@ -34089,24 +34218,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $287 = s === "vertical";
-        if ($287) {
+        var $292 = s === "vertical";
+        if ($292) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $288 = s === "rtl";
-        if ($288) {
+        var $293 = s === "rtl";
+        if ($293) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $289 = s === "named";
-        if ($289) {
+        var $294 = s === "named";
+        if ($294) {
           return new Just("otp-code");
         }
         ;
@@ -34144,8 +34273,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $290 = s === "richcontent";
-        if ($290) {
+        var $295 = s === "richcontent";
+        if ($295) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34164,15 +34293,15 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2213, column 1 - line 2213, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2228, column 1 - line 2228, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $293 = s === "reset";
-        if ($293) {
+        var $298 = s === "reset";
+        if ($298) {
           return [text5("Reset")];
         }
         ;
@@ -34185,8 +34314,8 @@
         required: true,
         serverInvalid: s === "serverInvalid",
         messages: function() {
-          var $294 = s === "defaultMessage";
-          if ($294) {
+          var $299 = s === "defaultMessage";
+          if ($299) {
             return [{
               match: ValueMissing.value,
               forceMatch: true,
@@ -34194,8 +34323,8 @@
             }];
           }
           ;
-          var $295 = s === "reset";
-          if ($295) {
+          var $300 = s === "reset";
+          if ($300) {
             return [{
               match: ValueMissing.value,
               forceMatch: false,
@@ -34234,7 +34363,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2079, column 12 - line 2081, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2094, column 12 - line 2096, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34255,8 +34384,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $303 = kv.before === key2;
-          if ($303) {
+          var $308 = kv.before === key2;
+          if ($308) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34267,7 +34396,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2061, column 15 - line 2063, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2076, column 15 - line 2078, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34383,8 +34512,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $305 = s === "submenu";
-        if ($305) {
+        var $310 = s === "submenu";
+        if ($310) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34408,8 +34537,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $306 = s === "radio";
-        if ($306) {
+        var $311 = s === "radio";
+        if ($311) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34450,8 +34579,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $307 = s === "controlled";
-        if ($307) {
+        var $312 = s === "controlled";
+        if ($312) {
           return new Just(true);
         }
         ;
@@ -34472,8 +34601,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $308 = klass === "";
-      if ($308) {
+      var $313 = klass === "";
+      if ($313) {
         return [];
       }
       ;
@@ -34497,8 +34626,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $309 = s === "radio";
-        if ($309) {
+        var $314 = s === "radio";
+        if ($314) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34594,8 +34723,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $310 = s === "submenu";
-        if ($310) {
+        var $315 = s === "submenu";
+        if ($315) {
           return [submenuEntry];
         }
         ;
@@ -34758,8 +34887,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $312 = s === "controlled";
-        if ($312) {
+        var $317 = s === "controlled";
+        if ($317) {
           return new Just(Checked.value);
         }
         ;
@@ -34783,16 +34912,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $314 = s === "form";
-        if ($314) {
+        var $319 = s === "form";
+        if ($319) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $315 = s === "form";
-        if ($315) {
+        var $320 = s === "form";
+        if ($320) {
           return "yes";
         }
         ;
@@ -34860,18 +34989,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $318 = s === "wide";
-        if ($318) {
+        var $323 = s === "wide";
+        if ($323) {
           return 16 / 9;
         }
         ;
-        var $319 = s === "tall";
-        if ($319) {
+        var $324 = s === "tall";
+        if ($324) {
           return 1 / 2;
         }
         ;
-        var $320 = s === "verywide";
-        if ($320) {
+        var $325 = s === "verywide";
+        if ($325) {
           return 21 / 9;
         }
         ;
@@ -34880,7 +35009,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1953, column 1 - line 1953, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1968, column 1 - line 1968, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -34934,8 +35063,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $321 = s === "single";
-        if ($321) {
+        var $326 = s === "single";
+        if ($326) {
           return ["item-1"];
         }
         ;
@@ -35059,17 +35188,25 @@
   var _popover = /* @__PURE__ */ function() {
     return $$Proxy.value;
   }();
+  var _passwordtoggleB = /* @__PURE__ */ function() {
+    return $$Proxy.value;
+  }();
   var _passwordtoggle = /* @__PURE__ */ function() {
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $322 = s === "formreset";
-    if ($322) {
+    var $327 = s === "formreset";
+    if ($327) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $323 = s === "formsubmit";
-    if ($323) {
+    var $328 = s === "multi";
+    if ($328) {
+      return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
+    }
+    ;
+    var $329 = s === "formsubmit";
+    if ($329) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -35149,92 +35286,92 @@
     return function(s) {
       return div3(append31([class_("radix-themes light"), style("--default-font-family: 'Inter Variable', sans-serif;")])(themeDataAttrs(true)))([box([new P("6")])([function() {
         if (c === "dialog") {
-          return slot_22(_dialog)(unit)(component29)(dialogInput);
+          return slot_3(_dialog)(unit)(component29)(dialogInput);
         }
         ;
         if (c === "alertdialog") {
-          return slot_3(_alertdialog)(unit)(component32)(alertDialogInput);
+          return slot_4(_alertdialog)(unit)(component32)(alertDialogInput);
         }
         ;
         if (c === "popover") {
-          return slot_4(_popover)(unit)(component42)(popoverInput(s));
+          return slot_5(_popover)(unit)(component42)(popoverInput(s));
         }
         ;
         if (c === "tooltip") {
-          return slot_5(_tooltip)(unit)(component52)(tooltipInput);
+          return slot_6(_tooltip)(unit)(component52)(tooltipInput);
         }
         ;
         if (c === "hovercard") {
-          return slot_6(_hovercard)(unit)(component62)(hoverCardInput(s));
+          return slot_7(_hovercard)(unit)(component62)(hoverCardInput(s));
         }
         ;
         if (c === "dropdownmenu") {
-          return slot_7(_dropdownmenu)(unit)(component72)(dropdownMenuInput(s));
+          return slot_8(_dropdownmenu)(unit)(component72)(dropdownMenuInput(s));
         }
         ;
         if (c === "contextmenu") {
-          return slot_8(_contextmenu)(unit)(component82)(contextMenuInput(s));
+          return slot_9(_contextmenu)(unit)(component82)(contextMenuInput(s));
         }
         ;
         if (c === "menubar") {
-          return slot_9(_menubar)(unit)(component92)(menubarInput(s));
+          return slot_10(_menubar)(unit)(component92)(menubarInput(s));
         }
         ;
         if (c === "navigationmenu") {
-          return slot_10(_navigationmenu)(unit)(component102)(navigationMenuInput(s));
+          return slot_11(_navigationmenu)(unit)(component102)(navigationMenuInput(s));
         }
         ;
         if (c === "select") {
-          return slot_11(_select)(unit)(component112)(selectInput(s));
+          return slot_12(_select)(unit)(component112)(selectInput(s));
         }
         ;
         if (c === "slider") {
-          var $325 = s === "vertical";
-          if ($325) {
-            return box([new StyleProp("height", "160px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
+          var $331 = s === "vertical";
+          if ($331) {
+            return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;
-          return box([new StyleProp("max-width", "320px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
+          return box([new StyleProp("max-width", "320px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
         }
         ;
         if (c === "accordion") {
-          return box([new StyleProp("max-width", "360px")])([slot_13(_accordion)(unit)(component132)(accordionInput(s))]);
+          return box([new StyleProp("max-width", "360px")])([slot_14(_accordion)(unit)(component132)(accordionInput(s))]);
         }
         ;
         if (c === "collapsible") {
-          return slot_14(_collapsible)(unit)(component142)(collapsibleInput(s));
+          return slot_15(_collapsible)(unit)(component142)(collapsibleInput(s));
         }
         ;
         if (c === "toast") {
-          return slot_15(_toast)(unit)(component152)(toastInput(s));
+          return slot_16(_toast)(unit)(component152)(toastInput(s));
         }
         ;
         if (c === "tabs") {
-          return slot_16(_tabs)(unit)(component162)(tabsInput(s));
+          return slot_17(_tabs)(unit)(component162)(tabsInput(s));
         }
         ;
         if (c === "togglegroup") {
-          return slot_17(_togglegroup)(unit)(component172)(toggleGroupInput(s));
+          return slot_18(_togglegroup)(unit)(component172)(toggleGroupInput(s));
         }
         ;
         if (c === "radiogroup") {
-          return formWrap(s)(slot_18(_radiogroup)(unit)(component182)(radioGroupInput(s)));
+          return formWrap(s)(slot_19(_radiogroup)(unit)(component182)(radioGroupInput(s)));
         }
         ;
         if (c === "checkbox") {
-          return formWrap(s)(slot_19(_checkbox)(unit)(component1)(checkboxInput(s)));
+          return formWrap(s)(slot_20(_checkbox)(unit)(component1)(checkboxInput(s)));
         }
         ;
         if (c === "switch") {
-          return formWrap(s)(slot_20(_switch)(unit)(component21)(switchInput(s)));
+          return formWrap(s)(slot_21(_switch)(unit)(component21)(switchInput(s)));
         }
         ;
         if (c === "toggle") {
-          return slot_21(_toggle)(unit)(component24)(toggleInput(s));
+          return slot_222(_toggle)(unit)(component24)(toggleInput(s));
         }
         ;
         if (c === "segmentedcontrol") {
-          return slot_222(_segmentedcontrol)(unit)(component172)(segmentedControlInput);
+          return slot_23(_segmentedcontrol)(unit)(component172)(segmentedControlInput);
         }
         ;
         if (c === "checkboxgroup") {
@@ -35242,7 +35379,7 @@
         }
         ;
         if (c === "radiocards") {
-          return slot_23(_radiocards)(unit)(component182)(radioCardsInput);
+          return slot_24(_radiocards)(unit)(component182)(radioCardsInput);
         }
         ;
         if (c === "checkboxcards") {
@@ -35254,11 +35391,11 @@
         }
         ;
         if (c === "avatar" && s === "loaded") {
-          return slot_24(_avatarx)(unit)(component3)(avatarLoadedInput);
+          return slot_25(_avatarx)(unit)(component3)(avatarLoadedInput);
         }
         ;
         if (c === "avatar" && s === "loadedattrs") {
-          return slot_24(_avatarx)(unit)(component3)(avatarLoadedAttrsInput);
+          return slot_25(_avatarx)(unit)(component3)(avatarLoadedAttrsInput);
         }
         ;
         if (c === "avatar") {
@@ -35270,7 +35407,7 @@
         }
         ;
         if (c === "scrollarea") {
-          return slot_25(_scrollarea)(unit)(component192)(scrollAreaInput);
+          return slot_26(_scrollarea)(unit)(component192)(scrollAreaInput);
         }
         ;
         if (c === "tabnav") {
@@ -35282,15 +35419,15 @@
         }
         ;
         if (c === "toolbar") {
-          return slot_26(_toolbar)(unit)(component202)(toolbarInput(s));
+          return slot_27(_toolbar)(unit)(component202)(toolbarInput(s));
         }
         ;
         if (c === "otp") {
-          return box([])([otpFormWrap(s)(slot_27(_otp)(unit)(component212)(otpInput(s)))]);
+          return box([])([otpFormWrap(s)(slot_28(_otp)(unit)(component212)(otpInput(s)))]);
         }
         ;
         if (c === "form") {
-          return box([])([slot_28(_form12)(unit)(component222)(formInput(s))]);
+          return box([])([slot_29(_form12)(unit)(component222)(formInput(s))]);
         }
         ;
         if (c === "separatorprim") {
@@ -35310,51 +35447,51 @@
         }
         ;
         if (c === "dropdownmenuchecks") {
-          return slot_29(_dropdownmenuchecks)(unit)(component72)(dropdownChecksInput(s));
+          return slot_30(_dropdownmenuchecks)(unit)(component72)(dropdownChecksInput(s));
         }
         ;
         if (c === "contextmenuchecks") {
-          return slot_30(_contextmenuchecks)(unit)(component82)(contextChecksInput(s));
+          return slot_31(_contextmenuchecks)(unit)(component82)(contextChecksInput(s));
         }
         ;
         if (c === "menubarchecks") {
-          return slot_31(_menubarchecks)(unit)(component92)(menubarChecksInput(s));
+          return slot_32(_menubarchecks)(unit)(component92)(menubarChecksInput(s));
         }
         ;
         if (c === "selectplaceholder") {
-          return slot_32(_selectplaceholder)(unit)(component112)(selectPlaceholderInput);
+          return slot_33(_selectplaceholder)(unit)(component112)(selectPlaceholderInput);
         }
         ;
         if (c === "tabsmanual") {
-          return slot_16(_tabs)(unit)(component162)(tabsManualInput(s));
+          return slot_17(_tabs)(unit)(component162)(tabsManualInput(s));
         }
         ;
         if (c === "togglegroupdisabled") {
-          return slot_17(_togglegroup)(unit)(component172)(toggleGroupDisabledInput);
+          return slot_18(_togglegroup)(unit)(component172)(toggleGroupDisabledInput);
         }
         ;
         if (c === "togglegroupnoloop") {
-          return slot_17(_togglegroup)(unit)(component172)(toggleGroupNoLoopInput);
+          return slot_18(_togglegroup)(unit)(component172)(toggleGroupNoLoopInput);
         }
         ;
         if (c === "togglegroupvert") {
-          return slot_17(_togglegroup)(unit)(component172)(toggleGroupVertInput);
+          return slot_18(_togglegroup)(unit)(component172)(toggleGroupVertInput);
         }
         ;
         if (c === "accordioncollapsible") {
-          return box([new StyleProp("max-width", "360px")])([slot_13(_accordion)(unit)(component132)(accordionCollapsibleInput)]);
+          return box([new StyleProp("max-width", "360px")])([slot_14(_accordion)(unit)(component132)(accordionCollapsibleInput)]);
         }
         ;
         if (c === "toolbarnoloop") {
-          return slot_26(_toolbar)(unit)(component202)(toolbarNoLoopInput);
+          return slot_27(_toolbar)(unit)(component202)(toolbarNoLoopInput);
         }
         ;
         if (c === "toolbarmultiple") {
-          return slot_26(_toolbar)(unit)(component202)(toolbarMultipleInput);
+          return slot_27(_toolbar)(unit)(component202)(toolbarMultipleInput);
         }
         ;
         if (c === "scrollareax") {
-          return slot_25(_scrollarea)(unit)(component192)(scrollAreaXInput(s));
+          return slot_26(_scrollarea)(unit)(component192)(scrollAreaXInput(s));
         }
         ;
         if (c === "separatorthemes") {
@@ -35362,55 +35499,55 @@
         }
         ;
         if (c === "selectform") {
-          return form2([])([slot_33(_selectform)(unit)(component112)(selectFormInput(s))]);
+          return form2([])([slot_34(_selectform)(unit)(component112)(selectFormInput(s))]);
         }
         ;
         if (c === "dropdownmenugroup") {
-          return slot_34(_dropdownmenugroup)(unit)(component72)(dropdownGroupInput);
+          return slot_35(_dropdownmenugroup)(unit)(component72)(dropdownGroupInput);
         }
         ;
         if (c === "toast-up") {
-          return slot_15(_toast)(unit)(component152)(toastUpInput);
+          return slot_16(_toast)(unit)(component152)(toastUpInput);
         }
         ;
         if (c === "tabsvert") {
-          return slot_16(_tabs)(unit)(component162)(tabsVertInput);
+          return slot_17(_tabs)(unit)(component162)(tabsVertInput);
         }
         ;
         if (c === "tabsrtl") {
-          return slot_16(_tabs)(unit)(component162)(tabsRtlInput);
+          return slot_17(_tabs)(unit)(component162)(tabsRtlInput);
         }
         ;
         if (c === "tabsmulti") {
-          return div_([slot_16(_tabs)(unit)(component162)(tabsInput("")), slot_35(_tabsB)(unit)(component162)(tabsInput(""))]);
+          return div_([slot_17(_tabs)(unit)(component162)(tabsInput("")), slot_36(_tabsB)(unit)(component162)(tabsInput(""))]);
         }
         ;
         if (c === "tabsnone") {
-          return slot_16(_tabs)(unit)(component162)(tabsNoneInput);
+          return slot_17(_tabs)(unit)(component162)(tabsNoneInput);
         }
         ;
         if (c === "accordionhoriz") {
-          return box([new StyleProp("max-width", "360px")])([slot_13(_accordion)(unit)(component132)(accordionHorizInput)]);
+          return box([new StyleProp("max-width", "360px")])([slot_14(_accordion)(unit)(component132)(accordionHorizInput)]);
         }
         ;
         if (c === "togglegrouprtl") {
-          return slot_17(_togglegroup)(unit)(component172)(toggleGroupRtlInput);
+          return slot_18(_togglegroup)(unit)(component172)(toggleGroupRtlInput);
         }
         ;
         if (c === "toolbarrtl") {
-          return slot_26(_toolbar)(unit)(component202)(toolbarRtlInput);
+          return slot_27(_toolbar)(unit)(component202)(toolbarRtlInput);
         }
         ;
         if (c === "sliderrange") {
-          return box([new StyleProp("max-width", "320px")])([slot_36(_sliderrange)(unit)(rangeComponent2)(sliderRangeInput(s))]);
+          return box([new StyleProp("max-width", "320px")])([slot_37(_sliderrange)(unit)(rangeComponent2)(sliderRangeInput(s))]);
         }
         ;
         if (c === "sliderrangeform") {
-          return form2([])([box([new StyleProp("max-width", "320px")])([slot_37(_sliderrangeform)(unit)(rangeComponent2)(sliderRangeFormInput(s))])]);
+          return form2([])([box([new StyleProp("max-width", "320px")])([slot_38(_sliderrangeform)(unit)(rangeComponent2)(sliderRangeFormInput(s))])]);
         }
         ;
         if (c === "labelguard") {
-          return slot_38(_labelguard)(unit)(component232)(labelGuardInput(s));
+          return slot_39(_labelguard)(unit)(component232)(labelGuardInput(s));
         }
         ;
         return div_([text5("pick a ?c=<component> (e.g. ?c=dialog)")]);
