@@ -105,6 +105,7 @@ STATES=(
   "slider:disabled"
   "otp:alpha"
   "otp:alphanumeric"
+  "otp:named"
   "form:multiMessage"
   # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
   "collapsible:disabled"

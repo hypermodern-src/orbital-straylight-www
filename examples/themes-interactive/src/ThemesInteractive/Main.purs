@@ -1676,6 +1676,8 @@ otpInput s = Otp.defaultInput
   -- horizontal axis (dir=RTL → focusIntent swaps ArrowLeft/Right).
   , orientation = if s == "vertical" then Vertical else Horizontal
   , dir = if s == "rtl" then RTL else LTR
+  -- `?s=named` sets the hidden aggregate input's form `name` (value=join().trim()).
+  , name = if s == "named" then Just "otp-code" else Nothing
   , style = { root: cn "", input: cn "" }
   }
 

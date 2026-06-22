@@ -1798,6 +1798,9 @@ const PAGES: Page[] = [
       // prop → ArrowLeft is forward).
       const vertical = s === "vertical";
       const rtl = s === "rtl";
+      // `?s=named` sets the Root `name` prop → the hidden aggregate input carries name="otp-code"
+      // (value=join().trim()) for form submission. defaultValue "123" at rest.
+      const named = s === "named";
       return (
         <Box>
           <OneTimePasswordField.Root
@@ -1809,6 +1812,7 @@ const PAGES: Page[] = [
             {...(readonly ? { readOnly: true } : {})}
             {...(vertical ? { orientation: "vertical" as const } : {})}
             {...(rtl ? { dir: "rtl" as const } : {})}
+            {...(named ? { name: "otp-code" } : {})}
             autoFocus={false}
           >
             <OneTimePasswordField.Input />

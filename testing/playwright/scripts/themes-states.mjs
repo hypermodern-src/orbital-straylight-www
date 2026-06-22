@@ -868,6 +868,16 @@ export const STATES = {
           && document.querySelector('input[type="hidden"]')?.value === "a1b";
       });
     },
+    // `?s=named` → Root name="otp-code": the hidden aggregate input carries that form name
+    // and value=join().trim() ("123"). At rest; the hidden input's attrs are the oracle.
+    named: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const h = document.querySelector('input[type="hidden"]');
+        return !!h && h.getAttribute("name") === "otp-code" && h.value === "123";
+      });
+    },
     // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
     password: async (pg) => {
       await root(pg).locator('[role="group"]').first().waitFor();
