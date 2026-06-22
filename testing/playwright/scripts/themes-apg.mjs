@@ -1083,6 +1083,23 @@ const CHECKS = [
     const onSlot = await pg.evaluate((s) => !!document.activeElement && document.activeElement.matches(s), sel);
     ok(!onSlot, "a slot was focused on mount, but themes autoFocus is inert");
   }},
+  // paste-fill: a pasted/dumped value is SANITIZED (whitespace + rejected chars stripped) and
+  // SLICED to the slot count, filling all slots and focusing the last (otp.tsx:478-485 PASTE).
+  { id: "otp", state: "paste", apg: "roving-tabindex", name: "paste sanitizes junk and slices to the slot count", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel + '[data-radix-index="0"]').focus();
+    await pg.evaluate(() => {
+      const el = document.querySelector('input[data-radix-otp-input][data-radix-index="0"]');
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      setter.call(el, "4 5-6789");                 // spaces/dash junk + more than 3 digits
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await pg.waitForTimeout(120);
+    const got = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
+    ok(got === "456", `paste did not sanitize+slice to the slot count (got '${got}')`);
+    ok(await activeIsNth(pg, sel, 2), "paste did not focus the last slot");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
