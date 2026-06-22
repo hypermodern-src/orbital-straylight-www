@@ -868,6 +868,32 @@ const CHECKS = [
     await pg.locator('#root button[type="reset"]').click();
     await attrEq(pg, inp, 0, "type", "password", "form reset did not re-hide the password");
   }},
+  // Toggling visibility swaps the SAME input's type → the value is retained (test.tsx:140-146).
+  { id: "passwordtoggle", state: "hidden", apg: "button", name: "toggling visibility retains the input value", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    await pg.locator(inp).first().fill("secret");
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    ok((await pg.locator(inp).first().inputValue()) === "secret", "toggling cleared the input value");
+  }},
+  // A pointer-triggered toggle refocuses the input (password-toggle-field.tsx:328-345).
+  { id: "passwordtoggle", state: "hidden", apg: "button", name: "clicking the toggle refocuses the input", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().fill("secret");
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    await pg.waitForTimeout(100);
+    ok(await pg.evaluate(() => document.activeElement === document.querySelector("#root input")), "toggle did not refocus the input");
+  }},
+  // …and restores the selection that was active before the toggle blurred the input.
+  { id: "passwordtoggle", state: "hidden", apg: "button", name: "clicking the toggle restores the input selection", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().fill("secret");
+    await pg.evaluate(() => { const i = document.querySelector("#root input"); i.focus(); i.setSelectionRange(2, 5); });
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    await pg.waitForTimeout(150);
+    const sel = await pg.evaluate(() => { const i = document.querySelector("#root input"); return { s: i.selectionStart, e: i.selectionEnd, active: document.activeElement === i }; });
+    ok(sel.active && sel.s === 2 && sel.e === 5, `selection not restored (got ${sel.s}..${sel.e} active=${sel.active})`);
+  }},
   // A form SUBMIT always re-hides the password (security: don't let the browser remember the
   // revealed value). The check installs its own preventDefault so the page doesn't navigate.
   { id: "passwordtoggle", state: "formsubmit", apg: "button", name: "a form submit re-hides the password (type text→password)", run: async (pg) => {

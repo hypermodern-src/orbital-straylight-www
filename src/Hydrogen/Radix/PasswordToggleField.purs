@@ -50,8 +50,10 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Foundation.Style (ClassNames, cn, classes)
 import Web.Event.Event (Event, EventType(..), defaultPrevented)
+import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.HTMLInputElement as HTMLInputElement
 import Web.HTML.HTMLFormElement as HTMLFormElement
+import Web.UIEvent.MouseEvent as ME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -130,11 +132,18 @@ type State =
   , toggleVisible :: Array HH.PlainHTML
   , toggleHidden :: Array HH.PlainHTML
   , style :: Style
+  -- focusState (password-toggle-field.tsx:50-55): the input selection stashed on blur, and whether
+  -- the toggle was activated by POINTER (refocus the input) vs keyboard (leave focus on the button).
+  , selStart :: Int          -- -1 = null
+  , selEnd :: Int
+  , clickTriggered :: Boolean
   }
 
 data Action
   = Initialize
-  | Toggled
+  | Toggled ME.MouseEvent
+  | ToggleDown               -- pointerdown on the toggle ⇒ this activation is pointer-triggered
+  | InputBlur                -- stash the input's selection (for restore after a pointer toggle)
   | Receive Input
   -- Wave-D: the enclosing form reset/submit forces visibility back to hidden (security:
   -- never leave the password revealed across a reset, nor let the browser remember it
@@ -177,6 +186,9 @@ initialState input =
   , toggleVisible: input.toggleVisible
   , toggleHidden: input.toggleHidden
   , style: input.style
+  , selStart: -1
+  , selEnd: -1
+  , clickTriggered: false
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -202,6 +214,7 @@ render st =
             , HP.attr (HH.AttrName "autocomplete") st.autoComplete
             , HP.attr (HH.AttrName "autocapitalize") "off"
             , HP.attr (HH.AttrName "spellcheck") "false"
+            , HE.onBlur (const InputBlur)
             , classes st.style.input
             ]
               <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
@@ -215,7 +228,8 @@ render st =
             , ARIA.controls idv
             , HP.id idv
             , classes st.style.toggle
-            , HE.onClick \_ -> Toggled
+            , HE.onMouseDown (const ToggleDown)
+            , HE.onClick Toggled
             ]
               <> (if hasText then [] else [ ARIA.label autoLabel ])
               <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
@@ -242,11 +256,34 @@ handleAction = case _ of
         let target = HTMLFormElement.toEventTarget form
         void $ H.subscribe (eventListener (EventType "reset") target (Just <<< FormReset))
         void $ H.subscribe (eventListener (EventType "submit") target \_ -> Just FormHide)
-  Toggled -> do
-    st <- H.get
-    let res = change (not (current st.ctrl)) st.ctrl
-    H.modify_ _ { ctrl = res.next }
-    H.raise (VisibilityChanged res.emit)
+  ToggleDown -> H.modify_ _ { clickTriggered = true }
+  InputBlur -> do
+    -- stash the input's current selection so a pointer-triggered toggle can restore it after the
+    -- refocus (password-toggle-field.tsx:186-191).
+    mel <- H.getHTMLElementRef inputRef
+    for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> do
+      ss <- liftEffect (HTMLInputElement.selectionStart inp)
+      se <- liftEffect (HTMLInputElement.selectionEnd inp)
+      H.modify_ _ { selStart = ss, selEnd = se }
+  Toggled me -> do
+    -- a click whose default was prevented by a consumer is a veto: reset and do nothing
+    -- (password-toggle-field.tsx:320-323).
+    prevented <- liftEffect (defaultPrevented (ME.toEvent me))
+    if prevented then H.modify_ _ { clickTriggered = false }
+    else do
+      st <- H.get
+      let res = change (not (current st.ctrl)) st.ctrl
+      H.modify_ _ { ctrl = res.next }
+      H.raise (VisibilityChanged res.emit)
+      -- pointer-triggered toggle: refocus the input + restore the stashed selection so typing
+      -- continues where it left off (password-toggle-field.tsx:328-345). Keyboard activation
+      -- (no preceding pointerdown) leaves focus on the button.
+      when st.clickTriggered do
+        mel <- H.getHTMLElementRef inputRef
+        for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> liftEffect do
+          HTMLElement.focus (HTMLInputElement.toHTMLElement inp)
+          when (st.selStart >= 0 && st.selEnd >= 0) (HTMLInputElement.setSelectionRange st.selStart st.selEnd "none" inp)
+      H.modify_ _ { clickTriggered = false }
   FormReset ev -> do
     -- a reset whose default was prevented is ignored (upstream gates on !defaultPrevented).
     prevented <- liftEffect (defaultPrevented ev)
