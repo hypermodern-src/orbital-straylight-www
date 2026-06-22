@@ -1659,7 +1659,7 @@ otpInput s = Otp.defaultInput
   , defaultValue =
       -- `?s=paste` starts EMPTY (like empty/typed) so the Wave-D paste driver can dump a
       -- full code into the first slot and exercise the PASTE reducer.
-      if s == "empty" || s == "typed" || s == "paste" || s == "form" || s == "autosubmit" then ""
+      if s == "empty" || s == "typed" || s == "paste" || s == "form" || s == "autosubmit" || s == "autofocus" then ""
       else if s == "alpha" then "abc"
       else if s == "alphanumeric" then "a1b"
       else "123"
@@ -1682,6 +1682,8 @@ otpInput s = Otp.defaultInput
   , name = if s == "named" then Just "otp-code" else Nothing
   -- `?s=autosubmit` arms autoSubmit: filling the last slot raises AutoSubmitted + requestSubmit.
   , autoSubmit = s == "autosubmit"
+  -- `?s=autofocus` focuses the first fillable slot on mount.
+  , autoFocus = s == "autofocus"
   , style = { root: cn "", input: cn "" }
   }
 

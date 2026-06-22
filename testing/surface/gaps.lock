@@ -16,10 +16,10 @@
     "coverage_preset_pct": 25,
     "binding_violations": 0,
     "enumerated_components": 32,
-    "named_open_cells": 452,
-    "closed_cells": 310,
+    "named_open_cells": 451,
+    "closed_cells": 311,
     "total_cells": 762,
-    "coverage_cells_pct": 40.7,
+    "coverage_cells_pct": 40.8,
     "invariance_subjects": 31
   },
   "per_component": {

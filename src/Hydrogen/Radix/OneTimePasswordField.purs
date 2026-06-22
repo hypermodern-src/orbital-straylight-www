@@ -87,6 +87,7 @@ type Input =
   , disabled :: Boolean            -- disables every slot + drops them from the roving order
   , readOnly :: Boolean            -- stamps readonly on every slot input
   , autoSubmit :: Boolean          -- when all slots fill, raise AutoSubmitted + form.requestSubmit
+  , autoFocus :: Boolean           -- focus the first fillable slot on mount
   , style :: Style
   }
 
@@ -103,6 +104,7 @@ defaultInput =
   , disabled: false
   , readOnly: false
   , autoSubmit: false
+  , autoFocus: false
   , style: defaultStyle
   }
 
@@ -131,6 +133,7 @@ type State =
   , disabled :: Boolean
   , readOnly :: Boolean
   , autoSubmit :: Boolean
+  , autoFocus :: Boolean
   , style :: Style
   , cursor :: Int          -- roving cursor over the slots
   , focusEntered :: Boolean -- false ⇒ all slots -1 (root holds the tab stop), autocomplete on slot 0
@@ -181,6 +184,7 @@ initialState input =
   , disabled: input.disabled
   , readOnly: input.readOnly
   , autoSubmit: input.autoSubmit
+  , autoFocus: input.autoFocus
   , style: input.style
   , cursor: 0
   , focusEntered: false
@@ -309,12 +313,17 @@ withForm k = do
 
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
-  Initialize ->
+  Initialize -> do
     -- Subscribe to the enclosing form's `reset` so the field clears with the form (upstream
     -- form.addEventListener('reset', …) → dispatch CLEAR). No form ⇒ no subscription.
     withForm \form -> do
       let target = HTMLFormElement.toEventTarget form
       void $ H.subscribe (eventListener (EventType "reset") target \_ -> Just FormReset)
+    -- NOTE: `autoFocus` is accepted but inert, matching the oracle — @radix-ui/themes does NOT
+    -- forward autoFocus to the slot inputs (verified: golden mounts with focus on <body>, no
+    -- autofocus attr). The primitives package focuses the first input, but the themed face we tie
+    -- out against drops it, so the port drops it too (no mount focus).
+    pure unit
   FormReset -> do
     -- CLEAR: empty every slot, return the cursor to slot 0, and focus it (otp.tsx:419-426).
     st <- H.get

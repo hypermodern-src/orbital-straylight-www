@@ -1074,6 +1074,15 @@ const CHECKS = [
     ok(v0 === "1", `retyping the same char changed slot 0 (got '${v0}')`);
     ok(await activeIsNth(pg, sel, 1), "retyping the current char did not advance to the next slot");
   }},
+  // autoFocus parity: @radix-ui/themes does NOT forward autoFocus to the slot inputs, so on mount
+  // NO slot is focused (the prop is inert). The port matches this no-op (not the primitives pkg).
+  { id: "otp", state: "autofocus", apg: "roving-tabindex", name: "autoFocus is inert (no slot focused on mount), matching themes", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.waitForTimeout(150);
+    const onSlot = await pg.evaluate((s) => !!document.activeElement && document.activeElement.matches(s), sel);
+    ok(!onSlot, "a slot was focused on mount, but themes autoFocus is inert");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

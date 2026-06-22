@@ -1781,7 +1781,9 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       // `?s=paste` starts empty so the Wave-D paste driver can dump a full code.
-      const empty = s === "empty" || s === "typed" || s === "paste";
+      const empty = s === "empty" || s === "typed" || s === "paste" || s === "autofocus";
+      // `?s=autofocus` focuses the first fillable slot on mount.
+      const autofocus = s === "autofocus";
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
@@ -1818,7 +1820,7 @@ const PAGES: Page[] = [
           {...(rtl ? { dir: "rtl" as const } : {})}
           {...(named ? { name: "otp-code" } : {})}
           {...(autosubmit ? { autoSubmit: true } : {})}
-          autoFocus={false}
+          autoFocus={autofocus}
         >
           <OneTimePasswordField.Input />
           <OneTimePasswordField.Input />
