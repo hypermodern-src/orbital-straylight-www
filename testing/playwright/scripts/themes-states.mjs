@@ -878,6 +878,27 @@ export const STATES = {
         return !!h && h.getAttribute("name") === "otp-code" && h.value === "123";
       });
     },
+    // `?s=placeholder` → empty field, every slot carries placeholder="○" (shown while empty).
+    placeholder: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        // placeholder lives on the autocomplete slot (index 0 at rest) only.
+        return a.length === 3 && a[0].getAttribute("placeholder") === "○"
+          && !a[1].hasAttribute("placeholder") && !a[2].hasAttribute("placeholder") && a[0].value === "";
+      });
+    },
+    // `?s=novalidation` → validationType="none": slots carry NO inputmode and NO pattern.
+    novalidation: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => !i.hasAttribute("inputmode") && !i.hasAttribute("pattern"))
+          && document.querySelector('input[type="hidden"]')?.value === "123";
+      });
+    },
     // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
     password: async (pg) => {
       await root(pg).locator('[role="group"]').first().waitFor();

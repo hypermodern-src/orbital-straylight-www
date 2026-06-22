@@ -1781,9 +1781,13 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       // `?s=paste` starts empty so the Wave-D paste driver can dump a full code.
-      const empty = s === "empty" || s === "typed" || s === "paste" || s === "autofocus";
+      const empty = s === "empty" || s === "typed" || s === "paste" || s === "autofocus" || s === "placeholder";
       // `?s=autofocus` focuses the first fillable slot on mount.
       const autofocus = s === "autofocus";
+      // `?s=placeholder` stamps a per-slot placeholder char (empty field so it shows).
+      const placeholder = s === "placeholder";
+      // `?s=novalidation` → validationType="none": slots carry NO inputmode/pattern.
+      const novalidation = s === "novalidation";
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
@@ -1813,6 +1817,8 @@ const PAGES: Page[] = [
           {...(startEmpty ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
           {...(alpha ? { validationType: "alpha" as const } : {})}
           {...(alphanumeric ? { validationType: "alphanumeric" as const } : {})}
+          {...(novalidation ? { validationType: "none" as const } : {})}
+          {...(placeholder ? { placeholder: "○" } : {})}
           {...(password ? { type: "password" as const } : {})}
           {...(disabled ? { disabled: true } : {})}
           {...(readonly ? { readOnly: true } : {})}

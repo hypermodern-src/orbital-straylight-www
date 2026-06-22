@@ -88,6 +88,7 @@ type Input =
   , readOnly :: Boolean            -- stamps readonly on every slot input
   , autoSubmit :: Boolean          -- when all slots fill, raise AutoSubmitted + form.requestSubmit
   , autoFocus :: Boolean           -- focus the first fillable slot on mount
+  , placeholder :: Maybe String    -- per-slot placeholder char (shown when the slot is empty)
   , style :: Style
   }
 
@@ -105,6 +106,7 @@ defaultInput =
   , readOnly: false
   , autoSubmit: false
   , autoFocus: false
+  , placeholder: Nothing
   , style: defaultStyle
   }
 
@@ -134,6 +136,7 @@ type State =
   , readOnly :: Boolean
   , autoSubmit :: Boolean
   , autoFocus :: Boolean
+  , placeholder :: Maybe String
   , style :: Style
   , cursor :: Int          -- roving cursor over the slots
   , focusEntered :: Boolean -- false ⇒ all slots -1 (root holds the tab stop), autocomplete on slot 0
@@ -185,6 +188,7 @@ initialState input =
   , readOnly: input.readOnly
   , autoSubmit: input.autoSubmit
   , autoFocus: input.autoFocus
+  , placeholder: input.placeholder
   , style: input.style
   , cursor: 0
   , focusEntered: false
@@ -240,6 +244,11 @@ renderSlot st idx ch =
         , HE.onFocus (const (SlotFocused idx))
         ]
           <> validationAttrs st.validation
+          -- Upstream stamps placeholder only on the autocomplete slot (the one that also carries
+          -- autocomplete=one-time-code), not every slot — verified against the golden.
+          <> (case st.placeholder of
+                Just ph | isAuto -> [ HP.attr (HH.AttrName "placeholder") ph ]
+                _ -> [])
           <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
           <> (if st.readOnly then [ HP.attr (HH.AttrName "readonly") "" ] else [])
           <> (if isAuto then [] else passwordManagerIgnore)
@@ -343,6 +352,7 @@ handleAction = case _ of
       , disabled = input.disabled
       , readOnly = input.readOnly
       , autoSubmit = input.autoSubmit
+      , placeholder = input.placeholder
       , style = input.style
       }
   SlotFocused idx -> do

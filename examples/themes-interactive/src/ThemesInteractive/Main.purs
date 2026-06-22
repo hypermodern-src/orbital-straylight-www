@@ -1659,7 +1659,7 @@ otpInput s = Otp.defaultInput
   , defaultValue =
       -- `?s=paste` starts EMPTY (like empty/typed) so the Wave-D paste driver can dump a
       -- full code into the first slot and exercise the PASTE reducer.
-      if s == "empty" || s == "typed" || s == "paste" || s == "form" || s == "autosubmit" || s == "autofocus" then ""
+      if s == "empty" || s == "typed" || s == "paste" || s == "form" || s == "autosubmit" || s == "autofocus" || s == "placeholder" then ""
       else if s == "alpha" then "abc"
       else if s == "alphanumeric" then "a1b"
       else "123"
@@ -1667,7 +1667,10 @@ otpInput s = Otp.defaultInput
   , validation =
       if s == "alpha" then Otp.Alpha
       else if s == "alphanumeric" then Otp.Alphanumeric
+      else if s == "novalidation" then Otp.NoValidation
       else Otp.Numeric
+  -- `?s=placeholder` stamps a per-slot placeholder char.
+  , placeholder = if s == "placeholder" then Just "○" else Nothing
   -- Wave-C state-variants: password masks slots, disabled drops them from the roving
   -- order + stamps disabled, readonly stamps readonly.
   , password = s == "password"
