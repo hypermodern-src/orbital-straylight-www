@@ -1014,6 +1014,42 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok(await activeIsNth(pg, sel, 2), "ArrowRight wrapped from the last slot (loop must be false)");
   }},
+  // Delete clears the focused slot in place (no retreat) when its value is SELECTED — onFocus
+  // selects the char, so Delete removes the selection (otp.tsx:773-776 + onChange CLEAR_CHAR).
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "Delete clears the selected slot in place without retreating", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    // Explicit full selection so the deletion is deterministic across faces (a collapsed cursor
+    // makes forward-Delete a harness-dependent no-op).
+    await pg.evaluate((s) => { const el = document.querySelectorAll(s)[1]; el.focus(); el.setSelectionRange(0, el.value.length); }, sel);
+    await pg.waitForTimeout(60);
+    await press(pg, "Delete"); await pg.waitForTimeout(120);
+    // CLEAR_CHAR removes + compacts: "123" minus slot 1 → "1","3","" (hidden "13"), focus stays.
+    const after = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(","), sel);
+    ok(after === "1,3,", `Delete did not remove+compact the slot (got '${after}')`);
+    ok(await activeIsNth(pg, sel, 1), "Delete must keep focus on the same slot (no retreat)");
+  }},
+  // Ctrl/Meta+Backspace clears the ENTIRE value (otp.tsx:781-784 CLEAR).
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "Ctrl+Backspace clears the entire value", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(2).focus();
+    await pg.waitForTimeout(60);
+    await pg.keyboard.press("Control+Backspace"); await pg.waitForTimeout(120);
+    const all = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
+    ok(all === "", `Ctrl+Backspace did not clear the whole value (got '${all}')`);
+  }},
+  // Cut clears the focused slot's char and keeps focus there (otp.tsx onCut → CLEAR_CHAR).
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "Cut clears the slot char and keeps focus", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.evaluate((s) => { const el = document.querySelectorAll(s)[1]; el.focus(); el.setSelectionRange(0, el.value.length); }, sel);
+    await pg.waitForTimeout(60);
+    await pg.keyboard.press("Control+x"); await pg.waitForTimeout(120);
+    const after = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(","), sel);
+    ok(after === "1,3,", `Cut did not remove+compact the slot char (got '${after}')`);
+    ok(await activeIsNth(pg, sel, 1), "Cut must keep focus on the same slot");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

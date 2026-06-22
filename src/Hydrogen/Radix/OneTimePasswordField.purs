@@ -36,7 +36,7 @@ module Hydrogen.Radix.OneTimePasswordField
 
 import Prelude
 
-import Data.Array (length, mapWithIndex, replicate, take, updateAt, filter, (!!))
+import Data.Array (deleteAt, length, mapWithIndex, replicate, take, updateAt, filter, (!!))
 import Data.Ord (clamp)
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
@@ -372,6 +372,11 @@ handleAction = case _ of
         -- char (the value ATTRIBUTE the DOM oracle reads is already correct via render).
         syncSlotValues next
         focusAt focusIdx
+    else if (not st.disabled && not st.readOnly && raw == "") then
+      -- An empty input event with no preceding keydown handler is a Cut (Backspace/Delete are
+      -- handled + preventDefaulted in SlotKeyDown): upstream's onCut → CLEAR_CHAR reason Cut
+      -- removes the char and keeps focus on the same slot.
+      clearCharCompact idx false
     else do
       -- Single-char input: take the LAST typed char (handles the slot already holding a value),
       -- accept it only if valid; fill the slot and auto-advance focus to the next slot. A disabled
@@ -397,19 +402,27 @@ handleAction = case _ of
   SlotKeyDown idx ke -> do
     st <- H.get
     let key = KE.key ke
+    let
+      clearing = KE.ctrlKey ke || KE.metaKey ke
+      atIdx = fromMaybe "" (current st.chars !! idx)
+      editable = not st.disabled && not st.readOnly
     case key of
-      "Backspace" | not st.disabled && not st.readOnly -> do
-        let
-          cur = current st.chars
-          atIdx = fromMaybe "" (cur !! idx)
-        if atIdx /= "" then do
-          let next = fromMaybe cur (updateAt idx "" cur)
-          H.modify_ \s -> s { chars = (change next s.chars).next, cursor = idx, focusEntered = true }
-          H.raise (ValueChanged (trim (joinWith "" next)))
+      -- Clear key, or Ctrl/Meta+Backspace, clears the ENTIRE value (otp.tsx:781-784, CLEAR).
+      "Clear" | editable -> liftEffect (preventDefault (KE.toEvent ke)) *> clearAllSlots
+      "Backspace" | editable && clearing -> liftEffect (preventDefault (KE.toEvent ke)) *> clearAllSlots
+      -- Backspace: remove the char + compact, focus the PREVIOUS slot; on an empty slot just
+      -- retreat. preventDefault so no native deletion races the compaction (otp.tsx:775-790).
+      "Backspace" | editable -> do
+        liftEffect (preventDefault (KE.toEvent ke))
+        if atIdx /= "" then clearCharCompact idx true
         else do
           let prev = max 0 (idx - 1)
           H.modify_ _ { cursor = prev, focusEntered = true }
           focusAt prev
+      -- Delete: remove the char + compact, focus stays; an empty slot is a no-op (otp.tsx:778-779).
+      "Delete" | editable -> do
+        liftEffect (preventDefault (KE.toEvent ke))
+        when (atIdx /= "") (clearCharCompact idx false)
       "Enter" -> do
         -- Enter submits the enclosing form (otp.tsx:813-816): preventDefault + form.requestSubmit().
         liftEffect (preventDefault (KE.toEvent ke))
@@ -467,6 +480,33 @@ maybeAutoSubmit next = do
   when (st.autoSubmit && length next == st.len && length (filter (_ /= "") next) == st.len) do
     H.raise (AutoSubmitted (joinWith "" next))
     withForm (liftEffect <<< requestSubmit)
+
+-- | CLEAR_CHAR (otp.tsx:327-344): REMOVE the char at `idx` and compact — upstream does
+-- | `value.filter((_, i) => i !== index)`, so "123" minus index 1 becomes "13" (not "1_3").
+-- | `retreat` picks the focus target: Backspace focuses the previous slot, Delete/Cut the same.
+-- | The DOM properties are resynced so a deferred/duplicate native event can't revert the shift.
+clearCharCompact :: forall m. MonadEffect m => Int -> Boolean -> H.HalogenM State Action () Output m Unit
+clearCharCompact idx retreat = do
+  st <- H.get
+  let cur = current st.chars
+  when (fromMaybe "" (cur !! idx) /= "") do
+    let
+      next = fromMaybe cur (deleteAt idx cur) <> [ "" ]   -- drop idx, re-pad to len
+      focusIdx = if retreat then max 0 (idx - 1) else idx
+    H.modify_ \s -> s { chars = (change next s.chars).next, cursor = focusIdx, focusEntered = true }
+    H.raise (ValueChanged (trim (joinWith "" next)))
+    syncSlotValues next
+    focusAt focusIdx
+
+-- | CLEAR: empty every slot, keeping focus where it is (otp.tsx CLEAR reason Backspace). Used by
+-- | the Clear key and Ctrl/Meta+Backspace.
+clearAllSlots :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+clearAllSlots = do
+  st <- H.get
+  let cleared = replicate st.len ""
+  H.modify_ \s -> s { chars = (change cleared s.chars).next, focusEntered = true }
+  H.raise (ValueChanged "")
+  syncSlotValues cleared
 
 focusAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
 focusAt idx = do
