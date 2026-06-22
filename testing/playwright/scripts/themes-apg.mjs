@@ -869,6 +869,16 @@ const CHECKS = [
     await press(pg, "Home");
     ok(await activeIsNth(pg, sel, 0), "Home did not focus the first slot");
   }},
+  // Backspace on an EMPTY slot retreats focus to the previous slot (a filled slot clears in
+  // place without retreating); driven on the all-empty field.
+  { id: "otp", state: "empty", apg: "roving-tabindex", name: "Backspace on an empty slot retreats focus to the previous slot", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.evaluate((s) => document.querySelectorAll(s)[1].focus(), sel);
+    ok(await activeIsNth(pg, sel, 1), "could not focus the second slot");
+    await press(pg, "Backspace");
+    ok(await activeIsNth(pg, sel, 0), "Backspace on an empty slot did not retreat to the previous slot");
+  }},
   // orientation=vertical: the roving axis flips to ArrowUp/ArrowDown (data-orientation=vertical).
   { id: "otp", state: "vertical", apg: "roving-tabindex", name: "vertical: ArrowDown/ArrowUp rove between slots", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
