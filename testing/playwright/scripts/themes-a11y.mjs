@@ -36,7 +36,13 @@ const axeOpts = { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa"] }, rules
 // Overlays expose "open"; the non-overlay interactive components expose their own single
 // shown state (checked/on/pressed/selected/active/tab2) — pick the one non-rest key.
 const shown = (id) => Object.keys(STATES[id]).includes("open") ? "open" : Object.keys(STATES[id]).filter((s) => s !== "rest")[0];
-const MATRIX = Object.keys(STATES).flatMap((id) => [{ id, state: "rest" }, { id, state: shown(id) }]);
+// Per-component EXTRA a11y states beyond rest+shown — for cells that require axe across more
+// states (e.g. otp.axe-states: empty/typed/password/disabled, not just rest+filled).
+const EXTRA_STATES = { otp: ["empty", "typed", "password", "disabled"] };
+const MATRIX = [
+  ...Object.keys(STATES).flatMap((id) => [{ id, state: "rest" }, { id, state: shown(id) }]),
+  ...Object.entries(EXTRA_STATES).flatMap(([id, sts]) => sts.map((state) => ({ id, state }))),
+];
 
 const { port: PORT, close: closeSrv } = await serve(DIR);
 // CHROMIUM_BIN overrides executablePath where the nix browser set isn't materialized
