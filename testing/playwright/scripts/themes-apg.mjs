@@ -928,6 +928,44 @@ const CHECKS = [
     ok(v0 === "9", `typing on a filled slot did not replace its char (got '${v0}')`);
     ok(await activeIsNth(pg, sel, 1), "typing on a filled slot did not advance focus");
   }},
+  // Enter in a slot submits the enclosing <form> via requestSubmit (otp.tsx:813-816). The check
+  // installs its own submit listener (the <form> is real DOM on both faces) and asserts it fired.
+  { id: "otp", state: "form", apg: "form-wiring", name: "Enter in a slot submits the enclosing form", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.evaluate(() => {
+      window.__otpSubmit = 0;
+      document.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); window.__otpSubmit++; });
+    });
+    await focusFirst(pg, sel);
+    await press(pg, "Enter"); await pg.waitForTimeout(80);
+    ok((await pg.evaluate(() => window.__otpSubmit)) === 1, "Enter did not submit the enclosing form");
+  }},
+  // autoSubmit: filling the last slot raises onAutoSubmit + requestSubmit (otp.tsx:431-442).
+  { id: "otp", state: "autosubmit", apg: "form-wiring", name: "autoSubmit submits the form once the last slot fills", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.evaluate(() => {
+      window.__otpSubmit = 0;
+      document.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); window.__otpSubmit++; });
+    });
+    await focusFirst(pg, sel);
+    await pg.keyboard.type("123"); await pg.waitForTimeout(150);
+    const filled = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
+    ok(filled === "123", `autoSubmit story did not fill all slots (got '${filled}')`);
+    ok((await pg.evaluate(() => window.__otpSubmit)) === 1, "autoSubmit did not submit the form on the final slot");
+  }},
+  // form.reset() clears the field via the Root's reset listener (otp.tsx:419-426).
+  { id: "otp", state: "form", apg: "form-wiring", name: "resetting the form clears every slot", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await pg.keyboard.type("12"); await pg.waitForTimeout(120);
+    await pg.evaluate(() => document.querySelector("form").reset());
+    await pg.waitForTimeout(120);
+    const after = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
+    ok(after === "", `form reset did not clear the slots (got '${after}')`);
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

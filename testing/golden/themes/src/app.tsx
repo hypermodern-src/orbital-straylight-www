@@ -1801,27 +1801,32 @@ const PAGES: Page[] = [
       // `?s=named` sets the Root `name` prop → the hidden aggregate input carries name="otp-code"
       // (value=join().trim()) for form submission. defaultValue "123" at rest.
       const named = s === "named";
-      return (
-        <Box>
-          <OneTimePasswordField.Root
-            {...(empty ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
-            {...(alpha ? { validationType: "alpha" as const } : {})}
-            {...(alphanumeric ? { validationType: "alphanumeric" as const } : {})}
-            {...(password ? { type: "password" as const } : {})}
-            {...(disabled ? { disabled: true } : {})}
-            {...(readonly ? { readOnly: true } : {})}
-            {...(vertical ? { orientation: "vertical" as const } : {})}
-            {...(rtl ? { dir: "rtl" as const } : {})}
-            {...(named ? { name: "otp-code" } : {})}
-            autoFocus={false}
-          >
-            <OneTimePasswordField.Input />
-            <OneTimePasswordField.Input />
-            <OneTimePasswordField.Input />
-            <OneTimePasswordField.HiddenInput />
-          </OneTimePasswordField.Root>
-        </Box>
+      // `?s=form` wraps the field in a real <form> (Enter→requestSubmit + reset listener);
+      // `?s=autosubmit` adds autoSubmit so filling the last slot submits. Both start empty.
+      const wrapForm = s === "form" || s === "autosubmit";
+      const autosubmit = s === "autosubmit";
+      const startEmpty = empty || wrapForm;
+      const field = (
+        <OneTimePasswordField.Root
+          {...(startEmpty ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
+          {...(alpha ? { validationType: "alpha" as const } : {})}
+          {...(alphanumeric ? { validationType: "alphanumeric" as const } : {})}
+          {...(password ? { type: "password" as const } : {})}
+          {...(disabled ? { disabled: true } : {})}
+          {...(readonly ? { readOnly: true } : {})}
+          {...(vertical ? { orientation: "vertical" as const } : {})}
+          {...(rtl ? { dir: "rtl" as const } : {})}
+          {...(named ? { name: "otp-code" } : {})}
+          {...(autosubmit ? { autoSubmit: true } : {})}
+          autoFocus={false}
+        >
+          <OneTimePasswordField.Input />
+          <OneTimePasswordField.Input />
+          <OneTimePasswordField.Input />
+          <OneTimePasswordField.HiddenInput />
+        </OneTimePasswordField.Root>
       );
+      return <Box>{wrapForm ? <form>{field}</form> : field}</Box>;
     })(),
   },
   {

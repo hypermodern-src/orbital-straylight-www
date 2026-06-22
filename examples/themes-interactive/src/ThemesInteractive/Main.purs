@@ -307,7 +307,9 @@ view c s =
             "tabnav" -> tabNavPage
             "passwordtoggle" -> passwordTogglePage s
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
-            "otp" -> box [] [ HH.slot_ _otp unit Otp.component (otpInput s) ]
+            -- `?s=form` / `?s=autosubmit` wrap the field in a real <form> so the hidden input's
+            -- `.form` resolves (Enter→requestSubmit, autoSubmit, and the form-reset listener).
+            "otp" -> box [] [ otpFormWrap s (HH.slot_ _otp unit Otp.component (otpInput s)) ]
             "form" -> box [] [ HH.slot_ _form unit Form.component (formInput s) ]
             -- Wave-B stateless depth oracles: the bare Hydrogen.Radix primitives, driven
             -- into at-rest variant stories by `s`. DOM (role/aria/data-*/inline-style) is
@@ -1657,7 +1659,7 @@ otpInput s = Otp.defaultInput
   , defaultValue =
       -- `?s=paste` starts EMPTY (like empty/typed) so the Wave-D paste driver can dump a
       -- full code into the first slot and exercise the PASTE reducer.
-      if s == "empty" || s == "typed" || s == "paste" then ""
+      if s == "empty" || s == "typed" || s == "paste" || s == "form" || s == "autosubmit" then ""
       else if s == "alpha" then "abc"
       else if s == "alphanumeric" then "a1b"
       else "123"
@@ -1678,8 +1680,17 @@ otpInput s = Otp.defaultInput
   , dir = if s == "rtl" then RTL else LTR
   -- `?s=named` sets the hidden aggregate input's form `name` (value=join().trim()).
   , name = if s == "named" then Just "otp-code" else Nothing
+  -- `?s=autosubmit` arms autoSubmit: filling the last slot raises AutoSubmitted + requestSubmit.
+  , autoSubmit = s == "autosubmit"
   , style = { root: cn "", input: cn "" }
   }
+
+-- | otpFormWrap — wrap the OTP slot in a real `<form>` for the form-wiring states (`?s=form`,
+-- | `?s=autosubmit`) so the hidden input's `.form` resolves; every other state passes through.
+otpFormWrap :: String -> H.ComponentHTML Void Slots Aff -> H.ComponentHTML Void Slots Aff
+otpFormWrap s content
+  | s == "form" || s == "autosubmit" = HH.form [] [ content ]
+  | otherwise = content
 
 -- | form — the bare @radix-ui Form primitive (Radix Themes ships none, so NO rt-*
 -- | classes; the golden is the unstyled primitive). A single required email field

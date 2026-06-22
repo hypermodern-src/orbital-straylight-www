@@ -49,3 +49,9 @@ export const clearTimeout = id => () => { window.clearTimeout(id); };
 // performance.now(): a monotonic high-resolution millisecond timestamp — used to measure how
 // much of a timer's duration elapsed before a pause, so resume can arm the REMAINING time.
 export const now = () => performance.now();
+
+// form.requestSubmit(): submit the form AS IF a submit button were pressed — fires the `submit`
+// event (so onSubmit handlers run) and runs constraint validation first. Distinct from the bound
+// HTMLFormElement.submit(), which bypasses BOTH. OneTimePasswordField's Enter/autoSubmit path
+// needs this exact semantic; purescript-web-html exposes submit() but not requestSubmit().
+export const requestSubmit = form => () => { form.requestSubmit(); };

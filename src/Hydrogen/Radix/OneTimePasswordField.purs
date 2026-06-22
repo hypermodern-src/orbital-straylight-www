@@ -49,11 +49,15 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Query.Event (eventListener)
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
+import Hydrogen.Radix.Foundation.Dom (requestSubmit)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataOrientation, dataAttr, orientationName, role)
+import Web.Event.Event (EventType(..), preventDefault)
 import Web.HTML.HTMLElement as HTMLElement
+import Web.HTML.HTMLFormElement as HTMLFormElement
 import Web.HTML.HTMLInputElement as HTMLInputElement
 import Web.UIEvent.KeyboardEvent as KE
 
@@ -82,6 +86,7 @@ type Input =
   , password :: Boolean            -- type=password masks every slot input
   , disabled :: Boolean            -- disables every slot + drops them from the roving order
   , readOnly :: Boolean            -- stamps readonly on every slot input
+  , autoSubmit :: Boolean          -- when all slots fill, raise AutoSubmitted + form.requestSubmit
   , style :: Style
   }
 
@@ -97,10 +102,13 @@ defaultInput =
   , password: false
   , disabled: false
   , readOnly: false
+  , autoSubmit: false
   , style: defaultStyle
   }
 
-data Output = ValueChanged String
+-- | `ValueChanged` on every value mutation; `AutoSubmitted` fires (before requestSubmit) once
+-- | every slot is filled while `autoSubmit` is set — upstream's onAutoSubmit callback.
+data Output = ValueChanged String | AutoSubmitted String
 
 data Query a
   = SetValue String a
@@ -122,19 +130,25 @@ type State =
   , password :: Boolean
   , disabled :: Boolean
   , readOnly :: Boolean
+  , autoSubmit :: Boolean
   , style :: Style
   , cursor :: Int          -- roving cursor over the slots
   , focusEntered :: Boolean -- false ⇒ all slots -1 (root holds the tab stop), autocomplete on slot 0
   }
 
 data Action
-  = Receive Input
+  = Initialize
+  | Receive Input
   | SlotInput Int String
   | SlotKeyDown Int KE.KeyboardEvent
   | SlotFocused Int
+  | FormReset
 
 slotRef :: Int -> H.RefLabel
 slotRef i = H.RefLabel ("otp-slot-" <> show i)
+
+hiddenRef :: H.RefLabel
+hiddenRef = H.RefLabel "otp-hidden"
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -145,6 +159,7 @@ component =
         { handleAction = handleAction
         , handleQuery = handleQuery
         , receive = Just <<< Receive
+        , initialize = Just Initialize
         }
     }
 
@@ -165,6 +180,7 @@ initialState input =
   , password: input.password
   , disabled: input.disabled
   , readOnly: input.readOnly
+  , autoSubmit: input.autoSubmit
   , style: input.style
   , cursor: 0
   , focusEntered: false
@@ -246,6 +262,7 @@ renderHidden :: forall m. State -> H.ComponentHTML Action () m
 renderHidden st =
   HH.input
     ( [ HP.type_ HP.InputHidden
+      , HP.ref hiddenRef
       , HP.attr (HH.AttrName "readonly") ""
       , HP.value (aggregate st)
       , HP.attr (HH.AttrName "autocomplete") "off"
@@ -276,8 +293,35 @@ accepts v s = case v of
   where
   isAlpha c = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
 
+-- | Locate the enclosing <form> off the hidden aggregate input (its `.form` property) and run
+-- | `k` with it. Mirrors upstream `locateForm` (hidden-input branch). No form ⇒ no-op, so the
+-- | bare/labelled stories without a form are unaffected.
+withForm
+  :: forall m
+   . MonadEffect m
+  => (HTMLFormElement.HTMLFormElement -> H.HalogenM State Action () Output m Unit)
+  -> H.HalogenM State Action () Output m Unit
+withForm k = do
+  mel <- H.getHTMLElementRef hiddenRef
+  for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> do
+    mform <- liftEffect (HTMLInputElement.form inp)
+    for_ mform k
+
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
+  Initialize ->
+    -- Subscribe to the enclosing form's `reset` so the field clears with the form (upstream
+    -- form.addEventListener('reset', …) → dispatch CLEAR). No form ⇒ no subscription.
+    withForm \form -> do
+      let target = HTMLFormElement.toEventTarget form
+      void $ H.subscribe (eventListener (EventType "reset") target \_ -> Just FormReset)
+  FormReset -> do
+    -- CLEAR: empty every slot, return the cursor to slot 0, and focus it (otp.tsx:419-426).
+    st <- H.get
+    let cleared = replicate st.len ""
+    H.modify_ \s -> s { chars = (change cleared s.chars).next, cursor = 0, focusEntered = false }
+    H.raise (ValueChanged "")
+    syncSlotValues cleared
   Receive input ->
     H.modify_ \st -> st
       { len = input.length
@@ -289,6 +333,7 @@ handleAction = case _ of
       , password = input.password
       , disabled = input.disabled
       , readOnly = input.readOnly
+      , autoSubmit = input.autoSubmit
       , style = input.style
       }
   SlotFocused idx -> do
@@ -312,6 +357,7 @@ handleAction = case _ of
       when (sanitized /= "") do
         H.modify_ \s -> s { chars = (change next s.chars).next, cursor = focusIdx, focusEntered = true }
         H.raise (ValueChanged (trim (joinWith "" next)))
+        maybeAutoSubmit next
         -- The pasted dump left a DIRTY value property on the receiving <input> (the browser
         -- keeps "456" on slot 0). Upstream's controlled React value resets each slot's property
         -- to its single char; mirror that imperatively so the property matches the per-slot
@@ -332,6 +378,7 @@ handleAction = case _ of
         H.modify_ \s -> s { chars = (change next s.chars).next, cursor = nextCursor, focusEntered = true }
         H.raise (ValueChanged (trim (joinWith "" next)))
         focusAt nextCursor
+        maybeAutoSubmit next
   SlotKeyDown idx ke -> do
     st <- H.get
     let key = KE.key ke
@@ -348,6 +395,10 @@ handleAction = case _ of
           let prev = max 0 (idx - 1)
           H.modify_ _ { cursor = prev, focusEntered = true }
           focusAt prev
+      "Enter" -> do
+        -- Enter submits the enclosing form (otp.tsx:813-816): preventDefault + form.requestSubmit().
+        liftEffect (preventDefault (KE.toEvent ke))
+        withForm (liftEffect <<< requestSubmit)
       _ -> do
         let
           cfg = { orientation: st.orientation, dir: st.dir, loop: false }
@@ -386,6 +437,16 @@ syncSlotValues slots =
   forWithIndex_ slots \i ch -> do
     mel <- H.getHTMLElementRef (slotRef i)
     for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.setValue ch)
+
+-- | When `autoSubmit` is set and the just-applied `next` has filled every slot, raise
+-- | `AutoSubmitted` (upstream onAutoSubmit) then submit the enclosing form (otp.tsx:431-442).
+-- | The callback fires whether or not a form is located; requestSubmit is best-effort.
+maybeAutoSubmit :: forall m. MonadEffect m => Array String -> H.HalogenM State Action () Output m Unit
+maybeAutoSubmit next = do
+  st <- H.get
+  when (st.autoSubmit && length next == st.len && length (filter (_ /= "") next) == st.len) do
+    H.raise (AutoSubmitted (joinWith "" next))
+    withForm (liftEffect <<< requestSubmit)
 
 focusAt :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
 focusAt idx = do

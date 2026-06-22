@@ -39,11 +39,13 @@ module Hydrogen.Radix.Foundation.Dom
   , setTimeout
   , clearTimeout
   , now
+  , requestSubmit
   ) where
 
 import Data.Unit (Unit)
 import Effect (Effect)
 import Web.HTML.HTMLElement (HTMLElement)
+import Web.HTML.HTMLFormElement (HTMLFormElement)
 
 -- | The resolved value of CSS property `prop` on `el` (`getComputedStyle`) — what
 -- | the engine paints after the cascade and any animation, e.g.
@@ -102,3 +104,10 @@ foreign import clearTimeout :: TimeoutId -> Effect Unit
 -- | measure elapsed time across a timer pause/resume (Toast pauses its auto-dismiss on hover
 -- | and resumes with the REMAINING time) — independent of wall-clock jumps. Not `Date.now`.
 foreign import now :: Effect Number
+
+-- | `form.requestSubmit()`: submit `form` as if a submit button were pressed — it fires the
+-- | `submit` event (so registered handlers run) and runs constraint validation first. This is
+-- | NOT `HTMLFormElement.submit()` (which the bindings DO expose), because that bypasses both
+-- | the event and validation. OneTimePasswordField's Enter and autoSubmit paths must trigger
+-- | the form's real submit pipeline, and `requestSubmit` is the only call with that semantic.
+foreign import requestSubmit :: HTMLFormElement -> Effect Unit
