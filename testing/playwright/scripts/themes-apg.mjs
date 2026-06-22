@@ -1123,6 +1123,17 @@ const CHECKS = [
     const r = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(","), sel);
     ok(r === "1,9,3", `cursor-at-end typing did not write the next slot (got '${r}')`);
   }},
+  // controlled: value is fixed by the parent (no-op onValueChange), so local typing cannot change it.
+  { id: "otp", state: "controlled", apg: "roving-tabindex", name: "a controlled value is fixed and ignores local typing", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    const before = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
+    ok(before === "12", `controlled value did not render (got '${before}')`);
+    await pg.locator(sel + '[data-radix-index="2"]').focus();
+    await pg.keyboard.type("9"); await pg.waitForTimeout(120);
+    const after = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
+    ok(after === "12", `controlled value changed on local typing (got '${after}')`);
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

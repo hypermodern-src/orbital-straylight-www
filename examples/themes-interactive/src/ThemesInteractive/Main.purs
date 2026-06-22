@@ -1656,6 +1656,8 @@ toolbarInput s = Toolbar.defaultInput
 otpInput :: String -> Otp.Input
 otpInput s = Otp.defaultInput
   { length = 3
+  -- `?s=controlled` → controlled value "12" (fixed; output discarded by slot_, so it never syncs).
+  , value = if s == "controlled" then Just "12" else Nothing
   , defaultValue =
       -- `?s=paste` starts EMPTY (like empty/typed) so the Wave-D paste driver can dump a
       -- full code into the first slot and exercise the PASTE reducer.

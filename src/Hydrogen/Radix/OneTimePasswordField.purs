@@ -50,7 +50,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.Query.Event (eventListener)
-import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
+import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, isControlled, sync)
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Dom (requestSubmit)
@@ -406,11 +406,18 @@ handleAction = case _ of
         let
           cur = current st.chars
           next = fromMaybe cur (updateAt idx typed cur)
+          res = change next st.chars
           nextCursor = min (idx + 1) (st.len - 1)
-        H.modify_ \s -> s { chars = (change next s.chars).next, cursor = nextCursor, focusEntered = true }
+        H.modify_ \s -> s { chars = res.next, cursor = nextCursor, focusEntered = true }
         H.raise (ValueChanged (trim (joinWith "" next)))
-        focusAt nextCursor
-        maybeAutoSubmit next
+        if isControlled st.chars
+          -- Controlled: the value is parent-owned and did NOT change, but the native keystroke
+          -- left a dirty property on the slot. Reset the DOM to the controlled value (React does
+          -- this via the fixed value prop); don't advance focus or auto-submit on an ignored edit.
+          then syncSlotValues (current res.next)
+          else do
+            focusAt nextCursor
+            maybeAutoSubmit next
       else
         -- A rejected char (e.g. Space, or a digit under Alpha validation) left a DIRTY value
         -- PROPERTY on the native <input> even though state did not change. Upstream's onChange

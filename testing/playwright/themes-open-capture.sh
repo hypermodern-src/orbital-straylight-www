@@ -108,6 +108,7 @@ STATES=(
   "otp:named"
   "otp:placeholder"
   "otp:novalidation"
+  "otp:controlled"
   "form:multiMessage"
   # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
   "collapsible:disabled"

@@ -1788,6 +1788,9 @@ const PAGES: Page[] = [
       const placeholder = s === "placeholder";
       // `?s=novalidation` → validationType="none": slots carry NO inputmode/pattern.
       const novalidation = s === "novalidation";
+      // `?s=controlled` → controlled value="12" with a no-op onValueChange (value stays fixed):
+      // the DOM reflects the controlled value and local typing cannot change it.
+      const controlled = s === "controlled";
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
@@ -1814,11 +1817,12 @@ const PAGES: Page[] = [
       const startEmpty = empty || wrapForm;
       const field = (
         <OneTimePasswordField.Root
-          {...(startEmpty ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
+          {...(startEmpty || controlled ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
           {...(alpha ? { validationType: "alpha" as const } : {})}
           {...(alphanumeric ? { validationType: "alphanumeric" as const } : {})}
           {...(novalidation ? { validationType: "none" as const } : {})}
           {...(placeholder ? { placeholder: "○" } : {})}
+          {...(controlled ? { value: "12", onValueChange: () => {} } : {})}
           {...(password ? { type: "password" as const } : {})}
           {...(disabled ? { disabled: true } : {})}
           {...(readonly ? { readOnly: true } : {})}

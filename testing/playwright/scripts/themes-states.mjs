@@ -899,6 +899,16 @@ export const STATES = {
           && document.querySelector('input[type="hidden"]')?.value === "123";
       });
     },
+    // `?s=controlled` → controlled value "12": slots 1/2/"" at rest, hidden input "12".
+    controlled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "1" && a[1].value === "2" && a[2].value === ""
+          && document.querySelector('input[type="hidden"]')?.value === "12";
+      });
+    },
     // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
     password: async (pg) => {
       await root(pg).locator('[role="group"]').first().waitFor();

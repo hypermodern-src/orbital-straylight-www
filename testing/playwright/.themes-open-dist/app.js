@@ -1535,13 +1535,13 @@
     return dict.foldr;
   };
   var traverse_ = function(dictApplicative) {
-    var applySecond15 = applySecond(dictApplicative.Apply0());
+    var applySecond16 = applySecond(dictApplicative.Apply0());
     var pure46 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
-          return applySecond15(f($454));
+          return applySecond16(f($454));
         })(pure46(unit));
       };
     };
@@ -4169,6 +4169,16 @@
       input3.select();
     };
   }
+  function selectionStart(input3) {
+    return function() {
+      return input3.selectionStart;
+    };
+  }
+  function selectionEnd(input3) {
+    return function() {
+      return input3.selectionEnd;
+    };
+  }
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Web.HTML.HTMLInputElement/index.js
   var map11 = /* @__PURE__ */ map(functorEffect);
@@ -4315,7 +4325,7 @@
     return dict.foldrWithIndex;
   };
   var traverseWithIndex_ = function(dictApplicative) {
-    var applySecond15 = applySecond(dictApplicative.Apply0());
+    var applySecond16 = applySecond(dictApplicative.Apply0());
     var pure46 = pure(dictApplicative);
     return function(dictFoldableWithIndex) {
       var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
@@ -4323,7 +4333,7 @@
         return foldrWithIndex1(function(i2) {
           var $289 = f(i2);
           return function($290) {
-            return applySecond15($289($290));
+            return applySecond16($289($290));
           };
         })(pure46(unit));
       };
@@ -7675,14 +7685,14 @@
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Halogen.Query.HalogenQ/index.js
   var Initialize = /* @__PURE__ */ function() {
-    function Initialize22(value0) {
+    function Initialize23(value0) {
       this.value0 = value0;
     }
     ;
-    Initialize22.create = function(value0) {
-      return new Initialize22(value0);
+    Initialize23.create = function(value0) {
+      return new Initialize23(value0);
     };
-    return Initialize22;
+    return Initialize23;
   }();
   var Finalize = /* @__PURE__ */ function() {
     function Finalize2(value0) {
@@ -9793,11 +9803,11 @@
     return ValueChanged9;
   }();
   var Initialize2 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive2 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -10308,6 +10318,9 @@
     window.clearTimeout(id3);
   };
   var now = () => performance.now();
+  var requestSubmit = (form3) => () => {
+    form3.requestSubmit();
+  };
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Hydrogen.Radix.Foundation.Dom/index.js
   var queueMicrotask2 = queueMicrotask_;
@@ -10786,11 +10799,11 @@
     return OpenChanged12;
   }();
   var Initialize3 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive3 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -12163,11 +12176,11 @@
     return OpenChanged12;
   }();
   var Initialize4 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive6 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -13105,11 +13118,11 @@
     return MenuSubEntry4;
   }();
   var Initialize5 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive7 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -14887,11 +14900,11 @@
     return OpenChanged12;
   }();
   var Initialize6 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive8 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -15686,11 +15699,11 @@
     return MenuSubEntry4;
   }();
   var Initialize7 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive9 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -17628,11 +17641,11 @@
     return BadInput2;
   }();
   var Initialize8 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive10 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -17685,11 +17698,11 @@
     return FormSubmit2;
   }();
   var FormReset = /* @__PURE__ */ function() {
-    function FormReset3() {
+    function FormReset4() {
     }
     ;
-    FormReset3.value = new FormReset3();
-    return FormReset3;
+    FormReset4.value = new FormReset4();
+    return FormReset4;
   }();
   var renderSubmit = function(st) {
     return button([type_25(ButtonSubmit.value), classes2(st.style.submit)])(map42(fromPlainHTML)(st.submitLabel));
@@ -18289,11 +18302,11 @@
     return OpenChanged12;
   }();
   var Initialize9 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive11 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -19244,11 +19257,11 @@
     return MenuSubEntry4;
   }();
   var Initialize10 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive12 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -21484,11 +21497,11 @@
     return Link3;
   }();
   var Initialize11 = /* @__PURE__ */ function() {
-    function Initialize22() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive13 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -22272,16 +22285,19 @@
   var for_20 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var bind118 = /* @__PURE__ */ bind(bindMaybe);
   var map120 = /* @__PURE__ */ map(functorMaybe);
-  var clamp3 = /* @__PURE__ */ clamp(ordInt);
-  var max10 = /* @__PURE__ */ max(ordInt);
-  var type_27 = /* @__PURE__ */ type_17(isPropInputType);
-  var discard21 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var modify_15 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var pure31 = /* @__PURE__ */ pure(applicativeHalogenM);
   var get14 = /* @__PURE__ */ get(monadStateHalogenM);
-  var value14 = /* @__PURE__ */ value12(isPropString);
   var when21 = /* @__PURE__ */ when(applicativeHalogenM);
+  var discard21 = /* @__PURE__ */ discard(discardUnit);
+  var discard110 = /* @__PURE__ */ discard21(bindHalogenM);
+  var max10 = /* @__PURE__ */ max(ordInt);
+  var modify_15 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var clamp3 = /* @__PURE__ */ clamp(ordInt);
+  var type_27 = /* @__PURE__ */ type_17(isPropInputType);
+  var pure31 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var value14 = /* @__PURE__ */ value12(isPropString);
+  var $$void12 = /* @__PURE__ */ $$void(functorHalogenM);
   var min7 = /* @__PURE__ */ min(ordInt);
+  var applySecond10 = /* @__PURE__ */ applySecond(applyHalogenM);
   var Numeric = /* @__PURE__ */ function() {
     function Numeric2() {
     }
@@ -22343,6 +22359,23 @@
     };
     return ValueChanged9;
   }();
+  var AutoSubmitted = /* @__PURE__ */ function() {
+    function AutoSubmitted2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    AutoSubmitted2.create = function(value0) {
+      return new AutoSubmitted2(value0);
+    };
+    return AutoSubmitted2;
+  }();
+  var Initialize12 = /* @__PURE__ */ function() {
+    function Initialize23() {
+    }
+    ;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
+  }();
   var Receive14 = /* @__PURE__ */ function() {
     function Receive27(value0) {
       this.value0 = value0;
@@ -22389,6 +22422,13 @@
     };
     return SlotFocused2;
   }();
+  var FormReset2 = /* @__PURE__ */ function() {
+    function FormReset4() {
+    }
+    ;
+    FormReset4.value = new FormReset4();
+    return FormReset4;
+  }();
   var validationAttrs = function(v) {
     if (v instanceof Numeric) {
       return [attr2("inputmode")("numeric"), attr2("pattern")("\\d{1}")];
@@ -22406,7 +22446,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 230, column 19 - line 234, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 259, column 19 - line 263, column 21): " + [v.constructor.name]);
   };
   var toSlots = function(len) {
     return function(s) {
@@ -22424,9 +22464,9 @@
         return function(ch) {
           return bind32(getHTMLElementRef(slotRef(i2)))(function(mel) {
             return for_20(bind118(mel)(fromHTMLElement))(function() {
-              var $128 = setValue3(ch);
-              return function($129) {
-                return liftEffect7($128($129));
+              var $176 = setValue3(ch);
+              return function($177) {
+                return liftEffect7($176($177));
               };
             }());
           });
@@ -22455,40 +22495,116 @@
       password: input3.password,
       disabled: input3.disabled,
       readOnly: input3.readOnly,
+      autoSubmit: input3.autoSubmit,
+      autoFocus: input3.autoFocus,
+      placeholder: input3.placeholder,
       style: input3.style,
       cursor: 0,
       focusEntered: false
+    };
+  };
+  var hiddenRef = "otp-hidden";
+  var withForm = function(dictMonadEffect) {
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    return function(k) {
+      return bind32(getHTMLElementRef(hiddenRef))(function(mel) {
+        return for_20(bind118(mel)(fromHTMLElement))(function(inp) {
+          return bind32(liftEffect7(form(inp)))(function(mform) {
+            return for_20(mform)(k);
+          });
+        });
+      });
+    };
+  };
+  var maybeAutoSubmit = function(dictMonadEffect) {
+    var withForm1 = withForm(dictMonadEffect);
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    return function(next) {
+      return bind32(get14)(function(st) {
+        return when21(st.autoSubmit && (length(next) === st.len && length(filter(function(v) {
+          return v !== "";
+        })(next)) === st.len))(discard110(raise(new AutoSubmitted(joinWith("")(next))))(function() {
+          return withForm1(function($178) {
+            return liftEffect7(requestSubmit($178));
+          });
+        }));
+      });
     };
   };
   var focusAt = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(idx) {
       return bind32(getHTMLElementRef(slotRef(idx)))(function(mel) {
-        return for_20(mel)(function($130) {
-          return liftEffect7(focus($130));
+        return for_20(mel)(function($179) {
+          return liftEffect7(focus($179));
         });
       });
     };
   };
-  var defaultStyle11 = {
-    root: /* @__PURE__ */ cn("rdx-otp"),
-    input: /* @__PURE__ */ cn("rdx-otp-input")
-  };
-  var defaultInput12 = /* @__PURE__ */ function() {
-    return {
-      length: 6,
-      value: Nothing.value,
-      defaultValue: "",
-      validation: Numeric.value,
-      orientation: Horizontal.value,
-      dir: LTR.value,
-      name: Nothing.value,
-      password: false,
-      disabled: false,
-      readOnly: false,
-      style: defaultStyle11
+  var clearCharCompact = function(dictMonadEffect) {
+    var syncSlotValues1 = syncSlotValues(dictMonadEffect);
+    var focusAt1 = focusAt(dictMonadEffect);
+    return function(idx) {
+      return function(retreat) {
+        return bind32(get14)(function(st) {
+          var cur = current(st.chars);
+          return when21(fromMaybe("")(index(cur)(idx)) !== "")(function() {
+            var next = append8(fromMaybe(cur)(deleteAt(idx)(cur)))([""]);
+            var focusIdx = function() {
+              if (retreat) {
+                return max10(0)(idx - 1 | 0);
+              }
+              ;
+              return idx;
+            }();
+            return discard110(modify_15(function(s) {
+              var $101 = {};
+              for (var $102 in s) {
+                if ({}.hasOwnProperty.call(s, $102)) {
+                  $101[$102] = s[$102];
+                }
+                ;
+              }
+              ;
+              $101.chars = change2(next)(s.chars).next;
+              $101.cursor = focusIdx;
+              $101.focusEntered = true;
+              return $101;
+            }))(function() {
+              return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
+                return discard110(syncSlotValues1(next))(function() {
+                  return focusAt1(focusIdx);
+                });
+              });
+            });
+          }());
+        });
+      };
     };
-  }();
+  };
+  var clearAllSlots = function(dictMonadEffect) {
+    var syncSlotValues1 = syncSlotValues(dictMonadEffect);
+    return bind32(get14)(function(st) {
+      var cleared = replicate(st.len)("");
+      return discard110(modify_15(function(s) {
+        var $104 = {};
+        for (var $105 in s) {
+          if ({}.hasOwnProperty.call(s, $105)) {
+            $104[$105] = s[$105];
+          }
+          ;
+        }
+        ;
+        $104.chars = change2(cleared)(s.chars).next;
+        $104.focusEntered = true;
+        return $104;
+      }))(function() {
+        return discard110(raise(new ValueChanged3("")))(function() {
+          return syncSlotValues1(cleared);
+        });
+      });
+    });
+  };
   var clampIdx = function(len) {
     return function(i2) {
       return clamp3(0)(max10(0)(len - 1 | 0))(i2);
@@ -22536,6 +22652,12 @@
           ;
           return "off";
         }()), dataOrientation(st.orientation), dataAttr("radix-collection-item")(""), dataAttr("radix-otp-input")(""), dataAttr("radix-index")(show12(idx)), tabIndex2(tab), classes2(st.style.input), onValueInput(SlotInput.create(idx)), onKeyDown(SlotKeyDown.create(idx)), onFocus($$const(new SlotFocused(idx)))])(append8(validationAttrs(st.validation))(append8(function() {
+          if (st.placeholder instanceof Just && isAuto) {
+            return [attr2("placeholder")(st.placeholder.value0)];
+          }
+          ;
+          return [];
+        }())(append8(function() {
           if (st.disabled) {
             return [attr2("disabled")("")];
           }
@@ -22553,7 +22675,7 @@
           }
           ;
           return passwordManagerIgnore;
-        }())))));
+        }()))))));
       };
     };
   };
@@ -22563,17 +22685,17 @@
   var handleQuery13 = function(dictMonadEffect) {
     return function(v) {
       if (v instanceof SetValue3) {
-        return discard21(modify_15(function(st) {
-          var $81 = {};
-          for (var $82 in st) {
-            if ({}.hasOwnProperty.call(st, $82)) {
-              $81[$82] = st[$82];
+        return discard110(modify_15(function(st) {
+          var $119 = {};
+          for (var $120 in st) {
+            if ({}.hasOwnProperty.call(st, $120)) {
+              $119[$120] = st[$120];
             }
             ;
           }
           ;
-          $81.chars = change2(toSlots(st.len)(v.value0))(st.chars).next;
-          return $81;
+          $119.chars = change2(toSlots(st.len)(v.value0))(st.chars).next;
+          return $119;
         }))(function() {
           return pure31(new Just(v.value1));
         });
@@ -22585,11 +22707,11 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 396, column 15 - line 402, column 39): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 560, column 15 - line 566, column 39): " + [v.constructor.name]);
     };
   };
   var renderHidden = function(st) {
-    return input2(append8([type_27(InputHidden.value), attr2("readonly")(""), value14(aggregate(st)), attr2("autocomplete")("off"), attr2("autocapitalize")("off"), attr2("autocorrect")("off"), attr2("autosave")("off"), attr2("spellcheck")("false")])(function() {
+    return input2(append8([type_27(InputHidden.value), ref2(hiddenRef), attr2("readonly")(""), value14(aggregate(st)), attr2("autocomplete")("off"), attr2("autocapitalize")("off"), attr2("autocorrect")("off"), attr2("autosave")("off"), attr2("spellcheck")("false")])(function() {
       if (st.name instanceof Just) {
         return [name15(st.name.value0)];
       }
@@ -22598,7 +22720,7 @@
         return [];
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 257, column 13 - line 259, column 28): " + [st.name.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 287, column 13 - line 289, column 28): " + [st.name.constructor.name]);
     }()));
   };
   var render13 = function(st) {
@@ -22641,10 +22763,10 @@
           return true;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 271, column 25 - line 275, column 27): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 301, column 25 - line 305, column 27): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 269, column 8 - line 275, column 27): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 299, column 8 - line 305, column 27): " + [v1.constructor.name]);
     };
   };
   var sanitizePaste = function(v) {
@@ -22656,51 +22778,114 @@
     };
   };
   var handleAction13 = function(dictMonadEffect) {
-    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    var withForm1 = withForm(dictMonadEffect);
     var syncSlotValues1 = syncSlotValues(dictMonadEffect);
     var focusAt1 = focusAt(dictMonadEffect);
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    var maybeAutoSubmit1 = maybeAutoSubmit(dictMonadEffect);
+    var clearCharCompact1 = clearCharCompact(dictMonadEffect);
+    var clearAllSlots1 = clearAllSlots(dictMonadEffect);
     return function(v) {
+      if (v instanceof Initialize12) {
+        return discard110(withForm1(function(form3) {
+          var target6 = toEventTarget3(form3);
+          return $$void12(subscribe2(eventListener2("reset")(target6)(function(v1) {
+            return new Just(FormReset2.value);
+          })));
+        }))(function() {
+          return pure31(unit);
+        });
+      }
+      ;
+      if (v instanceof FormReset2) {
+        return bind32(get14)(function(st) {
+          var cleared = replicate(st.len)("");
+          return discard110(modify_15(function(s) {
+            var $134 = {};
+            for (var $135 in s) {
+              if ({}.hasOwnProperty.call(s, $135)) {
+                $134[$135] = s[$135];
+              }
+              ;
+            }
+            ;
+            $134.chars = change2(cleared)(s.chars).next;
+            $134.cursor = 0;
+            $134.focusEntered = false;
+            return $134;
+          }))(function() {
+            return discard110(raise(new ValueChanged3("")))(function() {
+              return syncSlotValues1(cleared);
+            });
+          });
+        });
+      }
+      ;
       if (v instanceof Receive14) {
         return modify_15(function(st) {
-          var $96 = {};
-          for (var $97 in st) {
-            if ({}.hasOwnProperty.call(st, $97)) {
-              $96[$97] = st[$97];
+          var $137 = {};
+          for (var $138 in st) {
+            if ({}.hasOwnProperty.call(st, $138)) {
+              $137[$138] = st[$138];
             }
             ;
           }
           ;
-          $96.len = v.value0.length;
-          $96.chars = sync(map120(toSlots(v.value0.length))(v.value0.value))(st.chars);
-          $96.validation = v.value0.validation;
-          $96.orientation = v.value0.orientation;
-          $96.dir = v.value0.dir;
-          $96.name = v.value0.name;
-          $96.password = v.value0.password;
-          $96.disabled = v.value0.disabled;
-          $96.readOnly = v.value0.readOnly;
-          $96.style = v.value0.style;
-          return $96;
+          $137.len = v.value0.length;
+          $137.chars = sync(map120(toSlots(v.value0.length))(v.value0.value))(st.chars);
+          $137.validation = v.value0.validation;
+          $137.orientation = v.value0.orientation;
+          $137.dir = v.value0.dir;
+          $137.name = v.value0.name;
+          $137.password = v.value0.password;
+          $137.disabled = v.value0.disabled;
+          $137.readOnly = v.value0.readOnly;
+          $137.autoSubmit = v.value0.autoSubmit;
+          $137.placeholder = v.value0.placeholder;
+          $137.style = v.value0.style;
+          return $137;
         });
       }
       ;
       if (v instanceof SlotFocused) {
-        return discard21(modify_15(function(v1) {
-          var $100 = {};
-          for (var $101 in v1) {
-            if ({}.hasOwnProperty.call(v1, $101)) {
-              $100[$101] = v1[$101];
-            }
-            ;
+        return bind32(get14)(function(st) {
+          var lastSelectable = clamp3(0)(st.len - 1 | 0)(length2(aggregate(st)));
+          var $141 = v.value0 > lastSelectable;
+          if ($141) {
+            return discard110(modify_15(function(v1) {
+              var $142 = {};
+              for (var $143 in v1) {
+                if ({}.hasOwnProperty.call(v1, $143)) {
+                  $142[$143] = v1[$143];
+                }
+                ;
+              }
+              ;
+              $142.cursor = lastSelectable;
+              $142.focusEntered = true;
+              return $142;
+            }))(function() {
+              return focusAt1(lastSelectable);
+            });
           }
           ;
-          $100.cursor = v.value0;
-          $100.focusEntered = true;
-          return $100;
-        }))(function() {
-          return bind32(getHTMLElementRef(slotRef(v.value0)))(function(mel) {
-            return for_20(bind118(mel)(fromHTMLElement))(function($131) {
-              return liftEffect7(select($131));
+          return discard110(modify_15(function(v1) {
+            var $145 = {};
+            for (var $146 in v1) {
+              if ({}.hasOwnProperty.call(v1, $146)) {
+                $145[$146] = v1[$146];
+              }
+              ;
+            }
+            ;
+            $145.cursor = v.value0;
+            $145.focusEntered = true;
+            return $145;
+          }))(function() {
+            return bind32(getHTMLElementRef(slotRef(v.value0)))(function(mel) {
+              return for_20(bind118(mel)(fromHTMLElement))(function($180) {
+                return liftEffect7(select($180));
+              });
             });
           });
         });
@@ -22708,105 +22893,180 @@
       ;
       if (v instanceof SlotInput) {
         return bind32(get14)(function(st) {
-          var $104 = !st.disabled && (!st.readOnly && length(toCharArray(v.value1)) > 1);
-          if ($104) {
+          var $149 = !st.disabled && (!st.readOnly && length(toCharArray(v.value1)) > 1);
+          if ($149) {
             var sanitized = sanitizePaste(st.validation)(v.value1);
             var next = toSlots(st.len)(sanitized);
             var filled = length(filter(function(v1) {
               return v1 !== "";
             })(next));
             var focusIdx = clampIdx(st.len)(filled - 1 | 0);
-            return when21(sanitized !== "")(discard21(modify_15(function(s) {
-              var $105 = {};
-              for (var $106 in s) {
-                if ({}.hasOwnProperty.call(s, $106)) {
-                  $105[$106] = s[$106];
+            return when21(sanitized !== "")(discard110(modify_15(function(s) {
+              var $150 = {};
+              for (var $151 in s) {
+                if ({}.hasOwnProperty.call(s, $151)) {
+                  $150[$151] = s[$151];
                 }
                 ;
               }
               ;
-              $105.chars = change2(next)(s.chars).next;
-              $105.cursor = focusIdx;
-              $105.focusEntered = true;
-              return $105;
+              $150.chars = change2(next)(s.chars).next;
+              $150.cursor = focusIdx;
+              $150.focusEntered = true;
+              return $150;
             }))(function() {
-              return discard21(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
-                return discard21(syncSlotValues1(next))(function() {
-                  return focusAt1(focusIdx);
+              return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
+                return discard110(maybeAutoSubmit1(next))(function() {
+                  return discard110(syncSlotValues1(next))(function() {
+                    return focusAt1(focusIdx);
+                  });
                 });
               });
             }));
           }
           ;
+          var $153 = !st.disabled && (!st.readOnly && v.value1 === "");
+          if ($153) {
+            return clearCharCompact1(v.value0)(false);
+          }
+          ;
           var typed = lastChar(v.value1);
-          return when21(!st.disabled && (!st.readOnly && (typed !== "" && accepts(st.validation)(typed))))(function() {
+          var $154 = !st.disabled && (!st.readOnly && (typed !== "" && accepts(st.validation)(typed)));
+          if ($154) {
             var nextCursor = min7(v.value0 + 1 | 0)(st.len - 1 | 0);
             var cur = current(st.chars);
-            var next2 = fromMaybe(cur)(updateAt(v.value0)(typed)(cur));
-            return discard21(modify_15(function(s) {
-              var $108 = {};
-              for (var $109 in s) {
-                if ({}.hasOwnProperty.call(s, $109)) {
-                  $108[$109] = s[$109];
+            var next = fromMaybe(cur)(updateAt(v.value0)(typed)(cur));
+            return discard110(modify_15(function(s) {
+              var $155 = {};
+              for (var $156 in s) {
+                if ({}.hasOwnProperty.call(s, $156)) {
+                  $155[$156] = s[$156];
                 }
                 ;
               }
               ;
-              $108.chars = change2(next2)(s.chars).next;
-              $108.cursor = nextCursor;
-              $108.focusEntered = true;
-              return $108;
+              $155.chars = change2(next)(s.chars).next;
+              $155.cursor = nextCursor;
+              $155.focusEntered = true;
+              return $155;
             }))(function() {
-              return discard21(raise(new ValueChanged3(trim(joinWith("")(next2)))))(function() {
-                return focusAt1(nextCursor);
+              return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
+                return discard110(focusAt1(nextCursor))(function() {
+                  return maybeAutoSubmit1(next);
+                });
               });
             });
-          }());
+          }
+          ;
+          return for_20(index(current(st.chars))(v.value0))(function(ch) {
+            return bind32(getHTMLElementRef(slotRef(v.value0)))(function(mel) {
+              return for_20(bind118(mel)(fromHTMLElement))(function(inp) {
+                return liftEffect7(function __do12() {
+                  setValue3(ch)(inp)();
+                  return select(inp)();
+                });
+              });
+            });
+          });
         });
       }
       ;
       if (v instanceof SlotKeyDown) {
         return bind32(get14)(function(st) {
           var key2 = key(v.value1);
-          if (key2 === "Backspace" && (!st.disabled && !st.readOnly)) {
-            var cur = current(st.chars);
-            var atIdx = fromMaybe("")(index(cur)(v.value0));
-            var $114 = atIdx !== "";
-            if ($114) {
-              var next = fromMaybe(cur)(updateAt(v.value0)("")(cur));
-              return discard21(modify_15(function(s) {
-                var $115 = {};
-                for (var $116 in s) {
-                  if ({}.hasOwnProperty.call(s, $116)) {
-                    $115[$116] = s[$116];
+          var editable = !st.disabled && !st.readOnly;
+          var clearing = ctrlKey(v.value1) || metaKey(v.value1);
+          var atIdx = fromMaybe("")(index(current(st.chars))(v.value0));
+          if (key2 === "Clear" && editable) {
+            return applySecond10(liftEffect7(preventDefault(toEvent(v.value1))))(clearAllSlots1);
+          }
+          ;
+          if (key2 === "Backspace" && (editable && clearing)) {
+            return applySecond10(liftEffect7(preventDefault(toEvent(v.value1))))(clearAllSlots1);
+          }
+          ;
+          if (key2 === "Backspace" && editable) {
+            return discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
+              var $161 = atIdx !== "";
+              if ($161) {
+                return clearCharCompact1(v.value0)(true);
+              }
+              ;
+              var prev = max10(0)(v.value0 - 1 | 0);
+              return discard110(modify_15(function(v12) {
+                var $162 = {};
+                for (var $163 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $163)) {
+                    $162[$163] = v12[$163];
                   }
                   ;
                 }
                 ;
-                $115.chars = change2(next)(s.chars).next;
-                $115.cursor = v.value0;
-                $115.focusEntered = true;
-                return $115;
+                $162.cursor = prev;
+                $162.focusEntered = true;
+                return $162;
               }))(function() {
-                return raise(new ValueChanged3(trim(joinWith("")(next))));
+                return focusAt1(prev);
               });
-            }
-            ;
-            var prev = max10(0)(v.value0 - 1 | 0);
-            return discard21(modify_15(function(v12) {
-              var $118 = {};
-              for (var $119 in v12) {
-                if ({}.hasOwnProperty.call(v12, $119)) {
-                  $118[$119] = v12[$119];
-                }
-                ;
-              }
-              ;
-              $118.cursor = prev;
-              $118.focusEntered = true;
-              return $118;
-            }))(function() {
-              return focusAt1(prev);
+            });
+          }
+          ;
+          if (key2 === "Delete" && editable) {
+            return discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
+              return when21(atIdx !== "")(clearCharCompact1(v.value0)(false));
+            });
+          }
+          ;
+          if (key2 === "Enter") {
+            return discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
+              return withForm1(function($181) {
+                return liftEffect7(requestSubmit($181));
+              });
+            });
+          }
+          ;
+          if (editable && (atIdx !== "" && (v.value0 < (st.len - 1 | 0) && (length2(key2) === 1 && accepts(st.validation)(key2))))) {
+            return bind32(getHTMLElementRef(slotRef(v.value0)))(function(mel) {
+              return for_20(bind118(mel)(fromHTMLElement))(function(inp) {
+                return bind32(liftEffect7(selectionStart(inp)))(function(selStart) {
+                  return bind32(liftEffect7(selectionEnd(inp)))(function(selEnd) {
+                    var fullySelected = selStart === 0 && selEnd >= 1;
+                    return when21(!fullySelected)(discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
+                      var targetIdx = function() {
+                        var $165 = selStart === 0;
+                        if ($165) {
+                          return v.value0;
+                        }
+                        ;
+                        return v.value0 + 1 | 0;
+                      }();
+                      var nextCursor = min7(targetIdx + 1 | 0)(st.len - 1 | 0);
+                      var cur = current(st.chars);
+                      var next = fromMaybe(cur)(updateAt(targetIdx)(key2)(cur));
+                      return discard110(modify_15(function(s) {
+                        var $166 = {};
+                        for (var $167 in s) {
+                          if ({}.hasOwnProperty.call(s, $167)) {
+                            $166[$167] = s[$167];
+                          }
+                          ;
+                        }
+                        ;
+                        $166.chars = change2(next)(s.chars).next;
+                        $166.cursor = nextCursor;
+                        $166.focusEntered = true;
+                        return $166;
+                      }))(function() {
+                        return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
+                          return discard110(focusAt1(nextCursor))(function() {
+                            return maybeAutoSubmit1(next);
+                          });
+                        });
+                      });
+                    }));
+                  });
+                });
+              });
             });
           }
           ;
@@ -22814,6 +23074,7 @@
             count: st.len,
             current: v.value0
           };
+          var lastSelectable = clamp3(0)(st.len - 1 | 0)(length2(aggregate(st)));
           var cfg = {
             orientation: st.orientation,
             dir: st.dir,
@@ -22825,28 +23086,29 @@
           }
           ;
           if (v1 instanceof MoveTo) {
-            return discard21(modify_15(function(v2) {
-              var $122 = {};
-              for (var $123 in v2) {
-                if ({}.hasOwnProperty.call(v2, $123)) {
-                  $122[$123] = v2[$123];
+            var clamped = min7(v1.value0)(lastSelectable);
+            return when21(clamped !== v.value0)(discard110(modify_15(function(v2) {
+              var $170 = {};
+              for (var $171 in v2) {
+                if ({}.hasOwnProperty.call(v2, $171)) {
+                  $170[$171] = v2[$171];
                 }
                 ;
               }
               ;
-              $122.cursor = v1.value0;
-              $122.focusEntered = true;
-              return $122;
+              $170.cursor = clamped;
+              $170.focusEntered = true;
+              return $170;
             }))(function() {
-              return focusAt1(v1.value0);
-            });
+              return focusAt1(clamped);
+            }));
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 355, column 9 - line 359, column 27): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 480, column 9 - line 486, column 30): " + [v1.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 280, column 16 - line 359, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 324, column 16 - line 486, column 30): " + [v.constructor.name]);
     };
   };
   var component14 = function(dictMonadEffect) {
@@ -22854,13 +23116,13 @@
       initialState: initialState13,
       render: render13,
       "eval": mkEval({
-        initialize: defaultEval.initialize,
         finalize: defaultEval.finalize,
         handleAction: handleAction13(dictMonadEffect),
         handleQuery: handleQuery13(dictMonadEffect),
-        receive: function($132) {
-          return Just.create(Receive14.create($132));
-        }
+        receive: function($182) {
+          return Just.create(Receive14.create($182));
+        },
+        initialize: new Just(Initialize12.value)
       })
     });
   };
@@ -22878,7 +23140,7 @@
   var pure32 = /* @__PURE__ */ pure(applicativeHalogenM);
   var for_21 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var bind119 = /* @__PURE__ */ bind(bindMaybe);
-  var $$void12 = /* @__PURE__ */ $$void(functorHalogenM);
+  var $$void13 = /* @__PURE__ */ $$void(functorHalogenM);
   var SetVisible = /* @__PURE__ */ function() {
     function SetVisible2(value0, value1) {
       this.value0 = value0;
@@ -22912,12 +23174,12 @@
     };
     return VisibilityChanged2;
   }();
-  var Initialize12 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize13 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Toggled = /* @__PURE__ */ function() {
     function Toggled3() {
@@ -22936,15 +23198,15 @@
     };
     return Receive27;
   }();
-  var FormReset2 = /* @__PURE__ */ function() {
-    function FormReset3(value0) {
+  var FormReset3 = /* @__PURE__ */ function() {
+    function FormReset4(value0) {
       this.value0 = value0;
     }
     ;
-    FormReset3.create = function(value0) {
-      return new FormReset3(value0);
+    FormReset4.create = function(value0) {
+      return new FormReset4(value0);
     };
-    return FormReset3;
+    return FormReset4;
   }();
   var FormHide = /* @__PURE__ */ function() {
     function FormHide2() {
@@ -23066,7 +23328,7 @@
     var useId2 = useId(monadEffectHalogenM2);
     var liftEffect7 = liftEffect(monadEffectHalogenM2);
     return function(v) {
-      if (v instanceof Initialize12) {
+      if (v instanceof Initialize13) {
         return bind33(get15)(function(st) {
           return discard23(function() {
             if (st.inputId instanceof Just) {
@@ -23097,10 +23359,10 @@
                 return bind33(liftEffect7(form(inp)))(function(mform) {
                   return for_21(mform)(function(form3) {
                     var target6 = toEventTarget3(form3);
-                    return discard23($$void12(subscribe2(eventListener2("reset")(target6)(function($68) {
-                      return Just.create(FormReset2.create($68));
+                    return discard23($$void13(subscribe2(eventListener2("reset")(target6)(function($68) {
+                      return Just.create(FormReset3.create($68));
                     }))))(function() {
-                      return $$void12(subscribe2(eventListener2("submit")(target6)(function(v1) {
+                      return $$void13(subscribe2(eventListener2("submit")(target6)(function(v1) {
                         return new Just(FormHide.value);
                       })));
                     });
@@ -23132,7 +23394,7 @@
         });
       }
       ;
-      if (v instanceof FormReset2) {
+      if (v instanceof FormReset3) {
         return bind33(liftEffect7(defaultPrevented(v.value0)))(function(prevented) {
           return when22(!prevented)(hideVisibility);
         });
@@ -23179,11 +23441,11 @@
       throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 211, column 16 - line 254, column 8): " + [v.constructor.name]);
     };
   };
-  var defaultStyle12 = {
+  var defaultStyle11 = {
     input: /* @__PURE__ */ cn("rdx-password-input"),
     toggle: /* @__PURE__ */ cn("rdx-password-toggle")
   };
-  var defaultInput13 = /* @__PURE__ */ function() {
+  var defaultInput12 = /* @__PURE__ */ function() {
     return {
       visible: Nothing.value,
       defaultVisible: false,
@@ -23195,7 +23457,7 @@
       iconOnly: false,
       toggleVisible: [],
       toggleHidden: [],
-      style: defaultStyle12
+      style: defaultStyle11
     };
   }();
   var component15 = function(dictMonadEffect) {
@@ -23209,7 +23471,7 @@
         receive: function($69) {
           return Just.create(Receive15.create($69));
         },
-        initialize: new Just(Initialize12.value)
+        initialize: new Just(Initialize13.value)
       })
     });
   };
@@ -23218,7 +23480,7 @@
   var bind34 = /* @__PURE__ */ bind(bindHalogenM);
   var voidRight9 = /* @__PURE__ */ voidRight(functorEmitter);
   var discard24 = /* @__PURE__ */ discard(discardUnit);
-  var discard110 = /* @__PURE__ */ discard24(bindHalogenM);
+  var discard111 = /* @__PURE__ */ discard24(bindHalogenM);
   var pure33 = /* @__PURE__ */ pure(applicativeHalogenM);
   var map49 = /* @__PURE__ */ map(functorArray);
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
@@ -23226,7 +23488,7 @@
   var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var when23 = /* @__PURE__ */ when(applicativeEffect);
   var for_110 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
-  var $$void13 = /* @__PURE__ */ $$void(functorEffect);
+  var $$void14 = /* @__PURE__ */ $$void(functorEffect);
   var when110 = /* @__PURE__ */ when(applicativeHalogenM);
   var bind120 = /* @__PURE__ */ bind(bindEffect);
   var map121 = /* @__PURE__ */ map(functorHalogenM);
@@ -23270,12 +23532,12 @@
     };
     return OpenChanged12;
   }();
-  var Initialize13 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize14 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive16 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -23366,7 +23628,7 @@
     return function(act) {
       return bind34(liftEffect7(create3))(function(v) {
         return bind34(subscribe2(voidRight9(act)(v.emitter)))(function(sid) {
-          return discard110(liftEffect7(afterFrame(notify(v.listener)(unit))))(function() {
+          return discard111(liftEffect7(afterFrame(notify(v.listener)(unit))))(function() {
             return pure33(sid);
           });
         });
@@ -23421,9 +23683,9 @@
   var finishClose7 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind34(get16)(function(st) {
-      return discard110(for_26(st.animSub)(unsubscribe2))(function() {
-        return discard110(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard110(liftEffect7(removeFocusGuards))(function() {
+      return discard111(for_26(st.animSub)(unsubscribe2))(function() {
+        return discard111(for_26(st.postSub)(unsubscribe2))(function() {
+          return discard111(liftEffect7(removeFocusGuards))(function() {
             return modify_17(function(v) {
               var $95 = {};
               for (var $96 in v) {
@@ -23444,11 +23706,11 @@
       });
     });
   };
-  var defaultStyle13 = {
+  var defaultStyle12 = {
     trigger: /* @__PURE__ */ cn("rdx-popover-trigger"),
     content: /* @__PURE__ */ cn("rdx-popover-content")
   };
-  var defaultInput14 = /* @__PURE__ */ function() {
+  var defaultInput13 = /* @__PURE__ */ function() {
     return {
       open: Nothing.value,
       defaultOpen: false,
@@ -23456,7 +23718,7 @@
       align: Center.value,
       offset: 8,
       padding: 8,
-      style: defaultStyle13,
+      style: defaultStyle12,
       trigger: [],
       content: [],
       closeLabels: [],
@@ -23478,7 +23740,7 @@
                 return when23(focusToo)(function __do13() {
                   addFocusGuards();
                   return for_110(mc)(function(content3) {
-                    return $$void13(captureFocus(content3));
+                    return $$void14(captureFocus(content3));
                   })();
                 })();
               }));
@@ -23496,7 +23758,7 @@
     return bind34(get16)(function(st) {
       return when110(!current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
         return bind34(liftEffect7(activeElement(doc)))(function(mprev) {
-          return discard110(modify_17(function(v) {
+          return discard111(modify_17(function(v) {
             var $102 = {};
             for (var $103 in v) {
               if ({}.hasOwnProperty.call(v, $103)) {
@@ -23509,7 +23771,7 @@
             $102.restoreEl = mprev;
             return $102;
           }))(function() {
-            return discard110(raise(new OpenChanged8(true)))(function() {
+            return discard111(raise(new OpenChanged8(true)))(function() {
               return bind34(map121(map213(toNode))(getHTMLElementRef(contentRef9)))(function(mcNode) {
                 return bind34(liftEffect7(windowTarget))(function(win) {
                   var docTarget = toEventTarget(doc);
@@ -23521,7 +23783,7 @@
                         return bind34(subscribe2(eventListener2("resize")(win)(function(v) {
                           return new Just(Reposition5.value);
                         })))(function(resizeSub) {
-                          return discard110(for_26(st.animSub)(unsubscribe2))(function() {
+                          return discard111(for_26(st.animSub)(unsubscribe2))(function() {
                             return bind34(scheduleAfter1(AfterOpen8.value))(function(psid) {
                               return modify_17(function(v) {
                                 var $105 = {};
@@ -23633,12 +23895,12 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfter1 = scheduleAfter3(dictMonadEffect);
     return bind34(get16)(function(st) {
-      return when110(current(st.ctrl))(discard110(traverse_15(unsubscribe2)(st.subs))(function() {
-        return discard110(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard110(for_26(st.restoreEl)(function($160) {
+      return when110(current(st.ctrl))(discard111(traverse_15(unsubscribe2)(st.subs))(function() {
+        return discard111(for_26(st.postSub)(unsubscribe2))(function() {
+          return discard111(for_26(st.restoreEl)(function($160) {
             return liftEffect7(focus($160));
           }))(function() {
-            return discard110(modify_17(function(v) {
+            return discard111(modify_17(function(v) {
               var $122 = {};
               for (var $123 in v) {
                 if ({}.hasOwnProperty.call(v, $123)) {
@@ -23654,7 +23916,7 @@
               $122.contentNode = Nothing.value;
               return $122;
             }))(function() {
-              return discard110(raise(new OpenChanged8(false)))(function() {
+              return discard111(raise(new OpenChanged8(false)))(function() {
                 return bind34(scheduleAfter1(AfterClose7.value))(function(psid) {
                   return modify_17(function(v) {
                     var $125 = {};
@@ -23681,7 +23943,7 @@
     var closePopover1 = closePopover(dictMonadEffect);
     return function(v) {
       if (v instanceof SetOpen8) {
-        return discard110(function() {
+        return discard111(function() {
           if (v.value0) {
             return openPopover1;
           }
@@ -23765,7 +24027,7 @@
     var finalize1 = finalize5(dictMonadEffect);
     var finishClose1 = finishClose7(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize13) {
+      if (v instanceof Initialize14) {
         return bind34(useId2)(function(cid) {
           return modify_17(function(v1) {
             var $142 = {};
@@ -23832,7 +24094,7 @@
       }
       ;
       if (v instanceof AfterOpen8) {
-        return discard110(reposition1)(function() {
+        return discard111(reposition1)(function() {
           return finalize1(true);
         });
       }
@@ -23848,7 +24110,7 @@
               return bind34(liftEffect7(hasAnimation(mnode.value0)))(function(animates) {
                 if (animates) {
                   return bind34(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone8.value)))(function(sub3) {
-                    return discard110(modify_17(function(v1) {
+                    return discard111(modify_17(function(v1) {
                       var $153 = {};
                       for (var $154 in v1) {
                         if ({}.hasOwnProperty.call(v1, $154)) {
@@ -23913,7 +24175,7 @@
       }
       ;
       if (v instanceof Reposition5) {
-        return discard110(reposition1)(function() {
+        return discard111(reposition1)(function() {
           return finalize1(false);
         });
       }
@@ -23932,7 +24194,7 @@
         receive: function($162) {
           return Just.create(Receive16.create($162));
         },
-        initialize: new Just(Initialize13.value)
+        initialize: new Just(Initialize14.value)
       })
     });
   };
@@ -24056,12 +24318,12 @@
     };
     return ValueChanged9;
   }();
-  var Initialize14 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize15 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive17 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -24259,7 +24521,7 @@
     var useId2 = useId(monadEffectHalogenM(dictMonadEffect));
     var focusItemAt1 = focusItemAt(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize14) {
+      if (v instanceof Initialize15) {
         return bind35(useId2)(function(uid) {
           return modify_18(function(v1) {
             var $71 = {};
@@ -24417,7 +24679,7 @@
       throw new Error("Failed pattern match at Hydrogen.Radix.RadioGroup (line 413, column 16 - line 475, column 31): " + [v.constructor.name]);
     };
   };
-  var defaultStyle14 = {
+  var defaultStyle13 = {
     root: /* @__PURE__ */ cn("rdx-radio-group"),
     item: /* @__PURE__ */ cn("rdx-radio-group-item"),
     indicator: /* @__PURE__ */ cn("rdx-radio-group-indicator"),
@@ -24425,7 +24687,7 @@
     itemLabel: /* @__PURE__ */ cn(""),
     itemInner: /* @__PURE__ */ cn("")
   };
-  var defaultInput15 = /* @__PURE__ */ function() {
+  var defaultInput14 = /* @__PURE__ */ function() {
     return {
       items: [],
       value: Nothing.value,
@@ -24436,7 +24698,7 @@
       required: false,
       disabled: false,
       idPrefix: "rdx-radio-group",
-      style: defaultStyle14,
+      style: defaultStyle13,
       explicitOrientation: false,
       rootStyle: "",
       itemIds: true,
@@ -24604,7 +24866,7 @@
         receive: function($117) {
           return Just.create(Receive17.create($117));
         },
-        initialize: new Just(Initialize14.value)
+        initialize: new Just(Initialize15.value)
       })
     });
   };
@@ -24646,12 +24908,12 @@
     Both2.value = new Both2();
     return Both2;
   }();
-  var Initialize15 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize16 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Scrolled = /* @__PURE__ */ function() {
     function Scrolled2() {
@@ -24942,7 +25204,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var trackExtent1 = trackExtent(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize15) {
+      if (v instanceof Initialize16) {
         return recompute1;
       }
       ;
@@ -25085,7 +25347,7 @@
       throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 184, column 16 - line 235, column 50): " + [v.constructor.name]);
     };
   };
-  var defaultStyle15 = {
+  var defaultStyle14 = {
     root: /* @__PURE__ */ cn("rdx-scroll-area-root"),
     viewport: /* @__PURE__ */ cn("rdx-scroll-area-viewport"),
     focusRing: /* @__PURE__ */ cn(""),
@@ -25093,14 +25355,14 @@
     thumb: /* @__PURE__ */ cn("rdx-scroll-area-thumb"),
     corner: /* @__PURE__ */ cn("rdx-scroll-area-corner")
   };
-  var defaultInput16 = /* @__PURE__ */ function() {
+  var defaultInput15 = /* @__PURE__ */ function() {
     return {
       content: [],
       widthPx: 200,
       heightPx: 120,
       scrollbars: Vertical$prime.value,
       radius: "",
-      style: defaultStyle15
+      style: defaultStyle14
     };
   }();
   var component18 = function(dictMonadEffect) {
@@ -25120,7 +25382,7 @@
         receive: defaultEval.receive,
         finalize: defaultEval.finalize,
         handleAction: handleAction17(dictMonadEffect),
-        initialize: new Just(Initialize15.value)
+        initialize: new Just(Initialize16.value)
       })
     });
   };
@@ -25130,7 +25392,7 @@
   var bind37 = /* @__PURE__ */ bind(bindHalogenM);
   var voidRight10 = /* @__PURE__ */ voidRight(functorEmitter);
   var discard27 = /* @__PURE__ */ discard(discardUnit);
-  var discard111 = /* @__PURE__ */ discard27(bindHalogenM);
+  var discard112 = /* @__PURE__ */ discard27(bindHalogenM);
   var pure36 = /* @__PURE__ */ pure(applicativeHalogenM);
   var append11 = /* @__PURE__ */ append(semigroupArray);
   var value15 = /* @__PURE__ */ value12(isPropString);
@@ -25145,7 +25407,7 @@
   var map124 = /* @__PURE__ */ map(functorHalogenM);
   var map214 = /* @__PURE__ */ map(functorMaybe);
   var traverse_16 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
-  var applySecond10 = /* @__PURE__ */ applySecond(applyEffect);
+  var applySecond11 = /* @__PURE__ */ applySecond(applyEffect);
   var applySecond13 = /* @__PURE__ */ applySecond(applyHalogenM);
   var type_31 = /* @__PURE__ */ type_17(isPropButtonType);
   var SetOpen9 = /* @__PURE__ */ function() {
@@ -25214,12 +25476,12 @@
     };
     return ValueChanged9;
   }();
-  var Initialize16 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize17 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive18 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -25338,7 +25600,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind37(liftEffect7(create3))(function(v) {
       return bind37(subscribe2(voidRight10(AfterOpen9.value)(v.emitter)))(function(sid) {
-        return discard111(liftEffect7(queueMicrotask2(notify(v.listener)(unit))))(function() {
+        return discard112(liftEffect7(queueMicrotask2(notify(v.listener)(unit))))(function() {
           return pure36(sid);
         });
       });
@@ -25484,8 +25746,8 @@
             return st.search;
           }() + key2;
           return bind37(readItemTexts1(st.idPrefix)(length(st.items)))(function(texts) {
-            return discard111(for_30(nextMatch(search$prime)(texts)(st.focused))(function(idx) {
-              return discard111(modify_20(function(v) {
+            return discard112(for_30(nextMatch(search$prime)(texts)(st.focused))(function(idx) {
+              return discard112(modify_20(function(v) {
                 var $130 = {};
                 for (var $131 in v) {
                   if ({}.hasOwnProperty.call(v, $131)) {
@@ -25520,7 +25782,7 @@
     };
   };
   var dir5 = /* @__PURE__ */ attr2("dir");
-  var defaultStyle16 = {
+  var defaultStyle15 = {
     trigger: /* @__PURE__ */ cn("rdx-select-trigger"),
     value: /* @__PURE__ */ cn("rdx-select-value"),
     content: /* @__PURE__ */ cn("rdx-select-content"),
@@ -25531,7 +25793,7 @@
     item: /* @__PURE__ */ cn("rdx-select-item"),
     indicator: /* @__PURE__ */ cn("rdx-select-indicator")
   };
-  var defaultInput17 = /* @__PURE__ */ function() {
+  var defaultInput16 = /* @__PURE__ */ function() {
     return {
       items: [],
       open: Nothing.value,
@@ -25541,7 +25803,7 @@
       offset: 4,
       padding: 8,
       idPrefix: "rdx-select",
-      style: defaultStyle16,
+      style: defaultStyle15,
       trigger: [],
       groupLabel: [],
       checkIcon: [],
@@ -25603,7 +25865,7 @@
         var start2 = selectedIndex3(st);
         return bind37(liftEffect7(bind122(windowImpl)(document)))(function(doc) {
           return bind37(liftEffect7(activeElement(doc)))(function(mprev) {
-            return discard111(modify_20(function(v) {
+            return discard112(modify_20(function(v) {
               var $143 = {};
               for (var $144 in v) {
                 if ({}.hasOwnProperty.call(v, $144)) {
@@ -25617,7 +25879,7 @@
               $143.restoreEl = mprev;
               return $143;
             }))(function() {
-              return discard111(raise(new OpenChanged9(true)))(function() {
+              return discard112(raise(new OpenChanged9(true)))(function() {
                 return bind37(map124(map214(toNode))(getHTMLElementRef(contentRef10)))(function(mcNode) {
                   return bind37(liftEffect7(windowTarget))(function(win) {
                     var docTarget = toEventTarget(doc);
@@ -25685,13 +25947,13 @@
   var closeMenu5 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind37(get19)(function(st) {
-      return when25(current(st.ctrl))(discard111(traverse_16(unsubscribe2)(st.subs))(function() {
-        return discard111(for_30(st.postSub)(unsubscribe2))(function() {
-          return discard111(liftEffect7(applySecond10(applySecond10(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
-            return discard111(for_30(st.restoreEl)(function($211) {
+      return when25(current(st.ctrl))(discard112(traverse_16(unsubscribe2)(st.subs))(function() {
+        return discard112(for_30(st.postSub)(unsubscribe2))(function() {
+          return discard112(liftEffect7(applySecond11(applySecond11(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
+            return discard112(for_30(st.restoreEl)(function($211) {
               return liftEffect7(focus($211));
             }))(function() {
-              return discard111(modify_20(function(v) {
+              return discard112(modify_20(function(v) {
                 var $157 = {};
                 for (var $158 in v) {
                   if ({}.hasOwnProperty.call(v, $158)) {
@@ -25722,7 +25984,7 @@
       var v = index(st.items)(st.focused);
       if (v instanceof Just && !v.value0.disabled) {
         var res = change2(v.value0.value)(st.sel);
-        return discard111(modify_20(function(v1) {
+        return discard112(modify_20(function(v1) {
           var $161 = {};
           for (var $162 in v1) {
             if ({}.hasOwnProperty.call(v1, $162)) {
@@ -25734,7 +25996,7 @@
           $161.sel = res.next;
           return $161;
         }))(function() {
-          return discard111(raise(new ValueChanged5(res.emit)))(function() {
+          return discard112(raise(new ValueChanged5(res.emit)))(function() {
             return closeMenu1;
           });
         });
@@ -25755,7 +26017,7 @@
     var typeaheadList1 = typeaheadList(dictMonadEffect);
     var focusItem1 = focusItem3(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize16) {
+      if (v instanceof Initialize17) {
         return bind37(get19)(function(st) {
           return bind37(useId2)(function(cid) {
             return bind37(useId2)(function(lid) {
@@ -25821,14 +26083,14 @@
       if (v instanceof TriggerKeyDown4) {
         return bind37(get19)(function(st) {
           var key2 = key(v.value0);
-          return when25((key2 === " " || (key2 === "Enter" || (key2 === "ArrowUp" || key2 === "ArrowDown"))) && !current(st.ctrl))(discard111(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
+          return when25((key2 === " " || (key2 === "Enter" || (key2 === "ArrowUp" || key2 === "ArrowDown"))) && !current(st.ctrl))(discard112(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
             return openMenu1;
           }));
         });
       }
       ;
       if (v instanceof AfterOpen9) {
-        return discard111(reposition1)(function() {
+        return discard112(reposition1)(function() {
           return finalize1;
         });
       }
@@ -25869,7 +26131,7 @@
           }
           ;
           if (isTypeaheadChar(v1)(st.search !== "")) {
-            return discard111(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
+            return discard112(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
               return typeaheadList1(v1);
             });
           }
@@ -25884,7 +26146,7 @@
             }
             ;
             if (v2 instanceof MoveTo) {
-              return discard111(modify_20(function(v3) {
+              return discard112(modify_20(function(v3) {
                 var $178 = {};
                 for (var $179 in v3) {
                   if ({}.hasOwnProperty.call(v3, $179)) {
@@ -25910,7 +26172,7 @@
       if (v instanceof ItemChosen) {
         return bind37(get19)(function(st) {
           var res = change2(v.value0)(st.sel);
-          return discard111(modify_20(function(v1) {
+          return discard112(modify_20(function(v1) {
             var $183 = {};
             for (var $184 in v1) {
               if ({}.hasOwnProperty.call(v1, $184)) {
@@ -25922,7 +26184,7 @@
             $183.sel = res.next;
             return $183;
           }))(function() {
-            return discard111(raise(new ValueChanged5(res.emit)))(function() {
+            return discard112(raise(new ValueChanged5(res.emit)))(function() {
               return closeMenu1;
             });
           });
@@ -25941,7 +26203,7 @@
     var closeMenu1 = closeMenu5(dictMonadEffect);
     return function(v) {
       if (v instanceof SetOpen9) {
-        return discard111(function() {
+        return discard112(function() {
           if (v.value0) {
             return openMenu1;
           }
@@ -25961,7 +26223,7 @@
       if (v instanceof SetValue5) {
         return bind37(get19)(function(st) {
           var res = change2(v.value0)(st.sel);
-          return discard111(modify_20(function(v2) {
+          return discard112(modify_20(function(v2) {
             var $192 = {};
             for (var $193 in v2) {
               if ({}.hasOwnProperty.call(v2, $193)) {
@@ -25973,7 +26235,7 @@
             $192.sel = res.next;
             return $192;
           }))(function() {
-            return discard111(raise(new ValueChanged5(res.emit)))(function() {
+            return discard112(raise(new ValueChanged5(res.emit)))(function() {
               return pure36(new Just(v.value1));
             });
           });
@@ -26088,7 +26350,7 @@
         receive: function($213) {
           return Just.create(Receive18.create($213));
         },
-        initialize: new Just(Initialize16.value)
+        initialize: new Just(Initialize17.value)
       })
     });
   };
@@ -26113,7 +26375,7 @@
     }();
     return div3(append20([classes2(o.class_), dataOrientation(o.orientation)])(append20(semantics)(o.attrs)))([]);
   };
-  var defaultInput18 = /* @__PURE__ */ function() {
+  var defaultInput17 = /* @__PURE__ */ function() {
     return {
       orientation: Horizontal.value,
       decorative: false,
@@ -26124,8 +26386,8 @@
   var separator_ = function(orientation) {
     return function(decorative) {
       return separator({
-        class_: defaultInput18.class_,
-        attrs: defaultInput18.attrs,
+        class_: defaultInput17.class_,
+        attrs: defaultInput17.attrs,
         orientation,
         decorative
       });
@@ -26281,12 +26543,12 @@
     };
     return ValueChanged9;
   }();
-  var Initialize17 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize18 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive19 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -26822,7 +27084,7 @@
       return [];
     }())))([])])]);
   };
-  var defaultStyle17 = {
+  var defaultStyle16 = {
     root: /* @__PURE__ */ cn("rdx-slider-root"),
     track: /* @__PURE__ */ cn("rdx-slider-track"),
     range: /* @__PURE__ */ cn("rdx-slider-range"),
@@ -26840,12 +27102,12 @@
       dir: LTR.value,
       disabled: false,
       idPrefix: "rdx-slider-range",
-      style: defaultStyle17,
+      style: defaultStyle16,
       name: "",
       isFormControl: false
     };
   }();
-  var defaultInput19 = /* @__PURE__ */ function() {
+  var defaultInput18 = /* @__PURE__ */ function() {
     return {
       value: Nothing.value,
       defaultValue: 0,
@@ -26856,7 +27118,7 @@
       dir: LTR.value,
       disabled: false,
       idPrefix: "rdx-slider",
-      style: defaultStyle17
+      style: defaultStyle16
     };
   }();
   var commitFromPointer = function(dictMonadEffect) {
@@ -26885,7 +27147,7 @@
     var focusThumb1 = focusThumb(dictMonadEffect);
     var commitFromPointer1 = commitFromPointer(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize17) {
+      if (v instanceof Initialize18) {
         return bind38(useId2)(function(uid) {
           return modify_21(function(v1) {
             var $160 = {};
@@ -27024,7 +27286,7 @@
         receive: function($227) {
           return Just.create(Receive19.create($227));
         },
-        initialize: new Just(Initialize17.value)
+        initialize: new Just(Initialize18.value)
       })
     });
   };
@@ -27546,11 +27808,11 @@
     ;
     throw new Error("Failed pattern match at Hydrogen.Radix.Switch (line 198, column 16 - line 214, column 8): " + [v.constructor.name]);
   };
-  var defaultStyle18 = {
+  var defaultStyle17 = {
     root: /* @__PURE__ */ cn("rdx-switch"),
     thumb: /* @__PURE__ */ cn("rdx-switch-thumb")
   };
-  var defaultInput20 = /* @__PURE__ */ function() {
+  var defaultInput19 = /* @__PURE__ */ function() {
     return {
       checked: Nothing.value,
       defaultChecked: false,
@@ -27558,7 +27820,7 @@
       required: false,
       name: "",
       value: "on",
-      style: defaultStyle18,
+      style: defaultStyle17,
       children: [],
       isFormControl: false
     };
@@ -27702,12 +27964,12 @@
     Manual2.value = new Manual2();
     return Manual2;
   }();
-  var Initialize18 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize19 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive21 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -27875,7 +28137,7 @@
     var focusTabByValue1 = focusTabByValue(dictMonadEffect);
     var focusTabAt1 = focusTabAt(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize18) {
+      if (v instanceof Initialize19) {
         return bind40(useId2)(function(uid) {
           return modify_23(function(v1) {
             var $65 = {};
@@ -27995,13 +28257,13 @@
     ;
     throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 222, column 11 - line 224, column 15): " + [v.constructor.name]);
   };
-  var defaultStyle19 = {
+  var defaultStyle18 = {
     root: /* @__PURE__ */ cn("rdx-tabs-root"),
     list: /* @__PURE__ */ cn("rdx-tabs-list"),
     trigger: /* @__PURE__ */ cn("rdx-tabs-trigger"),
     content: /* @__PURE__ */ cn("rdx-tabs-content")
   };
-  var defaultInput21 = /* @__PURE__ */ function() {
+  var defaultInput20 = /* @__PURE__ */ function() {
     return {
       tabs: [],
       value: Nothing.value,
@@ -28011,7 +28273,7 @@
       loop: true,
       activationMode: Automatic.value,
       idPrefix: "rdx-tabs",
-      style: defaultStyle19
+      style: defaultStyle18
     };
   }();
   var base5 = function(st) {
@@ -28116,7 +28378,7 @@
         receive: function($92) {
           return Just.create(Receive21.create($92));
         },
-        initialize: new Just(Initialize18.value)
+        initialize: new Just(Initialize19.value)
       })
     });
   };
@@ -28189,7 +28451,7 @@
   var for_33 = /* @__PURE__ */ for_(applicativeHalogenM);
   var for_114 = /* @__PURE__ */ for_33(foldableMaybe);
   var modify_24 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var applySecond11 = /* @__PURE__ */ applySecond(applyHalogenM);
+  var applySecond14 = /* @__PURE__ */ applySecond(applyHalogenM);
   var when29 = /* @__PURE__ */ when(applicativeHalogenM);
   var append119 = /* @__PURE__ */ append(semigroupArray);
   var map57 = /* @__PURE__ */ map(functorArray);
@@ -28252,12 +28514,12 @@
     Escaped2.value = new Escaped2();
     return Escaped2;
   }();
-  var Initialize19 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize20 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive22 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -28521,7 +28783,7 @@
       });
     });
   };
-  var defaultStyle20 = {
+  var defaultStyle19 = {
     viewport: /* @__PURE__ */ cn("rdx-toast-viewport"),
     wrapper: /* @__PURE__ */ cn("rdx-toast-wrapper"),
     root: /* @__PURE__ */ cn("rdx-toast-root"),
@@ -28530,7 +28792,7 @@
     action: /* @__PURE__ */ cn("rdx-toast-action"),
     close: /* @__PURE__ */ cn("rdx-toast-close")
   };
-  var defaultInput22 = /* @__PURE__ */ function() {
+  var defaultInput21 = /* @__PURE__ */ function() {
     return {
       label: "Notifications (F8)",
       swipeDirection: "right",
@@ -28540,7 +28802,7 @@
       duration: Nothing.value,
       toastType: Foreground.value,
       closeOnEscape: true,
-      style: defaultStyle20,
+      style: defaultStyle19,
       title: [],
       description: [],
       action: [],
@@ -28561,7 +28823,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind41(get23)(function(st) {
       return discard31(for_114(st.durSub)(function(v) {
-        return applySecond11(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
+        return applySecond14(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_24(function(v) {
           var $117 = {};
@@ -28715,7 +28977,7 @@
     var finishClose1 = finishClose8(dictMonadEffect);
     var cancelDuration1 = cancelDuration(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize19) {
+      if (v instanceof Initialize20) {
         return bind41(get23)(function(st) {
           return discard31(when29(isRendered(st.presence) && st.closeOnEscape)(bind41(liftEffect7(bind124(windowImpl)(document)))(function(doc) {
             return bind41(subscribe2($$escape(toEventTarget(doc))(EscapePressed10.value)))(function(sub22) {
@@ -29082,7 +29344,7 @@
         receive: function($198) {
           return Just.create(Receive22.create($198));
         },
-        initialize: new Just(Initialize19.value)
+        initialize: new Just(Initialize20.value)
       })
     });
   };
@@ -29724,11 +29986,11 @@
       throw new Error("Failed pattern match at Hydrogen.Radix.ToggleGroup (line 271, column 16 - line 346, column 86): " + [v.constructor.name]);
     };
   };
-  var defaultStyle21 = {
+  var defaultStyle20 = {
     root: /* @__PURE__ */ cn("rdx-toggle-group"),
     item: /* @__PURE__ */ cn("rdx-toggle-group-item")
   };
-  var defaultInput23 = /* @__PURE__ */ function() {
+  var defaultInput22 = /* @__PURE__ */ function() {
     return {
       items: [],
       value: Nothing.value,
@@ -29742,7 +30004,7 @@
       idPrefix: "rdx-toggle-group",
       ariaLabel: Nothing.value,
       trailing: [],
-      style: defaultStyle21
+      style: defaultStyle20
     };
   }();
   var component25 = function(dictMonadEffect) {
@@ -29973,12 +30235,12 @@
     };
     return ToggleItemClicked2;
   }();
-  var Initialize20 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize21 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var updateAt$prime = function(i2) {
     return function(v) {
@@ -30223,7 +30485,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var focusAt1 = focusAt2(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize20) {
+      if (v instanceof Initialize21) {
         return pure43(unit);
       }
       ;
@@ -30450,7 +30712,7 @@
   var render25 = function(st) {
     return div3(append121([role("toolbar"), aria("orientation")(orientationName(st.orientation)), dataOrientation(st.orientation), attr2("dir")(dirName3(st.dir)), style("outline: none;"), tabIndex2(0), classes2(st.style.root), onKeyDown(ListKeyDown5.create), onFocus($$const(EntryFocus4.value))])(labelAttr(st.ariaLabel)))(mapWithIndex2(renderItem9(st))(st.items));
   };
-  var defaultStyle22 = {
+  var defaultStyle21 = {
     root: /* @__PURE__ */ cn("rdx-toolbar"),
     button: /* @__PURE__ */ cn("rdx-toolbar-button"),
     link: /* @__PURE__ */ cn("rdx-toolbar-link"),
@@ -30458,14 +30720,14 @@
     toggleGroup: /* @__PURE__ */ cn("rdx-toolbar-toggle-group"),
     toggleItem: /* @__PURE__ */ cn("rdx-toolbar-toggle-item")
   };
-  var defaultInput24 = /* @__PURE__ */ function() {
+  var defaultInput23 = /* @__PURE__ */ function() {
     return {
       items: [],
       orientation: Horizontal.value,
       dir: LTR.value,
       loop: true,
       ariaLabel: Nothing.value,
-      style: defaultStyle22
+      style: defaultStyle21
     };
   }();
   var component26 = function(dictMonadEffect) {
@@ -30479,7 +30741,7 @@
         receive: function($140) {
           return Just.create(Receive25.create($140));
         },
-        initialize: new Just(Initialize20.value)
+        initialize: new Just(Initialize21.value)
       })
     });
   };
@@ -30497,7 +30759,7 @@
   var modify_28 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var bind125 = /* @__PURE__ */ bind(bindEffect);
   var append122 = /* @__PURE__ */ append(semigroupArray);
-  var applySecond14 = /* @__PURE__ */ applySecond(applyHalogenM);
+  var applySecond15 = /* @__PURE__ */ applySecond(applyHalogenM);
   var SetOpen11 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
       this.value0 = value0;
@@ -30531,12 +30793,12 @@
     };
     return OpenChanged12;
   }();
-  var Initialize21 = /* @__PURE__ */ function() {
-    function Initialize22() {
+  var Initialize22 = /* @__PURE__ */ function() {
+    function Initialize23() {
     }
     ;
-    Initialize22.value = new Initialize22();
-    return Initialize22;
+    Initialize23.value = new Initialize23();
+    return Initialize23;
   }();
   var Receive26 = /* @__PURE__ */ function() {
     function Receive27(value0) {
@@ -30653,11 +30915,11 @@
       });
     };
   };
-  var defaultStyle23 = {
+  var defaultStyle22 = {
     trigger: /* @__PURE__ */ cn("rdx-tooltip-trigger"),
     content: /* @__PURE__ */ cn("rdx-tooltip-content")
   };
-  var defaultInput25 = /* @__PURE__ */ function() {
+  var defaultInput24 = /* @__PURE__ */ function() {
     return {
       open: Nothing.value,
       defaultOpen: false,
@@ -30665,7 +30927,7 @@
       align: Center.value,
       offset: 4,
       padding: 8,
-      style: defaultStyle23,
+      style: defaultStyle22,
       trigger: [],
       content: [],
       contentStyle: "",
@@ -30967,7 +31229,7 @@
     var reposition1 = reposition7(dictMonadEffect);
     var finalize1 = finalize7(dictMonadEffect);
     return function(v) {
-      if (v instanceof Initialize21) {
+      if (v instanceof Initialize22) {
         return bind45(useId2)(function(cid) {
           return modify_28(function(v1) {
             var $132 = {};
@@ -31016,7 +31278,7 @@
       }
       ;
       if (v instanceof FocusShow) {
-        return applySecond14(cancelPending1)(openTooltip1(false));
+        return applySecond15(cancelPending1)(openTooltip1(false));
       }
       ;
       if (v instanceof Opened2) {
@@ -31024,7 +31286,7 @@
       }
       ;
       if (v instanceof Hide2) {
-        return applySecond14(cancelPending1)(closeTooltip1);
+        return applySecond15(cancelPending1)(closeTooltip1);
       }
       ;
       if (v instanceof AfterOpen10) {
@@ -31057,7 +31319,7 @@
         receive: function($141) {
           return Just.create(Receive26.create($141));
         },
-        initialize: new Just(Initialize21.value)
+        initialize: new Just(Initialize22.value)
       })
     });
   };
@@ -32137,7 +32399,7 @@
   var discard36 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var bind126 = /* @__PURE__ */ bind(bindAff);
   var for_37 = /* @__PURE__ */ for_(applicativeAff)(foldableMaybe);
-  var $$void14 = /* @__PURE__ */ $$void(functorAff);
+  var $$void15 = /* @__PURE__ */ $$void(functorAff);
   var visuallyHiddenPrimPage = function(s) {
     if (s === "props") {
       return visuallyHiddenWith({
@@ -32159,7 +32421,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1925, column 1 - line 1925, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1943, column 1 - line 1943, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32167,8 +32429,8 @@
   };
   var toolbarRtlInput = /* @__PURE__ */ function() {
     return {
-      orientation: defaultInput24.orientation,
-      loop: defaultInput24.loop,
+      orientation: defaultInput23.orientation,
+      loop: defaultInput23.loop,
       dir: RTL.value,
       ariaLabel: new Just("Formatting"),
       items: [new Button({
@@ -32225,7 +32487,7 @@
   }();
   var toolbarMultipleInput = /* @__PURE__ */ function() {
     return {
-      loop: defaultInput24.loop,
+      loop: defaultInput23.loop,
       orientation: Horizontal.value,
       dir: LTR.value,
       ariaLabel: new Just("Formatting"),
@@ -32259,7 +32521,7 @@
   }();
   var toolbarInput = function(s) {
     return {
-      loop: defaultInput24.loop,
+      loop: defaultInput23.loop,
       orientation: function() {
         var $226 = s === "vertical";
         if ($226) {
@@ -32324,12 +32586,12 @@
   };
   var toggleGroupVertInput = /* @__PURE__ */ function() {
     return {
-      value: defaultInput23.value,
-      dir: defaultInput23.dir,
-      loop: defaultInput23.loop,
-      disabled: defaultInput23.disabled,
-      idPrefix: defaultInput23.idPrefix,
-      trailing: defaultInput23.trailing,
+      value: defaultInput22.value,
+      dir: defaultInput22.dir,
+      loop: defaultInput22.loop,
+      disabled: defaultInput22.disabled,
+      idPrefix: defaultInput22.idPrefix,
+      trailing: defaultInput22.trailing,
       single: true,
       orientation: Vertical.value,
       explicitOrientation: true,
@@ -32356,13 +32618,13 @@
   }();
   var toggleGroupRtlInput = /* @__PURE__ */ function() {
     return {
-      value: defaultInput23.value,
-      orientation: defaultInput23.orientation,
-      explicitOrientation: defaultInput23.explicitOrientation,
-      loop: defaultInput23.loop,
-      disabled: defaultInput23.disabled,
-      idPrefix: defaultInput23.idPrefix,
-      trailing: defaultInput23.trailing,
+      value: defaultInput22.value,
+      orientation: defaultInput22.orientation,
+      explicitOrientation: defaultInput22.explicitOrientation,
+      loop: defaultInput22.loop,
+      disabled: defaultInput22.disabled,
+      idPrefix: defaultInput22.idPrefix,
+      trailing: defaultInput22.trailing,
       single: true,
       dir: RTL.value,
       defaultValue: ["a"],
@@ -32388,13 +32650,13 @@
   }();
   var toggleGroupNoLoopInput = /* @__PURE__ */ function() {
     return {
-      value: defaultInput23.value,
-      orientation: defaultInput23.orientation,
-      explicitOrientation: defaultInput23.explicitOrientation,
-      dir: defaultInput23.dir,
-      disabled: defaultInput23.disabled,
-      idPrefix: defaultInput23.idPrefix,
-      trailing: defaultInput23.trailing,
+      value: defaultInput22.value,
+      orientation: defaultInput22.orientation,
+      explicitOrientation: defaultInput22.explicitOrientation,
+      dir: defaultInput22.dir,
+      disabled: defaultInput22.disabled,
+      idPrefix: defaultInput22.idPrefix,
+      trailing: defaultInput22.trailing,
       single: true,
       loop: false,
       defaultValue: ["a"],
@@ -32421,14 +32683,14 @@
   var toggleGroupInput = function(s) {
     if (s === "multiple") {
       return {
-        value: defaultInput23.value,
-        orientation: defaultInput23.orientation,
-        explicitOrientation: defaultInput23.explicitOrientation,
-        dir: defaultInput23.dir,
-        loop: defaultInput23.loop,
-        disabled: defaultInput23.disabled,
-        idPrefix: defaultInput23.idPrefix,
-        trailing: defaultInput23.trailing,
+        value: defaultInput22.value,
+        orientation: defaultInput22.orientation,
+        explicitOrientation: defaultInput22.explicitOrientation,
+        dir: defaultInput22.dir,
+        loop: defaultInput22.loop,
+        disabled: defaultInput22.disabled,
+        idPrefix: defaultInput22.idPrefix,
+        trailing: defaultInput22.trailing,
         single: false,
         defaultValue: ["a", "c"],
         ariaLabel: new Just("Text formatting"),
@@ -32455,14 +32717,14 @@
     if (otherwise) {
       var disableMiddle = s === "disabled-skip";
       return {
-        value: defaultInput23.value,
-        orientation: defaultInput23.orientation,
-        explicitOrientation: defaultInput23.explicitOrientation,
-        dir: defaultInput23.dir,
-        loop: defaultInput23.loop,
-        disabled: defaultInput23.disabled,
-        idPrefix: defaultInput23.idPrefix,
-        trailing: defaultInput23.trailing,
+        value: defaultInput22.value,
+        orientation: defaultInput22.orientation,
+        explicitOrientation: defaultInput22.explicitOrientation,
+        dir: defaultInput22.dir,
+        loop: defaultInput22.loop,
+        disabled: defaultInput22.disabled,
+        idPrefix: defaultInput22.idPrefix,
+        trailing: defaultInput22.trailing,
         single: true,
         defaultValue: [function() {
           if (disableMiddle) {
@@ -32492,17 +32754,17 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1373, column 1 - line 1373, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1375, column 1 - line 1375, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
-      value: defaultInput23.value,
-      orientation: defaultInput23.orientation,
-      explicitOrientation: defaultInput23.explicitOrientation,
-      dir: defaultInput23.dir,
-      loop: defaultInput23.loop,
-      idPrefix: defaultInput23.idPrefix,
-      trailing: defaultInput23.trailing,
+      value: defaultInput22.value,
+      orientation: defaultInput22.orientation,
+      explicitOrientation: defaultInput22.explicitOrientation,
+      dir: defaultInput22.dir,
+      loop: defaultInput22.loop,
+      idPrefix: defaultInput22.idPrefix,
+      trailing: defaultInput22.trailing,
       single: true,
       disabled: true,
       defaultValue: ["b"],
@@ -32528,8 +32790,8 @@
   }();
   var toastInput = function(s) {
     return {
-      toastType: defaultInput22.toastType,
-      closeOnEscape: defaultInput22.closeOnEscape,
+      toastType: defaultInput21.toastType,
+      closeOnEscape: defaultInput21.closeOnEscape,
       open: Nothing.value,
       defaultOpen: true,
       duration: function() {
@@ -32604,11 +32866,11 @@
   };
   var tabsInput = function(s) {
     return {
-      value: defaultInput21.value,
-      orientation: defaultInput21.orientation,
-      dir: defaultInput21.dir,
-      loop: defaultInput21.loop,
-      activationMode: defaultInput21.activationMode,
+      value: defaultInput20.value,
+      orientation: defaultInput20.orientation,
+      dir: defaultInput20.dir,
+      loop: defaultInput20.loop,
+      activationMode: defaultInput20.activationMode,
       tabs: [{
         value: "account",
         label: tabsTriggerLabel("Account"),
@@ -32694,7 +32956,7 @@
   var tabNavPage = /* @__PURE__ */ tabNavRoot([])([/* @__PURE__ */ tabNavLink(true)("#account")([])([/* @__PURE__ */ text5("Account")]), /* @__PURE__ */ tabNavLink(false)("#documents")([])([/* @__PURE__ */ text5("Documents")]), /* @__PURE__ */ tabNavLink(false)("#settings")([])([/* @__PURE__ */ text5("Settings")])]);
   var switchInput = function(s) {
     return {
-      children: defaultInput20.children,
+      children: defaultInput19.children,
       checked: function() {
         var $233 = s === "controlled";
         if ($233) {
@@ -32743,7 +33005,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2017, column 17 - line 2019, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2035, column 17 - line 2037, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -32811,9 +33073,9 @@
   };
   var sliderInput = function(s) {
     return {
-      value: defaultInput19.value,
-      dir: defaultInput19.dir,
-      idPrefix: defaultInput19.idPrefix,
+      value: defaultInput18.value,
+      dir: defaultInput18.dir,
+      idPrefix: defaultInput18.idPrefix,
       defaultValue: 40,
       min: 0,
       max: 100,
@@ -32856,7 +33118,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1972, column 1 - line 1972, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1990, column 1 - line 1990, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -32886,14 +33148,14 @@
   };
   var segmentedControlInput = /* @__PURE__ */ function() {
     return {
-      value: defaultInput23.value,
-      orientation: defaultInput23.orientation,
-      explicitOrientation: defaultInput23.explicitOrientation,
-      dir: defaultInput23.dir,
-      loop: defaultInput23.loop,
-      disabled: defaultInput23.disabled,
-      idPrefix: defaultInput23.idPrefix,
-      ariaLabel: defaultInput23.ariaLabel,
+      value: defaultInput22.value,
+      orientation: defaultInput22.orientation,
+      explicitOrientation: defaultInput22.explicitOrientation,
+      dir: defaultInput22.dir,
+      loop: defaultInput22.loop,
+      disabled: defaultInput22.disabled,
+      idPrefix: defaultInput22.idPrefix,
+      ariaLabel: defaultInput22.ariaLabel,
       single: true,
       defaultValue: ["inbox"],
       items: [{
@@ -32951,8 +33213,8 @@
   };
   var scrollAreaInput = /* @__PURE__ */ function() {
     return {
-      scrollbars: defaultInput16.scrollbars,
-      radius: defaultInput16.radius,
+      scrollbars: defaultInput15.scrollbars,
+      radius: defaultInput15.radius,
       widthPx: 200,
       heightPx: 120,
       style: {
@@ -32970,9 +33232,9 @@
   }();
   var radioGroupInput = function(s) {
     return {
-      value: defaultInput15.value,
-      idPrefix: defaultInput15.idPrefix,
-      rootStyle: defaultInput15.rootStyle,
+      value: defaultInput14.value,
+      idPrefix: defaultInput14.idPrefix,
+      rootStyle: defaultInput14.rootStyle,
       items: function() {
         var $245 = s === "keys" || s === "mixed";
         if ($245) {
@@ -33075,17 +33337,17 @@
   };
   var radioCardsInput = /* @__PURE__ */ function() {
     return {
-      value: defaultInput15.value,
-      orientation: defaultInput15.orientation,
-      dir: defaultInput15.dir,
-      loop: defaultInput15.loop,
-      required: defaultInput15.required,
-      disabled: defaultInput15.disabled,
-      idPrefix: defaultInput15.idPrefix,
-      explicitOrientation: defaultInput15.explicitOrientation,
-      labelOutside: defaultInput15.labelOutside,
-      name: defaultInput15.name,
-      isFormControl: defaultInput15.isFormControl,
+      value: defaultInput14.value,
+      orientation: defaultInput14.orientation,
+      dir: defaultInput14.dir,
+      loop: defaultInput14.loop,
+      required: defaultInput14.required,
+      disabled: defaultInput14.disabled,
+      idPrefix: defaultInput14.idPrefix,
+      explicitOrientation: defaultInput14.explicitOrientation,
+      labelOutside: defaultInput14.labelOutside,
+      name: defaultInput14.name,
+      isFormControl: defaultInput14.isFormControl,
       items: [{
         value: "1",
         label: [textAs("span")([new Weight("bold")])([text5("8-core CPU")])],
@@ -33180,11 +33442,11 @@
   };
   var tooltipInput = /* @__PURE__ */ function() {
     return {
-      open: defaultInput25.open,
-      defaultOpen: defaultInput25.defaultOpen,
-      side: defaultInput25.side,
-      align: defaultInput25.align,
-      delayMs: defaultInput25.delayMs,
+      open: defaultInput24.open,
+      defaultOpen: defaultInput24.defaultOpen,
+      side: defaultInput24.side,
+      align: defaultInput24.align,
+      delayMs: defaultInput24.delayMs,
       style: tooltipStyle,
       offset: 8,
       padding: 10,
@@ -33202,11 +33464,11 @@
   };
   var popoverInput = function(s) {
     return {
-      open: defaultInput14.open,
-      defaultOpen: defaultInput14.defaultOpen,
-      side: defaultInput14.side,
-      offset: defaultInput14.offset,
-      padding: defaultInput14.padding,
+      open: defaultInput13.open,
+      defaultOpen: defaultInput13.defaultOpen,
+      side: defaultInput13.side,
+      offset: defaultInput13.offset,
+      padding: defaultInput13.padding,
       align: Start.value,
       style: popoverStyle,
       triggerAttrs: [new Tuple("accent-color", "")],
@@ -33246,11 +33508,11 @@
   var passwordToggleIcon = /* @__PURE__ */ elementNS("http://www.w3.org/2000/svg")("svg")([/* @__PURE__ */ attr2("width")("15"), /* @__PURE__ */ attr2("height")("15"), /* @__PURE__ */ attr2("viewBox")("0 0 15 15"), /* @__PURE__ */ attr2("aria-hidden")("true"), /* @__PURE__ */ attr2("xmlns")("http://www.w3.org/2000/svg")])([/* @__PURE__ */ elementNS("http://www.w3.org/2000/svg")("circle")([/* @__PURE__ */ attr2("cx")("7.5"), /* @__PURE__ */ attr2("cy")("7.5"), /* @__PURE__ */ attr2("r")("2"), /* @__PURE__ */ attr2("fill")("currentColor")])([])]);
   var passwordToggleInput = function(s) {
     return {
-      visible: defaultInput13.visible,
-      defaultVisible: defaultInput13.defaultVisible,
-      autoComplete: defaultInput13.autoComplete,
-      showLabel: defaultInput13.showLabel,
-      hideLabel: defaultInput13.hideLabel,
+      visible: defaultInput12.visible,
+      defaultVisible: defaultInput12.defaultVisible,
+      autoComplete: defaultInput12.autoComplete,
+      showLabel: defaultInput12.showLabel,
+      hideLabel: defaultInput12.hideLabel,
       inputId: new Just("password"),
       toggleVisible: function() {
         var $255 = s === "autolabel";
@@ -33278,70 +33540,105 @@
   };
   var otpInput = function(s) {
     return {
-      value: defaultInput12.value,
       length: 3,
-      defaultValue: function() {
-        var $257 = s === "empty" || (s === "typed" || s === "paste");
+      value: function() {
+        var $257 = s === "controlled";
         if ($257) {
+          return new Just("12");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      defaultValue: function() {
+        var $258 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($258) {
           return "";
         }
         ;
-        var $258 = s === "alpha";
-        if ($258) {
+        var $259 = s === "alpha";
+        if ($259) {
           return "abc";
         }
         ;
-        var $259 = s === "alphanumeric";
-        if ($259) {
+        var $260 = s === "alphanumeric";
+        if ($260) {
           return "a1b";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $260 = s === "alpha";
-        if ($260) {
+        var $261 = s === "alpha";
+        if ($261) {
           return Alpha.value;
         }
         ;
-        var $261 = s === "alphanumeric";
-        if ($261) {
+        var $262 = s === "alphanumeric";
+        if ($262) {
           return Alphanumeric.value;
         }
         ;
+        var $263 = s === "novalidation";
+        if ($263) {
+          return NoValidation.value;
+        }
+        ;
         return Numeric.value;
+      }(),
+      placeholder: function() {
+        var $264 = s === "placeholder";
+        if ($264) {
+          return new Just("\u25CB");
+        }
+        ;
+        return Nothing.value;
       }(),
       password: s === "password",
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $262 = s === "vertical";
-        if ($262) {
+        var $265 = s === "vertical";
+        if ($265) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $263 = s === "rtl";
-        if ($263) {
+        var $266 = s === "rtl";
+        if ($266) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $264 = s === "named";
-        if ($264) {
+        var $267 = s === "named";
+        if ($267) {
           return new Just("otp-code");
         }
         ;
         return Nothing.value;
       }(),
+      autoSubmit: s === "autosubmit",
+      autoFocus: s === "autofocus",
       style: {
         root: cn(""),
         input: cn("")
       }
+    };
+  };
+  var otpFormWrap = function(s) {
+    return function(content3) {
+      if (s === "form" || s === "autosubmit") {
+        return form2([])([content3]);
+      }
+      ;
+      if (otherwise) {
+        return content3;
+      }
+      ;
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1697, column 1 - line 1697, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -33353,24 +33650,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $265 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($265) {
+        var $270 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($270) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $266 = s === "vertical";
-        if ($266) {
+        var $271 = s === "vertical";
+        if ($271) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $267 = s === "rtl";
-        if ($267) {
+        var $272 = s === "rtl";
+        if ($272) {
           return RTL.value;
         }
         ;
@@ -33425,8 +33722,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $268 = s === "submenu";
-          if ($268) {
+          var $273 = s === "submenu";
+          if ($273) {
             return [menubarSubEntry];
           }
           ;
@@ -33478,8 +33775,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $269 = s === "radio";
-          if ($269) {
+          var $274 = s === "radio";
+          if ($274) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -33585,7 +33882,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1984, column 1 - line 1984, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2002, column 1 - line 2002, column 41): " + [s.constructor.name]);
   };
   var hoverCardStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"),
@@ -33611,8 +33908,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $271 = s === "richcontent";
-        if ($271) {
+        var $276 = s === "richcontent";
+        if ($276) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -33631,15 +33928,15 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2162, column 1 - line 2162, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2180, column 1 - line 2180, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $274 = s === "reset";
-        if ($274) {
+        var $279 = s === "reset";
+        if ($279) {
           return [text5("Reset")];
         }
         ;
@@ -33652,8 +33949,8 @@
         required: true,
         serverInvalid: s === "serverInvalid",
         messages: function() {
-          var $275 = s === "defaultMessage";
-          if ($275) {
+          var $280 = s === "defaultMessage";
+          if ($280) {
             return [{
               match: ValueMissing.value,
               forceMatch: true,
@@ -33661,8 +33958,8 @@
             }];
           }
           ;
-          var $276 = s === "reset";
-          if ($276) {
+          var $281 = s === "reset";
+          if ($281) {
             return [{
               match: ValueMissing.value,
               forceMatch: false,
@@ -33701,7 +33998,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2028, column 12 - line 2030, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2046, column 12 - line 2048, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -33722,8 +34019,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $284 = kv.before === key2;
-          if ($284) {
+          var $289 = kv.before === key2;
+          if ($289) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -33734,7 +34031,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2010, column 15 - line 2012, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2028, column 15 - line 2030, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -33850,8 +34147,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $286 = s === "submenu";
-        if ($286) {
+        var $291 = s === "submenu";
+        if ($291) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -33875,8 +34172,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $287 = s === "radio";
-        if ($287) {
+        var $292 = s === "radio";
+        if ($292) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -33917,8 +34214,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $288 = s === "controlled";
-        if ($288) {
+        var $293 = s === "controlled";
+        if ($293) {
           return new Just(true);
         }
         ;
@@ -33939,8 +34236,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $289 = klass === "";
-      if ($289) {
+      var $294 = klass === "";
+      if ($294) {
         return [];
       }
       ;
@@ -33964,8 +34261,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $290 = s === "radio";
-        if ($290) {
+        var $295 = s === "radio";
+        if ($295) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34061,8 +34358,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $291 = s === "submenu";
-        if ($291) {
+        var $296 = s === "submenu";
+        if ($296) {
           return [submenuEntry];
         }
         ;
@@ -34107,13 +34404,13 @@
   var checkSvg = /* @__PURE__ */ elementNS(svgNS)("svg")([/* @__PURE__ */ attr2("class")("rt-SelectItemIndicatorIcon"), /* @__PURE__ */ attr2("width")("9"), /* @__PURE__ */ attr2("height")("9"), /* @__PURE__ */ attr2("viewBox")("0 0 9 9"), /* @__PURE__ */ attr2("fill")("currentcolor"), /* @__PURE__ */ attr2("xmlns")("http://www.w3.org/2000/svg")])([/* @__PURE__ */ elementNS(svgNS)("path")([/* @__PURE__ */ attr2("fill-rule")("evenodd"), /* @__PURE__ */ attr2("clip-rule")("evenodd"), /* @__PURE__ */ attr2("d")("M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z")])([])]);
   var selectFormInput = function(s) {
     return {
-      open: defaultInput17.open,
-      defaultOpen: defaultInput17.defaultOpen,
-      value: defaultInput17.value,
-      offset: defaultInput17.offset,
-      padding: defaultInput17.padding,
-      idPrefix: defaultInput17.idPrefix,
-      placeholder: defaultInput17.placeholder,
+      open: defaultInput16.open,
+      defaultOpen: defaultInput16.defaultOpen,
+      value: defaultInput16.value,
+      offset: defaultInput16.offset,
+      padding: defaultInput16.padding,
+      idPrefix: defaultInput16.idPrefix,
+      placeholder: defaultInput16.placeholder,
       defaultValue: "apple",
       name: "fruit",
       required: s !== "disabledtrigger",
@@ -34141,16 +34438,16 @@
   };
   var selectInput = function(s) {
     return {
-      open: defaultInput17.open,
-      defaultOpen: defaultInput17.defaultOpen,
-      value: defaultInput17.value,
-      offset: defaultInput17.offset,
-      padding: defaultInput17.padding,
-      idPrefix: defaultInput17.idPrefix,
-      placeholder: defaultInput17.placeholder,
-      name: defaultInput17.name,
-      required: defaultInput17.required,
-      disabled: defaultInput17.disabled,
+      open: defaultInput16.open,
+      defaultOpen: defaultInput16.defaultOpen,
+      value: defaultInput16.value,
+      offset: defaultInput16.offset,
+      padding: defaultInput16.padding,
+      idPrefix: defaultInput16.idPrefix,
+      placeholder: defaultInput16.placeholder,
+      name: defaultInput16.name,
+      required: defaultInput16.required,
+      disabled: defaultInput16.disabled,
       defaultValue: "apple",
       style: selectStyle,
       portalAttrs: portalThemeAttrs,
@@ -34175,16 +34472,16 @@
   };
   var selectPlaceholderInput = /* @__PURE__ */ function() {
     return {
-      open: defaultInput17.open,
-      defaultOpen: defaultInput17.defaultOpen,
-      value: defaultInput17.value,
-      defaultValue: defaultInput17.defaultValue,
-      offset: defaultInput17.offset,
-      padding: defaultInput17.padding,
-      idPrefix: defaultInput17.idPrefix,
-      name: defaultInput17.name,
-      required: defaultInput17.required,
-      disabled: defaultInput17.disabled,
+      open: defaultInput16.open,
+      defaultOpen: defaultInput16.defaultOpen,
+      value: defaultInput16.value,
+      defaultValue: defaultInput16.defaultValue,
+      offset: defaultInput16.offset,
+      padding: defaultInput16.padding,
+      idPrefix: defaultInput16.idPrefix,
+      name: defaultInput16.name,
+      required: defaultInput16.required,
+      disabled: defaultInput16.disabled,
       style: selectStyle,
       portalAttrs: portalThemeAttrs,
       contentStyle: "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;",
@@ -34225,8 +34522,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $293 = s === "controlled";
-        if ($293) {
+        var $298 = s === "controlled";
+        if ($298) {
           return new Just(Checked.value);
         }
         ;
@@ -34250,16 +34547,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $295 = s === "form";
-        if ($295) {
+        var $300 = s === "form";
+        if ($300) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $296 = s === "form";
-        if ($296) {
+        var $301 = s === "form";
+        if ($301) {
           return "yes";
         }
         ;
@@ -34327,18 +34624,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $299 = s === "wide";
-        if ($299) {
+        var $304 = s === "wide";
+        if ($304) {
           return 16 / 9;
         }
         ;
-        var $300 = s === "tall";
-        if ($300) {
+        var $305 = s === "tall";
+        if ($305) {
           return 1 / 2;
         }
         ;
-        var $301 = s === "verywide";
-        if ($301) {
+        var $306 = s === "verywide";
+        if ($306) {
           return 21 / 9;
         }
         ;
@@ -34347,7 +34644,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1902, column 1 - line 1902, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1920, column 1 - line 1920, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -34401,8 +34698,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $302 = s === "single";
-        if ($302) {
+        var $307 = s === "single";
+        if ($307) {
           return ["item-1"];
         }
         ;
@@ -34527,8 +34824,8 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $303 = s === "formreset";
-    if ($303) {
+    var $308 = s === "formreset";
+    if ($308) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
@@ -34648,8 +34945,8 @@
         }
         ;
         if (c === "slider") {
-          var $305 = s === "vertical";
-          if ($305) {
+          var $310 = s === "vertical";
+          if ($310) {
             return box([new StyleProp("height", "160px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;
@@ -34745,7 +35042,7 @@
         }
         ;
         if (c === "otp") {
-          return box([])([slot_27(_otp)(unit)(component212)(otpInput(s))]);
+          return box([])([otpFormWrap(s)(slot_27(_otp)(unit)(component212)(otpInput(s)))]);
         }
         ;
         if (c === "form") {
@@ -34887,7 +35184,7 @@
     return runHalogenAff(discard36(awaitLoad)(function() {
       return bind126(selectElement("#root"))(function(mEl) {
         return for_37(mEl)(function(el2) {
-          return $$void14(runUI2(root(c)(s))(unit)(el2));
+          return $$void15(runUI2(root(c)(s))(unit)(el2));
         });
       });
     }))();
