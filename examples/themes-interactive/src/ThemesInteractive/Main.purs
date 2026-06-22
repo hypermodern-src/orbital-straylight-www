@@ -1761,15 +1761,22 @@ formInput s = Form.defaultInput
   -- (clears each field's derived validity → Messages unmount) is exercised.
   , resetLabel = if s == "reset" then [ HH.text "Reset" ] else []
   , fields =
-    if s == "multi" then
+    if s == "custom" then
+      -- a custom matcher (value === "taken") → setCustomValidity + the custom Message mounts.
+      [ Form.defaultField
+          { name = "username", label = [ HH.text "Username" ], inputType = "text"
+          , messages = [ { match: Form.ValueMissing, customMatch: Just (\v -> v == "taken"), forceMatch: false, text: [ HH.text "Already taken" ] } ]
+          }
+      ]
+    else if s == "multi" then
       -- TWO required fields: submit empty → both invalid independently, focus the first (email).
       [ Form.defaultField
           { name = "email", label = [ HH.text "Email" ], inputType = "email", required = true
-          , messages = [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "Email is missing" ] } ]
+          , messages = [ { match: Form.ValueMissing, customMatch: Nothing, forceMatch: false, text: [ HH.text "Email is missing" ] } ]
           }
       , Form.defaultField
           { name = "name", label = [ HH.text "Name" ], inputType = "text", required = true
-          , messages = [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "Name is missing" ] } ]
+          , messages = [ { match: Form.ValueMissing, customMatch: Nothing, forceMatch: false, text: [ HH.text "Name is missing" ] } ]
           }
       ]
     else
@@ -1783,19 +1790,19 @@ formInput s = Form.defaultInput
               -- `?s=defaultMessage` forceMatches a single valueMissing Message with EMPTY text →
               -- the default built-in message text fallback (radix DEFAULT_BUILT_IN_MESSAGES).
               if s == "defaultMessage" then
-                [ { match: Form.ValueMissing, forceMatch: true, text: [] } ]
+                [ { match: Form.ValueMissing, customMatch: Nothing, forceMatch: true, text: [] } ]
               -- `?s=reset` has a SINGLE (non-forced) valueMissing Message — it mounts on the
               -- Submit click, then unmounts when the form is reset (matching the golden story).
               else if s == "reset" then
-                [ { match: Form.ValueMissing, forceMatch: false, text: [ HH.text "This value is missing" ] } ]
+                [ { match: Form.ValueMissing, customMatch: Nothing, forceMatch: false, text: [ HH.text "This value is missing" ] } ]
               else
               -- `?s=multiMessage` forceMatches BOTH messages → aria-describedby lists both ids
               -- in registration order (the multi-id describedby contract).
-              [ { match: Form.ValueMissing
+              [ { match: Form.ValueMissing, customMatch: Nothing
                 , forceMatch: s == "forceMatch" || s == "multiMessage"
                 , text: [ HH.text "This value is missing" ]
                 }
-              , { match: Form.TypeMismatch
+              , { match: Form.TypeMismatch, customMatch: Nothing
                 , forceMatch: s == "multiMessage"
                 , text: [ HH.text "Provide a valid email" ]
                 }

@@ -1965,6 +1965,22 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=custom` — a custom matcher function (value === "taken") → setCustomValidity makes the
+      // field invalid + mounts the custom Message; any other value is valid.
+      if (s === "custom") {
+        return (
+          <Box>
+            <Form.Root>
+              <Form.Field name="username">
+                <Form.Label>Username</Form.Label>
+                <Form.Control type="text" />
+                <Form.Message match={(value: string) => value === "taken"}>Already taken</Form.Message>
+              </Form.Field>
+              <Form.Submit>Submit</Form.Submit>
+            </Form.Root>
+          </Box>
+        );
+      }
       // `?s=multi` — TWO required fields: submitting empty marks BOTH invalid independently
       // (per-field validity) and focuses the FIRST invalid control (email).
       if (s === "multi") {

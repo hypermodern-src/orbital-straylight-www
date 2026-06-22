@@ -2535,6 +2535,38 @@ const CHECKS = [
     await pg.waitForTimeout(120);
     ok(await pg.evaluate(() => document.activeElement === document.querySelectorAll("#root form input")[0]), "submit did not focus the first invalid control");
   }},
+  // a custom matcher (value==="taken") marks the field invalid + mounts its Message; other values valid.
+  { id: "form", state: "custom", apg: "form", name: "a custom matcher invalidates the field and mounts its message", run: async (pg) => {
+    const inp = '#root input[name="username"]';
+    await pg.locator(inp).waitFor();
+    await pg.locator(inp).fill("taken");
+    await pg.locator(inp).blur();   // native change → custom matcher runs
+    await pg.waitForTimeout(120);
+    const bad = await pg.evaluate(() => { const i = document.querySelector('#root input[name="username"]'); const db = i.getAttribute("aria-describedby"); return { inv: i.getAttribute("data-invalid"), linked: !!(db && document.getElementById(db.split(" ")[0])) }; });
+    ok(bad.inv === "true" && bad.linked, `custom matcher did not invalidate+link (data-invalid=${bad.inv} linked=${bad.linked})`);
+    await pg.locator(inp).fill("free");
+    await pg.locator(inp).blur();
+    await pg.waitForTimeout(120);
+    ok(await pg.evaluate(() => !document.querySelector('#root input[name="username"]').hasAttribute("data-invalid")), "a valid value must clear the custom error");
+  }},
+  // serverInvalid focuses its control on mount (form.tsx:382-390).
+  { id: "form", state: "serverInvalid", apg: "form", name: "a serverInvalid field focuses its control on mount", run: async (pg) => {
+    await pg.locator('#root input[name="email"]').waitFor();
+    await pg.waitForTimeout(120);
+    ok(await pg.evaluate(() => document.activeElement === document.querySelector('#root input[name="email"]')), "serverInvalid did not focus its control on mount");
+  }},
+  // revalidate on native `change` (form.tsx:354-363): an invalid field recovers to data-valid when
+  // a valid value is entered and the control fires `change` (not just `input`).
+  { id: "form", state: "validatechange", apg: "form", name: "entering a valid value revalidates on change (data-invalid → data-valid)", run: async (pg) => {
+    await pg.locator('#root input[name="email"]').waitFor();
+    await pg.locator('#root button[type="submit"]').click();
+    await pg.locator('#root input[data-invalid="true"]').first().waitFor();
+    await pg.locator('#root input[name="email"]').fill("a@b.com");
+    await pg.locator('#root input[name="email"]').blur();   // fires native `change`
+    await pg.waitForTimeout(120);
+    const r = await pg.evaluate(() => { const i = document.querySelector('#root input[name="email"]'); return { inv: i.hasAttribute("data-invalid"), val: i.getAttribute("data-valid") }; });
+    ok(!r.inv && r.val === "true", `change did not revalidate (data-invalid=${r.inv} data-valid=${r.val})`);
+  }},
   { id: "form", state: "reset", apg: "form", name: "a form reset clears the field validity (Message unmounts, data-invalid drops)", run: async (pg) => {
     await pg.locator('#root form').first().waitFor();
     await pg.locator('#root button[type="submit"]').click();

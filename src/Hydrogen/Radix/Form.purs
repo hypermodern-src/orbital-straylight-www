@@ -43,13 +43,13 @@ module Hydrogen.Radix.Form
 
 import Prelude
 
-import Data.Array (elem, filter, findIndex, mapWithIndex, null, (!!))
+import Data.Array (catMaybes, elem, filter, findIndex, mapWithIndex, null, (!!))
 import Data.Array (filterA) as Array
 import Data.Foldable (for_)
 import Effect (Effect)
 import Data.Map (Map)
 import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isJust, isNothing)
 import Data.String (joinWith)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(..))
@@ -104,6 +104,9 @@ matcherFails vs = case _ of
 type Message =
   { match :: Matcher
   , forceMatch :: Boolean   -- render unconditionally (registers aria-describedby on first paint)
+  , customMatch :: Maybe (String -> Boolean)  -- a custom matcher predicate over the control value
+                                              -- (FormCustomMessage); when set, `match` is ignored
+                                              -- and the field is invalid via setCustomValidity.
   , text :: Array HH.PlainHTML
   }
 
@@ -180,7 +183,8 @@ type State =
   -- minted ids, keyed by field index
   , controlIds :: Map Int String
   , msgIds :: Map Int (Array String)       -- one id per message of field i
-  , failed :: Map Int (Array Matcher)      -- currently-failing matchers per field
+  , failed :: Map Int (Array Matcher)      -- currently-failing built-in matchers per field
+  , customFails :: Map Int (Array Int)     -- message indices whose custom predicate failed, per field
   , validPassed :: Map Int Boolean         -- field i has run validation AND passed (validity.valid===true)
   }
 
@@ -222,6 +226,7 @@ initialState input =
   , controlIds: Map.empty
   , msgIds: Map.empty
   , failed: Map.empty
+  , customFails: Map.empty
   , validPassed: Map.empty
   }
 
@@ -234,9 +239,18 @@ failedOf st i = fromMaybe [] (Map.lookup i st.failed)
 firstInvalidIndex :: State -> Maybe Int
 firstInvalidIndex st = findIndex identity (mapWithIndex (\i f -> fieldInvalid st i f) st.fields)
 
--- | Does field `i` count as invalid? (serverInvalid OR any failed matcher.)
+-- | The built-in matchers declared by field `f` (custom-matcher messages excluded — their
+-- | `match` is ignored; they validate via their predicate, not ValidityState).
+builtinMatchers :: Field -> Array Matcher
+builtinMatchers f = map _.match (filter (isNothing <<< _.customMatch) f.messages)
+
+-- | Message indices whose CUSTOM predicate currently fails for field `i`.
+customFailsOf :: State -> Int -> Array Int
+customFailsOf st i = fromMaybe [] (Map.lookup i st.customFails)
+
+-- | Does field `i` count as invalid? (serverInvalid OR a failed built-in OR a failed custom matcher.)
 fieldInvalid :: State -> Int -> Field -> Boolean
-fieldInvalid st i f = f.serverInvalid || not (null (failedOf st i))
+fieldInvalid st i f = f.serverInvalid || not (null (failedOf st i)) || not (null (customFailsOf st i))
 
 -- | The Messages of field `i` that should currently render (forceMatch OR matched),
 -- | paired with their minted id.
@@ -244,12 +258,14 @@ visibleMessages :: State -> Int -> Field -> Array { id :: String, text :: Array 
 visibleMessages st i f =
   let
     fails = failedOf st i
+    cfails = customFailsOf st i
     ids = fromMaybe [] (Map.lookup i st.msgIds)
   in
     filter (\m -> m.id /= "")
       ( mapWithIndex
           ( \j m ->
-              if m.forceMatch || (m.match `elem` fails)
+              if m.forceMatch
+                || (if isJust m.customMatch then j `elem` cfails else m.match `elem` fails)
                 -- a Message with NO children falls back to the default built-in message text
                 -- for its matcher (radix DEFAULT_BUILT_IN_MESSAGES).
                 then { id: fromMaybe "" (ids !! j), text: if null m.text then [ HH.text (defaultBuiltInMessage m.match) ] else m.text }
@@ -351,6 +367,23 @@ renderReset st =
     [ HP.type_ HP.ButtonReset ]
     (map HH.fromPlainHTML st.resetLabel)
 
+-- | Run the field's CUSTOM matcher predicates against the live control value: collect the failing
+-- | message indices, mirror them onto the native control via setCustomValidity (so submit blocks
+-- | and `data-invalid` stamps), and record them in `customFails` (FormCustomMessage validation).
+evalCustomFor :: forall m. MonadEffect m => Int -> H.HalogenM State Action () Output m Unit
+evalCustomFor i = do
+  st <- H.get
+  for_ (st.fields !! i) \f -> do
+    mel <- H.getHTMLElementRef (controlRef i)
+    for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> do
+      v <- liftEffect (HTMLInputElement.value inp)
+      let
+        cfails = catMaybes (mapWithIndex (\j m -> case m.customMatch of
+                     Just p | p v -> Just j
+                     _ -> Nothing) f.messages)
+      liftEffect (HTMLInputElement.setCustomValidity (if null cfails then "" else "invalid") inp)
+      H.modify_ \s -> s { customFails = if null cfails then Map.delete i s.customFails else Map.insert i cfails s.customFails }
+
 handleAction :: forall m. MonadEffect m => Action -> H.HalogenM State Action () Output m Unit
 handleAction = case _ of
   Initialize -> do
@@ -378,6 +411,11 @@ handleAction = case _ of
         -- radix revalidates on the native `change` (NOT input): re-read validity so an
         -- invalid→valid recovery stamps data-valid and clears the failed set.
         void $ H.subscribe (eventListener (EventType "change") target (\_ -> Just (ControlChange i)))
+    -- serverInvalid fields focus their control on mount (form.tsx:382-390 useEffect). Focus the
+    -- FIRST serverInvalid control, if any.
+    for_ (findIndex _.serverInvalid st'.fields) \i -> do
+      mel <- H.getHTMLElementRef (controlRef i)
+      for_ mel (liftEffect <<< HTMLElement.focus)
   Receive input ->
     H.modify_ \st -> st
       { fields = input.fields
@@ -396,16 +434,17 @@ handleAction = case _ of
       Just f -> do
         mel <- H.getHTMLElementRef (controlRef i)
         case mel >>= HTMLInputElement.fromHTMLElement of
-          Nothing -> pure (filter (\m -> m == ValueMissing) (map _.match f.messages))
+          Nothing -> pure (filter (\m -> m == ValueMissing) (builtinMatchers f))
           Just input -> liftEffect do
             vs <- HTMLInputElement.validity input
-            Array.filterA (\m -> matcherFails vs m) (map _.match f.messages)
+            Array.filterA (\m -> matcherFails vs m) (builtinMatchers f)
     -- a failed control is no longer "validated valid".
     H.modify_ _ { failed = Map.insert i fails st.failed, validPassed = Map.delete i st.validPassed }
-  ControlInput i ->
+  ControlInput i -> do
     -- typing clears the field's failed set (radix re-validates on input). It does NOT stamp
     -- data-valid — that is the `change`-driven path (validity recorded on change, not input).
     H.modify_ \st -> st { failed = Map.delete i st.failed, validPassed = Map.delete i st.validPassed }
+    evalCustomFor i
   ControlChange i -> do
     -- the native `change` fired — re-read the control's LIVE ValidityState (radix
     -- updateControlValidity). If valid, record validPassed (→ data-valid) + clear failed;
@@ -426,26 +465,28 @@ handleAction = case _ of
                 , failed = Map.delete i s.failed
                 }
             else do
-              fails <- liftEffect (Array.filterA (\m -> matcherFails vs m) (map _.match f.messages))
+              fails <- liftEffect (Array.filterA (\m -> matcherFails vs m) (builtinMatchers f))
               H.modify_ \s -> s
                 { validPassed = Map.delete i s.validPassed
                 , failed = Map.insert i fails s.failed
                 }
+    evalCustomFor i
   FormSubmit ev -> do
     -- prevent the native navigation; if all controls are valid, raise Submitted. The
     -- native `invalid` events (bound above) fire BEFORE submit for invalid controls.
     liftEffect (preventDefault ev)
     st <- H.get
-    if Map.isEmpty st.failed then H.raise Submitted
-    else
+    -- a field is invalid via a built-in matcher, a custom matcher, OR serverInvalid (firstInvalidIndex).
+    case firstInvalidIndex st of
+      Nothing -> H.raise Submitted
       -- onInvalid focuses the FIRST invalid control (form.tsx:167-173 getFirstInvalidControl).
-      for_ (firstInvalidIndex st) \i -> do
+      Just i -> do
         mel <- H.getHTMLElementRef (controlRef i)
         for_ mel (liftEffect <<< HTMLElement.focus)
   FormReset ->
     -- clear all derived validity (failed matchers + validated-valid). The Messages unmount
     -- and aria-describedby is dropped, returning the form to its pristine rest-valid DOM.
-    H.modify_ _ { failed = Map.empty, validPassed = Map.empty }
+    H.modify_ _ { failed = Map.empty, customFails = Map.empty, validPassed = Map.empty }
 
 handleQuery :: forall m a. MonadEffect m => Query a -> H.HalogenM State Action () Output m (Maybe a)
 handleQuery = case _ of
