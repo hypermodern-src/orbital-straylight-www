@@ -56,12 +56,15 @@ done
 # Overlay open-state invariance: each overlay opened under every preset (one per page),
 # behavioral DOM of the open overlay diffed across presets. Spec: "<baseId> <waitRole> <gesture>".
 echo "ℵ behavioral-invariance gate (overlay open-state)"
-# spec: baseId | open-detect (role:X | text:Y) | gesture (click|rightclick|hover) | trigger selector
+# spec: baseId | open-detect (role:X | text:Y) | gesture (click|rightclick|hover|focus) | trigger selector
+# ovl-tooltip opens via FOCUS, not hover: a hovered tooltip's content lands under the pointer
+# and fires mouseLeave→Hide ~50ms later (flap), racing the snapshot; focus-open is stable and
+# is an equally valid open path (the open DOM compared across presets is the same either way).
 for spec in \
   "ovl-dialog|role:dialog|click|button" \
   "ovl-alertdialog|role:alertdialog|click|button" \
   "ovl-popover|text:OVLOPEN|click|button" \
-  "ovl-tooltip|role:tooltip|hover|button" \
+  "ovl-tooltip|role:tooltip|focus|button" \
   "ovl-hovercard|text:OVLOPEN|hover|a" \
   "ovl-dropdownmenu|role:menu|click|button" \
   "ovl-contextmenu|role:menu|rightclick|text=Right-click here" \

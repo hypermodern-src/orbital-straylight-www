@@ -152,7 +152,7 @@ async function selftest() {
 // unambiguous — no pairing. Opens via a generic gesture on the trigger, waits for the
 // overlay's role, snapshots the whole <body>, diffs across presets. Self-contained (no
 // #root / STATES coupling — the gallery mounts to body).
-//   node invariance.mjs <dist> --overlay <baseId> <preset1,..> <waitRole> [click|rightclick|hover]
+//   node invariance.mjs <dist> --overlay <baseId> <preset1,..> <waitRole> [click|rightclick|hover|focus]
 async function overlay(DIR, baseId, presetCsv, waitRole, gesture = "click", trigSel = "button") {
   const presets = presetCsv.split(",");
   const { port, close } = await serve(DIR);
@@ -168,6 +168,7 @@ async function overlay(DIR, baseId, presetCsv, waitRole, gesture = "click", trig
       const trig = pg.locator(trigSel).first();
       if (gesture === "rightclick") await trig.click({ button: "right" });
       else if (gesture === "hover") await trig.hover();
+      else if (gesture === "focus") await trig.focus();
       else await trig.click();
       // open-detect: `role:<name>` waits [role=name]; `text:<marker>` waits getByText
       // (for roleless overlays like Popover/HoverCard whose open content carries no role).
@@ -197,7 +198,7 @@ if (process.argv.includes("--selftest")) {
   const DIR = process.argv[2];
   const [baseId, presetCsv, waitRole, gesture, trigSel] = process.argv.slice(i + 1);
   if (!DIR || !baseId || !presetCsv || !waitRole) {
-    console.error("usage: invariance.mjs <dist> --overlay <baseId> <preset1,...> <role:X|text:Y> [click|rightclick|hover] [trigSelector]"); process.exit(2);
+    console.error("usage: invariance.mjs <dist> --overlay <baseId> <preset1,...> <role:X|text:Y> [click|rightclick|hover|focus] [trigSelector]"); process.exit(2);
   }
   await overlay(DIR, baseId, presetCsv, waitRole, gesture, trigSel);
 } else {
