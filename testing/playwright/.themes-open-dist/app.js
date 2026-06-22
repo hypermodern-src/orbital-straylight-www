@@ -2045,6 +2045,7 @@
       };
     };
   };
+  var catMaybes = /* @__PURE__ */ mapMaybe(/* @__PURE__ */ identity(categoryFn));
   var any2 = /* @__PURE__ */ runFn2(anyImpl);
   var all2 = /* @__PURE__ */ runFn2(allImpl);
 
@@ -4152,6 +4153,11 @@
       return input3.form;
     };
   }
+  function value3(input3) {
+    return function() {
+      return input3.value;
+    };
+  }
   function setValue3(value17) {
     return function(input3) {
       return function() {
@@ -4162,6 +4168,13 @@
   function validity3(input3) {
     return function() {
       return input3.validity;
+    };
+  }
+  function setCustomValidity3(value17) {
+    return function(input3) {
+      return function() {
+        input3.setCustomValidity(value17);
+      };
     };
   }
   function select(input3) {
@@ -5035,13 +5048,6 @@
     return function($785) {
       return $784(toMapIter($785));
     };
-  };
-  var isEmpty = function(v) {
-    if (v instanceof Leaf) {
-      return true;
-    }
-    ;
-    return false;
   };
   var insert = function(dictOrd) {
     var compare2 = compare(dictOrd);
@@ -17569,25 +17575,26 @@
   var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
   var map42 = /* @__PURE__ */ map(functorArray);
   var lookup6 = /* @__PURE__ */ lookup(ordInt);
-  var identity12 = /* @__PURE__ */ identity(categoryFn);
   var bind27 = /* @__PURE__ */ bind(bindHalogenM);
   var get10 = /* @__PURE__ */ get(monadStateHalogenM);
   var fromFoldable4 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var pure26 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var identity12 = /* @__PURE__ */ identity(categoryFn);
+  var elem6 = /* @__PURE__ */ elem2(eqInt);
   var show9 = /* @__PURE__ */ show(showInt);
-  var $$for5 = /* @__PURE__ */ $$for(applicativeHalogenM)(traversableArray);
+  var for_10 = /* @__PURE__ */ for_(applicativeHalogenM);
+  var for_14 = /* @__PURE__ */ for_10(foldableMaybe);
+  var bind113 = /* @__PURE__ */ bind(bindMaybe);
   var discard16 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_11 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var fromFoldable1 = /* @__PURE__ */ fromFoldable(ordInt)(foldableArray);
-  var for_10 = /* @__PURE__ */ for_(applicativeHalogenM);
-  var for_14 = /* @__PURE__ */ for_10(foldableArray);
-  var for_23 = /* @__PURE__ */ for_10(foldableMaybe);
-  var $$void10 = /* @__PURE__ */ $$void(functorHalogenM);
-  var bind113 = /* @__PURE__ */ bind(bindMaybe);
-  var filterA3 = /* @__PURE__ */ filterA(applicativeEffect);
-  var insert5 = /* @__PURE__ */ insert(ordInt);
   var $$delete3 = /* @__PURE__ */ $$delete(ordInt);
+  var insert5 = /* @__PURE__ */ insert(ordInt);
   var append19 = /* @__PURE__ */ append(semigroupArray);
+  var $$for5 = /* @__PURE__ */ $$for(applicativeHalogenM)(traversableArray);
+  var fromFoldable1 = /* @__PURE__ */ fromFoldable(ordInt)(foldableArray);
+  var for_23 = /* @__PURE__ */ for_10(foldableArray);
+  var $$void10 = /* @__PURE__ */ $$void(functorHalogenM);
+  var filterA3 = /* @__PURE__ */ filterA(applicativeEffect);
   var Submitted = /* @__PURE__ */ function() {
     function Submitted2() {
     }
@@ -17783,6 +17790,7 @@
       controlIds: empty2,
       msgIds: empty2,
       failed: empty2,
+      customFails: empty2,
       validPassed: empty2
     };
   };
@@ -17790,20 +17798,6 @@
     return function(i2) {
       return fromMaybe([])(lookup6(i2)(st.failed));
     };
-  };
-  var fieldInvalid = function(st) {
-    return function(i2) {
-      return function(f) {
-        return f.serverInvalid || !$$null(failedOf(st)(i2));
-      };
-    };
-  };
-  var firstInvalidIndex = function(st) {
-    return findIndex(identity12)(mapWithIndex2(function(i2) {
-      return function(f) {
-        return fieldInvalid(st)(i2)(f);
-      };
-    })(st.fields));
   };
   var handleQuery9 = function(dictMonadEffect) {
     return function(v) {
@@ -17860,7 +17854,7 @@
       };
     }
   };
-  var elem6 = /* @__PURE__ */ elem2(eqMatcher);
+  var elem1 = /* @__PURE__ */ elem2(eqMatcher);
   var eq6 = /* @__PURE__ */ eq(eqMatcher);
   var defaultField = {
     name: "",
@@ -17907,24 +17901,51 @@
       return "This value is not valid";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 263, column 25 - line 272, column 40): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 279, column 25 - line 288, column 40): " + [v.constructor.name]);
+  };
+  var customFailsOf = function(st) {
+    return function(i2) {
+      return fromMaybe([])(lookup6(i2)(st.customFails));
+    };
+  };
+  var fieldInvalid = function(st) {
+    return function(i2) {
+      return function(f) {
+        return f.serverInvalid || (!$$null(failedOf(st)(i2)) || !$$null(customFailsOf(st)(i2)));
+      };
+    };
+  };
+  var firstInvalidIndex = function(st) {
+    return findIndex(identity12)(mapWithIndex2(function(i2) {
+      return function(f) {
+        return fieldInvalid(st)(i2)(f);
+      };
+    })(st.fields));
   };
   var visibleMessages = function(st) {
     return function(i2) {
       return function(f) {
         var ids = fromMaybe([])(lookup6(i2)(st.msgIds));
         var fails = failedOf(st)(i2);
+        var cfails = customFailsOf(st)(i2);
         return filter(function(m) {
           return m.id !== "";
         })(mapWithIndex2(function(j) {
           return function(m) {
-            var $79 = m.forceMatch || elem6(m.match)(fails);
-            if ($79) {
+            var $87 = m.forceMatch || function() {
+              var $86 = isJust(m.customMatch);
+              if ($86) {
+                return elem6(j)(cfails);
+              }
+              ;
+              return elem1(m.match)(fails);
+            }();
+            if ($87) {
               return {
                 id: fromMaybe("")(index(ids)(j)),
                 text: function() {
-                  var $80 = $$null(m.text);
-                  if ($80) {
+                  var $88 = $$null(m.text);
+                  if ($88) {
                     return [text5(defaultBuiltInMessage(m.match))];
                   }
                   ;
@@ -17945,278 +17966,56 @@
   var controlRef = function(i2) {
     return "form-control-" + show9(i2);
   };
-  var handleAction9 = function(dictMonadEffect) {
-    var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
-    var useId2 = useId(monadEffectHalogenM2);
-    var liftEffect7 = liftEffect(monadEffectHalogenM2);
-    return function(v) {
-      if (v instanceof Initialize8) {
-        return bind27(get10)(function(st) {
-          return bind27($$for5(mapWithIndex2(function(i2) {
-            return function(f) {
-              return {
-                i: i2,
-                f
-              };
-            };
-          })(st.fields))(function(v1) {
-            return bind27(useId2)(function(cid) {
-              return pure26({
-                i: v1.i,
-                cid
-              });
-            });
-          }))(function(cids) {
-            return bind27($$for5(mapWithIndex2(function(i2) {
-              return function(f) {
-                return {
-                  i: i2,
-                  f
-                };
-              };
-            })(st.fields))(function(v1) {
-              return bind27($$for5(v1.f.messages)(function(v2) {
-                return useId2;
-              }))(function(ids) {
-                return pure26({
-                  i: v1.i,
-                  ids
-                });
-              });
-            }))(function(mids) {
-              return discard16(modify_11(function(v1) {
-                var $87 = {};
-                for (var $88 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $88)) {
-                    $87[$88] = v1[$88];
-                  }
-                  ;
-                }
-                ;
-                $87.controlIds = fromFoldable1(map42(function(r) {
-                  return new Tuple(r.i, r.cid);
-                })(cids));
-                $87.msgIds = fromFoldable1(map42(function(r) {
-                  return new Tuple(r.i, r.ids);
-                })(mids));
-                return $87;
-              }))(function() {
-                return bind27(get10)(function(st$prime) {
-                  return for_14(mapWithIndex2(function(i2) {
-                    return function(f) {
-                      return {
-                        i: i2,
-                        f
-                      };
-                    };
-                  })(st$prime.fields))(function(v1) {
-                    return bind27(getHTMLElementRef(controlRef(v1.i)))(function(mel) {
-                      return for_23(mel)(function(el2) {
-                        var target6 = toEventTarget2(el2);
-                        return discard16($$void10(subscribe2(eventListener2("invalid")(target6)(function(v2) {
-                          return new Just(new ControlInvalid(v1.i));
-                        }))))(function() {
-                          return $$void10(subscribe2(eventListener2("change")(target6)(function(v2) {
-                            return new Just(new ControlChange(v1.i));
-                          })));
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      }
-      ;
-      if (v instanceof Receive10) {
-        return modify_11(function(st) {
-          var $92 = {};
-          for (var $93 in st) {
-            if ({}.hasOwnProperty.call(st, $93)) {
-              $92[$93] = st[$93];
-            }
-            ;
-          }
-          ;
-          $92.fields = v.value0.fields;
-          $92.submitLabel = v.value0.submitLabel;
-          $92.resetLabel = v.value0.resetLabel;
-          $92.style = v.value0.style;
-          return $92;
-        });
-      }
-      ;
-      if (v instanceof ControlInvalid) {
-        return bind27(get10)(function(st) {
-          return bind27(function() {
-            var v1 = index(st.fields)(v.value0);
-            if (v1 instanceof Nothing) {
-              return pure26([]);
-            }
-            ;
-            if (v1 instanceof Just) {
-              return bind27(getHTMLElementRef(controlRef(v.value0)))(function(mel) {
-                var v2 = bind113(mel)(fromHTMLElement);
-                if (v2 instanceof Nothing) {
-                  return pure26(filter(function(m) {
-                    return eq6(m)(ValueMissing.value);
-                  })(map42(function(v3) {
-                    return v3.match;
-                  })(v1.value0.messages)));
-                }
-                ;
-                if (v2 instanceof Just) {
-                  return liftEffect7(function __do12() {
-                    var vs = validity3(v2.value0)();
-                    return filterA3(function(m) {
-                      return matcherFails(vs)(m);
-                    })(map42(function(v3) {
-                      return v3.match;
-                    })(v1.value0.messages))();
-                  });
-                }
-                ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 398, column 9 - line 402, column 77): " + [v2.constructor.name]);
-              });
-            }
-            ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 394, column 14 - line 402, column 77): " + [v1.constructor.name]);
-          }())(function(fails) {
-            return modify_11(function(v1) {
-              var $100 = {};
-              for (var $101 in v1) {
-                if ({}.hasOwnProperty.call(v1, $101)) {
-                  $100[$101] = v1[$101];
-                }
-                ;
-              }
-              ;
-              $100.failed = insert5(v.value0)(fails)(st.failed);
-              $100.validPassed = $$delete3(v.value0)(st.validPassed);
-              return $100;
-            });
-          });
-        });
-      }
-      ;
-      if (v instanceof ControlInput) {
-        return modify_11(function(st) {
-          var $104 = {};
-          for (var $105 in st) {
-            if ({}.hasOwnProperty.call(st, $105)) {
-              $104[$105] = st[$105];
-            }
-            ;
-          }
-          ;
-          $104.failed = $$delete3(v.value0)(st.failed);
-          $104.validPassed = $$delete3(v.value0)(st.validPassed);
-          return $104;
-        });
-      }
-      ;
-      if (v instanceof ControlChange) {
-        return bind27(get10)(function(st) {
-          var v1 = index(st.fields)(v.value0);
-          if (v1 instanceof Nothing) {
-            return pure26(unit);
-          }
-          ;
-          if (v1 instanceof Just) {
-            return bind27(getHTMLElementRef(controlRef(v.value0)))(function(mel) {
-              var v2 = bind113(mel)(fromHTMLElement);
-              if (v2 instanceof Nothing) {
-                return pure26(unit);
-              }
-              ;
-              if (v2 instanceof Just) {
-                return bind27(liftEffect7(validity3(v2.value0)))(function(vs) {
-                  return bind27(liftEffect7(valid(vs)))(function(isValid) {
-                    if (isValid) {
-                      return modify_11(function(s) {
-                        var $111 = {};
-                        for (var $112 in s) {
-                          if ({}.hasOwnProperty.call(s, $112)) {
-                            $111[$112] = s[$112];
-                          }
-                          ;
-                        }
-                        ;
-                        $111.validPassed = insert5(v.value0)(true)(s.validPassed);
-                        $111.failed = $$delete3(v.value0)(s.failed);
-                        return $111;
-                      });
+  var evalCustomFor = function(dictMonadEffect) {
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    return function(i2) {
+      return bind27(get10)(function(st) {
+        return for_14(index(st.fields)(i2))(function(f) {
+          return bind27(getHTMLElementRef(controlRef(i2)))(function(mel) {
+            return for_14(bind113(mel)(fromHTMLElement))(function(inp) {
+              return bind27(liftEffect7(value3(inp)))(function(v) {
+                var cfails = catMaybes(mapWithIndex2(function(j) {
+                  return function(m) {
+                    if (m.customMatch instanceof Just && m.customMatch.value0(v)) {
+                      return new Just(j);
                     }
                     ;
-                    return bind27(liftEffect7(filterA3(function(m) {
-                      return matcherFails(vs)(m);
-                    })(map42(function(v3) {
-                      return v3.match;
-                    })(v1.value0.messages))))(function(fails) {
-                      return modify_11(function(s) {
-                        var $114 = {};
-                        for (var $115 in s) {
-                          if ({}.hasOwnProperty.call(s, $115)) {
-                            $114[$115] = s[$115];
-                          }
-                          ;
-                        }
-                        ;
-                        $114.validPassed = $$delete3(v.value0)(s.validPassed);
-                        $114.failed = insert5(v.value0)(fails)(s.failed);
-                        return $114;
-                      });
-                    });
+                    return Nothing.value;
+                  };
+                })(f.messages));
+                return discard16(liftEffect7(setCustomValidity3(function() {
+                  var $91 = $$null(cfails);
+                  if ($91) {
+                    return "";
+                  }
+                  ;
+                  return "invalid";
+                }())(inp)))(function() {
+                  return modify_11(function(s) {
+                    var $93 = {};
+                    for (var $94 in s) {
+                      if ({}.hasOwnProperty.call(s, $94)) {
+                        $93[$94] = s[$94];
+                      }
+                      ;
+                    }
+                    ;
+                    $93.customFails = function() {
+                      var $92 = $$null(cfails);
+                      if ($92) {
+                        return $$delete3(i2)(s.customFails);
+                      }
+                      ;
+                      return insert5(i2)(cfails)(s.customFails);
+                    }();
+                    return $93;
                   });
-                });
-              }
-              ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 418, column 9 - line 433, column 18): " + [v2.constructor.name]);
-            });
-          }
-          ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 414, column 5 - line 433, column 18): " + [v1.constructor.name]);
-        });
-      }
-      ;
-      if (v instanceof FormSubmit) {
-        return discard16(liftEffect7(preventDefault(v.value0)))(function() {
-          return bind27(get10)(function(st) {
-            var $120 = isEmpty(st.failed);
-            if ($120) {
-              return raise(Submitted.value);
-            }
-            ;
-            return for_23(firstInvalidIndex(st))(function(i2) {
-              return bind27(getHTMLElementRef(controlRef(i2)))(function(mel) {
-                return for_23(mel)(function($131) {
-                  return liftEffect7(focus($131));
                 });
               });
             });
           });
         });
-      }
-      ;
-      if (v instanceof FormReset) {
-        return modify_11(function(v1) {
-          var $122 = {};
-          for (var $123 in v1) {
-            if ({}.hasOwnProperty.call(v1, $123)) {
-              $122[$123] = v1[$123];
-            }
-            ;
-          }
-          ;
-          $122.failed = empty2;
-          $122.validPassed = empty2;
-          return $122;
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 355, column 16 - line 448, column 64): " + [v.constructor.name]);
+      });
     };
   };
   var renderField = function(st) {
@@ -18260,8 +18059,8 @@
           ;
           return [];
         }())(function() {
-          var $129 = describedBy !== "";
-          if ($129) {
+          var $100 = describedBy !== "";
+          if ($100) {
             return [aria("describedby")(describedBy)];
           }
           ;
@@ -18272,13 +18071,310 @@
   };
   var render9 = function(st) {
     return form2([classes2(st.style.root), onSubmit(FormSubmit.create), onReset($$const(FormReset.value))])(append19(mapWithIndex2(renderField(st))(st.fields))(append19([renderSubmit(st)])(function() {
-      var $130 = $$null(st.resetLabel);
-      if ($130) {
+      var $101 = $$null(st.resetLabel);
+      if ($101) {
         return [];
       }
       ;
       return [renderReset(st)];
     }())));
+  };
+  var builtinMatchers = function(f) {
+    return map42(function(v) {
+      return v.match;
+    })(filter(function($147) {
+      return isNothing(function(v) {
+        return v.customMatch;
+      }($147));
+    })(f.messages));
+  };
+  var handleAction9 = function(dictMonadEffect) {
+    var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
+    var useId2 = useId(monadEffectHalogenM2);
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var evalCustomFor1 = evalCustomFor(dictMonadEffect);
+    return function(v) {
+      if (v instanceof Initialize8) {
+        return bind27(get10)(function(st) {
+          return bind27($$for5(mapWithIndex2(function(i2) {
+            return function(f) {
+              return {
+                i: i2,
+                f
+              };
+            };
+          })(st.fields))(function(v1) {
+            return bind27(useId2)(function(cid) {
+              return pure26({
+                i: v1.i,
+                cid
+              });
+            });
+          }))(function(cids) {
+            return bind27($$for5(mapWithIndex2(function(i2) {
+              return function(f) {
+                return {
+                  i: i2,
+                  f
+                };
+              };
+            })(st.fields))(function(v1) {
+              return bind27($$for5(v1.f.messages)(function(v2) {
+                return useId2;
+              }))(function(ids) {
+                return pure26({
+                  i: v1.i,
+                  ids
+                });
+              });
+            }))(function(mids) {
+              return discard16(modify_11(function(v1) {
+                var $108 = {};
+                for (var $109 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $109)) {
+                    $108[$109] = v1[$109];
+                  }
+                  ;
+                }
+                ;
+                $108.controlIds = fromFoldable1(map42(function(r) {
+                  return new Tuple(r.i, r.cid);
+                })(cids));
+                $108.msgIds = fromFoldable1(map42(function(r) {
+                  return new Tuple(r.i, r.ids);
+                })(mids));
+                return $108;
+              }))(function() {
+                return bind27(get10)(function(st$prime) {
+                  return discard16(for_23(mapWithIndex2(function(i2) {
+                    return function(f) {
+                      return {
+                        i: i2,
+                        f
+                      };
+                    };
+                  })(st$prime.fields))(function(v1) {
+                    return bind27(getHTMLElementRef(controlRef(v1.i)))(function(mel) {
+                      return for_14(mel)(function(el2) {
+                        var target6 = toEventTarget2(el2);
+                        return discard16($$void10(subscribe2(eventListener2("invalid")(target6)(function(v2) {
+                          return new Just(new ControlInvalid(v1.i));
+                        }))))(function() {
+                          return $$void10(subscribe2(eventListener2("change")(target6)(function(v2) {
+                            return new Just(new ControlChange(v1.i));
+                          })));
+                        });
+                      });
+                    });
+                  }))(function() {
+                    return for_14(findIndex(function(v1) {
+                      return v1.serverInvalid;
+                    })(st$prime.fields))(function(i2) {
+                      return bind27(getHTMLElementRef(controlRef(i2)))(function(mel) {
+                        return for_14(mel)(function($148) {
+                          return liftEffect7(focus($148));
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof Receive10) {
+        return modify_11(function(st) {
+          var $113 = {};
+          for (var $114 in st) {
+            if ({}.hasOwnProperty.call(st, $114)) {
+              $113[$114] = st[$114];
+            }
+            ;
+          }
+          ;
+          $113.fields = v.value0.fields;
+          $113.submitLabel = v.value0.submitLabel;
+          $113.resetLabel = v.value0.resetLabel;
+          $113.style = v.value0.style;
+          return $113;
+        });
+      }
+      ;
+      if (v instanceof ControlInvalid) {
+        return bind27(get10)(function(st) {
+          return bind27(function() {
+            var v1 = index(st.fields)(v.value0);
+            if (v1 instanceof Nothing) {
+              return pure26([]);
+            }
+            ;
+            if (v1 instanceof Just) {
+              return bind27(getHTMLElementRef(controlRef(v.value0)))(function(mel) {
+                var v2 = bind113(mel)(fromHTMLElement);
+                if (v2 instanceof Nothing) {
+                  return pure26(filter(function(m) {
+                    return eq6(m)(ValueMissing.value);
+                  })(builtinMatchers(v1.value0)));
+                }
+                ;
+                if (v2 instanceof Just) {
+                  return liftEffect7(function __do12() {
+                    var vs = validity3(v2.value0)();
+                    return filterA3(function(m) {
+                      return matcherFails(vs)(m);
+                    })(builtinMatchers(v1.value0))();
+                  });
+                }
+                ;
+                throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 436, column 9 - line 440, column 72): " + [v2.constructor.name]);
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 432, column 14 - line 440, column 72): " + [v1.constructor.name]);
+          }())(function(fails) {
+            return modify_11(function(v1) {
+              var $121 = {};
+              for (var $122 in v1) {
+                if ({}.hasOwnProperty.call(v1, $122)) {
+                  $121[$122] = v1[$122];
+                }
+                ;
+              }
+              ;
+              $121.failed = insert5(v.value0)(fails)(st.failed);
+              $121.validPassed = $$delete3(v.value0)(st.validPassed);
+              return $121;
+            });
+          });
+        });
+      }
+      ;
+      if (v instanceof ControlInput) {
+        return discard16(modify_11(function(st) {
+          var $125 = {};
+          for (var $126 in st) {
+            if ({}.hasOwnProperty.call(st, $126)) {
+              $125[$126] = st[$126];
+            }
+            ;
+          }
+          ;
+          $125.failed = $$delete3(v.value0)(st.failed);
+          $125.validPassed = $$delete3(v.value0)(st.validPassed);
+          return $125;
+        }))(function() {
+          return evalCustomFor1(v.value0);
+        });
+      }
+      ;
+      if (v instanceof ControlChange) {
+        return bind27(get10)(function(st) {
+          return discard16(function() {
+            var v1 = index(st.fields)(v.value0);
+            if (v1 instanceof Nothing) {
+              return pure26(unit);
+            }
+            ;
+            if (v1 instanceof Just) {
+              return bind27(getHTMLElementRef(controlRef(v.value0)))(function(mel) {
+                var v2 = bind113(mel)(fromHTMLElement);
+                if (v2 instanceof Nothing) {
+                  return pure26(unit);
+                }
+                ;
+                if (v2 instanceof Just) {
+                  return bind27(liftEffect7(validity3(v2.value0)))(function(vs) {
+                    return bind27(liftEffect7(valid(vs)))(function(isValid) {
+                      if (isValid) {
+                        return modify_11(function(s) {
+                          var $132 = {};
+                          for (var $133 in s) {
+                            if ({}.hasOwnProperty.call(s, $133)) {
+                              $132[$133] = s[$133];
+                            }
+                            ;
+                          }
+                          ;
+                          $132.validPassed = insert5(v.value0)(true)(s.validPassed);
+                          $132.failed = $$delete3(v.value0)(s.failed);
+                          return $132;
+                        });
+                      }
+                      ;
+                      return bind27(liftEffect7(filterA3(function(m) {
+                        return matcherFails(vs)(m);
+                      })(builtinMatchers(v1.value0))))(function(fails) {
+                        return modify_11(function(s) {
+                          var $135 = {};
+                          for (var $136 in s) {
+                            if ({}.hasOwnProperty.call(s, $136)) {
+                              $135[$136] = s[$136];
+                            }
+                            ;
+                          }
+                          ;
+                          $135.validPassed = $$delete3(v.value0)(s.validPassed);
+                          $135.failed = insert5(v.value0)(fails)(s.failed);
+                          return $135;
+                        });
+                      });
+                    });
+                  });
+                }
+                ;
+                throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 457, column 9 - line 472, column 18): " + [v2.constructor.name]);
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 453, column 5 - line 472, column 18): " + [v1.constructor.name]);
+          }())(function() {
+            return evalCustomFor1(v.value0);
+          });
+        });
+      }
+      ;
+      if (v instanceof FormSubmit) {
+        return discard16(liftEffect7(preventDefault(v.value0)))(function() {
+          return bind27(get10)(function(st) {
+            var v1 = firstInvalidIndex(st);
+            if (v1 instanceof Nothing) {
+              return raise(Submitted.value);
+            }
+            ;
+            if (v1 instanceof Just) {
+              return bind27(getHTMLElementRef(controlRef(v1.value0)))(function(mel) {
+                return for_14(mel)(function($149) {
+                  return liftEffect7(focus($149));
+                });
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 480, column 5 - line 485, column 52): " + [v1.constructor.name]);
+          });
+        });
+      }
+      ;
+      if (v instanceof FormReset) {
+        return modify_11(function(v1) {
+          var $144 = {};
+          for (var $145 in v1) {
+            if ({}.hasOwnProperty.call(v1, $145)) {
+              $144[$145] = v1[$145];
+            }
+            ;
+          }
+          ;
+          $144.failed = empty2;
+          $144.customFails = empty2;
+          $144.validPassed = empty2;
+          return $144;
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Hydrogen.Radix.Form (line 388, column 16 - line 489, column 89): " + [v.constructor.name]);
+    };
   };
   var component9 = function(dictMonadEffect) {
     return mkComponent({
@@ -18288,8 +18384,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction9(dictMonadEffect),
         handleQuery: handleQuery9(dictMonadEffect),
-        receive: function($132) {
-          return Just.create(Receive10.create($132));
+        receive: function($150) {
+          return Just.create(Receive10.create($150));
         },
         initialize: new Just(Initialize8.value)
       })
@@ -32748,7 +32844,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2003, column 1 - line 2003, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2012, column 1 - line 2012, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32850,8 +32946,8 @@
     return {
       loop: defaultInput23.loop,
       orientation: function() {
-        var $239 = s === "vertical";
-        if ($239) {
+        var $240 = s === "vertical";
+        if ($240) {
           return Vertical.value;
         }
         ;
@@ -32895,8 +32991,8 @@
   var toggleInput = function(s) {
     return {
       pressed: function() {
-        var $240 = s === "controlled";
-        if ($240) {
+        var $241 = s === "controlled";
+        if ($241) {
           return new Just(true);
         }
         ;
@@ -33081,7 +33177,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1389, column 1 - line 1389, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1391, column 1 - line 1391, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33122,8 +33218,8 @@
       open: Nothing.value,
       defaultOpen: true,
       duration: function() {
-        var $243 = s === "autodismiss";
-        if ($243) {
+        var $244 = s === "autodismiss";
+        if ($244) {
           return new Just(1500);
         }
         ;
@@ -33214,8 +33310,8 @@
         disabled: false
       }],
       value: function() {
-        var $246 = s === "controlled";
-        if ($246) {
+        var $247 = s === "controlled";
+        if ($247) {
           return new Just("account");
         }
         ;
@@ -33292,8 +33388,8 @@
     return {
       children: defaultInput19.children,
       checked: function() {
-        var $247 = s === "controlled";
-        if ($247) {
+        var $248 = s === "controlled";
+        if ($248) {
           return new Just(true);
         }
         ;
@@ -33303,8 +33399,8 @@
       disabled: s === "disabled",
       required: s === "required" || s === "form",
       name: function() {
-        var $248 = s === "form";
-        if ($248) {
+        var $249 = s === "form";
+        if ($249) {
           return "notify";
         }
         ;
@@ -33339,7 +33435,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2095, column 17 - line 2097, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2104, column 17 - line 2106, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33352,13 +33448,13 @@
       name: defaultRangeInput.name,
       isFormControl: defaultRangeInput.isFormControl,
       defaultValue: function() {
-        var $251 = s === "triple";
-        if ($251) {
+        var $252 = s === "triple";
+        if ($252) {
           return [20, 50, 80];
         }
         ;
-        var $252 = s === "minsteps";
-        if ($252) {
+        var $253 = s === "minsteps";
+        if ($253) {
           return [40, 60];
         }
         ;
@@ -33368,8 +33464,8 @@
       max: 100,
       step: 1,
       minStepsBetweenThumbs: function() {
-        var $253 = s === "minsteps";
-        if ($253) {
+        var $254 = s === "minsteps";
+        if ($254) {
           return 10;
         }
         ;
@@ -33416,8 +33512,8 @@
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $254 = s === "vertical";
-        if ($254) {
+        var $255 = s === "vertical";
+        if ($255) {
           return Vertical.value;
         }
         ;
@@ -33452,12 +33548,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2050, column 1 - line 2050, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2059, column 1 - line 2059, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $256 = s === "vsem" || s === "vdec";
-      if ($256) {
+      var $257 = s === "vsem" || s === "vdec";
+      if ($257) {
         return Vertical.value;
       }
       ;
@@ -33517,16 +33613,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $257 = s === "horizontal";
-        if ($257) {
+        var $258 = s === "horizontal";
+        if ($258) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $258 = s === "radius";
-        if ($258) {
+        var $259 = s === "radius";
+        if ($259) {
           return "full";
         }
         ;
@@ -33570,8 +33666,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $259 = s === "keys" || s === "mixed";
-        if ($259) {
+        var $260 = s === "keys" || s === "mixed";
+        if ($260) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33587,8 +33683,8 @@
           }];
         }
         ;
-        var $260 = s === "loopoff" || s === "rtl";
-        if ($260) {
+        var $261 = s === "loopoff" || s === "rtl";
+        if ($261) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33604,8 +33700,8 @@
           }];
         }
         ;
-        var $261 = s === "alldisabled";
-        if ($261) {
+        var $262 = s === "alldisabled";
+        if ($262) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33630,8 +33726,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $262 = s === "horizontal" || s === "rtl";
-        if ($262) {
+        var $263 = s === "horizontal" || s === "rtl";
+        if ($263) {
           return Horizontal.value;
         }
         ;
@@ -33639,8 +33735,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $263 = s === "rtl";
-        if ($263) {
+        var $264 = s === "rtl";
+        if ($264) {
           return RTL.value;
         }
         ;
@@ -33650,8 +33746,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $264 = s === "form";
-        if ($264) {
+        var $265 = s === "form";
+        if ($265) {
           return "plan";
         }
         ;
@@ -33735,8 +33831,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $265 = styl === "";
-              if ($265) {
+              var $266 = styl === "";
+              if ($266) {
                 return [];
               }
               ;
@@ -33756,6 +33852,10 @@
     ;
     if (s === "custommax") {
       return prim(new Just(50))(200)("--progress-value: 50; --progress-max: 200;");
+    }
+    ;
+    if (s === "maxinvalid") {
+      return prim(new Just(25))(0)("--progress-value: 25; --progress-max: 0;");
     }
     ;
     if (s === "invalid") {
@@ -33810,16 +33910,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $267 = s === "close";
-        if ($267) {
+        var $268 = s === "close";
+        if ($268) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $268 = s === "close";
-        if ($268) {
+        var $269 = s === "close";
+        if ($269) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -33847,24 +33947,24 @@
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
       inputId: function() {
-        var $269 = s === "multi";
-        if ($269) {
+        var $270 = s === "multi";
+        if ($270) {
           return Nothing.value;
         }
         ;
         return new Just("password");
       }(),
       toggleVisible: function() {
-        var $270 = s === "autolabel";
-        if ($270) {
+        var $271 = s === "autolabel";
+        if ($271) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $271 = s === "autolabel";
-        if ($271) {
+        var $272 = s === "autolabel";
+        if ($272) {
           return [passwordToggleIcon];
         }
         ;
@@ -33873,8 +33973,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $272 = s === "passthrough";
-        if ($272) {
+        var $273 = s === "passthrough";
+        if ($273) {
           return new Just("pw");
         }
         ;
@@ -33882,16 +33982,16 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $273 = s === "passthrough";
-        if ($273) {
+        var $274 = s === "passthrough";
+        if ($274) {
           return new Just("Enter password");
         }
         ;
         return Nothing.value;
       }(),
       visible: function() {
-        var $274 = s === "controlled";
-        if ($274) {
+        var $275 = s === "controlled";
+        if ($275) {
           return new Just(false);
         }
         ;
@@ -33913,7 +34013,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1745, column 1 - line 1745, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1747, column 1 - line 1747, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -33925,24 +34025,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $277 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($277) {
+        var $278 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($278) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $278 = s === "vertical";
-        if ($278) {
+        var $279 = s === "vertical";
+        if ($279) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $279 = s === "rtl";
-        if ($279) {
+        var $280 = s === "rtl";
+        if ($280) {
           return RTL.value;
         }
         ;
@@ -33997,8 +34097,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $280 = s === "submenu";
-          if ($280) {
+          var $281 = s === "submenu";
+          if ($281) {
             return [menubarSubEntry];
           }
           ;
@@ -34050,8 +34150,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $281 = s === "radio";
-          if ($281) {
+          var $282 = s === "radio";
+          if ($282) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34157,84 +34257,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2062, column 1 - line 2062, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2071, column 1 - line 2071, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $335 = filter(function(c) {
+    var $337 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($336) {
-      return fromCharArray($335(toCharArray($336)));
+    return function($338) {
+      return fromCharArray($337(toCharArray($338)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $283 = s === "controlled";
-        if ($283) {
+        var $284 = s === "controlled";
+        if ($284) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $284 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($284) {
+        var $285 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($285) {
           return "";
         }
         ;
-        var $285 = s === "alpha";
-        if ($285) {
+        var $286 = s === "alpha";
+        if ($286) {
           return "abc";
         }
         ;
-        var $286 = s === "alphanumeric";
-        if ($286) {
+        var $287 = s === "alphanumeric";
+        if ($287) {
           return "a1b";
         }
         ;
-        var $287 = s === "revalidate";
-        if ($287) {
+        var $288 = s === "revalidate";
+        if ($288) {
           return "a1b2c";
         }
         ;
-        var $288 = s === "sanitizevalue";
-        if ($288) {
+        var $289 = s === "sanitizevalue";
+        if ($289) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $289 = s === "alpha" || s === "revalidate";
-        if ($289) {
+        var $290 = s === "alpha" || s === "revalidate";
+        if ($290) {
           return Alpha.value;
         }
         ;
-        var $290 = s === "alphanumeric";
-        if ($290) {
+        var $291 = s === "alphanumeric";
+        if ($291) {
           return Alphanumeric.value;
         }
         ;
-        var $291 = s === "novalidation" || s === "sanitizevalue";
-        if ($291) {
+        var $292 = s === "novalidation" || s === "sanitizevalue";
+        if ($292) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $292 = s === "sanitizevalue";
-        if ($292) {
+        var $293 = s === "sanitizevalue";
+        if ($293) {
           return keepDigitsOnly;
         }
         ;
         return identity14;
       }(),
       placeholder: function() {
-        var $293 = s === "placeholder";
-        if ($293) {
+        var $294 = s === "placeholder";
+        if ($294) {
           return new Just("\u25CB");
         }
         ;
@@ -34244,24 +34344,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $294 = s === "vertical";
-        if ($294) {
+        var $295 = s === "vertical";
+        if ($295) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $295 = s === "rtl";
-        if ($295) {
+        var $296 = s === "rtl";
+        if ($296) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $296 = s === "named";
-        if ($296) {
+        var $297 = s === "named";
+        if ($297) {
           return new Just("otp-code");
         }
         ;
@@ -34299,8 +34399,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $297 = s === "richcontent";
-        if ($297) {
+        var $298 = s === "richcontent";
+        if ($298) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34319,23 +34419,42 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2240, column 1 - line 2240, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2249, column 1 - line 2249, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $300 = s === "reset";
-        if ($300) {
+        var $301 = s === "reset";
+        if ($301) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
       fields: function() {
-        var $301 = s === "multi";
-        if ($301) {
+        var $302 = s === "custom";
+        if ($302) {
+          return [{
+            required: defaultField.required,
+            serverInvalid: defaultField.serverInvalid,
+            name: "username",
+            label: [text5("Username")],
+            inputType: "text",
+            messages: [{
+              match: ValueMissing.value,
+              customMatch: new Just(function(v2) {
+                return v2 === "taken";
+              }),
+              forceMatch: false,
+              text: [text5("Already taken")]
+            }]
+          }];
+        }
+        ;
+        var $303 = s === "multi";
+        if ($303) {
           return [{
             serverInvalid: defaultField.serverInvalid,
             name: "email",
@@ -34344,6 +34463,7 @@
             required: true,
             messages: [{
               match: ValueMissing.value,
+              customMatch: Nothing.value,
               forceMatch: false,
               text: [text5("Email is missing")]
             }]
@@ -34355,6 +34475,7 @@
             required: true,
             messages: [{
               match: ValueMissing.value,
+              customMatch: Nothing.value,
               forceMatch: false,
               text: [text5("Name is missing")]
             }]
@@ -34368,19 +34489,21 @@
           required: true,
           serverInvalid: s === "serverInvalid",
           messages: function() {
-            var $302 = s === "defaultMessage";
-            if ($302) {
+            var $304 = s === "defaultMessage";
+            if ($304) {
               return [{
                 match: ValueMissing.value,
+                customMatch: Nothing.value,
                 forceMatch: true,
                 text: []
               }];
             }
             ;
-            var $303 = s === "reset";
-            if ($303) {
+            var $305 = s === "reset";
+            if ($305) {
               return [{
                 match: ValueMissing.value,
+                customMatch: Nothing.value,
                 forceMatch: false,
                 text: [text5("This value is missing")]
               }];
@@ -34388,10 +34511,12 @@
             ;
             return [{
               match: ValueMissing.value,
+              customMatch: Nothing.value,
               forceMatch: s === "forceMatch" || s === "multiMessage",
               text: [text5("This value is missing")]
             }, {
               match: TypeMismatch2.value,
+              customMatch: Nothing.value,
               forceMatch: s === "multiMessage",
               text: [text5("Provide a valid email")]
             }];
@@ -34418,7 +34543,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2106, column 12 - line 2108, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2115, column 12 - line 2117, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34439,8 +34564,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $311 = kv.before === key2;
-          if ($311) {
+          var $313 = kv.before === key2;
+          if ($313) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34451,7 +34576,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2088, column 15 - line 2090, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2097, column 15 - line 2099, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34567,8 +34692,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $313 = s === "submenu";
-        if ($313) {
+        var $315 = s === "submenu";
+        if ($315) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34592,8 +34717,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $314 = s === "radio";
-        if ($314) {
+        var $316 = s === "radio";
+        if ($316) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34634,8 +34759,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $315 = s === "controlled";
-        if ($315) {
+        var $317 = s === "controlled";
+        if ($317) {
           return new Just(true);
         }
         ;
@@ -34656,8 +34781,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $316 = klass === "";
-      if ($316) {
+      var $318 = klass === "";
+      if ($318) {
         return [];
       }
       ;
@@ -34681,8 +34806,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $317 = s === "radio";
-        if ($317) {
+        var $319 = s === "radio";
+        if ($319) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34778,8 +34903,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $318 = s === "submenu";
-        if ($318) {
+        var $320 = s === "submenu";
+        if ($320) {
           return [submenuEntry];
         }
         ;
@@ -34942,8 +35067,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $320 = s === "controlled";
-        if ($320) {
+        var $322 = s === "controlled";
+        if ($322) {
           return new Just(Checked.value);
         }
         ;
@@ -34967,16 +35092,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $322 = s === "form";
-        if ($322) {
+        var $324 = s === "form";
+        if ($324) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $323 = s === "form";
-        if ($323) {
+        var $325 = s === "form";
+        if ($325) {
           return "yes";
         }
         ;
@@ -35044,18 +35169,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $326 = s === "wide";
-        if ($326) {
+        var $328 = s === "wide";
+        if ($328) {
           return 16 / 9;
         }
         ;
-        var $327 = s === "tall";
-        if ($327) {
+        var $329 = s === "tall";
+        if ($329) {
           return 1 / 2;
         }
         ;
-        var $328 = s === "verywide";
-        if ($328) {
+        var $330 = s === "verywide";
+        if ($330) {
           return 21 / 9;
         }
         ;
@@ -35064,7 +35189,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1980, column 1 - line 1980, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1989, column 1 - line 1989, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -35118,8 +35243,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $329 = s === "single";
-        if ($329) {
+        var $331 = s === "single";
+        if ($331) {
           return ["item-1"];
         }
         ;
@@ -35250,18 +35375,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $330 = s === "formreset";
-    if ($330) {
+    var $332 = s === "formreset";
+    if ($332) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $331 = s === "multi";
-    if ($331) {
+    var $333 = s === "multi";
+    if ($333) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $332 = s === "formsubmit";
-    if ($332) {
+    var $334 = s === "formsubmit";
+    if ($334) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -35381,8 +35506,8 @@
         }
         ;
         if (c === "slider") {
-          var $334 = s === "vertical";
-          if ($334) {
+          var $336 = s === "vertical";
+          if ($336) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

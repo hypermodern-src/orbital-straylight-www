@@ -662,6 +662,14 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
     },
+    // `?s=maxinvalid` — max=0 invalid → DEFAULT_MAX=100: aria-valuemax/data-max=100, valuenow=25.
+    maxinvalid: async (pg) => {
+      await pg.locator('[role="progressbar"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const p = document.querySelector('[role="progressbar"]');
+        return p?.getAttribute("aria-valuemax") === "100" && p?.getAttribute("aria-valuenow") === "25";
+      });
+    },
     // `?s=indeterminate` — no value: data-state=indeterminate, NO aria-valuenow/data-value.
     indeterminate: async (pg) => {
       await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();

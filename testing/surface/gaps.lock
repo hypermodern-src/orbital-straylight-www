@@ -7,19 +7,19 @@
     "note": "Goldens are only trustworthy against a fixed upstream. Bumping either value here is a deliberate re-baseline (regenerate goldens, review the diff)."
   },
   "totals": {
-    "gated_cells": 216,
-    "open_core_gaps": 61,
-    "required_behavioral": 277,
-    "coverage_behavioral_pct": 78,
+    "gated_cells": 217,
+    "open_core_gaps": 57,
+    "required_behavioral": 274,
+    "coverage_behavioral_pct": 79.2,
     "presets_gated": 1,
     "presets_required": 4,
     "coverage_preset_pct": 25,
     "binding_violations": 0,
     "enumerated_components": 32,
-    "named_open_cells": 392,
-    "closed_cells": 370,
+    "named_open_cells": 375,
+    "closed_cells": 387,
     "total_cells": 762,
-    "coverage_cells_pct": 48.6,
+    "coverage_cells_pct": 50.8,
     "invariance_subjects": 31
   },
   "per_component": {
@@ -60,7 +60,7 @@
       "core_open": 4
     },
     "Progress": {
-      "gated": 7,
+      "gated": 8,
       "core_open": 4
     },
     "RadioGroup": {

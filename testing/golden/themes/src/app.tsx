@@ -1640,6 +1640,9 @@ const PAGES: Page[] = [
         s === "indeterminate" ? <Progress /> :
         s === "complete" ? <Progress value={100} /> :
         s === "custommax" ? <Progress value={50} max={200} /> :
+        // `?s=maxinvalid` — max=0 is invalid (isValidMaxNumber) → falls back to DEFAULT_MAX=100,
+        // so aria-valuemax/data-max=100 and valuetext=25% (value=25 against the resolved max).
+        s === "maxinvalid" ? <Progress value={25} max={0} /> :
         // `?s=invalid` — value=150 > max=100: upstream isValidValueNumber rejects it and
         // coerces to indeterminate (data-state=indeterminate, NO aria-valuenow/data-value).
         s === "invalid" ? <Progress value={150} /> :

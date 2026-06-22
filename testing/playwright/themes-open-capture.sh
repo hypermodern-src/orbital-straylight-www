@@ -116,6 +116,7 @@ STATES=(
   "passwordtoggle:passthrough"
   "passwordtoggle:multi"
   "form:multi"
+  "progress:maxinvalid"
   "form:multiMessage"
   # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
   "collapsible:disabled"
