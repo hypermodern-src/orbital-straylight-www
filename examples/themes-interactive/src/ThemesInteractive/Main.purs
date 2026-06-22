@@ -13,6 +13,7 @@ import Data.Foldable (for_)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Data.String (drop, indexOf, splitAt) as Str
+import Data.String.CodeUnits (toCharArray, fromCharArray) as SCU
 import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
@@ -1664,13 +1665,17 @@ otpInput s = Otp.defaultInput
       if s == "empty" || s == "typed" || s == "paste" || s == "form" || s == "autosubmit" || s == "autofocus" || s == "placeholder" then ""
       else if s == "alpha" then "abc"
       else if s == "alphanumeric" then "a1b"
+      else if s == "revalidate" then "a1b2c"
+      else if s == "sanitizevalue" then "1a2"
       else "123"
   -- `?s=alpha` → Alpha (pattern=[a-zA-Z]{1}); `?s=alphanumeric` → Alphanumeric (pattern=[a-zA-Z0-9]{1}).
   , validation =
-      if s == "alpha" then Otp.Alpha
+      if s == "alpha" || s == "revalidate" then Otp.Alpha
       else if s == "alphanumeric" then Otp.Alphanumeric
-      else if s == "novalidation" then Otp.NoValidation
+      else if s == "novalidation" || s == "sanitizevalue" then Otp.NoValidation
       else Otp.Numeric
+  -- `?s=sanitizevalue` → a custom sanitizer (keep only digits) applied under NoValidation.
+  , sanitize = if s == "sanitizevalue" then keepDigitsOnly else identity
   -- `?s=placeholder` stamps a per-slot placeholder char.
   , placeholder = if s == "placeholder" then Just "○" else Nothing
   -- Wave-C state-variants: password masks slots, disabled drops them from the roving
@@ -1691,6 +1696,11 @@ otpInput s = Otp.defaultInput
   , autoFocus = s == "autofocus"
   , style = { root: cn "", input: cn "" }
   }
+
+-- | keepDigitsOnly — a custom OTP sanitizer (the `?s=sanitizevalue` story): drop every non-digit,
+-- | matching the golden's `(v) => v.replace(/[^0-9]/g, "")`.
+keepDigitsOnly :: String -> String
+keepDigitsOnly = SCU.fromCharArray <<< Array.filter (\c -> c >= '0' && c <= '9') <<< SCU.toCharArray
 
 -- | otpFormWrap — wrap the OTP slot in a real `<form>` for the form-wiring states (`?s=form`,
 -- | `?s=autosubmit`) so the hidden input's `.form` resolves; every other state passes through.

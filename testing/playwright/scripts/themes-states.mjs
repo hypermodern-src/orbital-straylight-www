@@ -909,6 +909,28 @@ export const STATES = {
           && document.querySelector('input[type="hidden"]')?.value === "12";
       });
     },
+    // `?s=revalidate` → alpha validation + junk defaultValue "a1b2c": sanitizeValue drops the
+    // digits at mount → slots a/b/c, hidden "abc" (same sanitize re-validation re-applies on change).
+    revalidate: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "a" && a[1].value === "b" && a[2].value === "c"
+          && document.querySelector('input[type="hidden"]')?.value === "abc";
+      });
+    },
+    // `?s=sanitizevalue` → validationType="none" + custom sanitizer keeping only digits:
+    // defaultValue "1a2" → "12" (slots 1/2/"", hidden "12"), no inputmode/pattern.
+    sanitizevalue: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "1" && a[1].value === "2" && a[2].value === ""
+          && !a[0].hasAttribute("pattern") && document.querySelector('input[type="hidden"]')?.value === "12";
+      });
+    },
     // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
     password: async (pg) => {
       await root(pg).locator('[role="group"]').first().waitFor();

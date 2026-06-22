@@ -89,6 +89,7 @@ type Input =
   , autoSubmit :: Boolean          -- when all slots fill, raise AutoSubmitted + form.requestSubmit
   , autoFocus :: Boolean           -- focus the first fillable slot on mount
   , placeholder :: Maybe String    -- per-slot placeholder char (shown when the slot is empty)
+  , sanitize :: String -> String   -- custom sanitizer, applied only when validation = NoValidation
   , style :: Style
   }
 
@@ -107,6 +108,7 @@ defaultInput =
   , autoSubmit: false
   , autoFocus: false
   , placeholder: Nothing
+  , sanitize: identity
   , style: defaultStyle
   }
 
@@ -137,6 +139,7 @@ type State =
   , autoSubmit :: Boolean
   , autoFocus :: Boolean
   , placeholder :: Maybe String
+  , sanitize :: String -> String
   , style :: Style
   , cursor :: Int          -- roving cursor over the slots
   , focusEntered :: Boolean -- false ⇒ all slots -1 (root holds the tab stop), autocomplete on slot 0
@@ -175,10 +178,16 @@ toSlots len s =
   let cs = map SCU.singleton (toCharArray s)
   in take len (cs <> replicate len "")
 
+-- | Normalize an aggregate string to `len` per-slot chars, sanitized by the validation set
+-- | (upstream `sanitizeValue`: strip whitespace + drop rejected chars). Applied to the initial
+-- | controlled value AND defaultValue, mirroring upstream's `sanitizeValue(valueProp/defaultValue)`.
+sanitizedSlots :: Validation -> (String -> String) -> Int -> String -> Array String
+sanitizedSlots v customF len s = toSlots len (sanitizePaste v customF s)
+
 initialState :: Input -> State
 initialState input =
   { len: input.length
-  , chars: controllable (map (toSlots input.length) input.value) (toSlots input.length input.defaultValue)
+  , chars: controllable (map (sanitizedSlots input.validation input.sanitize input.length) input.value) (sanitizedSlots input.validation input.sanitize input.length input.defaultValue)
   , validation: input.validation
   , orientation: input.orientation
   , dir: input.dir
@@ -189,6 +198,7 @@ initialState input =
   , autoSubmit: input.autoSubmit
   , autoFocus: input.autoFocus
   , placeholder: input.placeholder
+  , sanitize: input.sanitize
   , style: input.style
   , cursor: 0
   , focusEntered: false
@@ -341,9 +351,18 @@ handleAction = case _ of
     H.raise (ValueChanged "")
     syncSlotValues cleared
   Receive input ->
-    H.modify_ \st -> st
+    H.modify_ \st ->
+      let
+        synced = sync (map (sanitizedSlots input.validation input.sanitize input.length) input.value) st.chars
+        -- re-validate when the validation type changes (otp.tsx:379-389): re-sanitize the current
+        -- uncontrolled value under the new set, dropping chars it now rejects.
+        revalidated =
+          if input.validation /= st.validation
+            then synced { uncontrolled = sanitizedSlots input.validation input.sanitize input.length (joinWith "" synced.uncontrolled) }
+            else synced
+      in st
       { len = input.length
-      , chars = sync (map (toSlots input.length) input.value) st.chars
+      , chars = revalidated
       , validation = input.validation
       , orientation = input.orientation
       , dir = input.dir
@@ -353,6 +372,7 @@ handleAction = case _ of
       , readOnly = input.readOnly
       , autoSubmit = input.autoSubmit
       , placeholder = input.placeholder
+      , sanitize = input.sanitize
       , style = input.style
       }
   SlotFocused idx -> do
@@ -377,7 +397,7 @@ handleAction = case _ of
     -- runs regardless of WHICH slot received the dump (radix sets value3 directly, not offset).
     if (not st.disabled && not st.readOnly && length (toCharArray raw) > 1) then do
       let
-        sanitized = sanitizePaste st.validation raw
+        sanitized = sanitizePaste st.validation st.sanitize raw
         next = toSlots st.len sanitized
         filled = length (filter (_ /= "") next)
         focusIdx = clampIdx st.len (filled - 1)
@@ -492,14 +512,17 @@ handleAction = case _ of
               H.modify_ _ { cursor = clamped, focusEntered = true }
               focusAt clamped
 
--- | radix PASTE sanitize: strip whitespace, drop every char the validation set rejects,
--- | and re-join. (Mirrors `sanitizeValue`: remove `\s`, then `replace(validation.regexp,"")`
--- | which is the INVERSE — here expressed as keep-only-accepted.)
-sanitizePaste :: Validation -> String -> String
-sanitizePaste v s =
-  joinWith "" (filter keep (map SCU.singleton (toCharArray s)))
+-- | radix `sanitizeValue`: strip whitespace, then either drop every char the validation set
+-- | rejects (keep-only-accepted, the inverse of `replace(validation.regexp,"")`), OR — when
+-- | validation is `NoValidation` — apply the consumer's custom `sanitize` function (otp.tsx:233-249).
+sanitizePaste :: Validation -> (String -> String) -> String -> String
+sanitizePaste v customF s =
+  case v of
+    NoValidation -> customF noWhitespace
+    _ -> joinWith "" (filter (accepts v) (map SCU.singleton (toCharArray noWhitespace)))
   where
-  keep c = c /= " " && c /= "\t" && c /= "\n" && c /= "\r" && accepts v c
+  noWhitespace = joinWith "" (filter notWs (map SCU.singleton (toCharArray s)))
+  notWs c = c /= " " && c /= "\t" && c /= "\n" && c /= "\r"
 
 -- | clamp an index into [0, len-1] (a paste of zero accepted chars never reaches here).
 clampIdx :: Int -> Int -> Int

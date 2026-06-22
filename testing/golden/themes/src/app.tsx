@@ -1791,6 +1791,12 @@ const PAGES: Page[] = [
       // `?s=controlled` → controlled value="12" with a no-op onValueChange (value stays fixed):
       // the DOM reflects the controlled value and local typing cannot change it.
       const controlled = s === "controlled";
+      // `?s=revalidate` → alpha validation with a junk defaultValue: sanitizeValue drops the
+      // digits at mount (the same sanitize re-validation re-applies on a validationType change).
+      const revalidate = s === "revalidate";
+      // `?s=sanitizevalue` → validationType="none" + a custom sanitizeValue that keeps only digits:
+      // defaultValue "1a2" is sanitized to "12" (the custom-sanitize path, not the validation set).
+      const sanitizevalue = s === "sanitizevalue";
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
@@ -1817,8 +1823,9 @@ const PAGES: Page[] = [
       const startEmpty = empty || wrapForm;
       const field = (
         <OneTimePasswordField.Root
-          {...(startEmpty || controlled ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
-          {...(alpha ? { validationType: "alpha" as const } : {})}
+          {...(startEmpty || controlled ? {} : { defaultValue: revalidate ? "a1b2c" : sanitizevalue ? "1a2" : alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
+          {...(alpha || revalidate ? { validationType: "alpha" as const } : {})}
+          {...(sanitizevalue ? { validationType: "none" as const, sanitizeValue: (v: string) => v.replace(/[^0-9]/g, "") } : {})}
           {...(alphanumeric ? { validationType: "alphanumeric" as const } : {})}
           {...(novalidation ? { validationType: "none" as const } : {})}
           {...(placeholder ? { placeholder: "○" } : {})}
