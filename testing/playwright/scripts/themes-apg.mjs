@@ -992,6 +992,28 @@ const CHECKS = [
     await pg.waitForTimeout(80);
     ok(await activeIsNth(pg, sel, 0), "clicking slot 2 on an empty field did not clamp focus to slot 0");
   }},
+  // Space is rejected as a character (validation set never includes it) and never advances.
+  { id: "otp", state: "empty", apg: "roving-tabindex", name: "Space is rejected and does not fill or advance", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await pg.keyboard.press("Space"); await pg.waitForTimeout(100);
+    const v0 = await pg.evaluate((s) => document.querySelectorAll(s)[0].value, sel);
+    ok(v0 === "", `Space filled the slot (got '${v0}')`);
+    ok(await activeIsNth(pg, sel, 0), "Space advanced focus");
+  }},
+  // loop is hardcoded false (RovingFocusGroup loop=false): the ends do NOT wrap.
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "roving does not wrap at the ends (loop=false)", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 0), "ArrowLeft wrapped from the first slot (loop must be false)");
+    await press(pg, "End");
+    ok(await activeIsNth(pg, sel, 2), "End did not reach the last slot");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 2), "ArrowRight wrapped from the last slot (loop must be false)");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

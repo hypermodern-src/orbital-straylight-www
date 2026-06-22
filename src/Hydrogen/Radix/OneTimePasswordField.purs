@@ -378,7 +378,7 @@ handleAction = case _ of
       -- or read-only field never mutates (radix gates the SET_CHAR dispatch on both).
       let
         typed = lastChar raw
-      when (not st.disabled && not st.readOnly && typed /= "" && accepts st.validation typed) do
+      if (not st.disabled && not st.readOnly && typed /= "" && accepts st.validation typed) then do
         let
           cur = current st.chars
           next = fromMaybe cur (updateAt idx typed cur)
@@ -387,6 +387,13 @@ handleAction = case _ of
         H.raise (ValueChanged (trim (joinWith "" next)))
         focusAt nextCursor
         maybeAutoSubmit next
+      else
+        -- A rejected char (e.g. Space, or a digit under Alpha validation) left a DIRTY value
+        -- PROPERTY on the native <input> even though state did not change. Upstream's controlled
+        -- value resets it; mirror that by resyncing this slot's property to its state char.
+        for_ (current st.chars !! idx) \ch -> do
+          mel <- H.getHTMLElementRef (slotRef idx)
+          for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.setValue ch)
   SlotKeyDown idx ke -> do
     st <- H.get
     let key = KE.key ke
