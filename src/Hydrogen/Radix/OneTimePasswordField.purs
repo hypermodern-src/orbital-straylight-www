@@ -403,11 +403,14 @@ handleAction = case _ of
         maybeAutoSubmit next
       else
         -- A rejected char (e.g. Space, or a digit under Alpha validation) left a DIRTY value
-        -- PROPERTY on the native <input> even though state did not change. Upstream's controlled
-        -- value resets it; mirror that by resyncing this slot's property to its state char.
+        -- PROPERTY on the native <input> even though state did not change. Upstream's onChange
+        -- invalid branch resets the value AND re-selects it (rAF select) so the next keystroke
+        -- replaces. Mirror both: resync this slot's property to its state char, then re-select.
         for_ (current st.chars !! idx) \ch -> do
           mel <- H.getHTMLElementRef (slotRef idx)
-          for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.setValue ch)
+          for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> liftEffect do
+            HTMLInputElement.setValue ch inp
+            HTMLInputElement.select inp
   SlotKeyDown idx ke -> do
     st <- H.get
     let key = KE.key ke
@@ -436,6 +439,27 @@ handleAction = case _ of
         -- Enter submits the enclosing form (otp.tsx:813-816): preventDefault + form.requestSubmit().
         liftEffect (preventDefault (KE.toEvent ke))
         withForm (liftEffect <<< requestSubmit)
+      -- mid-selection insert (otp.tsx:836-862): a printable accepted char typed into a NON-empty,
+      -- not-fully-selected, non-last slot. A collapsed cursor at the start writes the CURRENT slot,
+      -- elsewhere the NEXT slot — preventDefault so the over-long autocomplete slot doesn't treat
+      -- the second char as a paste. A FULL selection falls through to the input path (replace).
+      _ | editable && atIdx /= "" && idx < st.len - 1 && SCU.length key == 1 && accepts st.validation key -> do
+        mel <- H.getHTMLElementRef (slotRef idx)
+        for_ (mel >>= HTMLInputElement.fromHTMLElement) \inp -> do
+          selStart <- liftEffect (HTMLInputElement.selectionStart inp)
+          selEnd <- liftEffect (HTMLInputElement.selectionEnd inp)
+          let fullySelected = selStart == 0 && selEnd >= 1
+          when (not fullySelected) do
+            liftEffect (preventDefault (KE.toEvent ke))
+            let
+              targetIdx = if selStart == 0 then idx else idx + 1
+              cur = current st.chars
+              next = fromMaybe cur (updateAt targetIdx key cur)
+              nextCursor = min (targetIdx + 1) (st.len - 1)
+            H.modify_ \s -> s { chars = (change next s.chars).next, cursor = nextCursor, focusEntered = true }
+            H.raise (ValueChanged (trim (joinWith "" next)))
+            focusAt nextCursor
+            maybeAutoSubmit next
       _ -> do
         let
           cfg = { orientation: st.orientation, dir: st.dir, loop: false }

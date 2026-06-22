@@ -1100,6 +1100,29 @@ const CHECKS = [
     ok(got === "456", `paste did not sanitize+slice to the slot count (got '${got}')`);
     ok(await activeIsNth(pg, sel, 2), "paste did not focus the last slot");
   }},
+  // invalid-change: typing a char the validation set rejects leaves the slot value unchanged AND
+  // re-selects it (otp.tsx onChange invalid branch → rAF select), so the next keystroke replaces.
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "an invalid char is rejected and the slot stays selected", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await pg.waitForTimeout(60);
+    await pg.keyboard.type("a"); await pg.waitForTimeout(120);   // 'a' rejected under numeric
+    const r = await pg.evaluate((s) => { const el = document.querySelectorAll(s)[0]; return { v: el.value, start: el.selectionStart, end: el.selectionEnd }; }, sel);
+    ok(r.v === "1", `invalid char changed the slot (got '${r.v}')`);
+    ok(r.start === 0 && r.end === 1, `slot not re-selected after invalid input (sel ${r.start}..${r.end})`);
+  }},
+  // mid-selection-insert: cursor collapsed at the END of a filled slot (not a selection) + typing a
+  // char sets the NEXT slot (otp.tsx:836-862 selectionStart!==0 branch).
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "typing with cursor at slot end writes the next slot", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.evaluate((s) => { const el = document.querySelectorAll(s)[0]; el.focus(); el.setSelectionRange(1, 1); }, sel);
+    await pg.waitForTimeout(60);
+    await pg.keyboard.type("9"); await pg.waitForTimeout(120);
+    const r = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(","), sel);
+    ok(r === "1,9,3", `cursor-at-end typing did not write the next slot (got '${r}')`);
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
