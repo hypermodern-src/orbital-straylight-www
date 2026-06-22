@@ -871,11 +871,15 @@ const CHECKS = [
   }},
   // Backspace on an EMPTY slot retreats focus to the previous slot (a filled slot clears in
   // place without retreating); driven on the all-empty field.
+  // Backspace on an EMPTY slot retreats focus to the previous slot (a filled slot clears in
+  // place). Driven by typing slot 0 first so slot 1 is REACHABLE-but-empty (isFocusable gating
+  // would make slot 1 unreachable on a wholly-empty field).
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "Backspace on an empty slot retreats focus to the previous slot", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
-    await pg.evaluate((s) => document.querySelectorAll(s)[1].focus(), sel);
-    ok(await activeIsNth(pg, sel, 1), "could not focus the second slot");
+    await focusFirst(pg, sel);
+    await pg.keyboard.type("1"); await pg.waitForTimeout(120);
+    ok(await activeIsNth(pg, sel, 1), "typing slot 0 did not advance to the empty slot 1");
     await press(pg, "Backspace");
     ok(await activeIsNth(pg, sel, 0), "Backspace on an empty slot did not retreat to the previous slot");
   }},
@@ -978,6 +982,15 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 0), "ArrowRight escaped slot 0 on an empty field (gating missing)");
     await press(pg, "End");
     ok(await activeIsNth(pg, sel, 0), "End escaped slot 0 on an empty field (gating missing)");
+  }},
+  // onPointerDown clamps focus to min(index, lastSelectableIndex) (otp.tsx:886-891): clicking an
+  // unreachable slot (past the filled prefix) lands focus on the last selectable slot instead.
+  { id: "otp", state: "empty", apg: "roving-tabindex", name: "clicking an unreachable slot clamps focus to slot 0", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(2).click();
+    await pg.waitForTimeout(80);
+    ok(await activeIsNth(pg, sel, 0), "clicking slot 2 on an empty field did not clamp focus to slot 0");
   }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';

@@ -337,10 +337,18 @@ handleAction = case _ of
       , style = input.style
       }
   SlotFocused idx -> do
-    H.modify_ _ { cursor = idx, focusEntered = true }
-    -- onFocus selects the slot's current value so the next keystroke REPLACES it (otp.tsx:670-672).
-    mel <- H.getHTMLElementRef (slotRef idx)
-    for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.select)
+    st <- H.get
+    -- onPointerDown clamps focus to min(index, lastSelectableIndex) (otp.tsx:886-891): focusing an
+    -- unreachable slot (past the filled prefix) bounces to the last selectable slot instead.
+    let lastSelectable = clamp 0 (st.len - 1) (SCU.length (aggregate st))
+    if idx > lastSelectable then do
+      H.modify_ _ { cursor = lastSelectable, focusEntered = true }
+      focusAt lastSelectable
+    else do
+      H.modify_ _ { cursor = idx, focusEntered = true }
+      -- onFocus selects the slot's current value so the next keystroke REPLACES it (otp.tsx:670-672).
+      mel <- H.getHTMLElementRef (slotRef idx)
+      for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.select)
   SlotInput idx raw -> do
     st <- H.get
     -- An input event delivering MORE THAN ONE char is a paste / password-manager autofill
