@@ -813,6 +813,14 @@ export const STATES = {
       await pg.waitForFunction(() =>
         document.querySelector("button")?.getAttribute("aria-label") === "Show password");
     },
+    // `?s=passthrough` → name/required/placeholder spread onto the input ({...props}). At rest.
+    passthrough: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector("input");
+        return i && i.getAttribute("name") === "pw" && i.hasAttribute("required") && i.getAttribute("placeholder") === "Enter password";
+      });
+    },
     // `?s=disabled` → native disabled passed through to BOTH the input and the toggle button.
     disabled: async (pg) => {
       await root(pg).locator("input").first().waitFor();

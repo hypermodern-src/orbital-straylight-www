@@ -50,7 +50,6 @@ import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Data.Int (round, toNumber)
 import Data.Foldable (for_)
-import Data.Ord (clamp)
 import Halogen.Query.Event (eventListener)
 import Web.Event.Event (preventDefault, EventType(..))
 import Web.HTML as HTML

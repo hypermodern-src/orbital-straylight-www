@@ -37,7 +37,6 @@ module Hydrogen.Radix.OneTimePasswordField
 import Prelude
 
 import Data.Array (deleteAt, length, mapWithIndex, replicate, take, updateAt, filter, (!!))
-import Data.Ord (clamp)
 import Data.Foldable (for_)
 import Data.FoldableWithIndex (forWithIndex_)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -54,7 +53,7 @@ import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, cu
 import Hydrogen.Radix.Behavior.Direction (Dir(..))
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Dom (requestSubmit)
-import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataOrientation, dataAttr, orientationName, role)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataOrientation, dataAttr, role)
 import Web.Event.Event (EventType(..), preventDefault)
 import Web.HTML.HTMLElement as HTMLElement
 import Web.HTML.HTMLFormElement as HTMLFormElement

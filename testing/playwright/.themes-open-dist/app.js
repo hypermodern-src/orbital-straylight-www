@@ -22452,7 +22452,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 269, column 19 - line 273, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 268, column 19 - line 272, column 21): " + [v.constructor.name]);
   };
   var toSlots = function(len) {
     return function(s) {
@@ -22718,7 +22718,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 590, column 15 - line 596, column 39): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 589, column 15 - line 595, column 39): " + [v.constructor.name]);
     };
   };
   var renderHidden = function(st) {
@@ -22731,7 +22731,7 @@
         return [];
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 297, column 13 - line 299, column 28): " + [st.name.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 296, column 13 - line 298, column 28): " + [st.name.constructor.name]);
     }()));
   };
   var render13 = function(st) {
@@ -22774,10 +22774,10 @@
           return true;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 311, column 25 - line 315, column 27): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 310, column 25 - line 314, column 27): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 309, column 8 - line 315, column 27): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 308, column 8 - line 314, column 27): " + [v1.constructor.name]);
     };
   };
   var sanitizePaste = function(v) {
@@ -23150,11 +23150,11 @@
             }));
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 507, column 9 - line 513, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 506, column 9 - line 512, column 30): " + [v1.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 334, column 16 - line 513, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 333, column 16 - line 512, column 30): " + [v.constructor.name]);
     };
   };
   var initialState13 = function(input3) {
@@ -23306,13 +23306,23 @@
       }
       ;
       return InputPassword.value;
-    }()), ref2(inputRef), id2(idv), attr2("autocomplete")(st.autoComplete), attr2("autocapitalize")("off"), attr2("spellcheck")("false"), classes2(st.style.input)])(function() {
+    }()), ref2(inputRef), id2(idv), attr2("autocomplete")(st.autoComplete), attr2("autocapitalize")("off"), attr2("spellcheck")("false"), classes2(st.style.input)])(append9(function() {
       if (st.disabled) {
         return [attr2("disabled")("")];
       }
       ;
       return [];
-    }())), button(append9([type_110(ButtonButton.value), controls2(idv), id2(idv), classes2(st.style.toggle), onClick(function(v) {
+    }())(append9(maybe([])(function(n) {
+      return [attr2("name")(n)];
+    })(st.name))(append9(function() {
+      if (st.required) {
+        return [attr2("required")("")];
+      }
+      ;
+      return [];
+    }())(maybe([])(function(p2) {
+      return [attr2("placeholder")(p2)];
+    })(st.placeholder)))))), button(append9([type_110(ButtonButton.value), controls2(idv), id2(idv), classes2(st.style.toggle), onClick(function(v) {
       return Toggled.value;
     })])(append9(function() {
       if (hasText) {
@@ -23336,6 +23346,9 @@
       showLabel: input3.showLabel,
       hideLabel: input3.hideLabel,
       disabled: input3.disabled,
+      name: input3.name,
+      required: input3.required,
+      placeholder: input3.placeholder,
       iconOnly: input3.iconOnly,
       toggleVisible: input3.toggleVisible,
       toggleHidden: input3.toggleHidden,
@@ -23346,16 +23359,16 @@
     return when22(current(st.ctrl))(function() {
       var res = change2(false)(st.ctrl);
       return discard23(modify_16(function(v) {
-        var $42 = {};
-        for (var $43 in v) {
-          if ({}.hasOwnProperty.call(v, $43)) {
-            $42[$43] = v[$43];
+        var $43 = {};
+        for (var $44 in v) {
+          if ({}.hasOwnProperty.call(v, $44)) {
+            $43[$44] = v[$44];
           }
           ;
         }
         ;
-        $42.ctrl = res.next;
-        return $42;
+        $43.ctrl = res.next;
+        return $43;
       }))(function() {
         return raise(new VisibilityChanged(res.emit));
       });
@@ -23365,16 +23378,16 @@
     return function(v) {
       if (v instanceof SetVisible) {
         return discard23(modify_16(function(st) {
-          var $46 = {};
-          for (var $47 in st) {
-            if ({}.hasOwnProperty.call(st, $47)) {
-              $46[$47] = st[$47];
+          var $47 = {};
+          for (var $48 in st) {
+            if ({}.hasOwnProperty.call(st, $48)) {
+              $47[$48] = st[$48];
             }
             ;
           }
           ;
-          $46.ctrl = change2(v.value0)(st.ctrl).next;
-          return $46;
+          $47.ctrl = change2(v.value0)(st.ctrl).next;
+          return $47;
         }))(function() {
           return pure32(new Just(v.value1));
         });
@@ -23386,7 +23399,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 267, column 15 - line 273, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 286, column 15 - line 292, column 42): " + [v.constructor.name]);
     };
   };
   var handleAction14 = function(dictMonadEffect) {
@@ -23404,29 +23417,29 @@
             if (st.inputId instanceof Nothing) {
               return bind33(useId2)(function(i2) {
                 return modify_16(function(v1) {
-                  var $55 = {};
-                  for (var $56 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $56)) {
-                      $55[$56] = v1[$56];
+                  var $56 = {};
+                  for (var $57 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $57)) {
+                      $56[$57] = v1[$57];
                     }
                     ;
                   }
                   ;
-                  $55.inputId = new Just(i2);
-                  return $55;
+                  $56.inputId = new Just(i2);
+                  return $56;
                 });
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 214, column 5 - line 218, column 41): " + [st.inputId.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 230, column 5 - line 234, column 41): " + [st.inputId.constructor.name]);
           }())(function() {
             return bind33(getHTMLElementRef(inputRef))(function(mel) {
               return for_21(bind119(mel)(fromHTMLElement))(function(inp) {
                 return bind33(liftEffect7(form(inp)))(function(mform) {
                   return for_21(mform)(function(form3) {
                     var target6 = toEventTarget3(form3);
-                    return discard23($$void13(subscribe2(eventListener2("reset")(target6)(function($68) {
-                      return Just.create(FormReset3.create($68));
+                    return discard23($$void13(subscribe2(eventListener2("reset")(target6)(function($69) {
+                      return Just.create(FormReset3.create($69));
                     }))))(function() {
                       return $$void13(subscribe2(eventListener2("submit")(target6)(function(v1) {
                         return new Just(FormHide.value);
@@ -23444,16 +23457,16 @@
         return bind33(get15)(function(st) {
           var res = change2(!current(st.ctrl))(st.ctrl);
           return discard23(modify_16(function(v1) {
-            var $58 = {};
-            for (var $59 in v1) {
-              if ({}.hasOwnProperty.call(v1, $59)) {
-                $58[$59] = v1[$59];
+            var $59 = {};
+            for (var $60 in v1) {
+              if ({}.hasOwnProperty.call(v1, $60)) {
+                $59[$60] = v1[$60];
               }
               ;
             }
             ;
-            $58.ctrl = res.next;
-            return $58;
+            $59.ctrl = res.next;
+            return $59;
           }))(function() {
             return raise(new VisibilityChanged(res.emit));
           });
@@ -23472,24 +23485,27 @@
       ;
       if (v instanceof Receive15) {
         return modify_16(function(st) {
-          var $64 = {};
-          for (var $65 in st) {
-            if ({}.hasOwnProperty.call(st, $65)) {
-              $64[$65] = st[$65];
+          var $65 = {};
+          for (var $66 in st) {
+            if ({}.hasOwnProperty.call(st, $66)) {
+              $65[$66] = st[$66];
             }
             ;
           }
           ;
-          $64.ctrl = sync(v.value0.visible)(st.ctrl);
-          $64.autoComplete = v.value0.autoComplete;
-          $64.showLabel = v.value0.showLabel;
-          $64.hideLabel = v.value0.hideLabel;
-          $64.disabled = v.value0.disabled;
-          $64.iconOnly = v.value0.iconOnly;
-          $64.toggleVisible = v.value0.toggleVisible;
-          $64.toggleHidden = v.value0.toggleHidden;
-          $64.style = v.value0.style;
-          $64.inputId = function() {
+          $65.ctrl = sync(v.value0.visible)(st.ctrl);
+          $65.autoComplete = v.value0.autoComplete;
+          $65.showLabel = v.value0.showLabel;
+          $65.hideLabel = v.value0.hideLabel;
+          $65.disabled = v.value0.disabled;
+          $65.name = v.value0.name;
+          $65.required = v.value0.required;
+          $65.placeholder = v.value0.placeholder;
+          $65.iconOnly = v.value0.iconOnly;
+          $65.toggleVisible = v.value0.toggleVisible;
+          $65.toggleHidden = v.value0.toggleHidden;
+          $65.style = v.value0.style;
+          $65.inputId = function() {
             if (v.value0.inputId instanceof Just) {
               return v.value0.inputId;
             }
@@ -23498,13 +23514,13 @@
               return st.inputId;
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 251, column 19 - line 253, column 32): " + [v.value0.inputId.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 270, column 19 - line 272, column 32): " + [v.value0.inputId.constructor.name]);
           }();
-          return $64;
+          return $65;
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 211, column 16 - line 254, column 8): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.PasswordToggleField (line 227, column 16 - line 273, column 8): " + [v.constructor.name]);
     };
   };
   var defaultStyle11 = {
@@ -23520,6 +23536,9 @@
       showLabel: "Show password",
       hideLabel: "Hide password",
       disabled: false,
+      name: Nothing.value,
+      required: false,
+      placeholder: Nothing.value,
       iconOnly: false,
       toggleVisible: [],
       toggleHidden: [],
@@ -23534,8 +23553,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction14(dictMonadEffect),
         handleQuery: handleQuery14(dictMonadEffect),
-        receive: function($69) {
-          return Just.create(Receive15.create($69));
+        receive: function($70) {
+          return Just.create(Receive15.create($70));
         },
         initialize: new Just(Initialize13.value)
       })
@@ -25042,7 +25061,7 @@
           return pure35(0);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 299, column 3 - line 305, column 24): " + [msb.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 298, column 3 - line 304, column 24): " + [msb.constructor.name]);
       });
     };
   };
@@ -25102,7 +25121,7 @@
                 return pure35(zeroAxis);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 271, column 3 - line 289, column 29): " + [msb.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 270, column 3 - line 288, column 29): " + [msb.constructor.name]);
             });
           };
         };
@@ -25151,7 +25170,7 @@
         return pure35(unit);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 244, column 3 - line 256, column 25): " + [mvp.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 243, column 3 - line 255, column 25): " + [mvp.constructor.name]);
     });
   };
   var eqScrollbars = {
@@ -25205,7 +25224,7 @@
         return "scroll";
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 410, column 23 - line 413, column 21): " + [st.input.scrollbars.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 409, column 23 - line 412, column 21): " + [st.input.scrollbars.constructor.name]);
     }();
     var isBoth = eq18(st.input.scrollbars)(Both.value);
     var hasVert = eq18(st.input.scrollbars)(Vertical$prime.value) || eq18(st.input.scrollbars)(Both.value);
@@ -25318,7 +25337,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 197, column 15 - line 209, column 148): " + [v.value0.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 196, column 15 - line 208, column 148): " + [v.value0.constructor.name]);
               }())(function(info2) {
                 return bind36(liftEffect7(bind121(windowImpl)(document)))(function(doc) {
                   var docTarget = toEventTarget(doc);
@@ -25368,7 +25387,7 @@
                     return toN(clientX(v.value0));
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 222, column 21 - line 224, column 46): " + [info2.axis.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 221, column 21 - line 223, column 46): " + [info2.axis.constructor.name]);
                 }();
                 var target6 = info2.startScroll + (pointer - info2.startPointer) * info2.scale;
                 return discard26(function() {
@@ -25380,7 +25399,7 @@
                     return liftEffect7(setScrollLeft(max11(0)(target6))(vpEl));
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 226, column 9 - line 228, column 81): " + [info2.axis.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 225, column 9 - line 227, column 81): " + [info2.axis.constructor.name]);
                 }())(function() {
                   return recompute1;
                 });
@@ -25410,7 +25429,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 184, column 16 - line 235, column 50): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 183, column 16 - line 234, column 50): " + [v.constructor.name]);
     };
   };
   var defaultStyle14 = {
@@ -28805,7 +28824,7 @@
       return " transform: translateX(" + (d + ("px); --radix-toast-swipe-move-x: " + (d + "px;")));
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 355, column 17 - line 363, column 95): " + [st.swipeStart.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 354, column 17 - line 362, column 95): " + [st.swipeStart.constructor.name]);
   };
   var swipeDistance = function(st) {
     return function(x) {
@@ -28830,7 +28849,7 @@
           return x - st.swipeStart.value0.x;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 367, column 24 - line 373, column 17): " + [st.swipeStart.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 366, column 24 - line 372, column 17): " + [st.swipeStart.constructor.name]);
       };
     };
   };
@@ -28856,7 +28875,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 583, column 12 - line 585, column 17): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 582, column 12 - line 584, column 17): " + [v.constructor.name]);
   };
   var maybeInt = function(v) {
     if (v instanceof Just) {
@@ -28867,7 +28886,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 588, column 12 - line 590, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 587, column 12 - line 589, column 15): " + [v.constructor.name]);
   };
   var liRef = "rdx-toast-li";
   var initialState21 = function(input3) {
@@ -28880,7 +28899,7 @@
         return input3.defaultOpen;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 275, column 15 - line 277, column 33): " + [input3.open.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 274, column 15 - line 276, column 33): " + [input3.open.constructor.name]);
     }();
     return {
       ctrl: controllable(input3.open)(input3.defaultOpen),
@@ -29058,7 +29077,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 626, column 15 - line 632, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 625, column 15 - line 631, column 42): " + [v.constructor.name]);
     };
   };
   var armTimer2 = function(dictMonadEffect) {
@@ -29108,7 +29127,7 @@
       return "polite";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 420, column 1 - line 420, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 419, column 1 - line 419, column 35): " + [v.constructor.name]);
   };
   var aria4 = function(name16) {
     return function(val) {
@@ -29319,7 +29338,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 512, column 14 - line 520, column 24): " + [mnode.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 511, column 14 - line 519, column 24): " + [mnode.constructor.name]);
                 }())(function(armed) {
                   return when29(!armed)(finishClose1);
                 });
@@ -29431,7 +29450,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 435, column 16 - line 552, column 96): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 434, column 16 - line 551, column 96): " + [v.constructor.name]);
     };
   };
   var announceNode = function(st) {
@@ -32588,7 +32607,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1962, column 1 - line 1962, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1976, column 1 - line 1976, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33179,7 +33198,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2054, column 17 - line 2056, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2068, column 17 - line 2070, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33292,7 +33311,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2009, column 1 - line 2009, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2023, column 1 - line 2023, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -33706,6 +33725,23 @@
       }(),
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
+      name: function() {
+        var $266 = s === "passthrough";
+        if ($266) {
+          return new Just("pw");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      required: s === "passthrough",
+      placeholder: function() {
+        var $267 = s === "passthrough";
+        if ($267) {
+          return new Just("Enter password");
+        }
+        ;
+        return Nothing.value;
+      }(),
       style: {
         input: cn(""),
         toggle: cn("")
@@ -33722,7 +33758,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1716, column 1 - line 1716, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1730, column 1 - line 1730, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -33734,24 +33770,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $268 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($268) {
+        var $270 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($270) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $269 = s === "vertical";
-        if ($269) {
+        var $271 = s === "vertical";
+        if ($271) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $270 = s === "rtl";
-        if ($270) {
+        var $272 = s === "rtl";
+        if ($272) {
           return RTL.value;
         }
         ;
@@ -33806,8 +33842,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $271 = s === "submenu";
-          if ($271) {
+          var $273 = s === "submenu";
+          if ($273) {
             return [menubarSubEntry];
           }
           ;
@@ -33859,8 +33895,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $272 = s === "radio";
-          if ($272) {
+          var $274 = s === "radio";
+          if ($274) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -33966,84 +34002,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2021, column 1 - line 2021, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2035, column 1 - line 2035, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $323 = filter(function(c) {
+    var $326 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($324) {
-      return fromCharArray($323(toCharArray($324)));
+    return function($327) {
+      return fromCharArray($326(toCharArray($327)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $274 = s === "controlled";
-        if ($274) {
+        var $276 = s === "controlled";
+        if ($276) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $275 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($275) {
+        var $277 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($277) {
           return "";
         }
         ;
-        var $276 = s === "alpha";
-        if ($276) {
+        var $278 = s === "alpha";
+        if ($278) {
           return "abc";
         }
         ;
-        var $277 = s === "alphanumeric";
-        if ($277) {
+        var $279 = s === "alphanumeric";
+        if ($279) {
           return "a1b";
         }
         ;
-        var $278 = s === "revalidate";
-        if ($278) {
+        var $280 = s === "revalidate";
+        if ($280) {
           return "a1b2c";
         }
         ;
-        var $279 = s === "sanitizevalue";
-        if ($279) {
+        var $281 = s === "sanitizevalue";
+        if ($281) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $280 = s === "alpha" || s === "revalidate";
-        if ($280) {
+        var $282 = s === "alpha" || s === "revalidate";
+        if ($282) {
           return Alpha.value;
         }
         ;
-        var $281 = s === "alphanumeric";
-        if ($281) {
+        var $283 = s === "alphanumeric";
+        if ($283) {
           return Alphanumeric.value;
         }
         ;
-        var $282 = s === "novalidation" || s === "sanitizevalue";
-        if ($282) {
+        var $284 = s === "novalidation" || s === "sanitizevalue";
+        if ($284) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $283 = s === "sanitizevalue";
-        if ($283) {
+        var $285 = s === "sanitizevalue";
+        if ($285) {
           return keepDigitsOnly;
         }
         ;
         return identity13;
       }(),
       placeholder: function() {
-        var $284 = s === "placeholder";
-        if ($284) {
+        var $286 = s === "placeholder";
+        if ($286) {
           return new Just("\u25CB");
         }
         ;
@@ -34053,24 +34089,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $285 = s === "vertical";
-        if ($285) {
+        var $287 = s === "vertical";
+        if ($287) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $286 = s === "rtl";
-        if ($286) {
+        var $288 = s === "rtl";
+        if ($288) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $287 = s === "named";
-        if ($287) {
+        var $289 = s === "named";
+        if ($289) {
           return new Just("otp-code");
         }
         ;
@@ -34108,8 +34144,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $288 = s === "richcontent";
-        if ($288) {
+        var $290 = s === "richcontent";
+        if ($290) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34128,15 +34164,15 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2199, column 1 - line 2199, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2213, column 1 - line 2213, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $291 = s === "reset";
-        if ($291) {
+        var $293 = s === "reset";
+        if ($293) {
           return [text5("Reset")];
         }
         ;
@@ -34149,8 +34185,8 @@
         required: true,
         serverInvalid: s === "serverInvalid",
         messages: function() {
-          var $292 = s === "defaultMessage";
-          if ($292) {
+          var $294 = s === "defaultMessage";
+          if ($294) {
             return [{
               match: ValueMissing.value,
               forceMatch: true,
@@ -34158,8 +34194,8 @@
             }];
           }
           ;
-          var $293 = s === "reset";
-          if ($293) {
+          var $295 = s === "reset";
+          if ($295) {
             return [{
               match: ValueMissing.value,
               forceMatch: false,
@@ -34198,7 +34234,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2065, column 12 - line 2067, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2079, column 12 - line 2081, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34219,8 +34255,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $301 = kv.before === key2;
-          if ($301) {
+          var $303 = kv.before === key2;
+          if ($303) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34231,7 +34267,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2047, column 15 - line 2049, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2061, column 15 - line 2063, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34347,8 +34383,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $303 = s === "submenu";
-        if ($303) {
+        var $305 = s === "submenu";
+        if ($305) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34372,8 +34408,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $304 = s === "radio";
-        if ($304) {
+        var $306 = s === "radio";
+        if ($306) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34414,8 +34450,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $305 = s === "controlled";
-        if ($305) {
+        var $307 = s === "controlled";
+        if ($307) {
           return new Just(true);
         }
         ;
@@ -34436,8 +34472,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $306 = klass === "";
-      if ($306) {
+      var $308 = klass === "";
+      if ($308) {
         return [];
       }
       ;
@@ -34461,8 +34497,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $307 = s === "radio";
-        if ($307) {
+        var $309 = s === "radio";
+        if ($309) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34558,8 +34594,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $308 = s === "submenu";
-        if ($308) {
+        var $310 = s === "submenu";
+        if ($310) {
           return [submenuEntry];
         }
         ;
@@ -34722,8 +34758,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $310 = s === "controlled";
-        if ($310) {
+        var $312 = s === "controlled";
+        if ($312) {
           return new Just(Checked.value);
         }
         ;
@@ -34747,16 +34783,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $312 = s === "form";
-        if ($312) {
+        var $314 = s === "form";
+        if ($314) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $313 = s === "form";
-        if ($313) {
+        var $315 = s === "form";
+        if ($315) {
           return "yes";
         }
         ;
@@ -34824,18 +34860,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $316 = s === "wide";
-        if ($316) {
+        var $318 = s === "wide";
+        if ($318) {
           return 16 / 9;
         }
         ;
-        var $317 = s === "tall";
-        if ($317) {
+        var $319 = s === "tall";
+        if ($319) {
           return 1 / 2;
         }
         ;
-        var $318 = s === "verywide";
-        if ($318) {
+        var $320 = s === "verywide";
+        if ($320) {
           return 21 / 9;
         }
         ;
@@ -34844,7 +34880,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1939, column 1 - line 1939, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1953, column 1 - line 1953, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -34898,8 +34934,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $319 = s === "single";
-        if ($319) {
+        var $321 = s === "single";
+        if ($321) {
           return ["item-1"];
         }
         ;
@@ -35027,9 +35063,14 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $320 = s === "formreset";
-    if ($320) {
+    var $322 = s === "formreset";
+    if ($322) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
+    }
+    ;
+    var $323 = s === "formsubmit";
+    if ($323) {
+      return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
     return box([])([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s))]);
@@ -35148,8 +35189,8 @@
         }
         ;
         if (c === "slider") {
-          var $322 = s === "vertical";
-          if ($322) {
+          var $325 = s === "vertical";
+          if ($325) {
             return box([new StyleProp("height", "160px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

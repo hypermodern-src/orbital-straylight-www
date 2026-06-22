@@ -59,7 +59,7 @@ import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered)
 import Hydrogen.Radix.Foundation.Dom as Dom
-import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, aria)
+import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, aria)
 import Web.DOM.Node as Node
 import Web.HTML as HTML
 import Web.HTML.HTMLDocument as HTMLDocument

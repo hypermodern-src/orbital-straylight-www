@@ -59,7 +59,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Foldable (for_, minimum, maximum, foldl)
 import Data.Array (mapWithIndex, length, index, updateAt, (!!))
 import Data.Number.Format (toString) as Num
-import Data.Ord (clamp, abs)
+import Data.Ord (abs)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH

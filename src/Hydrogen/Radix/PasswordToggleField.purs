@@ -38,7 +38,7 @@ import Prelude
 
 import Data.Array (null)
 import Data.Foldable (for_)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -72,6 +72,9 @@ type Input =
   , showLabel :: String                   -- aria-label when toggle has no inner text (hidden)
   , hideLabel :: String                   -- aria-label when toggle has no inner text (visible)
   , disabled :: Boolean                   -- pass-through native disabled on BOTH input + toggle
+  , name :: Maybe String                  -- {...props} passthrough: input name (form field)
+  , required :: Boolean                   -- {...props} passthrough: input required
+  , placeholder :: Maybe String           -- {...props} passthrough: input placeholder
   , iconOnly :: Boolean                    -- the toggle content is icon-only (empty textContent):
                                            -- upstream's MutationObserver applies the auto aria-label
                                            -- when textContent is empty; the consumer declares it here
@@ -90,6 +93,9 @@ defaultInput =
   , showLabel: "Show password"
   , hideLabel: "Hide password"
   , disabled: false
+  , name: Nothing
+  , required: false
+  , placeholder: Nothing
   , iconOnly: false
   , toggleVisible: []
   , toggleHidden: []
@@ -117,6 +123,9 @@ type State =
   , showLabel :: String
   , hideLabel :: String
   , disabled :: Boolean
+  , name :: Maybe String
+  , required :: Boolean
+  , placeholder :: Maybe String
   , iconOnly :: Boolean
   , toggleVisible :: Array HH.PlainHTML
   , toggleHidden :: Array HH.PlainHTML
@@ -161,6 +170,9 @@ initialState input =
   , showLabel: input.showLabel
   , hideLabel: input.hideLabel
   , disabled: input.disabled
+  , name: input.name
+  , required: input.required
+  , placeholder: input.placeholder
   , iconOnly: input.iconOnly
   , toggleVisible: input.toggleVisible
   , toggleHidden: input.toggleHidden
@@ -193,6 +205,10 @@ render st =
             , classes st.style.input
             ]
               <> (if st.disabled then [ HP.attr (HH.AttrName "disabled") "" ] else [])
+              -- {...props} passthrough onto the input (password-toggle-field.tsx:179,304).
+              <> maybe [] (\n -> [ HP.attr (HH.AttrName "name") n ]) st.name
+              <> (if st.required then [ HP.attr (HH.AttrName "required") "" ] else [])
+              <> maybe [] (\p -> [ HP.attr (HH.AttrName "placeholder") p ]) st.placeholder
           )
       , HH.button
           ( [ HP.type_ HP.ButtonButton
@@ -243,6 +259,9 @@ handleAction = case _ of
       , showLabel = input.showLabel
       , hideLabel = input.hideLabel
       , disabled = input.disabled
+      , name = input.name
+      , required = input.required
+      , placeholder = input.placeholder
       , iconOnly = input.iconOnly
       , toggleVisible = input.toggleVisible
       , toggleHidden = input.toggleHidden

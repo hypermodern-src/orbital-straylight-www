@@ -25,7 +25,6 @@ module Hydrogen.Runtime.Renderer
 
 import Prelude
 
-import Affjax.RequestBody (RequestBody(..))
 import Data.Array as Array
 import Data.Foldable (foldMap)
 import Data.Maybe (Maybe(..))

@@ -38,7 +38,7 @@ const axeOpts = { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa"] }, rules
 const shown = (id) => Object.keys(STATES[id]).includes("open") ? "open" : Object.keys(STATES[id]).filter((s) => s !== "rest")[0];
 // Per-component EXTRA a11y states beyond rest+shown — for cells that require axe across more
 // states (e.g. otp.axe-states: empty/typed/password/disabled, not just rest+filled).
-const EXTRA_STATES = { otp: ["empty", "typed", "password", "disabled"] };
+const EXTRA_STATES = { otp: ["empty", "typed", "password", "disabled"], passwordtoggle: ["visible"] };
 const MATRIX = [
   ...Object.keys(STATES).flatMap((id) => [{ id, state: "rest" }, { id, state: shown(id) }]),
   ...Object.entries(EXTRA_STATES).flatMap(([id, sts]) => sts.map((state) => ({ id, state }))),

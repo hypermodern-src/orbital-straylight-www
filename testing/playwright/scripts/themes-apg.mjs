@@ -868,6 +868,19 @@ const CHECKS = [
     await pg.locator('#root button[type="reset"]').click();
     await attrEq(pg, inp, 0, "type", "password", "form reset did not re-hide the password");
   }},
+  // A form SUBMIT always re-hides the password (security: don't let the browser remember the
+  // revealed value). The check installs its own preventDefault so the page doesn't navigate.
+  { id: "passwordtoggle", state: "formsubmit", apg: "button", name: "a form submit re-hides the password (type text→password)", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    await pg.evaluate(() => document.querySelector("form").addEventListener("submit", (e) => e.preventDefault()));
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "input should start hidden (type=password)");
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    ok((await attrOf(pg, inp, 0, "type")) === "text", "toggle did not reveal the password");
+    await pg.locator('#root button[type="submit"]').click();
+    await pg.waitForTimeout(80);
+    await attrEq(pg, inp, 0, "type", "password", "form submit did not re-hide the password");
+  }},
 
   { id: "otp", state: "filled", apg: "roving-tabindex", name: "ArrowRight/ArrowLeft rove between slots; the tab stop migrates", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';

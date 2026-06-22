@@ -1749,6 +1749,39 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=formsubmit` wraps the field in a <form> with a submit button: revealing the password
+      // then submitting must force the input type=text→password (upstream's submit listener always
+      // hides, for security). The test installs its own preventDefault so no navigation occurs.
+      if (s === "formsubmit") {
+        return (
+          <Box>
+            <form>
+              <label htmlFor="password">Password</label>
+              <PasswordToggleField.Root>
+                <PasswordToggleField.Input id="password" />
+                <PasswordToggleField.Toggle>
+                  <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+                </PasswordToggleField.Toggle>
+              </PasswordToggleField.Root>
+              <button type="submit">Submit</button>
+            </form>
+          </Box>
+        );
+      }
+      // `?s=passthrough` spreads name/required/placeholder onto the Input ({...props}).
+      if (s === "passthrough") {
+        return (
+          <Box>
+            <label htmlFor="password">Password</label>
+            <PasswordToggleField.Root>
+              <PasswordToggleField.Input id="password" name="pw" required placeholder="Enter password" />
+              <PasswordToggleField.Toggle>
+                <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+              </PasswordToggleField.Toggle>
+            </PasswordToggleField.Root>
+          </Box>
+        );
+      }
       if (s === "disabled") {
         return (
           <Box>

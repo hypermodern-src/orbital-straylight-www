@@ -1585,6 +1585,16 @@ passwordTogglePage s =
           , HH.button [ HP.type_ HP.ButtonReset ] [ HH.text "Reset" ]
           ]
       ]
+  else if s == "formsubmit" then
+    box []
+      [ HH.form_
+          [ HH.label
+              [ HP.attr (HH.AttrName "for") "password" ]
+              [ HH.text "Password" ]
+          , HH.slot_ _passwordtoggle unit PasswordToggleField.component (passwordToggleInput s)
+          , HH.button [ HP.type_ HP.ButtonSubmit ] [ HH.text "Submit" ]
+          ]
+      ]
   else
     box []
       [ HH.label
@@ -1622,6 +1632,10 @@ passwordToggleInput s = PasswordToggleField.defaultInput
   , toggleHidden = if s == "autolabel" then [ passwordToggleIcon ] else [ HH.text "Show" ]
   , iconOnly = s == "autolabel"
   , disabled = s == "disabled"
+  -- `?s=passthrough` spreads name/required/placeholder onto the input ({...props}).
+  , name = if s == "passthrough" then Just "pw" else Nothing
+  , required = s == "passthrough"
+  , placeholder = if s == "passthrough" then Just "Enter password" else Nothing
   , style = { input: cn "", toggle: cn "" }
   }
 

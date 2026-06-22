@@ -57,7 +57,6 @@ module Hydrogen.Radix.Toast
 
 import Prelude
 
-import Data.Array (null)
 import Data.Foldable (for_)
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), isJust)

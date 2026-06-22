@@ -25,7 +25,7 @@ module Hydrogen.Radix.Float.Compute
   , computePosition
   ) where
 
-import Prelude
+import Prelude hiding (flip)
 
 import Data.Array (find)
 import Data.Maybe (fromMaybe)
