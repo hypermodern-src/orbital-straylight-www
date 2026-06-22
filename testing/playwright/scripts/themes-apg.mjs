@@ -966,6 +966,19 @@ const CHECKS = [
     const after = await pg.evaluate((s) => [...document.querySelectorAll(s)].map((i) => i.value).join(""), sel);
     ok(after === "", `form reset did not clear the slots (got '${after}')`);
   }},
+  // isFocusable gating (otp.tsx:632-634): only slots up to lastSelectableIndex=clamp(value.length)
+  // are roving-focusable. On an EMPTY field lastSelectableIndex=0, so ArrowRight/End cannot leave
+  // slot 0 — you can't focus an unreachable empty slot.
+  { id: "otp", state: "empty", apg: "roving-tabindex", name: "empty field: ArrowRight cannot leave slot 0 (isFocusable gating)", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first slot");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "ArrowRight escaped slot 0 on an empty field (gating missing)");
+    await press(pg, "End");
+    ok(await activeIsNth(pg, sel, 0), "End escaped slot 0 on an empty field (gating missing)");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

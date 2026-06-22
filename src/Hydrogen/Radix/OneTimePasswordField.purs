@@ -403,11 +403,16 @@ handleAction = case _ of
         let
           cfg = { orientation: st.orientation, dir: st.dir, loop: false }
           pos = { count: st.len, current: idx }
+          -- isFocusable gating (otp.tsx:631-634): only slots up to lastSelectableIndex are
+          -- reachable, so a move can never land past it (End on an empty field stays put).
+          lastSelectable = clamp 0 (st.len - 1) (SCU.length (aggregate st))
         case navigate cfg pos key of
           Stay -> pure unit
           MoveTo target -> do
-            H.modify_ _ { cursor = target, focusEntered = true }
-            focusAt target
+            let clamped = min target lastSelectable
+            when (clamped /= idx) do
+              H.modify_ _ { cursor = clamped, focusEntered = true }
+              focusAt clamped
 
 -- | radix PASTE sanitize: strip whitespace, drop every char the validation set rejects,
 -- | and re-join. (Mirrors `sanitizeValue`: remove `\s`, then `replace(validation.regexp,"")`
