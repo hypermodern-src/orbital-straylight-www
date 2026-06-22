@@ -1,0 +1,10 @@
+- tablist:
+  - tab "Account" [selected]
+  - tab "Documents"
+  - tab "Settings"
+- tabpanel "Account": Make changes to your account.
+- tablist:
+  - tab "Account" [selected]
+  - tab "Documents"
+  - tab "Settings"
+- tabpanel "Account": Make changes to your account.
