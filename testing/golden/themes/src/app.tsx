@@ -1790,6 +1790,11 @@ const PAGES: Page[] = [
       const password = s === "password";
       const disabled = s === "disabled";
       const readonly = s === "readonly";
+      // `?s=vertical` lays the slots on the vertical axis (orientation prop → data-orientation
+      // + ArrowUp/Down roving instead of Left/Right). `?s=rtl` flips the horizontal axis (dir
+      // prop → ArrowLeft is forward).
+      const vertical = s === "vertical";
+      const rtl = s === "rtl";
       return (
         <Box>
           <OneTimePasswordField.Root
@@ -1798,6 +1803,8 @@ const PAGES: Page[] = [
             {...(password ? { type: "password" as const } : {})}
             {...(disabled ? { disabled: true } : {})}
             {...(readonly ? { readOnly: true } : {})}
+            {...(vertical ? { orientation: "vertical" as const } : {})}
+            {...(rtl ? { dir: "rtl" as const } : {})}
             autoFocus={false}
           >
             <OneTimePasswordField.Input />

@@ -869,6 +869,29 @@ const CHECKS = [
     await press(pg, "Home");
     ok(await activeIsNth(pg, sel, 0), "Home did not focus the first slot");
   }},
+  // orientation=vertical: the roving axis flips to ArrowUp/ArrowDown (data-orientation=vertical).
+  { id: "otp", state: "vertical", apg: "roving-tabindex", name: "vertical: ArrowDown/ArrowUp rove between slots", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    ok(await pg.evaluate(() => !!document.querySelector('[role="group"][data-orientation="vertical"]')), "root must carry data-orientation=vertical");
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowDown");
+    ok(await activeIsNth(pg, sel, 1), "ArrowDown did not rove to the next slot (vertical)");
+    await press(pg, "ArrowUp");
+    ok(await activeIsNth(pg, sel, 0), "ArrowUp did not rove back to the previous slot (vertical)");
+  }},
+  // dir=rtl: the horizontal roving axis is mirrored — ArrowLeft moves FORWARD (next slot).
+  { id: "otp", state: "rtl", apg: "roving-tabindex", name: "rtl: ArrowLeft moves to the NEXT slot, ArrowRight to the previous", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    // (upstream uses `dir` for the RovingFocus context, not a stamped root attribute — so the
+    // proof of rtl is the BEHAVIOR: ArrowLeft moves forward.)
+    await focusFirst(pg, sel);
+    await press(pg, "ArrowLeft");
+    ok(await activeIsNth(pg, sel, 1), "rtl: ArrowLeft did not rove to the NEXT slot");
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, sel, 0), "rtl: ArrowRight did not rove to the PREVIOUS slot");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();

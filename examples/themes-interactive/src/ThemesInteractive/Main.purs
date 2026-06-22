@@ -1667,6 +1667,11 @@ otpInput s = Otp.defaultInput
   , password = s == "password"
   , disabled = s == "disabled"
   , readOnly = s == "readonly"
+  -- `?s=vertical` lays the slots on the vertical axis (data-orientation=vertical + ArrowUp/Down
+  -- roving via the RovingFocus cfg, which already reads st.orientation). `?s=rtl` flips the
+  -- horizontal axis (dir=RTL → focusIntent swaps ArrowLeft/Right).
+  , orientation = if s == "vertical" then Vertical else Horizontal
+  , dir = if s == "rtl" then RTL else LTR
   , style = { root: cn "", input: cn "" }
   }
 
