@@ -400,6 +400,15 @@ export const STATES = {
         return t && t.getAttribute("data-state") === "active";
       });
     },
+    // `?s=disabled-skip` disables the MIDDLE tab (Documents): at rest it carries data-disabled=''
+    // + disabled + tabindex=-1. The at-rest DOM is the oracle (data-disabled empty-string contract).
+    "disabled-skip": async (pg) => {
+      await root(pg).getByRole("tab").first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelectorAll('[role="tab"]')[1];
+        return t && t.hasAttribute("data-disabled") && t.hasAttribute("disabled");
+      });
+    },
   },
   radiogroup: {
     checked: async (pg) => {

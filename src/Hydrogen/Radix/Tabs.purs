@@ -127,6 +127,10 @@ type State =
   , style :: Style
   , uid :: String       -- generated on Initialize; makes ids unique per instance
   , initialValue :: String  -- the originally-selected value (mount-animation-prevented panel)
+  , focusEntered :: Boolean -- false until focus/interaction enters: pre-entry NO trigger is the
+                            -- roving tab stop (all tabindex=-1) and the mount-selected panel keeps
+                            -- `animation-duration: 0s` (upstream RovingFocus null tabstop +
+                            -- isMountAnimationPrevented, both resolved on the first render after entry)
   }
 
 data Action
@@ -179,6 +183,7 @@ initialState input =
   , style: input.style
   , uid: ""
   , initialValue: firstValue input
+  , focusEntered: false
   }
 
 -- | The initial active value. Upstream is `value ?? defaultValue ?? ''` (tabs.tsx:80) — a
@@ -240,7 +245,9 @@ renderTrigger st _ tab =
         , dataAttr "radix-collection-item" ""
         , dataState (if selected then "active" else "inactive")
         , dataOrientation st.orientation
-        , HP.tabIndex (tabIndexFor curIdx idx)
+        -- Pre-entry the RovingFocusGroup tab stop is null → EVERY trigger is tabindex=-1; once
+        -- focus/interaction enters, the selected trigger becomes the single tab stop.
+        , HP.tabIndex (if st.focusEntered then tabIndexFor curIdx idx else (-1))
         , HP.disabled tab.disabled
         , classes st.style.trigger
         , HE.onClick \_ -> Selected tab.value
@@ -274,7 +281,11 @@ renderPanel st tab =
         , classes st.style.content
         ]
           <> (if selected then [] else [ HP.attr (HH.AttrName "hidden") "" ])
-          <> (if isInitial then [ HP.attr (HH.AttrName "style") "" ] else [])
+          -- mount-animation-prevention: the panel selected AT MOUNT carries
+          -- `animation-duration: 0s` until the first render after focus/interaction enters, then a
+          -- bare `style=`. Non-mount-selected panels carry no style attr. (upstream
+          -- isMountAnimationPreventedRef, cleared by rAF → reflected on the next render.)
+          <> (if isInitial then [ HP.attr (HH.AttrName "style") (if st.focusEntered then "" else "animation-duration: 0s;") ] else [])
       )
       (if selected then map HH.fromPlainHTML tab.content else [])
 
@@ -307,8 +318,11 @@ handleAction = case _ of
       , idPrefix = input.idPrefix
       , style = input.style
       }
-  Selected value -> selectValue value
+  Selected value -> do
+    H.modify_ _ { focusEntered = true }
+    selectValue value
   ListKeyDown ke -> do
+    H.modify_ _ { focusEntered = true }
     st <- H.get
     -- upstream RovingFocusGroup.Item focusable={!disabled} (tabs.tsx:168-169) → arrows
     -- navigate WITHIN the enabled subset and SKIP disabled tabs entirely (rather than
@@ -329,12 +343,14 @@ handleAction = case _ of
           focusTabByValue tab.value
           when (st.activationMode == Automatic) (selectValue tab.value)
   -- Enter/Space on a focused trigger activates it regardless of activationMode (tabs.tsx:192).
-  TriggerKeyDown value ke ->
+  TriggerKeyDown value ke -> do
+    H.modify_ _ { focusEntered = true }
     when (KE.key ke == "Enter" || KE.key ke == " ") (selectValue value)
   -- Tab-into-tablist: forward container focus to the active trigger. When nothing is
   -- selected (selectedIndex = -1, the zero-selected state) upstream focuses the FIRST
   -- focusable tab instead, so fall back to index 0.
   EntryFocus -> do
+    H.modify_ _ { focusEntered = true }
     st <- H.get
     let idx = selectedIndex st
     focusTabAt (if idx < 0 then 0 else idx)

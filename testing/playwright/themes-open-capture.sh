@@ -111,6 +111,7 @@ STATES=(
   "otp:controlled"
   "otp:revalidate"
   "otp:sanitizevalue"
+  "tabs:disabled-skip"
   "form:multiMessage"
   # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
   "collapsible:disabled"

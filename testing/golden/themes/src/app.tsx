@@ -1132,7 +1132,11 @@ const PAGES: Page[] = [
     // (no new DOM golden — the themed rt-Tabs class contract is pinned by tab2). Every other
     // state keeps the 3-enabled instance.
     node: (
-      <Tabs.Root defaultValue="account">
+      <Tabs.Root
+        {...(currentState() === "controlled"
+          ? { value: "account", onValueChange: () => {} }
+          : { defaultValue: "account" })}
+      >
         <Tabs.List>
           <Tabs.Trigger value="account">Account</Tabs.Trigger>
           <Tabs.Trigger value="documents" disabled={currentState() === "disabled-skip"}>Documents</Tabs.Trigger>

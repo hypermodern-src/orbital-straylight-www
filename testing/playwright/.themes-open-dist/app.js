@@ -22284,7 +22284,6 @@
   var bind32 = /* @__PURE__ */ bind(bindHalogenM);
   var for_20 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var bind118 = /* @__PURE__ */ bind(bindMaybe);
-  var map120 = /* @__PURE__ */ map(functorMaybe);
   var get14 = /* @__PURE__ */ get(monadStateHalogenM);
   var when21 = /* @__PURE__ */ when(applicativeHalogenM);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
@@ -22296,6 +22295,7 @@
   var pure31 = /* @__PURE__ */ pure(applicativeHalogenM);
   var value14 = /* @__PURE__ */ value12(isPropString);
   var $$void12 = /* @__PURE__ */ $$void(functorHalogenM);
+  var map120 = /* @__PURE__ */ map(functorMaybe);
   var min7 = /* @__PURE__ */ min(ordInt);
   var applySecond10 = /* @__PURE__ */ applySecond(applyHalogenM);
   var Numeric = /* @__PURE__ */ function() {
@@ -22446,7 +22446,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 259, column 19 - line 263, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 269, column 19 - line 273, column 21): " + [v.constructor.name]);
   };
   var toSlots = function(len) {
     return function(s) {
@@ -22464,9 +22464,9 @@
         return function(ch) {
           return bind32(getHTMLElementRef(slotRef(i2)))(function(mel) {
             return for_20(bind118(mel)(fromHTMLElement))(function() {
-              var $176 = setValue3(ch);
-              return function($177) {
-                return liftEffect7($176($177));
+              var $182 = setValue3(ch);
+              return function($183) {
+                return liftEffect7($182($183));
               };
             }());
           });
@@ -22483,25 +22483,6 @@
     }
     ;
     return fromMaybe("")(index(cs)(v - 1 | 0));
-  };
-  var initialState13 = function(input3) {
-    return {
-      len: input3.length,
-      chars: controllable(map120(toSlots(input3.length))(input3.value))(toSlots(input3.length)(input3.defaultValue)),
-      validation: input3.validation,
-      orientation: input3.orientation,
-      dir: input3.dir,
-      name: input3.name,
-      password: input3.password,
-      disabled: input3.disabled,
-      readOnly: input3.readOnly,
-      autoSubmit: input3.autoSubmit,
-      autoFocus: input3.autoFocus,
-      placeholder: input3.placeholder,
-      style: input3.style,
-      cursor: 0,
-      focusEntered: false
-    };
   };
   var hiddenRef = "otp-hidden";
   var withForm = function(dictMonadEffect) {
@@ -22524,8 +22505,8 @@
         return when21(st.autoSubmit && (length(next) === st.len && length(filter(function(v) {
           return v !== "";
         })(next)) === st.len))(discard110(raise(new AutoSubmitted(joinWith("")(next))))(function() {
-          return withForm1(function($178) {
-            return liftEffect7(requestSubmit($178));
+          return withForm1(function($184) {
+            return liftEffect7(requestSubmit($184));
           });
         }));
       });
@@ -22535,12 +22516,36 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(idx) {
       return bind32(getHTMLElementRef(slotRef(idx)))(function(mel) {
-        return for_20(mel)(function($179) {
-          return liftEffect7(focus($179));
+        return for_20(mel)(function($185) {
+          return liftEffect7(focus($185));
         });
       });
     };
   };
+  var eqValidation = {
+    eq: function(x) {
+      return function(y) {
+        if (x instanceof Numeric && y instanceof Numeric) {
+          return true;
+        }
+        ;
+        if (x instanceof Alpha && y instanceof Alpha) {
+          return true;
+        }
+        ;
+        if (x instanceof Alphanumeric && y instanceof Alphanumeric) {
+          return true;
+        }
+        ;
+        if (x instanceof NoValidation && y instanceof NoValidation) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var notEq25 = /* @__PURE__ */ notEq(eqValidation);
   var clearCharCompact = function(dictMonadEffect) {
     var syncSlotValues1 = syncSlotValues(dictMonadEffect);
     var focusAt1 = focusAt(dictMonadEffect);
@@ -22558,18 +22563,18 @@
               return idx;
             }();
             return discard110(modify_15(function(s) {
-              var $101 = {};
-              for (var $102 in s) {
-                if ({}.hasOwnProperty.call(s, $102)) {
-                  $101[$102] = s[$102];
+              var $104 = {};
+              for (var $105 in s) {
+                if ({}.hasOwnProperty.call(s, $105)) {
+                  $104[$105] = s[$105];
                 }
                 ;
               }
               ;
-              $101.chars = change2(next)(s.chars).next;
-              $101.cursor = focusIdx;
-              $101.focusEntered = true;
-              return $101;
+              $104.chars = change2(next)(s.chars).next;
+              $104.cursor = focusIdx;
+              $104.focusEntered = true;
+              return $104;
             }))(function() {
               return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
                 return discard110(syncSlotValues1(next))(function() {
@@ -22587,17 +22592,17 @@
     return bind32(get14)(function(st) {
       var cleared = replicate(st.len)("");
       return discard110(modify_15(function(s) {
-        var $104 = {};
-        for (var $105 in s) {
-          if ({}.hasOwnProperty.call(s, $105)) {
-            $104[$105] = s[$105];
+        var $107 = {};
+        for (var $108 in s) {
+          if ({}.hasOwnProperty.call(s, $108)) {
+            $107[$108] = s[$108];
           }
           ;
         }
         ;
-        $104.chars = change2(cleared)(s.chars).next;
-        $104.focusEntered = true;
-        return $104;
+        $107.chars = change2(cleared)(s.chars).next;
+        $107.focusEntered = true;
+        return $107;
       }))(function() {
         return discard110(raise(new ValueChanged3("")))(function() {
           return syncSlotValues1(cleared);
@@ -22686,16 +22691,16 @@
     return function(v) {
       if (v instanceof SetValue3) {
         return discard110(modify_15(function(st) {
-          var $119 = {};
-          for (var $120 in st) {
-            if ({}.hasOwnProperty.call(st, $120)) {
-              $119[$120] = st[$120];
+          var $122 = {};
+          for (var $123 in st) {
+            if ({}.hasOwnProperty.call(st, $123)) {
+              $122[$123] = st[$123];
             }
             ;
           }
           ;
-          $119.chars = change2(toSlots(st.len)(v.value0))(st.chars).next;
-          return $119;
+          $122.chars = change2(toSlots(st.len)(v.value0))(st.chars).next;
+          return $122;
         }))(function() {
           return pure31(new Just(v.value1));
         });
@@ -22707,7 +22712,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 560, column 15 - line 566, column 39): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 590, column 15 - line 596, column 39): " + [v.constructor.name]);
     };
   };
   var renderHidden = function(st) {
@@ -22720,7 +22725,7 @@
         return [];
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 287, column 13 - line 289, column 28): " + [st.name.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 297, column 13 - line 299, column 28): " + [st.name.constructor.name]);
     }()));
   };
   var render13 = function(st) {
@@ -22763,18 +22768,34 @@
           return true;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 301, column 25 - line 305, column 27): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 311, column 25 - line 315, column 27): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 299, column 8 - line 305, column 27): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 309, column 8 - line 315, column 27): " + [v1.constructor.name]);
     };
   };
   var sanitizePaste = function(v) {
-    return function(s) {
-      var keep = function(c) {
-        return c !== " " && (c !== "	" && (c !== "\n" && (c !== "\r" && accepts(v)(c))));
+    return function(customF) {
+      return function(s) {
+        var notWs = function(c) {
+          return c !== " " && (c !== "	" && (c !== "\n" && c !== "\r"));
+        };
+        var noWhitespace = joinWith("")(filter(notWs)(map47(singleton3)(toCharArray(s))));
+        if (v instanceof NoValidation) {
+          return customF(noWhitespace);
+        }
+        ;
+        return joinWith("")(filter(accepts(v))(map47(singleton3)(toCharArray(noWhitespace))));
       };
-      return joinWith("")(filter(keep)(map47(singleton3)(toCharArray(s))));
+    };
+  };
+  var sanitizedSlots = function(v) {
+    return function(customF) {
+      return function(len) {
+        return function(s) {
+          return toSlots(len)(sanitizePaste(v)(customF)(s));
+        };
+      };
     };
   };
   var handleAction13 = function(dictMonadEffect) {
@@ -22801,18 +22822,18 @@
         return bind32(get14)(function(st) {
           var cleared = replicate(st.len)("");
           return discard110(modify_15(function(s) {
-            var $134 = {};
-            for (var $135 in s) {
-              if ({}.hasOwnProperty.call(s, $135)) {
-                $134[$135] = s[$135];
+            var $138 = {};
+            for (var $139 in s) {
+              if ({}.hasOwnProperty.call(s, $139)) {
+                $138[$139] = s[$139];
               }
               ;
             }
             ;
-            $134.chars = change2(cleared)(s.chars).next;
-            $134.cursor = 0;
-            $134.focusEntered = false;
-            return $134;
+            $138.chars = change2(cleared)(s.chars).next;
+            $138.cursor = 0;
+            $138.focusEntered = false;
+            return $138;
           }))(function() {
             return discard110(raise(new ValueChanged3("")))(function() {
               return syncSlotValues1(cleared);
@@ -22823,68 +22844,81 @@
       ;
       if (v instanceof Receive14) {
         return modify_15(function(st) {
-          var $137 = {};
-          for (var $138 in st) {
-            if ({}.hasOwnProperty.call(st, $138)) {
-              $137[$138] = st[$138];
+          var synced = sync(map120(sanitizedSlots(v.value0.validation)(v.value0.sanitize)(v.value0.length))(v.value0.value))(st.chars);
+          var revalidated = function() {
+            var $141 = notEq25(v.value0.validation)(st.validation);
+            if ($141) {
+              return {
+                controlled: synced.controlled,
+                uncontrolled: sanitizedSlots(v.value0.validation)(v.value0.sanitize)(v.value0.length)(joinWith("")(synced.uncontrolled))
+              };
+            }
+            ;
+            return synced;
+          }();
+          var $142 = {};
+          for (var $143 in st) {
+            if ({}.hasOwnProperty.call(st, $143)) {
+              $142[$143] = st[$143];
             }
             ;
           }
           ;
-          $137.len = v.value0.length;
-          $137.chars = sync(map120(toSlots(v.value0.length))(v.value0.value))(st.chars);
-          $137.validation = v.value0.validation;
-          $137.orientation = v.value0.orientation;
-          $137.dir = v.value0.dir;
-          $137.name = v.value0.name;
-          $137.password = v.value0.password;
-          $137.disabled = v.value0.disabled;
-          $137.readOnly = v.value0.readOnly;
-          $137.autoSubmit = v.value0.autoSubmit;
-          $137.placeholder = v.value0.placeholder;
-          $137.style = v.value0.style;
-          return $137;
+          $142.len = v.value0.length;
+          $142.chars = revalidated;
+          $142.validation = v.value0.validation;
+          $142.orientation = v.value0.orientation;
+          $142.dir = v.value0.dir;
+          $142.name = v.value0.name;
+          $142.password = v.value0.password;
+          $142.disabled = v.value0.disabled;
+          $142.readOnly = v.value0.readOnly;
+          $142.autoSubmit = v.value0.autoSubmit;
+          $142.placeholder = v.value0.placeholder;
+          $142.sanitize = v.value0.sanitize;
+          $142.style = v.value0.style;
+          return $142;
         });
       }
       ;
       if (v instanceof SlotFocused) {
         return bind32(get14)(function(st) {
           var lastSelectable = clamp3(0)(st.len - 1 | 0)(length2(aggregate(st)));
-          var $141 = v.value0 > lastSelectable;
-          if ($141) {
+          var $146 = v.value0 > lastSelectable;
+          if ($146) {
             return discard110(modify_15(function(v1) {
-              var $142 = {};
-              for (var $143 in v1) {
-                if ({}.hasOwnProperty.call(v1, $143)) {
-                  $142[$143] = v1[$143];
+              var $147 = {};
+              for (var $148 in v1) {
+                if ({}.hasOwnProperty.call(v1, $148)) {
+                  $147[$148] = v1[$148];
                 }
                 ;
               }
               ;
-              $142.cursor = lastSelectable;
-              $142.focusEntered = true;
-              return $142;
+              $147.cursor = lastSelectable;
+              $147.focusEntered = true;
+              return $147;
             }))(function() {
               return focusAt1(lastSelectable);
             });
           }
           ;
           return discard110(modify_15(function(v1) {
-            var $145 = {};
-            for (var $146 in v1) {
-              if ({}.hasOwnProperty.call(v1, $146)) {
-                $145[$146] = v1[$146];
+            var $150 = {};
+            for (var $151 in v1) {
+              if ({}.hasOwnProperty.call(v1, $151)) {
+                $150[$151] = v1[$151];
               }
               ;
             }
             ;
-            $145.cursor = v.value0;
-            $145.focusEntered = true;
-            return $145;
+            $150.cursor = v.value0;
+            $150.focusEntered = true;
+            return $150;
           }))(function() {
             return bind32(getHTMLElementRef(slotRef(v.value0)))(function(mel) {
-              return for_20(bind118(mel)(fromHTMLElement))(function($180) {
-                return liftEffect7(select($180));
+              return for_20(bind118(mel)(fromHTMLElement))(function($186) {
+                return liftEffect7(select($186));
               });
             });
           });
@@ -22893,27 +22927,27 @@
       ;
       if (v instanceof SlotInput) {
         return bind32(get14)(function(st) {
-          var $149 = !st.disabled && (!st.readOnly && length(toCharArray(v.value1)) > 1);
-          if ($149) {
-            var sanitized = sanitizePaste(st.validation)(v.value1);
+          var $154 = !st.disabled && (!st.readOnly && length(toCharArray(v.value1)) > 1);
+          if ($154) {
+            var sanitized = sanitizePaste(st.validation)(st.sanitize)(v.value1);
             var next = toSlots(st.len)(sanitized);
             var filled = length(filter(function(v1) {
               return v1 !== "";
             })(next));
             var focusIdx = clampIdx(st.len)(filled - 1 | 0);
             return when21(sanitized !== "")(discard110(modify_15(function(s) {
-              var $150 = {};
-              for (var $151 in s) {
-                if ({}.hasOwnProperty.call(s, $151)) {
-                  $150[$151] = s[$151];
+              var $155 = {};
+              for (var $156 in s) {
+                if ({}.hasOwnProperty.call(s, $156)) {
+                  $155[$156] = s[$156];
                 }
                 ;
               }
               ;
-              $150.chars = change2(next)(s.chars).next;
-              $150.cursor = focusIdx;
-              $150.focusEntered = true;
-              return $150;
+              $155.chars = change2(next)(s.chars).next;
+              $155.cursor = focusIdx;
+              $155.focusEntered = true;
+              return $155;
             }))(function() {
               return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
                 return discard110(maybeAutoSubmit1(next))(function() {
@@ -22925,32 +22959,38 @@
             }));
           }
           ;
-          var $153 = !st.disabled && (!st.readOnly && v.value1 === "");
-          if ($153) {
+          var $158 = !st.disabled && (!st.readOnly && v.value1 === "");
+          if ($158) {
             return clearCharCompact1(v.value0)(false);
           }
           ;
           var typed = lastChar(v.value1);
-          var $154 = !st.disabled && (!st.readOnly && (typed !== "" && accepts(st.validation)(typed)));
-          if ($154) {
+          var $159 = !st.disabled && (!st.readOnly && (typed !== "" && accepts(st.validation)(typed)));
+          if ($159) {
             var nextCursor = min7(v.value0 + 1 | 0)(st.len - 1 | 0);
             var cur = current(st.chars);
             var next = fromMaybe(cur)(updateAt(v.value0)(typed)(cur));
+            var res = change2(next)(st.chars);
             return discard110(modify_15(function(s) {
-              var $155 = {};
-              for (var $156 in s) {
-                if ({}.hasOwnProperty.call(s, $156)) {
-                  $155[$156] = s[$156];
+              var $160 = {};
+              for (var $161 in s) {
+                if ({}.hasOwnProperty.call(s, $161)) {
+                  $160[$161] = s[$161];
                 }
                 ;
               }
               ;
-              $155.chars = change2(next)(s.chars).next;
-              $155.cursor = nextCursor;
-              $155.focusEntered = true;
-              return $155;
+              $160.chars = res.next;
+              $160.cursor = nextCursor;
+              $160.focusEntered = true;
+              return $160;
             }))(function() {
               return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
+                var $163 = isControlled(st.chars);
+                if ($163) {
+                  return syncSlotValues1(current(res.next));
+                }
+                ;
                 return discard110(focusAt1(nextCursor))(function() {
                   return maybeAutoSubmit1(next);
                 });
@@ -22987,24 +23027,24 @@
           ;
           if (key2 === "Backspace" && editable) {
             return discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
-              var $161 = atIdx !== "";
-              if ($161) {
+              var $167 = atIdx !== "";
+              if ($167) {
                 return clearCharCompact1(v.value0)(true);
               }
               ;
               var prev = max10(0)(v.value0 - 1 | 0);
               return discard110(modify_15(function(v12) {
-                var $162 = {};
-                for (var $163 in v12) {
-                  if ({}.hasOwnProperty.call(v12, $163)) {
-                    $162[$163] = v12[$163];
+                var $168 = {};
+                for (var $169 in v12) {
+                  if ({}.hasOwnProperty.call(v12, $169)) {
+                    $168[$169] = v12[$169];
                   }
                   ;
                 }
                 ;
-                $162.cursor = prev;
-                $162.focusEntered = true;
-                return $162;
+                $168.cursor = prev;
+                $168.focusEntered = true;
+                return $168;
               }))(function() {
                 return focusAt1(prev);
               });
@@ -23019,8 +23059,8 @@
           ;
           if (key2 === "Enter") {
             return discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
-              return withForm1(function($181) {
-                return liftEffect7(requestSubmit($181));
+              return withForm1(function($187) {
+                return liftEffect7(requestSubmit($187));
               });
             });
           }
@@ -23033,8 +23073,8 @@
                     var fullySelected = selStart === 0 && selEnd >= 1;
                     return when21(!fullySelected)(discard110(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
                       var targetIdx = function() {
-                        var $165 = selStart === 0;
-                        if ($165) {
+                        var $171 = selStart === 0;
+                        if ($171) {
                           return v.value0;
                         }
                         ;
@@ -23044,18 +23084,18 @@
                       var cur = current(st.chars);
                       var next = fromMaybe(cur)(updateAt(targetIdx)(key2)(cur));
                       return discard110(modify_15(function(s) {
-                        var $166 = {};
-                        for (var $167 in s) {
-                          if ({}.hasOwnProperty.call(s, $167)) {
-                            $166[$167] = s[$167];
+                        var $172 = {};
+                        for (var $173 in s) {
+                          if ({}.hasOwnProperty.call(s, $173)) {
+                            $172[$173] = s[$173];
                           }
                           ;
                         }
                         ;
-                        $166.chars = change2(next)(s.chars).next;
-                        $166.cursor = nextCursor;
-                        $166.focusEntered = true;
-                        return $166;
+                        $172.chars = change2(next)(s.chars).next;
+                        $172.cursor = nextCursor;
+                        $172.focusEntered = true;
+                        return $172;
                       }))(function() {
                         return discard110(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
                           return discard110(focusAt1(nextCursor))(function() {
@@ -23088,27 +23128,47 @@
           if (v1 instanceof MoveTo) {
             var clamped = min7(v1.value0)(lastSelectable);
             return when21(clamped !== v.value0)(discard110(modify_15(function(v2) {
-              var $170 = {};
-              for (var $171 in v2) {
-                if ({}.hasOwnProperty.call(v2, $171)) {
-                  $170[$171] = v2[$171];
+              var $176 = {};
+              for (var $177 in v2) {
+                if ({}.hasOwnProperty.call(v2, $177)) {
+                  $176[$177] = v2[$177];
                 }
                 ;
               }
               ;
-              $170.cursor = clamped;
-              $170.focusEntered = true;
-              return $170;
+              $176.cursor = clamped;
+              $176.focusEntered = true;
+              return $176;
             }))(function() {
               return focusAt1(clamped);
             }));
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 480, column 9 - line 486, column 30): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 507, column 9 - line 513, column 30): " + [v1.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 324, column 16 - line 486, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 334, column 16 - line 513, column 30): " + [v.constructor.name]);
+    };
+  };
+  var initialState13 = function(input3) {
+    return {
+      len: input3.length,
+      chars: controllable(map120(sanitizedSlots(input3.validation)(input3.sanitize)(input3.length))(input3.value))(sanitizedSlots(input3.validation)(input3.sanitize)(input3.length)(input3.defaultValue)),
+      validation: input3.validation,
+      orientation: input3.orientation,
+      dir: input3.dir,
+      name: input3.name,
+      password: input3.password,
+      disabled: input3.disabled,
+      readOnly: input3.readOnly,
+      autoSubmit: input3.autoSubmit,
+      autoFocus: input3.autoFocus,
+      placeholder: input3.placeholder,
+      sanitize: input3.sanitize,
+      style: input3.style,
+      cursor: 0,
+      focusEntered: false
     };
   };
   var component14 = function(dictMonadEffect) {
@@ -23119,8 +23179,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction13(dictMonadEffect),
         handleQuery: handleQuery13(dictMonadEffect),
-        receive: function($182) {
-          return Just.create(Receive14.create($182));
+        receive: function($188) {
+          return Just.create(Receive14.create($188));
         },
         initialize: new Just(Initialize12.value)
       })
@@ -28032,16 +28092,16 @@
   var selectValue2 = function(value17) {
     return bind40(get22)(function(st) {
       return when28(current(st.ctrl) !== value17)(discard30(modify_23(function(v) {
-        var $51 = {};
-        for (var $52 in v) {
-          if ({}.hasOwnProperty.call(v, $52)) {
-            $51[$52] = v[$52];
+        var $55 = {};
+        for (var $56 in v) {
+          if ({}.hasOwnProperty.call(v, $56)) {
+            $55[$56] = v[$56];
           }
           ;
         }
         ;
-        $51.ctrl = change2(value17)(st.ctrl).next;
-        return $51;
+        $55.ctrl = change2(value17)(st.ctrl).next;
+        return $55;
       }))(function() {
         return raise(new ValueChanged7(value17));
       }));
@@ -28061,15 +28121,15 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 366, column 15 - line 372, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 382, column 15 - line 388, column 42): " + [v.constructor.name]);
     };
   };
   var focusTabByValue = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(value17) {
       return bind40(getHTMLElementRef(tabRef(value17)))(function(mel) {
-        return for_32(mel)(function($90) {
-          return liftEffect7(focus($90));
+        return for_32(mel)(function($108) {
+          return liftEffect7(focus($108));
         });
       });
     };
@@ -28087,7 +28147,7 @@
           return focusTabByValue1(v.value0.value);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 347, column 3 - line 349, column 42): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 363, column 3 - line 365, column 42): " + [v.constructor.name]);
       });
     };
   };
@@ -28100,7 +28160,7 @@
       return fromMaybe("")(input3.defaultValue);
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 189, column 20 - line 191, column 45): " + [input3.value.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 194, column 20 - line 196, column 45): " + [input3.value.constructor.name]);
   };
   var initialState20 = function(input3) {
     return {
@@ -28113,7 +28173,8 @@
       idPrefix: input3.idPrefix,
       style: input3.style,
       uid: "",
-      initialValue: firstValue(input3)
+      initialValue: firstValue(input3),
+      focusEntered: false
     };
   };
   var eqActivationMode = {
@@ -28140,110 +28201,162 @@
       if (v instanceof Initialize19) {
         return bind40(useId2)(function(uid) {
           return modify_23(function(v1) {
-            var $65 = {};
-            for (var $66 in v1) {
-              if ({}.hasOwnProperty.call(v1, $66)) {
-                $65[$66] = v1[$66];
+            var $69 = {};
+            for (var $70 in v1) {
+              if ({}.hasOwnProperty.call(v1, $70)) {
+                $69[$70] = v1[$70];
               }
               ;
             }
             ;
-            $65.uid = uid;
-            return $65;
+            $69.uid = uid;
+            return $69;
           });
         });
       }
       ;
       if (v instanceof Receive21) {
         return modify_23(function(st) {
-          var $68 = {};
-          for (var $69 in st) {
-            if ({}.hasOwnProperty.call(st, $69)) {
-              $68[$69] = st[$69];
+          var $72 = {};
+          for (var $73 in st) {
+            if ({}.hasOwnProperty.call(st, $73)) {
+              $72[$73] = st[$73];
             }
             ;
           }
           ;
-          $68.tabs = v.value0.tabs;
-          $68.ctrl = sync(v.value0.value)(st.ctrl);
-          $68.orientation = v.value0.orientation;
-          $68.dir = v.value0.dir;
-          $68.loop = v.value0.loop;
-          $68.activationMode = v.value0.activationMode;
-          $68.idPrefix = v.value0.idPrefix;
-          $68.style = v.value0.style;
-          return $68;
+          $72.tabs = v.value0.tabs;
+          $72.ctrl = sync(v.value0.value)(st.ctrl);
+          $72.orientation = v.value0.orientation;
+          $72.dir = v.value0.dir;
+          $72.loop = v.value0.loop;
+          $72.activationMode = v.value0.activationMode;
+          $72.idPrefix = v.value0.idPrefix;
+          $72.style = v.value0.style;
+          return $72;
         });
       }
       ;
       if (v instanceof Selected2) {
-        return selectValue2(v.value0);
+        return discard30(modify_23(function(v1) {
+          var $76 = {};
+          for (var $77 in v1) {
+            if ({}.hasOwnProperty.call(v1, $77)) {
+              $76[$77] = v1[$77];
+            }
+            ;
+          }
+          ;
+          $76.focusEntered = true;
+          return $76;
+        }))(function() {
+          return selectValue2(v.value0);
+        });
       }
       ;
       if (v instanceof ListKeyDown3) {
-        return bind40(get22)(function(st) {
-          var enabled = filter(function($91) {
-            return !function(v1) {
-              return v1.disabled;
-            }($91);
-          })(st.tabs);
-          var curEnabled = fromMaybe(0)(findIndex(function(t) {
-            return t.value === current(st.ctrl);
-          })(enabled));
-          var pos = {
-            count: length(enabled),
-            current: curEnabled
-          };
-          var cfg = {
-            orientation: st.orientation,
-            dir: st.dir,
-            loop: st.loop
-          };
-          return when28(length(enabled) > 0)(function() {
-            var v1 = navigate(cfg)(pos)(key(v.value0));
-            if (v1 instanceof Stay) {
-              return pure39(unit);
+        return discard30(modify_23(function(v1) {
+          var $80 = {};
+          for (var $81 in v1) {
+            if ({}.hasOwnProperty.call(v1, $81)) {
+              $80[$81] = v1[$81];
             }
             ;
-            if (v1 instanceof MoveTo) {
-              var v2 = index(enabled)(v1.value0);
-              if (v2 instanceof Nothing) {
+          }
+          ;
+          $80.focusEntered = true;
+          return $80;
+        }))(function() {
+          return bind40(get22)(function(st) {
+            var enabled = filter(function($109) {
+              return !function(v1) {
+                return v1.disabled;
+              }($109);
+            })(st.tabs);
+            var curEnabled = fromMaybe(0)(findIndex(function(t) {
+              return t.value === current(st.ctrl);
+            })(enabled));
+            var pos = {
+              count: length(enabled),
+              current: curEnabled
+            };
+            var cfg = {
+              orientation: st.orientation,
+              dir: st.dir,
+              loop: st.loop
+            };
+            return when28(length(enabled) > 0)(function() {
+              var v1 = navigate(cfg)(pos)(key(v.value0));
+              if (v1 instanceof Stay) {
                 return pure39(unit);
               }
               ;
-              if (v2 instanceof Just) {
-                return discard30(focusTabByValue1(v2.value0.value))(function() {
-                  return when28(eq110(st.activationMode)(Automatic.value))(selectValue2(v2.value0.value));
-                });
+              if (v1 instanceof MoveTo) {
+                var v2 = index(enabled)(v1.value0);
+                if (v2 instanceof Nothing) {
+                  return pure39(unit);
+                }
+                ;
+                if (v2 instanceof Just) {
+                  return discard30(focusTabByValue1(v2.value0.value))(function() {
+                    return when28(eq110(st.activationMode)(Automatic.value))(selectValue2(v2.value0.value));
+                  });
+                }
+                ;
+                throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 338, column 21 - line 344, column 72): " + [v2.constructor.name]);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 324, column 21 - line 330, column 72): " + [v2.constructor.name]);
-            }
-            ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 322, column 33 - line 330, column 72): " + [v1.constructor.name]);
-          }());
+              throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 336, column 33 - line 344, column 72): " + [v1.constructor.name]);
+            }());
+          });
         });
       }
       ;
       if (v instanceof TriggerKeyDown5) {
-        return when28(key(v.value1) === "Enter" || key(v.value1) === " ")(selectValue2(v.value0));
-      }
-      ;
-      if (v instanceof EntryFocus2) {
-        return bind40(get22)(function(st) {
-          var idx = selectedIndex4(st);
-          return focusTabAt1(function() {
-            var $80 = idx < 0;
-            if ($80) {
-              return 0;
+        return discard30(modify_23(function(v1) {
+          var $88 = {};
+          for (var $89 in v1) {
+            if ({}.hasOwnProperty.call(v1, $89)) {
+              $88[$89] = v1[$89];
             }
             ;
-            return idx;
-          }());
+          }
+          ;
+          $88.focusEntered = true;
+          return $88;
+        }))(function() {
+          return when28(key(v.value1) === "Enter" || key(v.value1) === " ")(selectValue2(v.value0));
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 295, column 16 - line 340, column 44): " + [v.constructor.name]);
+      if (v instanceof EntryFocus2) {
+        return discard30(modify_23(function(v1) {
+          var $93 = {};
+          for (var $94 in v1) {
+            if ({}.hasOwnProperty.call(v1, $94)) {
+              $93[$94] = v1[$94];
+            }
+            ;
+          }
+          ;
+          $93.focusEntered = true;
+          return $93;
+        }))(function() {
+          return bind40(get22)(function(st) {
+            var idx = selectedIndex4(st);
+            return focusTabAt1(function() {
+              var $96 = idx < 0;
+              if ($96) {
+                return 0;
+              }
+              ;
+              return idx;
+            }());
+          });
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 306, column 16 - line 356, column 44): " + [v.constructor.name]);
     };
   };
   var dirName5 = function(v) {
@@ -28255,7 +28368,7 @@
       return "rtl";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 222, column 11 - line 224, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 227, column 11 - line 229, column 15): " + [v.constructor.name]);
   };
   var defaultStyle18 = {
     root: /* @__PURE__ */ cn("rdx-tabs-root"),
@@ -28289,7 +28402,7 @@
       return st.idPrefix + ("-" + st.uid);
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 142, column 1 - line 142, column 24): " + [st.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 146, column 1 - line 146, column 24): " + [st.constructor.name]);
   };
   var panelId2 = function(st) {
     return function(value17) {
@@ -28319,7 +28432,13 @@
         return [attr2("hidden")("")];
       }())(function() {
         if (isInitial) {
-          return [attr2("style")("")];
+          return [attr2("style")(function() {
+            if (st.focusEntered) {
+              return "";
+            }
+            ;
+            return "animation-duration: 0s;";
+          }())];
         }
         ;
         return [];
@@ -28352,7 +28471,13 @@
           }
           ;
           return "inactive";
-        }()), dataOrientation(st.orientation), tabIndex2(tabIndexFor(curIdx)(idx)), disabled10(tab.disabled), classes2(st.style.trigger), onClick(function(v1) {
+        }()), dataOrientation(st.orientation), tabIndex2(function() {
+          if (st.focusEntered) {
+            return tabIndexFor(curIdx)(idx);
+          }
+          ;
+          return -1 | 0;
+        }()), disabled10(tab.disabled), classes2(st.style.trigger), onClick(function(v1) {
           return new Selected2(tab.value);
         }), onKeyDown(TriggerKeyDown5.create(tab.value))])(function() {
           if (tab.disabled) {
@@ -28375,8 +28500,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction21(dictMonadEffect),
         handleQuery: handleQuery20(dictMonadEffect),
-        receive: function($92) {
-          return Just.create(Receive21.create($92));
+        receive: function($110) {
+          return Just.create(Receive21.create($110));
         },
         initialize: new Just(Initialize19.value)
       })
@@ -32183,6 +32308,7 @@
   var append31 = /* @__PURE__ */ append(semigroupArray);
   var map64 = /* @__PURE__ */ map(functorArray);
   var show21 = /* @__PURE__ */ show(showInt);
+  var identity13 = /* @__PURE__ */ identity(categoryFn);
   var bind46 = /* @__PURE__ */ bind(bindEffect);
   var slot_2 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_2({
@@ -32421,7 +32547,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1943, column 1 - line 1943, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1956, column 1 - line 1956, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32523,8 +32649,8 @@
     return {
       loop: defaultInput23.loop,
       orientation: function() {
-        var $226 = s === "vertical";
-        if ($226) {
+        var $231 = s === "vertical";
+        if ($231) {
           return Vertical.value;
         }
         ;
@@ -32568,8 +32694,8 @@
   var toggleInput = function(s) {
     return {
       pressed: function() {
-        var $227 = s === "controlled";
-        if ($227) {
+        var $232 = s === "controlled";
+        if ($232) {
           return new Just(true);
         }
         ;
@@ -32754,7 +32880,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1375, column 1 - line 1375, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1379, column 1 - line 1379, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -32795,8 +32921,8 @@
       open: Nothing.value,
       defaultOpen: true,
       duration: function() {
-        var $230 = s === "autodismiss";
-        if ($230) {
+        var $235 = s === "autodismiss";
+        if ($235) {
           return new Just(1500);
         }
         ;
@@ -32866,7 +32992,6 @@
   };
   var tabsInput = function(s) {
     return {
-      value: defaultInput20.value,
       orientation: defaultInput20.orientation,
       dir: defaultInput20.dir,
       loop: defaultInput20.loop,
@@ -32887,6 +33012,14 @@
         content: [textAs("span")([new Size("2")])([text5("Edit your profile or update contact information.")])],
         disabled: false
       }],
+      value: function() {
+        var $238 = s === "controlled";
+        if ($238) {
+          return new Just("account");
+        }
+        ;
+        return Nothing.value;
+      }(),
       defaultValue: new Just("account"),
       idPrefix: "",
       style: {
@@ -32958,8 +33091,8 @@
     return {
       children: defaultInput19.children,
       checked: function() {
-        var $233 = s === "controlled";
-        if ($233) {
+        var $239 = s === "controlled";
+        if ($239) {
           return new Just(true);
         }
         ;
@@ -32969,8 +33102,8 @@
       disabled: s === "disabled",
       required: s === "required" || s === "form",
       name: function() {
-        var $234 = s === "form";
-        if ($234) {
+        var $240 = s === "form";
+        if ($240) {
           return "notify";
         }
         ;
@@ -33005,7 +33138,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2035, column 17 - line 2037, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2048, column 17 - line 2050, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33018,13 +33151,13 @@
       name: defaultRangeInput.name,
       isFormControl: defaultRangeInput.isFormControl,
       defaultValue: function() {
-        var $237 = s === "triple";
-        if ($237) {
+        var $243 = s === "triple";
+        if ($243) {
           return [20, 50, 80];
         }
         ;
-        var $238 = s === "minsteps";
-        if ($238) {
+        var $244 = s === "minsteps";
+        if ($244) {
           return [40, 60];
         }
         ;
@@ -33034,8 +33167,8 @@
       max: 100,
       step: 1,
       minStepsBetweenThumbs: function() {
-        var $239 = s === "minsteps";
-        if ($239) {
+        var $245 = s === "minsteps";
+        if ($245) {
           return 10;
         }
         ;
@@ -33082,8 +33215,8 @@
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $240 = s === "vertical";
-        if ($240) {
+        var $246 = s === "vertical";
+        if ($246) {
           return Vertical.value;
         }
         ;
@@ -33118,12 +33251,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1990, column 1 - line 1990, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2003, column 1 - line 2003, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $242 = s === "vsem" || s === "vdec";
-      if ($242) {
+      var $248 = s === "vsem" || s === "vdec";
+      if ($248) {
         return Vertical.value;
       }
       ;
@@ -33183,16 +33316,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $243 = s === "horizontal";
-        if ($243) {
+        var $249 = s === "horizontal";
+        if ($249) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $244 = s === "radius";
-        if ($244) {
+        var $250 = s === "radius";
+        if ($250) {
           return "full";
         }
         ;
@@ -33236,8 +33369,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $245 = s === "keys" || s === "mixed";
-        if ($245) {
+        var $251 = s === "keys" || s === "mixed";
+        if ($251) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33253,8 +33386,8 @@
           }];
         }
         ;
-        var $246 = s === "loopoff" || s === "rtl";
-        if ($246) {
+        var $252 = s === "loopoff" || s === "rtl";
+        if ($252) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33270,8 +33403,8 @@
           }];
         }
         ;
-        var $247 = s === "alldisabled";
-        if ($247) {
+        var $253 = s === "alldisabled";
+        if ($253) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33296,8 +33429,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $248 = s === "horizontal" || s === "rtl";
-        if ($248) {
+        var $254 = s === "horizontal" || s === "rtl";
+        if ($254) {
           return Horizontal.value;
         }
         ;
@@ -33305,8 +33438,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $249 = s === "rtl";
-        if ($249) {
+        var $255 = s === "rtl";
+        if ($255) {
           return RTL.value;
         }
         ;
@@ -33316,8 +33449,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $250 = s === "form";
-        if ($250) {
+        var $256 = s === "form";
+        if ($256) {
           return "plan";
         }
         ;
@@ -33401,8 +33534,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $251 = styl === "";
-              if ($251) {
+              var $257 = styl === "";
+              if ($257) {
                 return [];
               }
               ;
@@ -33476,16 +33609,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $253 = s === "close";
-        if ($253) {
+        var $259 = s === "close";
+        if ($259) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $254 = s === "close";
-        if ($254) {
+        var $260 = s === "close";
+        if ($260) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -33515,16 +33648,16 @@
       hideLabel: defaultInput12.hideLabel,
       inputId: new Just("password"),
       toggleVisible: function() {
-        var $255 = s === "autolabel";
-        if ($255) {
+        var $261 = s === "autolabel";
+        if ($261) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $256 = s === "autolabel";
-        if ($256) {
+        var $262 = s === "autolabel";
+        if ($262) {
           return [passwordToggleIcon];
         }
         ;
@@ -33538,96 +33671,6 @@
       }
     };
   };
-  var otpInput = function(s) {
-    return {
-      length: 3,
-      value: function() {
-        var $257 = s === "controlled";
-        if ($257) {
-          return new Just("12");
-        }
-        ;
-        return Nothing.value;
-      }(),
-      defaultValue: function() {
-        var $258 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($258) {
-          return "";
-        }
-        ;
-        var $259 = s === "alpha";
-        if ($259) {
-          return "abc";
-        }
-        ;
-        var $260 = s === "alphanumeric";
-        if ($260) {
-          return "a1b";
-        }
-        ;
-        return "123";
-      }(),
-      validation: function() {
-        var $261 = s === "alpha";
-        if ($261) {
-          return Alpha.value;
-        }
-        ;
-        var $262 = s === "alphanumeric";
-        if ($262) {
-          return Alphanumeric.value;
-        }
-        ;
-        var $263 = s === "novalidation";
-        if ($263) {
-          return NoValidation.value;
-        }
-        ;
-        return Numeric.value;
-      }(),
-      placeholder: function() {
-        var $264 = s === "placeholder";
-        if ($264) {
-          return new Just("\u25CB");
-        }
-        ;
-        return Nothing.value;
-      }(),
-      password: s === "password",
-      disabled: s === "disabled",
-      readOnly: s === "readonly",
-      orientation: function() {
-        var $265 = s === "vertical";
-        if ($265) {
-          return Vertical.value;
-        }
-        ;
-        return Horizontal.value;
-      }(),
-      dir: function() {
-        var $266 = s === "rtl";
-        if ($266) {
-          return RTL.value;
-        }
-        ;
-        return LTR.value;
-      }(),
-      name: function() {
-        var $267 = s === "named";
-        if ($267) {
-          return new Just("otp-code");
-        }
-        ;
-        return Nothing.value;
-      }(),
-      autoSubmit: s === "autosubmit",
-      autoFocus: s === "autofocus",
-      style: {
-        root: cn(""),
-        input: cn("")
-      }
-    };
-  };
   var otpFormWrap = function(s) {
     return function(content3) {
       if (s === "form" || s === "autosubmit") {
@@ -33638,7 +33681,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1697, column 1 - line 1697, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1710, column 1 - line 1710, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -33650,24 +33693,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $270 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($270) {
+        var $265 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($265) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $271 = s === "vertical";
-        if ($271) {
+        var $266 = s === "vertical";
+        if ($266) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $272 = s === "rtl";
-        if ($272) {
+        var $267 = s === "rtl";
+        if ($267) {
           return RTL.value;
         }
         ;
@@ -33722,8 +33765,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $273 = s === "submenu";
-          if ($273) {
+          var $268 = s === "submenu";
+          if ($268) {
             return [menubarSubEntry];
           }
           ;
@@ -33775,8 +33818,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $274 = s === "radio";
-          if ($274) {
+          var $269 = s === "radio";
+          if ($269) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -33882,7 +33925,123 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2002, column 1 - line 2002, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2015, column 1 - line 2015, column 41): " + [s.constructor.name]);
+  };
+  var keepDigitsOnly = /* @__PURE__ */ function() {
+    var $320 = filter(function(c) {
+      return c >= "0" && c <= "9";
+    });
+    return function($321) {
+      return fromCharArray($320(toCharArray($321)));
+    };
+  }();
+  var otpInput = function(s) {
+    return {
+      length: 3,
+      value: function() {
+        var $271 = s === "controlled";
+        if ($271) {
+          return new Just("12");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      defaultValue: function() {
+        var $272 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($272) {
+          return "";
+        }
+        ;
+        var $273 = s === "alpha";
+        if ($273) {
+          return "abc";
+        }
+        ;
+        var $274 = s === "alphanumeric";
+        if ($274) {
+          return "a1b";
+        }
+        ;
+        var $275 = s === "revalidate";
+        if ($275) {
+          return "a1b2c";
+        }
+        ;
+        var $276 = s === "sanitizevalue";
+        if ($276) {
+          return "1a2";
+        }
+        ;
+        return "123";
+      }(),
+      validation: function() {
+        var $277 = s === "alpha" || s === "revalidate";
+        if ($277) {
+          return Alpha.value;
+        }
+        ;
+        var $278 = s === "alphanumeric";
+        if ($278) {
+          return Alphanumeric.value;
+        }
+        ;
+        var $279 = s === "novalidation" || s === "sanitizevalue";
+        if ($279) {
+          return NoValidation.value;
+        }
+        ;
+        return Numeric.value;
+      }(),
+      sanitize: function() {
+        var $280 = s === "sanitizevalue";
+        if ($280) {
+          return keepDigitsOnly;
+        }
+        ;
+        return identity13;
+      }(),
+      placeholder: function() {
+        var $281 = s === "placeholder";
+        if ($281) {
+          return new Just("\u25CB");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      password: s === "password",
+      disabled: s === "disabled",
+      readOnly: s === "readonly",
+      orientation: function() {
+        var $282 = s === "vertical";
+        if ($282) {
+          return Vertical.value;
+        }
+        ;
+        return Horizontal.value;
+      }(),
+      dir: function() {
+        var $283 = s === "rtl";
+        if ($283) {
+          return RTL.value;
+        }
+        ;
+        return LTR.value;
+      }(),
+      name: function() {
+        var $284 = s === "named";
+        if ($284) {
+          return new Just("otp-code");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      autoSubmit: s === "autosubmit",
+      autoFocus: s === "autofocus",
+      style: {
+        root: cn(""),
+        input: cn("")
+      }
+    };
   };
   var hoverCardStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"),
@@ -33908,8 +34067,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $276 = s === "richcontent";
-        if ($276) {
+        var $285 = s === "richcontent";
+        if ($285) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -33928,15 +34087,15 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2180, column 1 - line 2180, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2193, column 1 - line 2193, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $279 = s === "reset";
-        if ($279) {
+        var $288 = s === "reset";
+        if ($288) {
           return [text5("Reset")];
         }
         ;
@@ -33949,8 +34108,8 @@
         required: true,
         serverInvalid: s === "serverInvalid",
         messages: function() {
-          var $280 = s === "defaultMessage";
-          if ($280) {
+          var $289 = s === "defaultMessage";
+          if ($289) {
             return [{
               match: ValueMissing.value,
               forceMatch: true,
@@ -33958,8 +34117,8 @@
             }];
           }
           ;
-          var $281 = s === "reset";
-          if ($281) {
+          var $290 = s === "reset";
+          if ($290) {
             return [{
               match: ValueMissing.value,
               forceMatch: false,
@@ -33998,7 +34157,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2046, column 12 - line 2048, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2059, column 12 - line 2061, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34019,8 +34178,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $289 = kv.before === key2;
-          if ($289) {
+          var $298 = kv.before === key2;
+          if ($298) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34031,7 +34190,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2028, column 15 - line 2030, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2041, column 15 - line 2043, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34147,8 +34306,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $291 = s === "submenu";
-        if ($291) {
+        var $300 = s === "submenu";
+        if ($300) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34172,8 +34331,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $292 = s === "radio";
-        if ($292) {
+        var $301 = s === "radio";
+        if ($301) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34214,8 +34373,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $293 = s === "controlled";
-        if ($293) {
+        var $302 = s === "controlled";
+        if ($302) {
           return new Just(true);
         }
         ;
@@ -34236,8 +34395,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $294 = klass === "";
-      if ($294) {
+      var $303 = klass === "";
+      if ($303) {
         return [];
       }
       ;
@@ -34261,8 +34420,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $295 = s === "radio";
-        if ($295) {
+        var $304 = s === "radio";
+        if ($304) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34358,8 +34517,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $296 = s === "submenu";
-        if ($296) {
+        var $305 = s === "submenu";
+        if ($305) {
           return [submenuEntry];
         }
         ;
@@ -34522,8 +34681,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $298 = s === "controlled";
-        if ($298) {
+        var $307 = s === "controlled";
+        if ($307) {
           return new Just(Checked.value);
         }
         ;
@@ -34547,16 +34706,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $300 = s === "form";
-        if ($300) {
+        var $309 = s === "form";
+        if ($309) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $301 = s === "form";
-        if ($301) {
+        var $310 = s === "form";
+        if ($310) {
           return "yes";
         }
         ;
@@ -34624,18 +34783,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $304 = s === "wide";
-        if ($304) {
+        var $313 = s === "wide";
+        if ($313) {
           return 16 / 9;
         }
         ;
-        var $305 = s === "tall";
-        if ($305) {
+        var $314 = s === "tall";
+        if ($314) {
           return 1 / 2;
         }
         ;
-        var $306 = s === "verywide";
-        if ($306) {
+        var $315 = s === "verywide";
+        if ($315) {
           return 21 / 9;
         }
         ;
@@ -34644,7 +34803,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1920, column 1 - line 1920, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1933, column 1 - line 1933, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -34698,8 +34857,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $307 = s === "single";
-        if ($307) {
+        var $316 = s === "single";
+        if ($316) {
           return ["item-1"];
         }
         ;
@@ -34824,8 +34983,8 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $308 = s === "formreset";
-    if ($308) {
+    var $317 = s === "formreset";
+    if ($317) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
@@ -34945,8 +35104,8 @@
         }
         ;
         if (c === "slider") {
-          var $310 = s === "vertical";
-          if ($310) {
+          var $319 = s === "vertical";
+          if ($319) {
             return box([new StyleProp("height", "160px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

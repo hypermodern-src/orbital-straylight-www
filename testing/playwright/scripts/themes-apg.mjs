@@ -494,6 +494,16 @@ const CHECKS = [
     const panel = await pg.evaluate(() => { const t = document.querySelectorAll('[role="tab"]')[1]; const p = document.getElementById(t.getAttribute("aria-controls")); return p && !p.hasAttribute("hidden"); });
     ok(panel, "ArrowRight did not show the newly activated tab's panel");
   }},
+  // controlled: a fixed `value` (no-op onValueChange) means a click raises onValueChange but
+  // CANNOT change the selection — account stays selected, documents never activates.
+  { id: "tabs", state: "controlled", apg: "tabs", name: "controlled value is fixed: clicking a tab does not change selection", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "account should start selected");
+    await pg.locator('[role="tab"]').nth(1).click();
+    await pg.waitForTimeout(120);
+    ok((await attrOf(pg, '[role="tab"]', 1, "aria-selected")) === "false", "controlled: clicking documents must NOT select it");
+    ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "controlled: account must remain selected");
+  }},
   { id: "tabs", state: "tab2", apg: "tabs", name: "End activates the last tab, Home the first", run: async (pg) => {
     await pg.locator('[role="tab"]').first().waitFor();
     await press(pg, "Tab");

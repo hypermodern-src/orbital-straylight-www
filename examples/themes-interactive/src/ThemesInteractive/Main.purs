@@ -1211,6 +1211,9 @@ tabsInput s = Tabs.defaultInput
       , { value: "documents", label: tabsTriggerLabel "Documents", content: [ textAs "span" [ Size "2" ] [ HH.text "Access and update your documents." ] ], disabled: s == "disabled-skip" }
       , { value: "settings", label: tabsTriggerLabel "Settings", content: [ textAs "span" [ Size "2" ] [ HH.text "Edit your profile or update contact information." ] ], disabled: false }
       ]
+  -- `?s=controlled` drives a fixed controlled value (output discarded by slot_, so it never
+  -- syncs) — clicks raise onValueChange but cannot change the selection.
+  , value = if s == "controlled" then Just "account" else Nothing
   , defaultValue = Just "account"
   , idPrefix = ""
   , style =
