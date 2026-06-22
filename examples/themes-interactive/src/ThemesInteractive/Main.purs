@@ -1636,6 +1636,9 @@ passwordToggleInput s = PasswordToggleField.defaultInput
   , name = if s == "passthrough" then Just "pw" else Nothing
   , required = s == "passthrough"
   , placeholder = if s == "passthrough" then Just "Enter password" else Nothing
+  -- `?s=controlled` → fixed controlled visible=false (output discarded by slot_): clicks raise
+  -- onVisibilityChange but cannot reveal.
+  , visible = if s == "controlled" then Just false else Nothing
   , style = { input: cn "", toggle: cn "" }
   }
 

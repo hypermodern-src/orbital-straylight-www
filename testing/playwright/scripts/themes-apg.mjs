@@ -868,6 +868,25 @@ const CHECKS = [
     await pg.locator('#root button[type="reset"]').click();
     await attrEq(pg, inp, 0, "type", "password", "form reset did not re-hide the password");
   }},
+  // controlled visible=false (no-op handler): clicking the toggle cannot reveal the password.
+  { id: "passwordtoggle", state: "controlled", apg: "button", name: "controlled visible is fixed: clicking the toggle does not reveal", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "controlled hidden should start type=password");
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    await pg.waitForTimeout(100);
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "controlled: clicking the toggle must NOT reveal (type stays password)");
+  }},
+  // onClick honors defaultPrevented: a consumer veto (preventDefault on the click) blocks the toggle.
+  { id: "passwordtoggle", state: "hidden", apg: "button", name: "a defaultPrevented click does not toggle", run: async (pg) => {
+    const inp = '#root input';
+    await pg.locator(inp).first().waitFor();
+    // capture phase so the veto runs before BOTH React's delegated handler and Halogen's element handler
+    await pg.evaluate(() => document.querySelector("#root button").addEventListener("click", (e) => e.preventDefault(), true));
+    await pg.locator("#root button").filter({ hasText: /show|hide/i }).first().click();
+    await pg.waitForTimeout(100);
+    ok((await attrOf(pg, inp, 0, "type")) === "password", "a defaultPrevented click still toggled the field");
+  }},
   // Toggling visibility swaps the SAME input's type → the value is retained (test.tsx:140-146).
   { id: "passwordtoggle", state: "hidden", apg: "button", name: "toggling visibility retains the input value", run: async (pg) => {
     const inp = '#root input';

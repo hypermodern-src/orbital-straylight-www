@@ -1768,6 +1768,21 @@ const PAGES: Page[] = [
           </Box>
         );
       }
+      // `?s=controlled` drives a fixed controlled visible=false (no-op onVisibilityChange):
+      // clicking the toggle raises the callback but cannot reveal the password.
+      if (s === "controlled") {
+        return (
+          <Box>
+            <label htmlFor="password">Password</label>
+            <PasswordToggleField.Root visible={false} onVisiblityChange={() => {}}>
+              <PasswordToggleField.Input id="password" />
+              <PasswordToggleField.Toggle>
+                <PasswordToggleField.Slot visible="Hide" hidden="Show" />
+              </PasswordToggleField.Toggle>
+            </PasswordToggleField.Root>
+          </Box>
+        );
+      }
       // `?s=passthrough` spreads name/required/placeholder onto the Input ({...props}).
       if (s === "passthrough") {
         return (
