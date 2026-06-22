@@ -51,9 +51,13 @@ stories = map mk skins
     , eval: H.mkEval H.defaultEval
     }
 
+  -- Pad the trigger away from the viewport corner (≠ display:contents, which jams it at
+  -- (0,0)). A corner trigger leaves the tooltip no room: the popper clamps the content onto
+  -- the trigger, so a HOVER lands the content under the pointer → pointerout → Hide → reopen,
+  -- a 60fps flap that races the invariance snapshot. Real triggers have room; this gives it.
   view :: Skin -> H.ComponentHTML Void Slots Aff
   view s =
-    HH.div [ HP.style "display:contents" ]
+    HH.div [ HP.style "padding: 80px; display: flex; justify-content: center;" ]
       [ HH.slot_ _tooltip unit Tooltip.component (input s) ]
 
   input s = Tooltip.defaultInput
