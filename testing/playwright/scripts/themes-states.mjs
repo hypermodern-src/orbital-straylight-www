@@ -857,6 +857,17 @@ export const STATES = {
           && document.querySelector('input[type="hidden"]')?.value === "abc";
       });
     },
+    // `?s=alphanumeric` → validationType="alphanumeric": every slot inputmode=text +
+    // pattern=[a-zA-Z0-9]{1} (accepts letters AND digits), defaultValue "a1b". At rest.
+    alphanumeric: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("pattern") === "[a-zA-Z0-9]{1}" && i.getAttribute("inputmode") === "text")
+          && document.querySelector('input[type="hidden"]')?.value === "a1b";
+      });
+    },
     // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
     password: async (pg) => {
       await root(pg).locator('[role="group"]').first().waitFor();

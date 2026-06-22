@@ -1785,6 +1785,9 @@ const PAGES: Page[] = [
       // `?s=alpha` exercises validationType="alpha": each slot gets inputmode=text +
       // pattern=[a-zA-Z]{1} (rejects digits). defaultValue "abc" (all alpha) at rest.
       const alpha = s === "alpha";
+      // `?s=alphanumeric` exercises validationType="alphanumeric": inputmode=text +
+      // pattern=[a-zA-Z0-9]{1} (accepts letters AND digits). defaultValue "a1b" at rest.
+      const alphanumeric = s === "alphanumeric";
       // `?s=password` masks each slot (type=password); `?s=disabled` disables every slot
       // (disabled attr + dropped from the roving order); `?s=readonly` stamps readonly.
       const password = s === "password";
@@ -1798,8 +1801,9 @@ const PAGES: Page[] = [
       return (
         <Box>
           <OneTimePasswordField.Root
-            {...(empty ? {} : { defaultValue: alpha ? "abc" : "123" })}
+            {...(empty ? {} : { defaultValue: alpha ? "abc" : alphanumeric ? "a1b" : "123" })}
             {...(alpha ? { validationType: "alpha" as const } : {})}
+            {...(alphanumeric ? { validationType: "alphanumeric" as const } : {})}
             {...(password ? { type: "password" as const } : {})}
             {...(disabled ? { disabled: true } : {})}
             {...(readonly ? { readOnly: true } : {})}

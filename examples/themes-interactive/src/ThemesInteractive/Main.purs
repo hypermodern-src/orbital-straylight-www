@@ -1659,9 +1659,13 @@ otpInput s = Otp.defaultInput
       -- full code into the first slot and exercise the PASTE reducer.
       if s == "empty" || s == "typed" || s == "paste" then ""
       else if s == "alpha" then "abc"
+      else if s == "alphanumeric" then "a1b"
       else "123"
-  -- `?s=alpha` exercises the Alpha validation set (inputmode=text, pattern=[a-zA-Z]{1}).
-  , validation = if s == "alpha" then Otp.Alpha else Otp.Numeric
+  -- `?s=alpha` → Alpha (pattern=[a-zA-Z]{1}); `?s=alphanumeric` → Alphanumeric (pattern=[a-zA-Z0-9]{1}).
+  , validation =
+      if s == "alpha" then Otp.Alpha
+      else if s == "alphanumeric" then Otp.Alphanumeric
+      else Otp.Numeric
   -- Wave-C state-variants: password masks slots, disabled drops them from the roving
   -- order + stamps disabled, readonly stamps readonly.
   , password = s == "password"

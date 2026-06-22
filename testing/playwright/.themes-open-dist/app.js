@@ -4164,6 +4164,11 @@
       return input3.validity;
     };
   }
+  function select(input3) {
+    return function() {
+      input3.select();
+    };
+  }
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Web.HTML.HTMLInputElement/index.js
   var map11 = /* @__PURE__ */ map(functorEffect);
@@ -22419,9 +22424,9 @@
         return function(ch) {
           return bind32(getHTMLElementRef(slotRef(i2)))(function(mel) {
             return for_20(bind118(mel)(fromHTMLElement))(function() {
-              var $126 = setValue3(ch);
-              return function($127) {
-                return liftEffect7($126($127));
+              var $128 = setValue3(ch);
+              return function($129) {
+                return liftEffect7($128($129));
               };
             }());
           });
@@ -22459,8 +22464,8 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(idx) {
       return bind32(getHTMLElementRef(slotRef(idx)))(function(mel) {
-        return for_20(mel)(function($128) {
-          return liftEffect7(focus($128));
+        return for_20(mel)(function($130) {
+          return liftEffect7(focus($130));
         });
       });
     };
@@ -22559,16 +22564,16 @@
     return function(v) {
       if (v instanceof SetValue3) {
         return discard21(modify_15(function(st) {
-          var $79 = {};
-          for (var $80 in st) {
-            if ({}.hasOwnProperty.call(st, $80)) {
-              $79[$80] = st[$80];
+          var $81 = {};
+          for (var $82 in st) {
+            if ({}.hasOwnProperty.call(st, $82)) {
+              $81[$82] = st[$82];
             }
             ;
           }
           ;
-          $79.chars = change2(toSlots(st.len)(v.value0))(st.chars).next;
-          return $79;
+          $81.chars = change2(toSlots(st.len)(v.value0))(st.chars).next;
+          return $81;
         }))(function() {
           return pure31(new Just(v.value1));
         });
@@ -22580,7 +22585,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 393, column 15 - line 399, column 39): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 396, column 15 - line 402, column 39): " + [v.constructor.name]);
     };
   };
   var renderHidden = function(st) {
@@ -22651,53 +22656,60 @@
     };
   };
   var handleAction13 = function(dictMonadEffect) {
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var syncSlotValues1 = syncSlotValues(dictMonadEffect);
     var focusAt1 = focusAt(dictMonadEffect);
     return function(v) {
       if (v instanceof Receive14) {
         return modify_15(function(st) {
-          var $94 = {};
-          for (var $95 in st) {
-            if ({}.hasOwnProperty.call(st, $95)) {
-              $94[$95] = st[$95];
+          var $96 = {};
+          for (var $97 in st) {
+            if ({}.hasOwnProperty.call(st, $97)) {
+              $96[$97] = st[$97];
             }
             ;
           }
           ;
-          $94.len = v.value0.length;
-          $94.chars = sync(map120(toSlots(v.value0.length))(v.value0.value))(st.chars);
-          $94.validation = v.value0.validation;
-          $94.orientation = v.value0.orientation;
-          $94.dir = v.value0.dir;
-          $94.name = v.value0.name;
-          $94.password = v.value0.password;
-          $94.disabled = v.value0.disabled;
-          $94.readOnly = v.value0.readOnly;
-          $94.style = v.value0.style;
-          return $94;
+          $96.len = v.value0.length;
+          $96.chars = sync(map120(toSlots(v.value0.length))(v.value0.value))(st.chars);
+          $96.validation = v.value0.validation;
+          $96.orientation = v.value0.orientation;
+          $96.dir = v.value0.dir;
+          $96.name = v.value0.name;
+          $96.password = v.value0.password;
+          $96.disabled = v.value0.disabled;
+          $96.readOnly = v.value0.readOnly;
+          $96.style = v.value0.style;
+          return $96;
         });
       }
       ;
       if (v instanceof SlotFocused) {
-        return modify_15(function(v1) {
-          var $98 = {};
-          for (var $99 in v1) {
-            if ({}.hasOwnProperty.call(v1, $99)) {
-              $98[$99] = v1[$99];
+        return discard21(modify_15(function(v1) {
+          var $100 = {};
+          for (var $101 in v1) {
+            if ({}.hasOwnProperty.call(v1, $101)) {
+              $100[$101] = v1[$101];
             }
             ;
           }
           ;
-          $98.cursor = v.value0;
-          $98.focusEntered = true;
-          return $98;
+          $100.cursor = v.value0;
+          $100.focusEntered = true;
+          return $100;
+        }))(function() {
+          return bind32(getHTMLElementRef(slotRef(v.value0)))(function(mel) {
+            return for_20(bind118(mel)(fromHTMLElement))(function($131) {
+              return liftEffect7(select($131));
+            });
+          });
         });
       }
       ;
       if (v instanceof SlotInput) {
         return bind32(get14)(function(st) {
-          var $102 = !st.disabled && (!st.readOnly && length(toCharArray(v.value1)) > 1);
-          if ($102) {
+          var $104 = !st.disabled && (!st.readOnly && length(toCharArray(v.value1)) > 1);
+          if ($104) {
             var sanitized = sanitizePaste(st.validation)(v.value1);
             var next = toSlots(st.len)(sanitized);
             var filled = length(filter(function(v1) {
@@ -22705,18 +22717,18 @@
             })(next));
             var focusIdx = clampIdx(st.len)(filled - 1 | 0);
             return when21(sanitized !== "")(discard21(modify_15(function(s) {
-              var $103 = {};
-              for (var $104 in s) {
-                if ({}.hasOwnProperty.call(s, $104)) {
-                  $103[$104] = s[$104];
+              var $105 = {};
+              for (var $106 in s) {
+                if ({}.hasOwnProperty.call(s, $106)) {
+                  $105[$106] = s[$106];
                 }
                 ;
               }
               ;
-              $103.chars = change2(next)(s.chars).next;
-              $103.cursor = focusIdx;
-              $103.focusEntered = true;
-              return $103;
+              $105.chars = change2(next)(s.chars).next;
+              $105.cursor = focusIdx;
+              $105.focusEntered = true;
+              return $105;
             }))(function() {
               return discard21(raise(new ValueChanged3(trim(joinWith("")(next)))))(function() {
                 return discard21(syncSlotValues1(next))(function() {
@@ -22732,18 +22744,18 @@
             var cur = current(st.chars);
             var next2 = fromMaybe(cur)(updateAt(v.value0)(typed)(cur));
             return discard21(modify_15(function(s) {
-              var $106 = {};
-              for (var $107 in s) {
-                if ({}.hasOwnProperty.call(s, $107)) {
-                  $106[$107] = s[$107];
+              var $108 = {};
+              for (var $109 in s) {
+                if ({}.hasOwnProperty.call(s, $109)) {
+                  $108[$109] = s[$109];
                 }
                 ;
               }
               ;
-              $106.chars = change2(next2)(s.chars).next;
-              $106.cursor = nextCursor;
-              $106.focusEntered = true;
-              return $106;
+              $108.chars = change2(next2)(s.chars).next;
+              $108.cursor = nextCursor;
+              $108.focusEntered = true;
+              return $108;
             }))(function() {
               return discard21(raise(new ValueChanged3(trim(joinWith("")(next2)))))(function() {
                 return focusAt1(nextCursor);
@@ -22759,22 +22771,22 @@
           if (key2 === "Backspace" && (!st.disabled && !st.readOnly)) {
             var cur = current(st.chars);
             var atIdx = fromMaybe("")(index(cur)(v.value0));
-            var $112 = atIdx !== "";
-            if ($112) {
+            var $114 = atIdx !== "";
+            if ($114) {
               var next = fromMaybe(cur)(updateAt(v.value0)("")(cur));
               return discard21(modify_15(function(s) {
-                var $113 = {};
-                for (var $114 in s) {
-                  if ({}.hasOwnProperty.call(s, $114)) {
-                    $113[$114] = s[$114];
+                var $115 = {};
+                for (var $116 in s) {
+                  if ({}.hasOwnProperty.call(s, $116)) {
+                    $115[$116] = s[$116];
                   }
                   ;
                 }
                 ;
-                $113.chars = change2(next)(s.chars).next;
-                $113.cursor = v.value0;
-                $113.focusEntered = true;
-                return $113;
+                $115.chars = change2(next)(s.chars).next;
+                $115.cursor = v.value0;
+                $115.focusEntered = true;
+                return $115;
               }))(function() {
                 return raise(new ValueChanged3(trim(joinWith("")(next))));
               });
@@ -22782,17 +22794,17 @@
             ;
             var prev = max10(0)(v.value0 - 1 | 0);
             return discard21(modify_15(function(v12) {
-              var $116 = {};
-              for (var $117 in v12) {
-                if ({}.hasOwnProperty.call(v12, $117)) {
-                  $116[$117] = v12[$117];
+              var $118 = {};
+              for (var $119 in v12) {
+                if ({}.hasOwnProperty.call(v12, $119)) {
+                  $118[$119] = v12[$119];
                 }
                 ;
               }
               ;
-              $116.cursor = prev;
-              $116.focusEntered = true;
-              return $116;
+              $118.cursor = prev;
+              $118.focusEntered = true;
+              return $118;
             }))(function() {
               return focusAt1(prev);
             });
@@ -22814,27 +22826,27 @@
           ;
           if (v1 instanceof MoveTo) {
             return discard21(modify_15(function(v2) {
-              var $120 = {};
-              for (var $121 in v2) {
-                if ({}.hasOwnProperty.call(v2, $121)) {
-                  $120[$121] = v2[$121];
+              var $122 = {};
+              for (var $123 in v2) {
+                if ({}.hasOwnProperty.call(v2, $123)) {
+                  $122[$123] = v2[$123];
                 }
                 ;
               }
               ;
-              $120.cursor = v1.value0;
-              $120.focusEntered = true;
-              return $120;
+              $122.cursor = v1.value0;
+              $122.focusEntered = true;
+              return $122;
             }))(function() {
               return focusAt1(v1.value0);
             });
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 352, column 9 - line 356, column 27): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 355, column 9 - line 359, column 27): " + [v1.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 280, column 16 - line 356, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.OneTimePasswordField (line 280, column 16 - line 359, column 27): " + [v.constructor.name]);
     };
   };
   var component14 = function(dictMonadEffect) {
@@ -22846,8 +22858,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction13(dictMonadEffect),
         handleQuery: handleQuery13(dictMonadEffect),
-        receive: function($129) {
-          return Just.create(Receive14.create($129));
+        receive: function($132) {
+          return Just.create(Receive14.create($132));
         }
       })
     });
@@ -32147,7 +32159,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1914, column 1 - line 1914, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1923, column 1 - line 1923, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32731,7 +32743,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2006, column 17 - line 2008, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2015, column 17 - line 2017, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -32844,7 +32856,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1961, column 1 - line 1961, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1970, column 1 - line 1970, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -33267,8 +33279,6 @@
   var otpInput = function(s) {
     return {
       value: defaultInput12.value,
-      orientation: defaultInput12.orientation,
-      dir: defaultInput12.dir,
       name: defaultInput12.name,
       length: 3,
       defaultValue: function() {
@@ -33282,12 +33292,22 @@
           return "abc";
         }
         ;
+        var $259 = s === "alphanumeric";
+        if ($259) {
+          return "a1b";
+        }
+        ;
         return "123";
       }(),
       validation: function() {
-        var $259 = s === "alpha";
-        if ($259) {
+        var $260 = s === "alpha";
+        if ($260) {
           return Alpha.value;
+        }
+        ;
+        var $261 = s === "alphanumeric";
+        if ($261) {
+          return Alphanumeric.value;
         }
         ;
         return Numeric.value;
@@ -33295,6 +33315,22 @@
       password: s === "password",
       disabled: s === "disabled",
       readOnly: s === "readonly",
+      orientation: function() {
+        var $262 = s === "vertical";
+        if ($262) {
+          return Vertical.value;
+        }
+        ;
+        return Horizontal.value;
+      }(),
+      dir: function() {
+        var $263 = s === "rtl";
+        if ($263) {
+          return RTL.value;
+        }
+        ;
+        return LTR.value;
+      }(),
       style: {
         root: cn(""),
         input: cn("")
@@ -33310,24 +33346,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $260 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($260) {
+        var $264 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($264) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $261 = s === "vertical";
-        if ($261) {
+        var $265 = s === "vertical";
+        if ($265) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $262 = s === "rtl";
-        if ($262) {
+        var $266 = s === "rtl";
+        if ($266) {
           return RTL.value;
         }
         ;
@@ -33382,8 +33418,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $263 = s === "submenu";
-          if ($263) {
+          var $267 = s === "submenu";
+          if ($267) {
             return [menubarSubEntry];
           }
           ;
@@ -33435,8 +33471,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $264 = s === "radio";
-          if ($264) {
+          var $268 = s === "radio";
+          if ($268) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -33542,7 +33578,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1973, column 1 - line 1973, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1982, column 1 - line 1982, column 41): " + [s.constructor.name]);
   };
   var hoverCardStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"),
@@ -33568,8 +33604,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $266 = s === "richcontent";
-        if ($266) {
+        var $270 = s === "richcontent";
+        if ($270) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -33588,15 +33624,15 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2151, column 1 - line 2151, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2160, column 1 - line 2160, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $269 = s === "reset";
-        if ($269) {
+        var $273 = s === "reset";
+        if ($273) {
           return [text5("Reset")];
         }
         ;
@@ -33609,8 +33645,8 @@
         required: true,
         serverInvalid: s === "serverInvalid",
         messages: function() {
-          var $270 = s === "defaultMessage";
-          if ($270) {
+          var $274 = s === "defaultMessage";
+          if ($274) {
             return [{
               match: ValueMissing.value,
               forceMatch: true,
@@ -33618,8 +33654,8 @@
             }];
           }
           ;
-          var $271 = s === "reset";
-          if ($271) {
+          var $275 = s === "reset";
+          if ($275) {
             return [{
               match: ValueMissing.value,
               forceMatch: false,
@@ -33658,7 +33694,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2017, column 12 - line 2019, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2026, column 12 - line 2028, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -33679,8 +33715,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $279 = kv.before === key2;
-          if ($279) {
+          var $283 = kv.before === key2;
+          if ($283) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -33691,7 +33727,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 1999, column 15 - line 2001, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2008, column 15 - line 2010, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -33807,8 +33843,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $281 = s === "submenu";
-        if ($281) {
+        var $285 = s === "submenu";
+        if ($285) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -33832,8 +33868,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $282 = s === "radio";
-        if ($282) {
+        var $286 = s === "radio";
+        if ($286) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -33874,8 +33910,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $283 = s === "controlled";
-        if ($283) {
+        var $287 = s === "controlled";
+        if ($287) {
           return new Just(true);
         }
         ;
@@ -33896,8 +33932,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $284 = klass === "";
-      if ($284) {
+      var $288 = klass === "";
+      if ($288) {
         return [];
       }
       ;
@@ -33921,8 +33957,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $285 = s === "radio";
-        if ($285) {
+        var $289 = s === "radio";
+        if ($289) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34018,8 +34054,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $286 = s === "submenu";
-        if ($286) {
+        var $290 = s === "submenu";
+        if ($290) {
           return [submenuEntry];
         }
         ;
@@ -34182,8 +34218,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $288 = s === "controlled";
-        if ($288) {
+        var $292 = s === "controlled";
+        if ($292) {
           return new Just(Checked.value);
         }
         ;
@@ -34207,16 +34243,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $290 = s === "form";
-        if ($290) {
+        var $294 = s === "form";
+        if ($294) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $291 = s === "form";
-        if ($291) {
+        var $295 = s === "form";
+        if ($295) {
           return "yes";
         }
         ;
@@ -34284,18 +34320,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $294 = s === "wide";
-        if ($294) {
+        var $298 = s === "wide";
+        if ($298) {
           return 16 / 9;
         }
         ;
-        var $295 = s === "tall";
-        if ($295) {
+        var $299 = s === "tall";
+        if ($299) {
           return 1 / 2;
         }
         ;
-        var $296 = s === "verywide";
-        if ($296) {
+        var $300 = s === "verywide";
+        if ($300) {
           return 21 / 9;
         }
         ;
@@ -34304,7 +34340,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1891, column 1 - line 1891, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1900, column 1 - line 1900, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -34358,8 +34394,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $297 = s === "single";
-        if ($297) {
+        var $301 = s === "single";
+        if ($301) {
           return ["item-1"];
         }
         ;
@@ -34484,8 +34520,8 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $298 = s === "formreset";
-    if ($298) {
+    var $302 = s === "formreset";
+    if ($302) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
@@ -34605,8 +34641,8 @@
         }
         ;
         if (c === "slider") {
-          var $300 = s === "vertical";
-          if ($300) {
+          var $304 = s === "vertical";
+          if ($304) {
             return box([new StyleProp("height", "160px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;
