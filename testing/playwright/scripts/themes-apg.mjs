@@ -1050,6 +1050,30 @@ const CHECKS = [
     ok(after === "1,3,", `Cut did not remove+compact the slot char (got '${after}')`);
     ok(await activeIsNth(pg, sel, 1), "Cut must keep focus on the same slot");
   }},
+  // Typing on the LAST slot sets the char and stays put (there is no next slot to advance to),
+  // with the value selected so a further keystroke replaces it (otp.tsx:828-835 last-input guard).
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "typing on the last slot replaces and stays selected", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await pg.locator(sel).nth(2).focus();
+    await pg.waitForTimeout(60);
+    await pg.keyboard.type("9"); await pg.waitForTimeout(120);
+    const v2 = await pg.evaluate((s) => document.querySelectorAll(s)[2].value, sel);
+    ok(v2 === "9", `typing on the last slot did not set the char (got '${v2}')`);
+    ok(await activeIsNth(pg, sel, 2), "typing on the last slot moved focus off it");
+  }},
+  // Typing the SAME char already in the slot advances focus to the next slot (otp.tsx:828-832:
+  // value===key fires no change event, so upstream focuses the next input explicitly).
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "retyping the current char advances to the next slot", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await pg.waitForTimeout(60);
+    await pg.keyboard.type("1"); await pg.waitForTimeout(120);
+    const v0 = await pg.evaluate((s) => document.querySelectorAll(s)[0].value, sel);
+    ok(v0 === "1", `retyping the same char changed slot 0 (got '${v0}')`);
+    ok(await activeIsNth(pg, sel, 1), "retyping the current char did not advance to the next slot");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
