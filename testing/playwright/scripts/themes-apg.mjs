@@ -916,6 +916,18 @@ const CHECKS = [
     ok(span.len === 1, `expected the first slot to hold one char (got len ${span.len})`);
     ok(span.start === 0 && span.end === span.len, `focus did not select the slot value (selection ${span.start}..${span.end} of ${span.len})`);
   }},
+  // Typing on an already-filled slot REPLACES its char and advances (otp.tsx:303-311). With the
+  // onFocus selection in place, the keystroke overwrites the selected char rather than appending.
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "typing on a filled slot replaces the char and advances", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await pg.waitForTimeout(60);
+    await pg.keyboard.type("9"); await pg.waitForTimeout(120);
+    const v0 = await pg.evaluate((s) => document.querySelectorAll(s)[0].value, sel);
+    ok(v0 === "9", `typing on a filled slot did not replace its char (got '${v0}')`);
+    ok(await activeIsNth(pg, sel, 1), "typing on a filled slot did not advance focus");
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
