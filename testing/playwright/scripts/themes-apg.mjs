@@ -504,6 +504,19 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="tab"]', 1, "aria-selected")) === "false", "controlled: clicking documents must NOT select it");
     ok((await attrOf(pg, '[role="tab"]', 0, "aria-selected")) === "true", "controlled: account must remain selected");
   }},
+  // activation happens on POINTERDOWN (left button), not waiting for click/mouseup (tabs.tsx
+   // onMouseDown). Press the pointer down on documents without releasing → it activates.
+  { id: "tabs", state: "tab2", apg: "tabs", name: "mousedown activates the tab (before mouseup)", run: async (pg) => {
+    await pg.locator('[role="tab"]').first().waitFor();
+    const tab = pg.locator('[role="tab"]').nth(2);   // settings (tab2 has documents selected)
+    const box = await tab.boundingBox();
+    await pg.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await pg.mouse.down();
+    await pg.waitForTimeout(80);
+    const selectedDown = (await attrOf(pg, '[role="tab"]', 2, "aria-selected")) === "true";
+    await pg.mouse.up();
+    ok(selectedDown, "the tab did not activate on mousedown (before mouseup)");
+  }},
   { id: "tabs", state: "tab2", apg: "tabs", name: "End activates the last tab, Home the first", run: async (pg) => {
     await pg.locator('[role="tab"]').first().waitFor();
     await press(pg, "Tab");

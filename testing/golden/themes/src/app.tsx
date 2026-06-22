@@ -2541,6 +2541,29 @@ const PAGES: Page[] = [
       </Tabs.Root>
     ),
   },
+  // Two Tabs instances on one page: each mints its own id base (React useId / port per-mount uid),
+  // so trigger/panel ids never collide across instances. DOM golden `tabsmulti:multi` pins it.
+  {
+    id: "tabsmulti",
+    label: "Tabs (multi-instance)",
+    interactive: true,
+    node: (
+      <div>
+        {[0, 1].map((n) => (
+          <Tabs.Root key={n} defaultValue="account">
+            <Tabs.List>
+              <Tabs.Trigger value="account">Account</Tabs.Trigger>
+              <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+              <Tabs.Trigger value="settings">Settings</Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="account"><Text size="2">Make changes to your account.</Text></Tabs.Content>
+            <Tabs.Content value="documents"><Text size="2">Access and update your documents.</Text></Tabs.Content>
+            <Tabs.Content value="settings"><Text size="2">Edit your profile or update contact information.</Text></Tabs.Content>
+          </Tabs.Root>
+        ))}
+      </div>
+    ),
+  },
   // Zero-selected: NO defaultValue and an uncontrolled value that matches no tab → upstream
   // defaults the active value to '' (empty string), so NO tab is aria-selected and NO panel is
   // visible at rest. DOM golden `tabsnone:none` pins the zero-selected contract.

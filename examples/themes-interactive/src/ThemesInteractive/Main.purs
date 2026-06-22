@@ -88,6 +88,7 @@ type Slots =
   , collapsible :: Collapsible.Slot Unit
   , toast :: Toast.Slot Unit
   , tabs :: Tabs.Slot Unit
+  , tabsB :: Tabs.Slot Unit
   , radiogroup :: RadioGroup.Slot Unit
   , checkbox :: Checkbox.Slot Unit
   , switch :: Switch.Slot Unit
@@ -158,6 +159,9 @@ _toast = Proxy
 
 _tabs :: Proxy "tabs"
 _tabs = Proxy
+
+_tabsB :: Proxy "tabsB"
+_tabsB = Proxy
 
 _radiogroup :: Proxy "radiogroup"
 _radiogroup = Proxy
@@ -356,6 +360,8 @@ view c s =
             -- renders at a time), separate routes so the `tabs` story stays byte-identical.
             "tabsvert" -> HH.slot_ _tabs unit Tabs.component tabsVertInput
             "tabsrtl" -> HH.slot_ _tabs unit Tabs.component tabsRtlInput
+            -- Two Tabs instances on one page: their generated ids must NOT collide (per-mount uid).
+            "tabsmulti" -> HH.div_ [ HH.slot_ _tabs unit Tabs.component (tabsInput ""), HH.slot_ _tabsB unit Tabs.component (tabsInput "") ]
             "tabsnone" -> HH.slot_ _tabs unit Tabs.component tabsNoneInput
             -- Wave-D Accordion horizontal, ToggleGroup rtl, Toolbar rtl depth stories.
             "accordionhoriz" -> box [ StyleProp "max-width" "360px" ] [ HH.slot_ _accordion unit Accordion.component accordionHorizInput ]

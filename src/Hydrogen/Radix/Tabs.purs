@@ -45,6 +45,7 @@ import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, tabIndexFor)
 import Hydrogen.Radix.Foundation.Style (ClassNames, Orientation(..), cn, classes, dataState, dataAttr, dataOrientation, orientationName, role, aria)
 import Web.HTML.HTMLElement as HTMLElement
 import Web.UIEvent.KeyboardEvent as KE
+import Web.UIEvent.MouseEvent as ME
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Public surface
@@ -137,6 +138,7 @@ data Action
   = Initialize
   | Receive Input
   | Selected String
+  | TriggerMouseDown String ME.MouseEvent
   | ListKeyDown KE.KeyboardEvent
   | TriggerKeyDown String KE.KeyboardEvent
   | EntryFocus
@@ -251,6 +253,9 @@ renderTrigger st _ tab =
         , HP.disabled tab.disabled
         , classes st.style.trigger
         , HE.onClick \_ -> Selected tab.value
+        -- Activation fires on pointer-DOWN (left button, no ctrl), not waiting for mouseup
+        -- (tabs.tsx onMouseDown). onClick stays as a redundant idempotent backstop.
+        , HE.onMouseDown (TriggerMouseDown tab.value)
         -- Per-trigger Enter/Space activation (tabs.tsx:192-202). In manual mode this is the
         -- ONLY way to select; in automatic mode it is redundant with arrow-select but matches
         -- upstream, which always wires the trigger keydown regardless of activationMode.
@@ -321,6 +326,11 @@ handleAction = case _ of
   Selected value -> do
     H.modify_ _ { focusEntered = true }
     selectValue value
+  -- Activate on left-button pointer-down with no ctrl (tabs.tsx onMouseDown); other buttons /
+  -- ctrl+click do not select (the contextmenu/modifier path).
+  TriggerMouseDown value me -> do
+    H.modify_ _ { focusEntered = true }
+    when (ME.button me == 0 && not (ME.ctrlKey me)) (selectValue value)
   ListKeyDown ke -> do
     H.modify_ _ { focusEntered = true }
     st <- H.get

@@ -410,6 +410,19 @@ export const STATES = {
       });
     },
   },
+  tabsmulti: {
+    // two Tabs instances at rest — assert two tablists and that the two instances' trigger ids
+    // differ (distinct id base per mount). The at-rest DOM (both instances) is the oracle.
+    multi: async (pg) => {
+      await pg.waitForFunction(() => {
+        const lists = document.querySelectorAll('[role="tablist"]');
+        if (lists.length !== 2) return false;
+        const a = lists[0].querySelector('[role="tab"]')?.id;
+        const b = lists[1].querySelector('[role="tab"]')?.id;
+        return a && b && a !== b;
+      });
+    },
+  },
   radiogroup: {
     checked: async (pg) => {
       const target = pg.locator('[role="radio"][value="2"]').first();

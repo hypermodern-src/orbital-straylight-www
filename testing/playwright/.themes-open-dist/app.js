@@ -1466,11 +1466,11 @@
   var eqTuple = function(dictEq) {
     var eq8 = eq(dictEq);
     return function(dictEq1) {
-      var eq111 = eq(dictEq1);
+      var eq110 = eq(dictEq1);
       return {
         eq: function(x) {
           return function(y) {
-            return eq8(x.value0)(y.value0) && eq111(x.value1)(y.value1);
+            return eq8(x.value0)(y.value0) && eq110(x.value1)(y.value1);
           };
         }
       };
@@ -1966,10 +1966,10 @@
   };
   var filter = /* @__PURE__ */ runFn2(filterImpl);
   var elemIndex = function(dictEq) {
-    var eq26 = eq(dictEq);
+    var eq27 = eq(dictEq);
     return function(x) {
       return findIndex(function(v) {
-        return eq26(v)(x);
+        return eq27(v)(x);
       });
     };
   };
@@ -10737,6 +10737,12 @@
   }
   function clientY(e) {
     return e.clientY;
+  }
+  function ctrlKey2(e) {
+    return e.ctrlKey;
+  }
+  function button2(e) {
+    return e.button;
   }
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Web.UIEvent.MouseEvent/index.js
@@ -28051,6 +28057,19 @@
     };
     return Selected3;
   }();
+  var TriggerMouseDown = /* @__PURE__ */ function() {
+    function TriggerMouseDown2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    TriggerMouseDown2.create = function(value0) {
+      return function(value1) {
+        return new TriggerMouseDown2(value0, value1);
+      };
+    };
+    return TriggerMouseDown2;
+  }();
   var ListKeyDown3 = /* @__PURE__ */ function() {
     function ListKeyDown6(value0) {
       this.value0 = value0;
@@ -28092,16 +28111,16 @@
   var selectValue2 = function(value17) {
     return bind40(get22)(function(st) {
       return when28(current(st.ctrl) !== value17)(discard30(modify_23(function(v) {
-        var $55 = {};
-        for (var $56 in v) {
-          if ({}.hasOwnProperty.call(v, $56)) {
-            $55[$56] = v[$56];
+        var $58 = {};
+        for (var $59 in v) {
+          if ({}.hasOwnProperty.call(v, $59)) {
+            $58[$59] = v[$59];
           }
           ;
         }
         ;
-        $55.ctrl = change2(value17)(st.ctrl).next;
-        return $55;
+        $58.ctrl = change2(value17)(st.ctrl).next;
+        return $58;
       }))(function() {
         return raise(new ValueChanged7(value17));
       }));
@@ -28121,15 +28140,15 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 382, column 15 - line 388, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 392, column 15 - line 398, column 42): " + [v.constructor.name]);
     };
   };
   var focusTabByValue = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(value17) {
       return bind40(getHTMLElementRef(tabRef(value17)))(function(mel) {
-        return for_32(mel)(function($108) {
-          return liftEffect7(focus($108));
+        return for_32(mel)(function($116) {
+          return liftEffect7(focus($116));
         });
       });
     };
@@ -28147,7 +28166,7 @@
           return focusTabByValue1(v.value0.value);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 363, column 3 - line 365, column 42): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 373, column 3 - line 375, column 42): " + [v.constructor.name]);
       });
     };
   };
@@ -28160,7 +28179,7 @@
       return fromMaybe("")(input3.defaultValue);
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 194, column 20 - line 196, column 45): " + [input3.value.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 196, column 20 - line 198, column 45): " + [input3.value.constructor.name]);
   };
   var initialState20 = function(input3) {
     return {
@@ -28192,7 +28211,7 @@
       };
     }
   };
-  var eq110 = /* @__PURE__ */ eq(eqActivationMode);
+  var eq26 = /* @__PURE__ */ eq(eqActivationMode);
   var handleAction21 = function(dictMonadEffect) {
     var useId2 = useId(monadEffectHalogenM(dictMonadEffect));
     var focusTabByValue1 = focusTabByValue(dictMonadEffect);
@@ -28201,77 +28220,94 @@
       if (v instanceof Initialize19) {
         return bind40(useId2)(function(uid) {
           return modify_23(function(v1) {
-            var $69 = {};
-            for (var $70 in v1) {
-              if ({}.hasOwnProperty.call(v1, $70)) {
-                $69[$70] = v1[$70];
+            var $72 = {};
+            for (var $73 in v1) {
+              if ({}.hasOwnProperty.call(v1, $73)) {
+                $72[$73] = v1[$73];
               }
               ;
             }
             ;
-            $69.uid = uid;
-            return $69;
+            $72.uid = uid;
+            return $72;
           });
         });
       }
       ;
       if (v instanceof Receive21) {
         return modify_23(function(st) {
-          var $72 = {};
-          for (var $73 in st) {
-            if ({}.hasOwnProperty.call(st, $73)) {
-              $72[$73] = st[$73];
+          var $75 = {};
+          for (var $76 in st) {
+            if ({}.hasOwnProperty.call(st, $76)) {
+              $75[$76] = st[$76];
             }
             ;
           }
           ;
-          $72.tabs = v.value0.tabs;
-          $72.ctrl = sync(v.value0.value)(st.ctrl);
-          $72.orientation = v.value0.orientation;
-          $72.dir = v.value0.dir;
-          $72.loop = v.value0.loop;
-          $72.activationMode = v.value0.activationMode;
-          $72.idPrefix = v.value0.idPrefix;
-          $72.style = v.value0.style;
-          return $72;
+          $75.tabs = v.value0.tabs;
+          $75.ctrl = sync(v.value0.value)(st.ctrl);
+          $75.orientation = v.value0.orientation;
+          $75.dir = v.value0.dir;
+          $75.loop = v.value0.loop;
+          $75.activationMode = v.value0.activationMode;
+          $75.idPrefix = v.value0.idPrefix;
+          $75.style = v.value0.style;
+          return $75;
         });
       }
       ;
       if (v instanceof Selected2) {
         return discard30(modify_23(function(v1) {
-          var $76 = {};
-          for (var $77 in v1) {
-            if ({}.hasOwnProperty.call(v1, $77)) {
-              $76[$77] = v1[$77];
+          var $79 = {};
+          for (var $80 in v1) {
+            if ({}.hasOwnProperty.call(v1, $80)) {
+              $79[$80] = v1[$80];
             }
             ;
           }
           ;
-          $76.focusEntered = true;
-          return $76;
+          $79.focusEntered = true;
+          return $79;
         }))(function() {
           return selectValue2(v.value0);
         });
       }
       ;
-      if (v instanceof ListKeyDown3) {
+      if (v instanceof TriggerMouseDown) {
         return discard30(modify_23(function(v1) {
-          var $80 = {};
-          for (var $81 in v1) {
-            if ({}.hasOwnProperty.call(v1, $81)) {
-              $80[$81] = v1[$81];
+          var $83 = {};
+          for (var $84 in v1) {
+            if ({}.hasOwnProperty.call(v1, $84)) {
+              $83[$84] = v1[$84];
             }
             ;
           }
           ;
-          $80.focusEntered = true;
-          return $80;
+          $83.focusEntered = true;
+          return $83;
+        }))(function() {
+          return when28(button2(v.value1) === 0 && !ctrlKey2(v.value1))(selectValue2(v.value0));
+        });
+      }
+      ;
+      if (v instanceof ListKeyDown3) {
+        return discard30(modify_23(function(v1) {
+          var $88 = {};
+          for (var $89 in v1) {
+            if ({}.hasOwnProperty.call(v1, $89)) {
+              $88[$89] = v1[$89];
+            }
+            ;
+          }
+          ;
+          $88.focusEntered = true;
+          return $88;
         }))(function() {
           return bind40(get22)(function(st) {
-            var enabled = filter(function($109) {
+            var enabled = filter(function($117) {
               return !function(v1) {
                 return v1.disabled;
-              }($109);
+              }($117);
             })(st.tabs);
             var curEnabled = fromMaybe(0)(findIndex(function(t) {
               return t.value === current(st.ctrl);
@@ -28299,14 +28335,14 @@
                 ;
                 if (v2 instanceof Just) {
                   return discard30(focusTabByValue1(v2.value0.value))(function() {
-                    return when28(eq110(st.activationMode)(Automatic.value))(selectValue2(v2.value0.value));
+                    return when28(eq26(st.activationMode)(Automatic.value))(selectValue2(v2.value0.value));
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 338, column 21 - line 344, column 72): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 348, column 21 - line 354, column 72): " + [v2.constructor.name]);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 336, column 33 - line 344, column 72): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 346, column 33 - line 354, column 72): " + [v1.constructor.name]);
             }());
           });
         });
@@ -28314,16 +28350,16 @@
       ;
       if (v instanceof TriggerKeyDown5) {
         return discard30(modify_23(function(v1) {
-          var $88 = {};
-          for (var $89 in v1) {
-            if ({}.hasOwnProperty.call(v1, $89)) {
-              $88[$89] = v1[$89];
+          var $96 = {};
+          for (var $97 in v1) {
+            if ({}.hasOwnProperty.call(v1, $97)) {
+              $96[$97] = v1[$97];
             }
             ;
           }
           ;
-          $88.focusEntered = true;
-          return $88;
+          $96.focusEntered = true;
+          return $96;
         }))(function() {
           return when28(key(v.value1) === "Enter" || key(v.value1) === " ")(selectValue2(v.value0));
         });
@@ -28331,22 +28367,22 @@
       ;
       if (v instanceof EntryFocus2) {
         return discard30(modify_23(function(v1) {
-          var $93 = {};
-          for (var $94 in v1) {
-            if ({}.hasOwnProperty.call(v1, $94)) {
-              $93[$94] = v1[$94];
+          var $101 = {};
+          for (var $102 in v1) {
+            if ({}.hasOwnProperty.call(v1, $102)) {
+              $101[$102] = v1[$102];
             }
             ;
           }
           ;
-          $93.focusEntered = true;
-          return $93;
+          $101.focusEntered = true;
+          return $101;
         }))(function() {
           return bind40(get22)(function(st) {
             var idx = selectedIndex4(st);
             return focusTabAt1(function() {
-              var $96 = idx < 0;
-              if ($96) {
+              var $104 = idx < 0;
+              if ($104) {
                 return 0;
               }
               ;
@@ -28356,7 +28392,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 306, column 16 - line 356, column 44): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 311, column 16 - line 366, column 44): " + [v.constructor.name]);
     };
   };
   var dirName5 = function(v) {
@@ -28368,7 +28404,7 @@
       return "rtl";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 227, column 11 - line 229, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 229, column 11 - line 231, column 15): " + [v.constructor.name]);
   };
   var defaultStyle18 = {
     root: /* @__PURE__ */ cn("rdx-tabs-root"),
@@ -28402,7 +28438,7 @@
       return st.idPrefix + ("-" + st.uid);
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 146, column 1 - line 146, column 24): " + [st.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Tabs (line 148, column 1 - line 148, column 24): " + [st.constructor.name]);
   };
   var panelId2 = function(st) {
     return function(value17) {
@@ -28479,7 +28515,7 @@
           return -1 | 0;
         }()), disabled10(tab.disabled), classes2(st.style.trigger), onClick(function(v1) {
           return new Selected2(tab.value);
-        }), onKeyDown(TriggerKeyDown5.create(tab.value))])(function() {
+        }), onMouseDown(TriggerMouseDown.create(tab.value)), onKeyDown(TriggerKeyDown5.create(tab.value))])(function() {
           if (tab.disabled) {
             return [dataAttr("disabled")("")];
           }
@@ -28500,8 +28536,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction21(dictMonadEffect),
         handleQuery: handleQuery20(dictMonadEffect),
-        receive: function($110) {
-          return Just.create(Receive21.create($110));
+        receive: function($118) {
+          return Just.create(Receive21.create($118));
         },
         initialize: new Just(Initialize19.value)
       })
@@ -32507,16 +32543,21 @@
   })(ordUnit);
   var slot_35 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
+      return "tabsB";
+    }
+  })(ordUnit);
+  var slot_36 = /* @__PURE__ */ slot_2({
+    reflectSymbol: function() {
       return "sliderrange";
     }
   })(ordUnit);
   var rangeComponent2 = /* @__PURE__ */ rangeComponent(monadEffectAff);
-  var slot_36 = /* @__PURE__ */ slot_2({
+  var slot_37 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "sliderrangeform";
     }
   })(ordUnit);
-  var slot_37 = /* @__PURE__ */ slot_2({
+  var slot_38 = /* @__PURE__ */ slot_2({
     reflectSymbol: function() {
       return "labelguard";
     }
@@ -32547,7 +32588,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1956, column 1 - line 1956, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1962, column 1 - line 1962, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -32649,8 +32690,8 @@
     return {
       loop: defaultInput23.loop,
       orientation: function() {
-        var $231 = s === "vertical";
-        if ($231) {
+        var $234 = s === "vertical";
+        if ($234) {
           return Vertical.value;
         }
         ;
@@ -32694,8 +32735,8 @@
   var toggleInput = function(s) {
     return {
       pressed: function() {
-        var $232 = s === "controlled";
-        if ($232) {
+        var $235 = s === "controlled";
+        if ($235) {
           return new Just(true);
         }
         ;
@@ -32880,7 +32921,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1379, column 1 - line 1379, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1385, column 1 - line 1385, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -32921,8 +32962,8 @@
       open: Nothing.value,
       defaultOpen: true,
       duration: function() {
-        var $235 = s === "autodismiss";
-        if ($235) {
+        var $238 = s === "autodismiss";
+        if ($238) {
           return new Just(1500);
         }
         ;
@@ -33013,8 +33054,8 @@
         disabled: false
       }],
       value: function() {
-        var $238 = s === "controlled";
-        if ($238) {
+        var $241 = s === "controlled";
+        if ($241) {
           return new Just("account");
         }
         ;
@@ -33091,8 +33132,8 @@
     return {
       children: defaultInput19.children,
       checked: function() {
-        var $239 = s === "controlled";
-        if ($239) {
+        var $242 = s === "controlled";
+        if ($242) {
           return new Just(true);
         }
         ;
@@ -33102,8 +33143,8 @@
       disabled: s === "disabled",
       required: s === "required" || s === "form",
       name: function() {
-        var $240 = s === "form";
-        if ($240) {
+        var $243 = s === "form";
+        if ($243) {
           return "notify";
         }
         ;
@@ -33138,7 +33179,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2048, column 17 - line 2050, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2054, column 17 - line 2056, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33151,13 +33192,13 @@
       name: defaultRangeInput.name,
       isFormControl: defaultRangeInput.isFormControl,
       defaultValue: function() {
-        var $243 = s === "triple";
-        if ($243) {
+        var $246 = s === "triple";
+        if ($246) {
           return [20, 50, 80];
         }
         ;
-        var $244 = s === "minsteps";
-        if ($244) {
+        var $247 = s === "minsteps";
+        if ($247) {
           return [40, 60];
         }
         ;
@@ -33167,8 +33208,8 @@
       max: 100,
       step: 1,
       minStepsBetweenThumbs: function() {
-        var $245 = s === "minsteps";
-        if ($245) {
+        var $248 = s === "minsteps";
+        if ($248) {
           return 10;
         }
         ;
@@ -33215,8 +33256,8 @@
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $246 = s === "vertical";
-        if ($246) {
+        var $249 = s === "vertical";
+        if ($249) {
           return Vertical.value;
         }
         ;
@@ -33251,12 +33292,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2003, column 1 - line 2003, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2009, column 1 - line 2009, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $248 = s === "vsem" || s === "vdec";
-      if ($248) {
+      var $251 = s === "vsem" || s === "vdec";
+      if ($251) {
         return Vertical.value;
       }
       ;
@@ -33316,16 +33357,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $249 = s === "horizontal";
-        if ($249) {
+        var $252 = s === "horizontal";
+        if ($252) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $250 = s === "radius";
-        if ($250) {
+        var $253 = s === "radius";
+        if ($253) {
           return "full";
         }
         ;
@@ -33369,8 +33410,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $251 = s === "keys" || s === "mixed";
-        if ($251) {
+        var $254 = s === "keys" || s === "mixed";
+        if ($254) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33386,8 +33427,8 @@
           }];
         }
         ;
-        var $252 = s === "loopoff" || s === "rtl";
-        if ($252) {
+        var $255 = s === "loopoff" || s === "rtl";
+        if ($255) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33403,8 +33444,8 @@
           }];
         }
         ;
-        var $253 = s === "alldisabled";
-        if ($253) {
+        var $256 = s === "alldisabled";
+        if ($256) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33429,8 +33470,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $254 = s === "horizontal" || s === "rtl";
-        if ($254) {
+        var $257 = s === "horizontal" || s === "rtl";
+        if ($257) {
           return Horizontal.value;
         }
         ;
@@ -33438,8 +33479,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $255 = s === "rtl";
-        if ($255) {
+        var $258 = s === "rtl";
+        if ($258) {
           return RTL.value;
         }
         ;
@@ -33449,8 +33490,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $256 = s === "form";
-        if ($256) {
+        var $259 = s === "form";
+        if ($259) {
           return "plan";
         }
         ;
@@ -33534,8 +33575,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $257 = styl === "";
-              if ($257) {
+              var $260 = styl === "";
+              if ($260) {
                 return [];
               }
               ;
@@ -33609,16 +33650,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $259 = s === "close";
-        if ($259) {
+        var $262 = s === "close";
+        if ($262) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $260 = s === "close";
-        if ($260) {
+        var $263 = s === "close";
+        if ($263) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -33648,16 +33689,16 @@
       hideLabel: defaultInput12.hideLabel,
       inputId: new Just("password"),
       toggleVisible: function() {
-        var $261 = s === "autolabel";
-        if ($261) {
+        var $264 = s === "autolabel";
+        if ($264) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $262 = s === "autolabel";
-        if ($262) {
+        var $265 = s === "autolabel";
+        if ($265) {
           return [passwordToggleIcon];
         }
         ;
@@ -33681,7 +33722,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1710, column 1 - line 1710, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1716, column 1 - line 1716, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -33693,24 +33734,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $265 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($265) {
+        var $268 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($268) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $266 = s === "vertical";
-        if ($266) {
+        var $269 = s === "vertical";
+        if ($269) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $267 = s === "rtl";
-        if ($267) {
+        var $270 = s === "rtl";
+        if ($270) {
           return RTL.value;
         }
         ;
@@ -33765,8 +33806,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $268 = s === "submenu";
-          if ($268) {
+          var $271 = s === "submenu";
+          if ($271) {
             return [menubarSubEntry];
           }
           ;
@@ -33818,8 +33859,8 @@
         value: "view",
         trigger: [text5("View")],
         entries: function() {
-          var $269 = s === "radio";
-          if ($269) {
+          var $272 = s === "radio";
+          if ($272) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -33925,84 +33966,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2015, column 1 - line 2015, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2021, column 1 - line 2021, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $320 = filter(function(c) {
+    var $323 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($321) {
-      return fromCharArray($320(toCharArray($321)));
+    return function($324) {
+      return fromCharArray($323(toCharArray($324)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $271 = s === "controlled";
-        if ($271) {
+        var $274 = s === "controlled";
+        if ($274) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $272 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($272) {
+        var $275 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($275) {
           return "";
         }
         ;
-        var $273 = s === "alpha";
-        if ($273) {
+        var $276 = s === "alpha";
+        if ($276) {
           return "abc";
         }
         ;
-        var $274 = s === "alphanumeric";
-        if ($274) {
+        var $277 = s === "alphanumeric";
+        if ($277) {
           return "a1b";
         }
         ;
-        var $275 = s === "revalidate";
-        if ($275) {
+        var $278 = s === "revalidate";
+        if ($278) {
           return "a1b2c";
         }
         ;
-        var $276 = s === "sanitizevalue";
-        if ($276) {
+        var $279 = s === "sanitizevalue";
+        if ($279) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $277 = s === "alpha" || s === "revalidate";
-        if ($277) {
+        var $280 = s === "alpha" || s === "revalidate";
+        if ($280) {
           return Alpha.value;
         }
         ;
-        var $278 = s === "alphanumeric";
-        if ($278) {
+        var $281 = s === "alphanumeric";
+        if ($281) {
           return Alphanumeric.value;
         }
         ;
-        var $279 = s === "novalidation" || s === "sanitizevalue";
-        if ($279) {
+        var $282 = s === "novalidation" || s === "sanitizevalue";
+        if ($282) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $280 = s === "sanitizevalue";
-        if ($280) {
+        var $283 = s === "sanitizevalue";
+        if ($283) {
           return keepDigitsOnly;
         }
         ;
         return identity13;
       }(),
       placeholder: function() {
-        var $281 = s === "placeholder";
-        if ($281) {
+        var $284 = s === "placeholder";
+        if ($284) {
           return new Just("\u25CB");
         }
         ;
@@ -34012,24 +34053,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $282 = s === "vertical";
-        if ($282) {
+        var $285 = s === "vertical";
+        if ($285) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $283 = s === "rtl";
-        if ($283) {
+        var $286 = s === "rtl";
+        if ($286) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $284 = s === "named";
-        if ($284) {
+        var $287 = s === "named";
+        if ($287) {
           return new Just("otp-code");
         }
         ;
@@ -34067,8 +34108,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $285 = s === "richcontent";
-        if ($285) {
+        var $288 = s === "richcontent";
+        if ($288) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34087,15 +34128,15 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2193, column 1 - line 2193, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2199, column 1 - line 2199, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $288 = s === "reset";
-        if ($288) {
+        var $291 = s === "reset";
+        if ($291) {
           return [text5("Reset")];
         }
         ;
@@ -34108,8 +34149,8 @@
         required: true,
         serverInvalid: s === "serverInvalid",
         messages: function() {
-          var $289 = s === "defaultMessage";
-          if ($289) {
+          var $292 = s === "defaultMessage";
+          if ($292) {
             return [{
               match: ValueMissing.value,
               forceMatch: true,
@@ -34117,8 +34158,8 @@
             }];
           }
           ;
-          var $290 = s === "reset";
-          if ($290) {
+          var $293 = s === "reset";
+          if ($293) {
             return [{
               match: ValueMissing.value,
               forceMatch: false,
@@ -34157,7 +34198,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2059, column 12 - line 2061, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2065, column 12 - line 2067, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34178,8 +34219,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $298 = kv.before === key2;
-          if ($298) {
+          var $301 = kv.before === key2;
+          if ($301) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34190,7 +34231,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2041, column 15 - line 2043, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2047, column 15 - line 2049, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34306,8 +34347,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $300 = s === "submenu";
-        if ($300) {
+        var $303 = s === "submenu";
+        if ($303) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34331,8 +34372,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $301 = s === "radio";
-        if ($301) {
+        var $304 = s === "radio";
+        if ($304) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34373,8 +34414,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $302 = s === "controlled";
-        if ($302) {
+        var $305 = s === "controlled";
+        if ($305) {
           return new Just(true);
         }
         ;
@@ -34395,8 +34436,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $303 = klass === "";
-      if ($303) {
+      var $306 = klass === "";
+      if ($306) {
         return [];
       }
       ;
@@ -34420,8 +34461,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $304 = s === "radio";
-        if ($304) {
+        var $307 = s === "radio";
+        if ($307) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34517,8 +34558,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $305 = s === "submenu";
-        if ($305) {
+        var $308 = s === "submenu";
+        if ($308) {
           return [submenuEntry];
         }
         ;
@@ -34681,8 +34722,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $307 = s === "controlled";
-        if ($307) {
+        var $310 = s === "controlled";
+        if ($310) {
           return new Just(Checked.value);
         }
         ;
@@ -34706,16 +34747,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $309 = s === "form";
-        if ($309) {
+        var $312 = s === "form";
+        if ($312) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $310 = s === "form";
-        if ($310) {
+        var $313 = s === "form";
+        if ($313) {
           return "yes";
         }
         ;
@@ -34783,18 +34824,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $313 = s === "wide";
-        if ($313) {
+        var $316 = s === "wide";
+        if ($316) {
           return 16 / 9;
         }
         ;
-        var $314 = s === "tall";
-        if ($314) {
+        var $317 = s === "tall";
+        if ($317) {
           return 1 / 2;
         }
         ;
-        var $315 = s === "verywide";
-        if ($315) {
+        var $318 = s === "verywide";
+        if ($318) {
           return 21 / 9;
         }
         ;
@@ -34803,7 +34844,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1933, column 1 - line 1933, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1939, column 1 - line 1939, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -34857,8 +34898,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $316 = s === "single";
-        if ($316) {
+        var $319 = s === "single";
+        if ($319) {
           return ["item-1"];
         }
         ;
@@ -34940,6 +34981,9 @@
   var _toast = /* @__PURE__ */ function() {
     return $$Proxy.value;
   }();
+  var _tabsB = /* @__PURE__ */ function() {
+    return $$Proxy.value;
+  }();
   var _tabs = /* @__PURE__ */ function() {
     return $$Proxy.value;
   }();
@@ -34983,8 +35027,8 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $317 = s === "formreset";
-    if ($317) {
+    var $320 = s === "formreset";
+    if ($320) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
@@ -35104,8 +35148,8 @@
         }
         ;
         if (c === "slider") {
-          var $319 = s === "vertical";
-          if ($319) {
+          var $322 = s === "vertical";
+          if ($322) {
             return box([new StyleProp("height", "160px")])([slot_12(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;
@@ -35296,6 +35340,10 @@
           return slot_16(_tabs)(unit)(component162)(tabsRtlInput);
         }
         ;
+        if (c === "tabsmulti") {
+          return div_([slot_16(_tabs)(unit)(component162)(tabsInput("")), slot_35(_tabsB)(unit)(component162)(tabsInput(""))]);
+        }
+        ;
         if (c === "tabsnone") {
           return slot_16(_tabs)(unit)(component162)(tabsNoneInput);
         }
@@ -35313,15 +35361,15 @@
         }
         ;
         if (c === "sliderrange") {
-          return box([new StyleProp("max-width", "320px")])([slot_35(_sliderrange)(unit)(rangeComponent2)(sliderRangeInput(s))]);
+          return box([new StyleProp("max-width", "320px")])([slot_36(_sliderrange)(unit)(rangeComponent2)(sliderRangeInput(s))]);
         }
         ;
         if (c === "sliderrangeform") {
-          return form2([])([box([new StyleProp("max-width", "320px")])([slot_36(_sliderrangeform)(unit)(rangeComponent2)(sliderRangeFormInput(s))])]);
+          return form2([])([box([new StyleProp("max-width", "320px")])([slot_37(_sliderrangeform)(unit)(rangeComponent2)(sliderRangeFormInput(s))])]);
         }
         ;
         if (c === "labelguard") {
-          return slot_37(_labelguard)(unit)(component232)(labelGuardInput(s));
+          return slot_38(_labelguard)(unit)(component232)(labelGuardInput(s));
         }
         ;
         return div_([text5("pick a ?c=<component> (e.g. ?c=dialog)")]);
