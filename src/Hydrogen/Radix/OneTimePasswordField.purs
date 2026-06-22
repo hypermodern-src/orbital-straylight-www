@@ -291,8 +291,11 @@ handleAction = case _ of
       , readOnly = input.readOnly
       , style = input.style
       }
-  SlotFocused idx ->
+  SlotFocused idx -> do
     H.modify_ _ { cursor = idx, focusEntered = true }
+    -- onFocus selects the slot's current value so the next keystroke REPLACES it (otp.tsx:670-672).
+    mel <- H.getHTMLElementRef (slotRef idx)
+    for_ (mel >>= HTMLInputElement.fromHTMLElement) (liftEffect <<< HTMLInputElement.select)
   SlotInput idx raw -> do
     st <- H.get
     -- An input event delivering MORE THAN ONE char is a paste / password-manager autofill

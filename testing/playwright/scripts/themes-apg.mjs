@@ -902,6 +902,20 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok(await activeIsNth(pg, sel, 0), "rtl: ArrowRight did not rove to the PREVIOUS slot");
   }},
+  // onFocus selects the slot's current value so the next keystroke REPLACES it (otp.tsx:670-672).
+  // Proof: focus a filled slot and assert the input's selection spans its whole char.
+  { id: "otp", state: "filled", apg: "roving-tabindex", name: "focusing a filled slot selects its value so typing replaces", run: async (pg) => {
+    const sel = 'input[data-radix-otp-input]';
+    await pg.locator(sel).first().waitFor();
+    await focusFirst(pg, sel);
+    await pg.waitForTimeout(60);
+    const span = await pg.evaluate((s) => {
+      const el = document.querySelectorAll(s)[0];
+      return { start: el.selectionStart, end: el.selectionEnd, len: el.value.length };
+    }, sel);
+    ok(span.len === 1, `expected the first slot to hold one char (got len ${span.len})`);
+    ok(span.start === 0 && span.end === span.len, `focus did not select the slot value (selection ${span.start}..${span.end} of ${span.len})`);
+  }},
   { id: "otp", state: "empty", apg: "roving-tabindex", name: "typing a char fills the slot and auto-advances focus to the next", run: async (pg) => {
     const sel = 'input[data-radix-otp-input]';
     await pg.locator(sel).first().waitFor();
