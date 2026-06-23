@@ -67,7 +67,7 @@ import Halogen.Query.Event (eventListener)
 import Halogen.Subscription as HS
 import Hydrogen.Radix.Behavior.ControllableState (Controllable, controllable, current, change, sync)
 import Hydrogen.Radix.Behavior.DismissableLayer as Dismiss
-import Hydrogen.Radix.Behavior.Direction (Dir(..))
+import Hydrogen.Radix.Behavior.Direction (Dir(..), dirName)
 import Hydrogen.Radix.Behavior.Id (useId)
 import Hydrogen.Radix.Behavior.Presence (Presence(..), present, finishExit, isRendered, dataStateOf, hasAnimation, animationEnd)
 import Hydrogen.Radix.Behavior.RovingFocus (Move(..), navigate, navigatePaged, tabIndexFor)
@@ -474,7 +474,7 @@ render st =
       [ HH.div
           [ HP.ref wrapperRef
           , dataAttr "radix-popper-content-wrapper" ""
-          , dir "ltr"
+          , dir (dirName st.dir)
           , HP.style "position: fixed;"
           ]
           ( case mOpenI of
@@ -535,7 +535,7 @@ renderContent st i =
         , dataAttr "orientation" "vertical"
         , dataAttr "radix-menu-content" ""
         , dataAttr "radix-menubar-content" ""
-        , dir "ltr"
+        , dir (dirName st.dir)
         , HP.tabIndex (-1)
         , HP.style st.contentStyle
         , HE.onKeyDown MenuKeyDown
@@ -648,7 +648,7 @@ renderSubContent st sub =
   HH.div
     [ HP.ref subWrapperRef
     , dataAttr "radix-popper-content-wrapper" ""
-    , dir "ltr"
+    , dir (dirName st.dir)
     , HP.style "position: fixed;"
     ]
     [ HH.div
@@ -664,7 +664,7 @@ renderSubContent st sub =
           , dataAttr "orientation" "vertical"
           , dataAttr "radix-menu-content" ""
           , dataAttr "radix-menubar-content" ""
-          , dir "ltr"
+          , dir (dirName st.dir)
           , HP.tabIndex (-1)
           , HP.style st.contentStyle
           , HE.onKeyDown SubKeyDown
@@ -886,12 +886,18 @@ handleAction = case _ of
         v <- enabledValueAt st.itemFocus (openEntries st)
         _ <- findSub v (openEntries st)
         pure v
+      -- direction-aware cross-menu / sub-open keys (menubar.tsx:358 prevMenuKey, menu.tsx:31-34
+      -- SUB_OPEN_KEYS). In RTL the horizontal axis mirrors: NEXT menu / sub-open is ArrowLeft,
+      -- PREV menu is ArrowRight.
+      isRTL = st.dir == RTL
+      nextMenuKey = if isRTL then "ArrowLeft" else "ArrowRight"
+      prevMenuKey = if isRTL then "ArrowRight" else "ArrowLeft"
     case KE.key ke of
-      "ArrowRight" | Just v <- mFocusedSub -> liftEffect (preventDefault (KE.toEvent ke)) *> openSub v st.itemFocus (Just 0)
-      -- cross-menu: ArrowRight/ArrowLeft from inside the content close it and open the adjacent
-      -- trigger's menu (handled here via the menu list + wrap, NOT the vertical roving).
-      "ArrowRight" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st 1
-      "ArrowLeft" -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st (-1)
+      k | k == nextMenuKey, Just v <- mFocusedSub -> liftEffect (preventDefault (KE.toEvent ke)) *> openSub v st.itemFocus (Just 0)
+      -- cross-menu: the next/prev-menu key from inside the content closes it and opens the
+      -- adjacent trigger's menu (handled via the menu list + wrap, NOT the vertical roving).
+      k | k == nextMenuKey -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st 1
+      k | k == prevMenuKey -> liftEffect (preventDefault (KE.toEvent ke)) *> adjacentMenu st (-1)
       -- Enter/Space SELECT the focused item + close (upstream re-exports menu.tsx:667-680
       -- SELECTION_KEYS). Keyboard activation of items was previously impossible.
       key
@@ -933,8 +939,10 @@ handleAction = case _ of
       subEntries = fromMaybe [] (map _.entries (st.subOpen >>= \v -> findSub v (openEntries st)))
       cfg = { orientation: Vertical, dir: st.dir, loop: st.loop }
       pos = { count: itemCount subEntries, current: st.subFocused }
+      -- SUB_CLOSE_KEYS (menu.tsx:35-38): LTR=ArrowLeft, RTL=ArrowRight (mirrors sub-open).
+      subCloseKey = if st.dir == RTL then "ArrowRight" else "ArrowLeft"
     case key of
-      "ArrowLeft" -> liftEffect (preventDefault (KE.toEvent ke)) *> closeSub
+      k | k == subCloseKey -> liftEffect (preventDefault (KE.toEvent ke)) *> closeSub
       "Escape" -> liftEffect (preventDefault (KE.toEvent ke)) *> closeSub
       _
         | (key == "Enter" || key == " ") && st.subFocused >= 0 -> do

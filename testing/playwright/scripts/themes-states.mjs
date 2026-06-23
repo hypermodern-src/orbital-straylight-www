@@ -228,6 +228,9 @@ export const STATES = {
     // (File) by clicking its trigger (role=menuitem); the menus are non-modal so no scroll-lock.
     // Keyed off upstream role/data-* only, so the same driver runs against golden and port.
     open: async (pg) => openMenu(pg, () => root(pg).getByRole("menuitem").first().click()),
+    // `?s=rtl` — open the FIRST menu under dir=rtl; pins dir propagation onto the bar + content
+    // (the cross-menu ArrowLeft/ArrowRight swap is adjudicated by the APG harness).
+    rtl: async (pg) => openMenu(pg, () => root(pg).getByRole("menuitem").first().click()),
     // open then ArrowDown → the first menu item lands data-highlighted (roving tabindex=0).
     item1: async (pg) => {
       await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());

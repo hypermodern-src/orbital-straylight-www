@@ -194,6 +194,23 @@ const CHECKS = [
     await press(pg, "ArrowLeft");
     ok(await activeIsNth(pg, '#root [role="menuitem"]', 0), "ArrowLeft did not move back to the previous trigger");
   }},
+  // RTL cross-menu mirror (menubar.tsx:358 prevMenuKey = dir==='rtl' ? 'ArrowRight' : 'ArrowLeft').
+  // Under dir=rtl the horizontal axis flips: from an open menu, ArrowLeft opens the NEXT menu,
+  // ArrowRight the PREVIOUS. `?s=rtl` renders the bar with dir=rtl.
+  { id: "menubar", apg: "menubar", state: "rtl", name: "RTL: ArrowLeft opens the NEXT menu, ArrowRight the PREVIOUS (cross-menu mirror)", run: async (pg) => {
+    const expandedIdx = () => pg.evaluate(() => {
+      const t = [...document.querySelectorAll('#root [role="menuitem"][aria-haspopup="menu"]')];
+      return t.findIndex((e) => e.getAttribute("aria-expanded") === "true");
+    });
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(180);
+    ok((await expandedIdx()) === 0, "File menu did not open (precondition)");
+    await press(pg, "ArrowLeft");
+    ok((await expandedIdx()) === 1, "ArrowLeft in RTL did not open the NEXT (Edit) menu");
+    await press(pg, "ArrowRight");
+    ok((await expandedIdx()) === 0, "ArrowRight in RTL did not return to the PREVIOUS (File) menu");
+  }},
   { id: "menubar", apg: "menubar", name: "Home focuses the first trigger, End the last", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().waitFor();
     await pg.locator('#root [role="menuitem"]').first().focus();

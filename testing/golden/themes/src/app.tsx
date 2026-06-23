@@ -1037,8 +1037,10 @@ const PAGES: Page[] = [
       const s = currentState();
       const newWindowDisabled = s === "disabled";
       const sub = s === "submenu";
+      // `?s=rtl` — dir="rtl": the horizontal cross-menu axis mirrors (ArrowLeft=next, ArrowRight=prev).
+      const rtl = s === "rtl";
       return (
-      <Menubar.Root>
+      <Menubar.Root {...(rtl ? { dir: "rtl" as const } : {})}>
         <Menubar.Menu value="file">
           <Menubar.Trigger>File</Menubar.Trigger>
           <Menubar.Portal>

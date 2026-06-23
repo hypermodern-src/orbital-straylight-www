@@ -880,6 +880,9 @@ contextChecksInput s = ContextMenu.defaultInput
 menubarInput :: String -> Menubar.Input
 menubarInput s = Menubar.defaultInput
   { align = Start
+  -- `?s=rtl` → dir=RTL: dir attr stamped on popper wrapper + content, and the cross-menu /
+  -- sub-open/close keys mirror (ArrowLeft=next, ArrowRight=prev).
+  , dir = if s == "rtl" then RTL else LTR
   , contentStyle = "outline: none; " <> popperContentVars "menubar"
   , menus =
       [ { value: "file"

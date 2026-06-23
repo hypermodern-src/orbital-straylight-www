@@ -42,6 +42,7 @@ STATES=(
   "collapsible:open"
   "toast:open"
   "menubar:open"
+  "menubar:rtl"
   "menubar:closed-rest"
   "menubar:item1"
   "menubar:disabled"

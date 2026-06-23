@@ -126,12 +126,14 @@
       "id": "menubar.rtl-cross",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom",
         "apg"
       ],
-      "ref": "menubar.tsx:358-378 RTL cross-menu arrows swap; port hardcodes ArrowRight\u2192next, no dir awareness"
+      "ref": "DONE (2026-06-23): FIXED \u2014 port hardcoded ArrowRight=next + dir=ltr. Now dir-aware: nextMenuKey/prevMenuKey + subOpen/subClose keys mirror in RTL (menubar.tsx:358, menu.tsx:31-38), and content/popper emit dir=dirName st.dir. DOM golden menubar.rtl byte-identical + apg cross-menu mirror green both faces.",
+      "apg_check": "RTL: ArrowLeft opens the NEXT menu, ArrowRight the PREVIOUS",
+      "oracle_file": "menubar.rtl"
     },
     {
       "id": "menubar.noloop-cross",
