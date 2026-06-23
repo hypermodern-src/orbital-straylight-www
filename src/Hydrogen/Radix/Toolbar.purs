@@ -234,7 +234,10 @@ render st =
       , dataOrientation st.orientation
       , HP.attr (HH.AttrName "dir") (dirName st.dir)
       , HP.style "outline: none;"
-      , HP.tabIndex 0
+      -- the group root is the tab stop ONLY before focus enters; once an item holds the roving
+      -- tab stop the root drops to -1 so Shift+Tab escapes the toolbar instead of re-entering it
+      -- (RovingFocusGroup root tabIndex). At rest focusEntered=false → 0 (matches the golden).
+      , HP.tabIndex (if st.focusEntered then (-1) else 0)
       , classes st.style.root
       , HE.onKeyDown ListKeyDown
       , HE.onFocus (const EntryFocus)

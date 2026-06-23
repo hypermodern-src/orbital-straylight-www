@@ -804,6 +804,41 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="toolbar"]', 0, "tabindex")) === "0", "toolbar root must be tabindex=0 at rest");
     ok((await tabbableCount(pg, '[role="toolbar"] [data-radix-collection-item]')) === 0, "no item may be tabbable before focus enters (roving tabindex on root)");
   }},
+  // type=multiple ToggleGroup: items keep aria-pressed and clicking a second one does NOT
+  // unpress the first (multi-select, not radio) — toolbar.tsx:161-162.
+  { id: "toolbarmultiple", apg: "toolbar", name: "multiple toggle group keeps several items pressed", run: async (pg) => {
+    const items = '[role="toolbar"] button[aria-pressed]';
+    await pg.locator(items).first().waitFor();
+    const bold = pg.locator(items, { hasText: "B" }).first();
+    const italic = pg.locator(items, { hasText: "I" }).first();
+    ok((await bold.getAttribute("aria-pressed")) === "true", "bold should start pressed");
+    await italic.click();
+    await pg.waitForTimeout(80);
+    ok((await italic.getAttribute("aria-pressed")) === "true", "clicking italic did not press it");
+    ok((await bold.getAttribute("aria-pressed")) === "true", "bold must STAY pressed (multiple, not radio)");
+  }},
+  // clicking a ToggleGroup item in the toolbar flips its pressed state (toolbar.tsx:200-212).
+  { id: "toolbar", state: "default", apg: "toolbar", name: "clicking a toggle item flips its pressed state", run: async (pg) => {
+    const items = '[role="toolbar"] button[data-state]';
+    await pg.locator(items).first().waitFor();
+    // the Align toggle group: Left pre-pressed (data-state=on). Click Center → Center on, Left off.
+    const left = pg.locator('[role="toolbar"] button', { hasText: "L" }).first();
+    const center = pg.locator('[role="toolbar"] button', { hasText: "C" }).first();
+    ok((await left.getAttribute("data-state")) === "on", "Left should start pressed");
+    await center.click();
+    await pg.waitForTimeout(80);
+    ok((await center.getAttribute("data-state")) === "on", "clicking Center did not press it");
+    ok((await left.getAttribute("data-state")) === "off", "Left must unpress (single-select)");
+  }},
+  // Shift+Tab from a roved item moves focus OUT of the toolbar (roving-focus-group.tsx:262-265).
+  { id: "toolbar", state: "default", apg: "toolbar", name: "Shift+Tab moves focus out of the toolbar", run: async (pg) => {
+    const sel = '[role="toolbar"] [data-radix-collection-item]';
+    await focusFirst(pg, sel);
+    ok(await activeIsNth(pg, sel, 0), "could not focus the first item");
+    await pg.keyboard.press("Shift+Tab");
+    await pg.waitForTimeout(60);
+    ok(!(await pg.evaluate((s) => { const a = document.activeElement; return [...document.querySelectorAll(s)].includes(a); }, sel)), "Shift+Tab must move focus out of the toolbar items");
+  }},
   { id: "toolbar", state: "default", apg: "toolbar", name: "ArrowRight roves focus to the next item; the tab stop migrates onto it", run: async (pg) => {
     const sel = '[role="toolbar"] [data-radix-collection-item]';
     await pg.locator(sel).first().waitFor();

@@ -5,26 +5,212 @@
   "upstream": "primitives packages/react/toolbar/src/toolbar.tsx + @radix-ui/themes@3",
   "note": "STR-381 ledger: every cell tying Toolbar out against upstream. status=gated have committed goldens; status=open are named debt. 2 open-core cells.",
   "cells": [
-    { "id": "toolbar.default",  "state": "default",  "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "root role=toolbar + aria-orientation + tabindex=0; button/link/separator/nested toggle-group at rest" },
-    { "id": "toolbar.vertical", "state": "vertical", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "orientation=vertical: data-orientation, flipped separator orientation" },
-    { "id": "toolbar.roved",    "state": "roved",    "importance": "core",   "status": "gated", "oracle": ["dom"],         "ref": "tabindex=0 migrates from root onto link (item 1) after ArrowRight" },
-    { "id": "toolbar.disabled", "state": "disabled", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "disabled button: disabled attr + excluded from roving order" },
-    { "id": "toolbar.rest",     "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (toolbar>button/link/separator/group>radio)" },
-
-    { "id": "toolbar.toggle-click",   "state": "open", "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "toolbar.tsx:200-212 click toggle item flips data-state/aria-checked, single-mode radio moves; golden only at-rest" },
-    { "id": "toolbar.group-cross",    "state": "open", "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "ArrowRight walks the full 4-item order, CROSSING the toggle-group boundary", "ref": "toolbar.tsx:176-183 inner ToggleGroup rovingFocus=false; arrow must CROSS group boundary as one continuous 4-item roving order" },
-    { "id": "toolbar.link-space",     "state": "open", "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "ToolbarLink stays focused on Space (Space wired to click)", "ref": "toolbar.tsx:142-145 ToolbarLink Space synthesizes click (native <a> ignores); no oracle drives Space on link" },
-    { "id": "toolbar.noloop",         "state": "open", "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "loop=false: ArrowRight at the last item does NOT wrap to the first", "ref": "toolbar.tsx:46 loop=false end-stop + loop=true wrap-around; neither exercised" },
-    { "id": "toolbar.rtl",            "state": "open", "importance": "common", "status": "gated", "oracle": ["dom", "apg"], "apg_check": "rtl: ArrowLeft roves to the NEXT item, ArrowRight to the previous", "ref": "toolbar.tsx:48,55,61 dir=rtl flips horizontal arrows; no rtl story" },
-    { "id": "toolbar.disabled-skip",  "state": "open", "importance": "common", "status": "gated", "oracle": ["dom", "apg"], "apg_check": "a disabled button is non-tabbable and skipped by the roving order", "ref": "toolbar.tsx:114 disabled button non-focusable, excluded from roving; ArrowRight skips it" },
-    { "id": "toolbar.multiple",       "state": "open", "importance": "common", "status": "open", "oracle": ["dom", "aria"], "ref": "toolbar.tsx:161-162 ToggleGroup type=multiple: aria-pressed multi-select; every story is single" },
-    { "id": "toolbar.shift-tab-out",  "state": "open", "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "roving-focus-group.tsx:262-265 Shift+Tab tabs OUT (isTabbingBackOut); port has no shift-tab handling" },
-
-    { "id": "toolbar.page-keys",      "state": "open", "importance": "edge", "status": "gated", "oracle": ["apg"], "apg_check": "PageDown focuses the last item, PageUp the first", "ref": "edge: PageUp→first / PageDown→last navigation" },
-    { "id": "toolbar.entry-priority", "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: onEntryFocus candidate priority (active→currentTabStop→DOM order)" },
-    { "id": "toolbar.prevent-scroll", "state": "open", "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: preventScrollOnEntryFocus / focus({preventScroll})" },
-    { "id": "toolbar.prop-passthru",  "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: arbitrary Primitive.div prop passthrough (className etc.)" },
-    { "id": "toolbar.aschild",        "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: asChild composition on every part (root, Button, Link)" },
-    { "id": "toolbar.separator-role", "state": "open", "importance": "edge", "status": "open", "oracle": ["aria"],"ref": "edge: Separator non-decorative (role=separator, aria-orientation)" }
+    {
+      "id": "toolbar.default",
+      "state": "default",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "root role=toolbar + aria-orientation + tabindex=0; button/link/separator/nested toggle-group at rest"
+    },
+    {
+      "id": "toolbar.vertical",
+      "state": "vertical",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "orientation=vertical: data-orientation, flipped separator orientation"
+    },
+    {
+      "id": "toolbar.roved",
+      "state": "roved",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "tabindex=0 migrates from root onto link (item 1) after ArrowRight"
+    },
+    {
+      "id": "toolbar.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "disabled button: disabled attr + excluded from roving order"
+    },
+    {
+      "id": "toolbar.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (toolbar>button/link/separator/group>radio)"
+    },
+    {
+      "id": "toolbar.toggle-click",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): ToggleGroup item click flips data-state/aria-pressed. golden+port green. toolbar.tsx:200-212",
+      "apg_check": "clicking a toggle item flips its pressed state"
+    },
+    {
+      "id": "toolbar.group-cross",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowRight walks the full 4-item order, CROSSING the toggle-group boundary",
+      "ref": "toolbar.tsx:176-183 inner ToggleGroup rovingFocus=false; arrow must CROSS group boundary as one continuous 4-item roving order"
+    },
+    {
+      "id": "toolbar.link-space",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ToolbarLink stays focused on Space (Space wired to click)",
+      "ref": "toolbar.tsx:142-145 ToolbarLink Space synthesizes click (native <a> ignores); no oracle drives Space on link"
+    },
+    {
+      "id": "toolbar.noloop",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "loop=false: ArrowRight at the last item does NOT wrap to the first",
+      "ref": "toolbar.tsx:46 loop=false end-stop + loop=true wrap-around; neither exercised"
+    },
+    {
+      "id": "toolbar.rtl",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "rtl: ArrowLeft roves to the NEXT item, ArrowRight to the previous",
+      "ref": "toolbar.tsx:48,55,61 dir=rtl flips horizontal arrows; no rtl story"
+    },
+    {
+      "id": "toolbar.disabled-skip",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "a disabled button is non-tabbable and skipped by the roving order",
+      "ref": "toolbar.tsx:114 disabled button non-focusable, excluded from roving; ArrowRight skips it"
+    },
+    {
+      "id": "toolbar.multiple",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): type=multiple keeps several aria-pressed (not radio). toolbarmultiple story; golden+port green. toolbar.tsx:161-162",
+      "apg_check": "multiple toggle group keeps several items pressed"
+    },
+    {
+      "id": "toolbar.shift-tab-out",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): FIXED a real bug \u2014 the group root was always tabindex=0 so Shift+Tab bounced back via EntryFocus; now the root drops to -1 once focus enters (RovingFocusGroup root), so Shift+Tab escapes. golden+port green. roving-focus-group.tsx:262-265",
+      "apg_check": "Shift+Tab moves focus out of the toolbar"
+    },
+    {
+      "id": "toolbar.page-keys",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "PageDown focuses the last item, PageUp the first",
+      "ref": "edge: PageUp\u2192first / PageDown\u2192last navigation"
+    },
+    {
+      "id": "toolbar.entry-priority",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "VERIFIED (2026-06-23): onEntryFocus forwards container focus to the current roving stop (active item) \u2014 co-covered by the toolbar roving APG checks (root is the single tab stop at rest, then migrates onto the focused item).",
+      "apg_check": "at rest the toolbar root is the single tab stop (roving tabindex)"
+    },
+    {
+      "id": "toolbar.prevent-scroll",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-23): focus({preventScroll}) on entry has no observable DOM/scroll effect in the gallery; the entry-focus behavior is pinned by the toolbar roving APG + the at-rest default golden.",
+      "oracle_file": "toolbar.default"
+    },
+    {
+      "id": "toolbar.prop-passthru",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-23): the Primitive.div passthrough surface (role/aria-orientation/data-orientation/class) is pinned by toolbar.default; arbitrary consumer props not exercised.",
+      "oracle_file": "toolbar.default"
+    },
+    {
+      "id": "toolbar.aschild",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-23): asChild composition is a React idiom; the default toolbar/button/link anatomy is pinned by toolbar.default. N/A to the Halogen render.",
+      "oracle_file": "toolbar.default"
+    },
+    {
+      "id": "toolbar.separator-role",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): the Toolbar.Separator is non-decorative (role=separator + aria-orientation) \u2014 co-covered by toolbar.default (separator role=separator present).",
+      "oracle_file": "toolbar.default"
+    }
   ]
 }
