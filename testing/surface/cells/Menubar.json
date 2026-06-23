@@ -116,11 +116,12 @@
       "id": "menubar.kbopen-highlight",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "menubar.tsx:165-170,346-348 keyboard-open highlights first item; click-open does not; no positive kbopen DOM oracle"
+      "ref": "DONE (2026-06-23): co-covered. KEYBOARD-open highlights the first item \u2014 menubar.item1 golden (ArrowDown) has data-highlighted on item 0, + Enter/Space/ArrowDown APG checks assert it. CLICK-open does NOT highlight \u2014 menubar.open (click-driven) golden has 0 data-highlighted. Both committed + port DOM-identical.",
+      "oracle_file": "menubar.item1"
     },
     {
       "id": "menubar.rtl-cross",
