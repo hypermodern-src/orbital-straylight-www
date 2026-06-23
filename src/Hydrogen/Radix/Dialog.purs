@@ -109,6 +109,7 @@ type Input =
   , content :: Array HH.PlainHTML
   , contentStyle :: String         -- extra inline style on the content (e.g. max-width)
   , dir :: String                  -- writing direction propagated onto the content ("" = none, "rtl"/"ltr")
+  , forceMount :: Boolean           -- keep overlay+content mounted even while CLOSED (radix forceMount)
   , triggerAttrs :: Array (Tuple String String)  -- data-* attrs for the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)  -- data-* attrs for the portaled root (theme re-application)
   , closeLabels :: Array String  -- trimmed button labels inside content that act as DialogClose (close on click)
@@ -128,6 +129,7 @@ defaultInput =
   , content: []
   , contentStyle: ""
   , dir: ""
+  , forceMount: false
   , triggerAttrs: []
   , portalAttrs: []
   , closeLabels: []
@@ -158,6 +160,7 @@ type State =
   , content :: Array HH.PlainHTML
   , contentStyle :: String
   , dir :: String
+  , forceMount :: Boolean
   , triggerAttrs :: Array (Tuple String String)
   , portalAttrs :: Array (Tuple String String)
   , closeLabels :: Array String
@@ -179,6 +182,7 @@ data Action
   | ContentClicked ME.MouseEvent
   | ContentKeyDown KE.KeyboardEvent
   | EscapePressed
+  | AfterForceMount     -- runs after the initial render when forceMount keeps a CLOSED dialog mounted: portal + envelope, NO focus
   | AfterOpen           -- runs after the open render flushed: portal + focus
   | AfterClose          -- runs after the closing render flushed: re-portal + arm exit animation
   | AnimDone            -- the content exit animation finished: finishExit + tear down envelope
@@ -217,6 +221,7 @@ initialState input =
   , content: input.content
   , contentStyle: input.contentStyle
   , dir: input.dir
+  , forceMount: input.forceMount
   , triggerAttrs: input.triggerAttrs
   , portalAttrs: input.portalAttrs
   , closeLabels: input.closeLabels
@@ -269,7 +274,8 @@ render st =
         ]
           -- the overlay is rendered while `isRendered presence` (Open OR Closing): on close it
           -- LINGERS with data-state=closed through its exit animation, then unmounts at Closed.
-          <> (if isRendered st.presence then [ overlayContent st ] else [])
+          -- forceMount keeps the overlay+content mounted even while Closed (data-state=closed).
+          <> (if isRendered st.presence || st.forceMount then [ overlayContent st ] else [])
       )
 
 -- | The OVERLAY is the portaled, themed root (matches upstream: body > overlay > scroll >
@@ -301,7 +307,10 @@ overlayContent st =
                   -- NOTE: upstream does NOT set aria-modal — it aria-hides siblings via hideOthers.
                   , dataState (dataStateOf st.presence)
                   , HP.tabIndex (-1)
-                  , HP.style st.contentStyle
+                  -- `pointer-events: auto` is applied to the content ONLY while open (radix's
+                  -- DismissableLayer with disableOutsidePointerEvents={open}); a closed
+                  -- force-mounted content has no pointer-events override (dialog.tsx:287).
+                  , HP.style (st.contentStyle <> (if current st.ctrl then " pointer-events: auto;" else ""))
                   , HE.onKeyDown ContentKeyDown
                   , HE.onClick ContentClicked
                   ]
@@ -332,6 +341,14 @@ handleAction = case _ of
     tid <- useId
     did <- useId
     H.modify_ _ { contentId = cid, titleId = tid, descriptionId = did }
+    -- forceMount on a CLOSED dialog: the overlay+content are already mounted (render gate),
+    -- so on the next frame portal them to body and raise the modal envelope (scroll-lock,
+    -- focus guards, hideOthers) — matching upstream, which runs RemoveScroll/hideOthers
+    -- whenever the modal Content is mounted, even while closed. NO focus capture (it's closed).
+    st <- H.get
+    when (st.forceMount && not (current st.ctrl) && st.modal) do
+      H.modify_ _ { locked = true }   -- set BEFORE the frame so AfterForceMount needs no post-adopt modify
+      void (scheduleAfter AfterForceMount)
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -345,6 +362,7 @@ handleAction = case _ of
       , content = input.content
       , contentStyle = input.contentStyle
       , dir = input.dir
+      , forceMount = input.forceMount
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
       , closeLabels = input.closeLabels
@@ -382,6 +400,22 @@ handleAction = case _ of
   -- overlay into body FIRST, THEN focus into the dialog — focusing after the move means
   -- the appendChild doesn't blur it. No `modify` here: a re-render would re-parent the
   -- wrapper back out of body (the restore target was already captured in openDialog).
+  -- forceMount-while-closed: adopt the (already mounted, data-state=closed) overlay into body
+  -- and raise the modal envelope — but do NOT capture focus or arm Escape (the dialog is closed).
+  AfterForceMount -> do
+    mbody <- liftEffect Portal.documentBody
+    mwrap <- H.getHTMLElementRef portalRef
+    case mbody, mwrap of
+      Just body, Just wrap -> liftEffect (Portal.adopt body (HTMLElement.toElement wrap))
+      _, _ -> pure unit
+    -- envelope after the adopt, with NO trailing modify (a re-render would re-parent the
+    -- overlay back under the component root — the AfterOpen discipline; locked is preset).
+    for_ mwrap \wrap -> liftEffect do
+      -- marker-only lock: data-scroll-locked WITHOUT body pointer-events:none (that block is
+      -- DismissableLayer's, open-gated) — a CLOSED force-mounted dialog has just the marker.
+      Envelope.lockScrollMarker
+      Envelope.addFocusGuards
+      Envelope.hideOthers wrap
   AfterOpen -> do
     mbody <- liftEffect Portal.documentBody
     mwrap <- H.getHTMLElementRef portalRef

@@ -96,6 +96,9 @@ export const STATES = {
     notitle: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
     // `?s=rtl` — open dialog whose Content carries dir="rtl" (direction passthrough).
     rtl: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
+    // `?s=forcemount` — NO interaction: forceMount keeps the content mounted while CLOSED.
+    // Wait for the closed content node (data-state=closed) to exist in the (portaled) DOM.
+    forcemount: async (pg) => { await pg.locator('[role="dialog"][data-state="closed"]').first().waitFor({ state: "attached" }); },
     // at-rest CLOSED disclosure (no interaction): pins the closed-trigger contract —
     // aria-expanded=false and NO aria-controls (present only while open). Keyed off the
     // upstream closed trigger only, so the same driver runs golden + port.

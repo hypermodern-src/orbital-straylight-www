@@ -638,12 +638,15 @@ const PAGES: Page[] = [
       const controlled = currentState() === "controlled";
       // `?s=rtl` — dir="rtl" propagated onto the Content (passes through; not in RemovedProps).
       const rtl = currentState() === "rtl";
+      // `?s=forcemount` — forceMount on Content keeps the overlay+content MOUNTED while CLOSED
+      // (data-state=closed), portaled to body, with NO modal envelope (closed = no lock/focus).
+      const forcemount = currentState() === "forcemount";
       return (
       <Dialog.Root {...(controlled ? { open: true } : {})}>
         <Dialog.Trigger>
           <Button>Edit profile</Button>
         </Dialog.Trigger>
-        <Dialog.Content maxWidth="450px" {...(rtl ? { dir: "rtl" as const } : {})}>
+        <Dialog.Content maxWidth="450px" {...(rtl ? { dir: "rtl" as const } : {})} {...(forcemount ? { forceMount: true } : {})}>
           {!notitle && <Dialog.Title>Edit profile</Dialog.Title>}
           {!notitle && (
           <Dialog.Description size="2" mb="4">

@@ -119,6 +119,7 @@ STATES=(
   "progress:maxinvalid"
   "dialog:notitle"
   "dialog:rtl"
+  "dialog:forcemount"
   "form:multiMessage"
   # STR-330 wave-b structural depth gaps (Progress / Collapsible / Avatar).
   "collapsible:disabled"

@@ -189,11 +189,12 @@
       "id": "dialog.forcemount",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "edge: forceMount on Portal/Overlay/Content"
+      "ref": "DONE (2026-06-23): added forceMount field \u2014 overlay+content stay mounted while CLOSED (data-state=closed), portaled to body with the modal envelope (scroll-lock marker + focus guards + hideOthers) but NO focus/escape and NO body pointer-events:none (DismissableLayer open-gated). pointer-events:auto moved into the component (open-gated). golden-dom byte-identical. dialog.tsx:151,184,287",
+      "oracle_file": "dialog.forcemount"
     },
     {
       "id": "dialog.portal-container",

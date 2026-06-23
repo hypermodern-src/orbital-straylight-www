@@ -14,6 +14,7 @@
 -- | so the counters live in module-global `Ref`s created once at load.
 module Hydrogen.Radix.Foundation.Envelope
   ( lockScroll
+  , lockScrollMarker
   , unlockScroll
   , releaseScrollPointer
   , clearPointerEvents
@@ -72,6 +73,17 @@ lockScroll = do
   when (n == 0) $ withBody \body -> do
     setAttribute "data-scroll-locked" "1" (HTMLElement.toElement body)
     setInlineStyle body "pointer-events" "none"
+
+-- | Stamp ONLY the `data-scroll-locked=1` marker (RemoveScroll's mount marker), WITHOUT the
+-- | body `pointer-events:none` (that is DismissableLayer's open-gated block). Used by a CLOSED
+-- | force-mounted dialog, whose RemoveScroll is mounted but whose DismissableLayer is inactive.
+-- | Ref-counted like `lockScroll` so a later open/close balances correctly.
+lockScrollMarker :: Effect Unit
+lockScrollMarker = do
+  n <- Ref.read scrollDepth
+  Ref.write (n + 1) scrollDepth
+  when (n == 0) $ withBody \body ->
+    setAttribute "data-scroll-locked" "1" (HTMLElement.toElement body)
 
 unlockScroll :: Effect Unit
 unlockScroll = do

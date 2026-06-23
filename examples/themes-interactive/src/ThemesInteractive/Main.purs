@@ -410,7 +410,10 @@ dialogInput s = Dialog.defaultInput
   { style = dialogStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
-  , contentStyle = "--max-width: 450px; pointer-events: auto;"
+  -- pointer-events:auto is applied by the component itself, gated on open (radix
+  -- DismissableLayer disableOutsidePointerEvents={open}) — NOT baked in here, so a
+  -- closed force-mounted content correctly has no pointer-events override.
+  , contentStyle = "--max-width: 450px;"
   , closeLabels = [ "Cancel", "Save" ]
   , trigger = [ HH.text "Edit profile" ]
   -- `?s=controlled` — the parent OWNS open (open = Just true, no setter wired): Escape must
@@ -418,6 +421,8 @@ dialogInput s = Dialog.defaultInput
   , open = if s == "controlled" then Just true else Nothing
   -- `?s=rtl` — dir="rtl" propagated onto the content (matches the themed Content dir passthrough).
   , dir = if s == "rtl" then "rtl" else ""
+  -- `?s=forcemount` — keep the overlay+content mounted while CLOSED (radix forceMount).
+  , forceMount = s == "forcemount"
   -- `?s=notitle` omits Title + Description (both optional sub-parts) → no <h1>/<p>, no
   -- aria-labelledby/describedby on the content.
   , title = if s == "notitle" then [] else [ HH.text "Edit profile" ]
