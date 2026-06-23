@@ -211,6 +211,23 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok((await expandedIdx()) === 0, "ArrowRight in RTL did not return to the PREVIOUS (File) menu");
   }},
+  // disabled trigger (`?s=distrigger` disables the middle Edit trigger) — it is non-focusable
+  // and SKIPPED by both the bar roving and the cross-menu (menubar.tsx:226 focusable, :367 filter).
+  { id: "menubar", apg: "menubar", state: "distrigger", name: "disabled trigger is skipped by bar roving and cross-menu", run: async (pg) => {
+    const t = pg.locator('#root [role="menuitem"]');
+    const expandedIdx = () => pg.evaluate(() => {
+      const a = [...document.querySelectorAll('#root [role="menuitem"][aria-haspopup="menu"]')];
+      return a.findIndex((e) => e.getAttribute("aria-expanded") === "true");
+    });
+    await t.first().focus();
+    await press(pg, "ArrowRight");
+    ok(await activeIsNth(pg, '#root [role="menuitem"]', 2), "ArrowRight did not SKIP the disabled (Edit) trigger to View");
+    // cross-menu: open File, ArrowRight skips disabled Edit and opens View
+    await t.first().focus(); await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(180);
+    await press(pg, "ArrowRight");
+    ok((await expandedIdx()) === 2, "cross-menu did not SKIP the disabled trigger (opened Edit instead of View)");
+  }},
   // loop=false (`?s=noloop`) — cross-menu does NOT wrap (menubar.tsx:373 slice vs wrapArray):
   // from the LAST open menu (View), ArrowRight (next) is a no-op; View stays open.
   { id: "menubar", apg: "menubar", state: "noloop", name: "loop=false: ArrowRight from the LAST open menu does NOT wrap to the first", run: async (pg) => {

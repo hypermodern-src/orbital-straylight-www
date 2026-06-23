@@ -185,6 +185,7 @@ type Menu =
   { value :: String
   , trigger :: Array HH.PlainHTML
   , entries :: Array MenuEntry
+  , disabled :: Boolean   -- a disabled top-level trigger: non-focusable, skipped in roving + cross-menu
   }
 
 type Style =
@@ -513,6 +514,10 @@ renderTrigger st mOpenI i menu =
         ]
           <> (if open then [ aria "controls" (contentIdAt st i) ] else [])
           <> (if open then [ dataAttr "radix-popper-side" (sideName st.placedSide), dataAttr "radix-popper-align" (alignName st.placedAlign) ] else [])
+          -- a disabled trigger carries the HTML `disabled` attr + `data-disabled` (menubar.tsx:239-240);
+          -- it is inherently non-focusable (browser) so it drops out of the roving order, and the
+          -- cross-menu / openIndex helpers filter it (menubar.tsx:367 getItems().filter(!disabled)).
+          <> (if menu.disabled then [ HP.disabled true, dataAttr "disabled" "" ] else [])
           <> portalData st.triggerAttrs
       )
       (map HH.fromPlainHTML menu.trigger)
@@ -520,7 +525,7 @@ renderTrigger st mOpenI i menu =
 renderContent :: forall m. State -> Int -> H.ComponentHTML Action () m
 renderContent st i =
   let
-    menu = fromMaybe { value: "", trigger: [], entries: [] } (Array.index st.menus i)
+    menu = fromMaybe { value: "", trigger: [], entries: [], disabled: false } (Array.index st.menus i)
   in
     HH.div
       ( [ HP.ref contentRef
@@ -831,14 +836,21 @@ handleAction = case _ of
       "Enter" -> liftEffect (preventDefault (KE.toEvent ke)) *> (H.modify_ _ { triggerFocus = i } *> openMenuAt i 0 (Just 0))
       " " -> liftEffect (preventDefault (KE.toEvent ke)) *> (H.modify_ _ { triggerFocus = i } *> openMenuAt i 0 (Just 0))
       key -> do
-        let cfg = { orientation: Horizontal, dir: st.dir, loop: st.loop }
-        case navigate cfg { count: Array.length st.menus, current: st.triggerFocus } key of
+        let
+          cfg = { orientation: Horizontal, dir: st.dir, loop: st.loop }
+          -- rove over the ENABLED triggers only (a disabled trigger is non-focusable and out of
+          -- the roving order): navigate within the enabled-index list, then map the position back.
+          enabled = enabledTriggers st
+          curPos = fromMaybe (-1) (Array.findIndex (_ == st.triggerFocus) enabled)
+        case navigate cfg { count: Array.length enabled, current: curPos } key of
           Stay -> pure unit
-          MoveTo j -> do
-            liftEffect (preventDefault (KE.toEvent ke))
-            H.modify_ _ { triggerFocus = j }
-            mt <- H.getHTMLElementRef (triggerRef st.idPrefix j)
-            for_ mt (liftEffect <<< HTMLElement.focus)
+          MoveTo posJ -> case Array.index enabled posJ of
+            Nothing -> pure unit
+            Just j -> do
+              liftEffect (preventDefault (KE.toEvent ke))
+              H.modify_ _ { triggerFocus = j }
+              mt <- H.getHTMLElementRef (triggerRef st.idPrefix j)
+              for_ mt (liftEffect <<< HTMLElement.focus)
   -- open-on-hover: while a menu is open, entering a DIFFERENT trigger switches the open menu
   -- to it and focuses that trigger (the signature menubar behavior).
   TriggerPointerEnter i -> do
@@ -995,19 +1007,31 @@ lastItem st i = case Array.index st.menus i of
 
 -- | Move to the menu `delta` away from the open one (wrapping), closing the current content
 -- | and opening the adjacent one focused into its content. The cross-menu arrow behavior.
+-- | The indices of the ENABLED top-level triggers (disabled triggers drop out of the roving
+-- | order AND the cross-menu list — menubar.tsx:226 focusable={!disabled}, :367 filter(!disabled)).
+enabledTriggers :: State -> Array Int
+enabledTriggers st =
+  Array.filter (\i -> maybe false (not <<< _.disabled) (Array.index st.menus i))
+    (Array.range 0 (Array.length st.menus - 1))
+
 adjacentMenu :: forall m. MonadEffect m => State -> Int -> H.HalogenM State Action () Output m Unit
 adjacentMenu st delta = case openIndex st of
   Nothing -> pure unit
   Just i -> do
     let
-      n = Array.length st.menus
-      raw = i + delta
-      -- loop=true wraps the cross-menu axis (menubar.tsx:373 wrapArray); loop=false slices past
-      -- the end (no wrap) — at the first/last menu the prev/next key is a no-op.
-      j = if st.loop then (((raw `mod` n) + n) `mod` n) else raw
-    when (j /= i && j >= 0 && j < n) do
-      H.modify_ _ { triggerFocus = j }
-      switchTo j (-1) Nothing
+      -- navigate over the ENABLED triggers only, so a disabled menu is skipped. loop=true wraps
+      -- the cross-menu axis (menubar.tsx:373 wrapArray); loop=false slices past the end (no wrap).
+      enabled = enabledTriggers st
+      ne = Array.length enabled
+      curPos = fromMaybe (-1) (Array.findIndex (_ == i) enabled)
+      rawPos = curPos + delta
+      posJ = if st.loop then (((rawPos `mod` ne) + ne) `mod` ne) else rawPos
+      mJ = if curPos >= 0 && posJ >= 0 && posJ < ne then Array.index enabled posJ else Nothing
+    case mJ of
+      Just j | j /= i -> do
+        H.modify_ _ { triggerFocus = j }
+        switchTo j (-1) Nothing
+      _ -> pure unit
 
 -- | Open the submenu `value` (SubTrigger at the active content's roving index `idx`). The
 -- | SubTrigger becomes the content's roving tab stop. See DropdownMenu.openSub.

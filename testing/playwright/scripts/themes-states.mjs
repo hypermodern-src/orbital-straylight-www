@@ -231,6 +231,9 @@ export const STATES = {
     // `?s=rtl` — open the FIRST menu under dir=rtl; pins dir propagation onto the bar + content
     // (the cross-menu ArrowLeft/ArrowRight swap is adjudicated by the APG harness).
     rtl: async (pg) => openMenu(pg, () => root(pg).getByRole("menuitem").first().click()),
+    // `?s=distrigger` — at-rest closed bar with the Edit (middle) trigger DISABLED: pins the
+    // disabled trigger's attrs (disabled / data-disabled / tabindex out of the roving order).
+    distrigger: async (pg) => { await root(pg).getByRole("menuitem").first().waitFor(); },
     // open then ArrowDown → the first menu item lands data-highlighted (roving tabindex=0).
     item1: async (pg) => {
       await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());

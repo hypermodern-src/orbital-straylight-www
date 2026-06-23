@@ -4,7 +4,6 @@ module Gallery.Story.Toggle (story) where
 
 import Prelude
 
-import Data.Void (Void)
 import Effect.Aff (Aff)
 import Gallery.Story (Story, StoryComponent)
 import Halogen as H

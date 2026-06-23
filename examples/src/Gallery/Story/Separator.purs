@@ -5,7 +5,6 @@ module Gallery.Story.Separator (story) where
 
 import Prelude
 
-import Data.Void (Void)
 import Effect.Aff (Aff)
 import Gallery.Story (Story, staticStory)
 import Halogen as H

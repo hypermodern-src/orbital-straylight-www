@@ -60,6 +60,7 @@ stories = map mk skins
     { menus =
         [ { value: "file"
           , trigger: [ HH.text "File" ]
+          , disabled: false
           , entries:
               [ Menubar.menuItem "open" [ HH.text "OVLOPEN" ]
               , Menubar.menuItem "new" [ HH.text "New" ]
@@ -69,6 +70,7 @@ stories = map mk skins
           }
         , { value: "edit"
           , trigger: [ HH.text "Edit" ]
+          , disabled: false
           , entries:
               [ Menubar.menuItem "undo" [ HH.text "Undo" ]
               , Menubar.menuItem "redo" [ HH.text "Redo" ]

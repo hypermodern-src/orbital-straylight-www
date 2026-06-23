@@ -14,7 +14,6 @@ module Gallery.Story.OvlContextMenu (stories, ids) where
 
 import Prelude
 
-import Data.Void (Void)
 import Effect.Aff (Aff)
 import Gallery.Story (Story, StoryComponent)
 import Halogen as H

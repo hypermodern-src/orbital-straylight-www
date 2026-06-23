@@ -14,7 +14,6 @@ module Gallery.Story
 import Prelude
 
 import Data.Const (Const)
-import Data.Void (Void)
 import Effect.Aff (Aff)
 import Halogen as H
 import Type.Proxy (Proxy(..))

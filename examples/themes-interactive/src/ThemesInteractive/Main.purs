@@ -889,6 +889,7 @@ menubarInput s = Menubar.defaultInput
   , menus =
       [ { value: "file"
         , trigger: [ HH.text "File" ]
+        , disabled: false
         , entries:
             -- `?s=disabled` disables "New Window" so the APG disabled-skip check proves
             -- vertical roving skips it (react-menu filter(!disabled)).
@@ -903,6 +904,8 @@ menubarInput s = Menubar.defaultInput
         }
       , { value: "edit"
         , trigger: [ HH.text "Edit" ]
+        -- `?s=distrigger` disables the Edit (middle) trigger: non-focusable + skipped in cross-menu.
+        , disabled: s == "distrigger"
         , entries:
             [ Menubar.menuItem "undo" [ HH.text "Undo" ]
             , Menubar.menuItem "redo" [ HH.text "Redo" ]
@@ -910,6 +913,7 @@ menubarInput s = Menubar.defaultInput
         }
       , { value: "view"
         , trigger: [ HH.text "View" ]
+        , disabled: false
         , entries:
             [ Menubar.menuItem "zoom-in" [ HH.text "Zoom In" ]
             , Menubar.menuItem "zoom-out" [ HH.text "Zoom Out" ]
@@ -937,6 +941,7 @@ menubarChecksInput s = Menubar.defaultInput
   , menus =
       [ { value: "view"
         , trigger: [ HH.text "View" ]
+        , disabled: false
         , entries:
             if s == "radio" then
               [ Menubar.MenuRadioGroupEntry

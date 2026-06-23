@@ -43,6 +43,7 @@ STATES=(
   "toast:open"
   "menubar:open"
   "menubar:rtl"
+  "menubar:distrigger"
   "menubar:closed-rest"
   "menubar:item1"
   "menubar:disabled"

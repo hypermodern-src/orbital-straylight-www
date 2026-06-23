@@ -1068,7 +1068,7 @@ const PAGES: Page[] = [
           </Menubar.Portal>
         </Menubar.Menu>
         <Menubar.Menu value="edit">
-          <Menubar.Trigger>Edit</Menubar.Trigger>
+          <Menubar.Trigger disabled={s === "distrigger"}>Edit</Menubar.Trigger>
           <Menubar.Portal>
             <Menubar.Content align="start">
               <Menubar.Item>Undo</Menubar.Item>

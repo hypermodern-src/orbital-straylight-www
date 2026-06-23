@@ -151,12 +151,14 @@
       "id": "menubar.disabled-trigger",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom",
         "apg"
       ],
-      "ref": "menubar.tsx:211,222,239-240,367 disabled trigger non-focusable, filtered from cross-menu; port Menu has no disabled field"
+      "ref": "DONE (2026-06-23): FEATURE \u2014 added disabled field to Menu; trigger emits disabled+data-disabled (menubar.tsx:239-240), and enabledTriggers filters disabled out of BOTH bar roving and adjacentMenu cross-menu (focusable={!disabled}, getItems().filter(!disabled)). DOM golden menubar.distrigger + apg skip green both faces.",
+      "apg_check": "disabled trigger is skipped by bar roving and cross-menu",
+      "oracle_file": "menubar.distrigger"
     },
     {
       "id": "menubar.disabled-item",
