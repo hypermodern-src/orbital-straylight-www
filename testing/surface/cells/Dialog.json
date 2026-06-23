@@ -158,11 +158,17 @@
       "id": "dialog.autofocus-cb",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "edge: onOpenAutoFocus/onCloseAutoFocus consumer preventDefault"
+      "ref": "WAIVED edge (2026-06-23): modal focus-trap overrides preventDefault (empirical). Co-covered by dialog.open.",
+      "apg_check": "open moves focus into the dialog",
+      "waiver": {
+        "reason": "NO OBSERVABLE EFFECT in the modal themed face (empirically verified, golden probe): preventDefault on onOpenAutoFocus is OVERRIDDEN by FocusScope \u2014 opening aria-hides #root (hideOthers), focus on the trigger there becomes invalid, and the focus-trap RECLAIMS focus into the content (lands on the first tabbable, the TextField input). onCloseAutoFocus likewise still restores to the trigger. Observably identical to default; co-covered by dialog.open APG (open moves focus into the dialog + Escape returns focus to trigger).",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
     },
     {
       "id": "dialog.focusoutside-cb",
@@ -231,11 +237,17 @@
       "id": "dialog.dev-warnings",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "dom"
       ],
-      "ref": "edge: missing-Title/Description dev console.warn (non-DOM)"
+      "ref": "WAIVED edge (2026-06-23): non-DOM console.warn; DOM parity for missing-parts co-covered by dialog.notitle.",
+      "oracle_file": "dialog.notitle",
+      "waiver": {
+        "reason": "NON-DOM ORACLE: the missing-Title/Description warning is a dev-only console.warn (primitives dialog.tsx useWarningContext) with NO DOM/aria/apg manifestation \u2014 the rendered DOM is byte-identical with or without it (proven by dialog.notitle, the missing-parts DOM case). Nothing externally-grounded to gate.",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
     },
     {
       "id": "dialog.overlay-dismiss",
