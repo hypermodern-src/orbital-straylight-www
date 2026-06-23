@@ -139,11 +139,12 @@
       "id": "menubar.noloop-cross",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "menubar.tsx:373-376 loop=false cross-menu no wrap; port adjacentMenu always wraps mod n"
+      "ref": "DONE (2026-06-23): FIXED \u2014 adjacentMenu now respects st.loop (menubar.tsx:373 wrapArray vs slice): loop=false slices past the end (no wrap), loop=true (default) wraps. ?s=noloop apg green both faces.",
+      "apg_check": "loop=false: ArrowRight from the LAST open menu does NOT wrap to the first"
     },
     {
       "id": "menubar.disabled-trigger",

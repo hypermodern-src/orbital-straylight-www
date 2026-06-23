@@ -1039,8 +1039,10 @@ const PAGES: Page[] = [
       const sub = s === "submenu";
       // `?s=rtl` — dir="rtl": the horizontal cross-menu axis mirrors (ArrowLeft=next, ArrowRight=prev).
       const rtl = s === "rtl";
+      // `?s=noloop` — loop={false}: cross-menu does NOT wrap past the first/last menu.
+      const noloop = s === "noloop";
       return (
-      <Menubar.Root {...(rtl ? { dir: "rtl" as const } : {})}>
+      <Menubar.Root {...(rtl ? { dir: "rtl" as const } : {})} {...(noloop ? { loop: false } : {})}>
         <Menubar.Menu value="file">
           <Menubar.Trigger>File</Menubar.Trigger>
           <Menubar.Portal>

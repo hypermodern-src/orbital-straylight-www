@@ -883,6 +883,8 @@ menubarInput s = Menubar.defaultInput
   -- `?s=rtl` → dir=RTL: dir attr stamped on popper wrapper + content, and the cross-menu /
   -- sub-open/close keys mirror (ArrowLeft=next, ArrowRight=prev).
   , dir = if s == "rtl" then RTL else LTR
+  -- `?s=noloop` — loop=false: cross-menu does NOT wrap (default loop=true matches upstream).
+  , loop = s /= "noloop"
   , contentStyle = "outline: none; " <> popperContentVars "menubar"
   , menus =
       [ { value: "file"

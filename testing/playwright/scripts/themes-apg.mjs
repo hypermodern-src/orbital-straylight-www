@@ -211,6 +211,20 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok((await expandedIdx()) === 0, "ArrowRight in RTL did not return to the PREVIOUS (File) menu");
   }},
+  // loop=false (`?s=noloop`) — cross-menu does NOT wrap (menubar.tsx:373 slice vs wrapArray):
+  // from the LAST open menu (View), ArrowRight (next) is a no-op; View stays open.
+  { id: "menubar", apg: "menubar", state: "noloop", name: "loop=false: ArrowRight from the LAST open menu does NOT wrap to the first", run: async (pg) => {
+    const expandedIdx = () => pg.evaluate(() => {
+      const t = [...document.querySelectorAll('#root [role="menuitem"][aria-haspopup="menu"]')];
+      return t.findIndex((e) => e.getAttribute("aria-expanded") === "true");
+    });
+    await pg.locator('#root [role="menuitem"]').nth(2).focus();   // View (last)
+    await pg.keyboard.press("Enter");
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(180);
+    ok((await expandedIdx()) === 2, "View (last) menu did not open (precondition)");
+    await press(pg, "ArrowRight");
+    ok((await expandedIdx()) === 2, "ArrowRight wrapped past the last menu despite loop=false");
+  }},
   { id: "menubar", apg: "menubar", name: "Home focuses the first trigger, End the last", run: async (pg) => {
     await pg.locator('#root [role="menuitem"]').first().waitFor();
     await pg.locator('#root [role="menuitem"]').first().focus();

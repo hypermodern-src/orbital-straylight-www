@@ -1001,8 +1001,11 @@ adjacentMenu st delta = case openIndex st of
   Just i -> do
     let
       n = Array.length st.menus
-      j = (((i + delta) `mod` n) + n) `mod` n
-    when (j /= i) do
+      raw = i + delta
+      -- loop=true wraps the cross-menu axis (menubar.tsx:373 wrapArray); loop=false slices past
+      -- the end (no wrap) — at the first/last menu the prev/next key is a no-op.
+      j = if st.loop then (((raw `mod` n) + n) `mod` n) else raw
+    when (j /= i && j >= 0 && j < n) do
       H.modify_ _ { triggerFocus = j }
       switchTo j (-1) Nothing
 
