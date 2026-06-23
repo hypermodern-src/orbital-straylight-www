@@ -154,6 +154,8 @@ type State =
   , toggleValues :: Array (Array String)
   , currentIndex :: Int      -- roving cursor over the FOCUSABLE leaf space
   , focusEntered :: Boolean   -- false ⇒ every item -1 (root holds the tab stop)
+  , tabbingOut :: Boolean    -- a Shift+Tab/Tab is in flight: the root's onFocus must NOT forward
+                             -- focus to an item (RovingFocusGroup isTabbingBackOut), so focus escapes
   }
 
 -- | A focusable leaf in the roving index space — identified by a stable ref key.
@@ -208,6 +210,7 @@ initialState input =
   , toggleValues: map initialToggle input.items
   , currentIndex: 0
   , focusEntered: false
+  , tabbingOut: false
   }
   where
   initialToggle = case _ of
@@ -234,10 +237,7 @@ render st =
       , dataOrientation st.orientation
       , HP.attr (HH.AttrName "dir") (dirName st.dir)
       , HP.style "outline: none;"
-      -- the group root is the tab stop ONLY before focus enters; once an item holds the roving
-      -- tab stop the root drops to -1 so Shift+Tab escapes the toolbar instead of re-entering it
-      -- (RovingFocusGroup root tabIndex). At rest focusEntered=false → 0 (matches the golden).
-      , HP.tabIndex (if st.focusEntered then (-1) else 0)
+      , HP.tabIndex 0
       , classes st.style.root
       , HE.onKeyDown ListKeyDown
       , HE.onFocus (const EntryFocus)
@@ -384,6 +384,10 @@ handleAction = case _ of
       groupValue = "g" <> show gi
     H.modify_ \s -> s { toggleValues = updateAt' gi next s.toggleValues }
     H.raise (ToggleChanged groupValue next)
+  ListKeyDown ke | KE.key ke == "Tab" ->
+    -- Tab/Shift+Tab leaves the group: mark it so the root's onFocus (fired when Shift+Tab lands
+    -- focus on the root from inside) does NOT bounce focus back onto an item. Let native Tab run.
+    H.modify_ _ { tabbingOut = true }
   ListKeyDown ke -> do
     st <- H.get
     let
@@ -404,10 +408,13 @@ handleAction = case _ of
         focusAt idx
   EntryFocus -> do
     st <- H.get
-    -- Tab-into-group: forward container focus to the current roving leaf and mark
-    -- focus as entered (migrating tabindex=0 from the root onto the item).
-    H.modify_ _ { focusEntered = true }
-    focusAt st.currentIndex
+    -- A Tab/Shift+Tab in flight means focus is LEAVING (it just landed on the root on its way
+    -- out): consume the flag and do NOT forward focus, so it escapes. Otherwise this is a genuine
+    -- Tab-INTO: forward container focus to the current roving leaf, migrating the tab stop.
+    if st.tabbingOut then H.modify_ _ { tabbingOut = false }
+    else do
+      H.modify_ _ { focusEntered = true }
+      focusAt st.currentIndex
   ItemFocused key -> do
     -- An item received focus directly (Tab into the toolbar lands on the current
     -- roving stop; a programmatic .focus() lands on any item) — make it the single
