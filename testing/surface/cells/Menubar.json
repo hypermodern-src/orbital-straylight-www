@@ -231,11 +231,12 @@
       "id": "menubar.hover-switch",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "menubar.tsx:253-259 open-on-hover requires bar already open; hover-switch unverified"
+      "ref": "DONE (2026-06-23): FIXED a real envelope-ordering bug \u2014 open-on-hover switch (menubar.tsx:253-259) re-adopted the new content via Portal.adopt (appendChild to body END), landing it AFTER the existing trail focus-guard. finalize now uses reAdoptBeforeTrail (inserts before the trail guard on switch, appends on initial open). ?s=hoverswitch golden byte-identical; open/submenu unregressed.",
+      "oracle_file": "menubar.hoverswitch"
     },
     {
       "id": "menubar.outside-norestore",

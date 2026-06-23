@@ -1144,8 +1144,12 @@ finalize focusToo = do
       Nothing -> H.getHTMLElementRef contentRef
     else pure Nothing
   case mbody, mwrap of
-    Just body, Just wrap -> liftEffect do
-      Portal.adopt body (HTMLElement.toElement wrap)
+    Just _, Just wrap -> liftEffect do
+      -- adopt BEFORE the trail focus-guard, not at body end: on a hover-SWITCH the guards
+      -- already exist, so a plain appendChild would land the new content AFTER the trail guard
+      -- (breaking body order). reAdoptBeforeTrail appends when there is no trail guard yet
+      -- (initial open) and inserts before it once it exists (switch) — matching upstream.
+      Envelope.reAdoptBeforeTrail wrap
       when focusToo do
         Envelope.addFocusGuards
         for_ mfocus HTMLElement.focus

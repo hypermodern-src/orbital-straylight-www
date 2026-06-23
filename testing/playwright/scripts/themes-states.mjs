@@ -234,6 +234,14 @@ export const STATES = {
     // `?s=distrigger` — at-rest closed bar with the Edit (middle) trigger DISABLED: pins the
     // disabled trigger's attrs (disabled / data-disabled / tabindex out of the roving order).
     distrigger: async (pg) => { await root(pg).getByRole("menuitem").first().waitFor(); },
+    // `?s=hoverswitch` — open File (click), then HOVER Edit: open-on-hover switches the open
+    // menu to Edit while the bar is already open (menubar.tsx:253-259). Snapshot has Edit open.
+    hoverswitch: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").nth(0).click());
+      await root(pg).getByRole("menuitem").nth(1).hover();
+      await pg.waitForTimeout(180);
+      await pg.locator('[role="menu"]').first().waitFor();
+    },
     // open then ArrowDown → the first menu item lands data-highlighted (roving tabindex=0).
     item1: async (pg) => {
       await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
