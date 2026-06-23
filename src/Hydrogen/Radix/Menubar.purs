@@ -327,6 +327,7 @@ data Action
   | TriggerPointerEnter Int
   | TriggerFocused Int
   | AfterOpen
+  | AfterStartOpen   -- controlled/default value open at mount: portal + position + guards, NO focus
   | AfterClose
   | AnimDone
   | EscapePressed
@@ -798,6 +799,22 @@ handleAction = case _ of
     stid <- useId
     scid <- useId
     H.modify_ _ { triggerIds = tids, contentIds = cids, subGenTriggerId = stid, subGenContentId = scid }
+    -- start-open: a controlled/default value present at mount renders a menu OPEN (presence=Open
+    -- from initialState). Arm the open envelope (dismiss subs + portal/position on the next tick)
+    -- so the content portals to body + positions, WITHOUT moving focus into it (no interaction).
+    st <- H.get
+    when (current st.ctrl /= "") do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      win <- liftEffect Popper.windowTarget
+      let docTarget = HTMLDocument.toEventTarget doc
+      escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+      ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
+      scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+      resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+      { emitter, listener } <- liftEffect HS.create
+      psid <- H.subscribe (AfterStartOpen <$ emitter)
+      liftEffect (Dom.queueMicrotask (HS.notify listener unit))
+      H.modify_ _ { itemFocus = -1, subs = [ escSub, ptrSub, scrollSub, resizeSub ], postSub = Just psid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.value st.ctrl
@@ -863,6 +880,9 @@ handleAction = case _ of
   AfterOpen -> do
     reposition
     finalize true
+  AfterStartOpen -> do
+    reposition
+    finalize false
   AfterClose -> do
     mnode <- H.getHTMLElementRef contentRef
     armed <- case mnode of
@@ -1150,9 +1170,11 @@ finalize focusToo = do
       -- (breaking body order). reAdoptBeforeTrail appends when there is no trail guard yet
       -- (initial open) and inserts before it once it exists (switch) — matching upstream.
       Envelope.reAdoptBeforeTrail wrap
-      when focusToo do
-        Envelope.addFocusGuards
-        for_ mfocus HTMLElement.focus
+      -- the focus guards bracket the body whenever a menu is open (independent of focus move);
+      -- `focusToo` only governs whether we move focus INTO the menu (a controlled start-open
+      -- mounts open WITHOUT moving focus, so it passes false).
+      Envelope.addFocusGuards
+      when focusToo $ for_ mfocus HTMLElement.focus
     _, _ -> pure unit
 
 -- | Close the open menu. `restore` returns focus to the trigger — true for Escape / selection /

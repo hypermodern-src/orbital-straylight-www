@@ -1041,8 +1041,11 @@ const PAGES: Page[] = [
       const rtl = s === "rtl";
       // `?s=noloop` — loop={false}: cross-menu does NOT wrap past the first/last menu.
       const noloop = s === "noloop";
+      // `?s=controlled` — value is OWNED by the parent (value="file", no onValueChange): File is
+      // open at mount and internal interactions cannot change which menu is open.
+      const controlled = s === "controlled";
       return (
-      <Menubar.Root {...(rtl ? { dir: "rtl" as const } : {})} {...(noloop ? { loop: false } : {})}>
+      <Menubar.Root {...(rtl ? { dir: "rtl" as const } : {})} {...(noloop ? { loop: false } : {})} {...(controlled ? { value: "file" } : {})}>
         <Menubar.Menu value="file">
           <Menubar.Trigger>File</Menubar.Trigger>
           <Menubar.Portal>

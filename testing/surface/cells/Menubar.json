@@ -221,11 +221,12 @@
       "id": "menubar.controlled",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "menubar.tsx:76-81 controlled value/onValueChange; no oracle drives external value flipping open menu"
+      "ref": "DONE (2026-06-23): FIXED start-open \u2014 a controlled value=\"file\" at mount renders File OPEN (presence=Open from initialState), but Initialize did not arm the open envelope. Now Initialize, when current ctrl /= \"\", sets up the dismiss subs + schedules AfterStartOpen (reposition + finalize false: portal+position+guards, NO focus move). finalize now adds focus guards independent of focusToo. golden menubar.controlled byte-identical; all other menubar states unregressed.",
+      "oracle_file": "menubar.controlled"
     },
     {
       "id": "menubar.hover-switch",

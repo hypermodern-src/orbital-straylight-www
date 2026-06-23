@@ -885,6 +885,9 @@ menubarInput s = Menubar.defaultInput
   , dir = if s == "rtl" then RTL else LTR
   -- `?s=noloop` — loop=false: cross-menu does NOT wrap (default loop=true matches upstream).
   , loop = s /= "noloop"
+  -- `?s=controlled` — parent OWNS the open value (Just "file"): File open at mount, internal
+  -- interactions cannot change it (no setter wired).
+  , value = if s == "controlled" then Just "file" else Nothing
   , contentStyle = "outline: none; " <> popperContentVars "menubar"
   , menus =
       [ { value: "file"

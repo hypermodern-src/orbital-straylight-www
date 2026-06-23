@@ -45,6 +45,7 @@ STATES=(
   "menubar:rtl"
   "menubar:distrigger"
   "menubar:hoverswitch"
+  "menubar:controlled"
   "menubar:closed-rest"
   "menubar:item1"
   "menubar:disabled"
