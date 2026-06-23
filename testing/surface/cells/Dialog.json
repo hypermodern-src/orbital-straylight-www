@@ -147,11 +147,12 @@
       "id": "dialog.rightclick-outside",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "edge: right/ctrl-click outside does NOT dismiss (modal)"
+      "ref": "DONE (2026-06-23): apg both faces green (port already correct). edge: right/ctrl-click outside does NOT dismiss (modal)",
+      "apg_check": "right-click outside does NOT dismiss the dialog"
     },
     {
       "id": "dialog.autofocus-cb",
@@ -177,11 +178,12 @@
       "id": "dialog.trigger-reclick",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "edge: trigger-as-outside guard (close-then-reopen)"
+      "ref": "DONE (2026-06-23): apg both faces green (port already correct). edge: trigger-as-outside guard (close-then-reopen)",
+      "apg_check": "re-clicking the trigger after close re-opens the dialog"
     },
     {
       "id": "dialog.forcemount",
@@ -237,11 +239,12 @@
       "id": "dialog.overlay-dismiss",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "edge: overlay registers as dismiss surface (stopPropagation contract)"
+      "ref": "DONE (2026-06-23): apg both faces green (port already correct). edge: overlay registers as dismiss surface (stopPropagation contract)",
+      "apg_check": "left-click on the overlay (outside content) dismisses the dialog"
     },
     {
       "id": "dialog.removescroll-pinch",

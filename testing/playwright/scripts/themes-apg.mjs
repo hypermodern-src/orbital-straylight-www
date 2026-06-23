@@ -1298,6 +1298,29 @@ const CHECKS = [
     await pg.keyboard.press("Escape"); await pg.waitForTimeout(200);
     ok(await visible(pg, '[role="dialog"]'), "Escape closed a controlled-open dialog (parent owns the value — must stay open)");
   }},
+  // dialog.overlay-dismiss — the overlay is a dismiss surface: a left-click OUTSIDE the content
+  // (on the overlay/scroll padding) closes the modal (radix DismissableLayer pointerdown-outside).
+  { id: "dialog", apg: "dialog-modal", name: "left-click on the overlay (outside content) dismisses the dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    await pg.mouse.click(5, 5); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="dialog"]')), "left-click on the overlay did not dismiss the dialog");
+  }},
+  // dialog.rightclick-outside (edge) — a RIGHT/secondary click outside fires no `click` event
+  // (only contextmenu), so it must NOT dismiss the modal.
+  { id: "dialog", apg: "dialog-modal", name: "right-click outside does NOT dismiss the dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    await pg.mouse.click(5, 5, { button: "right" }); await pg.waitForTimeout(180);
+    ok(await visible(pg, '[role="dialog"]'), "right-click outside incorrectly dismissed the dialog");
+  }},
+  // dialog.trigger-reclick (edge) — after Escape-close (focus restored to the trigger), clicking
+  // the trigger again RE-OPENS the dialog (the trigger is not stuck as an outside-dismiss target).
+  { id: "dialog", apg: "dialog-modal", name: "re-clicking the trigger after close re-opens the dialog", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(150);
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="dialog"]')), "Escape did not close the dialog (precondition)");
+    await triggerBtn(pg).click(); await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(150);
+    ok(await visible(pg, '[role="dialog"]'), "re-clicking the trigger did not re-open the dialog");
+  }},
 
   // AlertDialog — alert-dialog.tsx. The defining contracts: focus the CANCEL button on open
   // (126-129), outside-click NEVER closes (130-131 both preventDefault'd), modal Tab-trap +
