@@ -845,7 +845,9 @@ handleAction = case _ of
     st <- H.get
     when (current st.ctrl == "") case KE.key ke of
       "ArrowDown" -> liftEffect (preventDefault (KE.toEvent ke)) *> (H.modify_ _ { triggerFocus = i } *> openMenuAt i 0 (Just 0))
-      "ArrowUp" -> liftEffect (preventDefault (KE.toEvent ke)) *> (H.modify_ _ { triggerFocus = i } *> openMenuAt i (lastItem st i) (Just (lastItem st i)))
+      -- NOTE: the menubar trigger opens ONLY on Enter/Space/ArrowDown (menubar.tsx:260-269);
+      -- ArrowUp is NOT a trigger open key (unlike DropdownMenu). It falls through to the bar
+      -- roving below, where a vertical key on the horizontal axis is a no-op.
       -- Enter / Space on a CLOSED trigger open the menu AND highlight the first item
       -- (upstream menubar.tsx:260-269: onMenuToggle + wasKeyboardTriggerOpenRef=true →
       -- onEntryFocus focuses the first item, exactly like ArrowDown). preventDefault stops

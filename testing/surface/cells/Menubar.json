@@ -265,11 +265,12 @@
       "id": "menubar.arrowup-last",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "edge: ArrowUp on closed trigger opens focused on LAST item"
+      "ref": "DONE (2026-06-23): CORRECTED + FIXED \u2014 the cell premise was wrong (ArrowUp-opens-to-last is DropdownMenu behavior). The menubar trigger opens ONLY on Enter/Space/ArrowDown (menubar.tsx:260-269); ArrowUp does NOT open. Removed the port ArrowUp open branch; apg green both faces.",
+      "apg_check": "ArrowUp on a closed trigger does NOT open the menu"
     },
     {
       "id": "menubar.item-shortcut",
@@ -315,11 +316,12 @@
       "id": "menubar.align-default",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "edge: align default 'start' on Content (side/sideOffset/align)"
+      "ref": "DONE (2026-06-23): co-covered by menubar.open \u2014 the open trigger carries data-radix-popper-align=start + data-radix-popper-side=bottom and the content data-align=start data-side=bottom (default align=start, side=bottom), port DOM-identical.",
+      "oracle_file": "menubar.open"
     },
     {
       "id": "menubar.arrow-part",

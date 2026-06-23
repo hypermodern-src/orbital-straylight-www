@@ -228,6 +228,14 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok((await expandedIdx()) === 2, "cross-menu did not SKIP the disabled trigger (opened Edit instead of View)");
   }},
+  // arrowup-noopen (menubar.tsx:260-269) — the menubar trigger opens ONLY on Enter/Space/ArrowDown;
+  // ArrowUp is NOT a trigger open key (unlike DropdownMenu). It must NOT open the menu.
+  { id: "menubar", apg: "menubar", name: "ArrowUp on a closed trigger does NOT open the menu", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().focus();
+    await pg.keyboard.press("ArrowUp");
+    await pg.waitForTimeout(180);
+    ok(!(await visible(pg, '[role="menu"]')), "ArrowUp incorrectly opened the menu (not a trigger open key)");
+  }},
   // outside-norestore (menubar.tsx:317,328-345 hasInteractedOutsideRef) — when a menu closes via
   // an OUTSIDE pointer-dismiss the focus is NOT snapped back to the trigger (unlike Escape/select).
   { id: "menubar", apg: "menubar", name: "outside-click close does NOT restore focus to the trigger", run: async (pg) => {
