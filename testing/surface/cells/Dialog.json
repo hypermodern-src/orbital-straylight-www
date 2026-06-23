@@ -174,11 +174,17 @@
       "id": "dialog.focusoutside-cb",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "edge: onFocusOutside preventDefaulted in modal"
+      "ref": "WAIVED edge (2026-06-23): modal focus-trap makes onFocusOutside moot. Co-covered by dialog.open Tab-trap.",
+      "apg_check": "Tab is trapped within the dialog",
+      "waiver": {
+        "reason": "MOOT in modal: onFocusOutside fires when focus leaves the layer, but a modal dialog TRAPS focus (FocusScope) so focus cannot leave \u2014 there is nothing for the callback to act on. Co-covered by dialog.open APG (Tab is trapped within the dialog), which proves focus cannot escape the modal on both faces.",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
     },
     {
       "id": "dialog.trigger-reclick",
@@ -264,11 +270,17 @@
       "id": "dialog.removescroll-pinch",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "edge: RemoveScroll allowPinchZoom + shards=[contentRef]"
+      "ref": "WAIVED edge (2026-06-23): non-DOM-observable touch config; scroll-lock marker co-covered by dialog.open.",
+      "oracle_file": "dialog.open",
+      "waiver": {
+        "reason": "NOT DOM-OBSERVABLE: RemoveScroll allowPinchZoom + shards=[contentRef] are internal touch-event-handling config with NO manifestation in the normalized DOM snapshot \u2014 the only scroll-lock evidence is body[data-scroll-locked], which dialog.open already matches byte-identically. The port uses a simplified scroll-lock marker; the pinch/shards behavior has no externally-grounded DOM oracle to gate.",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
     }
   ]
 }
