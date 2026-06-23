@@ -228,6 +228,17 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     ok((await expandedIdx()) === 2, "cross-menu did not SKIP the disabled trigger (opened Edit instead of View)");
   }},
+  // outside-norestore (menubar.tsx:317,328-345 hasInteractedOutsideRef) — when a menu closes via
+  // an OUTSIDE pointer-dismiss the focus is NOT snapped back to the trigger (unlike Escape/select).
+  { id: "menubar", apg: "menubar", name: "outside-click close does NOT restore focus to the trigger", run: async (pg) => {
+    await pg.locator('#root [role="menuitem"]').first().click();
+    await pg.getByRole("menu").waitFor(); await pg.waitForTimeout(150);
+    await pg.mouse.click(5, 5);
+    await pg.waitForTimeout(220);
+    ok(!(await visible(pg, '[role="menu"]')), "outside click did not close the menu (precondition)");
+    const onTrigger = await pg.evaluate(() => document.activeElement === document.querySelector('#root [role="menuitem"]'));
+    ok(!onTrigger, "focus was restored to the trigger after an outside-click close (must NOT be)");
+  }},
   // loop=false (`?s=noloop`) — cross-menu does NOT wrap (menubar.tsx:373 slice vs wrapArray):
   // from the LAST open menu (View), ArrowRight (next) is a no-op; View stays open.
   { id: "menubar", apg: "menubar", state: "noloop", name: "loop=false: ArrowRight from the LAST open menu does NOT wrap to the first", run: async (pg) => {

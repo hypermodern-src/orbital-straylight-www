@@ -819,7 +819,7 @@ handleAction = case _ of
     st <- H.get
     -- the trigger that was clicked becomes the bar tab stop; toggle/switch its menu.
     H.modify_ _ { triggerFocus = i }
-    if openIndex st == Just i then closeMenu
+    if openIndex st == Just i then closeMenu true
     else if current st.ctrl /= "" then switchTo i (-1) Nothing
     else openMenuAt i (-1) Nothing
   -- On a CLOSED trigger ArrowDown opens + highlights the first item (APG menubar). The
@@ -879,12 +879,12 @@ handleAction = case _ of
       for_ mwrap \wrap -> liftEffect (Envelope.reAdoptBeforeTrail wrap)
     else finishClose
   AnimDone -> finishClose
-  EscapePressed -> closeMenu
+  EscapePressed -> closeMenu true
   PointerDown e -> do
     st <- H.get
     for_ st.contentNode \node -> do
       outside <- liftEffect (Dismiss.isOutside node e)
-      when outside closeMenu
+      when outside (closeMenu false)
   MenuKeyDown ke -> do
     st <- H.get
     let
@@ -996,7 +996,7 @@ handleAction = case _ of
     when (maybe true not mDisabled) do
       for_ (openIndex st >>= Array.index st.menus) \menu ->
         H.raise (ItemSelected { menu: menu.value, item: value })
-      closeMenu
+      closeMenu true
   Reposition -> reposition
 
 -- | The last focusable item index of menu `i` (for ArrowUp-open → highlight last).
@@ -1082,7 +1082,7 @@ closeSub = do
 closeMenuAndSub :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeMenuAndSub = do
   H.modify_ _ { subOpen = Nothing, subFocused = -1 }
-  closeMenu
+  closeMenu true
 
 openMenuAt :: forall m. MonadEffect m => Int -> Int -> Maybe Int -> H.HalogenM State Action () Output m Unit
 openMenuAt i focusedIdx openFocus = do
@@ -1151,13 +1151,16 @@ finalize focusToo = do
         for_ mfocus HTMLElement.focus
     _, _ -> pure unit
 
-closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
-closeMenu = do
+-- | Close the open menu. `restore` returns focus to the trigger — true for Escape / selection /
+-- | programmatic close, but FALSE for an outside pointer-dismiss (menubar.tsx:317,328-345
+-- | hasInteractedOutsideRef: the user clicked elsewhere, so focus must NOT snap back).
+closeMenu :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
+closeMenu restore = do
   st <- H.get
   when (current st.ctrl /= "") do
     traverse_ H.unsubscribe st.subs
     for_ st.postSub H.unsubscribe
-    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+    when restore $ for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
     H.modify_ _ { ctrl = (change "" st.ctrl).next, presence = present false st.presence, restoreEl = Nothing, subs = [], postSub = Nothing, contentNode = Nothing, openFocus = Nothing, search = "", subOpen = Nothing, subFocused = -1 }
     H.raise (OpenChanged Nothing)
     psid <- scheduleAfterClose
@@ -1238,7 +1241,7 @@ handleQuery = case _ of
   SetOpen mv a -> do
     st <- H.get
     case mv of
-      Nothing -> closeMenu
+      Nothing -> closeMenu true
       Just v -> case Array.findIndex (\m -> m.value == v) st.menus of
         Just i -> openMenuAt i (-1) Nothing
         Nothing -> pure unit

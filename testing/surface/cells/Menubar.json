@@ -241,11 +241,12 @@
       "id": "menubar.outside-norestore",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "menubar.tsx:317,328-345 hasInteractedOutsideRef: outside-click close must NOT refocus trigger; port always restores"
+      "ref": "DONE (2026-06-23): FIXED \u2014 closeMenu now takes a restore flag; the outside pointer-dismiss path passes false (menubar.tsx:317,328-345 hasInteractedOutsideRef), Escape/selection/programmatic close pass true. apg green both faces.",
+      "apg_check": "outside-click close does NOT restore focus to the trigger"
     },
     {
       "id": "menubar.bar-tabindex",
