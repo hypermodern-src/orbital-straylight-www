@@ -265,7 +265,7 @@ view c s =
     )
     [ box [ P "6" ]
         [ case c of
-            "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
+            "dialog" -> HH.slot_ _dialog unit Dialog.component (dialogInput s)
             "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
             "popover" -> HH.slot_ _popover unit Popover.component (popoverInput s)
             "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
@@ -405,16 +405,18 @@ themeDataAttrs isRoot =
 -- | built from the at-rest Themes components. Driven open by the shared state driver
 -- | (not defaultOpen — so the DOM-oracle driver, which clicks the trigger, can open it;
 -- | a defaultOpen modal renders with the backdrop already over the trigger).
-dialogInput :: Dialog.Input
-dialogInput = Dialog.defaultInput
+dialogInput :: String -> Dialog.Input
+dialogInput s = Dialog.defaultInput
   { style = dialogStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "--max-width: 450px; pointer-events: auto;"
   , closeLabels = [ "Cancel", "Save" ]
   , trigger = [ HH.text "Edit profile" ]
-  , title = [ HH.text "Edit profile" ]
-  , description = [ HH.text "Make changes to your profile." ]
+  -- `?s=notitle` omits Title + Description (both optional sub-parts) → no <h1>/<p>, no
+  -- aria-labelledby/describedby on the content.
+  , title = if s == "notitle" then [] else [ HH.text "Edit profile" ]
+  , description = if s == "notitle" then [] else [ HH.text "Make changes to your profile." ]
   , content =
       [ flex [ Direction "column", Gap "3" ]
           [ HH.label_

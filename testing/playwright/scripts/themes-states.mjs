@@ -91,6 +91,9 @@ export const CLOSE = {
 export const STATES = {
   dialog: {
     open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
+    // `?s=notitle` — Title + Description omitted: the open dialog content has NO <h1>/<p> and
+    // (the contract under test) NO aria-labelledby/describedby.
+    notitle: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
     // at-rest CLOSED disclosure (no interaction): pins the closed-trigger contract —
     // aria-expanded=false and NO aria-controls (present only while open). Keyed off the
     // upstream closed trigger only, so the same driver runs golden + port.

@@ -5,30 +5,247 @@
   "upstream": "primitives@45f8b34 packages/react/dialog/src/dialog.tsx + @radix-ui/themes@3",
   "note": "The STR-381 template: every cell that ties Dialog out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt (replaces the scalar core_gaps_open=1). Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
   "cells": [
-    { "id": "dialog.open",      "state": "open",      "importance": "core",   "status": "gated", "oracle": ["dom", "aria", "apg"], "ref": "open modal: overlay>scroll>content, role=dialog, focus-into, Tab-trap, Escape-restore" },
-    { "id": "dialog.closing",   "state": "closing",   "importance": "common", "status": "gated", "oracle": ["dom"],               "ref": "Presence exit: lingering data-state=closed node through pinned anim" },
-    { "id": "dialog.rest",      "state": "rest",      "importance": "common", "status": "gated", "oracle": ["aria"],              "ref": "at-rest trigger (button only) a11y tree" },
-
-    { "id": "dialog.close-button", "state": "close-button", "importance": "core",   "status": "gated", "oracle": ["apg", "dom"], "apg_check": "clicking the Cancel close-button closes the dialog + restores focus", "ref": "dialog.tsx:472-492 DialogClose onClick→onOpenChange(false); port has NO Close part — Cancel/Save are inert. THE core gap." },
-    { "id": "dialog.h2-title",     "state": "open",         "importance": "common", "status": "open", "oracle": ["aria", "dom"], "ref": "dialog.tsx:434-444 Primitive.h2; port hardcodes <h1> → a11y heading level 1 vs 2" },
-    { "id": "dialog.no-title",     "state": "open",         "importance": "common", "status": "open", "oracle": ["dom", "aria"], "ref": "dialog.tsx:438-464 Title/Description optional; port emits stray empty h1/p" },
-    { "id": "dialog.aria-always",  "state": "open",         "importance": "common", "status": "open", "oracle": ["aria"],        "ref": "dialog.tsx:414-415 aria-labelledby/describedby ALWAYS present; port omits when array empty" },
-    { "id": "dialog.nonmodal",     "state": "nonmodal",     "importance": "common", "status": "open", "oracle": ["dom", "apg"],  "ref": "dialog.tsx:183-188,313-365 modal=false: no overlay/lock/hideOthers, Tab not trapped — effectively unimplemented" },
-    { "id": "dialog.closed-attr",  "state": "closed-attr",  "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "dialog.tsx:108 aria-controls absent while closed — golden-dom/dialog.closed-attr.txt; port==upstream (parity confirmed)" },
-    { "id": "dialog.shifttab-loop","state": "open",         "importance": "common", "status": "gated", "oracle": ["apg"],         "apg_check": "Shift+Tab from the first focusable wraps to the last (loop)", "ref": "dialog.tsx:406 FocusScope loop=true bidirectional; APG only Tabs forward" },
-    { "id": "dialog.first-focus",  "state": "open",         "importance": "common", "status": "gated", "oracle": ["apg"],         "apg_check": "open focuses the FIRST tabbable inside the content", "ref": "dialog.tsx:408 onMountAutoFocus exact first-tabbable target unverified" },
-    { "id": "dialog.controlled",   "state": "open",         "importance": "common", "status": "open", "oracle": ["apg"],         "ref": "dialog.tsx:61-66 controlled open: Escape must NOT close when parent owns value" },
-
-    { "id": "dialog.rightclick-outside", "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: right/ctrl-click outside does NOT dismiss (modal)" },
-    { "id": "dialog.autofocus-cb",       "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: onOpenAutoFocus/onCloseAutoFocus consumer preventDefault" },
-    { "id": "dialog.focusoutside-cb",    "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: onFocusOutside preventDefaulted in modal" },
-    { "id": "dialog.trigger-reclick",    "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: trigger-as-outside guard (close-then-reopen)" },
-    { "id": "dialog.forcemount",         "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: forceMount on Portal/Overlay/Content" },
-    { "id": "dialog.portal-container",   "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: Portal container prop (custom mount node)" },
-    { "id": "dialog.nested-stack",       "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: nested modals — body pointer-events restore must be stacked" },
-    { "id": "dialog.rtl",                "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: dir=rtl propagation" },
-    { "id": "dialog.dev-warnings",       "state": "open", "importance": "edge", "status": "open", "oracle": ["none"],"ref": "edge: missing-Title/Description dev console.warn (non-DOM)" },
-    { "id": "dialog.overlay-dismiss",    "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: overlay registers as dismiss surface (stopPropagation contract)" },
-    { "id": "dialog.removescroll-pinch", "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: RemoveScroll allowPinchZoom + shards=[contentRef]" }
+    {
+      "id": "dialog.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria",
+        "apg"
+      ],
+      "ref": "open modal: overlay>scroll>content, role=dialog, focus-into, Tab-trap, Escape-restore"
+    },
+    {
+      "id": "dialog.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Presence exit: lingering data-state=closed node through pinned anim"
+    },
+    {
+      "id": "dialog.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest trigger (button only) a11y tree"
+    },
+    {
+      "id": "dialog.close-button",
+      "state": "close-button",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg",
+        "dom"
+      ],
+      "apg_check": "clicking the Cancel close-button closes the dialog + restores focus",
+      "ref": "dialog.tsx:472-492 DialogClose onClick\u2192onOpenChange(false); port has NO Close part \u2014 Cancel/Save are inert. THE core gap."
+    },
+    {
+      "id": "dialog.h2-title",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-23): the THEMED Title is an <h1> (rt-Heading) with id=titleId wired into the content's aria-labelledby \u2014 co-covered by dialog.open. (The <h2> in the ref is the PRIMITIVE; our face is themed = h1; the port matches.) dialog.tsx:434-444",
+      "oracle_file": "dialog.open"
+    },
+    {
+      "id": "dialog.no-title",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 Title/Description are optional; the port now renders the <h1>/<p> ONLY when present (previously emitted stray empty nodes). ?s=notitle golden-dom byte-identical (no <h1>/<p>). dialog.tsx:438-464",
+      "oracle_file": "dialog.notitle"
+    },
+    {
+      "id": "dialog.aria-always",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 aria-labelledby/describedby are ALWAYS on the content (point to the Title/Description ids) even when those parts are omitted; verified against dialog.notitle (both attrs present though no <h1>/<p>). The port previously omitted them when empty. dialog.tsx:414-415",
+      "oracle_file": "dialog.notitle"
+    },
+    {
+      "id": "dialog.nonmodal",
+      "state": "nonmodal",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "dialog.tsx:183-188,313-365 modal=false: no overlay/lock/hideOthers, Tab not trapped \u2014 effectively unimplemented"
+    },
+    {
+      "id": "dialog.closed-attr",
+      "state": "closed-attr",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "dialog.tsx:108 aria-controls absent while closed \u2014 golden-dom/dialog.closed-attr.txt; port==upstream (parity confirmed)"
+    },
+    {
+      "id": "dialog.shifttab-loop",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Shift+Tab from the first focusable wraps to the last (loop)",
+      "ref": "dialog.tsx:406 FocusScope loop=true bidirectional; APG only Tabs forward"
+    },
+    {
+      "id": "dialog.first-focus",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "open focuses the FIRST tabbable inside the content",
+      "ref": "dialog.tsx:408 onMountAutoFocus exact first-tabbable target unverified"
+    },
+    {
+      "id": "dialog.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "dialog.tsx:61-66 controlled open: Escape must NOT close when parent owns value"
+    },
+    {
+      "id": "dialog.rightclick-outside",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: right/ctrl-click outside does NOT dismiss (modal)"
+    },
+    {
+      "id": "dialog.autofocus-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: onOpenAutoFocus/onCloseAutoFocus consumer preventDefault"
+    },
+    {
+      "id": "dialog.focusoutside-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: onFocusOutside preventDefaulted in modal"
+    },
+    {
+      "id": "dialog.trigger-reclick",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: trigger-as-outside guard (close-then-reopen)"
+    },
+    {
+      "id": "dialog.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Portal/Overlay/Content"
+    },
+    {
+      "id": "dialog.portal-container",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Portal container prop (custom mount node)"
+    },
+    {
+      "id": "dialog.nested-stack",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: nested modals \u2014 body pointer-events restore must be stacked"
+    },
+    {
+      "id": "dialog.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: dir=rtl propagation"
+    },
+    {
+      "id": "dialog.dev-warnings",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: missing-Title/Description dev console.warn (non-DOM)"
+    },
+    {
+      "id": "dialog.overlay-dismiss",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: overlay registers as dismiss surface (stopPropagation contract)"
+    },
+    {
+      "id": "dialog.removescroll-pinch",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: RemoveScroll allowPinchZoom + shards=[contentRef]"
+    }
   ]
 }

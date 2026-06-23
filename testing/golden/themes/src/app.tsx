@@ -628,16 +628,23 @@ const PAGES: Page[] = [
   {
     id: "dialog",
     label: "Dialog",
-    node: (
+    interactive: true,
+    // `?s=notitle` omits Title + Description (both optional) → the Content has no <h1>/<p> and
+    // (verify) no aria-labelledby/describedby.
+    node: (() => {
+      const notitle = currentState() === "notitle";
+      return (
       <Dialog.Root>
         <Dialog.Trigger>
           <Button>Edit profile</Button>
         </Dialog.Trigger>
         <Dialog.Content maxWidth="450px">
-          <Dialog.Title>Edit profile</Dialog.Title>
+          {!notitle && <Dialog.Title>Edit profile</Dialog.Title>}
+          {!notitle && (
           <Dialog.Description size="2" mb="4">
             Make changes to your profile.
           </Dialog.Description>
+          )}
           <Flex direction="column" gap="3">
             <label>
               <Text as="div" size="2" mb="1" weight="bold">
@@ -658,7 +665,8 @@ const PAGES: Page[] = [
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
-    ),
+      );
+    })(),
   },
   {
     id: "alertdialog",

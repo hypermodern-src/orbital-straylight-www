@@ -301,15 +301,18 @@ overlayContent st =
                   , HE.onKeyDown ContentKeyDown
                   , HE.onClick ContentClicked
                   ]
-                    -- link title/description only when present (radix is conditional)
-                    <> (if null st.title then [] else [ aria "labelledby" st.titleId ])
-                    <> (if null st.description then [] else [ aria "describedby" st.descriptionId ])
+                    -- aria-labelledby/describedby are ALWAYS emitted on the content (pointing to the
+                    -- Title/Description ids) even when those optional parts are absent — verified
+                    -- against the no-title golden, which keeps both attrs though no <h1>/<p> render.
+                    <> [ aria "labelledby" st.titleId, aria "describedby" st.descriptionId ]
                 )
-                -- title is an <h1>, description a <p> (radix Heading/Text defaults); the body
-                -- content is placed directly (no wrapper div) so it matches upstream's tree.
-                ( [ HH.h1 ([ classes st.style.title ] <> (if null st.title then [] else [ HP.id st.titleId ])) (map HH.fromPlainHTML st.title)
-                  , HH.p ([ classes st.style.description ] <> (if null st.description then [] else [ HP.id st.descriptionId ])) (map HH.fromPlainHTML st.description)
-                  ] <> map HH.fromPlainHTML st.content
+                -- Title (<h1> rt-Heading) and Description (<p> rt-Text) are OPTIONAL sub-parts:
+                -- render each ONLY when its content is present (upstream renders no node when the
+                -- consumer omits Dialog.Title/Description — the port previously emitted a stray
+                -- empty <h1>/<p>). The body content is placed directly (no wrapper div).
+                ( (if null st.title then [] else [ HH.h1 [ classes st.style.title, HP.id st.titleId ] (map HH.fromPlainHTML st.title) ])
+                    <> (if null st.description then [] else [ HH.p [ classes st.style.description, HP.id st.descriptionId ] (map HH.fromPlainHTML st.description) ])
+                    <> map HH.fromPlainHTML st.content
                 )
             ]
         ]
