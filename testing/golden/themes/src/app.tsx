@@ -636,12 +636,14 @@ const PAGES: Page[] = [
       // `?s=controlled` — open is OWNED by the parent (open={true}, no onOpenChange): Escape
       // (and any internal close) must NOT close it, because the parent never updates the prop.
       const controlled = currentState() === "controlled";
+      // `?s=rtl` — dir="rtl" propagated onto the Content (passes through; not in RemovedProps).
+      const rtl = currentState() === "rtl";
       return (
       <Dialog.Root {...(controlled ? { open: true } : {})}>
         <Dialog.Trigger>
           <Button>Edit profile</Button>
         </Dialog.Trigger>
-        <Dialog.Content maxWidth="450px">
+        <Dialog.Content maxWidth="450px" {...(rtl ? { dir: "rtl" as const } : {})}>
           {!notitle && <Dialog.Title>Edit profile</Dialog.Title>}
           {!notitle && (
           <Dialog.Description size="2" mb="4">

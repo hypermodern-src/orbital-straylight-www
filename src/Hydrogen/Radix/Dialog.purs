@@ -108,6 +108,7 @@ type Input =
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String         -- extra inline style on the content (e.g. max-width)
+  , dir :: String                  -- writing direction propagated onto the content ("" = none, "rtl"/"ltr")
   , triggerAttrs :: Array (Tuple String String)  -- data-* attrs for the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)  -- data-* attrs for the portaled root (theme re-application)
   , closeLabels :: Array String  -- trimmed button labels inside content that act as DialogClose (close on click)
@@ -126,6 +127,7 @@ defaultInput =
   , description: []
   , content: []
   , contentStyle: ""
+  , dir: ""
   , triggerAttrs: []
   , portalAttrs: []
   , closeLabels: []
@@ -155,6 +157,7 @@ type State =
   , description :: Array HH.PlainHTML
   , content :: Array HH.PlainHTML
   , contentStyle :: String
+  , dir :: String
   , triggerAttrs :: Array (Tuple String String)
   , portalAttrs :: Array (Tuple String String)
   , closeLabels :: Array String
@@ -213,6 +216,7 @@ initialState input =
   , description: input.description
   , content: input.content
   , contentStyle: input.contentStyle
+  , dir: input.dir
   , triggerAttrs: input.triggerAttrs
   , portalAttrs: input.portalAttrs
   , closeLabels: input.closeLabels
@@ -305,6 +309,9 @@ overlayContent st =
                     -- Title/Description ids) even when those optional parts are absent — verified
                     -- against the no-title golden, which keeps both attrs though no <h1>/<p> render.
                     <> [ aria "labelledby" st.titleId, aria "describedby" st.descriptionId ]
+                    -- `dir` is propagated onto the content when set (radix passes the Content
+                    -- dir prop through; "" = inherit, no attribute).
+                    <> (if st.dir == "" then [] else [ HP.attr (HH.AttrName "dir") st.dir ])
                 )
                 -- Title (<h1> rt-Heading) and Description (<p> rt-Text) are OPTIONAL sub-parts:
                 -- render each ONLY when its content is present (upstream renders no node when the
@@ -337,6 +344,7 @@ handleAction = case _ of
       , description = input.description
       , content = input.content
       , contentStyle = input.contentStyle
+      , dir = input.dir
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
       , closeLabels = input.closeLabels

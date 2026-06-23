@@ -219,11 +219,12 @@
       "id": "dialog.rtl",
       "state": "open",
       "importance": "edge",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "edge: dir=rtl propagation"
+      "ref": "DONE (2026-06-23): added dir field to Input \u2192 Content emits dir attr (radix Content dir passthrough). ?s=rtl golden-dom byte-identical (dir=rtl on content). ",
+      "oracle_file": "dialog.rtl"
     },
     {
       "id": "dialog.dev-warnings",
