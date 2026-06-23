@@ -633,8 +633,11 @@ const PAGES: Page[] = [
     // (verify) no aria-labelledby/describedby.
     node: (() => {
       const notitle = currentState() === "notitle";
+      // `?s=controlled` — open is OWNED by the parent (open={true}, no onOpenChange): Escape
+      // (and any internal close) must NOT close it, because the parent never updates the prop.
+      const controlled = currentState() === "controlled";
       return (
-      <Dialog.Root>
+      <Dialog.Root {...(controlled ? { open: true } : {})}>
         <Dialog.Trigger>
           <Button>Edit profile</Button>
         </Dialog.Trigger>

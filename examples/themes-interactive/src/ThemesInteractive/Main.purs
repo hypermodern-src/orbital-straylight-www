@@ -413,6 +413,9 @@ dialogInput s = Dialog.defaultInput
   , contentStyle = "--max-width: 450px; pointer-events: auto;"
   , closeLabels = [ "Cancel", "Save" ]
   , trigger = [ HH.text "Edit profile" ]
+  -- `?s=controlled` — the parent OWNS open (open = Just true, no setter wired): Escape must
+  -- NOT close it (closeDialog honors the controlled resolution — `current` stays true).
+  , open = if s == "controlled" then Just true else Nothing
   -- `?s=notitle` omits Title + Description (both optional sub-parts) → no <h1>/<p>, no
   -- aria-labelledby/describedby on the content.
   , title = if s == "notitle" then [] else [ HH.text "Edit profile" ]

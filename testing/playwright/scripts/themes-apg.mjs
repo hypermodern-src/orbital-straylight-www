@@ -1288,6 +1288,16 @@ const CHECKS = [
     });
     ok(onLast, "Shift+Tab from the first focusable did not wrap to the last (loop broken)");
   }},
+  // dialog.controlled (dialog.tsx:61-66) — `?s=controlled` renders open OWNED by the parent
+  // (open={true}, no onOpenChange). Escape signals the desired close but the parent never
+  // updates the prop, so the dialog must STAY OPEN. Proves controlled-open dialog: Escape
+  // does NOT close (parent owns open).
+  { id: "dialog", apg: "dialog-modal", state: "controlled", name: "controlled-open dialog: Escape does NOT close (parent owns open)", run: async (pg) => {
+    await pg.getByRole("dialog").waitFor(); await pg.waitForTimeout(180);
+    ok(await visible(pg, '[role="dialog"]'), "controlled dialog did not render open at mount");
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(200);
+    ok(await visible(pg, '[role="dialog"]'), "Escape closed a controlled-open dialog (parent owns the value — must stay open)");
+  }},
 
   // AlertDialog — alert-dialog.tsx. The defining contracts: focus the CANCEL button on open
   // (126-129), outside-click NEVER closes (130-131 both preventDefault'd), modal Tab-trap +

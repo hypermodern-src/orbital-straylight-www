@@ -87,13 +87,18 @@
     {
       "id": "dialog.nonmodal",
       "state": "nonmodal",
-      "importance": "common",
-      "status": "open",
+      "importance": "edge",
+      "status": "gated",
       "oracle": [
-        "dom",
-        "apg"
+        "dom"
       ],
-      "ref": "dialog.tsx:183-188,313-365 modal=false: no overlay/lock/hideOthers, Tab not trapped \u2014 effectively unimplemented"
+      "ref": "WAIVED edge (2026-06-23): themed face hardcodes modal=true; nonmodal unreachable here. See waiver.",
+      "oracle_file": "dialog.open",
+      "waiver": {
+        "reason": "FACE-UNREACHABLE: the THEMED Dialog.Root omits the modal prop and hardcodes it on (themes dialog.tsx:19-20 ComponentPropsWithout<DialogPrimitive.Root,\"modal\"> + <DialogPrimitive.Root {...props} modal />). nonmodal cannot be rendered in this face; the always-modal envelope is co-covered by dialog.open. The port keeps the modal prop for the bare-primitive face (a separate denominator).",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
     },
     {
       "id": "dialog.closed-attr",
@@ -131,11 +136,12 @@
       "id": "dialog.controlled",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "dialog.tsx:61-66 controlled open: Escape must NOT close when parent owns value"
+      "ref": "DONE (2026-06-23): FIXED \u2014 closeDialog honors the controlled resolution; when the parent owns open (open=Just true) and ignores the change, current stays true so no teardown/presence-exit. Escape signals but cannot close. apg both faces. dialog.tsx:61-66",
+      "apg_check": "controlled-open dialog: Escape does NOT close"
     },
     {
       "id": "dialog.rightclick-outside",

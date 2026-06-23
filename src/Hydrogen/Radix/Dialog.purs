@@ -461,13 +461,21 @@ closeDialog :: forall m. MonadEffect m => H.HalogenM State Action () Output m Un
 closeDialog = do
   st <- H.get
   when (current st.ctrl) do
-    for_ st.escSub H.unsubscribe
-    for_ st.postSub H.unsubscribe
-    for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
-    H.modify_ _ { ctrl = (change false st.ctrl).next, presence = present false st.presence, escSub = Nothing, postSub = Nothing }
+    -- always signal the parent of the desired close. But only TEAR DOWN (presence exit,
+    -- focus restore, sub teardown) when the resolution actually flips open→false: a
+    -- CONTROLLED parent that ignores the change keeps `current res.next` true, so the
+    -- dialog must stay open (radix `dialog.controlled` — Escape can't close it). dialog.tsx:61-66
+    let res = change false st.ctrl
     H.raise (OpenChanged false)
-    psid <- scheduleAfter AfterClose
-    H.modify_ _ { postSub = Just psid }
+    if current res.next then
+      H.modify_ _ { ctrl = res.next }
+    else do
+      for_ st.escSub H.unsubscribe
+      for_ st.postSub H.unsubscribe
+      for_ st.restoreEl (liftEffect <<< HTMLElement.focus)
+      H.modify_ _ { ctrl = res.next, presence = present false st.presence, escSub = Nothing, postSub = Nothing }
+      psid <- scheduleAfter AfterClose
+      H.modify_ _ { postSub = Just psid }
 
 -- | The exit animation finished (or there was none): tear down the modal envelope, drop the
 -- | overlay (Presence Closing → Closed unmounts it), and clear the exit subscriptions.
