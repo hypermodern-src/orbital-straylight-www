@@ -228,7 +228,7 @@
       "oracle": [
         "apg"
       ],
-      "ref": "slider.tsx:147-149,900-923 fractional/scientific step (0.1, 1e-7) via roundValue precision; port is Int-only"
+      "ref": "BLOCKED (2026-06-24): the port Slider is Int-only (defaultValue/min/max/step :: Int). Fractional/scientific step (0.1, 1e-7) needs an Int\u2192Number refactor across the WHOLE Slider (value math, snap, geometry). Large \u2014 deferred to a dedicated Slider numeric-foundation task. Golden-first probe confirmed upstream steps 0.4\u21920.5\u21920.6 with no float drift."
     },
     {
       "id": "slider.disabled-track-range",
