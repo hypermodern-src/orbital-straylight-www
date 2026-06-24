@@ -840,8 +840,11 @@ const PAGES: Page[] = [
       // `?s=cancelselect` — the Edit item's onSelect preventDefaults, so selecting it KEEPS the
       // menu open (cancelable ITEM_SELECT, menu.tsx:637-648).
       const cancelEdit = s === "cancelselect";
+      // `?s=controlled` — open is OWNED by the parent (open={true}, no onOpenChange). With no
+      // right-click position the menu anchors at the top-left (0,0) + a dev warning.
+      const ctlOpen = s === "controlled";
       return (
-        <ContextMenu.Root {...(nonmodal ? { modal: false } : {})}>
+        <ContextMenu.Root {...(nonmodal ? { modal: false } : {})} {...(ctlOpen ? { open: true } : {})}>
           <ContextMenu.Trigger>
             <Flex
               align="center"

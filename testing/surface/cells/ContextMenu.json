@@ -233,11 +233,12 @@
       "id": "contextmenu.controlled",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "context-menu.tsx:51-74 controlled open round-trip + dev-warn top-left anchor"
+      "ref": "DONE (2026-06-24): FIXED start-open \u2014 a controlled open=Just true at mount renders the menu OPEN (presence=Open from initialState) anchored at the default point (0,0) = the top-left dev-warn anchor. Initialize now arms the open envelope (subs + scheduleAfterOpen) when current ctrl, mirroring openMenu without the ctrl change. golden contextmenu.controlled byte-identical; contextmenu.open unregressed. context-menu.tsx:51-74",
+      "oracle_file": "contextmenu.controlled"
     },
     {
       "id": "contextmenu.tab-prevent",

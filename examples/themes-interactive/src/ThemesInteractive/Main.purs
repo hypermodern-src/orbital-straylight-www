@@ -793,6 +793,8 @@ contextMenuInput s = ContextMenu.defaultInput
   , modal = s /= "nonmodal"
   -- `?s=cancelselect` — the Edit item's select is cancelable (preventDefault) → keeps menu open.
   , keepOpenValues = if s == "cancelselect" then [ "edit" ] else []
+  -- `?s=controlled` — parent OWNS open (Just true): menu open at mount, anchored top-left (0,0).
+  , open = if s == "controlled" then Just true else Nothing
   , style = contextMenuStyle
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"

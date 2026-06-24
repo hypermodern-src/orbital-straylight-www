@@ -779,6 +779,20 @@ handleAction = case _ of
     stid <- useId
     scid <- useId
     H.modify_ _ { subGenTriggerId = stid, subGenContentId = scid }
+    -- controlled/default OPEN at mount (presence=Open from initialState): arm the open envelope
+    -- exactly like openMenu but WITHOUT the ctrl change (already open). With no right-click the
+    -- virtual anchor is the default point (0,0) — the top-left dev-warn anchor (context-menu.tsx).
+    st <- H.get
+    when (current st.ctrl) do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      win <- liftEffect Popper.windowTarget
+      let docTarget = HTMLDocument.toEventTarget doc
+      escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+      ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
+      scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+      resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+      psid <- scheduleAfterOpen
+      H.modify_ _ { focused = -1, subs = [ escSub, ptrSub, scrollSub, resizeSub ], postSub = Just psid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

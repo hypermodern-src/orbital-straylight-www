@@ -188,6 +188,8 @@ export const STATES = {
     // `?s=nonmodal` — modal={false}: right-click open; the snapshot pins the NON-modal envelope
     // (body has no data-scroll-locked, #root not aria-hidden) with focus guards still present.
     nonmodal: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),
+    // `?s=controlled` — open at mount (parent owns open={true}), NO interaction; anchors top-left.
+    controlled: async (pg) => { await pg.locator('[role="menu"]').first().waitFor(); },
     // right-click open then ArrowDown ×2 → the second enabled item (Duplicate) lands
     // data-highlighted (roving tabindex=0). Mirrors dropdownmenu.item2. Keyed off
     // role/data-* only, so the same driver runs against golden and port.
