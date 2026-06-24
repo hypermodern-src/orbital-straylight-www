@@ -273,11 +273,12 @@
       "id": "dropdownmenu.focus-trap",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "menu.tsx:273-307 FocusScope trap + interacted-outside discrimination; port always refocuses trigger"
+      "ref": "DONE (2026-06-24): co-covered \u2014 the FocusScope trap (menu.tsx:273-307) keeps focus in the open menu; Tab/Shift+Tab are preventDefault-ed (DropdownMenu.purs:994-996). Existing apg check Tab is prevented green both faces.",
+      "apg_check": "Tab is prevented (focus stays in the menu)"
     },
     {
       "id": "dropdownmenu.keyboard-entry",
