@@ -645,6 +645,10 @@ dropdownMenuInput s = DropdownMenu.defaultInput
   { style = menuStyle
   -- `?s=nonmodal` — modal=false (default true matches upstream DropdownMenu).
   , modal = s /= "nonmodal"
+  -- `?s=controlled` — parent OWNS open (Just true): menu open at mount, anchored to the trigger.
+  , open = if s == "controlled" then Just true else Nothing
+  -- `?s=selectnoclose` — Edit's select is cancelable (onSelect preventDefault) → keeps menu open.
+  , keepOpenValues = if s == "selectnoclose" then [ "edit" ] else []
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"

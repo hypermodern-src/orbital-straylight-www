@@ -123,6 +123,15 @@ const CHECKS = [
     ok(await activeWithin(pg, '[role="menu"]'), "menu did not receive focus");
     await hlStarts(pg, "Edit");
   }},
+  // select-noclose (menu.tsx:637-648) — an item whose onSelect preventDefaults is CANCELABLE:
+  // selecting it keeps the menu OPEN (`?s=selectnoclose` makes Edit cancelable).
+  { id: "dropdownmenu", state: "selectnoclose", apg: "menu", name: "cancelable item select (preventDefault) keeps the menu OPEN", run: async (pg) => {
+    await triggerBtn(pg).click();
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(150);
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(220);
+    ok(await visible(pg, '[role="menu"]'), "selecting a preventDefault'd (cancelable) item closed the menu — it must stay open");
+  }},
   // Keyboard-opened (ArrowDown opens + highlights first) — then rove from a known state.
   { id: "dropdownmenu", apg: "menu", name: "ArrowDown roves to the next item", run: async (pg) => {
     await triggerBtn(pg).focus(); await pg.keyboard.press("ArrowDown"); await pg.locator('[role="menu"]').waitFor();

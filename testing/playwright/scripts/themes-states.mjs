@@ -150,6 +150,8 @@ export const STATES = {
     // `?s=nonmodal` — modal=false: open via click; snapshot pins the NON-modal envelope (body
     // no data-scroll-locked, #root not aria-hidden), focus guards still present.
     nonmodal: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
+    // `?s=controlled` — open at mount (parent owns open); NO interaction.
+    controlled: async (pg) => { await pg.locator('[role="menu"]').first().waitFor(); },
     item2: async (pg) => {
       await openMenu(pg, () => triggerButton(pg).click());
       await pg.keyboard.press("ArrowDown");

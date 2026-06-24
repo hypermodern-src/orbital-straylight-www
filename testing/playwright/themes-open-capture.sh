@@ -27,6 +27,7 @@ STATES=(
   "hovercard:open"
   "dropdownmenu:open"
   "dropdownmenu:nonmodal"
+  "dropdownmenu:controlled"
   "dropdownmenu:closed-rest"
   "dropdownmenu:item2"
   "dropdownmenu:disabled"

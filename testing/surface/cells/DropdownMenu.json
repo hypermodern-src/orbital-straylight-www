@@ -196,11 +196,12 @@
       "id": "dropdownmenu.select-noclose",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "apg"
       ],
-      "ref": "menu.tsx:637-648 onSelect preventDefault keeps menu open; port always closes on ItemClicked"
+      "ref": "DONE (2026-06-24): FEATURE (ContextMenu pattern) \u2014 keepOpenValues Input field models cancelable onSelect-preventDefault; both select paths (click + keyboard Enter/Space) skip closeMenu when the value is in keepOpenValues. ?s=selectnoclose apg green both faces; normal select-and-close unregressed. menu.tsx:637-648",
+      "apg_check": "cancelable item select (preventDefault) keeps the menu OPEN"
     },
     {
       "id": "dropdownmenu.loop",
@@ -239,11 +240,12 @@
       "id": "dropdownmenu.controlled",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "dropdown-menu.tsx:62-67 controlled open + onOpenChange; port implements but no oracle drives it"
+      "ref": "DONE (2026-06-24): FIXED start-open (ContextMenu pattern) \u2014 controlled open=Just true at mount renders the menu OPEN (presence=Open from initialState) anchored to the trigger. Initialize arms the open envelope (subs + scheduleAfterOpen) when current ctrl, mirroring openMenuWith without the ctrl change. golden dropdownmenu.controlled byte-identical; open/submenu unregressed. dropdown-menu.tsx:62-67",
+      "oracle_file": "dropdownmenu.controlled"
     },
     {
       "id": "dropdownmenu.trigger-keys",

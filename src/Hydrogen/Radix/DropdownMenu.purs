@@ -291,6 +291,7 @@ type Input =
   , trigger :: Array HH.PlainHTML
   , contentStyle :: String     -- the content's CONSTANT style (outline + menu vars + pointer-events)
   , subContentStyle :: String  -- the SubContent's CONSTANT style (Themes orders pointer-events BEFORE the vars)
+  , keepOpenValues :: Array String  -- item values whose select is CANCELABLE (onSelect preventDefault) — keep menu open
   , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
   }
@@ -310,6 +311,7 @@ defaultInput =
   , trigger: []
   , contentStyle: ""
   , subContentStyle: ""
+  , keepOpenValues: []
   , triggerAttrs: []
   , portalAttrs: []
   }
@@ -345,6 +347,7 @@ type State =
   , trigger :: Array HH.PlainHTML
   , contentStyle :: String
   , subContentStyle :: String
+  , keepOpenValues :: Array String
   , triggerAttrs :: Array (Tuple String String)
   , portalAttrs :: Array (Tuple String String)
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
@@ -454,6 +457,7 @@ initialState input =
   , trigger: input.trigger
   , contentStyle: input.contentStyle
   , subContentStyle: input.subContentStyle
+  , keepOpenValues: input.keepOpenValues
   , triggerAttrs: input.triggerAttrs
   , portalAttrs: input.portalAttrs
   , restoreEl: Nothing
@@ -866,6 +870,20 @@ handleAction = case _ of
     stid <- useId
     scid <- useId
     H.modify_ _ { triggerId = tid, contentId = cid, subGenTriggerId = stid, subGenContentId = scid }
+    -- controlled/default OPEN at mount (presence=Open from initialState): arm the open envelope
+    -- exactly like openMenuWith but WITHOUT the ctrl change (already open), so the content portals
+    -- + positions against the trigger on the next tick (dropdown-menu.tsx:62-67 controlled open).
+    st <- H.get
+    when (current st.ctrl) do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      win <- liftEffect Popper.windowTarget
+      let docTarget = HTMLDocument.toEventTarget doc
+      escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+      ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
+      scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+      resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+      psid <- scheduleAfterOpen
+      H.modify_ _ { focused = -1, subs = [ escSub, ptrSub, scrollSub, resizeSub ], postSub = Just psid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -880,6 +898,7 @@ handleAction = case _ of
       , modal = input.modal
       , contentStyle = input.contentStyle
       , subContentStyle = input.subContentStyle
+      , keepOpenValues = input.keepOpenValues
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
       }
@@ -970,7 +989,8 @@ handleAction = case _ of
           liftEffect (preventDefault (KE.toEvent ke))
           for_ (enabledValueAt st.focused st.entries) \v -> do
             H.raise (ItemSelected v)
-            closeMenu
+            -- cancelable ITEM_SELECT (menu.tsx:637-648): a keepOpen value keeps the menu open.
+            unless (Array.elem v st.keepOpenValues) closeMenu
         -- Tab/Shift+Tab are preventDefault-ed inside the menu (menu.tsx:531-532): focus is
         -- trapped, the key cannot tab out (Shift+Tab also reports key="Tab").
         else if key == "Tab" then liftEffect (preventDefault (KE.toEvent ke))
@@ -993,7 +1013,7 @@ handleAction = case _ of
       mDisabled = Array.findMap pick st.entries
     when (maybe true not mDisabled) do
       H.raise (ItemSelected value)
-      closeMenu
+      unless (Array.elem value st.keepOpenValues) closeMenu
   -- scroll/resize: just re-place. NOT re-adopt — the wrapper stays in body across renders
   -- (Halogen patches it in place), and re-adopting would move it past the trailing focus
   -- guard AND blur the focused content. (This bit the menu because lockScroll fires resize.)

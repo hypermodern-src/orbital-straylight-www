@@ -794,8 +794,13 @@ const PAGES: Page[] = [
       // `?s=nonmodal` — modal={false}: no scroll-lock / no aria-hide-siblings / no body pointer
       // block (focus guards still render). Default modal=true matches upstream DropdownMenu.
       const nonmodal = s === "nonmodal";
+      // `?s=controlled` — open OWNED by the parent (open={true}, no onOpenChange): menu open at
+      // mount, anchored to the trigger (dropdown-menu.tsx:62-67).
+      const ctlOpen = s === "controlled";
+      // `?s=selectnoclose` — Edit's onSelect preventDefaults, keeping the menu open on select.
+      const cancelEdit = s === "selectnoclose";
       return (
-        <DropdownMenu.Root {...(nonmodal ? { modal: false } : {})}>
+        <DropdownMenu.Root {...(nonmodal ? { modal: false } : {})} {...(ctlOpen ? { open: true } : {})}>
           <DropdownMenu.Trigger>
             <Button variant="soft">
               Options
@@ -803,7 +808,7 @@ const PAGES: Page[] = [
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
-            <DropdownMenu.Item shortcut="⌘ E">Edit</DropdownMenu.Item>
+            <DropdownMenu.Item shortcut="⌘ E" {...(cancelEdit ? { onSelect: (e: Event) => e.preventDefault() } : {})}>Edit</DropdownMenu.Item>
             <DropdownMenu.Item shortcut="⌘ D" disabled={dupDisabled}>Duplicate</DropdownMenu.Item>
             <DropdownMenu.Separator />
             <DropdownMenu.Item shortcut="⌘ N">Archive</DropdownMenu.Item>
