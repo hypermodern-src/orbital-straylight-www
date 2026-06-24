@@ -791,8 +791,11 @@ const PAGES: Page[] = [
       // `?s=submenu` → a Sub (SubTrigger "More" + SubContent), with BOTH the root and the sub
       // forced open (defaultOpen) so the nested role=menu is captured at rest by the DOM oracle.
       const sub = s === "submenu";
+      // `?s=nonmodal` — modal={false}: no scroll-lock / no aria-hide-siblings / no body pointer
+      // block (focus guards still render). Default modal=true matches upstream DropdownMenu.
+      const nonmodal = s === "nonmodal";
       return (
-        <DropdownMenu.Root>
+        <DropdownMenu.Root {...(nonmodal ? { modal: false } : {})}>
           <DropdownMenu.Trigger>
             <Button variant="soft">
               Options

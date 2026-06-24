@@ -56,6 +56,8 @@ module Hydrogen.Radix.DropdownMenu
 
 import Prelude
 
+import Data.String (Pattern(..), stripSuffix) as Str
+
 import Data.Array as Array
 import Data.Foldable (foldl, for_, traverse_)
 import Data.Maybe (Maybe(..), maybe, isJust, fromMaybe)
@@ -279,6 +281,7 @@ type Input =
   { entries :: Array MenuEntry
   , open :: Maybe Boolean
   , defaultOpen :: Boolean
+  , modal :: Boolean           -- modal=true (default): scroll-lock + hideOthers + content pointer block; false = focus guards only
   , side :: Side
   , align :: Align
   , offset :: Number
@@ -297,6 +300,7 @@ defaultInput =
   { entries: []
   , open: Nothing
   , defaultOpen: false
+  , modal: true
   , side: Bottom
   , align: Start
   , offset: 4.0
@@ -327,6 +331,7 @@ type Slot id = H.Slot Query Output id
 type State =
   { ctrl :: Controllable Boolean
   , presence :: Presence         -- Open / Closing (mounted, exiting) / Closed (display:none)
+  , modal :: Boolean
   , entries :: Array MenuEntry
   , focused :: Int               -- roving tab stop among focusable items
   , side :: Side
@@ -435,6 +440,7 @@ initialState :: Input -> State
 initialState input =
   { ctrl: controllable input.open input.defaultOpen
   , presence: if startOpen then Open else Closed
+  , modal: input.modal
   , entries: input.entries
   , focused: 0
   , side: input.side
@@ -531,7 +537,9 @@ render st =
                 , dataAttr "radix-menu-content" ""
                 , dir "ltr"
                 , HP.tabIndex (-1)
-                , HP.style st.contentStyle
+                -- the content's `pointer-events: auto` is the MODAL RemoveScroll pointer re-enable;
+                -- a non-modal menu (no body pointer block) carries no such override.
+                , HP.style (if st.modal then st.contentStyle else stripPE st.contentStyle)
                 , HE.onKeyDown MenuKeyDown
                 ] <> portalData st.portalAttrs
               )
@@ -869,6 +877,7 @@ handleAction = case _ of
       , idPrefix = input.idPrefix
       , style = input.style
       , trigger = input.trigger
+      , modal = input.modal
       , contentStyle = input.contentStyle
       , subContentStyle = input.subContentStyle
       , triggerAttrs = input.triggerAttrs
@@ -1121,9 +1130,12 @@ finalize focusToo = do
     Just body, Just wrap -> liftEffect do
       Portal.adopt body (HTMLElement.toElement wrap)
       when focusToo do
-        Envelope.lockScroll
+        -- scroll-lock + aria-hide-siblings are the MODAL envelope (gated on st.modal); the focus
+        -- guards + content focus apply in BOTH modes. ORDER lock→guards→hideOthers so hideOthers
+        -- aria-hides the guards too in modal mode (dropdown-menu.tsx modal default true).
+        when st.modal Envelope.lockScroll
         Envelope.addFocusGuards
-        Envelope.hideOthers wrap
+        when st.modal (Envelope.hideOthers wrap)
         for_ mfocus HTMLElement.focus
     _, _ -> pure unit
 
@@ -1195,12 +1207,24 @@ scheduleAfterClose = do
 
 -- | The exit animation finished (or there was none): tear down the modal envelope, drop the
 -- | wrapper to display:none (Presence Closing → Closed), and clear the exit subscriptions.
+-- | Drop a trailing ` pointer-events: auto;` (the open RemoveScroll pointer re-enable) from a
+-- | content style string — used for the non-modal content, which carries no body pointer block.
+stripPE :: String -> String
+stripPE s = case Str.stripSuffix (Str.Pattern " pointer-events: auto;") s of
+  Just t -> t
+  Nothing -> case Str.stripSuffix (Str.Pattern "pointer-events: auto;") s of
+    Just t -> t
+    Nothing -> s
+
 finishClose :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 finishClose = do
   st <- H.get
   for_ st.animSub H.unsubscribe
   for_ st.postSub H.unsubscribe
-  liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
+  -- mirror finalize: removeFocusGuards in BOTH modes; showOthers + unlockScroll only when modal.
+  liftEffect do
+    Envelope.removeFocusGuards
+    when st.modal (Envelope.showOthers *> Envelope.unlockScroll)
   H.modify_ _ { presence = finishExit st.presence, animSub = Nothing, postSub = Nothing }
 
 reposition :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit

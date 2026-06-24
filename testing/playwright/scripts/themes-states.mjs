@@ -147,6 +147,9 @@ export const STATES = {
   dropdownmenu: {
     "closed-rest": async (pg) => { await root(pg).getByRole("button").first().waitFor(); },
     open: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
+    // `?s=nonmodal` — modal=false: open via click; snapshot pins the NON-modal envelope (body
+    // no data-scroll-locked, #root not aria-hidden), focus guards still present.
+    nonmodal: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
     item2: async (pg) => {
       await openMenu(pg, () => triggerButton(pg).click());
       await pg.keyboard.press("ArrowDown");

@@ -643,6 +643,8 @@ hoverCardStyle =
 dropdownMenuInput :: String -> DropdownMenu.Input
 dropdownMenuInput s = DropdownMenu.defaultInput
   { style = menuStyle
+  -- `?s=nonmodal` — modal=false (default true matches upstream DropdownMenu).
+  , modal = s /= "nonmodal"
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
