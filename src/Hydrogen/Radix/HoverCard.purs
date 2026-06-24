@@ -314,6 +314,19 @@ handleAction = case _ of
   Initialize -> do
     cid <- useId
     H.modify_ _ { contentId = cid }
+    -- controlled open / defaultOpen at mount (presence=Open from initialState): arm the open
+    -- envelope (Escape + reposition subs, no pointer-down — hovercard) on the next tick, so the
+    -- content portals + positions against the trigger (hover-card.tsx:67-72).
+    st <- H.get
+    when (current st.ctrl) do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      win <- liftEffect Popper.windowTarget
+      let docTarget = HTMLDocument.toEventTarget doc
+      escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+      scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+      resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+      psid <- scheduleAfterOpen
+      H.modify_ _ { subs = [ escSub, scrollSub, resizeSub ], postSub = Just psid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

@@ -111,6 +111,9 @@ export const STATES = {
   },
   popover: {
     open: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
+    // `?s=controlled` / `?s=defaultopen` — open at MOUNT (no interaction); wait for the content.
+    controlled: async (pg) => { await pg.locator(".rt-PopoverContent").first().waitFor(); },
+    defaultopen: async (pg) => { await pg.locator(".rt-PopoverContent").first().waitFor(); },
     // ?s=close → the content holds a Popover.Close submit button below the textarea. The open
     // driver is the same (click the trigger); the snapshot pins the extra close-button markup.
     // Keyed off rt-PopoverContent, so the same driver runs golden + port.
@@ -132,6 +135,8 @@ export const STATES = {
   },
   hovercard: {
     open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },
+    // `?s=controlled` — open at MOUNT (parent owns open); NO hover. Wait for the content.
+    controlled: async (pg) => { await pg.locator(".rt-HoverCardContent").first().waitFor(); },
     // RICH-CONTENT (?s=richcontent): the card holds a tabbable <a>; on open, upstream sets
     // tabindex=-1 on every tabbable content descendant (the card is a preview, not a focus
     // target). Hover the TRIGGER link (the first link in the prose), wait for the content, then

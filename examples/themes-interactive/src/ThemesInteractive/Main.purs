@@ -513,6 +513,9 @@ alertDialogStyle =
 popoverInput :: String -> Popover.Input
 popoverInput s = Popover.defaultInput
   { align = Start
+  -- `?s=controlled` (parent owns open) / `?s=defaultopen` (uncontrolled default) — open at mount.
+  , open = if s == "controlled" then Just true else Nothing
+  , defaultOpen = s == "defaultopen"
   , style = popoverStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
@@ -598,6 +601,8 @@ tooltipStyle =
 hoverCardInput :: String -> HoverCard.Input
 hoverCardInput s = HoverCard.defaultInput
   { align = Start
+  -- `?s=controlled` — parent owns open (Just true): open at mount, anchored to the trigger.
+  , open = if s == "controlled" then Just true else Nothing
   -- Radix Themes' HoverCard wrapper pins openDelay=200/closeDelay=150 (not the bare
   -- primitive's 700/300) — match it so the open/close timing tracks the Themes golden.
   , openDelay = 200

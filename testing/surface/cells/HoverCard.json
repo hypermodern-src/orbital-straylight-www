@@ -5,29 +5,219 @@
   "upstream": "primitives hover-card.tsx + @radix-ui/themes@3",
   "note": "STR-381 ledger for HoverCard. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 17 gaps / 4 core per DEPTH-AUDIT.md:301.",
   "cells": [
-    { "id": "hovercard.open",        "state": "open",        "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "open tree: trigger+wrapper data-radix-popper vars, content data-state=open data-side=bottom align=start" },
-    { "id": "hovercard.closing",     "state": "closing",     "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "STR-335 pinned-anim closing: lingering data-state=closed wrapper+content" },
-    { "id": "hovercard.richcontent", "state": "richcontent", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "content with tabbable child to expose tabindex=-1 walk" },
-    { "id": "hovercard.rest",        "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest trigger link a11y tree (link-in-text-block)" },
-
-    { "id": "hovercard.delays",          "state": "open",        "importance": "core",   "status": "open", "oracle": ["none"],       "ref": "hover-card.tsx:58-84 openDelay/closeDelay timers (200/150 themes); v1 skips them — timer/runtime" },
-    { "id": "hovercard.focus-open",      "state": "open",        "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "focus on the trigger shows the card", "ref": "hover-card.tsx:137-138 onFocus→open / onBlur→close; keyboard reachability unverified" },
-    { "id": "hovercard.escape",          "state": "closing",     "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "Escape hides the card", "ref": "hover-card.tsx:323-332 DismissableLayer Escape→dismiss; no oracle presses Escape" },
-    { "id": "hovercard.pointer-stays",   "state": "open",        "importance": "core",   "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:217-218 move trigger→content keeps open; defining hover-card contract unverified" },
-
-    { "id": "hovercard.controlled",      "state": "open",        "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:67-72 controlled open + onOpenChange round-trip; SetOpen/GetOpen Query" },
-    { "id": "hovercard.tabindex-walk",   "state": "richcontent", "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:315-320 getTabbableNodes sets tabindex=-1 on content links; port omits walk" },
-    { "id": "hovercard.no-outside",      "state": "open",        "importance": "common", "status": "open", "oracle": ["none"],       "ref": "hover-card.tsx:324-331 outside click does NOT dismiss; absence-of-behavior unproven" },
-    { "id": "hovercard.arrow",           "state": "open",        "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:369-383 HoverCardArrow sub-part absent (Popper.positionArrow exists, unwired)" },
-    { "id": "hovercard.placement",       "state": "open",        "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx:113-119 side/align/sideOffset/collisionPadding (8 vs 10) + collision-flip unverified" },
-    { "id": "hovercard.multi-instance",  "state": "open",        "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "hover-card.tsx scoping: two cards open/close independently; all oracles use ONE instance" },
-
-    { "id": "hovercard.exclude-touch",   "state": "open",        "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: excludeTouch — touch pointers ignored on trigger/content" },
-    { "id": "hovercard.text-selection",  "state": "open",        "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: text-selection containment inside card (pointerDown userSelect lock)" },
-    { "id": "hovercard.forcemount",      "state": "open",        "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: forceMount on Portal and Content" },
-    { "id": "hovercard.portal-container","state": "open",        "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Portal container prop (custom mount node)" },
-    { "id": "hovercard.available-vars",  "state": "open",        "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: --radix-hover-card-content-available-width/height + transform-origin vars" },
-    { "id": "hovercard.trigger-link",    "state": "rest",        "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Trigger as Primitive.a (a LINK) via asChild" },
-    { "id": "hovercard.reopen-inflight", "state": "open",        "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: re-open cancels an in-flight exit (wrapper still mounted)" }
+    {
+      "id": "hovercard.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "open tree: trigger+wrapper data-radix-popper vars, content data-state=open data-side=bottom align=start"
+    },
+    {
+      "id": "hovercard.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "STR-335 pinned-anim closing: lingering data-state=closed wrapper+content"
+    },
+    {
+      "id": "hovercard.richcontent",
+      "state": "richcontent",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "content with tabbable child to expose tabindex=-1 walk"
+    },
+    {
+      "id": "hovercard.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest trigger link a11y tree (link-in-text-block)"
+    },
+    {
+      "id": "hovercard.delays",
+      "state": "open",
+      "importance": "core",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "hover-card.tsx:58-84 openDelay/closeDelay timers (200/150 themes); v1 skips them \u2014 timer/runtime"
+    },
+    {
+      "id": "hovercard.focus-open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "focus on the trigger shows the card",
+      "ref": "hover-card.tsx:137-138 onFocus\u2192open / onBlur\u2192close; keyboard reachability unverified"
+    },
+    {
+      "id": "hovercard.escape",
+      "state": "closing",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Escape hides the card",
+      "ref": "hover-card.tsx:323-332 DismissableLayer Escape\u2192dismiss; no oracle presses Escape"
+    },
+    {
+      "id": "hovercard.pointer-stays",
+      "state": "open",
+      "importance": "core",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "hover-card.tsx:217-218 move trigger\u2192content keeps open; defining hover-card contract unverified"
+    },
+    {
+      "id": "hovercard.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): FIXED start-open (overlay pattern) \u2014 controlled open=Just true at mount renders open, anchored to the trigger. Initialize arms the open envelope (Escape + reposition subs, no pointer-down) when current ctrl, mirroring the open path without the ctrl change. golden byte-identical; hovercard.open unregressed. hover-card.tsx:67-72",
+      "oracle_file": "hovercard.controlled"
+    },
+    {
+      "id": "hovercard.tabindex-walk",
+      "state": "richcontent",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "hover-card.tsx:315-320 getTabbableNodes sets tabindex=-1 on content links; port omits walk"
+    },
+    {
+      "id": "hovercard.no-outside",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "hover-card.tsx:324-331 outside click does NOT dismiss; absence-of-behavior unproven"
+    },
+    {
+      "id": "hovercard.arrow",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "hover-card.tsx:369-383 HoverCardArrow sub-part absent (Popper.positionArrow exists, unwired)"
+    },
+    {
+      "id": "hovercard.placement",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "hover-card.tsx:113-119 side/align/sideOffset/collisionPadding (8 vs 10) + collision-flip unverified"
+    },
+    {
+      "id": "hovercard.multi-instance",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "hover-card.tsx scoping: two cards open/close independently; all oracles use ONE instance"
+    },
+    {
+      "id": "hovercard.exclude-touch",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: excludeTouch \u2014 touch pointers ignored on trigger/content"
+    },
+    {
+      "id": "hovercard.text-selection",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: text-selection containment inside card (pointerDown userSelect lock)"
+    },
+    {
+      "id": "hovercard.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Portal and Content"
+    },
+    {
+      "id": "hovercard.portal-container",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Portal container prop (custom mount node)"
+    },
+    {
+      "id": "hovercard.available-vars",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: --radix-hover-card-content-available-width/height + transform-origin vars"
+    },
+    {
+      "id": "hovercard.trigger-link",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Trigger as Primitive.a (a LINK) via asChild"
+    },
+    {
+      "id": "hovercard.reopen-inflight",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: re-open cancels an in-flight exit (wrapper still mounted)"
+    }
   ]
 }

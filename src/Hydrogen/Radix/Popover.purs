@@ -298,6 +298,20 @@ handleAction = case _ of
   Initialize -> do
     cid <- useId
     H.modify_ _ { contentId = cid }
+    -- controlled open / defaultOpen at mount (presence=Open from initialState): arm the open
+    -- envelope exactly like openPopover but WITHOUT the ctrl change (already open), so the content
+    -- portals + positions against the trigger on the next tick (popover.tsx:50-52,68-73).
+    st <- H.get
+    when (current st.ctrl) do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      win <- liftEffect Popper.windowTarget
+      let docTarget = HTMLDocument.toEventTarget doc
+      escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+      ptrSub <- H.subscribe (Dismiss.pointerDown docTarget PointerDown)
+      scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+      resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+      psid <- scheduleAfter AfterOpen
+      H.modify_ _ { subs = [ escSub, ptrSub, scrollSub, resizeSub ], postSub = Just psid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

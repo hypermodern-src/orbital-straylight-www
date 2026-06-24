@@ -713,8 +713,12 @@ const PAGES: Page[] = [
     // (?c=popover, no ?s) are byte-identical — this variant is append-only.
     node: (() => {
       const withClose = currentState() === "close";
+      // `?s=controlled` (parent owns open={true}) / `?s=defaultopen` (defaultOpen) — both render
+      // the popover OPEN at mount, anchored to the trigger (popover.tsx:50-52,68-73).
+      const ctlOpen = currentState() === "controlled";
+      const defOpen = currentState() === "defaultopen";
       return (
-        <Popover.Root>
+        <Popover.Root {...(ctlOpen ? { open: true } : {})} {...(defOpen ? { defaultOpen: true } : {})}>
           <Popover.Trigger>
             <Button variant="soft">Comment</Button>
           </Popover.Trigger>
@@ -755,10 +759,13 @@ const PAGES: Page[] = [
     // the open/rest oracles are unchanged.
     node: (() => {
       const rich = currentState() === "richcontent";
+      // `?s=controlled` — parent owns open={true}: the hover card is OPEN at mount, anchored to
+      // the trigger (hover-card.tsx:67-72).
+      const ctlOpen = currentState() === "controlled";
       return (
         <Text>
           Follow{" "}
-          <HoverCard.Root>
+          <HoverCard.Root {...(ctlOpen ? { open: true } : {})}>
             <HoverCard.Trigger>
               <Link href="#">@radix_ui</Link>
             </HoverCard.Trigger>
