@@ -106,6 +106,9 @@ export const STATES = {
   },
   alertdialog: {
     open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("alertdialog").waitFor(); },
+    // `?s=controlled` / `?s=defaultopen` — open at MOUNT (no interaction); wait for the dialog.
+    controlled: async (pg) => { await pg.getByRole("alertdialog").waitFor(); },
+    defaultopen: async (pg) => { await pg.getByRole("alertdialog").waitFor(); },
     // at-rest CLOSED disclosure: aria-controls present only when open, aria-expanded=false.
     "aria-controls": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
   },

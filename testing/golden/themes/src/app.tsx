@@ -679,8 +679,14 @@ const PAGES: Page[] = [
   {
     id: "alertdialog",
     label: "Alert Dialog",
-    node: (
-      <AlertDialog.Root>
+    interactive: true,
+    // `?s=controlled` (parent owns open) / `?s=defaultopen` (defaultOpen) — both render the alert
+    // dialog OPEN at mount (alert-dialog.tsx:22-23). The default/other states are unchanged.
+    node: (() => {
+      const ctlOpen = currentState() === "controlled";
+      const defOpen = currentState() === "defaultopen";
+      return (
+      <AlertDialog.Root {...(ctlOpen ? { open: true } : {})} {...(defOpen ? { defaultOpen: true } : {})}>
         <AlertDialog.Trigger>
           <Button color="red">Revoke access</Button>
         </AlertDialog.Trigger>
@@ -701,7 +707,8 @@ const PAGES: Page[] = [
           </Flex>
         </AlertDialog.Content>
       </AlertDialog.Root>
-    ),
+      );
+    })(),
   },
   {
     id: "popover",

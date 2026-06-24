@@ -266,7 +266,7 @@ view c s =
     [ box [ P "6" ]
         [ case c of
             "dialog" -> HH.slot_ _dialog unit Dialog.component (dialogInput s)
-            "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
+            "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component (alertDialogInput s)
             "popover" -> HH.slot_ _popover unit Popover.component (popoverInput s)
             "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
             "hovercard" -> HH.slot_ _hovercard unit HoverCard.component (hoverCardInput s)
@@ -471,9 +471,12 @@ dialogStyle =
 -- | The themed AlertDialog: same modal anatomy as Dialog (overlay > scroll > scrollPadding
 -- | > content) but role=alertdialog, no close-on-outside-click, and the upstream "Revoke
 -- | access" demo content. `defaultOpen` so the open state renders.
-alertDialogInput :: AlertDialog.Input
-alertDialogInput = AlertDialog.defaultInput
+alertDialogInput :: String -> AlertDialog.Input
+alertDialogInput s = AlertDialog.defaultInput
   { style = alertDialogStyle
+  -- `?s=controlled` (parent owns open) / `?s=defaultopen` (uncontrolled default) — open at mount.
+  , open = if s == "controlled" then Just true else Nothing
+  , defaultOpen = s == "defaultopen"
   , triggerAttrs = [ Tuple "accent-color" "red" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "--max-width: 450px; pointer-events: auto;"

@@ -315,6 +315,18 @@ handleAction = case _ of
     tid <- useId
     did <- useId
     H.modify_ _ { contentId = cid, titleId = tid, descriptionId = did }
+    -- controlled open / defaultOpen at mount (presence=Open from initialState): arm the modal
+    -- envelope exactly like openDialog but WITHOUT the ctrl change (already open) — escape sub +
+    -- AfterOpen (portal + focus + scroll-lock/guards/hideOthers) on the next tick. alert-dialog.tsx:22-23
+    st <- H.get
+    when (current st.ctrl) do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      sub <-
+        if st.closeOnEscape then
+          Just <$> H.subscribe (Dismiss.escape (HTMLDocument.toEventTarget doc) EscapePressed)
+        else pure Nothing
+      psid <- scheduleAfter AfterOpen
+      H.modify_ _ { escSub = sub, postSub = Just psid, locked = true }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
