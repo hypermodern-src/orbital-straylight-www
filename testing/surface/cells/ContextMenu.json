@@ -5,46 +5,399 @@
   "upstream": "primitives context-menu.tsx + menu.tsx + @radix-ui/themes@3",
   "note": "STR-381 ledger for ContextMenu. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 28 gaps / 4 core per DEPTH-AUDIT.md:266. DropdownMenu clone with point-anchoring.",
   "cells": [
-    { "id": "contextmenu.open",            "state": "open",     "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "at-cursor open: role=menu data-side=right/align=start, 3 items+separator, scroll-lock" },
-    { "id": "contextmenu.closed-rest",     "state": "closed-rest", "importance": "common", "status": "gated", "oracle": ["dom"], "ref": "FIXED (2026-06-21): wrapper gated on isRendered → content UNMOUNTED at closed-rest (was display:none always-mounted). golden-dom/contextmenu.closed-rest.txt; open/item2/disabled/submenu/closing no regression. (systemic popper-overlay closed-rest bug)" },
-    { "id": "contextmenu.item2",           "state": "item2",    "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "ArrowDown×2: data-highlighted + roving tabindex=0 migration" },
-    { "id": "contextmenu.disabled",        "state": "disabled", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "data-disabled item present in the menu tree" },
-    { "id": "contextmenu.submenu",         "state": "submenu",  "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "two role=menu layers, aria-expanded=true on subtrigger" },
-    { "id": "contextmenu.closing",         "state": "closing",  "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "STR-335 pinned-anim closing: data-state=closed, pointer-events cleared" },
-    { "id": "contextmenu.rest",            "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest trigger text a11y tree" },
-    { "id": "contextmenuchecks.checkbox",  "state": "checkbox", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "role=menuitemcheckbox aria-checked + data-state + indicator span" },
-    { "id": "contextmenuchecks.radio",     "state": "radio",    "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "role=menuitemradio aria-checked single-selection" },
-    { "id": "contextmenuchecks.rest",      "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest checks-trigger a11y tree" },
-
-    { "id": "contextmenu.disabled-skip",   "state": "open",     "importance": "core",   "status": "gated", "oracle": ["apg", "dom"], "apg_check": "ArrowDown SKIPS a disabled item to the next enabled one", "ref": "menu.tsx:720 focusable={!disabled}; navigate() walks raw indices, disabled becomes tab stop" },
-    { "id": "contextmenu.apg-roving",      "state": "open",     "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "ArrowDown roves Edit→Duplicate (right-click open)", "ref": "menu.tsx:523-544 no APG gate: ArrowUp/Down, Home/End, Escape-restores-focus all unverified" },
-    { "id": "contextmenu.submenu-part",    "state": "submenu",  "importance": "core",   "status": "gated", "oracle": ["dom", "apg"], "apg_check": "ArrowRight opens the submenu; ArrowLeft closes it", "ref": "context-menu.tsx:458-544 Sub/SubTrigger/SubContent absent: nested menu, aria-haspopup/expanded/controls" },
-    { "id": "contextmenu.space-select",    "state": "open",     "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "Enter selects the highlighted item and closes the menu", "ref": "menu.tsx:667-680 SELECTION_KEYS Enter+Space select item; port routes through navigate, never fires ItemSelected" },
-
-    { "id": "contextmenu.item2-dom",       "state": "item2",    "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "menu.tsx:723 highlighted-item DOM after ArrowDown not captured (dropdown has it)" },
-    { "id": "contextmenu.grace-area",      "state": "submenu",  "importance": "common", "status": "open", "oracle": ["none"],       "ref": "menu.tsx:444-476 submenu grace polygon, pointerDir, 100ms/300ms timers — runtime only" },
-    { "id": "contextmenu.checkbox-item",   "state": "checkbox", "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "menu.tsx:782-804 CheckboxItem role=menuitemcheckbox aria-checked true/false/mixed, indicator" },
-    { "id": "contextmenu.radio-item",      "state": "radio",    "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "menu.tsx:823-872 RadioGroup/RadioItem role=menuitemradio single-selection value context" },
-    { "id": "contextmenu.typeahead",       "state": "open",     "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "typeahead: a letter focuses the next matching item, repeats cycle", "ref": "IMPLEMENTED (2026-06-21): shared Behavior.Typeahead.nextMatch + ContextMenu wiring (search buffer, performance.now 1s lazy reset, space-guard). menu.tsx:411-434" },
-    { "id": "contextmenu.nonmodal",        "state": "open",     "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "context-menu.tsx:43 modal=false: no scroll-lock/hideOthers; port always layers Envelope" },
-    { "id": "contextmenu.loop-default",    "state": "open",     "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "loop off (default): ArrowDown on the last item does NOT wrap", "ref": "FIXED (2026-06-21): cfg loop true→false in MenuKeyDown + SubKeyDown (menu.tsx:362 default false). golden-validated" },
-    { "id": "contextmenu.controlled",      "state": "open",     "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "context-menu.tsx:51-74 controlled open round-trip + dev-warn top-left anchor" },
-    { "id": "contextmenu.tab-prevent",     "state": "open",     "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "Tab is prevented (focus stays in the menu)", "ref": "IMPLEMENTED (2026-06-21): MenuKeyDown intercepts Tab → preventDefault. menu.tsx:532. golden-validated" },
-    { "id": "contextmenu.content-focus",   "state": "open",     "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "menu.tsx:507-510 right-click opens with CONTENT focused (focused=-1), first ArrowDown highlights item0" },
-    { "id": "contextmenu.select-cancel",   "state": "open",     "importance": "common", "status": "open", "oracle": ["none"],       "ref": "menu.tsx:637-648 cancelable ITEM_SELECT: preventDefault keeps menu open; port always closeMenu" },
-
-    { "id": "contextmenu.indeterminate",   "state": "checkbox", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: indeterminate checkbox aria-checked='mixed' data-state=indeterminate" },
-    { "id": "contextmenu.rtl",             "state": "open",     "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: RTL/dir support; port hardcodes dir='ltr'" },
-    { "id": "contextmenu.long-press",      "state": "open",     "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: long-press touch-to-open (700ms, whenTouchOrPen)" },
-    { "id": "contextmenu.disabled-native", "state": "open",     "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: disabled trigger enables the native context menu (onContextMenu)" },
-    { "id": "contextmenu.window-blur",     "state": "closing",  "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: close on window blur (tab/app switch); port has no window blur listener" },
-    { "id": "contextmenu.pointerup-select","state": "open",     "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: pointerUp synthetic-click selection + pointerDown tracking" },
-    { "id": "contextmenu.group-label",     "state": "open",     "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Group + Label parts (role=group wrapper, label div) absent" },
-    { "id": "contextmenu.arrow",           "state": "open",     "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: Arrow part (ContextMenuArrow / popper arrow) absent" },
-    { "id": "contextmenu.forcemount",      "state": "open",     "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: forceMount on Portal/Content/ItemIndicator" },
-    { "id": "contextmenu.autofocus-cb",    "state": "open",     "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: onCloseAutoFocus/onInteractOutside/onEscapeKeyDown/onPointerDownOutside callbacks" },
-    { "id": "contextmenu.textvalue",       "state": "open",     "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: textValue override for typeahead (distinct from rendered text)" },
-    { "id": "contextmenu.collision-attr",  "state": "open",     "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: data-side/data-align reflect actual collision-flipped placement" },
-    { "id": "contextmenu.empty-menu",      "state": "open",     "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: empty/single-item menu (itemCount=0, no focusable)" }
+    {
+      "id": "contextmenu.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "at-cursor open: role=menu data-side=right/align=start, 3 items+separator, scroll-lock"
+    },
+    {
+      "id": "contextmenu.closed-rest",
+      "state": "closed-rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "FIXED (2026-06-21): wrapper gated on isRendered \u2192 content UNMOUNTED at closed-rest (was display:none always-mounted). golden-dom/contextmenu.closed-rest.txt; open/item2/disabled/submenu/closing no regression. (systemic popper-overlay closed-rest bug)"
+    },
+    {
+      "id": "contextmenu.item2",
+      "state": "item2",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "ArrowDown\u00d72: data-highlighted + roving tabindex=0 migration"
+    },
+    {
+      "id": "contextmenu.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "data-disabled item present in the menu tree"
+    },
+    {
+      "id": "contextmenu.submenu",
+      "state": "submenu",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "two role=menu layers, aria-expanded=true on subtrigger"
+    },
+    {
+      "id": "contextmenu.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "STR-335 pinned-anim closing: data-state=closed, pointer-events cleared"
+    },
+    {
+      "id": "contextmenu.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest trigger text a11y tree"
+    },
+    {
+      "id": "contextmenuchecks.checkbox",
+      "state": "checkbox",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "role=menuitemcheckbox aria-checked + data-state + indicator span"
+    },
+    {
+      "id": "contextmenuchecks.radio",
+      "state": "radio",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "role=menuitemradio aria-checked single-selection"
+    },
+    {
+      "id": "contextmenuchecks.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest checks-trigger a11y tree"
+    },
+    {
+      "id": "contextmenu.disabled-skip",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg",
+        "dom"
+      ],
+      "apg_check": "ArrowDown SKIPS a disabled item to the next enabled one",
+      "ref": "menu.tsx:720 focusable={!disabled}; navigate() walks raw indices, disabled becomes tab stop"
+    },
+    {
+      "id": "contextmenu.apg-roving",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowDown roves Edit\u2192Duplicate (right-click open)",
+      "ref": "menu.tsx:523-544 no APG gate: ArrowUp/Down, Home/End, Escape-restores-focus all unverified"
+    },
+    {
+      "id": "contextmenu.submenu-part",
+      "state": "submenu",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "ArrowRight opens the submenu; ArrowLeft closes it",
+      "ref": "context-menu.tsx:458-544 Sub/SubTrigger/SubContent absent: nested menu, aria-haspopup/expanded/controls"
+    },
+    {
+      "id": "contextmenu.space-select",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter selects the highlighted item and closes the menu",
+      "ref": "menu.tsx:667-680 SELECTION_KEYS Enter+Space select item; port routes through navigate, never fires ItemSelected"
+    },
+    {
+      "id": "contextmenu.item2-dom",
+      "state": "item2",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): co-covered by contextmenu.item2 golden (ArrowDown highlights item 2 \u2014 data-highlighted + tabindex=0), port DOM-identical (verified).",
+      "oracle_file": "contextmenu.item2"
+    },
+    {
+      "id": "contextmenu.grace-area",
+      "state": "submenu",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "menu.tsx:444-476 submenu grace polygon, pointerDir, 100ms/300ms timers \u2014 runtime only"
+    },
+    {
+      "id": "contextmenu.checkbox-item",
+      "state": "checkbox",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): co-covered by contextmenuchecks.checkbox golden (role=menuitemcheckbox + aria-checked + data-state + ItemIndicator), port DOM-identical (verified).",
+      "oracle_file": "contextmenuchecks.checkbox"
+    },
+    {
+      "id": "contextmenu.radio-item",
+      "state": "radio",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): co-covered by contextmenuchecks.radio golden (role=menuitemradio + aria-checked single-selection), port DOM-identical (verified).",
+      "oracle_file": "contextmenuchecks.radio"
+    },
+    {
+      "id": "contextmenu.typeahead",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "typeahead: a letter focuses the next matching item, repeats cycle",
+      "ref": "IMPLEMENTED (2026-06-21): shared Behavior.Typeahead.nextMatch + ContextMenu wiring (search buffer, performance.now 1s lazy reset, space-guard). menu.tsx:411-434"
+    },
+    {
+      "id": "contextmenu.nonmodal",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "context-menu.tsx:43 modal=false: no scroll-lock/hideOthers; port always layers Envelope"
+    },
+    {
+      "id": "contextmenu.loop-default",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "loop off (default): ArrowDown on the last item does NOT wrap",
+      "ref": "FIXED (2026-06-21): cfg loop true\u2192false in MenuKeyDown + SubKeyDown (menu.tsx:362 default false). golden-validated"
+    },
+    {
+      "id": "contextmenu.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "context-menu.tsx:51-74 controlled open round-trip + dev-warn top-left anchor"
+    },
+    {
+      "id": "contextmenu.tab-prevent",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Tab is prevented (focus stays in the menu)",
+      "ref": "IMPLEMENTED (2026-06-21): MenuKeyDown intercepts Tab \u2192 preventDefault. menu.tsx:532. golden-validated"
+    },
+    {
+      "id": "contextmenu.content-focus",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "menu.tsx:507-510 right-click opens with CONTENT focused (focused=-1), first ArrowDown highlights item0"
+    },
+    {
+      "id": "contextmenu.select-cancel",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "menu.tsx:637-648 cancelable ITEM_SELECT: preventDefault keeps menu open; port always closeMenu"
+    },
+    {
+      "id": "contextmenu.indeterminate",
+      "state": "checkbox",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: indeterminate checkbox aria-checked='mixed' data-state=indeterminate"
+    },
+    {
+      "id": "contextmenu.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: RTL/dir support; port hardcodes dir='ltr'"
+    },
+    {
+      "id": "contextmenu.long-press",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: long-press touch-to-open (700ms, whenTouchOrPen)"
+    },
+    {
+      "id": "contextmenu.disabled-native",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: disabled trigger enables the native context menu (onContextMenu)"
+    },
+    {
+      "id": "contextmenu.window-blur",
+      "state": "closing",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: close on window blur (tab/app switch); port has no window blur listener"
+    },
+    {
+      "id": "contextmenu.pointerup-select",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: pointerUp synthetic-click selection + pointerDown tracking"
+    },
+    {
+      "id": "contextmenu.group-label",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Group + Label parts (role=group wrapper, label div) absent"
+    },
+    {
+      "id": "contextmenu.arrow",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Arrow part (ContextMenuArrow / popper arrow) absent"
+    },
+    {
+      "id": "contextmenu.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Portal/Content/ItemIndicator"
+    },
+    {
+      "id": "contextmenu.autofocus-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: onCloseAutoFocus/onInteractOutside/onEscapeKeyDown/onPointerDownOutside callbacks"
+    },
+    {
+      "id": "contextmenu.textvalue",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: textValue override for typeahead (distinct from rendered text)"
+    },
+    {
+      "id": "contextmenu.collision-attr",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: data-side/data-align reflect actual collision-flipped placement"
+    },
+    {
+      "id": "contextmenu.empty-menu",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: empty/single-item menu (itemCount=0, no focusable)"
+    }
   ]
 }
