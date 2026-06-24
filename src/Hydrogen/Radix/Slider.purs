@@ -107,6 +107,7 @@ type Input =
   , orientation :: Orientation
   , dir :: Dir
   , disabled :: Boolean
+  , ariaLabel :: String         -- aria-label on the thumb (radix getLabel passthrough); "" = none
   , idPrefix :: String          -- reserved for future id wiring; minted on Initialize
   , style :: Style
   }
@@ -121,6 +122,7 @@ defaultInput =
   , orientation: Horizontal
   , dir: LTR
   , disabled: false
+  , ariaLabel: ""
   , idPrefix: "rdx-slider"
   , style: defaultStyle
   }
@@ -145,6 +147,7 @@ type State =
   , orientation :: Orientation
   , dir :: Dir
   , disabled :: Boolean
+  , ariaLabel :: String
   , idPrefix :: String
   , style :: Style
   , uid :: String        -- minted on Initialize (parity with the other primitives)
@@ -191,6 +194,7 @@ initialState input =
   , orientation: input.orientation
   , dir: input.dir
   , disabled: input.disabled
+  , ariaLabel: input.ariaLabel
   , idPrefix: input.idPrefix
   , style: input.style
   , uid: ""
@@ -238,6 +242,9 @@ render st =
         ]
           -- only SliderHorizontal forwards `dir` to SliderImpl (radix); SliderVertical omits it.
           <> (if isVertical then [] else [ HP.attr (HH.AttrName "dir") (dirName st.dir) ])
+          -- aria-label passes through onto the ROOT (radix-themes forwards it to SliderRoot, not
+          -- the thumb — the thumb's axe aria-input-field-name is unchanged, same on both faces).
+          <> (if st.ariaLabel == "" then [] else [ aria "label" st.ariaLabel ])
           <> (if st.disabled then [ dataAttr "disabled" "" ] else [ HE.onMouseDown SlideStart ])
       )
       [ HH.span
@@ -367,6 +374,7 @@ handleAction = case _ of
       , orientation = input.orientation
       , dir = input.dir
       , disabled = input.disabled
+      , ariaLabel = input.ariaLabel
       , idPrefix = input.idPrefix
       , style = input.style
       }
@@ -591,6 +599,7 @@ asThumbState st =
   , orientation: st.orientation
   , dir: st.dir
   , disabled: st.disabled
+  , ariaLabel: ""   -- unused in the geometry projection (range thumbs get per-thumb labels)
   , idPrefix: st.idPrefix
   , style: st.style
   , uid: st.uid

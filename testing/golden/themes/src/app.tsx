@@ -1595,6 +1595,9 @@ const PAGES: Page[] = [
       // `?s=highvalue` — a single thumb PAST centre (80%, pct>50): the in-bounds offset operator
       // in the thumb wrapper calc flips to `-` (getThumbInBoundsOffset, slider.tsx:664-668).
       const highvalue = s === "highvalue";
+      // `?s=arialabel` — aria-label on the slider names the thumb (radix getLabel), clearing the
+      // axe `aria-input-field-name` finding the unnamed default carries.
+      const arialabel = s === "arialabel";
       if (vertical) {
         return (
           <Box style={{ height: 160 }}>
@@ -1604,7 +1607,7 @@ const PAGES: Page[] = [
       }
       return (
         <Box style={{ maxWidth: 320 }}>
-          <Slider defaultValue={[highvalue ? 80 : 40]} {...(disabled ? { disabled: true } : {})} />
+          <Slider defaultValue={[highvalue ? 80 : 40]} {...(disabled ? { disabled: true } : {})} {...(arialabel ? { "aria-label": "Volume" } : {})} />
         </Box>
       );
     })(),

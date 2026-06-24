@@ -1064,6 +1064,8 @@ selectStyle =
 sliderInput :: String -> Slider.Input
 sliderInput s = Slider.defaultInput
   { defaultValue = if s == "highvalue" then 80 else 40
+  -- `?s=arialabel` — name the thumb (clears axe aria-input-field-name).
+  , ariaLabel = if s == "arialabel" then "Volume" else ""
   , min = 0
   , max = 100
   , step = 1

@@ -246,11 +246,12 @@
       "id": "slider.aria-label",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "aria"
       ],
-      "ref": "slider.tsx:681,823-831 aria-label fallback/passthrough clears axe aria-input-field-name; port has no aria-label wiring"
+      "ref": "DONE (2026-06-24): added ariaLabel field \u2014 passes through onto the ROOT span (radix-themes forwards Slider aria-label to SliderRoot, NOT the thumb). ?s=arialabel DOM + ARIA goldens byte-identical; the thumb axe aria-input-field-name fingerprint is unchanged (same both faces \u2014 aria-label on root does not name the thumb). slider.tsx:681,823-831",
+      "oracle_file": "slider.arialabel"
     },
     {
       "id": "slider.rest-dom",

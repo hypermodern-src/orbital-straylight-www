@@ -753,6 +753,7 @@ export const STATES = {
   },
   slider: {
     highvalue: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },
+    arialabel: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },
     // Single-thumb slider (role=slider, defaultValue=[40], min 0 max 100 step 1). Drive it
     // purely by KEYBOARD: focus the thumb, press ArrowRight 5× → a deterministic value of 45
     // (40 + 5·step). The landed value is exact, so the thumb's `left: calc(45% + …)` and the

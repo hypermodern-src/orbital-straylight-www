@@ -67,6 +67,7 @@ STATES=(
   "tabnav:active"
   "slider:stepped"
   "slider:highvalue"
+  "slider:arialabel"
   "scrollarea:shown"
   "progress:shown"
   "accessibleicon:shown"
