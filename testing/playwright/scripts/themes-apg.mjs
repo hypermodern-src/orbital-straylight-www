@@ -1579,6 +1579,15 @@ const CHECKS = [
   // (ArrowDown/Up rove, Home/End first/last, Enter/Space select+close, Escape close+restore).
   // The port wired navigate + Dismiss.escape but had NO APG gate. Keyed off role/data-* only,
   // so the same checks run against golden AND port. ctxOpen right-clicks the trigger area.
+  // content-focus (menu.tsx:507-510) — a right-click opens the ContextMenu with the CONTENT
+  // itself focused (focused index = -1), NOT the first item; the first ArrowDown then highlights
+  // item 0 (proven separately by the Edit→Duplicate rove).
+  { id: "contextmenu", apg: "menu", name: "right-click opens with the CONTENT focused (not an item)", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(150);
+    const onContent = await pg.evaluate(() => document.activeElement === document.querySelector('[role="menu"]'));
+    ok(onContent, "ContextMenu did not open with the content focused (an item was focused instead)");
+  }},
   { id: "contextmenu", apg: "menu", name: "ArrowDown roves Edit→Duplicate (right-click open)", run: async (pg) => {
     await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
     await pg.locator('[role="menu"]').waitFor();

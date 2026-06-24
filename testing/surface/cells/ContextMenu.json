@@ -253,11 +253,12 @@
       "id": "contextmenu.content-focus",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "menu.tsx:507-510 right-click opens with CONTENT focused (focused=-1), first ArrowDown highlights item0"
+      "ref": "DONE (2026-06-24): apg both faces \u2014 right-click opens the ContextMenu with the content (role=menu) focused, focused index=-1 (menu.tsx:507-510); the first ArrowDown then highlights item 0 (co-proven by the Edit\u2192Duplicate rove). Port matches.",
+      "apg_check": "right-click opens with the CONTENT focused (not an item)"
     },
     {
       "id": "contextmenu.select-cancel",
