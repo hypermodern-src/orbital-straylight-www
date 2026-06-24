@@ -1063,7 +1063,7 @@ selectStyle =
 -- | is supplied via the primitive's Style slots.
 sliderInput :: String -> Slider.Input
 sliderInput s = Slider.defaultInput
-  { defaultValue = 40
+  { defaultValue = if s == "highvalue" then 80 else 40
   , min = 0
   , max = 100
   , step = 1

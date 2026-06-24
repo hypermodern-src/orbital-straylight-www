@@ -204,11 +204,12 @@
       "id": "slider.thumb-bounds-offset",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "apg"
+        "dom"
       ],
-      "ref": "slider.tsx:664-668,852-857 getThumbInBoundsOffset nudges thumb inward at edges; port hardcodes +0px (overhang at 0%/100%)"
+      "ref": "DONE (2026-06-24): FIXED \u2014 the single-thumb wrapper hardcoded calc(pct% + 0px); past centre (pct>50) radix flips the in-bounds-offset operator to `-` (getThumbInBoundsOffset slider.tsx:664-668). Now op = if pct>50 then - else +, matching the range slider. ?s=highvalue (80%) golden byte-identical (calc(80% - <px>)); rest/stepped/vertical/disabled unregressed.",
+      "oracle_file": "slider.highvalue"
     },
     {
       "id": "slider.value-commit",

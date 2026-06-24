@@ -1592,6 +1592,9 @@ const PAGES: Page[] = [
       const s = currentState();
       const disabled = s === "disabled";
       const vertical = s === "vertical";
+      // `?s=highvalue` — a single thumb PAST centre (80%, pct>50): the in-bounds offset operator
+      // in the thumb wrapper calc flips to `-` (getThumbInBoundsOffset, slider.tsx:664-668).
+      const highvalue = s === "highvalue";
       if (vertical) {
         return (
           <Box style={{ height: 160 }}>
@@ -1601,7 +1604,7 @@ const PAGES: Page[] = [
       }
       return (
         <Box style={{ maxWidth: 320 }}>
-          <Slider defaultValue={[40]} {...(disabled ? { disabled: true } : {})} />
+          <Slider defaultValue={[highvalue ? 80 : 40]} {...(disabled ? { disabled: true } : {})} />
         </Box>
       );
     })(),

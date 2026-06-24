@@ -257,7 +257,9 @@ render st =
           ]
       , HH.span
           [ HP.attr (HH.AttrName "style")
-              ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> thumbStart <> "% + 0px);")
+              -- in-bounds offset operator (getThumbInBoundsOffset, slider.tsx:664-668): `+` left of
+              -- centre (pct<50), `-` past it (pct>50); magnitude is a measured px (oracle → <px>).
+              ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> thumbStart <> "% " <> (if pct > 50.0 then "-" else "+") <> " 0px);")
           ]
           [ HH.span
               ( [ classes st.style.thumb

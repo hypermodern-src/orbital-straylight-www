@@ -66,6 +66,7 @@ STATES=(
   "checkboxcards:selected"
   "tabnav:active"
   "slider:stepped"
+  "slider:highvalue"
   "scrollarea:shown"
   "progress:shown"
   "accessibleicon:shown"
