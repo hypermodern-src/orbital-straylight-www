@@ -265,11 +265,12 @@
       "id": "contextmenu.select-cancel",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "apg"
       ],
-      "ref": "menu.tsx:637-648 cancelable ITEM_SELECT: preventDefault keeps menu open; port always closeMenu"
+      "ref": "DONE (2026-06-24): FEATURE \u2014 cancelable ITEM_SELECT (menu.tsx:637-648). Added keepOpenValues to Input (item values whose select is preventDefault-cancelable); both top-level select paths (click + keyboard Enter/Space) skip closeMenu when the value is in keepOpenValues. ?s=cancelselect (Edit onSelect preventDefault) apg green both faces; normal select-closes unregressed.",
+      "apg_check": "cancelable item select (preventDefault) keeps the menu OPEN"
     },
     {
       "id": "contextmenu.indeterminate",

@@ -244,6 +244,7 @@ type Input =
   , contentStyle :: String     -- the content's CONSTANT style (outline + menu vars + pointer-events)
   , subContentStyle :: String  -- the SubContent's CONSTANT style (pointer-events BEFORE the vars)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
+  , keepOpenValues :: Array String  -- item values whose select is CANCELABLE (preventDefault) — selecting them keeps the menu open
   }
 
 defaultInput :: Input
@@ -263,6 +264,7 @@ defaultInput =
   , contentStyle: ""
   , subContentStyle: ""
   , portalAttrs: []
+  , keepOpenValues: []
   }
 
 data Output
@@ -298,6 +300,7 @@ type State =
   , contentStyle :: String
   , subContentStyle :: String
   , portalAttrs :: Array (Tuple String String)
+  , keepOpenValues :: Array String
   , restoreEl :: Maybe HTMLElement.HTMLElement  -- element to refocus on close (the trigger)
   , subs :: Array H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId  -- one-shot microtask subscription for AfterOpen / AfterClose
@@ -403,6 +406,7 @@ initialState input =
   , contentStyle: input.contentStyle
   , subContentStyle: input.subContentStyle
   , portalAttrs: input.portalAttrs
+  , keepOpenValues: input.keepOpenValues
   , restoreEl: Nothing
   , subs: []
   , postSub: Nothing
@@ -791,6 +795,7 @@ handleAction = case _ of
       , contentStyle = input.contentStyle
       , subContentStyle = input.subContentStyle
       , portalAttrs = input.portalAttrs
+      , keepOpenValues = input.keepOpenValues
       }
   Opened e -> do
     -- suppress the native browser context menu, capture the cursor point (the menu's
@@ -867,7 +872,8 @@ handleAction = case _ of
           liftEffect (preventDefault (KE.toEvent ke))
           for_ (enabledValueAt st.focused st.entries) \v -> do
             H.raise (ItemSelected v)
-            closeMenu
+            -- cancelable ITEM_SELECT (menu.tsx:637-648): a keepOpen value keeps the menu open.
+            unless (Array.elem v st.keepOpenValues) closeMenu
         -- Tab/Shift+Tab preventDefault inside the menu (menu.tsx:531-532): focus stays trapped.
         else if key == "Tab" then liftEffect (preventDefault (KE.toEvent ke))
         else case navigatePaged cfg pos key of
@@ -886,7 +892,8 @@ handleAction = case _ of
       mDisabled = Array.findMap pick st.entries
     when (maybe true not mDisabled) do
       H.raise (ItemSelected value)
-      closeMenu
+      -- cancelable ITEM_SELECT (menu.tsx:637-648): a keepOpen value's select keeps the menu open.
+      unless (Array.elem value st.keepOpenValues) closeMenu
   -- scroll/resize: just re-place. NOT re-adopt — the wrapper stays in body across renders
   -- (Halogen patches it in place), and re-adopting would move it past the trailing focus
   -- guard AND blur the focused content. (This bit the menu because lockScroll fires resize.)

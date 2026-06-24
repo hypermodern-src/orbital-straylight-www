@@ -1588,6 +1588,15 @@ const CHECKS = [
     const onContent = await pg.evaluate(() => document.activeElement === document.querySelector('[role="menu"]'));
     ok(onContent, "ContextMenu did not open with the content focused (an item was focused instead)");
   }},
+  // select-cancel (menu.tsx:637-648) — an item whose onSelect preventDefaults is CANCELABLE:
+  // selecting it keeps the menu OPEN (`?s=cancelselect` makes Edit cancelable).
+  { id: "contextmenu", state: "cancelselect", apg: "menu", name: "cancelable item select (preventDefault) keeps the menu OPEN", run: async (pg) => {
+    await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
+    await pg.locator('[role="menu"]').waitFor(); await pg.waitForTimeout(150);
+    await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Edit");
+    await pg.keyboard.press("Enter"); await pg.waitForTimeout(220);
+    ok(await visible(pg, '[role="menu"]'), "selecting a preventDefault'd (cancelable) item closed the menu — it must stay open");
+  }},
   { id: "contextmenu", apg: "menu", name: "ArrowDown roves Edit→Duplicate (right-click open)", run: async (pg) => {
     await pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" });
     await pg.locator('[role="menu"]').waitFor();

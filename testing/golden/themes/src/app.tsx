@@ -837,6 +837,9 @@ const PAGES: Page[] = [
       // `?s=nonmodal` — modal={false}: no scroll-lock / no aria-hide-siblings / no body
       // pointer-block; the two focus-guard sentinels still render (FocusGuards ≠ modality).
       const nonmodal = s === "nonmodal";
+      // `?s=cancelselect` — the Edit item's onSelect preventDefaults, so selecting it KEEPS the
+      // menu open (cancelable ITEM_SELECT, menu.tsx:637-648).
+      const cancelEdit = s === "cancelselect";
       return (
         <ContextMenu.Root {...(nonmodal ? { modal: false } : {})}>
           <ContextMenu.Trigger>
@@ -856,7 +859,7 @@ const PAGES: Page[] = [
             </Flex>
           </ContextMenu.Trigger>
           <ContextMenu.Content>
-            <ContextMenu.Item shortcut="⌘ E">Edit</ContextMenu.Item>
+            <ContextMenu.Item shortcut="⌘ E" {...(cancelEdit ? { onSelect: (e: Event) => e.preventDefault() } : {})}>Edit</ContextMenu.Item>
             <ContextMenu.Item shortcut="⌘ D" disabled={dupDisabled}>Duplicate</ContextMenu.Item>
             <ContextMenu.Separator />
             {sub && (

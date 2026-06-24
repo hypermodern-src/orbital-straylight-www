@@ -791,6 +791,8 @@ contextMenuInput s = ContextMenu.defaultInput
   -- `?s=nonmodal` — modal=false: no scroll-lock / no hideOthers / no content pointer block
   -- (focus guards still render). Default modal=true matches upstream ContextMenu.
   , modal = s /= "nonmodal"
+  -- `?s=cancelselect` — the Edit item's select is cancelable (preventDefault) → keeps menu open.
+  , keepOpenValues = if s == "cancelselect" then [ "edit" ] else []
   , style = contextMenuStyle
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"
