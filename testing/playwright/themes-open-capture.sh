@@ -68,6 +68,7 @@ STATES=(
   "slider:stepped"
   "slider:highvalue"
   "slider:arialabel"
+  "slider:rtl"
   "scrollarea:shown"
   "progress:shown"
   "accessibleicon:shown"

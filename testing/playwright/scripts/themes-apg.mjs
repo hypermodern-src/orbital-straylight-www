@@ -837,6 +837,17 @@ const CHECKS = [
     await press(pg, "ArrowRight");
     await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "vertical ArrowLeft/ArrowRight must be no-ops");
   }},
+  // rtl-geometry (keyboard half): under dir=rtl the horizontal arrows FLIP — ArrowLeft increments
+  // (toward max on the now-right start edge), ArrowRight decrements (radix slider.tsx:548-549).
+  { id: "slider", state: "rtl", apg: "slider", name: "RTL: ArrowLeft increments, ArrowRight decrements (flipped horizontal)", run: async (pg) => {
+    await pg.locator('[role="slider"]').first().waitFor();
+    await focusFirst(pg, '[role="slider"]');
+    const before = Number(await attrOf(pg, '[role="slider"]', 0, "aria-valuenow"));
+    await press(pg, "ArrowLeft");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before + 1), "RTL ArrowLeft should increment (+step)");
+    await press(pg, "ArrowRight");
+    await attrEq(pg, '[role="slider"]', 0, "aria-valuenow", String(before), "RTL ArrowRight should decrement (-step)");
+  }},
   // Pointer-drag: a pointer-down on the track jumps the value to the pointer (radix
   // handleSlideStart → getValueFromPointer maps (x − rect.left)/width → [min,max]); dragging
   // moves it. Asserts value ≈ the clicked fraction (±3 for sub-pixel/step). Non-circular:

@@ -193,12 +193,14 @@
       "id": "slider.rtl-geometry",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom",
         "apg"
       ],
-      "ref": "slider.tsx:284-303,328-330,548-549 RTL startEdge=right, range right edge; port flips arrow meaning but not rendered edge"
+      "ref": "DONE (2026-06-24): FIXED geometry \u2014 horizontal startEdge/endEdge flip to right/left for RTL, and the in-bounds-offset operator XORs with dir ((pct>50) /= isRTL). RTL arrow keys already flipped (port). ?s=rtl DOM golden byte-identical (range right:0%/left:N%, thumb right:calc(...)) + apg flip green both faces. slider.tsx:284-303,548-549",
+      "apg_check": "RTL: ArrowLeft increments, ArrowRight decrements",
+      "oracle_file": "slider.rtl"
     },
     {
       "id": "slider.thumb-bounds-offset",

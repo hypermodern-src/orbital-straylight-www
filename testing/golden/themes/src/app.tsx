@@ -1598,6 +1598,9 @@ const PAGES: Page[] = [
       // `?s=arialabel` — aria-label on the slider names the thumb (radix getLabel), clearing the
       // axe `aria-input-field-name` finding the unnamed default carries.
       const arialabel = s === "arialabel";
+      // `?s=rtl` — dir="rtl": the horizontal axis mirrors — startEdge=right/endEdge=left on
+      // range+thumb, and the RTL arrow keys flip (slider.tsx:284-303,328-330,548-549).
+      const rtl = s === "rtl";
       if (vertical) {
         return (
           <Box style={{ height: 160 }}>
@@ -1607,7 +1610,7 @@ const PAGES: Page[] = [
       }
       return (
         <Box style={{ maxWidth: 320 }}>
-          <Slider defaultValue={[highvalue ? 80 : 40]} {...(disabled ? { disabled: true } : {})} {...(arialabel ? { "aria-label": "Volume" } : {})} />
+          <Slider defaultValue={[highvalue ? 80 : 40]} {...(disabled ? { disabled: true } : {})} {...(arialabel ? { "aria-label": "Volume" } : {})} {...(rtl ? { dir: "rtl" as const } : {})} />
         </Box>
       );
     })(),

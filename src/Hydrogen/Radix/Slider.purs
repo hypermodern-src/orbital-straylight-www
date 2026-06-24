@@ -227,8 +227,10 @@ render st =
     -- Range stamps `{startEdge}: 0%; {endEdge}: {100-pct}%`; the thumb wrapper stamps
     -- `{startEdge}: calc({pct}% + <px>)`. Key ORDER (start then end) matches React's style object.
     isVertical = st.orientation == Vertical
-    startEdge = if isVertical then "bottom" else "left"
-    endEdge = if isVertical then "top" else "right"
+    -- horizontal RTL mirrors the axis: startEdge=right, endEdge=left (radix SliderHorizontal dir).
+    isRTL = st.dir == RTL
+    startEdge = if isVertical then "bottom" else if isRTL then "right" else "left"
+    endEdge = if isVertical then "top" else if isRTL then "left" else "right"
     thumbTransform = if isVertical then "translateY(50%)" else "translateX(-50%)"
     rangeEnd = fmtPct (100.0 - pct)
     thumbStart = fmtPct pct
@@ -266,7 +268,7 @@ render st =
           [ HP.attr (HH.AttrName "style")
               -- in-bounds offset operator (getThumbInBoundsOffset, slider.tsx:664-668): `+` left of
               -- centre (pct<50), `-` past it (pct>50); magnitude is a measured px (oracle → <px>).
-              ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> thumbStart <> "% " <> (if pct > 50.0 then "-" else "+") <> " 0px);")
+              ("transform: var(--radix-slider-thumb-transform); position: absolute; " <> startEdge <> ": calc(" <> thumbStart <> "% " <> (if (pct > 50.0) /= isRTL then "-" else "+") <> " 0px);")
           ]
           [ HH.span
               ( [ classes st.style.thumb
