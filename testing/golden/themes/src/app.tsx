@@ -834,8 +834,11 @@ const PAGES: Page[] = [
       const s = currentState();
       const dupDisabled = s === "disabled";
       const sub = s === "submenu";
+      // `?s=nonmodal` — modal={false}: no scroll-lock / no aria-hide-siblings / no body
+      // pointer-block; the two focus-guard sentinels still render (FocusGuards ≠ modality).
+      const nonmodal = s === "nonmodal";
       return (
-        <ContextMenu.Root>
+        <ContextMenu.Root {...(nonmodal ? { modal: false } : {})}>
           <ContextMenu.Trigger>
             <Flex
               align="center"

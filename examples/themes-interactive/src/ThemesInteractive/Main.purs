@@ -788,6 +788,9 @@ dropdownChecksInput s = DropdownMenu.defaultInput
 contextMenuInput :: String -> ContextMenu.Input
 contextMenuInput s = ContextMenu.defaultInput
   { side = Right   -- radix point-anchors the menu to the right of the cursor (data-side=right)
+  -- `?s=nonmodal` — modal=false: no scroll-lock / no hideOthers / no content pointer block
+  -- (focus guards still render). Default modal=true matches upstream ContextMenu.
+  , modal = s /= "nonmodal"
   , style = contextMenuStyle
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"

@@ -211,11 +211,12 @@
       "id": "contextmenu.nonmodal",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "context-menu.tsx:43 modal=false: no scroll-lock/hideOthers; port always layers Envelope"
+      "ref": "DONE (2026-06-24): FEATURE \u2014 added modal field (default true). finalize gates lockScroll + hideOthers on st.modal (focus guards + content focus apply in BOTH modes; order lock\u2192guards\u2192hideOthers so hideOthers aria-hides the guards in modal); content pointer-events:auto kept only while open AND modal; finishClose gates showOthers+unlockScroll on modal. ?s=nonmodal golden byte-identical (no data-scroll-locked, no #root aria-hidden, guards present, content no pointer-events:auto); modal states unregressed. context-menu.tsx:43",
+      "oracle_file": "contextmenu.nonmodal"
     },
     {
       "id": "contextmenu.loop-default",

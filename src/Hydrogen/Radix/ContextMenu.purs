@@ -232,6 +232,7 @@ type Input =
   { entries :: Array MenuEntry
   , open :: Maybe Boolean
   , defaultOpen :: Boolean
+  , modal :: Boolean           -- modal=true (default): scroll-lock + hideOthers + content pointer block; false = focus guards only
   , side :: Side
   , align :: Align
   , offset :: Number
@@ -250,6 +251,7 @@ defaultInput =
   { entries: []
   , open: Nothing
   , defaultOpen: false
+  , modal: true
   , side: Bottom
   , align: Start
   , offset: 4.0
@@ -282,6 +284,7 @@ type State =
   , presence :: Presence  -- Open / Closing (mounted, exiting) / Closed (unmounted)
   , entries :: Array MenuEntry
   , focused :: Int               -- roving tab stop among focusable items
+  , modal :: Boolean
   , side :: Side
   , align :: Align
   , offset :: Number
@@ -386,6 +389,7 @@ initialState input =
   , presence: if startOpen then Open else Closed
   , entries: input.entries
   , focused: 0
+  , modal: input.modal
   , side: input.side
   , align: input.align
   , offset: input.offset
@@ -433,7 +437,10 @@ render st =
     -- the open RemoveScroll wrapper re-enables pointers over the content (`pointer-events: auto`
     -- baked into contentStyle). On close that block is released immediately (Envelope.clearPointerEvents)
     -- while the node lingers for the exit animation, so the closing render must NOT carry it.
-    contentStyle' = if open then st.contentStyle else stripPointerEventsAuto st.contentStyle
+    -- the content's `pointer-events: auto` is the MODAL RemoveScroll pointer re-enable; a
+    -- non-modal menu (no body pointer block) carries no such override, and a closing node drops
+    -- it too. So keep it ONLY while open AND modal.
+    contentStyle' = if open && st.modal then st.contentStyle else stripPointerEventsAuto st.contentStyle
   in
     -- transparent component root (display:contents) — the DOM-oracle normalizer strips it.
     HH.div [ HP.style "display:contents" ]
@@ -771,6 +778,7 @@ handleAction = case _ of
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
+      , modal = input.modal
       , entries = input.entries
       , side = input.side
       , align = input.align
@@ -1031,6 +1039,7 @@ scheduleAfterOpen = do
 -- | open-state driver fires its arrow keys immediately, before a deferred focus would land.
 finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
 finalize focusToo = do
+  st <- H.get
   mbody <- liftEffect Portal.documentBody
   mwrap <- H.getHTMLElementRef wrapperRef
   -- radix focuses the menu CONTENT on open (role=menu, tabindex=-1), not an item.
@@ -1039,9 +1048,13 @@ finalize focusToo = do
     Just body, Just wrap -> liftEffect do
       Portal.adopt body (HTMLElement.toElement wrap)
       when focusToo do
-        Envelope.lockScroll
+        -- scroll-lock + aria-hide-siblings are the MODAL envelope (gated on st.modal); the focus
+        -- guards + content focus apply in BOTH modes (FocusGuards ≠ modality — context-menu.tsx:43).
+        -- ORDER: lock → addFocusGuards → hideOthers, so hideOthers aria-hides the guards too
+        -- (in modal mode the guards carry aria-hidden; in non-modal they don't).
+        when st.modal Envelope.lockScroll
         Envelope.addFocusGuards
-        Envelope.hideOthers wrap
+        when st.modal (Envelope.hideOthers wrap)
         for_ mcontent HTMLElement.focus
     _, _ -> pure unit
 
@@ -1115,7 +1128,10 @@ finishClose = do
   st <- H.get
   for_ st.animSub H.unsubscribe
   for_ st.postSub H.unsubscribe
-  liftEffect (Envelope.showOthers *> Envelope.removeFocusGuards *> Envelope.unlockScroll)
+  -- mirror finalize: removeFocusGuards in BOTH modes; showOthers + unlockScroll only when modal.
+  liftEffect do
+    Envelope.removeFocusGuards
+    when st.modal (Envelope.showOthers *> Envelope.unlockScroll)
   H.modify_ _ { presence = finishExit st.presence, restoreEl = Nothing, animSub = Nothing, postSub = Nothing }
 
 -- | Point-anchored: position the popper WRAPPER at the captured cursor point (a zero-size
