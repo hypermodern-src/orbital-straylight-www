@@ -5,37 +5,323 @@
   "upstream": "primitives packages/react/slider/src/slider.tsx + @radix-ui/themes@3",
   "note": "STR-381 ledger for Slider: 20 gaps (2 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
   "cells": [
-    { "id": "slider.rest",            "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "at-rest slider a11y tree" },
-    { "id": "slider.stepped",         "state": "stepped",  "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "after 5 ArrowRight: aria-valuenow=45, left:calc(45%+<px>)/right:55%" },
-    { "id": "slider.disabled",        "state": "disabled", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "disabled DOM: data-disabled on root+track+range+thumb, no thumb tabindex" },
-    { "id": "slider.vertical",        "state": "vertical", "importance": "common", "status": "gated", "oracle": ["dom"],          "ref": "vertical: translateY(50%) + bottom/top edges" },
-    { "id": "sliderrange.default",    "state": "default",  "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "range slider two thumbs render" },
-    { "id": "sliderrange.minsteps",   "state": "minsteps", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "range with minStepsBetweenThumbs render" },
-    { "id": "sliderrange.triple",     "state": "triple",   "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "three-thumb range: Value N of M aria-labels" },
-    { "id": "sliderrange.rest",       "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "range slider at-rest a11y tree" },
-    { "id": "sliderrangeform.default","state": "default",  "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "range slider in form render" },
-    { "id": "sliderrangeform.rest",   "state": "rest",     "importance": "common", "status": "gated", "oracle": ["aria"],         "ref": "range form slider at-rest a11y tree" },
-
-    { "id": "slider.multi-thumb",        "state": "default",  "importance": "core",   "status": "gated", "oracle": ["dom", "apg"], "apg_check": "two role=slider thumbs labelled Minimum/Maximum, each focusable", "ref": "slider.tsx:62,116,131-163,533-553,807-846 value number[]: aria-label Minimum/Maximum, range offsetStart/End, closest-thumb, cross-over sort; port is single-Int" },
-    { "id": "slider.form-bubble-input",  "state": "form",     "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "slider.tsx:606-611,717-801 SliderBubbleInput hidden input per-thumb + native input event; absent in port" },
-    { "id": "slider.pointer-track",      "state": "open",     "importance": "core",   "status": "gated", "oracle": ["apg"],        "apg_check": "pointer-down on the track jumps the value; dragging follows the pointer", "ref": "slider.tsx:288-296,315-332,460-484 click/drag track sets value from pointer, setPointerCapture; absent in port" },
-    { "id": "slider.shift-arrow",        "state": "open",     "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "Shift+ArrowRight/Left move by 10 steps", "ref": "slider.tsx:212-218 Shift+Arrow = 10x step; port handles Page keys but not shift+arrow" },
-    { "id": "slider.page-keys",          "state": "open",     "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "PageUp/PageDown move by 10 steps", "ref": "slider.tsx:17,212-218,454-458 PageUp/PageDown x10 step; port implements but no oracle drives Page keys" },
-    { "id": "slider.min-steps-between",   "state": "minsteps","importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "minStepsBetweenThumbs blocks the thumb at the neighbour boundary", "ref": "slider.tsx:101,154,866-889 minStepsBetweenThumbs blocks updates within min gap; single-thumb port has no analog" },
-    { "id": "slider.vertical-transform", "state": "vertical", "importance": "common", "status": "open", "oracle": ["dom"],        "ref": "slider.tsx:345-409,381-387 vertical: translateY(50%), bottom/top edges; port hardcodes translateX(-50%) + left/right" },
-    { "id": "slider.rtl-geometry",       "state": "open",     "importance": "common", "status": "open", "oracle": ["dom", "apg"], "ref": "slider.tsx:284-303,328-330,548-549 RTL startEdge=right, range right edge; port flips arrow meaning but not rendered edge" },
-    { "id": "slider.thumb-bounds-offset", "state": "open",    "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "slider.tsx:664-668,852-857 getThumbInBoundsOffset nudges thumb inward at edges; port hardcodes +0px (overhang at 0%/100%)" },
-    { "id": "slider.value-commit",       "state": "open",     "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "slider.tsx:87,140-162,200-218 onValueCommit on slide end + key commit; port has only ValueChanged" },
-    { "id": "slider.fractional-step",    "state": "open",     "importance": "common", "status": "open", "oracle": ["apg"],        "ref": "slider.tsx:147-149,900-923 fractional/scientific step (0.1, 1e-7) via roundValue precision; port is Int-only" },
-    { "id": "slider.disabled-track-range","state": "disabled","importance": "common", "status": "open", "oracle": ["dom"],        "ref": "slider.tsx:181-182,506,543 disabled DOM: data-disabled missing on track+range in port, no disabled golden" },
-    { "id": "slider.aria-label",         "state": "open",     "importance": "common", "status": "open", "oracle": ["aria"],       "ref": "slider.tsx:681,823-831 aria-label fallback/passthrough clears axe aria-input-field-name; port has no aria-label wiring" },
-    { "id": "slider.rest-dom",           "state": "rest",     "importance": "common", "status": "gated", "oracle": ["dom"], "oracle_file": "slider.rest", "ref": "at-rest DOM (value 40, range right:60%, thumb left:calc(40%+<px>)) — co-covered by golden-dom/slider.rest.txt; port==upstream (verified)" },
-    { "id": "slider.clamp-grid-snap",    "state": "open",     "importance": "common", "status": "gated", "oracle": ["apg"],        "apg_check": "value clamps at min/max (overshoot is a no-op)", "ref": "slider.tsx:147-151,276-283 clamp + grid-snap on overshoot; port does it but no oracle presses past boundary" },
-
-    { "id": "slider.inverted",           "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: inverted prop flips slide direction (start/end edge, scale)" },
-    { "id": "slider.collection-wiring",  "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: thumbs registered in a Collection (data-radix-collection-item)" },
-    { "id": "slider.focus-visible",      "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: focusVisible discipline — keyboard focuses thumb with ring" },
-    { "id": "slider.ssr-hidden-thumb",   "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"], "ref": "edge: SSR/initial-render thumb gets style display:none" },
-    { "id": "slider.home-end-commit",    "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: Home/End commit semantics + boundary clamp" }
+    {
+      "id": "slider.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest slider a11y tree"
+    },
+    {
+      "id": "slider.stepped",
+      "state": "stepped",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "after 5 ArrowRight: aria-valuenow=45, left:calc(45%+<px>)/right:55%"
+    },
+    {
+      "id": "slider.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled DOM: data-disabled on root+track+range+thumb, no thumb tabindex"
+    },
+    {
+      "id": "slider.vertical",
+      "state": "vertical",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "vertical: translateY(50%) + bottom/top edges"
+    },
+    {
+      "id": "sliderrange.default",
+      "state": "default",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "range slider two thumbs render"
+    },
+    {
+      "id": "sliderrange.minsteps",
+      "state": "minsteps",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "range with minStepsBetweenThumbs render"
+    },
+    {
+      "id": "sliderrange.triple",
+      "state": "triple",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "three-thumb range: Value N of M aria-labels"
+    },
+    {
+      "id": "sliderrange.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "range slider at-rest a11y tree"
+    },
+    {
+      "id": "sliderrangeform.default",
+      "state": "default",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "range slider in form render"
+    },
+    {
+      "id": "sliderrangeform.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "range form slider at-rest a11y tree"
+    },
+    {
+      "id": "slider.multi-thumb",
+      "state": "default",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "two role=slider thumbs labelled Minimum/Maximum, each focusable",
+      "ref": "slider.tsx:62,116,131-163,533-553,807-846 value number[]: aria-label Minimum/Maximum, range offsetStart/End, closest-thumb, cross-over sort; port is single-Int"
+    },
+    {
+      "id": "slider.form-bubble-input",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): co-covered by sliderrangeform.default golden \u2014 per-thumb hidden SliderBubbleInput (<input name=band[] style=display:none value=N>) for native form participation. Port DOM-identical (in green gate).",
+      "oracle_file": "sliderrangeform.default"
+    },
+    {
+      "id": "slider.pointer-track",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "pointer-down on the track jumps the value; dragging follows the pointer",
+      "ref": "slider.tsx:288-296,315-332,460-484 click/drag track sets value from pointer, setPointerCapture; absent in port"
+    },
+    {
+      "id": "slider.shift-arrow",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Shift+ArrowRight/Left move by 10 steps",
+      "ref": "slider.tsx:212-218 Shift+Arrow = 10x step; port handles Page keys but not shift+arrow"
+    },
+    {
+      "id": "slider.page-keys",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "PageUp/PageDown move by 10 steps",
+      "ref": "slider.tsx:17,212-218,454-458 PageUp/PageDown x10 step; port implements but no oracle drives Page keys"
+    },
+    {
+      "id": "slider.min-steps-between",
+      "state": "minsteps",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "minStepsBetweenThumbs blocks the thumb at the neighbour boundary",
+      "ref": "slider.tsx:101,154,866-889 minStepsBetweenThumbs blocks updates within min gap; single-thumb port has no analog"
+    },
+    {
+      "id": "slider.vertical-transform",
+      "state": "vertical",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): co-covered by slider.vertical golden \u2014 data-orientation=vertical with translateY(50%) thumb transform + bottom/top edge positioning. Port DOM-identical (in green gate).",
+      "oracle_file": "slider.vertical"
+    },
+    {
+      "id": "slider.rtl-geometry",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "slider.tsx:284-303,328-330,548-549 RTL startEdge=right, range right edge; port flips arrow meaning but not rendered edge"
+    },
+    {
+      "id": "slider.thumb-bounds-offset",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "slider.tsx:664-668,852-857 getThumbInBoundsOffset nudges thumb inward at edges; port hardcodes +0px (overhang at 0%/100%)"
+    },
+    {
+      "id": "slider.value-commit",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "slider.tsx:87,140-162,200-218 onValueCommit on slide end + key commit; port has only ValueChanged"
+    },
+    {
+      "id": "slider.fractional-step",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "slider.tsx:147-149,900-923 fractional/scientific step (0.1, 1e-7) via roundValue precision; port is Int-only"
+    },
+    {
+      "id": "slider.disabled-track-range",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): co-covered by slider.disabled golden \u2014 data-disabled present on root+track+range+thumb (4 occurrences). Port DOM-identical (in green gate).",
+      "oracle_file": "slider.disabled"
+    },
+    {
+      "id": "slider.aria-label",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "slider.tsx:681,823-831 aria-label fallback/passthrough clears axe aria-input-field-name; port has no aria-label wiring"
+    },
+    {
+      "id": "slider.rest-dom",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "slider.rest",
+      "ref": "at-rest DOM (value 40, range right:60%, thumb left:calc(40%+<px>)) \u2014 co-covered by golden-dom/slider.rest.txt; port==upstream (verified)"
+    },
+    {
+      "id": "slider.clamp-grid-snap",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "value clamps at min/max (overshoot is a no-op)",
+      "ref": "slider.tsx:147-151,276-283 clamp + grid-snap on overshoot; port does it but no oracle presses past boundary"
+    },
+    {
+      "id": "slider.inverted",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: inverted prop flips slide direction (start/end edge, scale)"
+    },
+    {
+      "id": "slider.collection-wiring",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: thumbs registered in a Collection (data-radix-collection-item)"
+    },
+    {
+      "id": "slider.focus-visible",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: focusVisible discipline \u2014 keyboard focuses thumb with ring"
+    },
+    {
+      "id": "slider.ssr-hidden-thumb",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: SSR/initial-render thumb gets style display:none"
+    },
+    {
+      "id": "slider.home-end-commit",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: Home/End commit semantics + boundary clamp"
+    }
   ]
 }
