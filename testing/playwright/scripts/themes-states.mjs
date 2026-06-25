@@ -427,6 +427,21 @@ export const STATES = {
     disabled: async (pg) => {
       await root(pg).locator('button[aria-expanded][disabled]').first().waitFor();
     },
+    // ?s=disabledroot: the whole Root disabled → EVERY item disabled (data-disabled on
+    // item/header/trigger/content + each trigger's disabled attr). Wait until all three
+    // triggers are disabled. Same locator both faces.
+    disabledroot: async (pg) => {
+      const trigs = root(pg).locator('button[aria-expanded]');
+      await trigs.first().waitFor();
+      await pg.waitForFunction(
+        () => {
+          const bs = Array.from(document.querySelectorAll('#root button[aria-expanded]'));
+          return bs.length === 3 && bs.every((b) => b.hasAttribute('disabled'));
+        },
+        undefined,
+        { timeout: 5000 }
+      );
+    },
     // ?s=multiple (the default type): open TWO items (item-1 then item-3) and assert BOTH
     // regions are open simultaneously (independent toggles, set semantics). Keyed off upstream
     // aria-expanded/role=region only, so the same driver runs against golden and port.

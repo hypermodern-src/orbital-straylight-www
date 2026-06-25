@@ -151,12 +151,14 @@
       "id": "accordion.disabled-root",
       "state": "disabled",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom",
         "apg"
       ],
-      "ref": "accordion.tsx:316,363 disabled root: all triggers disabled + data-disabled, keydown handler removed"
+      "ref": "DONE (2026-06-25): root-level disable (<Accordion.Root disabled>) propagates to every item \u2014 data-disabled on item/header/trigger/content + each trigger disabled attr. accordion.disabledroot DOM golden byte-identical; new APG check (golden-first) proves clicking any trigger leaves aria-expanded=false. accordion.tsx:316,363",
+      "oracle_file": "accordion.disabledroot",
+      "apg_check": "disabled root: clicking a trigger does NOT open its panel"
     },
     {
       "id": "accordion.item-disabled",

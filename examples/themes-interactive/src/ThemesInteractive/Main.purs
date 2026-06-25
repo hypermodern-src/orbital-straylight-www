@@ -1192,6 +1192,8 @@ accordionInput s = Accordion.defaultInput
   -- closed, so it carries aria-disabled=true (accordion.tsx:452). Else type="multiple" closed.
   , single = s == "single"
   , collapsible = false
+  -- `?s=disabledroot` → the whole Root disabled; propagates to every item.
+  , disabled = s == "disabledroot"
   , defaultValue = if s == "single" then [ "item-1" ] else []
   , style =
       { root: cn ""

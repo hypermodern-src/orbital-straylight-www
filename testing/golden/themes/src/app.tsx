@@ -978,10 +978,14 @@ const PAGES: Page[] = [
       // `?s=single` renders type="single" (NON-collapsible) with item-1 open at first paint:
       // the open trigger CANNOT be closed, so upstream stamps aria-disabled=true on it
       // (accordion.tsx:452). Every other state keeps the default type="multiple".
+      // `?s=disabledroot` — the whole Root disabled: accordionContext.disabled propagates to
+      // every item (data-disabled on item/header/trigger/content + each trigger's disabled attr).
       const rootProps =
         s === "single"
           ? ({ type: "single", defaultValue: "item-1" } as const)
-          : ({ type: "multiple" } as const);
+          : s === "disabledroot"
+            ? ({ type: "multiple", disabled: true } as const)
+            : ({ type: "multiple" } as const);
       return (
         <Box style={{ maxWidth: 360 }}>
           <Accordion.Root {...rootProps}>

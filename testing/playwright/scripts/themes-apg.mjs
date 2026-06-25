@@ -2422,6 +2422,17 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 0), "Ctrl+ArrowRight must NOT move focus (modifiers ignored)");
   }},
 
+  // Accordion — ?s=disabledroot: the whole Root disabled → clicking any trigger does NOT open
+  // its panel (every item disabled). Validated golden-first.
+  { id: "accordion", state: "disabledroot", apg: "accordion", name: "disabled root: clicking a trigger does NOT open its panel", run: async (pg) => {
+    const all = pg.locator('#root button[aria-expanded]');
+    await all.first().waitFor();
+    ok((await all.count()) === 3, "expected 3 triggers");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "disabled")) !== null, "the first trigger must be disabled (root disabled)");
+    await all.nth(0).click({ force: true }).catch(() => {});
+    await pg.waitForTimeout(100);
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "disabled root: the trigger must NOT open after a click");
+  }},
   // Accordion — type="single" NON-collapsible: clicking the OPEN trigger does NOT close it
   // (accordion.tsx the open trigger is aria-disabled). The `single` story opens item-1 at
   // mount; clicking it leaves it open + aria-expanded=true.
