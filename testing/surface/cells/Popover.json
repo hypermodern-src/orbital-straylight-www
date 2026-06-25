@@ -92,11 +92,14 @@
       "id": "popover.close-part",
       "state": "close",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "dom",
+        "apg"
       ],
-      "ref": "popover.tsx:450-470 PopoverClose button calls onOpenChange(false); content opaque, no Close wiring"
+      "ref": "DONE (2026-06-24): PopoverClose part \u2014 the ?s=close story wraps a \"Comment\" submit button in Popover.Close. popover.close DOM golden (gate-green) byte-pins the close button inside the open content; the APG check (gate-green) proves clicking it closes the popover and restores focus to the trigger. popover.tsx:450-470",
+      "oracle_file": "popover.close",
+      "apg_check": "clicking the PopoverClose button closes the popover + restores focus"
     },
     {
       "id": "popover.anchor-part",
