@@ -170,12 +170,14 @@
       "id": "select.disabled-trigger",
       "state": "disabled",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom",
         "apg"
       ],
-      "ref": "select.tsx:299-302,342-343 disabled trigger: button disabled + data-disabled, does not open; port has no disabled prop"
+      "ref": "DONE (2026-06-24): disabled Root \u2192 trigger button[disabled]+data-disabled, popup never opens (port already had the disabled field; added the story state). select.disabledtrigger DOM golden byte-identical; APG check (golden-first) proves clicking the disabled trigger opens 0 listbox nodes. select.tsx:299-302,342-343",
+      "oracle_file": "select.disabledtrigger",
+      "apg_check": "disabled trigger click does NOT open the listbox"
     },
     {
       "id": "select.aria-selected-focus-gated",

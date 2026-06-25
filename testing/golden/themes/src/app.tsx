@@ -927,9 +927,13 @@ const PAGES: Page[] = [
     // assert ArrowDown roves Apple→Grape OVER it. The default (rest/open) render is unchanged
     // (all enabled), so the existing pixel + open-state goldens are untouched.
     node: (() => {
-      const middleDisabled = currentState() === "disabled";
+      const s = currentState();
+      const middleDisabled = s === "disabled";
+      // `?s=disabledtrigger` → disabled Root: the trigger is button[disabled] + data-disabled
+      // and the popup never opens (select.tsx:299-302,342-343). Closed-rest snapshot.
+      const rootDisabled = s === "disabledtrigger";
       return (
-        <Select.Root defaultValue="apple">
+        <Select.Root defaultValue="apple" disabled={rootDisabled}>
           <Select.Trigger />
           <Select.Content>
             <Select.Group>

@@ -412,6 +412,15 @@ const CHECKS = [
     await hlStarts(pg, "Apple");
     await pg.keyboard.press("ArrowDown"); await hlStarts(pg, "Grape");
   }},
+  // ?s=disabledtrigger — a disabled Root: the trigger is button[disabled]+data-disabled and
+  // clicking it must NOT open the popup (select.tsx:299-302,342-343). Validated golden-first.
+  { id: "select", apg: "listbox", state: "disabledtrigger", name: "disabled trigger click does NOT open the listbox", run: async (pg) => {
+    await pg.locator('.rt-SelectTrigger[disabled]').first().waitFor();
+    await pg.locator(".rt-SelectTrigger").click({ force: true }).catch(() => {});
+    await pg.waitForTimeout(150);
+    const n = await pg.locator('[role="listbox"]').count();
+    if (n !== 0) throw new Error(`disabled trigger opened the listbox (${n} listbox nodes)`);
+  }},
   { id: "select", apg: "listbox", name: "loop off (default): ArrowDown on the last option does NOT wrap", run: async (pg) => {
     await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); await pg.waitForTimeout(150);
     await hlStarts(pg, "Apple");

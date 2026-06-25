@@ -1029,6 +1029,7 @@ navigationMenuInput s = NavigationMenu.defaultInput
 selectInput :: String -> Select.Input
 selectInput s = Select.defaultInput
   { defaultValue = "apple"
+  , disabled = s == "disabledtrigger"
   , style = selectStyle
   , portalAttrs = portalThemeAttrs
   , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"

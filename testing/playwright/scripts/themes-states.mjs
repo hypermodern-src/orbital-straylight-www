@@ -315,6 +315,9 @@ export const STATES = {
   select: {
     "closed-rest": async (pg) => { await pg.locator(".rt-SelectTrigger").first().waitFor(); },
     open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
+    // DISABLED trigger (?s=disabledtrigger): the trigger is button[disabled] + data-disabled and
+    // the popup never opens. Closed-rest snapshot — wait for the disabled trigger to settle.
+    disabledtrigger: async (pg) => { await pg.locator('.rt-SelectTrigger[disabled]').first().waitFor(); },
   },
   toast: {
     // Toast is rendered CONTROLLED open={true} duration={Infinity} (golden story), so it is
