@@ -724,8 +724,15 @@ const PAGES: Page[] = [
       // the popover OPEN at mount, anchored to the trigger (popover.tsx:50-52,68-73).
       const ctlOpen = currentState() === "controlled";
       const defOpen = currentState() === "defaultopen";
+      // `?s=modal` — modal popover OPEN at mount: RemoveScroll (body data-scroll-locked +
+      // pointer-events:none), hideOthers (siblings aria-hidden), content pointer-events:auto.
+      const modal = currentState() === "modal";
       return (
-        <Popover.Root {...(ctlOpen ? { open: true } : {})} {...(defOpen ? { defaultOpen: true } : {})}>
+        <Popover.Root
+          {...(ctlOpen ? { open: true } : {})}
+          {...(defOpen || modal ? { defaultOpen: true } : {})}
+          {...(modal ? { modal: true } : {})}
+        >
           <Popover.Trigger>
             <Button variant="soft">Comment</Button>
           </Popover.Trigger>

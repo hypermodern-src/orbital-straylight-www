@@ -1467,6 +1467,19 @@ const CHECKS = [
     ok(!(await visible(pg, '.rt-PopoverContent')), "Escape did not close the popover");
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
   }},
+  // ?s=modal — a MODAL popover (defaultOpen, modal): the open envelope locks body scroll
+  // (RemoveScroll → body[data-scroll-locked]) and aria-hides the siblings (#root). Escape closes
+  // it, which must TEAR DOWN the envelope (scroll-lock released, #root un-hidden). A runtime
+  // lifecycle proof beyond the static DOM golden. Validated golden-first.
+  { id: "popover", apg: "dialog", state: "modal", name: "modal popover locks body scroll + aria-hides siblings; Escape tears it down", run: async (pg) => {
+    await pg.locator(".rt-PopoverContent").first().waitFor();
+    ok(await pg.locator('body[data-scroll-locked]').count() === 1, "modal open: body must be scroll-locked");
+    ok((await attrOf(pg, '#root', 0, "aria-hidden")) === "true", "modal open: #root sibling must be aria-hidden");
+    await pg.keyboard.press("Escape"); await pg.waitForTimeout(260);
+    ok(!(await visible(pg, '.rt-PopoverContent')), "Escape did not close the modal popover");
+    ok(await pg.locator('body[data-scroll-locked]').count() === 0, "Escape must release the body scroll-lock");
+    ok((await attrOf(pg, '#root', 0, "aria-hidden")) === null, "Escape must un-hide the #root sibling");
+  }},
   // Closed-rest trigger contract (popover.tsx:147 aria-controls gated on open; the Popper
   // data-radix-popper-side/align live on Popper.Anchor, which wraps the trigger ONLY while
   // open — popper.tsx:126-127). A full closed-DOM oracle is incompatible with the port's

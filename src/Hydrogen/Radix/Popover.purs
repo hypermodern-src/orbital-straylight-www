@@ -98,6 +98,7 @@ type Input =
   , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
   , closeLabels :: Array String  -- trimmed button labels in content acting as PopoverClose (close on click)
+  , modal :: Boolean  -- modal=true: RemoveScroll (scroll-lock) + hideOthers (aria-hide siblings) + content pointer-events:auto. radix Popover defaults FALSE.
   }
 
 defaultInput :: Input
@@ -115,6 +116,7 @@ defaultInput =
   , contentStyle: ""
   , triggerAttrs: []
   , portalAttrs: []
+  , modal: false
   }
 
 data Output = OpenChanged Boolean
@@ -151,6 +153,8 @@ type State =
   , animSub :: Maybe H.SubscriptionId  -- content `animationend` subscription during exit
   , contentNode :: Maybe Node
   , contentId :: String  -- generated on Initialize; trigger aria-controls target + content id
+  , modal :: Boolean   -- raise the modal envelope (scroll-lock + hideOthers + pointer-events)
+  , locked :: Boolean  -- the modal envelope is currently up (tear down on close)
   }
 
 data Action
@@ -216,6 +220,8 @@ initialState input =
   , animSub: Nothing
   , contentNode: Nothing
   , contentId: ""
+  , modal: input.modal
+  , locked: false
   }
   where
   startOpen = case input.open of
@@ -282,8 +288,10 @@ render st =
                 , dataAttr "align" (alignName st.placedAlign)
                 , HP.tabIndex (-1)
                 -- the content's CONSTANT style: --width + the --radix-popover-content-* var
-                -- aliases (the wrapper positions; the content itself is unpositioned).
-                , HP.style st.contentStyle
+                -- aliases (the wrapper positions; the content itself is unpositioned). A MODAL
+                -- popover adds `pointer-events: auto` while open (RemoveScroll re-enables pointers
+                -- over the content while the body is pointer-locked); released on close.
+                , HP.style (st.contentStyle <> (if st.modal && current st.ctrl then " pointer-events: auto;" else ""))
                 , HE.onKeyDown ContentKeyDown
                 , HE.onClick ContentClicked
                 ] <> portalData st.portalAttrs
@@ -311,7 +319,7 @@ handleAction = case _ of
       scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
       resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
       psid <- scheduleAfter AfterOpen
-      H.modify_ _ { subs = [ escSub, ptrSub, scrollSub, resizeSub ], postSub = Just psid }
+      H.modify_ _ { subs = [ escSub, ptrSub, scrollSub, resizeSub ], postSub = Just psid, locked = st.modal }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl
@@ -326,6 +334,7 @@ handleAction = case _ of
       , contentStyle = input.contentStyle
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
+      , modal = input.modal
       }
   TriggerClicked -> do
     st <- H.get
@@ -351,6 +360,7 @@ handleAction = case _ of
   -- Then read the content ref and arm the exit: if it has a running CSS exit animation, finish
   -- when `animationend` fires; otherwise finish now (no animation ⇒ immediate unmount).
   AfterClose -> do
+    st <- H.get
     mnode <- H.getHTMLElementRef contentRef
     armed <- case mnode of
       Nothing -> pure false
@@ -366,6 +376,13 @@ handleAction = case _ of
       -- appendChild would land it after the trail guard and break body order).
       mwrap <- H.getHTMLElementRef wrapperRef
       for_ mwrap \wrap -> liftEffect (Envelope.reAdoptBeforeTrail wrap)
+      -- release the modal pointer block the open envelope set: radix's RemoveScroll disables the
+      -- moment `open` flips false (body pointer-events:none + the content's pointer-events:auto
+      -- go away), while the closing node lingers for the exit animation. The data-scroll-locked
+      -- marker + focus guards + hideOthers stay until unmount (finishClose).
+      when st.locked do
+        liftEffect Envelope.releaseScrollPointer
+        for_ mnode \node -> liftEffect (Envelope.clearPointerEvents (HTMLElement.toElement node))
     else finishClose
   AnimDone -> finishClose
   EscapePressed -> closePopover
@@ -411,6 +428,7 @@ openPopover = do
       , contentNode = mcNode
       , subs = [ escSub, ptrSub, scrollSub, resizeSub ]
       , postSub = Just psid
+      , locked = st.modal
       }
 
 -- | Dispatch `act` on the next animation frame (after Halogen patches the render). A one-shot
@@ -427,6 +445,7 @@ scheduleAfter act = do
 -- | appendChild doesn't blur it.
 finalize :: forall m. MonadEffect m => Boolean -> H.HalogenM State Action () Output m Unit
 finalize focusToo = do
+  st <- H.get
   mbody <- liftEffect Portal.documentBody
   mwrap <- H.getHTMLElementRef wrapperRef
   mc <- H.getHTMLElementRef contentRef
@@ -439,6 +458,13 @@ finalize focusToo = do
         when focusToo do
           Envelope.addFocusGuards
           for_ mc \content -> void (captureFocus content)
+          -- a MODAL popover raises the document envelope, now that the wrapper is a body
+          -- child: lock body scroll (data-scroll-locked + pointer-events:none) and aria-hide
+          -- every sibling EXCEPT the wrapper (the guards + #root get aria-hidden; the content
+          -- stays reachable). hideOthers runs LAST so the just-added guards are hidden too.
+          when st.modal do
+            Envelope.lockScroll
+            Envelope.hideOthers wrap
     _, _ -> pure unit
 
 -- | Begin the close: flip controllable + Presence to Closing (the wrapper stays MOUNTED with
@@ -465,8 +491,11 @@ finishClose = do
   st <- H.get
   for_ st.animSub H.unsubscribe
   for_ st.postSub H.unsubscribe
+  -- a MODAL popover also un-hides the aria-hidden siblings + drops the scroll-lock marker; the
+  -- focus guards are removed in BOTH modes (the non-modal popover still brackets the body).
+  when st.locked (liftEffect (Envelope.showOthers *> Envelope.unlockScroll))
   liftEffect Envelope.removeFocusGuards
-  H.modify_ _ { presence = finishExit st.presence, restoreEl = Nothing, animSub = Nothing, postSub = Nothing }
+  H.modify_ _ { presence = finishExit st.presence, restoreEl = Nothing, animSub = Nothing, postSub = Nothing, locked = false }
 
 -- | Measure + solve, position the WRAPPER (not the content), and stamp the resolved
 -- | placement for the trigger/content data-side/align.

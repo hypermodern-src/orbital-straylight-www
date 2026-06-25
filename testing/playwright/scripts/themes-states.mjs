@@ -117,6 +117,12 @@ export const STATES = {
     // `?s=controlled` / `?s=defaultopen` — open at MOUNT (no interaction); wait for the content.
     controlled: async (pg) => { await pg.locator(".rt-PopoverContent").first().waitFor(); },
     defaultopen: async (pg) => { await pg.locator(".rt-PopoverContent").first().waitFor(); },
+    // `?s=modal` — open at MOUNT, modal: wait for the content AND the body scroll-lock marker
+    // (RemoveScroll) so the modal envelope has settled. Same selectors both faces.
+    modal: async (pg) => {
+      await pg.locator(".rt-PopoverContent").first().waitFor();
+      await pg.locator('body[data-scroll-locked]').waitFor();
+    },
     // ?s=close → the content holds a Popover.Close submit button below the textarea. The open
     // driver is the same (click the trigger); the snapshot pins the extra close-button markup.
     // Keyed off rt-PopoverContent, so the same driver runs golden + port.

@@ -50,12 +50,14 @@
       "id": "popover.modal",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom",
         "apg"
       ],
-      "ref": "popover.tsx:229-299 modal=true: RemoveScroll, hideOthers aria-hidden, trapFocus, disableOutsidePointerEvents"
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 added the `modal` field (default false, matching radix). modal open raises the document envelope: lockScroll (body data-scroll-locked=1 + pointer-events:none), hideOthers (siblings incl focus-guards + #root get aria-hidden; wrapper exempt), content pointer-events:auto; finishClose tears it down (showOthers+unlockScroll), AfterClose releases the pointer block. popover.modal DOM golden byte-identical; APG check proves the runtime raise+teardown. popover.tsx:229-299",
+      "oracle_file": "popover.modal",
+      "apg_check": "modal popover locks body scroll + aria-hides siblings; Escape tears it down"
     },
     {
       "id": "popover.reopen-guard",

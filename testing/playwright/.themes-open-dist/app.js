@@ -1535,13 +1535,13 @@
     return dict.foldr;
   };
   var traverse_ = function(dictApplicative) {
-    var applySecond16 = applySecond(dictApplicative.Apply0());
+    var applySecond17 = applySecond(dictApplicative.Apply0());
     var pure46 = pure(dictApplicative);
     return function(dictFoldable) {
       var foldr22 = foldr(dictFoldable);
       return function(f) {
         return foldr22(function($454) {
-          return applySecond16(f($454));
+          return applySecond17(f($454));
         })(pure46(unit));
       };
     };
@@ -4350,7 +4350,7 @@
     return dict.foldrWithIndex;
   };
   var traverseWithIndex_ = function(dictApplicative) {
-    var applySecond16 = applySecond(dictApplicative.Apply0());
+    var applySecond17 = applySecond(dictApplicative.Apply0());
     var pure46 = pure(dictApplicative);
     return function(dictFoldableWithIndex) {
       var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
@@ -4358,7 +4358,7 @@
         return foldrWithIndex1(function(i2) {
           var $289 = f(i2);
           return function($290) {
-            return applySecond16($289($290));
+            return applySecond17($289($290));
           };
         })(pure46(unit));
       };
@@ -24185,11 +24185,12 @@
   var map49 = /* @__PURE__ */ map(functorArray);
   var get16 = /* @__PURE__ */ get(monadStateHalogenM);
   var for_26 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
+  var when22 = /* @__PURE__ */ when(applicativeHalogenM);
+  var applySecond11 = /* @__PURE__ */ applySecond(applyEffect);
   var modify_17 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var when22 = /* @__PURE__ */ when(applicativeEffect);
+  var when111 = /* @__PURE__ */ when(applicativeEffect);
   var for_110 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var $$void14 = /* @__PURE__ */ $$void(functorEffect);
-  var when111 = /* @__PURE__ */ when(applicativeHalogenM);
   var bind120 = /* @__PURE__ */ bind(bindEffect);
   var map121 = /* @__PURE__ */ map(functorHalogenM);
   var map213 = /* @__PURE__ */ map(functorMaybe);
@@ -24348,7 +24349,7 @@
         return input3.defaultOpen;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 221, column 15 - line 223, column 33): " + [input3.open.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 227, column 15 - line 229, column 33): " + [input3.open.constructor.name]);
     }();
     return {
       ctrl: controllable(input3.open)(input3.defaultOpen),
@@ -24377,7 +24378,9 @@
       postSub: Nothing.value,
       animSub: Nothing.value,
       contentNode: Nothing.value,
-      contentId: ""
+      contentId: "",
+      modal: input3.modal,
+      locked: false
     };
   };
   var finishClose7 = function(dictMonadEffect) {
@@ -24385,21 +24388,24 @@
     return bind34(get16)(function(st) {
       return discard112(for_26(st.animSub)(unsubscribe2))(function() {
         return discard112(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard112(liftEffect7(removeFocusGuards))(function() {
-            return modify_17(function(v) {
-              var $99 = {};
-              for (var $100 in v) {
-                if ({}.hasOwnProperty.call(v, $100)) {
-                  $99[$100] = v[$100];
+          return discard112(when22(st.locked)(liftEffect7(applySecond11(showOthers)(unlockScroll))))(function() {
+            return discard112(liftEffect7(removeFocusGuards))(function() {
+              return modify_17(function(v) {
+                var $101 = {};
+                for (var $102 in v) {
+                  if ({}.hasOwnProperty.call(v, $102)) {
+                    $101[$102] = v[$102];
+                  }
+                  ;
                 }
                 ;
-              }
-              ;
-              $99.presence = finishExit(st.presence);
-              $99.restoreEl = Nothing.value;
-              $99.animSub = Nothing.value;
-              $99.postSub = Nothing.value;
-              return $99;
+                $101.presence = finishExit(st.presence);
+                $101.restoreEl = Nothing.value;
+                $101.animSub = Nothing.value;
+                $101.postSub = Nothing.value;
+                $101.locked = false;
+                return $101;
+              });
             });
           });
         });
@@ -24424,29 +24430,36 @@
       closeLabels: [],
       contentStyle: "",
       triggerAttrs: [],
-      portalAttrs: []
+      portalAttrs: [],
+      modal: false
     };
   }();
   var contentRef9 = "rdx-popover-content";
   var finalize5 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(focusToo) {
-      return bind34(liftEffect7(documentBody))(function(mbody) {
-        return bind34(getHTMLElementRef(wrapperRef5))(function(mwrap) {
-          return bind34(getHTMLElementRef(contentRef9))(function(mc) {
-            if (mbody instanceof Just && mwrap instanceof Just) {
-              return liftEffect7(afterFrame(function __do13() {
-                adopt(mbody.value0)(toElement(mwrap.value0))();
-                return when22(focusToo)(function __do14() {
-                  addFocusGuards();
-                  return for_110(mc)(function(content3) {
-                    return $$void14(captureFocus(content3));
+      return bind34(get16)(function(st) {
+        return bind34(liftEffect7(documentBody))(function(mbody) {
+          return bind34(getHTMLElementRef(wrapperRef5))(function(mwrap) {
+            return bind34(getHTMLElementRef(contentRef9))(function(mc) {
+              if (mbody instanceof Just && mwrap instanceof Just) {
+                return liftEffect7(afterFrame(function __do13() {
+                  adopt(mbody.value0)(toElement(mwrap.value0))();
+                  return when111(focusToo)(function __do14() {
+                    addFocusGuards();
+                    for_110(mc)(function(content3) {
+                      return $$void14(captureFocus(content3));
+                    })();
+                    return when111(st.modal)(function __do15() {
+                      lockScroll();
+                      return hideOthers(mwrap.value0)();
+                    })();
                   })();
-                })();
-              }));
-            }
-            ;
-            return pure33(unit);
+                }));
+              }
+              ;
+              return pure33(unit);
+            });
           });
         });
       });
@@ -24456,20 +24469,20 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfter1 = scheduleAfter3(dictMonadEffect);
     return bind34(get16)(function(st) {
-      return when111(!current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
+      return when22(!current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
         return bind34(liftEffect7(activeElement(doc)))(function(mprev) {
           return discard112(modify_17(function(v) {
-            var $106 = {};
-            for (var $107 in v) {
-              if ({}.hasOwnProperty.call(v, $107)) {
-                $106[$107] = v[$107];
+            var $108 = {};
+            for (var $109 in v) {
+              if ({}.hasOwnProperty.call(v, $109)) {
+                $108[$109] = v[$109];
               }
               ;
             }
             ;
-            $106.ctrl = change2(true)(st.ctrl).next;
-            $106.restoreEl = mprev;
-            return $106;
+            $108.ctrl = change2(true)(st.ctrl).next;
+            $108.restoreEl = mprev;
+            return $108;
           }))(function() {
             return discard112(raise(new OpenChanged8(true)))(function() {
               return bind34(map121(map213(toNode))(getHTMLElementRef(contentRef9)))(function(mcNode) {
@@ -24486,20 +24499,21 @@
                           return discard112(for_26(st.animSub)(unsubscribe2))(function() {
                             return bind34(scheduleAfter1(AfterOpen8.value))(function(psid) {
                               return modify_17(function(v) {
-                                var $109 = {};
-                                for (var $110 in v) {
-                                  if ({}.hasOwnProperty.call(v, $110)) {
-                                    $109[$110] = v[$110];
+                                var $111 = {};
+                                for (var $112 in v) {
+                                  if ({}.hasOwnProperty.call(v, $112)) {
+                                    $111[$112] = v[$112];
                                   }
                                   ;
                                 }
                                 ;
-                                $109.presence = Open.value;
-                                $109.animSub = Nothing.value;
-                                $109.contentNode = mcNode;
-                                $109.subs = [escSub, ptrSub, scrollSub, resizeSub];
-                                $109.postSub = new Just(psid);
-                                return $109;
+                                $111.presence = Open.value;
+                                $111.animSub = Nothing.value;
+                                $111.contentNode = mcNode;
+                                $111.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                $111.postSub = new Just(psid);
+                                $111.locked = st.modal;
+                                return $111;
                               });
                             });
                           });
@@ -24538,16 +24552,23 @@
       ;
       return [];
     }())(append113(function() {
-      var $115 = isRendered(st.presence);
-      if ($115) {
+      var $117 = isRendered(st.presence);
+      if ($117) {
         return [dataAttr("radix-popper-side")(sideName(st.placedSide)), dataAttr("radix-popper-align")(alignName(st.placedAlign))];
       }
       ;
       return [];
     }())(portalData7(st.triggerAttrs)))))(map49(fromPlainHTML)(st.trigger))])(function() {
-      var $116 = isRendered(st.presence);
-      if ($116) {
-        return [div3([ref2(wrapperRef5), dataAttr("radix-popper-content-wrapper")(""), style("position: fixed;")])([div3(append113([ref2(contentRef9), id2(st.contentId), classes2(st.style.content), role("dialog"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(ContentKeyDown3.create), onClick(ContentClicked3.create)])(portalData7(st.portalAttrs)))(map49(fromPlainHTML)(st.content))])];
+      var $118 = isRendered(st.presence);
+      if ($118) {
+        return [div3([ref2(wrapperRef5), dataAttr("radix-popper-content-wrapper")(""), style("position: fixed;")])([div3(append113([ref2(contentRef9), id2(st.contentId), classes2(st.style.content), role("dialog"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), tabIndex2(-1 | 0), style(st.contentStyle + function() {
+          var $119 = st.modal && current(st.ctrl);
+          if ($119) {
+            return " pointer-events: auto;";
+          }
+          ;
+          return "";
+        }()), onKeyDown(ContentKeyDown3.create), onClick(ContentClicked3.create)])(portalData7(st.portalAttrs)))(map49(fromPlainHTML)(st.content))])];
       }
       ;
       return [];
@@ -24570,17 +24591,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return modify_17(function(v) {
-                  var $120 = {};
-                  for (var $121 in v) {
-                    if ({}.hasOwnProperty.call(v, $121)) {
-                      $120[$121] = v[$121];
+                  var $123 = {};
+                  for (var $124 in v) {
+                    if ({}.hasOwnProperty.call(v, $124)) {
+                      $123[$124] = v[$124];
                     }
                     ;
                   }
                   ;
-                  $120.placedSide = placed.placement.side;
-                  $120.placedAlign = placed.placement.align;
-                  return $120;
+                  $123.placedSide = placed.placement.side;
+                  $123.placedAlign = placed.placement.align;
+                  return $123;
                 });
               });
             }
@@ -24595,40 +24616,40 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfter1 = scheduleAfter3(dictMonadEffect);
     return bind34(get16)(function(st) {
-      return when111(current(st.ctrl))(discard112(traverse_15(unsubscribe2)(st.subs))(function() {
+      return when22(current(st.ctrl))(discard112(traverse_15(unsubscribe2)(st.subs))(function() {
         return discard112(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard112(for_26(st.restoreEl)(function($167) {
-            return liftEffect7(focus($167));
+          return discard112(for_26(st.restoreEl)(function($170) {
+            return liftEffect7(focus($170));
           }))(function() {
             return discard112(modify_17(function(v) {
-              var $126 = {};
-              for (var $127 in v) {
-                if ({}.hasOwnProperty.call(v, $127)) {
-                  $126[$127] = v[$127];
+              var $129 = {};
+              for (var $130 in v) {
+                if ({}.hasOwnProperty.call(v, $130)) {
+                  $129[$130] = v[$130];
                 }
                 ;
               }
               ;
-              $126.ctrl = change2(false)(st.ctrl).next;
-              $126.presence = present(false)(st.presence);
-              $126.subs = [];
-              $126.postSub = Nothing.value;
-              $126.contentNode = Nothing.value;
-              return $126;
+              $129.ctrl = change2(false)(st.ctrl).next;
+              $129.presence = present(false)(st.presence);
+              $129.subs = [];
+              $129.postSub = Nothing.value;
+              $129.contentNode = Nothing.value;
+              return $129;
             }))(function() {
               return discard112(raise(new OpenChanged8(false)))(function() {
                 return bind34(scheduleAfter1(AfterClose7.value))(function(psid) {
                   return modify_17(function(v) {
-                    var $129 = {};
-                    for (var $130 in v) {
-                      if ({}.hasOwnProperty.call(v, $130)) {
-                        $129[$130] = v[$130];
+                    var $132 = {};
+                    for (var $133 in v) {
+                      if ({}.hasOwnProperty.call(v, $133)) {
+                        $132[$133] = v[$133];
                       }
                       ;
                     }
                     ;
-                    $129.postSub = new Just(psid);
-                    return $129;
+                    $132.postSub = new Just(psid);
+                    return $132;
                   });
                 });
               });
@@ -24660,14 +24681,14 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 487, column 15 - line 493, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 516, column 15 - line 522, column 42): " + [v.constructor.name]);
     };
   };
   var closeLabelHit3 = function(content3) {
     return function(labels9) {
       return function(ev) {
-        var wanted = map49(function($168) {
-          return toLower(trim($168));
+        var wanted = map49(function($171) {
+          return toLower(trim($171));
         })(labels9);
         var walk = function(node) {
           if (unsafeRefEq(node)(content3)) {
@@ -24698,11 +24719,11 @@
                 return false;
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 514, column 39 - line 516, column 32): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 543, column 39 - line 545, column 32): " + [v2.constructor.name]);
             };
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 505, column 3 - line 516, column 32): " + [node.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 534, column 3 - line 545, column 32): " + [node.constructor.name]);
         };
         var v = bind212(target5(ev))(fromEventTarget2);
         if (v instanceof Nothing) {
@@ -24713,7 +24734,7 @@
           return walk(v.value0);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 500, column 3 - line 502, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 529, column 3 - line 531, column 29): " + [v.constructor.name]);
       };
     };
   };
@@ -24731,19 +24752,19 @@
       if (v instanceof Initialize14) {
         return bind34(useId2)(function(cid) {
           return discard112(modify_17(function(v1) {
-            var $146 = {};
-            for (var $147 in v1) {
-              if ({}.hasOwnProperty.call(v1, $147)) {
-                $146[$147] = v1[$147];
+            var $149 = {};
+            for (var $150 in v1) {
+              if ({}.hasOwnProperty.call(v1, $150)) {
+                $149[$150] = v1[$150];
               }
               ;
             }
             ;
-            $146.contentId = cid;
-            return $146;
+            $149.contentId = cid;
+            return $149;
           }))(function() {
             return bind34(get16)(function(st) {
-              return when111(current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
+              return when22(current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
                 return bind34(liftEffect7(windowTarget))(function(win) {
                   var docTarget = toEventTarget(doc);
                   return bind34(subscribe2($$escape(docTarget)(EscapePressed8.value)))(function(escSub) {
@@ -24756,17 +24777,18 @@
                         })))(function(resizeSub) {
                           return bind34(scheduleAfter1(AfterOpen8.value))(function(psid) {
                             return modify_17(function(v1) {
-                              var $149 = {};
-                              for (var $150 in v1) {
-                                if ({}.hasOwnProperty.call(v1, $150)) {
-                                  $149[$150] = v1[$150];
+                              var $152 = {};
+                              for (var $153 in v1) {
+                                if ({}.hasOwnProperty.call(v1, $153)) {
+                                  $152[$153] = v1[$153];
                                 }
                                 ;
                               }
                               ;
-                              $149.subs = [escSub, ptrSub, scrollSub, resizeSub];
-                              $149.postSub = new Just(psid);
-                              return $149;
+                              $152.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                              $152.postSub = new Just(psid);
+                              $152.locked = st.modal;
+                              return $152;
                             });
                           });
                         });
@@ -24782,34 +24804,35 @@
       ;
       if (v instanceof Receive16) {
         return modify_17(function(st) {
-          var $152 = {};
-          for (var $153 in st) {
-            if ({}.hasOwnProperty.call(st, $153)) {
-              $152[$153] = st[$153];
+          var $155 = {};
+          for (var $156 in st) {
+            if ({}.hasOwnProperty.call(st, $156)) {
+              $155[$156] = st[$156];
             }
             ;
           }
           ;
-          $152.ctrl = sync(v.value0.open)(st.ctrl);
-          $152.side = v.value0.side;
-          $152.align = v.value0.align;
-          $152.offset = v.value0.offset;
-          $152.padding = v.value0.padding;
-          $152.style = v.value0.style;
-          $152.trigger = v.value0.trigger;
-          $152.content = v.value0.content;
-          $152.closeLabels = v.value0.closeLabels;
-          $152.contentStyle = v.value0.contentStyle;
-          $152.triggerAttrs = v.value0.triggerAttrs;
-          $152.portalAttrs = v.value0.portalAttrs;
-          return $152;
+          $155.ctrl = sync(v.value0.open)(st.ctrl);
+          $155.side = v.value0.side;
+          $155.align = v.value0.align;
+          $155.offset = v.value0.offset;
+          $155.padding = v.value0.padding;
+          $155.style = v.value0.style;
+          $155.trigger = v.value0.trigger;
+          $155.content = v.value0.content;
+          $155.closeLabels = v.value0.closeLabels;
+          $155.contentStyle = v.value0.contentStyle;
+          $155.triggerAttrs = v.value0.triggerAttrs;
+          $155.portalAttrs = v.value0.portalAttrs;
+          $155.modal = v.value0.modal;
+          return $155;
         });
       }
       ;
       if (v instanceof TriggerClicked6) {
         return bind34(get16)(function(st) {
-          var $156 = current(st.ctrl);
-          if ($156) {
+          var $159 = current(st.ctrl);
+          if ($159) {
             return closePopover1;
           }
           ;
@@ -24819,10 +24842,10 @@
       ;
       if (v instanceof ContentClicked3) {
         return bind34(get16)(function(st) {
-          return when111(!$$null(st.closeLabels))(bind34(getHTMLElementRef(contentRef9))(function(mc) {
+          return when22(!$$null(st.closeLabels))(bind34(getHTMLElementRef(contentRef9))(function(mc) {
             return for_26(mc)(function(content3) {
               return bind34(liftEffect7(closeLabelHit3(toNode(content3))(st.closeLabels)(toEvent2(v.value0))))(function(hit) {
-                return when111(hit)(closePopover1);
+                return when22(hit)(closePopover1);
               });
             });
           }));
@@ -24836,48 +24859,56 @@
       }
       ;
       if (v instanceof AfterClose7) {
-        return bind34(getHTMLElementRef(contentRef9))(function(mnode) {
-          return bind34(function() {
-            if (mnode instanceof Nothing) {
-              return pure33(false);
-            }
-            ;
-            if (mnode instanceof Just) {
-              return bind34(liftEffect7(hasAnimation(mnode.value0)))(function(animates) {
-                if (animates) {
-                  return bind34(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone8.value)))(function(sub3) {
-                    return discard112(modify_17(function(v1) {
-                      var $160 = {};
-                      for (var $161 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $161)) {
-                          $160[$161] = v1[$161];
+        return bind34(get16)(function(st) {
+          return bind34(getHTMLElementRef(contentRef9))(function(mnode) {
+            return bind34(function() {
+              if (mnode instanceof Nothing) {
+                return pure33(false);
+              }
+              ;
+              if (mnode instanceof Just) {
+                return bind34(liftEffect7(hasAnimation(mnode.value0)))(function(animates) {
+                  if (animates) {
+                    return bind34(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone8.value)))(function(sub3) {
+                      return discard112(modify_17(function(v1) {
+                        var $163 = {};
+                        for (var $164 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $164)) {
+                            $163[$164] = v1[$164];
+                          }
+                          ;
                         }
                         ;
-                      }
-                      ;
-                      $160.animSub = new Just(sub3);
-                      return $160;
-                    }))(function() {
-                      return pure33(true);
+                        $163.animSub = new Just(sub3);
+                        return $163;
+                      }))(function() {
+                        return pure33(true);
+                      });
                     });
-                  });
-                }
-                ;
-                return pure33(false);
-              });
-            }
-            ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 355, column 14 - line 363, column 24): " + [mnode.constructor.name]);
-          }())(function(armed) {
-            if (armed) {
-              return bind34(getHTMLElementRef(wrapperRef5))(function(mwrap) {
-                return for_26(mwrap)(function(wrap4) {
-                  return liftEffect7(reAdoptBeforeTrail(wrap4));
+                  }
+                  ;
+                  return pure33(false);
                 });
-              });
-            }
-            ;
-            return finishClose1;
+              }
+              ;
+              throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 365, column 14 - line 373, column 24): " + [mnode.constructor.name]);
+            }())(function(armed) {
+              if (armed) {
+                return bind34(getHTMLElementRef(wrapperRef5))(function(mwrap) {
+                  return discard112(for_26(mwrap)(function(wrap4) {
+                    return liftEffect7(reAdoptBeforeTrail(wrap4));
+                  }))(function() {
+                    return when22(st.locked)(discard112(liftEffect7(releaseScrollPointer))(function() {
+                      return for_26(mnode)(function(node) {
+                        return liftEffect7(clearPointerEvents(toElement(node)));
+                      });
+                    }));
+                  });
+                });
+              }
+              ;
+              return finishClose1;
+            });
           });
         });
       }
@@ -24894,7 +24925,7 @@
         return bind34(get16)(function(st) {
           return for_26(st.contentNode)(function(node) {
             return bind34(liftEffect7(isOutside(node)(v.value0)))(function(outside) {
-              return when111(outside)(closePopover1);
+              return when22(outside)(closePopover1);
             });
           });
         });
@@ -24904,7 +24935,7 @@
         return bind34(getHTMLElementRef(contentRef9))(function(mnode) {
           return for_26(mnode)(function(node) {
             return bind34(liftEffect7(tabLoop(true)(node)(v.value0)))(function(handled) {
-              return when111(handled)(liftEffect7(preventDefault(toEvent(v.value0))));
+              return when22(handled)(liftEffect7(preventDefault(toEvent(v.value0))));
             });
           });
         });
@@ -24916,7 +24947,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 297, column 16 - line 386, column 19): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 305, column 16 - line 403, column 19): " + [v.constructor.name]);
     };
   };
   var component16 = function(dictMonadEffect) {
@@ -24927,8 +24958,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction15(dictMonadEffect),
         handleQuery: handleQuery15(dictMonadEffect),
-        receive: function($169) {
-          return Just.create(Receive16.create($169));
+        receive: function($172) {
+          return Just.create(Receive16.create($172));
         },
         initialize: new Just(Initialize14.value)
       })
@@ -26143,8 +26174,8 @@
   var map124 = /* @__PURE__ */ map(functorHalogenM);
   var map214 = /* @__PURE__ */ map(functorMaybe);
   var traverse_16 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
-  var applySecond11 = /* @__PURE__ */ applySecond(applyEffect);
-  var applySecond13 = /* @__PURE__ */ applySecond(applyHalogenM);
+  var applySecond13 = /* @__PURE__ */ applySecond(applyEffect);
+  var applySecond14 = /* @__PURE__ */ applySecond(applyHalogenM);
   var type_31 = /* @__PURE__ */ type_17(isPropButtonType);
   var SetOpen9 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
@@ -26685,7 +26716,7 @@
     return bind37(get19)(function(st) {
       return when24(current(st.ctrl))(discard113(traverse_16(unsubscribe2)(st.subs))(function() {
         return discard113(for_30(st.postSub)(unsubscribe2))(function() {
-          return discard113(liftEffect7(applySecond11(applySecond11(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
+          return discard113(liftEffect7(applySecond13(applySecond13(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
             return discard113(for_30(st.restoreEl)(function($211) {
               return liftEffect7(focus($211));
             }))(function() {
@@ -26859,11 +26890,11 @@
           };
           var v1 = key(v.value0);
           if (v1 === "Enter") {
-            return applySecond13(liftEffect7(preventDefault(toEvent(v.value0))))(commitFocused1);
+            return applySecond14(liftEffect7(preventDefault(toEvent(v.value0))))(commitFocused1);
           }
           ;
           if (v1 === " " && st.search === "") {
-            return applySecond13(liftEffect7(preventDefault(toEvent(v.value0))))(commitFocused1);
+            return applySecond14(liftEffect7(preventDefault(toEvent(v.value0))))(commitFocused1);
           }
           ;
           if (isTypeaheadChar(v1)(st.search !== "")) {
@@ -29309,7 +29340,7 @@
   var for_33 = /* @__PURE__ */ for_(applicativeHalogenM);
   var for_114 = /* @__PURE__ */ for_33(foldableMaybe);
   var modify_24 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var applySecond14 = /* @__PURE__ */ applySecond(applyHalogenM);
+  var applySecond15 = /* @__PURE__ */ applySecond(applyHalogenM);
   var when28 = /* @__PURE__ */ when(applicativeHalogenM);
   var append119 = /* @__PURE__ */ append(semigroupArray);
   var map57 = /* @__PURE__ */ map(functorArray);
@@ -29681,7 +29712,7 @@
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind41(get23)(function(st) {
       return discard31(for_114(st.durSub)(function(v) {
-        return applySecond14(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
+        return applySecond15(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_24(function(v) {
           var $117 = {};
@@ -31648,7 +31679,7 @@
   var modify_28 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var bind125 = /* @__PURE__ */ bind(bindEffect);
   var append122 = /* @__PURE__ */ append(semigroupArray);
-  var applySecond15 = /* @__PURE__ */ applySecond(applyHalogenM);
+  var applySecond16 = /* @__PURE__ */ applySecond(applyHalogenM);
   var SetOpen11 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
       this.value0 = value0;
@@ -32213,7 +32244,7 @@
       }
       ;
       if (v instanceof FocusShow) {
-        return applySecond15(cancelPending1)(openTooltip1(false));
+        return applySecond16(cancelPending1)(openTooltip1(false));
       }
       ;
       if (v instanceof Opened2) {
@@ -32221,7 +32252,7 @@
       }
       ;
       if (v instanceof Hide2) {
-        return applySecond15(cancelPending1)(closeTooltip1);
+        return applySecond16(cancelPending1)(closeTooltip1);
       }
       ;
       if (v instanceof AfterOpen10) {
@@ -33367,7 +33398,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2073, column 1 - line 2073, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2075, column 1 - line 2075, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33700,7 +33731,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1452, column 1 - line 1452, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1454, column 1 - line 1454, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33958,7 +33989,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2165, column 17 - line 2167, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2167, column 17 - line 2169, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -34093,7 +34124,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2120, column 1 - line 2120, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2122, column 1 - line 2122, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -34470,7 +34501,8 @@
         ;
         return Nothing.value;
       }(),
-      defaultOpen: s === "defaultopen",
+      defaultOpen: s === "defaultopen" || s === "modal",
+      modal: s === "modal",
       style: popoverStyle,
       triggerAttrs: [new Tuple("accent-color", "")],
       portalAttrs: portalThemeAttrs,
@@ -34580,7 +34612,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1808, column 1 - line 1808, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1810, column 1 - line 1810, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -34849,7 +34881,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2132, column 1 - line 2132, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2134, column 1 - line 2134, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
     var $357 = filter(function(c) {
@@ -35025,7 +35057,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2310, column 1 - line 2310, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2312, column 1 - line 2312, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
@@ -35149,7 +35181,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2176, column 12 - line 2178, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2178, column 12 - line 2180, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -35182,7 +35214,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2158, column 15 - line 2160, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2160, column 15 - line 2162, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -35863,7 +35895,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2050, column 1 - line 2050, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2052, column 1 - line 2052, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),

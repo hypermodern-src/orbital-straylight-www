@@ -517,8 +517,10 @@ popoverInput :: String -> Popover.Input
 popoverInput s = Popover.defaultInput
   { align = Start
   -- `?s=controlled` (parent owns open) / `?s=defaultopen` (uncontrolled default) — open at mount.
+  -- `?s=modal` — modal popover open at mount (scroll-lock + hideOthers + content pointer-events).
   , open = if s == "controlled" then Just true else Nothing
-  , defaultOpen = s == "defaultopen"
+  , defaultOpen = s == "defaultopen" || s == "modal"
+  , modal = s == "modal"
   , style = popoverStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
