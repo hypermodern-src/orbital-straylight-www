@@ -109,6 +109,9 @@ type Input =
   -- type="auto": a scrollbar is mounted only when its axis OVERFLOWS (content > viewport),
   -- measured on Initialize/scroll. Default false ⇒ type="always" (bars mounted unconditionally).
   , auto :: Boolean
+  -- type="hover": like auto (overflow-gated) but ALSO only while the pointer is over the Root.
+  -- Hidden at rest; the Root's pointerenter mounts the bar, pointerleave hides it.
+  , hover :: Boolean
   , style :: Style
   }
 
@@ -120,6 +123,7 @@ defaultInput =
   , scrollbars: Vertical'
   , radius: ""
   , auto: false
+  , hover: false
   , style: defaultStyle
   }
 
@@ -154,6 +158,7 @@ type State =
   , horiz :: Axis -- horizontal bar measurements (thumb width / X offset)
   , overflowV :: Boolean -- vertical axis overflows (content > viewport) — gates the bar when auto
   , overflowH :: Boolean -- horizontal axis overflows
+  , hovered :: Boolean   -- pointer is over the Root (type=hover: gates the bar's mount)
   , drag :: Maybe DragInfo
   , dragSubs :: Array H.SubscriptionId
   }
@@ -161,6 +166,8 @@ type State =
 data Action
   = Initialize
   | Scrolled
+  | RootEnter   -- pointer entered the Root (type=hover → show the scrollbar)
+  | RootLeave   -- pointer left the Root (type=hover → hide the scrollbar)
   | ThumbDown Orientation ME.MouseEvent  -- pointer-down on a thumb → begin a drag
   | ThumbMove ME.MouseEvent              -- document pointer-move → scroll the viewport
   | ThumbUp
@@ -177,7 +184,7 @@ hScrollbarRef = H.RefLabel "scrollarea-scrollbar-h"
 component :: forall q o m. MonadEffect m => H.Component q Input o m
 component =
   H.mkComponent
-    { initialState: \input -> { input, vert: zeroAxis, horiz: zeroAxis, overflowV: false, overflowH: false, drag: Nothing, dragSubs: [] }
+    { initialState: \input -> { input, vert: zeroAxis, horiz: zeroAxis, overflowV: false, overflowH: false, hovered: false, drag: Nothing, dragSubs: [] }
     , render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -192,6 +199,10 @@ handleAction = case _ of
   -- min 18, upstream's `getThumbSize`) and offset(s) (0 at the start).
   Initialize -> recompute
   Scrolled -> recompute
+  -- type=hover: pointer over the Root mounts the bar; re-measure so the freshly-mounted
+  -- thumb is sized against the live track (the bar ref only resolves after this render).
+  RootEnter -> H.modify_ _ { hovered = true } *> recompute
+  RootLeave -> H.modify_ _ { hovered = false }
   -- pointer-down on a thumb: measure the axis to derive the pointer→scroll scale
   -- (maxScroll/maxThumb), then drag the viewport's scroll position (radix Thumb pointer-drag).
   ThumbDown axis me -> do
@@ -326,10 +337,13 @@ dragScale maxScroll track thumbSize =
 render :: forall m. State -> H.ComponentHTML Action () m
 render st =
   HH.div
-    [ classes st.input.style.root
+    ( [ classes st.input.style.root
     , HP.attr (HH.AttrName "dir") "ltr"
     , HP.attr (HH.AttrName "style") rootStyle
     ]
+      -- type=hover: the Root's pointer enter/leave toggle the scrollbar's mount.
+      <> (if st.input.hover then [ HE.onMouseEnter (\_ -> RootEnter), HE.onMouseLeave (\_ -> RootLeave) ] else [])
+    )
     ( [ -- Viewport: hides the native scrollbar, scrolls per scrollbars enabled. Upstream
         -- serializes overflowX/overflowY to a shorthand: vertical → "hidden scroll",
         -- horizontal → "scroll hidden", both → "scroll".
@@ -358,8 +372,12 @@ render st =
   -- under type="always" (auto=false) the bars are unconditional.
   famVert = st.input.scrollbars == Vertical' || st.input.scrollbars == Both
   famHoriz = st.input.scrollbars == Horizontal' || st.input.scrollbars == Both
-  hasVert = famVert && (not st.input.auto || st.overflowV)
-  hasHoriz = famHoriz && (not st.input.auto || st.overflowH)
+  -- bar-mount gates: auto/hover mount only on overflow; hover additionally only while the
+  -- Root is hovered. type=always (auto=hover=false) mounts the track unconditionally.
+  needsOverflow = st.input.auto || st.input.hover
+  needsHover = st.input.hover
+  hasVert = famVert && (not needsOverflow || st.overflowV) && (not needsHover || st.hovered)
+  hasHoriz = famHoriz && (not needsOverflow || st.overflowH) && (not needsHover || st.hovered)
   isBoth = hasVert && hasHoriz
 
   -- the scrollbar list, in UPSTREAM order: horizontal FIRST, then vertical (matches

@@ -862,6 +862,12 @@ export const STATES = {
       await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"]').first().waitFor();
       await pg.waitForFunction(() => document.querySelectorAll('.rt-ScrollAreaThumb').length === 0);
     },
+    // type="hover": hidden at rest. Hover the Root → the vertical bar mounts (data-state=visible).
+    // Snapshot the HOVERED state (both faces key off the upstream rt-ScrollAreaScrollbar selector).
+    hover: async (pg) => {
+      await pg.locator('.rt-ScrollAreaRoot').first().hover();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+    },
   },
   slider: {
     highvalue: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },

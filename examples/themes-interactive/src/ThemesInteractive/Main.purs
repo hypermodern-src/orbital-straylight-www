@@ -1161,6 +1161,8 @@ scrollAreaInput s = ScrollArea.defaultInput
   , heightPx = 120
   -- `?s=autofit`/`?s=autooverflow` → type="auto" (bar mounts only on overflow); else type="always".
   , auto = s == "autofit" || s == "autooverflow"
+  -- `?s=hover` → type="hover": hidden at rest, the Root's pointerenter mounts the bar.
+  , hover = s == "hover"
   , style =
       { root: cn "rt-ScrollAreaRoot"
       , viewport: cn "rt-ScrollAreaViewport"

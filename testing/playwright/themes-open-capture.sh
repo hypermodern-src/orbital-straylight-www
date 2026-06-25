@@ -92,6 +92,7 @@ STATES=(
   "scrollarea:autooverflow"
   "scrollarea:autofit"
   "scrollarea:nothumb"
+  "scrollarea:hover"
   "progress:shown"
   "accessibleicon:shown"
   # Bare @radix-ui/react-* primitives Radix Themes ships no component for (STR-330).

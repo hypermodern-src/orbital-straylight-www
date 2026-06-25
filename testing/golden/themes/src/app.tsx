@@ -1780,12 +1780,14 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       const auto = s === "autofit" || s === "autooverflow";
+      // `?s=hover` → type="hover": hidden at rest, the Root's pointerenter mounts the bar.
+      const hover = s === "hover";
       // `?s=nothumb` → type="always" with content that FITS: the scrollbar TRACK is present but
       // there is NO thumb (upstream hasThumb gate — Presence on ScrollAreaThumb).
       const lines = s === "autofit" || s === "nothumb" ? 1 : 12;
       return (
         <ScrollArea
-          type={auto ? "auto" : "always"}
+          type={hover ? "hover" : auto ? "auto" : "always"}
           scrollbars="vertical"
           style={{ width: 200, height: 120 }}
         >

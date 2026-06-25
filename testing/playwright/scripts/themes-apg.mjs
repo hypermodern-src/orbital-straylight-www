@@ -727,6 +727,19 @@ const CHECKS = [
   // the viewport, the thumb's translate3d Y must equal getThumbOffsetFromScroll =
   // (scrollTop/maxScroll)·(track − thumb). This pins the post-scroll offset the at-rest oracle
   // never exercised. Computed from live geometry → identical on golden AND port. (--golden first.)
+  // type="hover" — the bar is HIDDEN at rest and mounts on the Root's pointerenter (and unmounts
+  // on leave). Validated golden-first. Pins the hover state machine the static DOM golden can't.
+  { id: "scrollarea", state: "hover", apg: "scrollarea", name: "type=hover: bar hidden at rest, pointerenter shows it, leave hides it", run: async (pg) => {
+    const root = pg.locator(".rt-ScrollAreaRoot").first();
+    await root.waitFor();
+    ok((await pg.locator(".rt-ScrollAreaScrollbar").count()) === 0, "type=hover: the bar must be HIDDEN at rest");
+    await root.hover();
+    await pg.locator('.rt-ScrollAreaScrollbar[data-state="visible"]').first().waitFor();
+    ok((await pg.locator(".rt-ScrollAreaScrollbar").count()) === 1, "pointerenter must mount the bar");
+    // move the pointer off the Root → the bar hides again.
+    await pg.mouse.move(0, 0);
+    await pg.waitForFunction(() => document.querySelectorAll(".rt-ScrollAreaScrollbar").length === 0, undefined, { timeout: 4000 });
+  }},
   { id: "scrollarea", state: "shown", apg: "scrollarea", name: "thumb re-offsets on scroll to getThumbOffsetFromScroll", run: async (pg) => {
     const vp = pg.locator(".rt-ScrollAreaViewport").first();
     const thumb = pg.locator(".rt-ScrollAreaThumb").first();

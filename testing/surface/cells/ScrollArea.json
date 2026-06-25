@@ -73,11 +73,14 @@
       "id": "scrollarea.hover",
       "state": "hover",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "dom",
+        "apg"
       ],
-      "ref": "scroll-area.tsx:228-287 type=hover: hidden at rest, pointerenter\u2192data-state=visible (Presence mount), leave\u2192hide. MISSING in port."
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 type=\"hover\" (the `hover` field). Hidden at rest; the Root pointerenter (RootEnter) mounts the bar (gated on hovered && overflow), pointerleave (RootLeave) hides it. scrollarea.hover DOM golden byte-identical + self-stable (hovered state, data-state=visible); APG check (golden-first) proves rest=0 bars \u2192 pointerenter=1 \u2192 leave=0. scroll-area.tsx:228-287",
+      "oracle_file": "scrollarea.hover",
+      "apg_check": "type=hover: bar hidden at rest, pointerenter shows it, leave hides it"
     },
     {
       "id": "scrollarea.nothumb",
