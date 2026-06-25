@@ -25743,15 +25743,15 @@
           return pure35(0);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 298, column 3 - line 304, column 24): " + [msb.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 307, column 3 - line 313, column 24): " + [msb.constructor.name]);
       });
     };
   };
   var toN = toNumber;
   var ratioOf = function(viewport) {
     return function(content3) {
-      var $55 = content3 <= 0;
-      if ($55) {
+      var $57 = content3 <= 0;
+      if ($57) {
         return 0;
       }
       ;
@@ -25772,8 +25772,8 @@
                     var track2 = max11(cw)(ch);
                     var thickness = min8(cw)(ch);
                     var ratio = function() {
-                      var $57 = content3 <= 0;
-                      if ($57) {
+                      var $59 = content3 <= 0;
+                      if ($59) {
                         return 0;
                       }
                       ;
@@ -25783,8 +25783,8 @@
                     var maxThumb = track2 - thumbSize;
                     var maxScroll = content3 - viewport;
                     var offset = function() {
-                      var $58 = maxScroll <= 0;
-                      if ($58) {
+                      var $60 = maxScroll <= 0;
+                      if ($60) {
                         return 0;
                       }
                       ;
@@ -25803,7 +25803,7 @@
                 return pure35(zeroAxis);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 270, column 3 - line 288, column 29): " + [msb.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 279, column 3 - line 297, column 29): " + [msb.constructor.name]);
             });
           };
         };
@@ -25826,17 +25826,19 @@
                     return bind36(measureAxis1(vScrollbarRef)(vH)(cH)(sTop))(function(vert) {
                       return bind36(measureAxis1(hScrollbarRef)(vW)(cW)(sLeft))(function(horiz) {
                         return modify_19(function(v) {
-                          var $61 = {};
-                          for (var $62 in v) {
-                            if ({}.hasOwnProperty.call(v, $62)) {
-                              $61[$62] = v[$62];
+                          var $63 = {};
+                          for (var $64 in v) {
+                            if ({}.hasOwnProperty.call(v, $64)) {
+                              $63[$64] = v[$64];
                             }
                             ;
                           }
                           ;
-                          $61.vert = vert;
-                          $61.horiz = horiz;
-                          return $61;
+                          $63.vert = vert;
+                          $63.horiz = horiz;
+                          $63.overflowV = cH > vH + 1;
+                          $63.overflowH = cW > vW + 1;
+                          return $63;
                         });
                       });
                     });
@@ -25852,7 +25854,7 @@
         return pure35(unit);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 243, column 3 - line 255, column 25): " + [mvp.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 249, column 3 - line 264, column 25): " + [mvp.constructor.name]);
     });
   };
   var eqScrollbars = {
@@ -25877,8 +25879,8 @@
   var eq18 = /* @__PURE__ */ eq(eqScrollbars);
   var render17 = function(st) {
     var radiusAttr = function() {
-      var $67 = st.input.radius === "";
-      if ($67) {
+      var $69 = st.input.radius === "";
+      if ($69) {
         return [];
       }
       ;
@@ -25906,13 +25908,15 @@
         return "scroll";
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 409, column 23 - line 412, column 21): " + [st.input.scrollbars.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 423, column 23 - line 426, column 21): " + [st.input.scrollbars.constructor.name]);
     }();
-    var isBoth = eq18(st.input.scrollbars)(Both.value);
-    var hasVert = eq18(st.input.scrollbars)(Vertical$prime.value) || eq18(st.input.scrollbars)(Both.value);
-    var hasHoriz = eq18(st.input.scrollbars)(Horizontal$prime.value) || eq18(st.input.scrollbars)(Both.value);
     var hScrollbarStyle = "position: absolute; bottom: 0px; left: 0px; " + ("right: var(--radix-scroll-area-corner-width); " + ("--radix-scroll-area-thumb-width: " + (pxN(st.horiz.sizePx) + ";")));
     var horizScrollbar = div3(append115([classes2(st.input.style.scrollbar), ref2(hScrollbarRef), dataOrientation(Horizontal.value), dataState("visible"), attr2("style")(hScrollbarStyle)])(radiusAttr))([div3([classes2(st.input.style.thumb), dataState("visible"), attr2("style")(thumbStyle), onMouseDown(ThumbDown.create(Horizontal.value))])([])]);
+    var famVert = eq18(st.input.scrollbars)(Vertical$prime.value) || eq18(st.input.scrollbars)(Both.value);
+    var hasVert = famVert && (!st.input.auto || st.overflowV);
+    var famHoriz = eq18(st.input.scrollbars)(Horizontal$prime.value) || eq18(st.input.scrollbars)(Both.value);
+    var hasHoriz = famHoriz && (!st.input.auto || st.overflowH);
+    var isBoth = hasVert && hasHoriz;
     var scrollbars = append115(function() {
       if (hasHoriz) {
         return [horizScrollbar];
@@ -25957,8 +25961,8 @@
     return function(track2) {
       return function(thumbSize) {
         var maxThumb = track2 - thumbSize;
-        var $74 = maxThumb > 0;
-        if ($74) {
+        var $76 = maxThumb > 0;
+        if ($76) {
           return maxScroll / maxThumb;
         }
         ;
@@ -26019,31 +26023,31 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 196, column 15 - line 208, column 148): " + [v.value0.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 202, column 15 - line 214, column 148): " + [v.value0.constructor.name]);
               }())(function(info2) {
                 return bind36(liftEffect7(bind121(windowImpl)(document)))(function(doc) {
                   var docTarget = toEventTarget(doc);
                   return bind36(subscribe2(eventListener2("mousemove")(docTarget)(function() {
-                    var $88 = map123(ThumbMove.create);
-                    return function($89) {
-                      return $88(fromEvent2($89));
+                    var $90 = map123(ThumbMove.create);
+                    return function($91) {
+                      return $90(fromEvent2($91));
                     };
                   }())))(function(moveSub) {
                     return bind36(subscribe2(eventListener2("mouseup")(docTarget)(function(v1) {
                       return new Just(ThumbUp.value);
                     })))(function(upSub) {
                       return modify_19(function(v1) {
-                        var $77 = {};
-                        for (var $78 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $78)) {
-                            $77[$78] = v1[$78];
+                        var $79 = {};
+                        for (var $80 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $80)) {
+                            $79[$80] = v1[$80];
                           }
                           ;
                         }
                         ;
-                        $77.drag = new Just(info2);
-                        $77.dragSubs = [moveSub, upSub];
-                        return $77;
+                        $79.drag = new Just(info2);
+                        $79.dragSubs = [moveSub, upSub];
+                        return $79;
                       });
                     });
                   });
@@ -26069,7 +26073,7 @@
                     return toN(clientX(v.value0));
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 221, column 21 - line 223, column 46): " + [info2.axis.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 227, column 21 - line 229, column 46): " + [info2.axis.constructor.name]);
                 }();
                 var target6 = info2.startScroll + (pointer - info2.startPointer) * info2.scale;
                 return discard26(function() {
@@ -26081,7 +26085,7 @@
                     return liftEffect7(setScrollLeft(max11(0)(target6))(vpEl));
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 225, column 9 - line 227, column 81): " + [info2.axis.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 231, column 9 - line 233, column 81): " + [info2.axis.constructor.name]);
                 }())(function() {
                   return recompute1;
                 });
@@ -26095,23 +26099,23 @@
         return bind36(get18)(function(st) {
           return discard26(for_29(st.dragSubs)(unsubscribe2))(function() {
             return modify_19(function(v1) {
-              var $85 = {};
-              for (var $86 in v1) {
-                if ({}.hasOwnProperty.call(v1, $86)) {
-                  $85[$86] = v1[$86];
+              var $87 = {};
+              for (var $88 in v1) {
+                if ({}.hasOwnProperty.call(v1, $88)) {
+                  $87[$88] = v1[$88];
                 }
                 ;
               }
               ;
-              $85.drag = Nothing.value;
-              $85.dragSubs = [];
-              return $85;
+              $87.drag = Nothing.value;
+              $87.dragSubs = [];
+              return $87;
             });
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 183, column 16 - line 234, column 50): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 189, column 16 - line 240, column 50): " + [v.constructor.name]);
     };
   };
   var defaultStyle14 = {
@@ -26129,6 +26133,7 @@
       heightPx: 120,
       scrollbars: Vertical$prime.value,
       radius: "",
+      auto: false,
       style: defaultStyle14
     };
   }();
@@ -26139,6 +26144,8 @@
           input: input3,
           vert: zeroAxis,
           horiz: zeroAxis,
+          overflowV: false,
+          overflowH: false,
           drag: Nothing.value,
           dragSubs: []
         };
@@ -33398,7 +33405,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2077, column 1 - line 2077, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2079, column 1 - line 2079, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33731,7 +33738,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1456, column 1 - line 1456, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1458, column 1 - line 1458, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33989,7 +33996,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2169, column 17 - line 2171, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2171, column 17 - line 2173, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -34124,7 +34131,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2124, column 1 - line 2124, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2126, column 1 - line 2126, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -34186,6 +34193,7 @@
   }();
   var scrollAreaXInput = function(s) {
     return {
+      auto: defaultInput15.auto,
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
@@ -34217,12 +34225,13 @@
       })(range2(1)(12)))]
     };
   };
-  var scrollAreaInput = /* @__PURE__ */ function() {
+  var scrollAreaInput = function(s) {
     return {
       scrollbars: defaultInput15.scrollbars,
       radius: defaultInput15.radius,
       widthPx: 200,
       heightPx: 120,
+      auto: s === "autofit" || s === "autooverflow",
       style: {
         root: cn("rt-ScrollAreaRoot"),
         viewport: cn("rt-ScrollAreaViewport"),
@@ -34233,17 +34242,24 @@
       },
       content: [box([new P("2"), new Width("160px")])(map64(function(n) {
         return textAs("p")([new Size("2")])([text5("Line "), text5(show21(n))]);
-      })(range2(1)(12)))]
+      })(range2(1)(function() {
+        var $263 = s === "autofit";
+        if ($263) {
+          return 1;
+        }
+        ;
+        return 12;
+      }())))]
     };
-  }();
+  };
   var radioGroupInput = function(s) {
     return {
       value: defaultInput14.value,
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $263 = s === "keys" || s === "mixed";
-        if ($263) {
+        var $264 = s === "keys" || s === "mixed";
+        if ($264) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -34259,8 +34275,8 @@
           }];
         }
         ;
-        var $264 = s === "loopoff" || s === "rtl";
-        if ($264) {
+        var $265 = s === "loopoff" || s === "rtl";
+        if ($265) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -34276,8 +34292,8 @@
           }];
         }
         ;
-        var $265 = s === "alldisabled";
-        if ($265) {
+        var $266 = s === "alldisabled";
+        if ($266) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -34302,8 +34318,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $266 = s === "horizontal" || s === "rtl";
-        if ($266) {
+        var $267 = s === "horizontal" || s === "rtl";
+        if ($267) {
           return Horizontal.value;
         }
         ;
@@ -34311,8 +34327,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $267 = s === "rtl";
-        if ($267) {
+        var $268 = s === "rtl";
+        if ($268) {
           return RTL.value;
         }
         ;
@@ -34322,8 +34338,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $268 = s === "form";
-        if ($268) {
+        var $269 = s === "form";
+        if ($269) {
           return "plan";
         }
         ;
@@ -34407,8 +34423,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $269 = styl === "";
-              if ($269) {
+              var $270 = styl === "";
+              if ($270) {
                 return [];
               }
               ;
@@ -34456,8 +34472,8 @@
       align: defaultInput24.align,
       delayMs: defaultInput24.delayMs,
       open: function() {
-        var $271 = s === "controlled" || s === "arialabel";
-        if ($271) {
+        var $272 = s === "controlled" || s === "arialabel";
+        if ($272) {
           return new Just(true);
         }
         ;
@@ -34465,8 +34481,8 @@
       }(),
       defaultOpen: s === "defaultopen",
       ariaLabel: function() {
-        var $272 = s === "arialabel";
-        if ($272) {
+        var $273 = s === "arialabel";
+        if ($273) {
           return "Add this item to your library";
         }
         ;
@@ -34493,8 +34509,8 @@
       padding: defaultInput13.padding,
       align: Start.value,
       open: function() {
-        var $273 = s === "controlled";
-        if ($273) {
+        var $274 = s === "controlled";
+        if ($274) {
           return new Just(true);
         }
         ;
@@ -34503,8 +34519,8 @@
       defaultOpen: s === "defaultopen" || (s === "modal" || s === "flip"),
       modal: s === "modal",
       side: function() {
-        var $274 = s === "flip";
-        if ($274) {
+        var $275 = s === "flip";
+        if ($275) {
           return Top.value;
         }
         ;
@@ -34516,16 +34532,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $275 = s === "close";
-        if ($275) {
+        var $276 = s === "close";
+        if ($276) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $276 = s === "close";
-        if ($276) {
+        var $277 = s === "close";
+        if ($277) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -34553,24 +34569,24 @@
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
       inputId: function() {
-        var $277 = s === "multi";
-        if ($277) {
+        var $278 = s === "multi";
+        if ($278) {
           return Nothing.value;
         }
         ;
         return new Just("password");
       }(),
       toggleVisible: function() {
-        var $278 = s === "autolabel";
-        if ($278) {
+        var $279 = s === "autolabel";
+        if ($279) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $279 = s === "autolabel";
-        if ($279) {
+        var $280 = s === "autolabel";
+        if ($280) {
           return [passwordToggleIcon];
         }
         ;
@@ -34579,8 +34595,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $280 = s === "passthrough";
-        if ($280) {
+        var $281 = s === "passthrough";
+        if ($281) {
           return new Just("pw");
         }
         ;
@@ -34588,16 +34604,16 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $281 = s === "passthrough";
-        if ($281) {
+        var $282 = s === "passthrough";
+        if ($282) {
           return new Just("Enter password");
         }
         ;
         return Nothing.value;
       }(),
       visible: function() {
-        var $282 = s === "controlled";
-        if ($282) {
+        var $283 = s === "controlled";
+        if ($283) {
           return new Just(false);
         }
         ;
@@ -34619,7 +34635,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1812, column 1 - line 1812, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1814, column 1 - line 1814, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -34630,32 +34646,32 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $285 = s === "open" || (s === "clicktoggle" || (s === "vertical" || (s === "rtl" || s === "activelink")));
-        if ($285) {
+        var $286 = s === "open" || (s === "clicktoggle" || (s === "vertical" || (s === "rtl" || s === "activelink")));
+        if ($286) {
           return "one";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $286 = s === "controlled";
-        if ($286) {
+        var $287 = s === "controlled";
+        if ($287) {
           return new Just("one");
         }
         ;
         return Nothing.value;
       }(),
       orientation: function() {
-        var $287 = s === "vertical";
-        if ($287) {
+        var $288 = s === "vertical";
+        if ($288) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $288 = s === "rtl";
-        if ($288) {
+        var $289 = s === "rtl";
+        if ($289) {
           return RTL.value;
         }
         ;
@@ -34697,8 +34713,8 @@
       portalAttrs: defaultInput10.portalAttrs,
       align: Start.value,
       dir: function() {
-        var $289 = s === "rtl";
-        if ($289) {
+        var $290 = s === "rtl";
+        if ($290) {
           return RTL.value;
         }
         ;
@@ -34706,8 +34722,8 @@
       }(),
       loop: s !== "noloop",
       value: function() {
-        var $290 = s === "controlled";
-        if ($290) {
+        var $291 = s === "controlled";
+        if ($291) {
           return new Just("file");
         }
         ;
@@ -34725,8 +34741,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $291 = s === "submenu";
-          if ($291) {
+          var $292 = s === "submenu";
+          if ($292) {
             return [menubarSubEntry];
           }
           ;
@@ -34781,8 +34797,8 @@
         trigger: [text5("View")],
         disabled: false,
         entries: function() {
-          var $292 = s === "radio";
-          if ($292) {
+          var $293 = s === "radio";
+          if ($293) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34888,84 +34904,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2136, column 1 - line 2136, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2138, column 1 - line 2138, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $358 = filter(function(c) {
+    var $359 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($359) {
-      return fromCharArray($358(toCharArray($359)));
+    return function($360) {
+      return fromCharArray($359(toCharArray($360)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $294 = s === "controlled";
-        if ($294) {
+        var $295 = s === "controlled";
+        if ($295) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $295 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($295) {
+        var $296 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($296) {
           return "";
         }
         ;
-        var $296 = s === "alpha";
-        if ($296) {
+        var $297 = s === "alpha";
+        if ($297) {
           return "abc";
         }
         ;
-        var $297 = s === "alphanumeric";
-        if ($297) {
+        var $298 = s === "alphanumeric";
+        if ($298) {
           return "a1b";
         }
         ;
-        var $298 = s === "revalidate";
-        if ($298) {
+        var $299 = s === "revalidate";
+        if ($299) {
           return "a1b2c";
         }
         ;
-        var $299 = s === "sanitizevalue";
-        if ($299) {
+        var $300 = s === "sanitizevalue";
+        if ($300) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $300 = s === "alpha" || s === "revalidate";
-        if ($300) {
+        var $301 = s === "alpha" || s === "revalidate";
+        if ($301) {
           return Alpha.value;
         }
         ;
-        var $301 = s === "alphanumeric";
-        if ($301) {
+        var $302 = s === "alphanumeric";
+        if ($302) {
           return Alphanumeric.value;
         }
         ;
-        var $302 = s === "novalidation" || s === "sanitizevalue";
-        if ($302) {
+        var $303 = s === "novalidation" || s === "sanitizevalue";
+        if ($303) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $303 = s === "sanitizevalue";
-        if ($303) {
+        var $304 = s === "sanitizevalue";
+        if ($304) {
           return keepDigitsOnly;
         }
         ;
         return identity14;
       }(),
       placeholder: function() {
-        var $304 = s === "placeholder";
-        if ($304) {
+        var $305 = s === "placeholder";
+        if ($305) {
           return new Just("\u25CB");
         }
         ;
@@ -34975,24 +34991,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $305 = s === "vertical";
-        if ($305) {
+        var $306 = s === "vertical";
+        if ($306) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $306 = s === "rtl";
-        if ($306) {
+        var $307 = s === "rtl";
+        if ($307) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $307 = s === "named";
-        if ($307) {
+        var $308 = s === "named";
+        if ($308) {
           return new Just("otp-code");
         }
         ;
@@ -35018,16 +35034,16 @@
       triggerHref: defaultInput9.triggerHref,
       align: Start.value,
       open: function() {
-        var $308 = s === "controlled" || s === "placement";
-        if ($308) {
+        var $309 = s === "controlled" || s === "placement";
+        if ($309) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       side: function() {
-        var $309 = s === "placement";
-        if ($309) {
+        var $310 = s === "placement";
+        if ($310) {
           return Right2.value;
         }
         ;
@@ -35044,8 +35060,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $310 = s === "richcontent";
-        if ($310) {
+        var $311 = s === "richcontent";
+        if ($311) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -35064,23 +35080,23 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2314, column 1 - line 2314, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2316, column 1 - line 2316, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $313 = s === "reset";
-        if ($313) {
+        var $314 = s === "reset";
+        if ($314) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
       fields: function() {
-        var $314 = s === "custom";
-        if ($314) {
+        var $315 = s === "custom";
+        if ($315) {
           return [{
             required: defaultField.required,
             serverInvalid: defaultField.serverInvalid,
@@ -35098,8 +35114,8 @@
           }];
         }
         ;
-        var $315 = s === "multi";
-        if ($315) {
+        var $316 = s === "multi";
+        if ($316) {
           return [{
             serverInvalid: defaultField.serverInvalid,
             name: "email",
@@ -35134,8 +35150,8 @@
           required: true,
           serverInvalid: s === "serverInvalid",
           messages: function() {
-            var $316 = s === "defaultMessage";
-            if ($316) {
+            var $317 = s === "defaultMessage";
+            if ($317) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35144,8 +35160,8 @@
               }];
             }
             ;
-            var $317 = s === "reset";
-            if ($317) {
+            var $318 = s === "reset";
+            if ($318) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35188,7 +35204,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2180, column 12 - line 2182, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2182, column 12 - line 2184, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -35209,8 +35225,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $325 = kv.before === key2;
-          if ($325) {
+          var $326 = kv.before === key2;
+          if ($326) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -35221,7 +35237,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2162, column 15 - line 2164, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2164, column 15 - line 2166, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -35257,16 +35273,16 @@
       closeLabels: ["Cancel", "Save"],
       trigger: [text5("Edit profile")],
       open: function() {
-        var $327 = s === "controlled";
-        if ($327) {
+        var $328 = s === "controlled";
+        if ($328) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       dir: function() {
-        var $328 = s === "rtl";
-        if ($328) {
+        var $329 = s === "rtl";
+        if ($329) {
           return "rtl";
         }
         ;
@@ -35274,16 +35290,16 @@
       }(),
       forceMount: s === "forcemount",
       title: function() {
-        var $329 = s === "notitle";
-        if ($329) {
+        var $330 = s === "notitle";
+        if ($330) {
           return [];
         }
         ;
         return [text5("Edit profile")];
       }(),
       description: function() {
-        var $330 = s === "notitle";
-        if ($330) {
+        var $331 = s === "notitle";
+        if ($331) {
           return [];
         }
         ;
@@ -35361,16 +35377,16 @@
       side: Right2.value,
       modal: s !== "nonmodal",
       keepOpenValues: function() {
-        var $331 = s === "cancelselect";
-        if ($331) {
+        var $332 = s === "cancelselect";
+        if ($332) {
           return ["edit"];
         }
         ;
         return [];
       }(),
       open: function() {
-        var $332 = s === "controlled";
-        if ($332) {
+        var $333 = s === "controlled";
+        if ($333) {
           return new Just(true);
         }
         ;
@@ -35383,8 +35399,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $333 = s === "submenu";
-        if ($333) {
+        var $334 = s === "submenu";
+        if ($334) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -35410,8 +35426,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $334 = s === "radio";
-        if ($334) {
+        var $335 = s === "radio";
+        if ($335) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -35452,8 +35468,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $335 = s === "controlled";
-        if ($335) {
+        var $336 = s === "controlled";
+        if ($336) {
           return new Just(true);
         }
         ;
@@ -35474,8 +35490,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $336 = klass === "";
-      if ($336) {
+      var $337 = klass === "";
+      if ($337) {
         return [];
       }
       ;
@@ -35501,8 +35517,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $337 = s === "radio";
-        if ($337) {
+        var $338 = s === "radio";
+        if ($338) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -35595,16 +35611,16 @@
       style: menuStyle,
       modal: s !== "nonmodal",
       open: function() {
-        var $338 = s === "controlled";
-        if ($338) {
+        var $339 = s === "controlled";
+        if ($339) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       keepOpenValues: function() {
-        var $339 = s === "selectnoclose";
-        if ($339) {
+        var $340 = s === "selectnoclose";
+        if ($340) {
           return ["edit"];
         }
         ;
@@ -35616,8 +35632,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $340 = s === "submenu";
-        if ($340) {
+        var $341 = s === "submenu";
+        if ($341) {
           return [submenuEntry];
         }
         ;
@@ -35780,8 +35796,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $342 = s === "controlled";
-        if ($342) {
+        var $343 = s === "controlled";
+        if ($343) {
           return new Just(Checked.value);
         }
         ;
@@ -35805,16 +35821,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $344 = s === "form";
-        if ($344) {
+        var $345 = s === "form";
+        if ($345) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $345 = s === "form";
-        if ($345) {
+        var $346 = s === "form";
+        if ($346) {
           return "yes";
         }
         ;
@@ -35882,18 +35898,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $348 = s === "wide";
-        if ($348) {
+        var $349 = s === "wide";
+        if ($349) {
           return 16 / 9;
         }
         ;
-        var $349 = s === "tall";
-        if ($349) {
+        var $350 = s === "tall";
+        if ($350) {
           return 1 / 2;
         }
         ;
-        var $350 = s === "verywide";
-        if ($350) {
+        var $351 = s === "verywide";
+        if ($351) {
           return 21 / 9;
         }
         ;
@@ -35902,7 +35918,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2054, column 1 - line 2054, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2056, column 1 - line 2056, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -35918,8 +35934,8 @@
       closeOnEscape: defaultInput2.closeOnEscape,
       style: alertDialogStyle,
       open: function() {
-        var $351 = s === "controlled";
-        if ($351) {
+        var $352 = s === "controlled";
+        if ($352) {
           return new Just(true);
         }
         ;
@@ -35963,8 +35979,8 @@
       collapsible: s === "singlecollapsible",
       disabled: s === "disabledroot",
       defaultValue: function() {
-        var $352 = s === "single" || s === "singlecollapsible";
-        if ($352) {
+        var $353 = s === "single" || s === "singlecollapsible";
+        if ($353) {
           return ["item-1"];
         }
         ;
@@ -36095,18 +36111,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $353 = s === "formreset";
-    if ($353) {
+    var $354 = s === "formreset";
+    if ($354) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $354 = s === "multi";
-    if ($354) {
+    var $355 = s === "multi";
+    if ($355) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $355 = s === "formsubmit";
-    if ($355) {
+    var $356 = s === "formsubmit";
+    if ($356) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -36226,8 +36242,8 @@
         }
         ;
         if (c === "slider") {
-          var $357 = s === "vertical";
-          if ($357) {
+          var $358 = s === "vertical";
+          if ($358) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;
@@ -36307,7 +36323,7 @@
         }
         ;
         if (c === "scrollarea") {
-          return slot_26(_scrollarea)(unit)(component192)(scrollAreaInput);
+          return slot_26(_scrollarea)(unit)(component192)(scrollAreaInput(s));
         }
         ;
         if (c === "tabnav") {

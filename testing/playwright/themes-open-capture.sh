@@ -89,6 +89,8 @@ STATES=(
   "slider:arialabel"
   "slider:rtl"
   "scrollarea:shown"
+  "scrollarea:autooverflow"
+  "scrollarea:autofit"
   "progress:shown"
   "accessibleicon:shown"
   # Bare @radix-ui/react-* primitives Radix Themes ships no component for (STR-330).

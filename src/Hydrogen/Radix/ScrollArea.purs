@@ -106,6 +106,9 @@ type Input =
   -- The themes default is `undefined` (React omits the attr), so "" ⇒ no data-radius —
   -- matching the existing scrollbars goldens; a non-empty value stamps it on each bar.
   , radius :: String
+  -- type="auto": a scrollbar is mounted only when its axis OVERFLOWS (content > viewport),
+  -- measured on Initialize/scroll. Default false ⇒ type="always" (bars mounted unconditionally).
+  , auto :: Boolean
   , style :: Style
   }
 
@@ -116,6 +119,7 @@ defaultInput =
   , heightPx: 120
   , scrollbars: Vertical'
   , radius: ""
+  , auto: false
   , style: defaultStyle
   }
 
@@ -148,6 +152,8 @@ type State =
   { input :: Input
   , vert :: Axis -- vertical bar measurements (thumb height / Y offset)
   , horiz :: Axis -- horizontal bar measurements (thumb width / X offset)
+  , overflowV :: Boolean -- vertical axis overflows (content > viewport) — gates the bar when auto
+  , overflowH :: Boolean -- horizontal axis overflows
   , drag :: Maybe DragInfo
   , dragSubs :: Array H.SubscriptionId
   }
@@ -171,7 +177,7 @@ hScrollbarRef = H.RefLabel "scrollarea-scrollbar-h"
 component :: forall q o m. MonadEffect m => H.Component q Input o m
 component =
   H.mkComponent
-    { initialState: \input -> { input, vert: zeroAxis, horiz: zeroAxis, drag: Nothing, dragSubs: [] }
+    { initialState: \input -> { input, vert: zeroAxis, horiz: zeroAxis, overflowV: false, overflowH: false, drag: Nothing, dragSubs: [] }
     , render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -251,7 +257,10 @@ recompute = do
       sLeft <- liftEffect (Element.scrollLeft vpEl)
       vert <- measureAxis vScrollbarRef vH cH sTop
       horiz <- measureAxis hScrollbarRef vW cW sLeft
-      H.modify_ _ { vert = vert, horiz = horiz }
+      -- overflow per axis (content extent exceeds the viewport, +1px slack for sub-pixel
+      -- rounding) — gates the scrollbar mount under type="auto". Thumb px are normalized to
+      -- <px> in the oracle, so the bar's PRESENCE is the only thing this needs to be right.
+      H.modify_ _ { vert = vert, horiz = horiz, overflowV = cH > vH + 1.0, overflowH = cW > vW + 1.0 }
     Nothing -> pure unit
 
 -- | One axis: viewport extent / content extent / scroll position along the axis, the
@@ -344,9 +353,14 @@ render st =
         <> corner
     )
   where
-  hasVert = st.input.scrollbars == Vertical' || st.input.scrollbars == Both
-  hasHoriz = st.input.scrollbars == Horizontal' || st.input.scrollbars == Both
-  isBoth = st.input.scrollbars == Both
+  -- the scrollbar FAMILY (which axes this Root carries), then the AUTO gate: under type="auto"
+  -- a bar mounts only when its axis overflows (upstream Presence on ScrollAreaScrollbarAuto);
+  -- under type="always" (auto=false) the bars are unconditional.
+  famVert = st.input.scrollbars == Vertical' || st.input.scrollbars == Both
+  famHoriz = st.input.scrollbars == Horizontal' || st.input.scrollbars == Both
+  hasVert = famVert && (not st.input.auto || st.overflowV)
+  hasHoriz = famHoriz && (not st.input.auto || st.overflowH)
+  isBoth = hasVert && hasHoriz
 
   -- the scrollbar list, in UPSTREAM order: horizontal FIRST, then vertical (matches
   -- ScrollAreaScrollbarX/Y render order in the themes scrollbars="both" tree).

@@ -1774,17 +1774,29 @@ const PAGES: Page[] = [
     // exactly ONE scrollbar (no horizontal, no corner) for a deterministic anatomy:
     // Root > Viewport > content + Scrollbar(vertical) > Thumb. Thumb size/offset are px
     // (normalized to <px>); the oracle tests STRUCTURE.
-    node: (
-      <ScrollArea type="always" scrollbars="vertical" style={{ width: 200, height: 120 }}>
-        <Box p="2" style={{ width: 160 }}>
-          {Array.from({ length: 12 }, (_, i) => (
-            <Text key={i} as="p" size="2">
-              Line {i + 1}
-            </Text>
-          ))}
-        </Box>
-      </ScrollArea>
-    ),
+    // `?s=autofit` → type="auto" with content that FITS (1 line): no overflow ⇒ NO scrollbar
+    // mounted. `?s=autooverflow` → type="auto" with tall content: overflow ⇒ the vertical
+    // scrollbar IS mounted (data-state=visible). Default/rest → type="always" (bar unconditional).
+    node: (() => {
+      const s = currentState();
+      const auto = s === "autofit" || s === "autooverflow";
+      const lines = s === "autofit" ? 1 : 12;
+      return (
+        <ScrollArea
+          type={auto ? "auto" : "always"}
+          scrollbars="vertical"
+          style={{ width: 200, height: 120 }}
+        >
+          <Box p="2" style={{ width: 160 }}>
+            {Array.from({ length: lines }, (_, i) => (
+              <Text key={i} as="p" size="2">
+                Line {i + 1}
+              </Text>
+            ))}
+          </Box>
+        </ScrollArea>
+      );
+    })(),
   },
   // ── Bare @radix-ui/react-* primitives Radix Themes ships NO component for ───────
   // (toolbar / password-toggle-field / one-time-password-field / form). These render the

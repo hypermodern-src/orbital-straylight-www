@@ -845,6 +845,17 @@ export const STATES = {
         return t && t.getBoundingClientRect().height > 1;
       });
     },
+    // type="auto" + OVERFLOWING content: the vertical scrollbar mounts (measured overflow).
+    // Wait for it to appear, same as `shown`.
+    autooverflow: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+    },
+    // type="auto" + content that FITS: NO scrollbar ever mounts. Wait for the viewport to be
+    // present, then assert (after the measure settles) that no scrollbar is in the DOM.
+    autofit: async (pg) => {
+      await pg.locator('[data-radix-scroll-area-viewport]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelectorAll('.rt-ScrollAreaScrollbar').length === 0);
+    },
   },
   slider: {
     highvalue: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },

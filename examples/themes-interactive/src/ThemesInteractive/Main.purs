@@ -312,7 +312,7 @@ view c s =
             "avatar" | s == "loadedattrs" -> HH.slot_ _avatarx unit RadixAvatar.component avatarLoadedAttrsInput
             "avatar" -> Avatar.avatar "A" []
             "progress" -> box [ StyleProp "max-width" "320px" ] [ progressVariant s ]
-            "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
+            "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component (scrollAreaInput s)
             "tabnav" -> tabNavPage
             "passwordtoggle" -> passwordTogglePage s
             "toolbar" -> HH.slot_ _toolbar unit Toolbar.component (toolbarInput s)
@@ -1155,10 +1155,12 @@ progressVariant s = case s of
 -- | thumb render at rest. The rt-* Style reproduces upstream's class anatomy; the content
 -- | mirrors the golden story (a `rt-Box rt-r-p-2 width:160px` of `rt-Text rt-r-size-2`
 -- | paragraphs, each "Line " + N as TWO text nodes, exactly as React splits the JSX).
-scrollAreaInput :: ScrollArea.Input
-scrollAreaInput = ScrollArea.defaultInput
+scrollAreaInput :: String -> ScrollArea.Input
+scrollAreaInput s = ScrollArea.defaultInput
   { widthPx = 200
   , heightPx = 120
+  -- `?s=autofit`/`?s=autooverflow` → type="auto" (bar mounts only on overflow); else type="always".
+  , auto = s == "autofit" || s == "autooverflow"
   , style =
       { root: cn "rt-ScrollAreaRoot"
       , viewport: cn "rt-ScrollAreaViewport"
@@ -1171,7 +1173,7 @@ scrollAreaInput = ScrollArea.defaultInput
       [ box [ P "2", Width "160px" ]
           ( map
               ( \n -> textAs "p" [ Size "2" ] [ HH.text "Line ", HH.text (show n) ] )
-              (Array.range 1 12)
+              (Array.range 1 (if s == "autofit" then 1 else 12))
           )
       ]
   }

@@ -123,21 +123,23 @@
       "id": "scrollarea.auto-overflow",
       "state": "auto",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "scroll-area.tsx:366-394 type=auto: visible only when viewport overflows (ResizeObserver); shown variant"
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 added type=\"auto\" (the `auto` field). type=auto + overflowing content mounts the vertical scrollbar (measured overflow: content scrollHeight > viewport offsetHeight). scrollarea.autooverflow DOM golden byte-identical + self-stable. scroll-area.tsx:366-394",
+      "oracle_file": "scrollarea.autooverflow"
     },
     {
       "id": "scrollarea.auto-fit",
       "state": "auto",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "scroll-area.tsx:366-394 type=auto: content fits \u2192 NO scrollbar; covers hasThumb gate"
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 type=\"auto\" + content that FITS (no overflow) mounts NO scrollbar (and no corner). scrollarea.autofit DOM golden byte-identical + self-stable (0 scrollbar nodes). scroll-area.tsx:366-394",
+      "oracle_file": "scrollarea.autofit"
     },
     {
       "id": "scrollarea.thumb-drag",
