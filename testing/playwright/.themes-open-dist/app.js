@@ -33367,7 +33367,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2071, column 1 - line 2071, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2073, column 1 - line 2073, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33700,7 +33700,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1450, column 1 - line 1450, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1452, column 1 - line 1452, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33958,7 +33958,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2163, column 17 - line 2165, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2165, column 17 - line 2167, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -34093,7 +34093,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2118, column 1 - line 2118, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2120, column 1 - line 2120, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -34580,13 +34580,12 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1806, column 1 - line 1806, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1808, column 1 - line 1808, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
   var navigationMenuInput = function(s) {
     return {
-      value: defaultInput11.value,
       idPrefix: defaultInput11.idPrefix,
       withViewport: defaultInput11.withViewport,
       withIndicator: defaultInput11.withIndicator,
@@ -34599,17 +34598,25 @@
         ;
         return "";
       }(),
-      orientation: function() {
-        var $285 = s === "vertical";
+      value: function() {
+        var $285 = s === "controlled";
         if ($285) {
+          return new Just("one");
+        }
+        ;
+        return Nothing.value;
+      }(),
+      orientation: function() {
+        var $286 = s === "vertical";
+        if ($286) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $286 = s === "rtl";
-        if ($286) {
+        var $287 = s === "rtl";
+        if ($287) {
           return RTL.value;
         }
         ;
@@ -34651,8 +34658,8 @@
       portalAttrs: defaultInput10.portalAttrs,
       align: Start.value,
       dir: function() {
-        var $287 = s === "rtl";
-        if ($287) {
+        var $288 = s === "rtl";
+        if ($288) {
           return RTL.value;
         }
         ;
@@ -34660,8 +34667,8 @@
       }(),
       loop: s !== "noloop",
       value: function() {
-        var $288 = s === "controlled";
-        if ($288) {
+        var $289 = s === "controlled";
+        if ($289) {
           return new Just("file");
         }
         ;
@@ -34679,8 +34686,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $289 = s === "submenu";
-          if ($289) {
+          var $290 = s === "submenu";
+          if ($290) {
             return [menubarSubEntry];
           }
           ;
@@ -34735,8 +34742,8 @@
         trigger: [text5("View")],
         disabled: false,
         entries: function() {
-          var $290 = s === "radio";
-          if ($290) {
+          var $291 = s === "radio";
+          if ($291) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34842,84 +34849,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2130, column 1 - line 2130, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2132, column 1 - line 2132, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $356 = filter(function(c) {
+    var $357 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($357) {
-      return fromCharArray($356(toCharArray($357)));
+    return function($358) {
+      return fromCharArray($357(toCharArray($358)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $292 = s === "controlled";
-        if ($292) {
+        var $293 = s === "controlled";
+        if ($293) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $293 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($293) {
+        var $294 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($294) {
           return "";
         }
         ;
-        var $294 = s === "alpha";
-        if ($294) {
+        var $295 = s === "alpha";
+        if ($295) {
           return "abc";
         }
         ;
-        var $295 = s === "alphanumeric";
-        if ($295) {
+        var $296 = s === "alphanumeric";
+        if ($296) {
           return "a1b";
         }
         ;
-        var $296 = s === "revalidate";
-        if ($296) {
+        var $297 = s === "revalidate";
+        if ($297) {
           return "a1b2c";
         }
         ;
-        var $297 = s === "sanitizevalue";
-        if ($297) {
+        var $298 = s === "sanitizevalue";
+        if ($298) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $298 = s === "alpha" || s === "revalidate";
-        if ($298) {
+        var $299 = s === "alpha" || s === "revalidate";
+        if ($299) {
           return Alpha.value;
         }
         ;
-        var $299 = s === "alphanumeric";
-        if ($299) {
+        var $300 = s === "alphanumeric";
+        if ($300) {
           return Alphanumeric.value;
         }
         ;
-        var $300 = s === "novalidation" || s === "sanitizevalue";
-        if ($300) {
+        var $301 = s === "novalidation" || s === "sanitizevalue";
+        if ($301) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $301 = s === "sanitizevalue";
-        if ($301) {
+        var $302 = s === "sanitizevalue";
+        if ($302) {
           return keepDigitsOnly;
         }
         ;
         return identity14;
       }(),
       placeholder: function() {
-        var $302 = s === "placeholder";
-        if ($302) {
+        var $303 = s === "placeholder";
+        if ($303) {
           return new Just("\u25CB");
         }
         ;
@@ -34929,24 +34936,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $303 = s === "vertical";
-        if ($303) {
+        var $304 = s === "vertical";
+        if ($304) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $304 = s === "rtl";
-        if ($304) {
+        var $305 = s === "rtl";
+        if ($305) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $305 = s === "named";
-        if ($305) {
+        var $306 = s === "named";
+        if ($306) {
           return new Just("otp-code");
         }
         ;
@@ -34972,16 +34979,16 @@
       triggerHref: defaultInput9.triggerHref,
       align: Start.value,
       open: function() {
-        var $306 = s === "controlled" || s === "placement";
-        if ($306) {
+        var $307 = s === "controlled" || s === "placement";
+        if ($307) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       side: function() {
-        var $307 = s === "placement";
-        if ($307) {
+        var $308 = s === "placement";
+        if ($308) {
           return Right2.value;
         }
         ;
@@ -34998,8 +35005,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $308 = s === "richcontent";
-        if ($308) {
+        var $309 = s === "richcontent";
+        if ($309) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -35018,23 +35025,23 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2308, column 1 - line 2308, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2310, column 1 - line 2310, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $311 = s === "reset";
-        if ($311) {
+        var $312 = s === "reset";
+        if ($312) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
       fields: function() {
-        var $312 = s === "custom";
-        if ($312) {
+        var $313 = s === "custom";
+        if ($313) {
           return [{
             required: defaultField.required,
             serverInvalid: defaultField.serverInvalid,
@@ -35052,8 +35059,8 @@
           }];
         }
         ;
-        var $313 = s === "multi";
-        if ($313) {
+        var $314 = s === "multi";
+        if ($314) {
           return [{
             serverInvalid: defaultField.serverInvalid,
             name: "email",
@@ -35088,8 +35095,8 @@
           required: true,
           serverInvalid: s === "serverInvalid",
           messages: function() {
-            var $314 = s === "defaultMessage";
-            if ($314) {
+            var $315 = s === "defaultMessage";
+            if ($315) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35098,8 +35105,8 @@
               }];
             }
             ;
-            var $315 = s === "reset";
-            if ($315) {
+            var $316 = s === "reset";
+            if ($316) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35142,7 +35149,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2174, column 12 - line 2176, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2176, column 12 - line 2178, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -35163,8 +35170,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $323 = kv.before === key2;
-          if ($323) {
+          var $324 = kv.before === key2;
+          if ($324) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -35175,7 +35182,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2156, column 15 - line 2158, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2158, column 15 - line 2160, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -35211,16 +35218,16 @@
       closeLabels: ["Cancel", "Save"],
       trigger: [text5("Edit profile")],
       open: function() {
-        var $325 = s === "controlled";
-        if ($325) {
+        var $326 = s === "controlled";
+        if ($326) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       dir: function() {
-        var $326 = s === "rtl";
-        if ($326) {
+        var $327 = s === "rtl";
+        if ($327) {
           return "rtl";
         }
         ;
@@ -35228,16 +35235,16 @@
       }(),
       forceMount: s === "forcemount",
       title: function() {
-        var $327 = s === "notitle";
-        if ($327) {
+        var $328 = s === "notitle";
+        if ($328) {
           return [];
         }
         ;
         return [text5("Edit profile")];
       }(),
       description: function() {
-        var $328 = s === "notitle";
-        if ($328) {
+        var $329 = s === "notitle";
+        if ($329) {
           return [];
         }
         ;
@@ -35315,16 +35322,16 @@
       side: Right2.value,
       modal: s !== "nonmodal",
       keepOpenValues: function() {
-        var $329 = s === "cancelselect";
-        if ($329) {
+        var $330 = s === "cancelselect";
+        if ($330) {
           return ["edit"];
         }
         ;
         return [];
       }(),
       open: function() {
-        var $330 = s === "controlled";
-        if ($330) {
+        var $331 = s === "controlled";
+        if ($331) {
           return new Just(true);
         }
         ;
@@ -35337,8 +35344,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $331 = s === "submenu";
-        if ($331) {
+        var $332 = s === "submenu";
+        if ($332) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -35364,8 +35371,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $332 = s === "radio";
-        if ($332) {
+        var $333 = s === "radio";
+        if ($333) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -35406,8 +35413,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $333 = s === "controlled";
-        if ($333) {
+        var $334 = s === "controlled";
+        if ($334) {
           return new Just(true);
         }
         ;
@@ -35428,8 +35435,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $334 = klass === "";
-      if ($334) {
+      var $335 = klass === "";
+      if ($335) {
         return [];
       }
       ;
@@ -35455,8 +35462,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $335 = s === "radio";
-        if ($335) {
+        var $336 = s === "radio";
+        if ($336) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -35549,16 +35556,16 @@
       style: menuStyle,
       modal: s !== "nonmodal",
       open: function() {
-        var $336 = s === "controlled";
-        if ($336) {
+        var $337 = s === "controlled";
+        if ($337) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       keepOpenValues: function() {
-        var $337 = s === "selectnoclose";
-        if ($337) {
+        var $338 = s === "selectnoclose";
+        if ($338) {
           return ["edit"];
         }
         ;
@@ -35570,8 +35577,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $338 = s === "submenu";
-        if ($338) {
+        var $339 = s === "submenu";
+        if ($339) {
           return [submenuEntry];
         }
         ;
@@ -35734,8 +35741,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $340 = s === "controlled";
-        if ($340) {
+        var $341 = s === "controlled";
+        if ($341) {
           return new Just(Checked.value);
         }
         ;
@@ -35759,16 +35766,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $342 = s === "form";
-        if ($342) {
+        var $343 = s === "form";
+        if ($343) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $343 = s === "form";
-        if ($343) {
+        var $344 = s === "form";
+        if ($344) {
           return "yes";
         }
         ;
@@ -35836,18 +35843,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $346 = s === "wide";
-        if ($346) {
+        var $347 = s === "wide";
+        if ($347) {
           return 16 / 9;
         }
         ;
-        var $347 = s === "tall";
-        if ($347) {
+        var $348 = s === "tall";
+        if ($348) {
           return 1 / 2;
         }
         ;
-        var $348 = s === "verywide";
-        if ($348) {
+        var $349 = s === "verywide";
+        if ($349) {
           return 21 / 9;
         }
         ;
@@ -35856,7 +35863,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2048, column 1 - line 2048, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2050, column 1 - line 2050, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -35872,8 +35879,8 @@
       closeOnEscape: defaultInput2.closeOnEscape,
       style: alertDialogStyle,
       open: function() {
-        var $349 = s === "controlled";
-        if ($349) {
+        var $350 = s === "controlled";
+        if ($350) {
           return new Just(true);
         }
         ;
@@ -35917,8 +35924,8 @@
       collapsible: s === "singlecollapsible",
       disabled: s === "disabledroot",
       defaultValue: function() {
-        var $350 = s === "single" || s === "singlecollapsible";
-        if ($350) {
+        var $351 = s === "single" || s === "singlecollapsible";
+        if ($351) {
           return ["item-1"];
         }
         ;
@@ -36049,18 +36056,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $351 = s === "formreset";
-    if ($351) {
+    var $352 = s === "formreset";
+    if ($352) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $352 = s === "multi";
-    if ($352) {
+    var $353 = s === "multi";
+    if ($353) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $353 = s === "formsubmit";
-    if ($353) {
+    var $354 = s === "formsubmit";
+    if ($354) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -36180,8 +36187,8 @@
         }
         ;
         if (c === "slider") {
-          var $355 = s === "vertical";
-          if ($355) {
+          var $356 = s === "vertical";
+          if ($356) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

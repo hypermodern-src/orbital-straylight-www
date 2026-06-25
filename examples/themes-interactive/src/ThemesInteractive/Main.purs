@@ -1003,6 +1003,8 @@ navigationMenuInput s = NavigationMenu.defaultInput
   -- every other path (the `closed`/`rest` capture, the index) renders at rest — mirroring the
   -- golden story's `currentState() === "open"` switch (so the a11y `rest` baseline matches too).
   { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" || s == "rtl" then "one" else ""
+  -- `?s=controlled` → parent OWNS value="one" (open at mount, parent-controlled).
+  , value = if s == "controlled" then Just "one" else Nothing
   , orientation = if s == "vertical" then Vertical else Horizontal
   -- Wave-D: ?s=rtl drives dir=RTL (the FocusGroup swaps the horizontal roving keys + the
   -- dir attribute is stamped on the nav/list/content). Every other path stays LTR.

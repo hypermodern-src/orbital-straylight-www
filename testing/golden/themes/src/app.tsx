@@ -1181,9 +1181,13 @@ const PAGES: Page[] = [
       // entry; the horizontal axis is mirrored). dir=rtl is stamped on nav/list/content. Opens
       // Item One at first paint via defaultValue (no timer race).
       const rtl = currentState() === "rtl";
+      // `?s=controlled` → parent OWNS value="one" (open at first paint, parent-controlled). The
+      // first-paint DOM matches the uncontrolled `open` story (navigation-menu.tsx:82-140).
+      const controlled = currentState() === "controlled";
       return (
         <NavigationMenu.Root
           {...(open || vertical || rtl ? { defaultValue: "one" } : {})}
+          {...(controlled ? { value: "one", onValueChange: () => {} } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
           {...(rtl ? { dir: "rtl" as const } : {})}
         >

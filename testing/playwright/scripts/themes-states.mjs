@@ -356,6 +356,18 @@ export const STATES = {
         return !!vp;
       });
     },
+    // CONTROLLED (?s=controlled): parent OWNS value="one" → open at first paint, same DOM as
+    // `open`. Same open-state wait (no interaction). Keyed off upstream role/data-* only.
+    controlled: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
     // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
     // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
     // omits defaultValue. No interaction — wait for the closed trigger.
