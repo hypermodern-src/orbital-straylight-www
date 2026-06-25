@@ -87,6 +87,7 @@ type Input =
   , triggerAttrs :: Array (Tuple String String)  -- data-* on the trigger (e.g. accent-color)
   , portalAttrs :: Array (Tuple String String)   -- data-* on the content (theme re-application)
   , delayMs :: Int               -- hover-open delay (radix DEFAULT_DELAY_DURATION=700); focus opens instantly
+  , ariaLabel :: String          -- aria-label on Content: overrides the role=tooltip VisuallyHidden copy's accessible name (ariaLabel||children); consumed, never spread onto the content node
   }
 
 defaultInput :: Input
@@ -105,6 +106,7 @@ defaultInput =
   , triggerAttrs: []
   , portalAttrs: []
   , delayMs: 700
+  , ariaLabel: ""
   }
 
 data Output = OpenChanged Boolean
@@ -142,6 +144,7 @@ type State =
   , delayMs :: Int              -- hover-open delay
   , pendingOpen :: Maybe Dom.TimeoutId       -- the live hover-open timer (cancel on early leave)
   , pendingSub :: Maybe H.SubscriptionId     -- the emitter subscription feeding `Opened` from that timer
+  , ariaLabel :: String                      -- aria-label override for the role=tooltip copy
   }
 
 data Action
@@ -211,6 +214,7 @@ initialState input =
   , delayMs: input.delayMs
   , pendingOpen: Nothing
   , pendingSub: Nothing
+  , ariaLabel: input.ariaLabel
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -269,7 +273,10 @@ render st =
               -- carrying the id (the trigger's aria-describedby target). Radix's a11y shape.
               ( map HH.fromPlainHTML st.content
                   <> (if null st.arrow then [] else [ HH.span [ HP.ref arrowRef, HP.style "position: absolute;" ] (map HH.fromPlainHTML st.arrow) ])
-                  <> [ HH.span [ HP.id st.contentId, role "tooltip", HP.style visuallyHiddenStyle ] (map HH.fromPlainHTML st.content) ]
+                  -- the role=tooltip accessible-name copy: `ariaLabel || children` (upstream
+                  -- tooltip.tsx:570-572) — a non-empty ariaLabel replaces the content text.
+                  <> [ HH.span [ HP.id st.contentId, role "tooltip", HP.style visuallyHiddenStyle ]
+                         (if st.ariaLabel == "" then map HH.fromPlainHTML st.content else [ HH.text st.ariaLabel ]) ]
               )
           ]
       ] else [] )
@@ -310,6 +317,7 @@ handleAction = case _ of
       , triggerAttrs = input.triggerAttrs
       , portalAttrs = input.portalAttrs
       , delayMs = input.delayMs
+      , ariaLabel = input.ariaLabel
       }
   Show -> scheduleOpen
   FocusShow -> cancelPending *> openTooltip false

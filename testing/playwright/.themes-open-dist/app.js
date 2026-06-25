@@ -31775,7 +31775,8 @@
       wasDelayed: false,
       delayMs: input3.delayMs,
       pendingOpen: Nothing.value,
-      pendingSub: Nothing.value
+      pendingSub: Nothing.value,
+      ariaLabel: input3.ariaLabel
     };
   };
   var finalize7 = function(dictMonadEffect) {
@@ -31811,7 +31812,8 @@
       arrow: [],
       triggerAttrs: [],
       portalAttrs: [],
-      delayMs: 700
+      delayMs: 700,
+      ariaLabel: ""
     };
   }();
   var contentRef11 = "rdx-tooltip-content";
@@ -31820,23 +31822,23 @@
     return bind45(get27)(function(st) {
       return when32(current(st.ctrl))(discard35(traverse_17(unsubscribe2)(st.subs))(function() {
         return discard35(for_36(st.postSub)(unsubscribe2))(function() {
-          return discard35(for_36(st.restoreEl)(function($147) {
-            return liftEffect7(focus($147));
+          return discard35(for_36(st.restoreEl)(function($149) {
+            return liftEffect7(focus($149));
           }))(function() {
             return discard35(modify_28(function(v) {
-              var $96 = {};
-              for (var $97 in v) {
-                if ({}.hasOwnProperty.call(v, $97)) {
-                  $96[$97] = v[$97];
+              var $97 = {};
+              for (var $98 in v) {
+                if ({}.hasOwnProperty.call(v, $98)) {
+                  $97[$98] = v[$98];
                 }
                 ;
               }
               ;
-              $96.ctrl = change2(false)(st.ctrl).next;
-              $96.restoreEl = Nothing.value;
-              $96.subs = [];
-              $96.postSub = Nothing.value;
-              return $96;
+              $97.ctrl = change2(false)(st.ctrl).next;
+              $97.restoreEl = Nothing.value;
+              $97.subs = [];
+              $97.postSub = Nothing.value;
+              return $97;
             }))(function() {
               return raise(new OpenChanged11(false));
             });
@@ -31848,22 +31850,22 @@
   var cancelPending = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind45(get27)(function(st) {
-      return discard35(for_36(st.pendingOpen)(function($148) {
-        return liftEffect7(clearTimeout2($148));
+      return discard35(for_36(st.pendingOpen)(function($150) {
+        return liftEffect7(clearTimeout2($150));
       }))(function() {
         return discard35(for_36(st.pendingSub)(unsubscribe2))(function() {
           return modify_28(function(v) {
-            var $99 = {};
-            for (var $100 in v) {
-              if ({}.hasOwnProperty.call(v, $100)) {
-                $99[$100] = v[$100];
+            var $100 = {};
+            for (var $101 in v) {
+              if ({}.hasOwnProperty.call(v, $101)) {
+                $100[$101] = v[$101];
               }
               ;
             }
             ;
-            $99.pendingOpen = Nothing.value;
-            $99.pendingSub = Nothing.value;
-            return $99;
+            $100.pendingOpen = Nothing.value;
+            $100.pendingSub = Nothing.value;
+            return $100;
           });
         });
       });
@@ -31879,18 +31881,18 @@
           return when32(!current(st.ctrl))(bind45(liftEffect7(bind125(windowImpl)(document)))(function(doc) {
             return bind45(liftEffect7(activeElement(doc)))(function(mprev) {
               return discard35(modify_28(function(v) {
-                var $102 = {};
-                for (var $103 in v) {
-                  if ({}.hasOwnProperty.call(v, $103)) {
-                    $102[$103] = v[$103];
+                var $103 = {};
+                for (var $104 in v) {
+                  if ({}.hasOwnProperty.call(v, $104)) {
+                    $103[$104] = v[$104];
                   }
                   ;
                 }
                 ;
-                $102.ctrl = change2(true)(st.ctrl).next;
-                $102.restoreEl = mprev;
-                $102.wasDelayed = delayed;
-                return $102;
+                $103.ctrl = change2(true)(st.ctrl).next;
+                $103.restoreEl = mprev;
+                $103.wasDelayed = delayed;
+                return $103;
               }))(function() {
                 return discard35(raise(new OpenChanged11(true)))(function() {
                   return bind45(liftEffect7(windowTarget))(function(win) {
@@ -31904,17 +31906,17 @@
                         })))(function(resizeSub) {
                           return bind45(scheduleAfterOpen1)(function(psid) {
                             return modify_28(function(v) {
-                              var $105 = {};
-                              for (var $106 in v) {
-                                if ({}.hasOwnProperty.call(v, $106)) {
-                                  $105[$106] = v[$106];
+                              var $106 = {};
+                              for (var $107 in v) {
+                                if ({}.hasOwnProperty.call(v, $107)) {
+                                  $106[$107] = v[$107];
                                 }
                                 ;
                               }
                               ;
-                              $105.subs = [escSub, scrollSub, resizeSub];
-                              $105.postSub = new Just(psid);
-                              return $105;
+                              $106.subs = [escSub, scrollSub, resizeSub];
+                              $106.postSub = new Just(psid);
+                              return $106;
                             });
                           });
                         });
@@ -31951,7 +31953,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 432, column 15 - line 438, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 440, column 15 - line 446, column 42): " + [v.constructor.name]);
     };
   };
   var scheduleOpen2 = function(dictMonadEffect) {
@@ -31973,17 +31975,17 @@
               return bind45(subscribe2(voidRight12(Opened2.value)(v.emitter)))(function(sid) {
                 return bind45(liftEffect7(setTimeout2(st.delayMs)(notify(v.listener)(unit))))(function(tid) {
                   return modify_28(function(v1) {
-                    var $116 = {};
-                    for (var $117 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $117)) {
-                        $116[$117] = v1[$117];
+                    var $117 = {};
+                    for (var $118 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $118)) {
+                        $117[$118] = v1[$118];
                       }
                       ;
                     }
                     ;
-                    $116.pendingOpen = new Just(tid);
-                    $116.pendingSub = new Just(sid);
-                    return $116;
+                    $117.pendingOpen = new Just(tid);
+                    $117.pendingSub = new Just(sid);
+                    return $117;
                   });
                 });
               });
@@ -31992,7 +31994,7 @@
           ;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 339, column 5 - line 347, column 74): " + [st.pendingOpen.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 347, column 5 - line 355, column 74): " + [st.pendingOpen.constructor.name]);
       }());
     });
   };
@@ -32035,13 +32037,20 @@
     }()))))(map61(fromPlainHTML)(st.trigger))])(function() {
       if (open) {
         return [div3([ref2(wrapperRef7), dataAttr("radix-popper-content-wrapper")(""), style("position: fixed;")])([div3(append122([ref2(contentRef11), classes2(st.style.content), dataState(stateAttr), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), style(st.contentStyle)])(portalData9(st.portalAttrs)))(append122(map61(fromPlainHTML)(st.content))(append122(function() {
-          var $126 = $$null(st.arrow);
-          if ($126) {
+          var $127 = $$null(st.arrow);
+          if ($127) {
             return [];
           }
           ;
           return [span3([ref2(arrowRef), style("position: absolute;")])(map61(fromPlainHTML)(st.arrow))];
-        }())([span3([id2(st.contentId), role("tooltip"), style(visuallyHiddenStyle2)])(map61(fromPlainHTML)(st.content))])))])];
+        }())([span3([id2(st.contentId), role("tooltip"), style(visuallyHiddenStyle2)])(function() {
+          var $128 = st.ariaLabel === "";
+          if ($128) {
+            return map61(fromPlainHTML)(st.content);
+          }
+          ;
+          return [text5(st.ariaLabel)];
+        }())])))])];
       }
       ;
       return [];
@@ -32064,17 +32073,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return discard35(modify_28(function(v) {
-                  var $130 = {};
-                  for (var $131 in v) {
-                    if ({}.hasOwnProperty.call(v, $131)) {
-                      $130[$131] = v[$131];
+                  var $132 = {};
+                  for (var $133 in v) {
+                    if ({}.hasOwnProperty.call(v, $133)) {
+                      $132[$133] = v[$133];
                     }
                     ;
                   }
                   ;
-                  $130.placedSide = placed.placement.side;
-                  $130.placedAlign = placed.placement.align;
-                  return $130;
+                  $132.placedSide = placed.placement.side;
+                  $132.placedAlign = placed.placement.align;
+                  return $132;
                 }))(function() {
                   return bind45(getHTMLElementRef(arrowRef))(function(marrow) {
                     return for_36(marrow)(function(arrow) {
@@ -32112,16 +32121,16 @@
       if (v instanceof Initialize22) {
         return bind45(useId2)(function(cid) {
           return discard35(modify_28(function(v1) {
-            var $137 = {};
-            for (var $138 in v1) {
-              if ({}.hasOwnProperty.call(v1, $138)) {
-                $137[$138] = v1[$138];
+            var $139 = {};
+            for (var $140 in v1) {
+              if ({}.hasOwnProperty.call(v1, $140)) {
+                $139[$140] = v1[$140];
               }
               ;
             }
             ;
-            $137.contentId = cid;
-            return $137;
+            $139.contentId = cid;
+            return $139;
           }))(function() {
             return bind45(get27)(function(st) {
               return when32(current(st.ctrl))(bind45(liftEffect7(bind125(windowImpl)(document)))(function(doc) {
@@ -32136,17 +32145,17 @@
                       })))(function(resizeSub) {
                         return bind45(scheduleAfterOpen1)(function(psid) {
                           return modify_28(function(v1) {
-                            var $140 = {};
-                            for (var $141 in v1) {
-                              if ({}.hasOwnProperty.call(v1, $141)) {
-                                $140[$141] = v1[$141];
+                            var $142 = {};
+                            for (var $143 in v1) {
+                              if ({}.hasOwnProperty.call(v1, $143)) {
+                                $142[$143] = v1[$143];
                               }
                               ;
                             }
                             ;
-                            $140.subs = [escSub, scrollSub, resizeSub];
-                            $140.postSub = new Just(psid);
-                            return $140;
+                            $142.subs = [escSub, scrollSub, resizeSub];
+                            $142.postSub = new Just(psid);
+                            return $142;
                           });
                         });
                       });
@@ -32161,28 +32170,29 @@
       ;
       if (v instanceof Receive26) {
         return modify_28(function(st) {
-          var $143 = {};
-          for (var $144 in st) {
-            if ({}.hasOwnProperty.call(st, $144)) {
-              $143[$144] = st[$144];
+          var $145 = {};
+          for (var $146 in st) {
+            if ({}.hasOwnProperty.call(st, $146)) {
+              $145[$146] = st[$146];
             }
             ;
           }
           ;
-          $143.ctrl = sync(v.value0.open)(st.ctrl);
-          $143.side = v.value0.side;
-          $143.align = v.value0.align;
-          $143.offset = v.value0.offset;
-          $143.padding = v.value0.padding;
-          $143.style = v.value0.style;
-          $143.trigger = v.value0.trigger;
-          $143.content = v.value0.content;
-          $143.contentStyle = v.value0.contentStyle;
-          $143.arrow = v.value0.arrow;
-          $143.triggerAttrs = v.value0.triggerAttrs;
-          $143.portalAttrs = v.value0.portalAttrs;
-          $143.delayMs = v.value0.delayMs;
-          return $143;
+          $145.ctrl = sync(v.value0.open)(st.ctrl);
+          $145.side = v.value0.side;
+          $145.align = v.value0.align;
+          $145.offset = v.value0.offset;
+          $145.padding = v.value0.padding;
+          $145.style = v.value0.style;
+          $145.trigger = v.value0.trigger;
+          $145.content = v.value0.content;
+          $145.contentStyle = v.value0.contentStyle;
+          $145.arrow = v.value0.arrow;
+          $145.triggerAttrs = v.value0.triggerAttrs;
+          $145.portalAttrs = v.value0.portalAttrs;
+          $145.delayMs = v.value0.delayMs;
+          $145.ariaLabel = v.value0.ariaLabel;
+          return $145;
         });
       }
       ;
@@ -32218,7 +32228,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 279, column 16 - line 329, column 19): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 286, column 16 - line 337, column 19): " + [v.constructor.name]);
     };
   };
   var component27 = function(dictMonadEffect) {
@@ -32229,8 +32239,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction26(dictMonadEffect),
         handleQuery: handleQuery25(dictMonadEffect),
-        receive: function($149) {
-          return Just.create(Receive26.create($149));
+        receive: function($151) {
+          return Just.create(Receive26.create($151));
         },
         initialize: new Just(Initialize22.value)
       })
@@ -33345,7 +33355,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2064, column 1 - line 2064, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2065, column 1 - line 2065, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33678,7 +33688,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1443, column 1 - line 1443, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1444, column 1 - line 1444, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33936,7 +33946,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2156, column 17 - line 2158, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2157, column 17 - line 2159, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -34071,7 +34081,7 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2111, column 1 - line 2111, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2112, column 1 - line 2112, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
@@ -34403,7 +34413,7 @@
       align: defaultInput24.align,
       delayMs: defaultInput24.delayMs,
       open: function() {
-        var $271 = s === "controlled";
+        var $271 = s === "controlled" || s === "arialabel";
         if ($271) {
           return new Just(true);
         }
@@ -34411,6 +34421,14 @@
         return Nothing.value;
       }(),
       defaultOpen: s === "defaultopen",
+      ariaLabel: function() {
+        var $272 = s === "arialabel";
+        if ($272) {
+          return "Add this item to your library";
+        }
+        ;
+        return "";
+      }(),
       style: tooltipStyle,
       offset: 8,
       padding: 10,
@@ -34433,8 +34451,8 @@
       padding: defaultInput13.padding,
       align: Start.value,
       open: function() {
-        var $272 = s === "controlled";
-        if ($272) {
+        var $273 = s === "controlled";
+        if ($273) {
           return new Just(true);
         }
         ;
@@ -34447,16 +34465,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $273 = s === "close";
-        if ($273) {
+        var $274 = s === "close";
+        if ($274) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $274 = s === "close";
-        if ($274) {
+        var $275 = s === "close";
+        if ($275) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -34484,24 +34502,24 @@
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
       inputId: function() {
-        var $275 = s === "multi";
-        if ($275) {
+        var $276 = s === "multi";
+        if ($276) {
           return Nothing.value;
         }
         ;
         return new Just("password");
       }(),
       toggleVisible: function() {
-        var $276 = s === "autolabel";
-        if ($276) {
+        var $277 = s === "autolabel";
+        if ($277) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $277 = s === "autolabel";
-        if ($277) {
+        var $278 = s === "autolabel";
+        if ($278) {
           return [passwordToggleIcon];
         }
         ;
@@ -34510,8 +34528,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $278 = s === "passthrough";
-        if ($278) {
+        var $279 = s === "passthrough";
+        if ($279) {
           return new Just("pw");
         }
         ;
@@ -34519,16 +34537,16 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $279 = s === "passthrough";
-        if ($279) {
+        var $280 = s === "passthrough";
+        if ($280) {
           return new Just("Enter password");
         }
         ;
         return Nothing.value;
       }(),
       visible: function() {
-        var $280 = s === "controlled";
-        if ($280) {
+        var $281 = s === "controlled";
+        if ($281) {
           return new Just(false);
         }
         ;
@@ -34550,7 +34568,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1799, column 1 - line 1799, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1800, column 1 - line 1800, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -34562,24 +34580,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $283 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($283) {
+        var $284 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($284) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $284 = s === "vertical";
-        if ($284) {
+        var $285 = s === "vertical";
+        if ($285) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $285 = s === "rtl";
-        if ($285) {
+        var $286 = s === "rtl";
+        if ($286) {
           return RTL.value;
         }
         ;
@@ -34621,8 +34639,8 @@
       portalAttrs: defaultInput10.portalAttrs,
       align: Start.value,
       dir: function() {
-        var $286 = s === "rtl";
-        if ($286) {
+        var $287 = s === "rtl";
+        if ($287) {
           return RTL.value;
         }
         ;
@@ -34630,8 +34648,8 @@
       }(),
       loop: s !== "noloop",
       value: function() {
-        var $287 = s === "controlled";
-        if ($287) {
+        var $288 = s === "controlled";
+        if ($288) {
           return new Just("file");
         }
         ;
@@ -34649,8 +34667,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $288 = s === "submenu";
-          if ($288) {
+          var $289 = s === "submenu";
+          if ($289) {
             return [menubarSubEntry];
           }
           ;
@@ -34705,8 +34723,8 @@
         trigger: [text5("View")],
         disabled: false,
         entries: function() {
-          var $289 = s === "radio";
-          if ($289) {
+          var $290 = s === "radio";
+          if ($290) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34812,84 +34830,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2123, column 1 - line 2123, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2124, column 1 - line 2124, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $354 = filter(function(c) {
+    var $355 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($355) {
-      return fromCharArray($354(toCharArray($355)));
+    return function($356) {
+      return fromCharArray($355(toCharArray($356)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $291 = s === "controlled";
-        if ($291) {
+        var $292 = s === "controlled";
+        if ($292) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $292 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($292) {
+        var $293 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($293) {
           return "";
         }
         ;
-        var $293 = s === "alpha";
-        if ($293) {
+        var $294 = s === "alpha";
+        if ($294) {
           return "abc";
         }
         ;
-        var $294 = s === "alphanumeric";
-        if ($294) {
+        var $295 = s === "alphanumeric";
+        if ($295) {
           return "a1b";
         }
         ;
-        var $295 = s === "revalidate";
-        if ($295) {
+        var $296 = s === "revalidate";
+        if ($296) {
           return "a1b2c";
         }
         ;
-        var $296 = s === "sanitizevalue";
-        if ($296) {
+        var $297 = s === "sanitizevalue";
+        if ($297) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $297 = s === "alpha" || s === "revalidate";
-        if ($297) {
+        var $298 = s === "alpha" || s === "revalidate";
+        if ($298) {
           return Alpha.value;
         }
         ;
-        var $298 = s === "alphanumeric";
-        if ($298) {
+        var $299 = s === "alphanumeric";
+        if ($299) {
           return Alphanumeric.value;
         }
         ;
-        var $299 = s === "novalidation" || s === "sanitizevalue";
-        if ($299) {
+        var $300 = s === "novalidation" || s === "sanitizevalue";
+        if ($300) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $300 = s === "sanitizevalue";
-        if ($300) {
+        var $301 = s === "sanitizevalue";
+        if ($301) {
           return keepDigitsOnly;
         }
         ;
         return identity14;
       }(),
       placeholder: function() {
-        var $301 = s === "placeholder";
-        if ($301) {
+        var $302 = s === "placeholder";
+        if ($302) {
           return new Just("\u25CB");
         }
         ;
@@ -34899,24 +34917,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $302 = s === "vertical";
-        if ($302) {
+        var $303 = s === "vertical";
+        if ($303) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $303 = s === "rtl";
-        if ($303) {
+        var $304 = s === "rtl";
+        if ($304) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $304 = s === "named";
-        if ($304) {
+        var $305 = s === "named";
+        if ($305) {
           return new Just("otp-code");
         }
         ;
@@ -34943,8 +34961,8 @@
       triggerHref: defaultInput9.triggerHref,
       align: Start.value,
       open: function() {
-        var $305 = s === "controlled";
-        if ($305) {
+        var $306 = s === "controlled";
+        if ($306) {
           return new Just(true);
         }
         ;
@@ -34961,8 +34979,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $306 = s === "richcontent";
-        if ($306) {
+        var $307 = s === "richcontent";
+        if ($307) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34981,23 +34999,23 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2301, column 1 - line 2301, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2302, column 1 - line 2302, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $309 = s === "reset";
-        if ($309) {
+        var $310 = s === "reset";
+        if ($310) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
       fields: function() {
-        var $310 = s === "custom";
-        if ($310) {
+        var $311 = s === "custom";
+        if ($311) {
           return [{
             required: defaultField.required,
             serverInvalid: defaultField.serverInvalid,
@@ -35015,8 +35033,8 @@
           }];
         }
         ;
-        var $311 = s === "multi";
-        if ($311) {
+        var $312 = s === "multi";
+        if ($312) {
           return [{
             serverInvalid: defaultField.serverInvalid,
             name: "email",
@@ -35051,8 +35069,8 @@
           required: true,
           serverInvalid: s === "serverInvalid",
           messages: function() {
-            var $312 = s === "defaultMessage";
-            if ($312) {
+            var $313 = s === "defaultMessage";
+            if ($313) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35061,8 +35079,8 @@
               }];
             }
             ;
-            var $313 = s === "reset";
-            if ($313) {
+            var $314 = s === "reset";
+            if ($314) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35105,7 +35123,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2167, column 12 - line 2169, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2168, column 12 - line 2170, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -35126,8 +35144,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $321 = kv.before === key2;
-          if ($321) {
+          var $322 = kv.before === key2;
+          if ($322) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -35138,7 +35156,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2149, column 15 - line 2151, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2150, column 15 - line 2152, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -35174,16 +35192,16 @@
       closeLabels: ["Cancel", "Save"],
       trigger: [text5("Edit profile")],
       open: function() {
-        var $323 = s === "controlled";
-        if ($323) {
+        var $324 = s === "controlled";
+        if ($324) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       dir: function() {
-        var $324 = s === "rtl";
-        if ($324) {
+        var $325 = s === "rtl";
+        if ($325) {
           return "rtl";
         }
         ;
@@ -35191,16 +35209,16 @@
       }(),
       forceMount: s === "forcemount",
       title: function() {
-        var $325 = s === "notitle";
-        if ($325) {
+        var $326 = s === "notitle";
+        if ($326) {
           return [];
         }
         ;
         return [text5("Edit profile")];
       }(),
       description: function() {
-        var $326 = s === "notitle";
-        if ($326) {
+        var $327 = s === "notitle";
+        if ($327) {
           return [];
         }
         ;
@@ -35278,16 +35296,16 @@
       side: Right2.value,
       modal: s !== "nonmodal",
       keepOpenValues: function() {
-        var $327 = s === "cancelselect";
-        if ($327) {
+        var $328 = s === "cancelselect";
+        if ($328) {
           return ["edit"];
         }
         ;
         return [];
       }(),
       open: function() {
-        var $328 = s === "controlled";
-        if ($328) {
+        var $329 = s === "controlled";
+        if ($329) {
           return new Just(true);
         }
         ;
@@ -35300,8 +35318,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $329 = s === "submenu";
-        if ($329) {
+        var $330 = s === "submenu";
+        if ($330) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -35327,8 +35345,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $330 = s === "radio";
-        if ($330) {
+        var $331 = s === "radio";
+        if ($331) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -35369,8 +35387,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $331 = s === "controlled";
-        if ($331) {
+        var $332 = s === "controlled";
+        if ($332) {
           return new Just(true);
         }
         ;
@@ -35391,8 +35409,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $332 = klass === "";
-      if ($332) {
+      var $333 = klass === "";
+      if ($333) {
         return [];
       }
       ;
@@ -35418,8 +35436,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $333 = s === "radio";
-        if ($333) {
+        var $334 = s === "radio";
+        if ($334) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -35512,16 +35530,16 @@
       style: menuStyle,
       modal: s !== "nonmodal",
       open: function() {
-        var $334 = s === "controlled";
-        if ($334) {
+        var $335 = s === "controlled";
+        if ($335) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       keepOpenValues: function() {
-        var $335 = s === "selectnoclose";
-        if ($335) {
+        var $336 = s === "selectnoclose";
+        if ($336) {
           return ["edit"];
         }
         ;
@@ -35533,8 +35551,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $336 = s === "submenu";
-        if ($336) {
+        var $337 = s === "submenu";
+        if ($337) {
           return [submenuEntry];
         }
         ;
@@ -35697,8 +35715,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $338 = s === "controlled";
-        if ($338) {
+        var $339 = s === "controlled";
+        if ($339) {
           return new Just(Checked.value);
         }
         ;
@@ -35722,16 +35740,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $340 = s === "form";
-        if ($340) {
+        var $341 = s === "form";
+        if ($341) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $341 = s === "form";
-        if ($341) {
+        var $342 = s === "form";
+        if ($342) {
           return "yes";
         }
         ;
@@ -35799,18 +35817,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $344 = s === "wide";
-        if ($344) {
+        var $345 = s === "wide";
+        if ($345) {
           return 16 / 9;
         }
         ;
-        var $345 = s === "tall";
-        if ($345) {
+        var $346 = s === "tall";
+        if ($346) {
           return 1 / 2;
         }
         ;
-        var $346 = s === "verywide";
-        if ($346) {
+        var $347 = s === "verywide";
+        if ($347) {
           return 21 / 9;
         }
         ;
@@ -35819,7 +35837,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2041, column 1 - line 2041, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2042, column 1 - line 2042, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -35835,8 +35853,8 @@
       closeOnEscape: defaultInput2.closeOnEscape,
       style: alertDialogStyle,
       open: function() {
-        var $347 = s === "controlled";
-        if ($347) {
+        var $348 = s === "controlled";
+        if ($348) {
           return new Just(true);
         }
         ;
@@ -35880,8 +35898,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $348 = s === "single";
-        if ($348) {
+        var $349 = s === "single";
+        if ($349) {
           return ["item-1"];
         }
         ;
@@ -36012,18 +36030,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $349 = s === "formreset";
-    if ($349) {
+    var $350 = s === "formreset";
+    if ($350) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $350 = s === "multi";
-    if ($350) {
+    var $351 = s === "multi";
+    if ($351) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $351 = s === "formsubmit";
-    if ($351) {
+    var $352 = s === "formsubmit";
+    if ($352) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -36143,8 +36161,8 @@
         }
         ;
         if (c === "slider") {
-          var $353 = s === "vertical";
-          if ($353) {
+          var $354 = s === "vertical";
+          if ($354) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

@@ -758,8 +758,12 @@ const PAGES: Page[] = [
       const s = currentState();
       const extra =
         s === "controlled" ? { open: true } : s === "defaultopen" ? { defaultOpen: true } : {};
+      // `?s=arialabel` → aria-label on Content overrides the role=tooltip VisuallyHidden copy's
+      // accessible name (ariaLabel||children); opened so the copy is in the DOM. The themes
+      // Tooltip forwards aria-label onto the content impl. (tooltip.tsx:570-572)
+      const al = s === "arialabel" ? { "aria-label": "Add this item to your library", open: true } : {};
       return (
-        <Tooltip content="Add to library" {...extra}>
+        <Tooltip content="Add to library" {...extra} {...al}>
           <Button variant="soft">Hover me</Button>
         </Tooltip>
       );

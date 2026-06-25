@@ -146,6 +146,12 @@ export const STATES = {
       await pg.getByRole("tooltip").waitFor();
       await pg.locator('button[data-state="instant-open"]').first().waitFor();
     },
+    // ARIA-LABEL (?s=arialabel): aria-label overrides the role=tooltip copy's text. Opened at
+    // mount (instant-open); wait for the tooltip copy to carry the override text.
+    arialabel: async (pg) => {
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
   },
   hovercard: {
     open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },

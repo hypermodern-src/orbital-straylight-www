@@ -562,8 +562,9 @@ popperContentVars c =
 -- | golden's data-side=bottom). The driver hovers the trigger to open it.
 tooltipInput :: String -> Tooltip.Input
 tooltipInput s = Tooltip.defaultInput
-  { open = if s == "controlled" then Just true else Nothing
+  { open = if s == "controlled" || s == "arialabel" then Just true else Nothing
   , defaultOpen = s == "defaultopen"
+  , ariaLabel = if s == "arialabel" then "Add this item to your library" else ""
   , style = tooltipStyle
   -- offset 8 holds the 5px arrow; padding 10 = radix's collisionPadding. Near the viewport
   -- top the preferred `top` overflows the gutter and genuinely flips to `bottom` (the

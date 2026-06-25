@@ -122,11 +122,13 @@
       "id": "tooltip.aria-label",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
+        "dom",
         "aria"
       ],
-      "ref": "tooltip.tsx:493,570-572 aria-label overrides VisuallyHidden accessible name; port always duplicates visible content"
+      "ref": "DONE (2026-06-24): added ariaLabel field \u2014 a non-empty aria-label on Content overrides the role=tooltip VisuallyHidden copy accessible name (ariaLabel||children, tooltip.tsx:570-572); consumed, never spread onto the content node. tooltip.arialabel DOM golden byte-identical (visible text \"Add to library\", role=tooltip copy \"Add this item to your library\"); ARIA tree + axe fingerprint match upstream (a11y MATRIX). tooltip.open/controlled unregressed.",
+      "oracle_file": "tooltip.arialabel"
     },
     {
       "id": "tooltip.forcemount-unmount",

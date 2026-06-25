@@ -30,6 +30,7 @@ STATES=(
   "tooltip:closed-rest"
   "tooltip:controlled"
   "tooltip:defaultopen"
+  "tooltip:arialabel"
   "hovercard:open"
   "hovercard:controlled"
   "dropdownmenu:open"
