@@ -368,6 +368,18 @@ export const STATES = {
         return !!vp;
       });
     },
+    // ACTIVELINK (?s=activelink): OPEN with the first content link active (aria-current="page"
+    // + data-active). Same open-state wait, then wait for the active link to be present.
+    activelink: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('a[aria-current="page"]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
     // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
     // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
     // omits defaultValue. No interaction — wait for the closed trigger.

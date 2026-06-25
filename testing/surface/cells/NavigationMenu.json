@@ -204,11 +204,13 @@
       "id": "navigationmenu.link-active",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
+        "dom",
         "aria"
       ],
-      "ref": "navigation-menu.tsx:589-604 active\u2192data-active/aria-current=page; no top-level Link variant in port"
+      "ref": "DONE (2026-06-25): active Link \u2014 the active content link carries data-active=\"\" + aria-current=\"page\" (navigation-menu.tsx:589-604). navigationmenu.activelink DOM golden byte-identical; ARIA tree + axe fingerprint match upstream (navigationmenu:activelink added to the a11y MATRIX).",
+      "oracle_file": "navigationmenu.activelink"
     },
     {
       "id": "navigationmenu.disabled",

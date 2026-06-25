@@ -1171,7 +1171,10 @@ const PAGES: Page[] = [
       // Render OPEN only for the explicit `open` capture state (defaultValue="one" → open at
       // first paint, no timer). Every other path (the `closed`/`rest` capture, the index
       // gallery) renders at rest, so the a11y `rest` baseline is the genuine closed nav.
-      const open = currentState() === "open" || currentState() === "clicktoggle";
+      // `?s=activelink` → OPEN with the first content Link `active` (data-active + aria-current=
+      // "page"; navigation-menu.tsx:589-604). Opens Item One at first paint via defaultValue.
+      const activelink = currentState() === "activelink";
+      const open = currentState() === "open" || currentState() === "clicktoggle" || activelink;
       // Wave-B depth: ?s=vertical → an OPEN vertical-orientation nav (data-orientation=vertical,
       // the Indicator measures top/height/translateY instead of left/width/translateX). ?s=open
       // and ?s=vertical both open Item One at first paint via defaultValue.
@@ -1195,7 +1198,7 @@ const PAGES: Page[] = [
             <NavigationMenu.Item value="one">
               <NavigationMenu.Trigger>Item One</NavigationMenu.Trigger>
               <NavigationMenu.Content>
-                <NavigationMenu.Link href="#one">Content One</NavigationMenu.Link>
+                <NavigationMenu.Link href="#one" active={activelink}>Content One</NavigationMenu.Link>
                 <NavigationMenu.Link href="#two">Content Two</NavigationMenu.Link>
               </NavigationMenu.Content>
             </NavigationMenu.Item>

@@ -34591,7 +34591,7 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $284 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        var $284 = s === "open" || (s === "clicktoggle" || (s === "vertical" || (s === "rtl" || s === "activelink")));
         if ($284) {
           return "one";
         }
@@ -34628,7 +34628,7 @@
         links: [{
           href: "#one",
           label: [text5("Content One")],
-          active: false
+          active: s === "activelink"
         }, {
           href: "#two",
           label: [text5("Content Two")],
