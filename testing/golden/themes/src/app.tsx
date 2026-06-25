@@ -1076,6 +1076,10 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       const dur = s === "autodismiss" ? 1500 : Infinity;
+      // `?s=multi` → the multi-toast QUEUE: two Roots held open in the one Provider/Viewport.
+      // Upstream renders both <li> in the shared <ol> (DOM order = mount order) plus one
+      // role=status announce mirror per toast — this is the queue structure the port must match.
+      const multi = s === "multi";
       return (
         <>
           <style>{`@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } }
@@ -1087,6 +1091,14 @@ const PAGES: Page[] = [
               <Toast.Action altText="Undo">Undo</Toast.Action>
               <Toast.Close aria-label="Close">×</Toast.Close>
             </Toast.Root>
+            {multi && (
+              <Toast.Root duration={Infinity}>
+                <Toast.Title>Deployed</Toast.Title>
+                <Toast.Description>Monday at 9am</Toast.Description>
+                <Toast.Action altText="View">View</Toast.Action>
+                <Toast.Close aria-label="Close">×</Toast.Close>
+              </Toast.Root>
+            )}
             <Toast.Viewport />
           </Toast.Provider>
         </>

@@ -60,6 +60,7 @@ STATES=(
   "accordion:singlecollapsible"
   "collapsible:open"
   "toast:open"
+  "toast:multi"
   "menubar:open"
   "menubar:rtl"
   "menubar:distrigger"

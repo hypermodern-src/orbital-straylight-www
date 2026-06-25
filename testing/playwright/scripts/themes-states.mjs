@@ -342,6 +342,13 @@ export const STATES = {
     open: async (pg) => {
       await pg.locator('li[data-state="open"][data-swipe-direction]').first().waitFor();
     },
+    // `?s=multi` — the queue: two toasts held open in the one viewport <ol>. Wait until BOTH
+    // <li data-state=open> are mounted (keyed off upstream data-* only, same as `open`).
+    multi: async (pg) => {
+      await pg.waitForFunction(
+        () => document.querySelectorAll('li[data-state="open"][data-swipe-direction]').length >= 2
+      );
+    },
   },
   navigationmenu: {
     // OPEN at first paint via defaultValue="one" — NO click/hover, so the delayDuration/

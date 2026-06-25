@@ -29421,9 +29421,9 @@
   var modify_24 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var applySecond16 = /* @__PURE__ */ applySecond(applyHalogenM);
   var when28 = /* @__PURE__ */ when(applicativeHalogenM);
-  var append119 = /* @__PURE__ */ append(semigroupArray);
   var map57 = /* @__PURE__ */ map(functorArray);
   var type_34 = /* @__PURE__ */ type_17(isPropButtonType);
+  var append119 = /* @__PURE__ */ append(semigroupArray);
   var bind124 = /* @__PURE__ */ bind(bindEffect);
   var max1 = /* @__PURE__ */ max(ordInt);
   var map126 = /* @__PURE__ */ map(functorMaybe);
@@ -29612,7 +29612,7 @@
       return " transform: translateX(" + (d + ("px); --radix-toast-swipe-move-x: " + (d + "px;")));
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 354, column 17 - line 362, column 95): " + [st.swipeStart.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 373, column 17 - line 381, column 95): " + [st.swipeStart.constructor.name]);
   };
   var swipeDistance = function(st) {
     return function(x) {
@@ -29637,7 +29637,7 @@
           return x - st.swipeStart.value0.x;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 366, column 24 - line 372, column 17): " + [st.swipeStart.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 385, column 24 - line 391, column 17): " + [st.swipeStart.constructor.name]);
       };
     };
   };
@@ -29663,7 +29663,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 582, column 12 - line 584, column 17): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 637, column 12 - line 639, column 17): " + [v.constructor.name]);
   };
   var maybeInt = function(v) {
     if (v instanceof Just) {
@@ -29674,7 +29674,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 587, column 12 - line 589, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 642, column 12 - line 644, column 15): " + [v.constructor.name]);
   };
   var liRef = "rdx-toast-li";
   var initialState21 = function(input3) {
@@ -29687,7 +29687,7 @@
         return input3.defaultOpen;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 274, column 15 - line 276, column 33): " + [input3.open.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 293, column 15 - line 295, column 33): " + [input3.open.constructor.name]);
     }();
     return {
       ctrl: controllable(input3.open)(input3.defaultOpen),
@@ -29712,6 +29712,7 @@
       closeLabel: input3.closeLabel,
       announceText: input3.announceText,
       exitCss: input3.exitCss,
+      extra: input3.extra,
       escSub: Nothing.value,
       postSub: Nothing.value,
       animSub: Nothing.value,
@@ -29734,18 +29735,18 @@
       return discard31(for_114(st.animSub)(unsubscribe2))(function() {
         return discard31(for_114(st.postSub)(unsubscribe2))(function() {
           return modify_24(function(v) {
-            var $109 = {};
-            for (var $110 in v) {
-              if ({}.hasOwnProperty.call(v, $110)) {
-                $109[$110] = v[$110];
+            var $111 = {};
+            for (var $112 in v) {
+              if ({}.hasOwnProperty.call(v, $112)) {
+                $111[$112] = v[$112];
               }
               ;
             }
             ;
-            $109.presence = finishExit(st.presence);
-            $109.animSub = Nothing.value;
-            $109.postSub = Nothing.value;
-            return $109;
+            $111.presence = finishExit(st.presence);
+            $111.animSub = Nothing.value;
+            $111.postSub = Nothing.value;
+            return $111;
           });
         });
       });
@@ -29778,7 +29779,8 @@
       close: [],
       closeLabel: "Close",
       announceText: "",
-      exitCss: ""
+      exitCss: "",
+      extra: []
     };
   }();
   var dataState$prime = /* @__PURE__ */ attr2("data-state");
@@ -29794,18 +29796,18 @@
         return applySecond16(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_24(function(v) {
-          var $117 = {};
-          for (var $118 in v) {
-            if ({}.hasOwnProperty.call(v, $118)) {
-              $117[$118] = v[$118];
+          var $119 = {};
+          for (var $120 in v) {
+            if ({}.hasOwnProperty.call(v, $120)) {
+              $119[$120] = v[$120];
             }
             ;
           }
           ;
-          $117.durSub = Nothing.value;
-          $117.durRemaining = Nothing.value;
-          $117.durStart = Nothing.value;
-          return $117;
+          $119.durSub = Nothing.value;
+          $119.durRemaining = Nothing.value;
+          $119.durStart = Nothing.value;
+          return $119;
         });
       });
     });
@@ -29816,32 +29818,32 @@
       return bind41(get23)(function(st) {
         return when28(current(st.ctrl))(discard31(for_114(st.escSub)(unsubscribe2))(function() {
           return discard31(modify_24(function(v) {
-            var $120 = {};
-            for (var $121 in v) {
-              if ({}.hasOwnProperty.call(v, $121)) {
-                $120[$121] = v[$121];
+            var $122 = {};
+            for (var $123 in v) {
+              if ({}.hasOwnProperty.call(v, $123)) {
+                $122[$123] = v[$123];
               }
               ;
             }
             ;
-            $120.ctrl = change2(false)(st.ctrl).next;
-            $120.presence = present(false)(st.presence);
-            $120.escSub = Nothing.value;
-            return $120;
+            $122.ctrl = change2(false)(st.ctrl).next;
+            $122.presence = present(false)(st.presence);
+            $122.escSub = Nothing.value;
+            return $122;
           }))(function() {
             return discard31(raise(new OpenChanged10(false)))(function() {
               return bind41(scheduleAfter1(AfterClose8.value))(function(psid) {
                 return modify_24(function(v) {
-                  var $123 = {};
-                  for (var $124 in v) {
-                    if ({}.hasOwnProperty.call(v, $124)) {
-                      $123[$124] = v[$124];
+                  var $125 = {};
+                  for (var $126 in v) {
+                    if ({}.hasOwnProperty.call(v, $126)) {
+                      $125[$126] = v[$126];
                     }
                     ;
                   }
                   ;
-                  $123.postSub = new Just(psid);
-                  return $123;
+                  $125.postSub = new Just(psid);
+                  return $125;
                 });
               });
             });
@@ -29865,7 +29867,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 625, column 15 - line 631, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 680, column 15 - line 686, column 42): " + [v.constructor.name]);
     };
   };
   var armTimer2 = function(dictMonadEffect) {
@@ -29889,18 +29891,18 @@
       return bind41(liftEffect7(now))(function(start2) {
         return bind41(armTimer1(ms)(DurationElapsed.value))(function(h) {
           return modify_24(function(v) {
-            var $133 = {};
-            for (var $134 in v) {
-              if ({}.hasOwnProperty.call(v, $134)) {
-                $133[$134] = v[$134];
+            var $135 = {};
+            for (var $136 in v) {
+              if ({}.hasOwnProperty.call(v, $136)) {
+                $135[$136] = v[$136];
               }
               ;
             }
             ;
-            $133.durSub = new Just(h);
-            $133.durRemaining = new Just(ms);
-            $133.durStart = new Just(start2);
-            return $133;
+            $135.durSub = new Just(h);
+            $135.durRemaining = new Just(ms);
+            $135.durStart = new Just(start2);
+            return $135;
           });
         });
       });
@@ -29915,17 +29917,26 @@
       return "polite";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 419, column 1 - line 419, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 473, column 1 - line 473, column 35): " + [v.constructor.name]);
   };
   var aria4 = function(name16) {
     return function(val) {
       return attr2("aria-" + name16)(val);
     };
   };
+  var extraLi = function(style3) {
+    return function(item) {
+      return li([dataAttr$prime("radix-collection-item")(""), dataState$prime("open"), dataAttr$prime("swipe-direction")(item.swipeDirection), style("user-select: none; touch-action: none;"), tabIndex2(0), classes2(style3.root)])([div3([classes2(style3.title)])(map57(fromPlainHTML)(item.title)), div3([classes2(style3.description)])(map57(fromPlainHTML)(item.description)), button([type_34(ButtonButton.value), dataAttr$prime("radix-toast-announce-exclude")(""), dataAttr$prime("radix-toast-announce-alt")(item.altText), classes2(style3.action), onClick(function(v) {
+        return ActionClicked.value;
+      })])(map57(fromPlainHTML)(item.action)), button([type_34(ButtonButton.value), dataAttr$prime("radix-toast-announce-exclude")(""), aria4("label")(item.closeLabel), classes2(style3.close), onClick(function(v) {
+        return CloseClicked.value;
+      })])(map57(fromPlainHTML)(item.close))]);
+    };
+  };
   var toastLi = function(st) {
     return li(append119([ref2(liRef), dataAttr$prime("radix-collection-item")(""), dataState$prime(dataStateOf(st.presence)), dataAttr$prime("swipe-direction")(st.swipeDirection), style("user-select: none; touch-action: none;" + swipeStyle(st)), tabIndex2(0), classes2(st.style.root), onMouseDown(SwipeStart.create)])(function() {
-      var $137 = st.swipeState === "";
-      if ($137) {
+      var $139 = st.swipeState === "";
+      if ($139) {
         return [];
       }
       ;
@@ -29950,31 +29961,31 @@
           return discard31(when28(isRendered(st.presence) && st.closeOnEscape)(bind41(liftEffect7(bind124(windowImpl)(document)))(function(doc) {
             return bind41(subscribe2($$escape(toEventTarget(doc))(EscapePressed10.value)))(function(sub22) {
               return modify_24(function(v1) {
-                var $139 = {};
-                for (var $140 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $140)) {
-                    $139[$140] = v1[$140];
+                var $141 = {};
+                for (var $142 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $142)) {
+                    $141[$142] = v1[$142];
                   }
                   ;
                 }
                 ;
-                $139.escSub = new Just(sub22);
-                return $139;
+                $141.escSub = new Just(sub22);
+                return $141;
               });
             });
           })))(function() {
             return bind41(scheduleAfter1(AfterMount.value))(function(psid) {
               return discard31(modify_24(function(v1) {
-                var $142 = {};
-                for (var $143 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $143)) {
-                    $142[$143] = v1[$143];
+                var $144 = {};
+                for (var $145 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $145)) {
+                    $144[$145] = v1[$145];
                   }
                   ;
                 }
                 ;
-                $142.postSub = new Just(psid);
-                return $142;
+                $144.postSub = new Just(psid);
+                return $144;
               }))(function() {
                 return when28(isRendered(st.presence))(for_114(st.duration)(function(ms) {
                   return armDuration1(ms);
@@ -29987,31 +29998,32 @@
       ;
       if (v instanceof Receive22) {
         return modify_24(function(st) {
-          var $145 = {};
-          for (var $146 in st) {
-            if ({}.hasOwnProperty.call(st, $146)) {
-              $145[$146] = st[$146];
+          var $147 = {};
+          for (var $148 in st) {
+            if ({}.hasOwnProperty.call(st, $148)) {
+              $147[$148] = st[$148];
             }
             ;
           }
           ;
-          $145.ctrl = sync(v.value0.open)(st.ctrl);
-          $145.label = v.value0.label;
-          $145.swipeDirection = v.value0.swipeDirection;
-          $145.announceLabel = v.value0.announceLabel;
-          $145.toastType = v.value0.toastType;
-          $145.closeOnEscape = v.value0.closeOnEscape;
-          $145.style = v.value0.style;
-          $145.title = v.value0.title;
-          $145.description = v.value0.description;
-          $145.action = v.value0.action;
-          $145.altText = v.value0.altText;
-          $145.close = v.value0.close;
-          $145.closeLabel = v.value0.closeLabel;
-          $145.announceText = v.value0.announceText;
-          $145.exitCss = v.value0.exitCss;
-          $145.duration = v.value0.duration;
-          return $145;
+          $147.ctrl = sync(v.value0.open)(st.ctrl);
+          $147.label = v.value0.label;
+          $147.swipeDirection = v.value0.swipeDirection;
+          $147.announceLabel = v.value0.announceLabel;
+          $147.toastType = v.value0.toastType;
+          $147.closeOnEscape = v.value0.closeOnEscape;
+          $147.style = v.value0.style;
+          $147.title = v.value0.title;
+          $147.description = v.value0.description;
+          $147.action = v.value0.action;
+          $147.altText = v.value0.altText;
+          $147.close = v.value0.close;
+          $147.closeLabel = v.value0.closeLabel;
+          $147.announceText = v.value0.announceText;
+          $147.exitCss = v.value0.exitCss;
+          $147.extra = v.value0.extra;
+          $147.duration = v.value0.duration;
+          return $147;
         });
       }
       ;
@@ -30036,17 +30048,17 @@
                   var ran = round2(elapsed - maybeNum(st.durStart));
                   var rem2 = maybeInt(st.durRemaining) - ran | 0;
                   return modify_24(function(v2) {
-                    var $150 = {};
-                    for (var $151 in v2) {
-                      if ({}.hasOwnProperty.call(v2, $151)) {
-                        $150[$151] = v2[$151];
+                    var $152 = {};
+                    for (var $153 in v2) {
+                      if ({}.hasOwnProperty.call(v2, $153)) {
+                        $152[$153] = v2[$153];
                       }
                       ;
                     }
                     ;
-                    $150.durSub = Nothing.value;
-                    $150.durRemaining = new Just(max1(0)(rem2));
-                    return $150;
+                    $152.durSub = Nothing.value;
+                    $152.durRemaining = new Just(max1(0)(rem2));
+                    return $152;
                   });
                 });
               });
@@ -30106,16 +30118,16 @@
                       if (animates) {
                         return bind41(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone9.value)))(function(sub22) {
                           return discard31(modify_24(function(v1) {
-                            var $170 = {};
-                            for (var $171 in v1) {
-                              if ({}.hasOwnProperty.call(v1, $171)) {
-                                $170[$171] = v1[$171];
+                            var $172 = {};
+                            for (var $173 in v1) {
+                              if ({}.hasOwnProperty.call(v1, $173)) {
+                                $172[$173] = v1[$173];
                               }
                               ;
                             }
                             ;
-                            $170.animSub = new Just(sub22);
-                            return $170;
+                            $172.animSub = new Just(sub22);
+                            return $172;
                           }))(function() {
                             return pure40(true);
                           });
@@ -30126,7 +30138,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 511, column 14 - line 519, column 24): " + [mnode.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 566, column 14 - line 574, column 24): " + [mnode.constructor.name]);
                 }())(function(armed) {
                   return when28(!armed)(finishClose1);
                 });
@@ -30146,31 +30158,31 @@
             return bind41(liftEffect7(bind124(windowImpl)(document)))(function(doc) {
               var docTarget = toEventTarget(doc);
               return bind41(subscribe2(eventListener2("mousemove")(docTarget)(function() {
-                var $196 = map126(SwipeMove.create);
-                return function($197) {
-                  return $196(fromEvent2($197));
+                var $198 = map126(SwipeMove.create);
+                return function($199) {
+                  return $198(fromEvent2($199));
                 };
               }())))(function(moveSub) {
                 return bind41(subscribe2(eventListener2("mouseup")(docTarget)(function(v1) {
                   return new Just(SwipeEnd.value);
                 })))(function(upSub) {
                   return modify_24(function(v1) {
-                    var $174 = {};
-                    for (var $175 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $175)) {
-                        $174[$175] = v1[$175];
+                    var $176 = {};
+                    for (var $177 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $177)) {
+                        $176[$177] = v1[$177];
                       }
                       ;
                     }
                     ;
-                    $174.swipeStart = new Just({
+                    $176.swipeStart = new Just({
                       x: toNumber(clientX(v.value0)),
                       y: toNumber(clientY(v.value0))
                     });
-                    $174.swipeDelta = 0;
-                    $174.swipeState = "";
-                    $174.swipeSubs = [moveSub, upSub];
-                    return $174;
+                    $176.swipeDelta = 0;
+                    $176.swipeState = "";
+                    $176.swipeSubs = [moveSub, upSub];
+                    return $176;
                   });
                 });
               });
@@ -30182,17 +30194,17 @@
       if (v instanceof SwipeMove) {
         return bind41(get23)(function(st) {
           return when28(isJust(st.swipeStart))(modify_24(function(v1) {
-            var $178 = {};
-            for (var $179 in v1) {
-              if ({}.hasOwnProperty.call(v1, $179)) {
-                $178[$179] = v1[$179];
+            var $180 = {};
+            for (var $181 in v1) {
+              if ({}.hasOwnProperty.call(v1, $181)) {
+                $180[$181] = v1[$181];
               }
               ;
             }
             ;
-            $178.swipeDelta = swipeDistance(st)(toNumber(clientX(v.value0)))(toNumber(clientY(v.value0)));
-            $178.swipeState = "move";
-            return $178;
+            $180.swipeDelta = swipeDistance(st)(toNumber(clientX(v.value0)))(toNumber(clientY(v.value0)));
+            $180.swipeState = "move";
+            return $180;
           }));
         });
       }
@@ -30200,51 +30212,51 @@
       if (v instanceof SwipeEnd) {
         return bind41(get23)(function(st) {
           return discard31(for_211(st.swipeSubs)(unsubscribe2))(function() {
-            var $182 = st.swipeDelta >= swipeThreshold;
-            if ($182) {
+            var $184 = st.swipeDelta >= swipeThreshold;
+            if ($184) {
               return discard31(modify_24(function(v1) {
-                var $183 = {};
-                for (var $184 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $184)) {
-                    $183[$184] = v1[$184];
+                var $185 = {};
+                for (var $186 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $186)) {
+                    $185[$186] = v1[$186];
                   }
                   ;
                 }
                 ;
-                $183.swipeState = "end";
-                $183.swipeSubs = [];
-                return $183;
+                $185.swipeState = "end";
+                $185.swipeSubs = [];
+                return $185;
               }))(function() {
                 return closeToast1;
               });
             }
             ;
             return modify_24(function(v1) {
-              var $186 = {};
-              for (var $187 in v1) {
-                if ({}.hasOwnProperty.call(v1, $187)) {
-                  $186[$187] = v1[$187];
+              var $188 = {};
+              for (var $189 in v1) {
+                if ({}.hasOwnProperty.call(v1, $189)) {
+                  $188[$189] = v1[$189];
                 }
                 ;
               }
               ;
-              $186.swipeStart = Nothing.value;
-              $186.swipeDelta = 0;
-              $186.swipeState = "";
-              $186.swipeSubs = [];
-              return $186;
+              $188.swipeStart = Nothing.value;
+              $188.swipeDelta = 0;
+              $188.swipeState = "";
+              $188.swipeSubs = [];
+              return $188;
             });
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 434, column 16 - line 551, column 96): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Toast (line 488, column 16 - line 606, column 96): " + [v.constructor.name]);
     };
   };
   var announceNode = function(st) {
     return span3([ref2(announceRef), roleAttr3("status"), aria4("live")(ariaLiveFor(st.toastType)), style(inlineStyle2)])(function() {
-      var $189 = trim(st.announceText) === "";
-      if ($189) {
+      var $191 = trim(st.announceText) === "";
+      if ($191) {
         return [];
       }
       ;
@@ -30261,8 +30273,8 @@
       return "pointer-events: none;";
     }();
     return div3([style("display:contents")])(append119(function() {
-      var $191 = st.exitCss === "";
-      if ($191) {
+      var $193 = st.exitCss === "";
+      if ($193) {
         return [];
       }
       ;
@@ -30281,13 +30293,13 @@
       return PauseTimer.value;
     }), onFocusOut(function(v) {
       return ResumeTimer.value;
-    })])(function() {
+    })])(append119(function() {
       if (hasToasts) {
         return [toastLi(st)];
       }
       ;
       return [];
-    }())])(function() {
+    }())(map57(extraLi(st.style))(st.extra)))])(function() {
       if (hasToasts) {
         return [focusProxy];
       }
@@ -30309,8 +30321,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction22(dictMonadEffect),
         handleQuery: handleQuery21(dictMonadEffect),
-        receive: function($198) {
-          return Just.create(Receive22.create($198));
+        receive: function($200) {
+          return Just.create(Receive22.create($200));
         },
         initialize: new Just(Initialize20.value)
       })
@@ -33477,7 +33489,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2081, column 1 - line 2081, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2094, column 1 - line 2094, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33810,7 +33822,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1460, column 1 - line 1460, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1473, column 1 - line 1473, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33877,6 +33889,22 @@
       description: [text5("Friday at 5pm")],
       action: [text5("Undo")],
       close: [text5("\xD7")],
+      extra: function() {
+        var $245 = s === "multi";
+        if ($245) {
+          return [{
+            title: [text5("Deployed")],
+            description: [text5("Monday at 9am")],
+            action: [text5("View")],
+            altText: "View",
+            close: [text5("\xD7")],
+            closeLabel: "Close",
+            swipeDirection: "right"
+          }];
+        }
+        ;
+        return [];
+      }(),
       exitCss: '@keyframes toastExit { from { opacity: 1 } to { opacity: 0 } } li[data-state="closed"][data-swipe-direction] { animation: toastExit 100ms ease-out; }'
     };
   };
@@ -33899,6 +33927,7 @@
       closeLabel: v.closeLabel,
       announceText: v.announceText,
       exitCss: v.exitCss,
+      extra: v.extra,
       swipeDirection: "up"
     };
   }();
@@ -33943,8 +33972,8 @@
         disabled: false
       }],
       value: function() {
-        var $247 = s === "controlled";
-        if ($247) {
+        var $248 = s === "controlled";
+        if ($248) {
           return new Just("account");
         }
         ;
@@ -34021,8 +34050,8 @@
     return {
       children: defaultInput19.children,
       checked: function() {
-        var $248 = s === "controlled";
-        if ($248) {
+        var $249 = s === "controlled";
+        if ($249) {
           return new Just(true);
         }
         ;
@@ -34032,8 +34061,8 @@
       disabled: s === "disabled",
       required: s === "required" || s === "form",
       name: function() {
-        var $249 = s === "form";
-        if ($249) {
+        var $250 = s === "form";
+        if ($250) {
           return "notify";
         }
         ;
@@ -34068,7 +34097,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2173, column 17 - line 2175, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2186, column 17 - line 2188, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -34081,13 +34110,13 @@
       name: defaultRangeInput.name,
       isFormControl: defaultRangeInput.isFormControl,
       defaultValue: function() {
-        var $252 = s === "triple";
-        if ($252) {
+        var $253 = s === "triple";
+        if ($253) {
           return [20, 50, 80];
         }
         ;
-        var $253 = s === "minsteps";
-        if ($253) {
+        var $254 = s === "minsteps";
+        if ($254) {
           return [40, 60];
         }
         ;
@@ -34097,8 +34126,8 @@
       max: 100,
       step: 1,
       minStepsBetweenThumbs: function() {
-        var $254 = s === "minsteps";
-        if ($254) {
+        var $255 = s === "minsteps";
+        if ($255) {
           return 10;
         }
         ;
@@ -34139,24 +34168,24 @@
       value: defaultInput18.value,
       idPrefix: defaultInput18.idPrefix,
       defaultValue: function() {
-        var $255 = s === "highvalue";
-        if ($255) {
+        var $256 = s === "highvalue";
+        if ($256) {
           return 80;
         }
         ;
         return 40;
       }(),
       ariaLabel: function() {
-        var $256 = s === "arialabel";
-        if ($256) {
+        var $257 = s === "arialabel";
+        if ($257) {
           return "Volume";
         }
         ;
         return "";
       }(),
       dir: function() {
-        var $257 = s === "rtl";
-        if ($257) {
+        var $258 = s === "rtl";
+        if ($258) {
           return RTL.value;
         }
         ;
@@ -34167,8 +34196,8 @@
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $258 = s === "vertical";
-        if ($258) {
+        var $259 = s === "vertical";
+        if ($259) {
           return Vertical.value;
         }
         ;
@@ -34203,12 +34232,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2128, column 1 - line 2128, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2141, column 1 - line 2141, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $260 = s === "vsem" || s === "vdec";
-      if ($260) {
+      var $261 = s === "vsem" || s === "vdec";
+      if ($261) {
         return Vertical.value;
       }
       ;
@@ -34270,16 +34299,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $261 = s === "horizontal";
-        if ($261) {
+        var $262 = s === "horizontal";
+        if ($262) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $262 = s === "radius";
-        if ($262) {
+        var $263 = s === "radius";
+        if ($263) {
           return "full";
         }
         ;
@@ -34317,8 +34346,8 @@
       content: [box([new P("2"), new Width("160px")])(map64(function(n) {
         return textAs("p")([new Size("2")])([text5("Line "), text5(show21(n))]);
       })(range2(1)(function() {
-        var $263 = s === "autofit" || s === "nothumb";
-        if ($263) {
+        var $264 = s === "autofit" || s === "nothumb";
+        if ($264) {
           return 1;
         }
         ;
@@ -34332,8 +34361,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $264 = s === "keys" || s === "mixed";
-        if ($264) {
+        var $265 = s === "keys" || s === "mixed";
+        if ($265) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -34349,8 +34378,8 @@
           }];
         }
         ;
-        var $265 = s === "loopoff" || s === "rtl";
-        if ($265) {
+        var $266 = s === "loopoff" || s === "rtl";
+        if ($266) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -34366,8 +34395,8 @@
           }];
         }
         ;
-        var $266 = s === "alldisabled";
-        if ($266) {
+        var $267 = s === "alldisabled";
+        if ($267) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -34392,8 +34421,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $267 = s === "horizontal" || s === "rtl";
-        if ($267) {
+        var $268 = s === "horizontal" || s === "rtl";
+        if ($268) {
           return Horizontal.value;
         }
         ;
@@ -34401,8 +34430,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $268 = s === "rtl";
-        if ($268) {
+        var $269 = s === "rtl";
+        if ($269) {
           return RTL.value;
         }
         ;
@@ -34412,8 +34441,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $269 = s === "form";
-        if ($269) {
+        var $270 = s === "form";
+        if ($270) {
           return "plan";
         }
         ;
@@ -34497,8 +34526,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $270 = styl === "";
-              if ($270) {
+              var $271 = styl === "";
+              if ($271) {
                 return [];
               }
               ;
@@ -34546,8 +34575,8 @@
       align: defaultInput24.align,
       delayMs: defaultInput24.delayMs,
       open: function() {
-        var $272 = s === "controlled" || s === "arialabel";
-        if ($272) {
+        var $273 = s === "controlled" || s === "arialabel";
+        if ($273) {
           return new Just(true);
         }
         ;
@@ -34555,8 +34584,8 @@
       }(),
       defaultOpen: s === "defaultopen",
       ariaLabel: function() {
-        var $273 = s === "arialabel";
-        if ($273) {
+        var $274 = s === "arialabel";
+        if ($274) {
           return "Add this item to your library";
         }
         ;
@@ -34583,8 +34612,8 @@
       padding: defaultInput13.padding,
       align: Start.value,
       open: function() {
-        var $274 = s === "controlled";
-        if ($274) {
+        var $275 = s === "controlled";
+        if ($275) {
           return new Just(true);
         }
         ;
@@ -34593,8 +34622,8 @@
       defaultOpen: s === "defaultopen" || (s === "modal" || s === "flip"),
       modal: s === "modal",
       side: function() {
-        var $275 = s === "flip";
-        if ($275) {
+        var $276 = s === "flip";
+        if ($276) {
           return Top.value;
         }
         ;
@@ -34606,16 +34635,16 @@
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $276 = s === "close";
-        if ($276) {
+        var $277 = s === "close";
+        if ($277) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $277 = s === "close";
-        if ($277) {
+        var $278 = s === "close";
+        if ($278) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -34643,24 +34672,24 @@
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
       inputId: function() {
-        var $278 = s === "multi";
-        if ($278) {
+        var $279 = s === "multi";
+        if ($279) {
           return Nothing.value;
         }
         ;
         return new Just("password");
       }(),
       toggleVisible: function() {
-        var $279 = s === "autolabel";
-        if ($279) {
+        var $280 = s === "autolabel";
+        if ($280) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $280 = s === "autolabel";
-        if ($280) {
+        var $281 = s === "autolabel";
+        if ($281) {
           return [passwordToggleIcon];
         }
         ;
@@ -34669,8 +34698,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $281 = s === "passthrough";
-        if ($281) {
+        var $282 = s === "passthrough";
+        if ($282) {
           return new Just("pw");
         }
         ;
@@ -34678,16 +34707,16 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $282 = s === "passthrough";
-        if ($282) {
+        var $283 = s === "passthrough";
+        if ($283) {
           return new Just("Enter password");
         }
         ;
         return Nothing.value;
       }(),
       visible: function() {
-        var $283 = s === "controlled";
-        if ($283) {
+        var $284 = s === "controlled";
+        if ($284) {
           return new Just(false);
         }
         ;
@@ -34709,7 +34738,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1816, column 1 - line 1816, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1829, column 1 - line 1829, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -34720,32 +34749,32 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $286 = s === "open" || (s === "clicktoggle" || (s === "vertical" || (s === "rtl" || s === "activelink")));
-        if ($286) {
+        var $287 = s === "open" || (s === "clicktoggle" || (s === "vertical" || (s === "rtl" || s === "activelink")));
+        if ($287) {
           return "one";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $287 = s === "controlled";
-        if ($287) {
+        var $288 = s === "controlled";
+        if ($288) {
           return new Just("one");
         }
         ;
         return Nothing.value;
       }(),
       orientation: function() {
-        var $288 = s === "vertical";
-        if ($288) {
+        var $289 = s === "vertical";
+        if ($289) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $289 = s === "rtl";
-        if ($289) {
+        var $290 = s === "rtl";
+        if ($290) {
           return RTL.value;
         }
         ;
@@ -34787,8 +34816,8 @@
       portalAttrs: defaultInput10.portalAttrs,
       align: Start.value,
       dir: function() {
-        var $290 = s === "rtl";
-        if ($290) {
+        var $291 = s === "rtl";
+        if ($291) {
           return RTL.value;
         }
         ;
@@ -34796,8 +34825,8 @@
       }(),
       loop: s !== "noloop",
       value: function() {
-        var $291 = s === "controlled";
-        if ($291) {
+        var $292 = s === "controlled";
+        if ($292) {
           return new Just("file");
         }
         ;
@@ -34815,8 +34844,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $292 = s === "submenu";
-          if ($292) {
+          var $293 = s === "submenu";
+          if ($293) {
             return [menubarSubEntry];
           }
           ;
@@ -34871,8 +34900,8 @@
         trigger: [text5("View")],
         disabled: false,
         entries: function() {
-          var $293 = s === "radio";
-          if ($293) {
+          var $294 = s === "radio";
+          if ($294) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34978,84 +35007,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2140, column 1 - line 2140, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2153, column 1 - line 2153, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $359 = filter(function(c) {
+    var $360 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($360) {
-      return fromCharArray($359(toCharArray($360)));
+    return function($361) {
+      return fromCharArray($360(toCharArray($361)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $295 = s === "controlled";
-        if ($295) {
+        var $296 = s === "controlled";
+        if ($296) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $296 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($296) {
+        var $297 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($297) {
           return "";
         }
         ;
-        var $297 = s === "alpha";
-        if ($297) {
+        var $298 = s === "alpha";
+        if ($298) {
           return "abc";
         }
         ;
-        var $298 = s === "alphanumeric";
-        if ($298) {
+        var $299 = s === "alphanumeric";
+        if ($299) {
           return "a1b";
         }
         ;
-        var $299 = s === "revalidate";
-        if ($299) {
+        var $300 = s === "revalidate";
+        if ($300) {
           return "a1b2c";
         }
         ;
-        var $300 = s === "sanitizevalue";
-        if ($300) {
+        var $301 = s === "sanitizevalue";
+        if ($301) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $301 = s === "alpha" || s === "revalidate";
-        if ($301) {
+        var $302 = s === "alpha" || s === "revalidate";
+        if ($302) {
           return Alpha.value;
         }
         ;
-        var $302 = s === "alphanumeric";
-        if ($302) {
+        var $303 = s === "alphanumeric";
+        if ($303) {
           return Alphanumeric.value;
         }
         ;
-        var $303 = s === "novalidation" || s === "sanitizevalue";
-        if ($303) {
+        var $304 = s === "novalidation" || s === "sanitizevalue";
+        if ($304) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $304 = s === "sanitizevalue";
-        if ($304) {
+        var $305 = s === "sanitizevalue";
+        if ($305) {
           return keepDigitsOnly;
         }
         ;
         return identity14;
       }(),
       placeholder: function() {
-        var $305 = s === "placeholder";
-        if ($305) {
+        var $306 = s === "placeholder";
+        if ($306) {
           return new Just("\u25CB");
         }
         ;
@@ -35065,24 +35094,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $306 = s === "vertical";
-        if ($306) {
+        var $307 = s === "vertical";
+        if ($307) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $307 = s === "rtl";
-        if ($307) {
+        var $308 = s === "rtl";
+        if ($308) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $308 = s === "named";
-        if ($308) {
+        var $309 = s === "named";
+        if ($309) {
           return new Just("otp-code");
         }
         ;
@@ -35108,16 +35137,16 @@
       triggerHref: defaultInput9.triggerHref,
       align: Start.value,
       open: function() {
-        var $309 = s === "controlled" || s === "placement";
-        if ($309) {
+        var $310 = s === "controlled" || s === "placement";
+        if ($310) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       side: function() {
-        var $310 = s === "placement";
-        if ($310) {
+        var $311 = s === "placement";
+        if ($311) {
           return Right2.value;
         }
         ;
@@ -35134,8 +35163,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $311 = s === "richcontent";
-        if ($311) {
+        var $312 = s === "richcontent";
+        if ($312) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -35154,23 +35183,23 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2318, column 1 - line 2318, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2331, column 1 - line 2331, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $314 = s === "reset";
-        if ($314) {
+        var $315 = s === "reset";
+        if ($315) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
       fields: function() {
-        var $315 = s === "custom";
-        if ($315) {
+        var $316 = s === "custom";
+        if ($316) {
           return [{
             required: defaultField.required,
             serverInvalid: defaultField.serverInvalid,
@@ -35188,8 +35217,8 @@
           }];
         }
         ;
-        var $316 = s === "multi";
-        if ($316) {
+        var $317 = s === "multi";
+        if ($317) {
           return [{
             serverInvalid: defaultField.serverInvalid,
             name: "email",
@@ -35224,8 +35253,8 @@
           required: true,
           serverInvalid: s === "serverInvalid",
           messages: function() {
-            var $317 = s === "defaultMessage";
-            if ($317) {
+            var $318 = s === "defaultMessage";
+            if ($318) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35234,8 +35263,8 @@
               }];
             }
             ;
-            var $318 = s === "reset";
-            if ($318) {
+            var $319 = s === "reset";
+            if ($319) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -35278,7 +35307,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2184, column 12 - line 2186, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2197, column 12 - line 2199, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -35299,8 +35328,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $326 = kv.before === key2;
-          if ($326) {
+          var $327 = kv.before === key2;
+          if ($327) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -35311,7 +35340,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2166, column 15 - line 2168, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2179, column 15 - line 2181, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -35347,16 +35376,16 @@
       closeLabels: ["Cancel", "Save"],
       trigger: [text5("Edit profile")],
       open: function() {
-        var $328 = s === "controlled";
-        if ($328) {
+        var $329 = s === "controlled";
+        if ($329) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       dir: function() {
-        var $329 = s === "rtl";
-        if ($329) {
+        var $330 = s === "rtl";
+        if ($330) {
           return "rtl";
         }
         ;
@@ -35364,16 +35393,16 @@
       }(),
       forceMount: s === "forcemount",
       title: function() {
-        var $330 = s === "notitle";
-        if ($330) {
+        var $331 = s === "notitle";
+        if ($331) {
           return [];
         }
         ;
         return [text5("Edit profile")];
       }(),
       description: function() {
-        var $331 = s === "notitle";
-        if ($331) {
+        var $332 = s === "notitle";
+        if ($332) {
           return [];
         }
         ;
@@ -35451,16 +35480,16 @@
       side: Right2.value,
       modal: s !== "nonmodal",
       keepOpenValues: function() {
-        var $332 = s === "cancelselect";
-        if ($332) {
+        var $333 = s === "cancelselect";
+        if ($333) {
           return ["edit"];
         }
         ;
         return [];
       }(),
       open: function() {
-        var $333 = s === "controlled";
-        if ($333) {
+        var $334 = s === "controlled";
+        if ($334) {
           return new Just(true);
         }
         ;
@@ -35473,8 +35502,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $334 = s === "submenu";
-        if ($334) {
+        var $335 = s === "submenu";
+        if ($335) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -35500,8 +35529,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $335 = s === "radio";
-        if ($335) {
+        var $336 = s === "radio";
+        if ($336) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -35542,8 +35571,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $336 = s === "controlled";
-        if ($336) {
+        var $337 = s === "controlled";
+        if ($337) {
           return new Just(true);
         }
         ;
@@ -35564,8 +35593,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $337 = klass === "";
-      if ($337) {
+      var $338 = klass === "";
+      if ($338) {
         return [];
       }
       ;
@@ -35591,8 +35620,8 @@
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $338 = s === "radio";
-        if ($338) {
+        var $339 = s === "radio";
+        if ($339) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -35685,16 +35714,16 @@
       style: menuStyle,
       modal: s !== "nonmodal",
       open: function() {
-        var $339 = s === "controlled";
-        if ($339) {
+        var $340 = s === "controlled";
+        if ($340) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       keepOpenValues: function() {
-        var $340 = s === "selectnoclose";
-        if ($340) {
+        var $341 = s === "selectnoclose";
+        if ($341) {
           return ["edit"];
         }
         ;
@@ -35706,8 +35735,8 @@
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $341 = s === "submenu";
-        if ($341) {
+        var $342 = s === "submenu";
+        if ($342) {
           return [submenuEntry];
         }
         ;
@@ -35870,8 +35899,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $343 = s === "controlled";
-        if ($343) {
+        var $344 = s === "controlled";
+        if ($344) {
           return new Just(Checked.value);
         }
         ;
@@ -35895,16 +35924,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $345 = s === "form";
-        if ($345) {
+        var $346 = s === "form";
+        if ($346) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $346 = s === "form";
-        if ($346) {
+        var $347 = s === "form";
+        if ($347) {
           return "yes";
         }
         ;
@@ -35972,18 +36001,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $349 = s === "wide";
-        if ($349) {
+        var $350 = s === "wide";
+        if ($350) {
           return 16 / 9;
         }
         ;
-        var $350 = s === "tall";
-        if ($350) {
+        var $351 = s === "tall";
+        if ($351) {
           return 1 / 2;
         }
         ;
-        var $351 = s === "verywide";
-        if ($351) {
+        var $352 = s === "verywide";
+        if ($352) {
           return 21 / 9;
         }
         ;
@@ -35992,7 +36021,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2058, column 1 - line 2058, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2071, column 1 - line 2071, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -36008,8 +36037,8 @@
       closeOnEscape: defaultInput2.closeOnEscape,
       style: alertDialogStyle,
       open: function() {
-        var $352 = s === "controlled";
-        if ($352) {
+        var $353 = s === "controlled";
+        if ($353) {
           return new Just(true);
         }
         ;
@@ -36053,8 +36082,8 @@
       collapsible: s === "singlecollapsible",
       disabled: s === "disabledroot",
       defaultValue: function() {
-        var $353 = s === "single" || s === "singlecollapsible";
-        if ($353) {
+        var $354 = s === "single" || s === "singlecollapsible";
+        if ($354) {
           return ["item-1"];
         }
         ;
@@ -36185,18 +36214,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $354 = s === "formreset";
-    if ($354) {
+    var $355 = s === "formreset";
+    if ($355) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $355 = s === "multi";
-    if ($355) {
+    var $356 = s === "multi";
+    if ($356) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $356 = s === "formsubmit";
-    if ($356) {
+    var $357 = s === "formsubmit";
+    if ($357) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -36316,8 +36345,8 @@
         }
         ;
         if (c === "slider") {
-          var $358 = s === "vertical";
-          if ($358) {
+          var $359 = s === "vertical";
+          if ($359) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

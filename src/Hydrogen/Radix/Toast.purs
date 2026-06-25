@@ -51,6 +51,7 @@ module Hydrogen.Radix.Toast
   , Slot
   , Style
   , ToastType(..)
+  , ToastItem
   , defaultStyle
   , defaultInput
   ) where
@@ -115,6 +116,20 @@ defaultStyle =
   , close: cn "rdx-toast-close"
   }
 
+-- | One additional held-open toast in the QUEUE (multi-toast viewport). The primary toast is
+-- | still the flat `Input` fields (its timer/swipe/Presence lifecycle); `extra` toasts are
+-- | rendered as additional held-open <li> in the shared <ol> — the queue STRUCTURE radix emits
+-- | when several toasts are live at once (toast.tsx Viewport collects every Toast into one list).
+type ToastItem =
+  { title :: Array HH.PlainHTML
+  , description :: Array HH.PlainHTML
+  , action :: Array HH.PlainHTML
+  , altText :: String
+  , close :: Array HH.PlainHTML
+  , closeLabel :: String
+  , swipeDirection :: String
+  }
+
 type Input =
   { label :: String                  -- viewport aria-label (default "Notifications (F8)")
   , swipeDirection :: String         -- data-swipe-direction (default "right")
@@ -137,6 +152,7 @@ type Input =
   , exitCss :: String                -- optional <style> (e.g. an exit keyframe on the closing
                                       -- li) so the close lifecycle has a real animation to linger
                                       -- through; emitted inside the (stripped) display:contents root
+  , extra :: Array ToastItem         -- additional held-open toasts in the queue (default [])
   }
 
 defaultInput :: Input
@@ -158,6 +174,7 @@ defaultInput =
   , closeLabel: "Close"
   , announceText: ""
   , exitCss: ""
+  , extra: []
   }
 
 data Output = OpenChanged Boolean | Escaped
@@ -189,6 +206,7 @@ type State =
   , closeLabel :: String
   , announceText :: String   -- the SR mirror's text (label + title + description + action)
   , exitCss :: String
+  , extra :: Array ToastItem  -- additional held-open queue toasts (rendered as static <li>)
   , escSub :: Maybe H.SubscriptionId
   , postSub :: Maybe H.SubscriptionId
   , animSub :: Maybe H.SubscriptionId
@@ -258,6 +276,7 @@ initialState input =
   , closeLabel: input.closeLabel
   , announceText: input.announceText
   , exitCss: input.exitCss
+  , extra: input.extra
   , escSub: Nothing
   , postSub: Nothing
   , animSub: Nothing
@@ -337,7 +356,7 @@ render st =
                        , HE.onFocusIn \_ -> PauseTimer
                        , HE.onFocusOut \_ -> ResumeTimer
                        ]
-                       (if hasToasts then [ toastLi st ] else [])
+                       ((if hasToasts then [ toastLi st ] else []) <> map (extraLi st.style) st.extra)
                    ]
                 <> (if hasToasts then [ focusProxy ] else [])
             )
@@ -414,6 +433,41 @@ toastLi st =
       ]
     )
 
+-- | A queued (non-primary) toast: a held-open <li> with the same per-part structure as the
+-- | primary, but STATIC — no ref, no swipe/timer/Presence wiring (the multi-queue DOM oracle
+-- | holds every toast open; per-toast lifecycle is exercised by the primary). Its close/action
+-- | buttons close the whole component (single-slot model), matching the held-open structure
+-- | radix's Viewport emits when several toasts are live.
+extraLi :: forall m. Style -> ToastItem -> H.ComponentHTML Action () m
+extraLi style item =
+  HH.li
+    [ dataAttr' "radix-collection-item" ""
+    , dataState' "open"
+    , dataAttr' "swipe-direction" item.swipeDirection
+    , HP.style "user-select: none; touch-action: none;"
+    , HP.tabIndex 0
+    , classes style.root
+    ]
+    [ HH.div [ classes style.title ] (map HH.fromPlainHTML item.title)
+    , HH.div [ classes style.description ] (map HH.fromPlainHTML item.description)
+    , HH.button
+        [ HP.type_ HP.ButtonButton
+        , dataAttr' "radix-toast-announce-exclude" ""
+        , dataAttr' "radix-toast-announce-alt" item.altText
+        , classes style.action
+        , HE.onClick \_ -> ActionClicked
+        ]
+        (map HH.fromPlainHTML item.action)
+    , HH.button
+        [ HP.type_ HP.ButtonButton
+        , dataAttr' "radix-toast-announce-exclude" ""
+        , aria "label" item.closeLabel
+        , classes style.close
+        , HE.onClick \_ -> CloseClicked
+        ]
+        (map HH.fromPlainHTML item.close)
+    ]
+
 -- | The SR-announce live region (role=status, aria-live=assertive|polite, VisuallyHidden).
 -- | Its text is the static `announceText`; portaled to body (AfterMount) like upstream.
 ariaLiveFor :: ToastType -> String
@@ -463,6 +517,7 @@ handleAction = case _ of
       , closeLabel = input.closeLabel
       , announceText = input.announceText
       , exitCss = input.exitCss
+      , extra = input.extra
       , duration = input.duration
       }
   ActionClicked -> closeToast

@@ -94,11 +94,12 @@
       "id": "toast.multi-queue",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "toast.tsx:89-112 multi-toast queue: N <li> in shared <ol>, reverse tab order, hasToasts gating. Port is single-toast. PORT FIX."
+      "oracle_file": "toast.multi",
+      "ref": "DONE (2026-06-25): multi-toast QUEUE — PORT FIX. Added Input.extra :: Array ToastItem; the Viewport <ol> renders the primary toast <li> followed by each queued toast as a held-open <li>, matching upstream's collect-all-toasts structure. Pinned DOM-identical by golden toast.multi (two held-open <li> in the shared <ol>, focus proxies bracketing). toast.tsx Viewport collection; Toast.purs extraLi."
     },
     {
       "id": "toast.hotkey",

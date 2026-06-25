@@ -1275,6 +1275,19 @@ toastInput s = Toast.defaultInput
   , description = [ HH.text "Friday at 5pm" ]
   , action = [ HH.text "Undo" ]
   , close = [ HH.text "×" ]
+  -- `?s=multi` → a second held-open toast in the queue (the multi-toast viewport structure).
+  , extra =
+      if s == "multi" then
+        [ { title: [ HH.text "Deployed" ]
+          , description: [ HH.text "Monday at 9am" ]
+          , action: [ HH.text "View" ]
+          , altText: "View"
+          , close: [ HH.text "×" ]
+          , closeLabel: "Close"
+          , swipeDirection: "right"
+          }
+        ]
+      else []
   -- mirror the golden story's inline exit keyframe so the closing li lingers data-state=closed
   -- through its (pinned) exit animation (otherwise Presence unmounts it synchronously). <style>
   -- is in the normalizer SKIP set, so it never enters the DOM diff.
