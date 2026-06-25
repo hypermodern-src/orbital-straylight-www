@@ -162,11 +162,12 @@
       "id": "accordion.item-disabled",
       "state": "item-disabled",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "accordion.tsx:363,378,418 per-item disabled: data-disabled on item/header/trigger + native disabled; sibling unaffected"
+      "ref": "DONE (2026-06-25): item-level disable (<Accordion.Item disabled>) \u2014 golden-first capture; PORT FIX: the content region (role=region) now also stamps data-disabled when the item is disabled (collapsible.tsx:209), matching the item/header/trigger which already did. accordion.disabled DOM golden byte-identical: data-disabled on item/header/trigger/content + the trigger disabled attr. accordion.tsx:363,378,418",
+      "oracle_file": "accordion.disabled"
     },
     {
       "id": "accordion.controls-open-only",

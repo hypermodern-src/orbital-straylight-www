@@ -9954,7 +9954,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 406, column 15 - line 412, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 412, column 15 - line 418, column 42): " + [v.constructor.name]);
     };
   };
   var toggleItem = function(value17) {
@@ -10006,7 +10006,7 @@
         return base2(st) + ("-panel-" + value17);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 314, column 20 - line 316, column 43): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 320, column 20 - line 322, column 43): " + [v.constructor.name]);
     };
   };
   var triggerId = function(st) {
@@ -10022,7 +10022,7 @@
         return base2(st) + ("-trigger-" + value17);
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 309, column 22 - line 311, column 45): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 315, column 22 - line 317, column 45): " + [v.constructor.name]);
     };
   };
   var handleAction = function(dictMonadEffect) {
@@ -10071,7 +10071,7 @@
               return mintItemIds1(it);
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 336, column 16 - line 338, column 36): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 342, column 16 - line 344, column 36): " + [v1.constructor.name]);
           })(v.value0.items))(function(ids) {
             return modify_3(function(st) {
               var $81 = {};
@@ -10124,7 +10124,7 @@
                 return 0;
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 367, column 20 - line 369, column 21): " + [mTargetId.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 373, column 20 - line 375, column 21): " + [mTargetId.constructor.name]);
             }();
             var pos = {
               count: length(enabled),
@@ -10149,22 +10149,22 @@
                 ;
                 if (v2 instanceof Just) {
                   return bind5(getHTMLElementRef(triggerRef(v2.value0.value)))(function(mel) {
-                    return for_3(mel)(function($103) {
-                      return liftEffect7(focus($103));
+                    return for_3(mel)(function($105) {
+                      return liftEffect7(focus($105));
                     });
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 374, column 21 - line 379, column 54): " + [v2.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 380, column 21 - line 385, column 54): " + [v2.constructor.name]);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 372, column 33 - line 379, column 54): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 378, column 33 - line 385, column 54): " + [v1.constructor.name]);
             }());
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 326, column 16 - line 379, column 54): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Accordion (line 332, column 16 - line 385, column 54): " + [v.constructor.name]);
     };
   };
   var renderItem = function(st) {
@@ -10231,10 +10231,22 @@
           return [];
         }()))))(map30(fromPlainHTML)(item.header))]), function() {
           if (open) {
-            return div3([id2(panelId(st)(item.value)), role("region"), aria("labelledby")(triggerId(st)(item.value)), dataState("open"), dataOrientation(st.orientation), classes2(st.style.content), style(openContentStyle(elem3(item.value)(st.initialOpen)))])(map30(fromPlainHTML)(item.content));
+            return div3(append12([id2(panelId(st)(item.value)), role("region"), aria("labelledby")(triggerId(st)(item.value)), dataState("open"), dataOrientation(st.orientation), classes2(st.style.content), style(openContentStyle(elem3(item.value)(st.initialOpen)))])(function() {
+              if (disabled11) {
+                return [dataAttr("disabled")("")];
+              }
+              ;
+              return [];
+            }()))(map30(fromPlainHTML)(item.content));
           }
           ;
-          return div3([id2(panelId(st)(item.value)), role("region"), aria("labelledby")(triggerId(st)(item.value)), dataState("closed"), dataOrientation(st.orientation), classes2(st.style.content), style(closedContentStyle), attr2("hidden")("")])([]);
+          return div3(append12([id2(panelId(st)(item.value)), role("region"), aria("labelledby")(triggerId(st)(item.value)), dataState("closed"), dataOrientation(st.orientation), classes2(st.style.content), style(closedContentStyle), attr2("hidden")("")])(function() {
+            if (disabled11) {
+              return [dataAttr("disabled")("")];
+            }
+            ;
+            return [];
+          }()))([]);
         }()]);
       };
     };
@@ -10250,8 +10262,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction(dictMonadEffect),
         handleQuery: handleQuery(dictMonadEffect),
-        receive: function($104) {
-          return Just.create(Receive2.create($104));
+        receive: function($106) {
+          return Just.create(Receive2.create($106));
         },
         initialize: new Just(Initialize2.value)
       })

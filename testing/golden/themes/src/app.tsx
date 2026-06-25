@@ -986,9 +986,9 @@ const PAGES: Page[] = [
         <Box style={{ maxWidth: 360 }}>
           <Accordion.Root {...rootProps}>
             {items.map((it) => (
-              <Accordion.Item key={it.value} value={it.value}>
+              <Accordion.Item key={it.value} value={it.value} disabled={it.disabled}>
                 <Accordion.Header>
-                  <Accordion.Trigger disabled={it.disabled}>{it.header}</Accordion.Trigger>
+                  <Accordion.Trigger>{it.header}</Accordion.Trigger>
                 </Accordion.Header>
                 <Accordion.Content>{it.content}</Accordion.Content>
               </Accordion.Item>

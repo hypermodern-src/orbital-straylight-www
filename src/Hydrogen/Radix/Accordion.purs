@@ -280,26 +280,32 @@ renderItem st _ item =
           ]
       , if open then
           HH.div
-            [ HP.id (panelId st item.value)
-            , role "region"
-            , aria "labelledby" (triggerId st item.value)
-            , dataState "open"
-            , dataOrientation st.orientation
-            , classes st.style.content
-            , HP.style (openContentStyle (item.value `elem` st.initialOpen))
-            ]
+            ( [ HP.id (panelId st item.value)
+              , role "region"
+              , aria "labelledby" (triggerId st item.value)
+              , dataState "open"
+              , dataOrientation st.orientation
+              , classes st.style.content
+              , HP.style (openContentStyle (item.value `elem` st.initialOpen))
+              ]
+              -- a disabled item stamps data-disabled on the content region too
+              -- (CollapsibleContentImpl, collapsible.tsx:209).
+              <> (if disabled then [ dataAttr "disabled" "" ] else [])
+            )
             (map HH.fromPlainHTML item.content)
         else
           HH.div
-            [ HP.id (panelId st item.value)
-            , role "region"
-            , aria "labelledby" (triggerId st item.value)
-            , dataState "closed"
-            , dataOrientation st.orientation
-            , classes st.style.content
-            , HP.style closedContentStyle
-            , HP.attr (HH.AttrName "hidden") ""
-            ]
+            ( [ HP.id (panelId st item.value)
+              , role "region"
+              , aria "labelledby" (triggerId st item.value)
+              , dataState "closed"
+              , dataOrientation st.orientation
+              , classes st.style.content
+              , HP.style closedContentStyle
+              , HP.attr (HH.AttrName "hidden") ""
+              ]
+              <> (if disabled then [ dataAttr "disabled" "" ] else [])
+            )
             []
       ]
 

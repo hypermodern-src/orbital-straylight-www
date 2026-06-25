@@ -421,6 +421,12 @@ export const STATES = {
       await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
       await root(pg).locator('button[aria-expanded="true"][aria-disabled="true"]').first().waitFor();
     },
+    // ?s=disabled: the MIDDLE item (item-2) is disabled at the ITEM level (Accordion.Item
+    // disabled) → data-disabled on item/header/trigger/content + the trigger's `disabled` attr.
+    // Closed-rest snapshot; same locator both faces (the disabled middle trigger).
+    disabled: async (pg) => {
+      await root(pg).locator('button[aria-expanded][disabled]').first().waitFor();
+    },
     // ?s=multiple (the default type): open TWO items (item-1 then item-3) and assert BOTH
     // regions are open simultaneously (independent toggles, set semantics). Keyed off upstream
     // aria-expanded/role=region only, so the same driver runs against golden and port.
