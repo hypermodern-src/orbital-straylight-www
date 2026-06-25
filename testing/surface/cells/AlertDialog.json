@@ -95,21 +95,24 @@
       "id": "alertdialog.role",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "aria"
+        "aria",
+        "dom"
       ],
-      "ref": "alert-dialog.tsx:122 role=alertdialog interruption semantic; structurally covered, listed for completeness"
+      "ref": "CO-COVER (2026-06-25): the alertdialog.open DOM + ARIA goldens (gate-green; a11y MATRIX shown=open) byte-pin role=\"alertdialog\" on the content (the interruption semantic, vs Dialog role=\"dialog\"). alert-dialog.tsx:122",
+      "oracle_file": "alertdialog.open"
     },
     {
       "id": "alertdialog.always-modal",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "alert-dialog.tsx:28 modal always true; scroll-lock+hideOthers+guards always present, no modal=false knob"
+      "ref": "CO-COVER (2026-06-25): AlertDialog is ALWAYS modal (no modal=false variant). The alertdialog.open DOM golden byte-pins the full modal envelope: body data-scroll-locked=1 + pointer-events:none, both focus-guard sentinels + #root aria-hidden (hideOthers), content pointer-events:auto. alert-dialog.tsx:28",
+      "oracle_file": "alertdialog.open"
     },
     {
       "id": "alertdialog.focus-restore",
