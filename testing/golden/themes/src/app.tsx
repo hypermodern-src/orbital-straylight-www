@@ -750,11 +750,20 @@ const PAGES: Page[] = [
   {
     id: "tooltip",
     label: "Tooltip",
-    node: (
-      <Tooltip content="Add to library">
-        <Button variant="soft">Hover me</Button>
-      </Tooltip>
-    ),
+    interactive: true,
+    // `?s=controlled` → parent owns open={true} (OPEN at mount, anchored to the trigger);
+    // `?s=defaultopen` → uncontrolled defaultOpen (OPEN at mount, parent does NOT own it).
+    // Either way the tooltip renders open immediately (instant-open, wasOpenDelayedRef=false).
+    node: (() => {
+      const s = currentState();
+      const extra =
+        s === "controlled" ? { open: true } : s === "defaultopen" ? { defaultOpen: true } : {};
+      return (
+        <Tooltip content="Add to library" {...extra}>
+          <Button variant="soft">Hover me</Button>
+        </Tooltip>
+      );
+    })(),
   },
   {
     id: "hovercard",

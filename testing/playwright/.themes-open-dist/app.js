@@ -468,11 +468,11 @@
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
     var bind47 = bind(dictMonad.Bind1());
-    var unless2 = unless(dictMonad.Applicative0());
+    var unless4 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
         return bind47(mb)(function(b2) {
-          return unless2(b2)(m);
+          return unless4(b2)(m);
         });
       };
     };
@@ -583,10 +583,10 @@
     };
   };
   var notEq = function(dictEq) {
-    var eq37 = eq(dictEq);
+    var eq36 = eq(dictEq);
     return function(x) {
       return function(y) {
-        return eq2(eq37(x)(y))(false);
+        return eq2(eq36(x)(y))(false);
       };
     };
   };
@@ -10926,19 +10926,19 @@
         return bind10(liftEffect7(activeElement(doc)))(function(mprev) {
           return discard12(for_5(st.animSub)(unsubscribe2))(function() {
             return discard12(modify_4(function(v) {
-              var $77 = {};
-              for (var $78 in v) {
-                if ({}.hasOwnProperty.call(v, $78)) {
-                  $77[$78] = v[$78];
+              var $79 = {};
+              for (var $80 in v) {
+                if ({}.hasOwnProperty.call(v, $80)) {
+                  $79[$80] = v[$80];
                 }
                 ;
               }
               ;
-              $77.ctrl = change2(true)(st.ctrl).next;
-              $77.restoreEl = mprev;
-              $77.presence = Open.value;
-              $77.animSub = Nothing.value;
-              return $77;
+              $79.ctrl = change2(true)(st.ctrl).next;
+              $79.restoreEl = mprev;
+              $79.presence = Open.value;
+              $79.animSub = Nothing.value;
+              return $79;
             }))(function() {
               return discard12(raise(new OpenChanged(true)))(function() {
                 return bind10(function() {
@@ -10950,18 +10950,18 @@
                 }())(function(sub3) {
                   return bind10(scheduleAfter1(AfterOpen.value))(function(psid) {
                     return modify_4(function(v) {
-                      var $81 = {};
-                      for (var $82 in v) {
-                        if ({}.hasOwnProperty.call(v, $82)) {
-                          $81[$82] = v[$82];
+                      var $83 = {};
+                      for (var $84 in v) {
+                        if ({}.hasOwnProperty.call(v, $84)) {
+                          $83[$84] = v[$84];
                         }
                         ;
                       }
                       ;
-                      $81.escSub = sub3;
-                      $81.postSub = new Just(psid);
-                      $81.locked = true;
-                      return $81;
+                      $83.escSub = sub3;
+                      $83.postSub = new Just(psid);
+                      $83.locked = true;
+                      return $83;
                     });
                   });
                 });
@@ -11020,20 +11020,20 @@
         return discard12(for_5(st.postSub)(unsubscribe2))(function() {
           return discard12(when7(st.locked)(liftEffect7(applySecond3(applySecond3(showOthers)(removeFocusGuards))(unlockScroll))))(function() {
             return modify_4(function(v) {
-              var $87 = {};
-              for (var $88 in v) {
-                if ({}.hasOwnProperty.call(v, $88)) {
-                  $87[$88] = v[$88];
+              var $89 = {};
+              for (var $90 in v) {
+                if ({}.hasOwnProperty.call(v, $90)) {
+                  $89[$90] = v[$90];
                 }
                 ;
               }
               ;
-              $87.presence = finishExit(st.presence);
-              $87.restoreEl = Nothing.value;
-              $87.animSub = Nothing.value;
-              $87.postSub = Nothing.value;
-              $87.locked = false;
-              return $87;
+              $89.presence = finishExit(st.presence);
+              $89.restoreEl = Nothing.value;
+              $89.animSub = Nothing.value;
+              $89.postSub = Nothing.value;
+              $89.locked = false;
+              return $89;
             });
           });
         });
@@ -11069,8 +11069,8 @@
   var closeLabelHit = function(content3) {
     return function(labels9) {
       return function(ev) {
-        var wanted = map33(function($137) {
-          return toLower(trim($137));
+        var wanted = map33(function($143) {
+          return toLower(trim($143));
         })(labels9);
         var walk = function(node) {
           if (unsafeRefEq(node)(content3)) {
@@ -11101,11 +11101,11 @@
                 return false;
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 485, column 39 - line 487, column 32): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 497, column 39 - line 499, column 32): " + [v2.constructor.name]);
             };
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 476, column 3 - line 487, column 32): " + [node.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 488, column 3 - line 499, column 32): " + [node.constructor.name]);
         };
         var v = bind22(target5(ev))(fromEventTarget2);
         if (v instanceof Nothing) {
@@ -11116,7 +11116,7 @@
           return walk(v.value0);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 471, column 3 - line 473, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 483, column 3 - line 485, column 29): " + [v.constructor.name]);
       };
     };
   };
@@ -11126,37 +11126,37 @@
     return bind10(get3)(function(st) {
       return when7(current(st.ctrl))(discard12(for_5(st.escSub)(unsubscribe2))(function() {
         return discard12(for_5(st.postSub)(unsubscribe2))(function() {
-          return discard12(for_5(st.restoreEl)(function($138) {
-            return liftEffect7(focus($138));
+          return discard12(for_5(st.restoreEl)(function($144) {
+            return liftEffect7(focus($144));
           }))(function() {
             return discard12(modify_4(function(v) {
-              var $98 = {};
-              for (var $99 in v) {
-                if ({}.hasOwnProperty.call(v, $99)) {
-                  $98[$99] = v[$99];
+              var $100 = {};
+              for (var $101 in v) {
+                if ({}.hasOwnProperty.call(v, $101)) {
+                  $100[$101] = v[$101];
                 }
                 ;
               }
               ;
-              $98.ctrl = change2(false)(st.ctrl).next;
-              $98.presence = present(false)(st.presence);
-              $98.escSub = Nothing.value;
-              $98.postSub = Nothing.value;
-              return $98;
+              $100.ctrl = change2(false)(st.ctrl).next;
+              $100.presence = present(false)(st.presence);
+              $100.escSub = Nothing.value;
+              $100.postSub = Nothing.value;
+              return $100;
             }))(function() {
               return discard12(raise(new OpenChanged(false)))(function() {
                 return bind10(scheduleAfter1(AfterClose.value))(function(psid) {
                   return modify_4(function(v) {
-                    var $101 = {};
-                    for (var $102 in v) {
-                      if ({}.hasOwnProperty.call(v, $102)) {
-                        $101[$102] = v[$102];
+                    var $103 = {};
+                    for (var $104 in v) {
+                      if ({}.hasOwnProperty.call(v, $104)) {
+                        $103[$104] = v[$104];
                       }
                       ;
                     }
                     ;
-                    $101.postSub = new Just(psid);
-                    return $101;
+                    $103.postSub = new Just(psid);
+                    return $103;
                   });
                 });
               });
@@ -11169,8 +11169,9 @@
   var handleAction2 = function(dictMonadEffect) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
     var useId2 = useId(monadEffectHalogenM2);
-    var openDialog1 = openDialog(dictMonadEffect);
     var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var scheduleAfter1 = scheduleAfter(dictMonadEffect);
+    var openDialog1 = openDialog(dictMonadEffect);
     var closeDialog1 = closeDialog(dictMonadEffect);
     var finishClose1 = finishClose(dictMonadEffect);
     return function(v) {
@@ -11178,19 +11179,48 @@
         return bind10(useId2)(function(cid) {
           return bind10(useId2)(function(tid) {
             return bind10(useId2)(function(did) {
-              return modify_4(function(v1) {
-                var $105 = {};
-                for (var $106 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $106)) {
-                    $105[$106] = v1[$106];
+              return discard12(modify_4(function(v1) {
+                var $107 = {};
+                for (var $108 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $108)) {
+                    $107[$108] = v1[$108];
                   }
                   ;
                 }
                 ;
-                $105.contentId = cid;
-                $105.titleId = tid;
-                $105.descriptionId = did;
-                return $105;
+                $107.contentId = cid;
+                $107.titleId = tid;
+                $107.descriptionId = did;
+                return $107;
+              }))(function() {
+                return bind10(get3)(function(st) {
+                  return when7(current(st.ctrl))(bind10(liftEffect7(bind16(windowImpl)(document)))(function(doc) {
+                    return bind10(function() {
+                      if (st.closeOnEscape) {
+                        return map113(Just.create)(subscribe2($$escape(toEventTarget(doc))(EscapePressed.value)));
+                      }
+                      ;
+                      return pure16(Nothing.value);
+                    }())(function(sub3) {
+                      return bind10(scheduleAfter1(AfterOpen.value))(function(psid) {
+                        return modify_4(function(v1) {
+                          var $111 = {};
+                          for (var $112 in v1) {
+                            if ({}.hasOwnProperty.call(v1, $112)) {
+                              $111[$112] = v1[$112];
+                            }
+                            ;
+                          }
+                          ;
+                          $111.escSub = sub3;
+                          $111.postSub = new Just(psid);
+                          $111.locked = true;
+                          return $111;
+                        });
+                      });
+                    });
+                  }));
+                });
               });
             });
           });
@@ -11199,26 +11229,26 @@
       ;
       if (v instanceof Receive3) {
         return modify_4(function(st) {
-          var $108 = {};
-          for (var $109 in st) {
-            if ({}.hasOwnProperty.call(st, $109)) {
-              $108[$109] = st[$109];
+          var $114 = {};
+          for (var $115 in st) {
+            if ({}.hasOwnProperty.call(st, $115)) {
+              $114[$115] = st[$115];
             }
             ;
           }
           ;
-          $108.ctrl = sync(v.value0.open)(st.ctrl);
-          $108.closeOnEscape = v.value0.closeOnEscape;
-          $108.style = v.value0.style;
-          $108.trigger = v.value0.trigger;
-          $108.title = v.value0.title;
-          $108.description = v.value0.description;
-          $108.content = v.value0.content;
-          $108.contentStyle = v.value0.contentStyle;
-          $108.triggerAttrs = v.value0.triggerAttrs;
-          $108.portalAttrs = v.value0.portalAttrs;
-          $108.closeLabels = v.value0.closeLabels;
-          return $108;
+          $114.ctrl = sync(v.value0.open)(st.ctrl);
+          $114.closeOnEscape = v.value0.closeOnEscape;
+          $114.style = v.value0.style;
+          $114.trigger = v.value0.trigger;
+          $114.title = v.value0.title;
+          $114.description = v.value0.description;
+          $114.content = v.value0.content;
+          $114.contentStyle = v.value0.contentStyle;
+          $114.triggerAttrs = v.value0.triggerAttrs;
+          $114.portalAttrs = v.value0.portalAttrs;
+          $114.closeLabels = v.value0.closeLabels;
+          return $114;
         });
       }
       ;
@@ -11294,16 +11324,16 @@
                 if (animates) {
                   return bind10(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone.value)))(function(sub3) {
                     return discard12(modify_4(function(v1) {
-                      var $120 = {};
-                      for (var $121 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $121)) {
-                          $120[$121] = v1[$121];
+                      var $126 = {};
+                      for (var $127 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $127)) {
+                          $126[$127] = v1[$127];
                         }
                         ;
                       }
                       ;
-                      $120.animSub = new Just(sub3);
-                      return $120;
+                      $126.animSub = new Just(sub3);
+                      return $126;
                     }))(function() {
                       return pure16(true);
                     });
@@ -11314,7 +11344,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 379, column 14 - line 387, column 24): " + [mnode.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 391, column 14 - line 399, column 24): " + [mnode.constructor.name]);
           }())(function(armed) {
             if (armed) {
               return bind10(getHTMLElementRef(portalRef))(function(mwrap) {
@@ -11339,7 +11369,7 @@
         return finishClose1;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 312, column 16 - line 400, column 26): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 312, column 16 - line 412, column 26): " + [v.constructor.name]);
     };
   };
   var handleQuery2 = function(dictMonadEffect) {
@@ -11364,7 +11394,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 458, column 15 - line 464, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 470, column 15 - line 476, column 42): " + [v.constructor.name]);
     };
   };
   var aria2 = function(name16) {
@@ -11374,29 +11404,29 @@
   };
   var overlayContent = function(st) {
     return div3(append13([ref2(portalRef), classes2(st.style.overlay), dataState(dataStateOf(st.presence)), style("pointer-events: auto;")])(portalData(st.portalAttrs)))([div3([classes2(st.style.scroll)])([div3([classes2(st.style.scrollPadding)])([div3(append13([ref2(contentRef), id2(st.contentId), classes2(st.style.content), roleAttr("alertdialog"), dataState(dataStateOf(st.presence)), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(ContentKeyDown.create), onClick(ContentClicked.create)])(append13(function() {
-      var $130 = $$null(st.title);
-      if ($130) {
+      var $136 = $$null(st.title);
+      if ($136) {
         return [];
       }
       ;
       return [aria2("labelledby")(st.titleId)];
     }())(function() {
-      var $131 = $$null(st.description);
-      if ($131) {
+      var $137 = $$null(st.description);
+      if ($137) {
         return [];
       }
       ;
       return [aria2("describedby")(st.descriptionId)];
     }())))(append13([h1(append13([classes2(st.style.title)])(function() {
-      var $132 = $$null(st.title);
-      if ($132) {
+      var $138 = $$null(st.title);
+      if ($138) {
         return [];
       }
       ;
       return [id2(st.titleId)];
     }()))(map33(fromPlainHTML)(st.title)), p(append13([classes2(st.style.description)])(function() {
-      var $133 = $$null(st.description);
-      if ($133) {
+      var $139 = $$null(st.description);
+      if ($139) {
         return [];
       }
       ;
@@ -11420,8 +11450,8 @@
       ;
       return [];
     }())(portalData(st.triggerAttrs))))(map33(fromPlainHTML)(st.trigger))])(function() {
-      var $136 = isRendered(st.presence);
-      if ($136) {
+      var $142 = isRendered(st.presence);
+      if ($142) {
         return [overlayContent(st)];
       }
       ;
@@ -11436,8 +11466,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction2(dictMonadEffect),
         handleQuery: handleQuery2(dictMonadEffect),
-        receive: function($139) {
-          return Just.create(Receive3.create($139));
+        receive: function($145) {
+          return Just.create(Receive3.create($145));
         },
         initialize: new Just(Initialize3.value)
       })
@@ -13027,15 +13057,17 @@
   var notEq22 = /* @__PURE__ */ notEq(eqAlign);
   var for_7 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var for_12 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
+  var when1 = /* @__PURE__ */ when(applicativeEffect);
   var applySecond5 = /* @__PURE__ */ applySecond(applyEffect);
   var not4 = /* @__PURE__ */ not(heytingAlgebraBoolean);
-  var when1 = /* @__PURE__ */ when(applicativeEffect);
   var bind110 = /* @__PURE__ */ bind(bindEffect);
   var map114 = /* @__PURE__ */ map(functorHalogenM);
   var map210 = /* @__PURE__ */ map(functorMaybe);
   var traverse_9 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
   var bind23 = /* @__PURE__ */ bind(bindMaybe);
   var pure110 = /* @__PURE__ */ pure(applicativeMaybe);
+  var unless2 = /* @__PURE__ */ unless(applicativeHalogenM);
+  var elem5 = /* @__PURE__ */ elem2(eqString);
   var applySecond1 = /* @__PURE__ */ applySecond(applyHalogenM);
   var SetOpen3 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
@@ -13332,10 +13364,10 @@
         return s;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 513, column 16 - line 515, column 19): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 524, column 16 - line 526, column 19): " + [v1.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 511, column 3 - line 515, column 19): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 522, column 3 - line 526, column 19): " + [v.constructor.name]);
   };
   var scheduleSubAfterOpen = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
@@ -13375,15 +13407,15 @@
         })])(append16(maybe([])(function(i2) {
           return [ref2(subItemRef(st.idPrefix)(i2))];
         })(mIdx))(append16(function() {
-          var $200 = eq4(mIdx)(new Just(st.subFocused));
-          if ($200) {
+          var $206 = eq4(mIdx)(new Just(st.subFocused));
+          if ($206) {
             return [dataAttr("highlighted")("")];
           }
           ;
           return [];
         }())(append16(function() {
-          var $201 = item.accent === "";
-          if ($201) {
+          var $207 = item.accent === "";
+          if ($207) {
             return [];
           }
           ;
@@ -13395,8 +13427,8 @@
           ;
           return [];
         }())))))(append16(map39(fromPlainHTML)(item.label))(function() {
-          var $203 = $$null(item.shortcut);
-          if ($203) {
+          var $209 = $$null(item.shortcut);
+          if ($209) {
             return [];
           }
           ;
@@ -13457,35 +13489,35 @@
         return function(focus3) {
           return bind20(get7)(function(st) {
             return when11(current(st.ctrl) && notEq2(st.subOpen)(new Just(value17)))(discard13(modify_8(function(v) {
-              var $209 = {};
-              for (var $210 in v) {
-                if ({}.hasOwnProperty.call(v, $210)) {
-                  $209[$210] = v[$210];
+              var $215 = {};
+              for (var $216 in v) {
+                if ({}.hasOwnProperty.call(v, $216)) {
+                  $215[$216] = v[$216];
                 }
                 ;
               }
               ;
-              $209.subOpen = new Just(value17);
-              $209.focused = idx;
-              $209.subAnchorIdx = idx;
-              $209.subFocused = -1 | 0;
-              $209.subOpenFocus = focus3;
-              $209.subPlacedSide = Right2.value;
-              $209.subPlacedAlign = Start.value;
-              return $209;
+              $215.subOpen = new Just(value17);
+              $215.focused = idx;
+              $215.subAnchorIdx = idx;
+              $215.subFocused = -1 | 0;
+              $215.subOpenFocus = focus3;
+              $215.subPlacedSide = Right2.value;
+              $215.subPlacedAlign = Start.value;
+              return $215;
             }))(function() {
               return bind20(scheduleSubAfterOpen1)(function(psid) {
                 return modify_8(function(v) {
-                  var $212 = {};
-                  for (var $213 in v) {
-                    if ({}.hasOwnProperty.call(v, $213)) {
-                      $212[$213] = v[$213];
+                  var $218 = {};
+                  for (var $219 in v) {
+                    if ({}.hasOwnProperty.call(v, $219)) {
+                      $218[$219] = v[$219];
                     }
                     ;
                   }
                   ;
-                  $212.subPostSub = new Just(psid);
-                  return $212;
+                  $218.subPostSub = new Just(psid);
+                  return $218;
                 });
               });
             }));
@@ -13529,7 +13561,7 @@
               return pure23("");
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 1084, column 5 - line 1086, column 25): " + [mel.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 1118, column 5 - line 1120, column 25): " + [mel.constructor.name]);
           });
         });
       };
@@ -13543,15 +13575,15 @@
         })])(append16(maybe([])(function(i2) {
           return [ref2(itemRef(st.idPrefix)(i2))];
         })(mIdx))(append16(function() {
-          var $217 = eq4(mIdx)(new Just(st.focused));
-          if ($217) {
+          var $223 = eq4(mIdx)(new Just(st.focused));
+          if ($223) {
             return [dataAttr("highlighted")("")];
           }
           ;
           return [];
         }())(append16(function() {
-          var $218 = item.accent === "";
-          if ($218) {
+          var $224 = item.accent === "";
+          if ($224) {
             return [];
           }
           ;
@@ -13563,8 +13595,8 @@
           ;
           return [];
         }())))))(append16(map39(fromPlainHTML)(item.label))(function() {
-          var $220 = $$null(item.shortcut);
-          if ($220) {
+          var $226 = $$null(item.shortcut);
+          if ($226) {
             return [];
           }
           ;
@@ -13596,8 +13628,8 @@
         })])(append16(maybe([])(function(i2) {
           return [ref2(itemRef(st.idPrefix)(i2))];
         })(mIdx))(append16(function() {
-          var $223 = eq4(mIdx)(new Just(st.focused));
-          if ($223) {
+          var $229 = eq4(mIdx)(new Just(st.focused));
+          if ($229) {
             return [dataAttr("highlighted")("")];
           }
           ;
@@ -13635,17 +13667,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return when11(notEq13(placed.placement.side)(st.subPlacedSide) || notEq22(placed.placement.align)(st.subPlacedAlign))(modify_8(function(v) {
-                  var $229 = {};
-                  for (var $230 in v) {
-                    if ({}.hasOwnProperty.call(v, $230)) {
-                      $229[$230] = v[$230];
+                  var $235 = {};
+                  for (var $236 in v) {
+                    if ({}.hasOwnProperty.call(v, $236)) {
+                      $235[$236] = v[$236];
                     }
                     ;
                   }
                   ;
-                  $229.subPlacedSide = placed.placement.side;
-                  $229.subPlacedAlign = placed.placement.align;
-                  return $229;
+                  $235.subPlacedSide = placed.placement.side;
+                  $235.subPlacedAlign = placed.placement.align;
+                  return $235;
                 }));
               });
             }
@@ -13666,7 +13698,7 @@
         return input3.defaultOpen;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 422, column 15 - line 424, column 33): " + [input3.open.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 430, column 15 - line 432, column 33): " + [input3.open.constructor.name]);
     }();
     return {
       ctrl: controllable(input3.open)(input3.defaultOpen),
@@ -13679,6 +13711,7 @@
       }(),
       entries: input3.entries,
       focused: 0,
+      modal: input3.modal,
       side: input3.side,
       align: input3.align,
       offset: input3.offset,
@@ -13692,6 +13725,7 @@
       contentStyle: input3.contentStyle,
       subContentStyle: input3.subContentStyle,
       portalAttrs: input3.portalAttrs,
+      keepOpenValues: input3.keepOpenValues,
       restoreEl: Nothing.value,
       subs: [],
       postSub: Nothing.value,
@@ -13720,16 +13754,16 @@
     return function(idx) {
       return bind20(get7)(function(st) {
         return discard13(modify_8(function(v) {
-          var $238 = {};
-          for (var $239 in v) {
-            if ({}.hasOwnProperty.call(v, $239)) {
-              $238[$239] = v[$239];
+          var $244 = {};
+          for (var $245 in v) {
+            if ({}.hasOwnProperty.call(v, $245)) {
+              $244[$245] = v[$245];
             }
             ;
           }
           ;
-          $238.focused = idx;
-          return $238;
+          $244.focused = idx;
+          return $244;
         }))(function() {
           return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
             return bind20(getHTMLElementRef(itemRef(st.idPrefix)(idx)))(function(mitem) {
@@ -13748,21 +13782,24 @@
     return bind20(get7)(function(st) {
       return discard13(for_12(st.animSub)(unsubscribe2))(function() {
         return discard13(for_12(st.postSub)(unsubscribe2))(function() {
-          return discard13(liftEffect7(applySecond5(applySecond5(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
+          return discard13(liftEffect7(function __do13() {
+            removeFocusGuards();
+            return when1(st.modal)(applySecond5(showOthers)(unlockScroll))();
+          }))(function() {
             return modify_8(function(v) {
-              var $241 = {};
-              for (var $242 in v) {
-                if ({}.hasOwnProperty.call(v, $242)) {
-                  $241[$242] = v[$242];
+              var $247 = {};
+              for (var $248 in v) {
+                if ({}.hasOwnProperty.call(v, $248)) {
+                  $247[$248] = v[$248];
                 }
                 ;
               }
               ;
-              $241.presence = finishExit(st.presence);
-              $241.restoreEl = Nothing.value;
-              $241.animSub = Nothing.value;
-              $241.postSub = Nothing.value;
-              return $241;
+              $247.presence = finishExit(st.presence);
+              $247.restoreEl = Nothing.value;
+              $247.animSub = Nothing.value;
+              $247.postSub = Nothing.value;
+              return $247;
             });
           });
         });
@@ -13816,10 +13853,10 @@
     }
     ;
     if (v instanceof MenuRadioGroupEntry) {
-      return length(filter(function($371) {
+      return length(filter(function($380) {
         return !function(v1) {
           return v1.disabled;
-        }($371);
+        }($380);
       })(v.value0.options));
     }
     ;
@@ -13860,17 +13897,17 @@
           return bind20(readItemTexts1(st.idPrefix)(itemCount(st.entries)))(function(texts) {
             return discard13(for_12(nextMatch(search$prime)(texts)(st.focused))(focusItem1))(function() {
               return modify_8(function(v) {
-                var $257 = {};
-                for (var $258 in v) {
-                  if ({}.hasOwnProperty.call(v, $258)) {
-                    $257[$258] = v[$258];
+                var $263 = {};
+                for (var $264 in v) {
+                  if ({}.hasOwnProperty.call(v, $264)) {
+                    $263[$264] = v[$264];
                   }
                   ;
                 }
                 ;
-                $257.search = search$prime;
-                $257.lastKey = now2;
-                return $257;
+                $263.search = search$prime;
+                $263.lastKey = now2;
+                return $263;
               });
             });
           });
@@ -13892,10 +13929,10 @@
         if (v instanceof MenuRadioGroupEntry) {
           return map39(function(v1) {
             return v1.value;
-          })(filter(function($372) {
+          })(filter(function($381) {
             return !function(v1) {
               return v1.disabled;
-            }($372);
+            }($381);
           })(v.value0.options));
         }
         ;
@@ -13912,8 +13949,8 @@
   var renderSubContent = function(st) {
     return function(sub22) {
       return div3([ref2(subWrapperRef), dataAttr("radix-popper-content-wrapper")(""), dir2("ltr"), style("position: fixed;")])([div3(append16([ref2(subContentRef), id2(st.subGenContentId), role("menu"), classes2(st.style.subContent), aria("labelledby")(st.subGenTriggerId), aria("orientation")("vertical"), dataState("open"), dataAttr("side")(sideName(st.subPlacedSide)), dataAttr("align")(alignName(st.subPlacedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dir2("ltr"), tabIndex2(-1 | 0), style(st.subContentStyle), onKeyDown(SubKeyDown.create)])(append16(function() {
-        var $265 = st.style.subContentColor === "";
-        if ($265) {
+        var $271 = st.style.subContentColor === "";
+        if ($271) {
           return [];
         }
         ;
@@ -13947,6 +13984,7 @@
       entries: [],
       open: Nothing.value,
       defaultOpen: false,
+      modal: true,
       side: Bottom.value,
       align: Start.value,
       offset: 4,
@@ -13957,35 +13995,38 @@
       triggerStyle: "",
       contentStyle: "",
       subContentStyle: "",
-      portalAttrs: []
+      portalAttrs: [],
+      keepOpenValues: []
     };
   }();
   var contentRef3 = "rdx-context-menu-content";
   var finalize = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(focusToo) {
-      return bind20(liftEffect7(documentBody))(function(mbody) {
-        return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
-          return bind20(function() {
-            if (focusToo) {
-              return getHTMLElementRef(contentRef3);
-            }
-            ;
-            return pure23(Nothing.value);
-          }())(function(mcontent) {
-            if (mbody instanceof Just && mwrap instanceof Just) {
-              return liftEffect7(function __do13() {
-                adopt(mbody.value0)(toElement(mwrap.value0))();
-                return when1(focusToo)(function __do14() {
-                  lockScroll();
-                  addFocusGuards();
-                  hideOthers(mwrap.value0)();
-                  return for_7(mcontent)(focus)();
-                })();
-              });
-            }
-            ;
-            return pure23(unit);
+      return bind20(get7)(function(st) {
+        return bind20(liftEffect7(documentBody))(function(mbody) {
+          return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
+            return bind20(function() {
+              if (focusToo) {
+                return getHTMLElementRef(contentRef3);
+              }
+              ;
+              return pure23(Nothing.value);
+            }())(function(mcontent) {
+              if (mbody instanceof Just && mwrap instanceof Just) {
+                return liftEffect7(function __do13() {
+                  adopt(mbody.value0)(toElement(mwrap.value0))();
+                  return when1(focusToo)(function __do14() {
+                    when1(st.modal)(lockScroll)();
+                    addFocusGuards();
+                    when1(st.modal)(hideOthers(mwrap.value0))();
+                    return for_7(mcontent)(focus)();
+                  })();
+                });
+              }
+              ;
+              return pure23(unit);
+            });
           });
         });
       });
@@ -13999,20 +14040,20 @@
         return bind20(liftEffect7(activeElement(doc)))(function(mprev) {
           return discard13(for_12(st.animSub)(unsubscribe2))(function() {
             return discard13(modify_8(function(v) {
-              var $271 = {};
-              for (var $272 in v) {
-                if ({}.hasOwnProperty.call(v, $272)) {
-                  $271[$272] = v[$272];
+              var $277 = {};
+              for (var $278 in v) {
+                if ({}.hasOwnProperty.call(v, $278)) {
+                  $277[$278] = v[$278];
                 }
                 ;
               }
               ;
-              $271.ctrl = change2(true)(st.ctrl).next;
-              $271.presence = Open.value;
-              $271.animSub = Nothing.value;
-              $271.focused = -1 | 0;
-              $271.restoreEl = mprev;
-              return $271;
+              $277.ctrl = change2(true)(st.ctrl).next;
+              $277.presence = Open.value;
+              $277.animSub = Nothing.value;
+              $277.focused = -1 | 0;
+              $277.restoreEl = mprev;
+              return $277;
             }))(function() {
               return discard13(raise(new OpenChanged3(true)))(function() {
                 return bind20(map114(map210(toNode))(getHTMLElementRef(contentRef3)))(function(mcNode) {
@@ -14028,18 +14069,18 @@
                           })))(function(resizeSub) {
                             return bind20(scheduleAfterOpen1)(function(psid) {
                               return modify_8(function(v) {
-                                var $274 = {};
-                                for (var $275 in v) {
-                                  if ({}.hasOwnProperty.call(v, $275)) {
-                                    $274[$275] = v[$275];
+                                var $280 = {};
+                                for (var $281 in v) {
+                                  if ({}.hasOwnProperty.call(v, $281)) {
+                                    $280[$281] = v[$281];
                                   }
                                   ;
                                 }
                                 ;
-                                $274.contentNode = mcNode;
-                                $274.subs = [escSub, ptrSub, scrollSub, resizeSub];
-                                $274.postSub = new Just(psid);
-                                return $274;
+                                $280.contentNode = mcNode;
+                                $280.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                $280.postSub = new Just(psid);
+                                return $280;
                               });
                             });
                           });
@@ -14071,17 +14112,17 @@
               padding: st.padding
             })))(function(placed) {
               return when11(notEq13(placed.placement.side)(st.placedSide) || notEq22(placed.placement.align)(st.placedAlign))(modify_8(function(v) {
-                var $279 = {};
-                for (var $280 in v) {
-                  if ({}.hasOwnProperty.call(v, $280)) {
-                    $279[$280] = v[$280];
+                var $285 = {};
+                for (var $286 in v) {
+                  if ({}.hasOwnProperty.call(v, $286)) {
+                    $285[$286] = v[$286];
                   }
                   ;
                 }
                 ;
-                $279.placedSide = placed.placement.side;
-                $279.placedAlign = placed.placement.align;
-                return $279;
+                $285.placedSide = placed.placement.side;
+                $285.placedAlign = placed.placement.align;
+                return $285;
               }));
             });
           }
@@ -14096,18 +14137,18 @@
     return bind20(get7)(function(st) {
       return when11(isJust(st.subOpen))(discard13(for_12(st.subPostSub)(unsubscribe2))(function() {
         return discard13(modify_8(function(v) {
-          var $284 = {};
-          for (var $285 in v) {
-            if ({}.hasOwnProperty.call(v, $285)) {
-              $284[$285] = v[$285];
+          var $290 = {};
+          for (var $291 in v) {
+            if ({}.hasOwnProperty.call(v, $291)) {
+              $290[$291] = v[$291];
             }
             ;
           }
           ;
-          $284.subOpen = Nothing.value;
-          $284.subFocused = -1 | 0;
-          $284.subPostSub = Nothing.value;
-          return $284;
+          $290.subOpen = Nothing.value;
+          $290.subFocused = -1 | 0;
+          $290.subPostSub = Nothing.value;
+          return $290;
         }))(function() {
           return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
             return bind20(getHTMLElementRef(itemRef(st.idPrefix)(st.subAnchorIdx)))(function(mtrig) {
@@ -14127,41 +14168,41 @@
     return bind20(get7)(function(st) {
       return when11(current(st.ctrl))(discard13(traverse_9(unsubscribe2)(st.subs))(function() {
         return discard13(for_12(st.postSub)(unsubscribe2))(function() {
-          return discard13(for_12(st.restoreEl)(function($373) {
-            return liftEffect7(focus($373));
+          return discard13(for_12(st.restoreEl)(function($382) {
+            return liftEffect7(focus($382));
           }))(function() {
             return discard13(modify_8(function(v) {
-              var $287 = {};
-              for (var $288 in v) {
-                if ({}.hasOwnProperty.call(v, $288)) {
-                  $287[$288] = v[$288];
+              var $293 = {};
+              for (var $294 in v) {
+                if ({}.hasOwnProperty.call(v, $294)) {
+                  $293[$294] = v[$294];
                 }
                 ;
               }
               ;
-              $287.ctrl = change2(false)(st.ctrl).next;
-              $287.presence = present(false)(st.presence);
-              $287.subs = [];
-              $287.postSub = Nothing.value;
-              $287.contentNode = Nothing.value;
-              $287.search = "";
-              $287.subOpen = Nothing.value;
-              $287.subFocused = -1 | 0;
-              return $287;
+              $293.ctrl = change2(false)(st.ctrl).next;
+              $293.presence = present(false)(st.presence);
+              $293.subs = [];
+              $293.postSub = Nothing.value;
+              $293.contentNode = Nothing.value;
+              $293.search = "";
+              $293.subOpen = Nothing.value;
+              $293.subFocused = -1 | 0;
+              return $293;
             }))(function() {
               return discard13(raise(new OpenChanged3(false)))(function() {
                 return bind20(scheduleAfterClose1)(function(psid) {
                   return modify_8(function(v) {
-                    var $290 = {};
-                    for (var $291 in v) {
-                      if ({}.hasOwnProperty.call(v, $291)) {
-                        $290[$291] = v[$291];
+                    var $296 = {};
+                    for (var $297 in v) {
+                      if ({}.hasOwnProperty.call(v, $297)) {
+                        $296[$297] = v[$297];
                       }
                       ;
                     }
                     ;
-                    $290.postSub = new Just(psid);
-                    return $290;
+                    $296.postSub = new Just(psid);
+                    return $296;
                   });
                 });
               });
@@ -14174,17 +14215,17 @@
   var closeMenuAndSub = function(dictMonadEffect) {
     var closeMenu1 = closeMenu(dictMonadEffect);
     return discard13(modify_8(function(v) {
-      var $293 = {};
-      for (var $294 in v) {
-        if ({}.hasOwnProperty.call(v, $294)) {
-          $293[$294] = v[$294];
+      var $299 = {};
+      for (var $300 in v) {
+        if ({}.hasOwnProperty.call(v, $300)) {
+          $299[$300] = v[$300];
         }
         ;
       }
       ;
-      $293.subOpen = Nothing.value;
-      $293.subFocused = -1 | 0;
-      return $293;
+      $299.subOpen = Nothing.value;
+      $299.subFocused = -1 | 0;
+      return $299;
     }))(function() {
       return closeMenu1;
     });
@@ -14193,6 +14234,7 @@
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
     var useId2 = useId(monadEffectHalogenM2);
     var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var scheduleAfterOpen1 = scheduleAfterOpen(dictMonadEffect);
     var openMenu1 = openMenu(dictMonadEffect);
     var reposition1 = reposition(dictMonadEffect);
     var finalize1 = finalize(dictMonadEffect);
@@ -14208,18 +14250,54 @@
       if (v instanceof Initialize5) {
         return bind20(useId2)(function(stid) {
           return bind20(useId2)(function(scid) {
-            return modify_8(function(v1) {
-              var $297 = {};
-              for (var $298 in v1) {
-                if ({}.hasOwnProperty.call(v1, $298)) {
-                  $297[$298] = v1[$298];
+            return discard13(modify_8(function(v1) {
+              var $303 = {};
+              for (var $304 in v1) {
+                if ({}.hasOwnProperty.call(v1, $304)) {
+                  $303[$304] = v1[$304];
                 }
                 ;
               }
               ;
-              $297.subGenTriggerId = stid;
-              $297.subGenContentId = scid;
-              return $297;
+              $303.subGenTriggerId = stid;
+              $303.subGenContentId = scid;
+              return $303;
+            }))(function() {
+              return bind20(get7)(function(st) {
+                return when11(current(st.ctrl))(bind20(liftEffect7(bind110(windowImpl)(document)))(function(doc) {
+                  return bind20(liftEffect7(windowTarget))(function(win) {
+                    var docTarget = toEventTarget(doc);
+                    return bind20(subscribe2($$escape(docTarget)(EscapePressed2.value)))(function(escSub) {
+                      return bind20(subscribe2(pointerDown(docTarget)(PointerDown.create)))(function(ptrSub) {
+                        return bind20(subscribe2(eventListener2("scroll")(win)(function(v1) {
+                          return new Just(Reposition.value);
+                        })))(function(scrollSub) {
+                          return bind20(subscribe2(eventListener2("resize")(win)(function(v1) {
+                            return new Just(Reposition.value);
+                          })))(function(resizeSub) {
+                            return bind20(scheduleAfterOpen1)(function(psid) {
+                              return modify_8(function(v1) {
+                                var $306 = {};
+                                for (var $307 in v1) {
+                                  if ({}.hasOwnProperty.call(v1, $307)) {
+                                    $306[$307] = v1[$307];
+                                  }
+                                  ;
+                                }
+                                ;
+                                $306.focused = -1 | 0;
+                                $306.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                $306.postSub = new Just(psid);
+                                return $306;
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                }));
+              });
             });
           });
         });
@@ -14227,28 +14305,30 @@
       ;
       if (v instanceof Receive7) {
         return modify_8(function(st) {
-          var $300 = {};
-          for (var $301 in st) {
-            if ({}.hasOwnProperty.call(st, $301)) {
-              $300[$301] = st[$301];
+          var $309 = {};
+          for (var $310 in st) {
+            if ({}.hasOwnProperty.call(st, $310)) {
+              $309[$310] = st[$310];
             }
             ;
           }
           ;
-          $300.ctrl = sync(v.value0.open)(st.ctrl);
-          $300.entries = v.value0.entries;
-          $300.side = v.value0.side;
-          $300.align = v.value0.align;
-          $300.offset = v.value0.offset;
-          $300.padding = v.value0.padding;
-          $300.idPrefix = v.value0.idPrefix;
-          $300.style = v.value0.style;
-          $300.trigger = v.value0.trigger;
-          $300.triggerStyle = v.value0.triggerStyle;
-          $300.contentStyle = v.value0.contentStyle;
-          $300.subContentStyle = v.value0.subContentStyle;
-          $300.portalAttrs = v.value0.portalAttrs;
-          return $300;
+          $309.ctrl = sync(v.value0.open)(st.ctrl);
+          $309.modal = v.value0.modal;
+          $309.entries = v.value0.entries;
+          $309.side = v.value0.side;
+          $309.align = v.value0.align;
+          $309.offset = v.value0.offset;
+          $309.padding = v.value0.padding;
+          $309.idPrefix = v.value0.idPrefix;
+          $309.style = v.value0.style;
+          $309.trigger = v.value0.trigger;
+          $309.triggerStyle = v.value0.triggerStyle;
+          $309.contentStyle = v.value0.contentStyle;
+          $309.subContentStyle = v.value0.subContentStyle;
+          $309.portalAttrs = v.value0.portalAttrs;
+          $309.keepOpenValues = v.value0.keepOpenValues;
+          return $309;
         });
       }
       ;
@@ -14256,19 +14336,19 @@
         return discard13(liftEffect7(preventDefault(v.value0)))(function() {
           return discard13(for_12(fromEvent2(v.value0))(function(me) {
             return modify_8(function(v1) {
-              var $304 = {};
-              for (var $305 in v1) {
-                if ({}.hasOwnProperty.call(v1, $305)) {
-                  $304[$305] = v1[$305];
+              var $313 = {};
+              for (var $314 in v1) {
+                if ({}.hasOwnProperty.call(v1, $314)) {
+                  $313[$314] = v1[$314];
                 }
                 ;
               }
               ;
-              $304.point = {
+              $313.point = {
                 x: toNumber(clientX(me)),
                 y: toNumber(clientY(me))
               };
-              return $304;
+              return $313;
             });
           }))(function() {
             return bind20(get7)(function(st) {
@@ -14296,16 +14376,16 @@
                 if (animates) {
                   return bind20(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone3.value)))(function(sub22) {
                     return discard13(modify_8(function(v1) {
-                      var $310 = {};
-                      for (var $311 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $311)) {
-                          $310[$311] = v1[$311];
+                      var $319 = {};
+                      for (var $320 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $320)) {
+                          $319[$320] = v1[$320];
                         }
                         ;
                       }
                       ;
-                      $310.animSub = new Just(sub22);
-                      return $310;
+                      $319.animSub = new Just(sub22);
+                      return $319;
                     }))(function() {
                       return pure23(true);
                     });
@@ -14316,12 +14396,12 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 808, column 14 - line 816, column 24): " + [mnode.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 835, column 14 - line 843, column 24): " + [mnode.constructor.name]);
           }())(function(armed) {
             if (armed) {
               return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
-                return discard13(for_12(mwrap)(function($374) {
-                  return liftEffect7(reAdoptBeforeTrail($374));
+                return discard13(for_12(mwrap)(function($383) {
+                  return liftEffect7(reAdoptBeforeTrail($383));
                 }))(function() {
                   return discard13(liftEffect7(releaseScrollPointer))(function() {
                     return for_12(mnode)(function(node) {
@@ -14378,26 +14458,26 @@
             });
           }
           ;
-          var $318 = isTypeaheadChar(key2)(st.search !== "");
-          if ($318) {
+          var $327 = isTypeaheadChar(key2)(st.search !== "");
+          if ($327) {
             return discard13(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
               return typeahead1(key2);
             });
           }
           ;
-          var $319 = (key2 === "Enter" || key2 === " ") && st.focused >= 0;
-          if ($319) {
+          var $328 = (key2 === "Enter" || key2 === " ") && st.focused >= 0;
+          if ($328) {
             return discard13(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
               return for_12(enabledValueAt(st.focused)(st.entries))(function(v12) {
                 return discard13(raise(new ItemSelected(v12)))(function() {
-                  return closeMenu1;
+                  return unless2(elem5(v12)(st.keepOpenValues))(closeMenu1);
                 });
               });
             });
           }
           ;
-          var $320 = key2 === "Tab";
-          if ($320) {
+          var $329 = key2 === "Tab";
+          if ($329) {
             return liftEffect7(preventDefault(toEvent(v.value0)));
           }
           ;
@@ -14410,7 +14490,7 @@
             return focusItem1(v1.value0);
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 865, column 14 - line 867, column 38): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 893, column 14 - line 895, column 38): " + [v1.constructor.name]);
         });
       }
       ;
@@ -14437,7 +14517,7 @@
           };
           var mDisabled = findMap(pick)(st.entries);
           return when11(maybe(true)(not4)(mDisabled))(discard13(raise(new ItemSelected(v.value0)))(function() {
-            return closeMenu1;
+            return unless2(elem5(v.value0)(st.keepOpenValues))(closeMenu1);
           }));
         });
       }
@@ -14459,16 +14539,16 @@
           return bind20(get7)(function(st) {
             return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
               return bind20(getHTMLElementRef(subWrapperRef))(function(mswrap) {
-                return discard13(for_12(mwrap)(function($375) {
-                  return liftEffect7(reAdoptBeforeTrail($375));
+                return discard13(for_12(mwrap)(function($384) {
+                  return liftEffect7(reAdoptBeforeTrail($384));
                 }))(function() {
-                  return discard13(for_12(mswrap)(function($376) {
-                    return liftEffect7(reAdoptBeforeTrail($376));
+                  return discard13(for_12(mswrap)(function($385) {
+                    return liftEffect7(reAdoptBeforeTrail($385));
                   }))(function() {
                     return for_12(st.subOpenFocus)(function(i2) {
                       return bind20(getHTMLElementRef(subItemRef(st.idPrefix)(i2)))(function(mitem) {
-                        return for_12(mitem)(function($377) {
-                          return liftEffect7(focus($377));
+                        return for_12(mitem)(function($386) {
+                          return liftEffect7(focus($386));
                         });
                       });
                     });
@@ -14527,16 +14607,16 @@
             ;
             if (v1 instanceof MoveTo) {
               return discard13(modify_8(function(v2) {
-                var $335 = {};
-                for (var $336 in v2) {
-                  if ({}.hasOwnProperty.call(v2, $336)) {
-                    $335[$336] = v2[$336];
+                var $344 = {};
+                for (var $345 in v2) {
+                  if ({}.hasOwnProperty.call(v2, $345)) {
+                    $344[$345] = v2[$345];
                   }
                   ;
                 }
                 ;
-                $335.subFocused = v1.value0;
-                return $335;
+                $344.subFocused = v1.value0;
+                return $344;
               }))(function() {
                 return bind20(getHTMLElementRef(wrapperRef))(function(mwrap) {
                   return bind20(getHTMLElementRef(subWrapperRef))(function(mswrap) {
@@ -14552,10 +14632,10 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 916, column 24 - line 926, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 945, column 24 - line 955, column 45): " + [v1.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 907, column 5 - line 926, column 45): " + [key2.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 936, column 5 - line 955, column 45): " + [key2.constructor.name]);
         });
       }
       ;
@@ -14584,7 +14664,7 @@
         return closeSub1;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 766, column 16 - line 937, column 23): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 777, column 16 - line 966, column 23): " + [v.constructor.name]);
     };
   };
   var handleQuery6 = function(dictMonadEffect) {
@@ -14609,7 +14689,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 1141, column 15 - line 1147, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 1178, column 15 - line 1184, column 42): " + [v.constructor.name]);
     };
   };
   var checkData = function(v) {
@@ -14625,7 +14705,7 @@
       return "indeterminate";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 706, column 13 - line 709, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 717, column 13 - line 720, column 35): " + [v.constructor.name]);
   };
   var renderIndicator = function(st) {
     return function(icon) {
@@ -14638,7 +14718,7 @@
           return [span3([classes2(st.style.indicator), dataState(checkData(cs))])(map39(fromPlainHTML)(icon))];
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 711, column 1 - line 711, column 110): " + [st.constructor.name, icon.constructor.name, cs.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 722, column 1 - line 722, column 110): " + [st.constructor.name, icon.constructor.name, cs.constructor.name]);
       };
     };
   };
@@ -14655,7 +14735,7 @@
       return "mixed";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 700, column 13 - line 703, column 27): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 711, column 13 - line 714, column 27): " + [v.constructor.name]);
   };
   var renderCheckbox = function(st) {
     return function(mIdx) {
@@ -14665,8 +14745,8 @@
         })])(append16(maybe([])(function(i2) {
           return [ref2(itemRef(st.idPrefix)(i2))];
         })(mIdx))(append16(function() {
-          var $353 = eq4(mIdx)(new Just(st.focused));
-          if ($353) {
+          var $362 = eq4(mIdx)(new Just(st.focused));
+          if ($362) {
             return [dataAttr("highlighted")("")];
           }
           ;
@@ -14678,8 +14758,8 @@
           ;
           return [];
         }()))))(append16(map39(fromPlainHTML)(item.label))(append16(renderIndicator(st)(st.style.checkIndicator)(item.check))(function() {
-          var $355 = $$null(item.shortcut);
-          if ($355) {
+          var $364 = $$null(item.shortcut);
+          if ($364) {
             return [];
           }
           ;
@@ -14693,8 +14773,8 @@
       return function(mIdx) {
         return function(opt) {
           var cs = function() {
-            var $356 = selected2 === opt.value;
-            if ($356) {
+            var $365 = selected2 === opt.value;
+            if ($365) {
               return Checked2.value;
             }
             ;
@@ -14705,8 +14785,8 @@
           })])(append16(maybe([])(function(i2) {
             return [ref2(itemRef(st.idPrefix)(i2))];
           })(mIdx))(append16(function() {
-            var $357 = eq4(mIdx)(new Just(st.focused));
-            if ($357) {
+            var $366 = eq4(mIdx)(new Just(st.focused));
+            if ($366) {
               return [dataAttr("highlighted")("")];
             }
             ;
@@ -14718,8 +14798,8 @@
             ;
             return [];
           }()))))(append16(map39(fromPlainHTML)(opt.label))(append16(renderIndicator(st)(st.style.radioIndicator)(cs))(function() {
-            var $359 = $$null(opt.shortcut);
-            if ($359) {
+            var $368 = $$null(opt.shortcut);
+            if ($368) {
               return [];
             }
             ;
@@ -14747,7 +14827,7 @@
             };
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 550, column 3 - line 555, column 10): " + [selected2.constructor.name, innerAcc.constructor.name, opt.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 561, column 3 - line 566, column 10): " + [selected2.constructor.name, innerAcc.constructor.name, opt.constructor.name]);
         };
       };
     };
@@ -14822,7 +14902,7 @@
           ;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 522, column 14 - line 549, column 12): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.ContextMenu (line 533, column 14 - line 560, column 12): " + [v.constructor.name]);
       };
     };
     return function(v) {
@@ -14836,7 +14916,8 @@
     var rendered = isRendered(st.presence);
     var open = current(st.ctrl);
     var contentStyle$prime = function() {
-      if (open) {
+      var $377 = open && st.modal;
+      if ($377) {
         return st.contentStyle;
       }
       ;
@@ -14868,8 +14949,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction6(dictMonadEffect),
         handleQuery: handleQuery6(dictMonadEffect),
-        receive: function($378) {
-          return Just.create(Receive7.create($378));
+        receive: function($387) {
+          return Just.create(Receive7.create($387));
         },
         initialize: new Just(Initialize5.value)
       })
@@ -14891,7 +14972,7 @@
   var map115 = /* @__PURE__ */ map(functorHalogenM);
   var applySecond6 = /* @__PURE__ */ applySecond(applyEffect);
   var pure111 = /* @__PURE__ */ pure(applicativeEffect);
-  var elem5 = /* @__PURE__ */ elem2(eqString);
+  var elem6 = /* @__PURE__ */ elem2(eqString);
   var bind24 = /* @__PURE__ */ bind(bindMaybe);
   var $$void9 = /* @__PURE__ */ $$void(functorHalogenM);
   var void1 = /* @__PURE__ */ $$void(functorEffect);
@@ -15210,7 +15291,7 @@
                 var v3 = fromNode2(node);
                 if (v3 instanceof Just && toLower(tagName(v3.value0)) === "button") {
                   var txt = textContent(node)();
-                  return elem5(toLower(trim(txt)))(wanted);
+                  return elem6(toLower(trim(txt)))(wanted);
                 }
                 ;
                 return false;
@@ -15670,9 +15751,9 @@
   var notEq23 = /* @__PURE__ */ notEq(eqAlign);
   var for_9 = /* @__PURE__ */ for_(applicativeEffect)(foldableMaybe);
   var for_13 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
+  var when14 = /* @__PURE__ */ when(applicativeEffect);
   var applySecond7 = /* @__PURE__ */ applySecond(applyEffect);
   var not5 = /* @__PURE__ */ not(heytingAlgebraBoolean);
-  var when14 = /* @__PURE__ */ when(applicativeEffect);
   var bind112 = /* @__PURE__ */ bind(bindEffect);
   var map116 = /* @__PURE__ */ map(functorHalogenM);
   var map211 = /* @__PURE__ */ map(functorMaybe);
@@ -15680,6 +15761,8 @@
   var applySecond12 = /* @__PURE__ */ applySecond(applyHalogenM);
   var bind26 = /* @__PURE__ */ bind(bindMaybe);
   var pure112 = /* @__PURE__ */ pure(applicativeMaybe);
+  var unless3 = /* @__PURE__ */ unless(applicativeHalogenM);
+  var elem7 = /* @__PURE__ */ elem2(eqString);
   var type_24 = /* @__PURE__ */ type_17(isPropButtonType);
   var SetOpen5 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
@@ -15977,6 +16060,27 @@
     };
   };
   var subContentRef2 = "rdx-dropdown-subcontent";
+  var stripPE = function(s) {
+    var v = stripSuffix(" pointer-events: auto;")(s);
+    if (v instanceof Just) {
+      return v.value0;
+    }
+    ;
+    if (v instanceof Nothing) {
+      var v1 = stripSuffix("pointer-events: auto;")(s);
+      if (v1 instanceof Just) {
+        return v1.value0;
+      }
+      ;
+      if (v1 instanceof Nothing) {
+        return s;
+      }
+      ;
+      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1235, column 14 - line 1237, column 17): " + [v1.constructor.name]);
+    }
+    ;
+    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1233, column 13 - line 1237, column 17): " + [v.constructor.name]);
+  };
   var scheduleSubAfterOpen2 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind25(liftEffect7(create3))(function(v) {
@@ -16015,15 +16119,15 @@
         })])(append18(maybe([])(function(i2) {
           return [ref2(subItemRef2(st.idPrefix)(i2))];
         })(mIdx))(append18(function() {
-          var $208 = eq5(mIdx)(new Just(st.subFocused));
-          if ($208) {
+          var $220 = eq5(mIdx)(new Just(st.subFocused));
+          if ($220) {
             return [dataAttr("highlighted")("")];
           }
           ;
           return [];
         }())(append18(function() {
-          var $209 = item.accent === "";
-          if ($209) {
+          var $221 = item.accent === "";
+          if ($221) {
             return [];
           }
           ;
@@ -16035,8 +16139,8 @@
           ;
           return [];
         }())))))(append18(map41(fromPlainHTML)(item.label))(function() {
-          var $211 = $$null(item.shortcut);
-          if ($211) {
+          var $223 = $$null(item.shortcut);
+          if ($223) {
             return [];
           }
           ;
@@ -16097,35 +16201,35 @@
         return function(focus3) {
           return bind25(get9)(function(st) {
             return when13(current(st.ctrl) && notEq3(st.subOpen)(new Just(value17)))(discard15(modify_10(function(v) {
-              var $217 = {};
-              for (var $218 in v) {
-                if ({}.hasOwnProperty.call(v, $218)) {
-                  $217[$218] = v[$218];
+              var $229 = {};
+              for (var $230 in v) {
+                if ({}.hasOwnProperty.call(v, $230)) {
+                  $229[$230] = v[$230];
                 }
                 ;
               }
               ;
-              $217.subOpen = new Just(value17);
-              $217.focused = idx;
-              $217.subAnchorIdx = idx;
-              $217.subFocused = -1 | 0;
-              $217.subOpenFocus = focus3;
-              $217.subPlacedSide = Right2.value;
-              $217.subPlacedAlign = Start.value;
-              return $217;
+              $229.subOpen = new Just(value17);
+              $229.focused = idx;
+              $229.subAnchorIdx = idx;
+              $229.subFocused = -1 | 0;
+              $229.subOpenFocus = focus3;
+              $229.subPlacedSide = Right2.value;
+              $229.subPlacedAlign = Start.value;
+              return $229;
             }))(function() {
               return bind25(scheduleSubAfterOpen1)(function(psid) {
                 return modify_10(function(v) {
-                  var $220 = {};
-                  for (var $221 in v) {
-                    if ({}.hasOwnProperty.call(v, $221)) {
-                      $220[$221] = v[$221];
+                  var $232 = {};
+                  for (var $233 in v) {
+                    if ({}.hasOwnProperty.call(v, $233)) {
+                      $232[$233] = v[$233];
                     }
                     ;
                   }
                   ;
-                  $220.subPostSub = new Just(psid);
-                  return $220;
+                  $232.subPostSub = new Just(psid);
+                  return $232;
                 });
               });
             }));
@@ -16177,7 +16281,7 @@
               return pure25("");
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1168, column 5 - line 1170, column 25): " + [mel.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1200, column 5 - line 1202, column 25): " + [mel.constructor.name]);
           });
         });
       };
@@ -16191,15 +16295,15 @@
         })])(append18(maybe([])(function(i2) {
           return [ref2(itemRef2(st.idPrefix)(i2))];
         })(mIdx))(append18(function() {
-          var $225 = eq5(mIdx)(new Just(st.focused));
-          if ($225) {
+          var $237 = eq5(mIdx)(new Just(st.focused));
+          if ($237) {
             return [dataAttr("highlighted")("")];
           }
           ;
           return [];
         }())(append18(function() {
-          var $226 = item.accent === "";
-          if ($226) {
+          var $238 = item.accent === "";
+          if ($238) {
             return [];
           }
           ;
@@ -16211,8 +16315,8 @@
           ;
           return [];
         }())))))(append18(map41(fromPlainHTML)(item.label))(function() {
-          var $228 = $$null(item.shortcut);
-          if ($228) {
+          var $240 = $$null(item.shortcut);
+          if ($240) {
             return [];
           }
           ;
@@ -16244,8 +16348,8 @@
         })])(append18(maybe([])(function(i2) {
           return [ref2(itemRef2(st.idPrefix)(i2))];
         })(mIdx))(append18(function() {
-          var $231 = eq5(mIdx)(new Just(st.focused));
-          if ($231) {
+          var $243 = eq5(mIdx)(new Just(st.focused));
+          if ($243) {
             return [dataAttr("highlighted")("")];
           }
           ;
@@ -16283,17 +16387,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return when13(notEq14(placed.placement.side)(st.subPlacedSide) || notEq23(placed.placement.align)(st.subPlacedAlign))(modify_10(function(v) {
-                  var $237 = {};
-                  for (var $238 in v) {
-                    if ({}.hasOwnProperty.call(v, $238)) {
-                      $237[$238] = v[$238];
+                  var $249 = {};
+                  for (var $250 in v) {
+                    if ({}.hasOwnProperty.call(v, $250)) {
+                      $249[$250] = v[$250];
                     }
                     ;
                   }
                   ;
-                  $237.subPlacedSide = placed.placement.side;
-                  $237.subPlacedAlign = placed.placement.align;
-                  return $237;
+                  $249.subPlacedSide = placed.placement.side;
+                  $249.subPlacedAlign = placed.placement.align;
+                  return $249;
                 }));
               });
             }
@@ -16314,7 +16418,7 @@
         return input3.defaultOpen;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 475, column 15 - line 477, column 33): " + [input3.open.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 485, column 15 - line 487, column 33): " + [input3.open.constructor.name]);
     }();
     return {
       ctrl: controllable(input3.open)(input3.defaultOpen),
@@ -16325,6 +16429,7 @@
         ;
         return Closed.value;
       }(),
+      modal: input3.modal,
       entries: input3.entries,
       focused: 0,
       side: input3.side,
@@ -16338,6 +16443,7 @@
       trigger: input3.trigger,
       contentStyle: input3.contentStyle,
       subContentStyle: input3.subContentStyle,
+      keepOpenValues: input3.keepOpenValues,
       triggerAttrs: input3.triggerAttrs,
       portalAttrs: input3.portalAttrs,
       restoreEl: Nothing.value,
@@ -16367,16 +16473,16 @@
     return function(idx) {
       return bind25(get9)(function(st) {
         return discard15(modify_10(function(v) {
-          var $246 = {};
-          for (var $247 in v) {
-            if ({}.hasOwnProperty.call(v, $247)) {
-              $246[$247] = v[$247];
+          var $258 = {};
+          for (var $259 in v) {
+            if ({}.hasOwnProperty.call(v, $259)) {
+              $258[$259] = v[$259];
             }
             ;
           }
           ;
-          $246.focused = idx;
-          return $246;
+          $258.focused = idx;
+          return $258;
         }))(function() {
           return bind25(getHTMLElementRef(wrapperRef2))(function(mwrap) {
             return bind25(getHTMLElementRef(itemRef2(st.idPrefix)(idx)))(function(mitem) {
@@ -16395,20 +16501,23 @@
     return bind25(get9)(function(st) {
       return discard15(for_13(st.animSub)(unsubscribe2))(function() {
         return discard15(for_13(st.postSub)(unsubscribe2))(function() {
-          return discard15(liftEffect7(applySecond7(applySecond7(showOthers)(removeFocusGuards))(unlockScroll)))(function() {
+          return discard15(liftEffect7(function __do13() {
+            removeFocusGuards();
+            return when14(st.modal)(applySecond7(showOthers)(unlockScroll))();
+          }))(function() {
             return modify_10(function(v) {
-              var $249 = {};
-              for (var $250 in v) {
-                if ({}.hasOwnProperty.call(v, $250)) {
-                  $249[$250] = v[$250];
+              var $261 = {};
+              for (var $262 in v) {
+                if ({}.hasOwnProperty.call(v, $262)) {
+                  $261[$262] = v[$262];
                 }
                 ;
               }
               ;
-              $249.presence = finishExit(st.presence);
-              $249.animSub = Nothing.value;
-              $249.postSub = Nothing.value;
-              return $249;
+              $261.presence = finishExit(st.presence);
+              $261.animSub = Nothing.value;
+              $261.postSub = Nothing.value;
+              return $261;
             });
           });
         });
@@ -16462,18 +16571,18 @@
     }
     ;
     if (v instanceof MenuRadioGroupEntry2) {
-      return length(filter(function($391) {
+      return length(filter(function($407) {
         return !function(v1) {
           return v1.disabled;
-        }($391);
+        }($407);
       })(v.value0.options));
     }
     ;
     if (v instanceof MenuGroupEntry) {
-      return length(filter(function($392) {
+      return length(filter(function($408) {
         return !function(v1) {
           return v1.disabled;
-        }($392);
+        }($408);
       })(v.value0.items));
     }
     ;
@@ -16489,7 +16598,7 @@
       return 0;
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 207, column 19 - line 213, column 21): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 209, column 19 - line 215, column 21): " + [v.constructor.name]);
   };
   var itemCount2 = /* @__PURE__ */ foldl3(function(n) {
     return function(e) {
@@ -16514,17 +16623,17 @@
           return bind25(readItemTexts1(st.idPrefix)(itemCount2(st.entries)))(function(texts) {
             return discard15(for_13(nextMatch(search$prime)(texts)(st.focused))(focusItem1))(function() {
               return modify_10(function(v) {
-                var $266 = {};
-                for (var $267 in v) {
-                  if ({}.hasOwnProperty.call(v, $267)) {
-                    $266[$267] = v[$267];
+                var $278 = {};
+                for (var $279 in v) {
+                  if ({}.hasOwnProperty.call(v, $279)) {
+                    $278[$279] = v[$279];
                   }
                   ;
                 }
                 ;
-                $266.search = search$prime;
-                $266.lastKey = now2;
-                return $266;
+                $278.search = search$prime;
+                $278.lastKey = now2;
+                return $278;
               });
             });
           });
@@ -16546,20 +16655,20 @@
         if (v instanceof MenuRadioGroupEntry2) {
           return map41(function(v1) {
             return v1.value;
-          })(filter(function($393) {
+          })(filter(function($409) {
             return !function(v1) {
               return v1.disabled;
-            }($393);
+            }($409);
           })(v.value0.options));
         }
         ;
         if (v instanceof MenuGroupEntry) {
           return map41(function(v1) {
             return v1.value;
-          })(filter(function($394) {
+          })(filter(function($410) {
             return !function(v1) {
               return v1.disabled;
-            }($394);
+            }($410);
           })(v.value0.items));
         }
         ;
@@ -16576,8 +16685,8 @@
   var renderSubContent2 = function(st) {
     return function(sub22) {
       return div3([ref2(subWrapperRef2), dataAttr("radix-popper-content-wrapper")(""), dir3("ltr"), style("position: fixed;")])([div3(append18([ref2(subContentRef2), id2(st.subGenContentId), role("menu"), classes2(st.style.subContent), aria("labelledby")(st.subGenTriggerId), aria("orientation")("vertical"), dataState("open"), dataAttr("side")(sideName(st.subPlacedSide)), dataAttr("align")(alignName(st.subPlacedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dir3("ltr"), tabIndex2(-1 | 0), style(st.subContentStyle), onKeyDown(SubKeyDown2.create)])(append18(function() {
-        var $275 = st.style.subContentColor === "";
-        if ($275) {
+        var $287 = st.style.subContentColor === "";
+        if ($287) {
           return [];
         }
         ;
@@ -16613,6 +16722,7 @@
       entries: [],
       open: Nothing.value,
       defaultOpen: false,
+      modal: true,
       side: Bottom.value,
       align: Start.value,
       offset: 4,
@@ -16622,6 +16732,7 @@
       trigger: [],
       contentStyle: "",
       subContentStyle: "",
+      keepOpenValues: [],
       triggerAttrs: [],
       portalAttrs: []
     };
@@ -16643,7 +16754,7 @@
                   return getHTMLElementRef(contentRef5);
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1116, column 10 - line 1118, column 48): " + [st.openFocus.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1145, column 10 - line 1147, column 48): " + [st.openFocus.constructor.name]);
               }
               ;
               return pure25(Nothing.value);
@@ -16652,9 +16763,9 @@
                 return liftEffect7(function __do13() {
                   adopt(mbody.value0)(toElement(mwrap.value0))();
                   return when14(focusToo)(function __do14() {
-                    lockScroll();
+                    when14(st.modal)(lockScroll)();
                     addFocusGuards();
-                    hideOthers(mwrap.value0)();
+                    when14(st.modal)(hideOthers(mwrap.value0))();
                     return for_9(mfocus)(focus)();
                   })();
                 });
@@ -16677,21 +16788,21 @@
             return bind25(liftEffect7(activeElement(doc)))(function(mprev) {
               return discard15(for_13(st.animSub)(unsubscribe2))(function() {
                 return discard15(modify_10(function(v) {
-                  var $283 = {};
-                  for (var $284 in v) {
-                    if ({}.hasOwnProperty.call(v, $284)) {
-                      $283[$284] = v[$284];
+                  var $295 = {};
+                  for (var $296 in v) {
+                    if ({}.hasOwnProperty.call(v, $296)) {
+                      $295[$296] = v[$296];
                     }
                     ;
                   }
                   ;
-                  $283.ctrl = change2(true)(st.ctrl).next;
-                  $283.presence = Open.value;
-                  $283.focused = focusedIdx;
-                  $283.restoreEl = mprev;
-                  $283.openFocus = openFocus;
-                  $283.animSub = Nothing.value;
-                  return $283;
+                  $295.ctrl = change2(true)(st.ctrl).next;
+                  $295.presence = Open.value;
+                  $295.focused = focusedIdx;
+                  $295.restoreEl = mprev;
+                  $295.openFocus = openFocus;
+                  $295.animSub = Nothing.value;
+                  return $295;
                 }))(function() {
                   return discard15(raise(new OpenChanged5(true)))(function() {
                     return bind25(map116(map211(toNode))(getHTMLElementRef(contentRef5)))(function(mcNode) {
@@ -16707,18 +16818,18 @@
                               })))(function(resizeSub) {
                                 return bind25(scheduleAfterOpen1)(function(psid) {
                                   return modify_10(function(v) {
-                                    var $286 = {};
-                                    for (var $287 in v) {
-                                      if ({}.hasOwnProperty.call(v, $287)) {
-                                        $286[$287] = v[$287];
+                                    var $298 = {};
+                                    for (var $299 in v) {
+                                      if ({}.hasOwnProperty.call(v, $299)) {
+                                        $298[$299] = v[$299];
                                       }
                                       ;
                                     }
                                     ;
-                                    $286.contentNode = mcNode;
-                                    $286.subs = [escSub, ptrSub, scrollSub, resizeSub];
-                                    $286.postSub = new Just(psid);
-                                    return $286;
+                                    $298.contentNode = mcNode;
+                                    $298.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                    $298.postSub = new Just(psid);
+                                    return $298;
                                   });
                                 });
                               });
@@ -16762,17 +16873,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return when13(notEq14(placed.placement.side)(st.placedSide) || notEq23(placed.placement.align)(st.placedAlign))(modify_10(function(v) {
-                  var $292 = {};
-                  for (var $293 in v) {
-                    if ({}.hasOwnProperty.call(v, $293)) {
-                      $292[$293] = v[$293];
+                  var $304 = {};
+                  for (var $305 in v) {
+                    if ({}.hasOwnProperty.call(v, $305)) {
+                      $304[$305] = v[$305];
                     }
                     ;
                   }
                   ;
-                  $292.placedSide = placed.placement.side;
-                  $292.placedAlign = placed.placement.align;
-                  return $292;
+                  $304.placedSide = placed.placement.side;
+                  $304.placedAlign = placed.placement.align;
+                  return $304;
                 }));
               });
             }
@@ -16788,18 +16899,18 @@
     return bind25(get9)(function(st) {
       return when13(isJust(st.subOpen))(discard15(for_13(st.subPostSub)(unsubscribe2))(function() {
         return discard15(modify_10(function(v) {
-          var $298 = {};
-          for (var $299 in v) {
-            if ({}.hasOwnProperty.call(v, $299)) {
-              $298[$299] = v[$299];
+          var $310 = {};
+          for (var $311 in v) {
+            if ({}.hasOwnProperty.call(v, $311)) {
+              $310[$311] = v[$311];
             }
             ;
           }
           ;
-          $298.subOpen = Nothing.value;
-          $298.subFocused = -1 | 0;
-          $298.subPostSub = Nothing.value;
-          return $298;
+          $310.subOpen = Nothing.value;
+          $310.subFocused = -1 | 0;
+          $310.subPostSub = Nothing.value;
+          return $310;
         }))(function() {
           return bind25(getHTMLElementRef(wrapperRef2))(function(mwrap) {
             return bind25(getHTMLElementRef(itemRef2(st.idPrefix)(st.subAnchorIdx)))(function(mtrig) {
@@ -16819,43 +16930,43 @@
     return bind25(get9)(function(st) {
       return when13(current(st.ctrl))(discard15(traverse_10(unsubscribe2)(st.subs))(function() {
         return discard15(for_13(st.postSub)(unsubscribe2))(function() {
-          return discard15(for_13(st.restoreEl)(function($395) {
-            return liftEffect7(focus($395));
+          return discard15(for_13(st.restoreEl)(function($411) {
+            return liftEffect7(focus($411));
           }))(function() {
             return discard15(modify_10(function(v) {
-              var $301 = {};
-              for (var $302 in v) {
-                if ({}.hasOwnProperty.call(v, $302)) {
-                  $301[$302] = v[$302];
+              var $313 = {};
+              for (var $314 in v) {
+                if ({}.hasOwnProperty.call(v, $314)) {
+                  $313[$314] = v[$314];
                 }
                 ;
               }
               ;
-              $301.ctrl = change2(false)(st.ctrl).next;
-              $301.presence = present(false)(st.presence);
-              $301.restoreEl = Nothing.value;
-              $301.subs = [];
-              $301.postSub = Nothing.value;
-              $301.contentNode = Nothing.value;
-              $301.openFocus = Nothing.value;
-              $301.search = "";
-              $301.subOpen = Nothing.value;
-              $301.subFocused = -1 | 0;
-              return $301;
+              $313.ctrl = change2(false)(st.ctrl).next;
+              $313.presence = present(false)(st.presence);
+              $313.restoreEl = Nothing.value;
+              $313.subs = [];
+              $313.postSub = Nothing.value;
+              $313.contentNode = Nothing.value;
+              $313.openFocus = Nothing.value;
+              $313.search = "";
+              $313.subOpen = Nothing.value;
+              $313.subFocused = -1 | 0;
+              return $313;
             }))(function() {
               return discard15(raise(new OpenChanged5(false)))(function() {
                 return bind25(scheduleAfterClose1)(function(psid) {
                   return modify_10(function(v) {
-                    var $304 = {};
-                    for (var $305 in v) {
-                      if ({}.hasOwnProperty.call(v, $305)) {
-                        $304[$305] = v[$305];
+                    var $316 = {};
+                    for (var $317 in v) {
+                      if ({}.hasOwnProperty.call(v, $317)) {
+                        $316[$317] = v[$317];
                       }
                       ;
                     }
                     ;
-                    $304.postSub = new Just(psid);
-                    return $304;
+                    $316.postSub = new Just(psid);
+                    return $316;
                   });
                 });
               });
@@ -16868,17 +16979,17 @@
   var closeMenuAndSub2 = function(dictMonadEffect) {
     var closeMenu1 = closeMenu2(dictMonadEffect);
     return discard15(modify_10(function(v) {
-      var $307 = {};
-      for (var $308 in v) {
-        if ({}.hasOwnProperty.call(v, $308)) {
-          $307[$308] = v[$308];
+      var $319 = {};
+      for (var $320 in v) {
+        if ({}.hasOwnProperty.call(v, $320)) {
+          $319[$320] = v[$320];
         }
         ;
       }
       ;
-      $307.subOpen = Nothing.value;
-      $307.subFocused = -1 | 0;
-      return $307;
+      $319.subOpen = Nothing.value;
+      $319.subFocused = -1 | 0;
+      return $319;
     }))(function() {
       return closeMenu1;
     });
@@ -16886,9 +16997,10 @@
   var handleAction8 = function(dictMonadEffect) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
     var useId2 = useId(monadEffectHalogenM2);
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var scheduleAfterOpen1 = scheduleAfterOpen2(dictMonadEffect);
     var closeMenu1 = closeMenu2(dictMonadEffect);
     var openMenu1 = openMenu2(dictMonadEffect);
-    var liftEffect7 = liftEffect(monadEffectHalogenM2);
     var openMenuAt1 = openMenuAt(dictMonadEffect);
     var reposition1 = reposition2(dictMonadEffect);
     var finalize1 = finalize2(dictMonadEffect);
@@ -16905,20 +17017,56 @@
           return bind25(useId2)(function(cid) {
             return bind25(useId2)(function(stid) {
               return bind25(useId2)(function(scid) {
-                return modify_10(function(v1) {
-                  var $311 = {};
-                  for (var $312 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $312)) {
-                      $311[$312] = v1[$312];
+                return discard15(modify_10(function(v1) {
+                  var $323 = {};
+                  for (var $324 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $324)) {
+                      $323[$324] = v1[$324];
                     }
                     ;
                   }
                   ;
-                  $311.triggerId = tid;
-                  $311.contentId = cid;
-                  $311.subGenTriggerId = stid;
-                  $311.subGenContentId = scid;
-                  return $311;
+                  $323.triggerId = tid;
+                  $323.contentId = cid;
+                  $323.subGenTriggerId = stid;
+                  $323.subGenContentId = scid;
+                  return $323;
+                }))(function() {
+                  return bind25(get9)(function(st) {
+                    return when13(current(st.ctrl))(bind25(liftEffect7(bind112(windowImpl)(document)))(function(doc) {
+                      return bind25(liftEffect7(windowTarget))(function(win) {
+                        var docTarget = toEventTarget(doc);
+                        return bind25(subscribe2($$escape(docTarget)(EscapePressed4.value)))(function(escSub) {
+                          return bind25(subscribe2(pointerDown(docTarget)(PointerDown2.create)))(function(ptrSub) {
+                            return bind25(subscribe2(eventListener2("scroll")(win)(function(v1) {
+                              return new Just(Reposition2.value);
+                            })))(function(scrollSub) {
+                              return bind25(subscribe2(eventListener2("resize")(win)(function(v1) {
+                                return new Just(Reposition2.value);
+                              })))(function(resizeSub) {
+                                return bind25(scheduleAfterOpen1)(function(psid) {
+                                  return modify_10(function(v1) {
+                                    var $326 = {};
+                                    for (var $327 in v1) {
+                                      if ({}.hasOwnProperty.call(v1, $327)) {
+                                        $326[$327] = v1[$327];
+                                      }
+                                      ;
+                                    }
+                                    ;
+                                    $326.focused = -1 | 0;
+                                    $326.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                    $326.postSub = new Just(psid);
+                                    return $326;
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    }));
+                  });
                 });
               });
             });
@@ -16928,35 +17076,37 @@
       ;
       if (v instanceof Receive9) {
         return modify_10(function(st) {
-          var $314 = {};
-          for (var $315 in st) {
-            if ({}.hasOwnProperty.call(st, $315)) {
-              $314[$315] = st[$315];
+          var $329 = {};
+          for (var $330 in st) {
+            if ({}.hasOwnProperty.call(st, $330)) {
+              $329[$330] = st[$330];
             }
             ;
           }
           ;
-          $314.ctrl = sync(v.value0.open)(st.ctrl);
-          $314.entries = v.value0.entries;
-          $314.side = v.value0.side;
-          $314.align = v.value0.align;
-          $314.offset = v.value0.offset;
-          $314.padding = v.value0.padding;
-          $314.idPrefix = v.value0.idPrefix;
-          $314.style = v.value0.style;
-          $314.trigger = v.value0.trigger;
-          $314.contentStyle = v.value0.contentStyle;
-          $314.subContentStyle = v.value0.subContentStyle;
-          $314.triggerAttrs = v.value0.triggerAttrs;
-          $314.portalAttrs = v.value0.portalAttrs;
-          return $314;
+          $329.ctrl = sync(v.value0.open)(st.ctrl);
+          $329.entries = v.value0.entries;
+          $329.side = v.value0.side;
+          $329.align = v.value0.align;
+          $329.offset = v.value0.offset;
+          $329.padding = v.value0.padding;
+          $329.idPrefix = v.value0.idPrefix;
+          $329.style = v.value0.style;
+          $329.trigger = v.value0.trigger;
+          $329.modal = v.value0.modal;
+          $329.contentStyle = v.value0.contentStyle;
+          $329.subContentStyle = v.value0.subContentStyle;
+          $329.keepOpenValues = v.value0.keepOpenValues;
+          $329.triggerAttrs = v.value0.triggerAttrs;
+          $329.portalAttrs = v.value0.portalAttrs;
+          return $329;
         });
       }
       ;
       if (v instanceof TriggerClicked3) {
         return bind25(get9)(function(st) {
-          var $318 = current(st.ctrl);
-          if ($318) {
+          var $333 = current(st.ctrl);
+          if ($333) {
             return closeMenu1;
           }
           ;
@@ -16995,16 +17145,16 @@
                 if (animates) {
                   return bind25(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone5.value)))(function(sub22) {
                     return discard15(modify_10(function(v1) {
-                      var $323 = {};
-                      for (var $324 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $324)) {
-                          $323[$324] = v1[$324];
+                      var $338 = {};
+                      for (var $339 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $339)) {
+                          $338[$339] = v1[$339];
                         }
                         ;
                       }
                       ;
-                      $323.animSub = new Just(sub22);
-                      return $323;
+                      $338.animSub = new Just(sub22);
+                      return $338;
                     }))(function() {
                       return pure25(true);
                     });
@@ -17015,7 +17165,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 905, column 14 - line 913, column 24): " + [mnode.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 933, column 14 - line 941, column 24): " + [mnode.constructor.name]);
           }())(function(armed) {
             if (armed) {
               return bind25(getHTMLElementRef(wrapperRef2))(function(mwrap) {
@@ -17077,26 +17227,26 @@
             });
           }
           ;
-          var $331 = isTypeaheadChar(key2)(st.search !== "");
-          if ($331) {
+          var $346 = isTypeaheadChar(key2)(st.search !== "");
+          if ($346) {
             return discard15(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
               return typeahead1(key2);
             });
           }
           ;
-          var $332 = (key2 === "Enter" || key2 === " ") && st.focused >= 0;
-          if ($332) {
+          var $347 = (key2 === "Enter" || key2 === " ") && st.focused >= 0;
+          if ($347) {
             return discard15(liftEffect7(preventDefault(toEvent(v.value0))))(function() {
               return for_13(enabledValueAt2(st.focused)(st.entries))(function(v12) {
                 return discard15(raise(new ItemSelected2(v12)))(function() {
-                  return closeMenu1;
+                  return unless3(elem7(v12)(st.keepOpenValues))(closeMenu1);
                 });
               });
             });
           }
           ;
-          var $333 = key2 === "Tab";
-          if ($333) {
+          var $348 = key2 === "Tab";
+          if ($348) {
             return liftEffect7(preventDefault(toEvent(v.value0)));
           }
           ;
@@ -17109,7 +17259,7 @@
             return focusItem1(v1.value0);
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 968, column 14 - line 970, column 38): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 997, column 14 - line 999, column 38): " + [v1.constructor.name]);
         });
       }
       ;
@@ -17144,7 +17294,7 @@
           };
           var mDisabled = findMap(pick)(st.entries);
           return when13(maybe(true)(not5)(mDisabled))(discard15(raise(new ItemSelected2(v.value0)))(function() {
-            return closeMenu1;
+            return unless3(elem7(v.value0)(st.keepOpenValues))(closeMenu1);
           }));
         });
       }
@@ -17166,16 +17316,16 @@
           return bind25(get9)(function(st) {
             return bind25(getHTMLElementRef(wrapperRef2))(function(mwrap) {
               return bind25(getHTMLElementRef(subWrapperRef2))(function(mswrap) {
-                return discard15(for_13(mwrap)(function($396) {
-                  return liftEffect7(reAdoptBeforeTrail($396));
+                return discard15(for_13(mwrap)(function($412) {
+                  return liftEffect7(reAdoptBeforeTrail($412));
                 }))(function() {
-                  return discard15(for_13(mswrap)(function($397) {
-                    return liftEffect7(reAdoptBeforeTrail($397));
+                  return discard15(for_13(mswrap)(function($413) {
+                    return liftEffect7(reAdoptBeforeTrail($413));
                   }))(function() {
                     return for_13(st.subOpenFocus)(function(i2) {
                       return bind25(getHTMLElementRef(subItemRef2(st.idPrefix)(i2)))(function(mitem) {
-                        return for_13(mitem)(function($398) {
-                          return liftEffect7(focus($398));
+                        return for_13(mitem)(function($414) {
+                          return liftEffect7(focus($414));
                         });
                       });
                     });
@@ -17234,16 +17384,16 @@
             ;
             if (v1 instanceof MoveTo) {
               return discard15(modify_10(function(v2) {
-                var $349 = {};
-                for (var $350 in v2) {
-                  if ({}.hasOwnProperty.call(v2, $350)) {
-                    $349[$350] = v2[$350];
+                var $364 = {};
+                for (var $365 in v2) {
+                  if ({}.hasOwnProperty.call(v2, $365)) {
+                    $364[$365] = v2[$365];
                   }
                   ;
                 }
                 ;
-                $349.subFocused = v1.value0;
-                return $349;
+                $364.subFocused = v1.value0;
+                return $364;
               }))(function() {
                 return bind25(getHTMLElementRef(wrapperRef2))(function(mwrap) {
                   return bind25(getHTMLElementRef(subWrapperRef2))(function(mswrap) {
@@ -17259,10 +17409,10 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1031, column 24 - line 1042, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1060, column 24 - line 1071, column 45): " + [v1.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1021, column 5 - line 1042, column 45): " + [key2.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1050, column 5 - line 1071, column 45): " + [key2.constructor.name]);
         });
       }
       ;
@@ -17291,7 +17441,7 @@
         return closeSub1;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 854, column 16 - line 1053, column 23): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 866, column 16 - line 1082, column 23): " + [v.constructor.name]);
     };
   };
   var handleQuery8 = function(dictMonadEffect) {
@@ -17316,7 +17466,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1285, column 15 - line 1291, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 1329, column 15 - line 1335, column 42): " + [v.constructor.name]);
     };
   };
   var checkData2 = function(v) {
@@ -17332,7 +17482,7 @@
       return "indeterminate";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 788, column 13 - line 791, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 800, column 13 - line 803, column 35): " + [v.constructor.name]);
   };
   var renderIndicator2 = function(st) {
     return function(icon) {
@@ -17345,7 +17495,7 @@
           return [span3([classes2(st.style.indicator), dataState(checkData2(cs))])(map41(fromPlainHTML)(icon))];
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 795, column 1 - line 795, column 110): " + [st.constructor.name, icon.constructor.name, cs.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 807, column 1 - line 807, column 110): " + [st.constructor.name, icon.constructor.name, cs.constructor.name]);
       };
     };
   };
@@ -17362,7 +17512,7 @@
       return "mixed";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 782, column 13 - line 785, column 27): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 794, column 13 - line 797, column 27): " + [v.constructor.name]);
   };
   var renderCheckbox2 = function(st) {
     return function(mIdx) {
@@ -17372,8 +17522,8 @@
         })])(append18(maybe([])(function(i2) {
           return [ref2(itemRef2(st.idPrefix)(i2))];
         })(mIdx))(append18(function() {
-          var $367 = eq5(mIdx)(new Just(st.focused));
-          if ($367) {
+          var $382 = eq5(mIdx)(new Just(st.focused));
+          if ($382) {
             return [dataAttr("highlighted")("")];
           }
           ;
@@ -17385,8 +17535,8 @@
           ;
           return [];
         }()))))(append18(map41(fromPlainHTML)(item.label))(append18(renderIndicator2(st)(st.style.checkIndicator)(item.check))(function() {
-          var $369 = $$null(item.shortcut);
-          if ($369) {
+          var $384 = $$null(item.shortcut);
+          if ($384) {
             return [];
           }
           ;
@@ -17400,8 +17550,8 @@
       return function(mIdx) {
         return function(opt) {
           var cs = function() {
-            var $370 = selected2 === opt.value;
-            if ($370) {
+            var $385 = selected2 === opt.value;
+            if ($385) {
               return Checked3.value;
             }
             ;
@@ -17412,8 +17562,8 @@
           })])(append18(maybe([])(function(i2) {
             return [ref2(itemRef2(st.idPrefix)(i2))];
           })(mIdx))(append18(function() {
-            var $371 = eq5(mIdx)(new Just(st.focused));
-            if ($371) {
+            var $386 = eq5(mIdx)(new Just(st.focused));
+            if ($386) {
               return [dataAttr("highlighted")("")];
             }
             ;
@@ -17425,8 +17575,8 @@
             ;
             return [];
           }()))))(append18(map41(fromPlainHTML)(opt.label))(append18(renderIndicator2(st)(st.style.radioIndicator)(cs))(function() {
-            var $373 = $$null(opt.shortcut);
-            if ($373) {
+            var $388 = $$null(opt.shortcut);
+            if ($388) {
               return [];
             }
             ;
@@ -17454,7 +17604,7 @@
             };
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 623, column 3 - line 628, column 10): " + [selected2.constructor.name, innerAcc.constructor.name, opt.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 635, column 3 - line 640, column 10): " + [selected2.constructor.name, innerAcc.constructor.name, opt.constructor.name]);
         };
       };
     };
@@ -17474,7 +17624,7 @@
           };
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 617, column 3 - line 622, column 10): " + [innerAcc.constructor.name, item.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 629, column 3 - line 634, column 10): " + [innerAcc.constructor.name, item.constructor.name]);
       };
     };
     var step4 = function(acc) {
@@ -17533,8 +17683,8 @@
         ;
         if (v instanceof MenuGroupEntry) {
           var labelled = function() {
-            var $383 = $$null(v.value0.label);
-            if ($383) {
+            var $398 = $$null(v.value0.label);
+            if ($398) {
               return [];
             }
             ;
@@ -17567,7 +17717,7 @@
           ;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 574, column 14 - line 616, column 12): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.DropdownMenu (line 586, column 14 - line 628, column 12): " + [v.constructor.name]);
       };
     };
     return function(v) {
@@ -17608,7 +17758,13 @@
       return [];
     }())(portalData4(st.triggerAttrs)))))(map41(fromPlainHTML)(st.trigger))])(append18(function() {
       if (rendered) {
-        return [div3([ref2(wrapperRef2), dataAttr("radix-popper-content-wrapper")(""), dir3("ltr"), style("position: fixed;")])([div3(append18([ref2(contentRef5), id2(st.contentId), role("menu"), classes2(st.style.content), aria("labelledby")(st.triggerId), aria("orientation")("vertical"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dir3("ltr"), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(MenuKeyDown2.create)])(portalData4(st.portalAttrs)))([div3([classes2(st.style.scrollRoot), dir3("ltr"), style("position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;")])([div3([classes2(st.style.scrollViewport), dataAttr("radix-scroll-area-viewport")(""), style("overflow: scroll;")])([div3([style("min-width: 100%; display: table;")])([div3([classes2(st.style.menuViewport)])(renderEntries2(st))])]), div3([classes2(st.style.focusRing)])([])])])])];
+        return [div3([ref2(wrapperRef2), dataAttr("radix-popper-content-wrapper")(""), dir3("ltr"), style("position: fixed;")])([div3(append18([ref2(contentRef5), id2(st.contentId), role("menu"), classes2(st.style.content), aria("labelledby")(st.triggerId), aria("orientation")("vertical"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dir3("ltr"), tabIndex2(-1 | 0), style(function() {
+          if (st.modal) {
+            return st.contentStyle;
+          }
+          ;
+          return stripPE(st.contentStyle);
+        }()), onKeyDown(MenuKeyDown2.create)])(portalData4(st.portalAttrs)))([div3([classes2(st.style.scrollRoot), dir3("ltr"), style("position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;")])([div3([classes2(st.style.scrollViewport), dataAttr("radix-scroll-area-viewport")(""), style("overflow: scroll;")])([div3([style("min-width: 100%; display: table;")])([div3([classes2(st.style.menuViewport)])(renderEntries2(st))])]), div3([classes2(st.style.focusRing)])([])])])])];
       }
       ;
       return [];
@@ -17626,8 +17782,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction8(dictMonadEffect),
         handleQuery: handleQuery8(dictMonadEffect),
-        receive: function($399) {
-          return Just.create(Receive9.create($399));
+        receive: function($415) {
+          return Just.create(Receive9.create($415));
         },
         initialize: new Just(Initialize7.value)
       })
@@ -17660,7 +17816,7 @@
   var fromFoldable4 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var pure26 = /* @__PURE__ */ pure(applicativeHalogenM);
   var identity12 = /* @__PURE__ */ identity(categoryFn);
-  var elem6 = /* @__PURE__ */ elem2(eqInt);
+  var elem8 = /* @__PURE__ */ elem2(eqInt);
   var show9 = /* @__PURE__ */ show(showInt);
   var for_10 = /* @__PURE__ */ for_(applicativeHalogenM);
   var for_14 = /* @__PURE__ */ for_10(foldableMaybe);
@@ -18015,7 +18171,7 @@
             var $87 = m.forceMatch || function() {
               var $86 = isJust(m.customMatch);
               if ($86) {
-                return elem6(j)(cfails);
+                return elem8(j)(cfails);
               }
               ;
               return elem1(m.match)(fails);
@@ -18679,18 +18835,18 @@
       return discard17(for_15(st.animSub)(unsubscribe2))(function() {
         return discard17(for_15(st.postSub)(unsubscribe2))(function() {
           return modify_12(function(v) {
-            var $127 = {};
-            for (var $128 in v) {
-              if ({}.hasOwnProperty.call(v, $128)) {
-                $127[$128] = v[$128];
+            var $131 = {};
+            for (var $132 in v) {
+              if ({}.hasOwnProperty.call(v, $132)) {
+                $131[$132] = v[$132];
               }
               ;
             }
             ;
-            $127.presence = finishExit(st.presence);
-            $127.animSub = Nothing.value;
-            $127.postSub = Nothing.value;
-            return $127;
+            $131.presence = finishExit(st.presence);
+            $131.animSub = Nothing.value;
+            $131.postSub = Nothing.value;
+            return $131;
           });
         });
       });
@@ -18766,17 +18922,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return modify_12(function(v) {
-                  var $137 = {};
-                  for (var $138 in v) {
-                    if ({}.hasOwnProperty.call(v, $138)) {
-                      $137[$138] = v[$138];
+                  var $141 = {};
+                  for (var $142 in v) {
+                    if ({}.hasOwnProperty.call(v, $142)) {
+                      $141[$142] = v[$142];
                     }
                     ;
                   }
                   ;
-                  $137.placedSide = placed.placement.side;
-                  $137.placedAlign = placed.placement.align;
-                  return $137;
+                  $141.placedSide = placed.placement.side;
+                  $141.placedAlign = placed.placement.align;
+                  return $141;
                 });
               });
             }
@@ -18811,8 +18967,8 @@
     }), onBlur(function(v) {
       return Hide.value;
     })])(portalData5(st.triggerAttrs)))(map43(fromPlainHTML)(st.trigger))])(map43(fromPlainHTML)(st.proseAfter))))])(function() {
-      var $144 = isRendered(st.presence);
-      if ($144) {
+      var $148 = isRendered(st.presence);
+      if ($148) {
         return [wrapperContent(st)];
       }
       ;
@@ -18826,16 +18982,16 @@
         return applySecond8(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_12(function(v) {
-          var $148 = {};
-          for (var $149 in v) {
-            if ({}.hasOwnProperty.call(v, $149)) {
-              $148[$149] = v[$149];
+          var $152 = {};
+          for (var $153 in v) {
+            if ({}.hasOwnProperty.call(v, $153)) {
+              $152[$153] = v[$153];
             }
             ;
           }
           ;
-          $148.pendingOpen = Nothing.value;
-          return $148;
+          $152.pendingOpen = Nothing.value;
+          return $152;
         });
       });
     });
@@ -18847,16 +19003,16 @@
         return applySecond8(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_12(function(v) {
-          var $154 = {};
-          for (var $155 in v) {
-            if ({}.hasOwnProperty.call(v, $155)) {
-              $154[$155] = v[$155];
+          var $158 = {};
+          for (var $159 in v) {
+            if ({}.hasOwnProperty.call(v, $159)) {
+              $158[$159] = v[$159];
             }
             ;
           }
           ;
-          $154.pendingClose = Nothing.value;
-          return $154;
+          $158.pendingClose = Nothing.value;
+          return $158;
         });
       });
     });
@@ -18870,38 +19026,38 @@
         return bind28(get11)(function(st) {
           return when15(current(st.ctrl))(discard17(traverse_11(unsubscribe2)(st.subs))(function() {
             return discard17(for_15(st.postSub)(unsubscribe2))(function() {
-              return discard17(for_15(st.restoreEl)(function($202) {
-                return liftEffect7(focus($202));
+              return discard17(for_15(st.restoreEl)(function($209) {
+                return liftEffect7(focus($209));
               }))(function() {
                 return discard17(modify_12(function(v) {
-                  var $157 = {};
-                  for (var $158 in v) {
-                    if ({}.hasOwnProperty.call(v, $158)) {
-                      $157[$158] = v[$158];
+                  var $161 = {};
+                  for (var $162 in v) {
+                    if ({}.hasOwnProperty.call(v, $162)) {
+                      $161[$162] = v[$162];
                     }
                     ;
                   }
                   ;
-                  $157.ctrl = change2(false)(st.ctrl).next;
-                  $157.presence = present(false)(st.presence);
-                  $157.restoreEl = Nothing.value;
-                  $157.subs = [];
-                  $157.postSub = Nothing.value;
-                  return $157;
+                  $161.ctrl = change2(false)(st.ctrl).next;
+                  $161.presence = present(false)(st.presence);
+                  $161.restoreEl = Nothing.value;
+                  $161.subs = [];
+                  $161.postSub = Nothing.value;
+                  return $161;
                 }))(function() {
                   return discard17(raise(new OpenChanged6(false)))(function() {
                     return bind28(scheduleAfterClose1)(function(psid) {
                       return modify_12(function(v) {
-                        var $160 = {};
-                        for (var $161 in v) {
-                          if ({}.hasOwnProperty.call(v, $161)) {
-                            $160[$161] = v[$161];
+                        var $164 = {};
+                        for (var $165 in v) {
+                          if ({}.hasOwnProperty.call(v, $165)) {
+                            $164[$165] = v[$165];
                           }
                           ;
                         }
                         ;
-                        $160.postSub = new Just(psid);
-                        return $160;
+                        $164.postSub = new Just(psid);
+                        return $164;
                       });
                     });
                   });
@@ -18924,19 +19080,19 @@
             return bind28(liftEffect7(activeElement(doc)))(function(mprev) {
               return discard17(for_15(st.animSub)(unsubscribe2))(function() {
                 return discard17(modify_12(function(v) {
-                  var $163 = {};
-                  for (var $164 in v) {
-                    if ({}.hasOwnProperty.call(v, $164)) {
-                      $163[$164] = v[$164];
+                  var $167 = {};
+                  for (var $168 in v) {
+                    if ({}.hasOwnProperty.call(v, $168)) {
+                      $167[$168] = v[$168];
                     }
                     ;
                   }
                   ;
-                  $163.ctrl = change2(true)(st.ctrl).next;
-                  $163.presence = Open.value;
-                  $163.animSub = Nothing.value;
-                  $163.restoreEl = mprev;
-                  return $163;
+                  $167.ctrl = change2(true)(st.ctrl).next;
+                  $167.presence = Open.value;
+                  $167.animSub = Nothing.value;
+                  $167.restoreEl = mprev;
+                  return $167;
                 }))(function() {
                   return discard17(raise(new OpenChanged6(true)))(function() {
                     return bind28(liftEffect7(windowTarget))(function(win) {
@@ -18950,17 +19106,17 @@
                           })))(function(resizeSub) {
                             return bind28(scheduleAfterOpen1)(function(psid) {
                               return modify_12(function(v) {
-                                var $166 = {};
-                                for (var $167 in v) {
-                                  if ({}.hasOwnProperty.call(v, $167)) {
-                                    $166[$167] = v[$167];
+                                var $170 = {};
+                                for (var $171 in v) {
+                                  if ({}.hasOwnProperty.call(v, $171)) {
+                                    $170[$171] = v[$171];
                                   }
                                   ;
                                 }
                                 ;
-                                $166.subs = [escSub, scrollSub, resizeSub];
-                                $166.postSub = new Just(psid);
-                                return $166;
+                                $170.subs = [escSub, scrollSub, resizeSub];
+                                $170.postSub = new Just(psid);
+                                return $170;
                               });
                             });
                           });
@@ -18998,7 +19154,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 535, column 15 - line 541, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 548, column 15 - line 554, column 42): " + [v.constructor.name]);
     };
   };
   var armTimer = function(dictMonadEffect) {
@@ -19033,23 +19189,23 @@
             if (otherwise) {
               return bind28(armTimer1(st.closeDelay)(DoClose.value))(function(h) {
                 return modify_12(function(v) {
-                  var $179 = {};
-                  for (var $180 in v) {
-                    if ({}.hasOwnProperty.call(v, $180)) {
-                      $179[$180] = v[$180];
+                  var $183 = {};
+                  for (var $184 in v) {
+                    if ({}.hasOwnProperty.call(v, $184)) {
+                      $183[$184] = v[$184];
                     }
                     ;
                   }
                   ;
-                  $179.pendingClose = new Just(h);
-                  return $179;
+                  $183.pendingClose = new Just(h);
+                  return $183;
                 });
               });
             }
             ;
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 421, column 28 - line 427, column 48): " + [st.pendingClose.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 434, column 28 - line 440, column 48): " + [st.pendingClose.constructor.name]);
         }());
       });
     });
@@ -19072,23 +19228,23 @@
             if (otherwise) {
               return bind28(armTimer1(st.openDelay)(DoOpen.value))(function(h) {
                 return modify_12(function(v) {
-                  var $184 = {};
-                  for (var $185 in v) {
-                    if ({}.hasOwnProperty.call(v, $185)) {
-                      $184[$185] = v[$185];
+                  var $188 = {};
+                  for (var $189 in v) {
+                    if ({}.hasOwnProperty.call(v, $189)) {
+                      $188[$189] = v[$189];
                     }
                     ;
                   }
                   ;
-                  $184.pendingOpen = new Just(h);
-                  return $184;
+                  $188.pendingOpen = new Just(h);
+                  return $188;
                 });
               });
             }
             ;
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 406, column 34 - line 412, column 47): " + [st.pendingOpen.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 419, column 34 - line 425, column 47): " + [st.pendingOpen.constructor.name]);
         }());
       });
     });
@@ -19096,6 +19252,8 @@
   var handleAction10 = function(dictMonadEffect) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
     var useId2 = useId(monadEffectHalogenM2);
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var scheduleAfterOpen1 = scheduleAfterOpen3(dictMonadEffect);
     var scheduleOpen1 = scheduleOpen(dictMonadEffect);
     var scheduleClose1 = scheduleClose(dictMonadEffect);
     var openCard1 = openCard(dictMonadEffect);
@@ -19103,54 +19261,86 @@
     var reposition1 = reposition3(dictMonadEffect);
     var removeContentFromTabOrder1 = removeContentFromTabOrder(dictMonadEffect);
     var finalize1 = finalize3(dictMonadEffect);
-    var liftEffect7 = liftEffect(monadEffectHalogenM2);
     var finishClose1 = finishClose5(dictMonadEffect);
     return function(v) {
       if (v instanceof Initialize9) {
         return bind28(useId2)(function(cid) {
-          return modify_12(function(v1) {
-            var $188 = {};
-            for (var $189 in v1) {
-              if ({}.hasOwnProperty.call(v1, $189)) {
-                $188[$189] = v1[$189];
+          return discard17(modify_12(function(v1) {
+            var $192 = {};
+            for (var $193 in v1) {
+              if ({}.hasOwnProperty.call(v1, $193)) {
+                $192[$193] = v1[$193];
               }
               ;
             }
             ;
-            $188.contentId = cid;
-            return $188;
+            $192.contentId = cid;
+            return $192;
+          }))(function() {
+            return bind28(get11)(function(st) {
+              return when15(current(st.ctrl))(bind28(liftEffect7(bind114(windowImpl)(document)))(function(doc) {
+                return bind28(liftEffect7(windowTarget))(function(win) {
+                  var docTarget = toEventTarget(doc);
+                  return bind28(subscribe2($$escape(docTarget)(EscapePressed5.value)))(function(escSub) {
+                    return bind28(subscribe2(eventListener2("scroll")(win)(function(v1) {
+                      return new Just(Reposition3.value);
+                    })))(function(scrollSub) {
+                      return bind28(subscribe2(eventListener2("resize")(win)(function(v1) {
+                        return new Just(Reposition3.value);
+                      })))(function(resizeSub) {
+                        return bind28(scheduleAfterOpen1)(function(psid) {
+                          return modify_12(function(v1) {
+                            var $195 = {};
+                            for (var $196 in v1) {
+                              if ({}.hasOwnProperty.call(v1, $196)) {
+                                $195[$196] = v1[$196];
+                              }
+                              ;
+                            }
+                            ;
+                            $195.subs = [escSub, scrollSub, resizeSub];
+                            $195.postSub = new Just(psid);
+                            return $195;
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              }));
+            });
           });
         });
       }
       ;
       if (v instanceof Receive11) {
         return modify_12(function(st) {
-          var $191 = {};
-          for (var $192 in st) {
-            if ({}.hasOwnProperty.call(st, $192)) {
-              $191[$192] = st[$192];
+          var $198 = {};
+          for (var $199 in st) {
+            if ({}.hasOwnProperty.call(st, $199)) {
+              $198[$199] = st[$199];
             }
             ;
           }
           ;
-          $191.ctrl = sync(v.value0.open)(st.ctrl);
-          $191.side = v.value0.side;
-          $191.align = v.value0.align;
-          $191.offset = v.value0.offset;
-          $191.padding = v.value0.padding;
-          $191.style = v.value0.style;
-          $191.triggerHref = v.value0.triggerHref;
-          $191.wrapperClass = v.value0.wrapperClass;
-          $191.proseBefore = v.value0.proseBefore;
-          $191.proseAfter = v.value0.proseAfter;
-          $191.trigger = v.value0.trigger;
-          $191.content = v.value0.content;
-          $191.contentStyle = v.value0.contentStyle;
-          $191.triggerAttrs = v.value0.triggerAttrs;
-          $191.portalAttrs = v.value0.portalAttrs;
-          $191.openDelay = v.value0.openDelay;
-          $191.closeDelay = v.value0.closeDelay;
-          return $191;
+          $198.ctrl = sync(v.value0.open)(st.ctrl);
+          $198.side = v.value0.side;
+          $198.align = v.value0.align;
+          $198.offset = v.value0.offset;
+          $198.padding = v.value0.padding;
+          $198.style = v.value0.style;
+          $198.triggerHref = v.value0.triggerHref;
+          $198.wrapperClass = v.value0.wrapperClass;
+          $198.proseBefore = v.value0.proseBefore;
+          $198.proseAfter = v.value0.proseAfter;
+          $198.trigger = v.value0.trigger;
+          $198.content = v.value0.content;
+          $198.contentStyle = v.value0.contentStyle;
+          $198.triggerAttrs = v.value0.triggerAttrs;
+          $198.portalAttrs = v.value0.portalAttrs;
+          $198.openDelay = v.value0.openDelay;
+          $198.closeDelay = v.value0.closeDelay;
+          return $198;
         });
       }
       ;
@@ -19190,16 +19380,16 @@
                 if (animates) {
                   return bind28(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone6.value)))(function(sub3) {
                     return discard17(modify_12(function(v1) {
-                      var $197 = {};
-                      for (var $198 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $198)) {
-                          $197[$198] = v1[$198];
+                      var $204 = {};
+                      for (var $205 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $205)) {
+                          $204[$205] = v1[$205];
                         }
                         ;
                       }
                       ;
-                      $197.animSub = new Just(sub3);
-                      return $197;
+                      $204.animSub = new Just(sub3);
+                      return $204;
                     }))(function() {
                       return pure27(true);
                     });
@@ -19210,7 +19400,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 357, column 14 - line 365, column 24): " + [mnode.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 370, column 14 - line 378, column 24): " + [mnode.constructor.name]);
           }())(function(armed) {
             if (armed) {
               return finalize1(false);
@@ -19235,7 +19425,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 313, column 16 - line 376, column 19): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.HoverCard (line 313, column 16 - line 389, column 19): " + [v.constructor.name]);
     };
   };
   var component10 = function(dictMonadEffect) {
@@ -19246,8 +19436,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction10(dictMonadEffect),
         handleQuery: handleQuery10(dictMonadEffect),
-        receive: function($203) {
-          return Just.create(Receive11.create($203));
+        receive: function($210) {
+          return Just.create(Receive11.create($210));
         },
         initialize: new Just(Initialize9.value)
       })
@@ -19365,6 +19555,7 @@
   var applySecond9 = /* @__PURE__ */ applySecond(applyHalogenM);
   var notEq5 = /* @__PURE__ */ notEq(eqMaybe4);
   var pure113 = /* @__PURE__ */ pure(applicativeMaybe);
+  var eq42 = /* @__PURE__ */ eq(eqDir);
   var SetOpen7 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
       this.value0 = value0;
@@ -19542,6 +19733,13 @@
     ;
     AfterOpen11.value = new AfterOpen11();
     return AfterOpen11;
+  }();
+  var AfterStartOpen = /* @__PURE__ */ function() {
+    function AfterStartOpen2() {
+    }
+    ;
+    AfterStartOpen2.value = new AfterStartOpen2();
+    return AfterStartOpen2;
   }();
   var AfterClose6 = /* @__PURE__ */ function() {
     function AfterClose9() {
@@ -19724,15 +19922,15 @@
         })])(append111(maybe([])(function(i2) {
           return [ref2(subItemRef3(st.idPrefix)(i2))];
         })(mIdx))(append111(function() {
-          var $230 = eq7(mIdx)(new Just(st.subFocused));
-          if ($230) {
+          var $240 = eq7(mIdx)(new Just(st.subFocused));
+          if ($240) {
             return [dataAttr("highlighted")("")];
           }
           ;
           return [];
         }())(append111(function() {
-          var $231 = item.accent === "";
-          if ($231) {
+          var $241 = item.accent === "";
+          if ($241) {
             return [];
           }
           ;
@@ -19744,8 +19942,8 @@
           ;
           return [];
         }())))))(append111(map45(fromPlainHTML)(item.label))(function() {
-          var $233 = $$null(item.shortcut);
-          if ($233) {
+          var $243 = $$null(item.shortcut);
+          if ($243) {
             return [];
           }
           ;
@@ -19806,35 +20004,35 @@
         return function(focus3) {
           return bind30(get12)(function(st) {
             return when17(current(st.ctrl) !== "" && notEq15(st.subOpen)(new Just(value17)))(discard19(modify_13(function(v) {
-              var $239 = {};
-              for (var $240 in v) {
-                if ({}.hasOwnProperty.call(v, $240)) {
-                  $239[$240] = v[$240];
+              var $249 = {};
+              for (var $250 in v) {
+                if ({}.hasOwnProperty.call(v, $250)) {
+                  $249[$250] = v[$250];
                 }
                 ;
               }
               ;
-              $239.subOpen = new Just(value17);
-              $239.itemFocus = idx;
-              $239.subAnchorIdx = idx;
-              $239.subFocused = -1 | 0;
-              $239.subOpenFocus = focus3;
-              $239.subPlacedSide = Right2.value;
-              $239.subPlacedAlign = Start.value;
-              return $239;
+              $249.subOpen = new Just(value17);
+              $249.itemFocus = idx;
+              $249.subAnchorIdx = idx;
+              $249.subFocused = -1 | 0;
+              $249.subOpenFocus = focus3;
+              $249.subPlacedSide = Right2.value;
+              $249.subPlacedAlign = Start.value;
+              return $249;
             }))(function() {
               return bind30(scheduleSubAfterOpen1)(function(psid) {
                 return modify_13(function(v) {
-                  var $242 = {};
-                  for (var $243 in v) {
-                    if ({}.hasOwnProperty.call(v, $243)) {
-                      $242[$243] = v[$243];
+                  var $252 = {};
+                  for (var $253 in v) {
+                    if ({}.hasOwnProperty.call(v, $253)) {
+                      $252[$253] = v[$253];
                     }
                     ;
                   }
                   ;
-                  $242.subPostSub = new Just(psid);
-                  return $242;
+                  $252.subPostSub = new Just(psid);
+                  return $252;
                 });
               });
             }));
@@ -19845,8 +20043,8 @@
   };
   var openIndex = function(st) {
     var v = current(st.ctrl);
-    var $245 = v === "";
-    if ($245) {
+    var $255 = v === "";
+    if ($255) {
       return Nothing.value;
     }
     ;
@@ -19907,7 +20105,7 @@
               return pure29("");
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1150, column 9 - line 1152, column 29): " + [mel.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1216, column 9 - line 1218, column 29): " + [mel.constructor.name]);
           });
         })(range2(0)(count - 1 | 0));
       };
@@ -19921,15 +20119,15 @@
         })])(append111(maybe([])(function(i2) {
           return [ref2(itemRef3(st.idPrefix)(i2))];
         })(mIdx))(append111(function() {
-          var $248 = eq7(mIdx)(new Just(st.itemFocus));
-          if ($248) {
+          var $258 = eq7(mIdx)(new Just(st.itemFocus));
+          if ($258) {
             return [dataAttr("highlighted")("")];
           }
           ;
           return [];
         }())(append111(function() {
-          var $249 = item.accent === "";
-          if ($249) {
+          var $259 = item.accent === "";
+          if ($259) {
             return [];
           }
           ;
@@ -19941,8 +20139,8 @@
           ;
           return [];
         }())))))(append111(map45(fromPlainHTML)(item.label))(function() {
-          var $251 = $$null(item.shortcut);
-          if ($251) {
+          var $261 = $$null(item.shortcut);
+          if ($261) {
             return [];
           }
           ;
@@ -19975,8 +20173,8 @@
         })])(append111(maybe([])(function(i2) {
           return [ref2(itemRef3(st.idPrefix)(i2))];
         })(mIdx))(append111(function() {
-          var $254 = eq7(mIdx)(new Just(st.itemFocus));
-          if ($254) {
+          var $264 = eq7(mIdx)(new Just(st.itemFocus));
+          if ($264) {
             return [dataAttr("highlighted")("")];
           }
           ;
@@ -19994,8 +20192,8 @@
           ;
           return [];
         }())))))(append111(map45(fromPlainHTML)(sub22.label))(function() {
-          var $257 = $$null(extra);
-          if ($257) {
+          var $267 = $$null(extra);
+          if ($267) {
             return [];
           }
           ;
@@ -20021,17 +20219,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return when17(notEq24(placed.placement.side)(st.subPlacedSide) || notEq32(placed.placement.align)(st.subPlacedAlign))(modify_13(function(v) {
-                  var $261 = {};
-                  for (var $262 in v) {
-                    if ({}.hasOwnProperty.call(v, $262)) {
-                      $261[$262] = v[$262];
+                  var $271 = {};
+                  for (var $272 in v) {
+                    if ({}.hasOwnProperty.call(v, $272)) {
+                      $271[$272] = v[$272];
                     }
                     ;
                   }
                   ;
-                  $261.subPlacedSide = placed.placement.side;
-                  $261.subPlacedAlign = placed.placement.align;
-                  return $261;
+                  $271.subPlacedSide = placed.placement.side;
+                  $271.subPlacedAlign = placed.placement.align;
+                  return $271;
                 }));
               });
             }
@@ -20052,13 +20250,13 @@
         return input3.defaultValue;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 441, column 14 - line 443, column 34): " + [input3.value.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 443, column 14 - line 445, column 34): " + [input3.value.constructor.name]);
     }();
     return {
       ctrl: controllable(input3.value)(input3.defaultValue),
       presence: function() {
-        var $269 = startVal !== "";
-        if ($269) {
+        var $279 = startVal !== "";
+        if ($279) {
           return Open.value;
         }
         ;
@@ -20107,16 +20305,16 @@
     return function(idx) {
       return bind30(get12)(function(st) {
         return discard19(modify_13(function(v) {
-          var $270 = {};
-          for (var $271 in v) {
-            if ({}.hasOwnProperty.call(v, $271)) {
-              $270[$271] = v[$271];
+          var $280 = {};
+          for (var $281 in v) {
+            if ({}.hasOwnProperty.call(v, $281)) {
+              $280[$281] = v[$281];
             }
             ;
           }
           ;
-          $270.itemFocus = idx;
-          return $270;
+          $280.itemFocus = idx;
+          return $280;
         }))(function() {
           return bind30(getHTMLElementRef(wrapperRef4))(function(mwrap) {
             return bind30(getHTMLElementRef(itemRef3(st.idPrefix)(idx)))(function(mitem) {
@@ -20137,18 +20335,18 @@
         return discard19(for_17(st.postSub)(unsubscribe2))(function() {
           return discard19(liftEffect7(removeFocusGuards))(function() {
             return modify_13(function(v) {
-              var $273 = {};
-              for (var $274 in v) {
-                if ({}.hasOwnProperty.call(v, $274)) {
-                  $273[$274] = v[$274];
+              var $283 = {};
+              for (var $284 in v) {
+                if ({}.hasOwnProperty.call(v, $284)) {
+                  $283[$284] = v[$284];
                 }
                 ;
               }
               ;
-              $273.presence = finishExit(st.presence);
-              $273.animSub = Nothing.value;
-              $273.postSub = Nothing.value;
-              return $273;
+              $283.presence = finishExit(st.presence);
+              $283.animSub = Nothing.value;
+              $283.postSub = Nothing.value;
+              return $283;
             });
           });
         });
@@ -20183,7 +20381,7 @@
       };
     }
   };
-  var eq34 = /* @__PURE__ */ eq(eqCheckState3);
+  var eq52 = /* @__PURE__ */ eq(eqCheckState3);
   var entryFocusables3 = function(v) {
     if (v instanceof MenuItemEntry3) {
       if (v.value0.disabled) {
@@ -20202,10 +20400,10 @@
     }
     ;
     if (v instanceof MenuRadioGroupEntry3) {
-      return length(filter(function($464) {
+      return length(filter(function($488) {
         return !function(v1) {
           return v1.disabled;
-        }($464);
+        }($488);
       })(v.value0.options));
     }
     ;
@@ -20228,20 +20426,6 @@
       return n + entryFocusables3(e) | 0;
     };
   })(0);
-  var lastItem = function(st) {
-    return function(i2) {
-      var v = index(st.menus)(i2);
-      if (v instanceof Just) {
-        return itemCount3(v.value0.entries) - 1 | 0;
-      }
-      ;
-      if (v instanceof Nothing) {
-        return 0;
-      }
-      ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 984, column 17 - line 986, column 15): " + [v.constructor.name]);
-    };
-  };
   var typeaheadMenu = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var readItemTexts1 = readItemTexts3(dictMonadEffect);
@@ -20260,17 +20444,17 @@
           return bind30(readItemTexts1(st.idPrefix)(itemCount3(openEntries(st))))(function(texts) {
             return discard19(for_17(nextMatch(search$prime)(texts)(st.itemFocus))(focusMenuItem1))(function() {
               return modify_13(function(v) {
-                var $291 = {};
-                for (var $292 in v) {
-                  if ({}.hasOwnProperty.call(v, $292)) {
-                    $291[$292] = v[$292];
+                var $301 = {};
+                for (var $302 in v) {
+                  if ({}.hasOwnProperty.call(v, $302)) {
+                    $301[$302] = v[$302];
                   }
                   ;
                 }
                 ;
-                $291.search = search$prime;
-                $291.lastKey = now2;
-                return $291;
+                $301.search = search$prime;
+                $301.lastKey = now2;
+                return $301;
               });
             });
           });
@@ -20292,10 +20476,10 @@
         if (v instanceof MenuRadioGroupEntry3) {
           return map45(function(v1) {
             return v1.value;
-          })(filter(function($465) {
+          })(filter(function($489) {
             return !function(v1) {
               return v1.disabled;
-            }($465);
+            }($489);
           })(v.value0.options));
         }
         ;
@@ -20308,10 +20492,19 @@
       return index(concatMap(enabledValues)(entries))(n);
     };
   };
+  var enabledTriggers = function(st) {
+    return filter(function(i2) {
+      return maybe(false)(function($490) {
+        return !function(v) {
+          return v.disabled;
+        }($490);
+      })(index(st.menus)(i2));
+    })(range2(0)(length(st.menus) - 1 | 0));
+  };
   var dir4 = /* @__PURE__ */ attr2("dir");
   var renderSubContent3 = function(st) {
     return function(sub22) {
-      return div3([ref2(subWrapperRef3), dataAttr("radix-popper-content-wrapper")(""), dir4("ltr"), style("position: fixed;")])([div3(append111([ref2(subContentRef3), id2(st.subGenContentId), role("menu"), classes2(st.style.subContent), aria("labelledby")(st.subGenTriggerId), aria("orientation")("vertical"), dataState("open"), dataAttr("side")(sideName(st.subPlacedSide)), dataAttr("align")(alignName(st.subPlacedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dataAttr("radix-menubar-content")(""), dir4("ltr"), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(SubKeyDown3.create)])(portalData6(st.portalAttrs)))(renderSubEntries3(st)(sub22.entries))]);
+      return div3([ref2(subWrapperRef3), dataAttr("radix-popper-content-wrapper")(""), dir4(dirName3(st.dir)), style("position: fixed;")])([div3(append111([ref2(subContentRef3), id2(st.subGenContentId), role("menu"), classes2(st.style.subContent), aria("labelledby")(st.subGenTriggerId), aria("orientation")("vertical"), dataState("open"), dataAttr("side")(sideName(st.subPlacedSide)), dataAttr("align")(alignName(st.subPlacedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dataAttr("radix-menubar-content")(""), dir4(dirName3(st.dir)), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(SubKeyDown3.create)])(portalData6(st.portalAttrs)))(renderSubEntries3(st)(sub22.entries))]);
     };
   };
   var defaultStyle9 = {
@@ -20366,18 +20559,16 @@
                   return getHTMLElementRef(contentRef7);
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1107, column 10 - line 1109, column 48): " + [st.openFocus.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1164, column 10 - line 1166, column 48): " + [st.openFocus.constructor.name]);
               }
               ;
               return pure29(Nothing.value);
             }())(function(mfocus) {
               if (mbody instanceof Just && mwrap instanceof Just) {
                 return liftEffect7(function __do13() {
-                  adopt(mbody.value0)(toElement(mwrap.value0))();
-                  return when18(focusToo)(function __do14() {
-                    addFocusGuards();
-                    return for_16(mfocus)(focus)();
-                  })();
+                  reAdoptBeforeTrail(mwrap.value0)();
+                  addFocusGuards();
+                  return when18(focusToo)(for_16(mfocus)(focus))();
                 });
               }
               ;
@@ -20400,21 +20591,21 @@
                 return bind30(liftEffect7(activeElement(doc)))(function(mprev) {
                   return discard19(for_17(st.animSub)(unsubscribe2))(function() {
                     return discard19(modify_13(function(v) {
-                      var $306 = {};
-                      for (var $307 in v) {
-                        if ({}.hasOwnProperty.call(v, $307)) {
-                          $306[$307] = v[$307];
+                      var $316 = {};
+                      for (var $317 in v) {
+                        if ({}.hasOwnProperty.call(v, $317)) {
+                          $316[$317] = v[$317];
                         }
                         ;
                       }
                       ;
-                      $306.ctrl = change2(menu2.value)(st.ctrl).next;
-                      $306.presence = Open.value;
-                      $306.itemFocus = focusedIdx;
-                      $306.restoreEl = mprev;
-                      $306.openFocus = openFocus;
-                      $306.animSub = Nothing.value;
-                      return $306;
+                      $316.ctrl = change2(menu2.value)(st.ctrl).next;
+                      $316.presence = Open.value;
+                      $316.itemFocus = focusedIdx;
+                      $316.restoreEl = mprev;
+                      $316.openFocus = openFocus;
+                      $316.animSub = Nothing.value;
+                      return $316;
                     }))(function() {
                       return discard19(raise(new OpenChanged7(new Just(menu2.value))))(function() {
                         return bind30(map118(map212(toNode))(getHTMLElementRef(contentRef7)))(function(mcNode) {
@@ -20430,18 +20621,18 @@
                                   })))(function(resizeSub) {
                                     return bind30(scheduleAfterOpen1)(function(psid) {
                                       return modify_13(function(v) {
-                                        var $309 = {};
-                                        for (var $310 in v) {
-                                          if ({}.hasOwnProperty.call(v, $310)) {
-                                            $309[$310] = v[$310];
+                                        var $319 = {};
+                                        for (var $320 in v) {
+                                          if ({}.hasOwnProperty.call(v, $320)) {
+                                            $319[$320] = v[$320];
                                           }
                                           ;
                                         }
                                         ;
-                                        $309.contentNode = mcNode;
-                                        $309.subs = [escSub, ptrSub, scrollSub, resizeSub];
-                                        $309.postSub = new Just(psid);
-                                        return $309;
+                                        $319.contentNode = mcNode;
+                                        $319.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                        $319.postSub = new Just(psid);
+                                        return $319;
                                       });
                                     });
                                   });
@@ -20484,17 +20675,17 @@
                   padding: st.padding
                 })))(function(placed) {
                   return when17(notEq24(placed.placement.side)(st.placedSide) || notEq32(placed.placement.align)(st.placedAlign))(modify_13(function(v1) {
-                    var $316 = {};
-                    for (var $317 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $317)) {
-                        $316[$317] = v1[$317];
+                    var $326 = {};
+                    for (var $327 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $327)) {
+                        $326[$327] = v1[$327];
                       }
                       ;
                     }
                     ;
-                    $316.placedSide = placed.placement.side;
-                    $316.placedAlign = placed.placement.align;
-                    return $316;
+                    $326.placedSide = placed.placement.side;
+                    $326.placedAlign = placed.placement.align;
+                    return $326;
                   }));
                 });
               }
@@ -20505,7 +20696,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1187, column 3 - line 1199, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1253, column 3 - line 1265, column 29): " + [v.constructor.name]);
     });
   };
   var switchTo = function(dictMonadEffect) {
@@ -20517,41 +20708,41 @@
           return bind30(get12)(function(st) {
             return for_17(index(st.menus)(i2))(function(menu2) {
               return when17(current(st.ctrl) !== menu2.value)(function() {
-                var $323 = $$null(st.subs);
-                if ($323) {
+                var $333 = $$null(st.subs);
+                if ($333) {
                   return openMenuAt1(i2)(focusedIdx)(openFocus);
                 }
                 ;
                 return discard19(modify_13(function(v) {
-                  var $324 = {};
-                  for (var $325 in v) {
-                    if ({}.hasOwnProperty.call(v, $325)) {
-                      $324[$325] = v[$325];
+                  var $334 = {};
+                  for (var $335 in v) {
+                    if ({}.hasOwnProperty.call(v, $335)) {
+                      $334[$335] = v[$335];
                     }
                     ;
                   }
                   ;
-                  $324.ctrl = change2(menu2.value)(st.ctrl).next;
-                  $324.presence = Open.value;
-                  $324.itemFocus = focusedIdx;
-                  $324.openFocus = openFocus;
-                  return $324;
+                  $334.ctrl = change2(menu2.value)(st.ctrl).next;
+                  $334.presence = Open.value;
+                  $334.itemFocus = focusedIdx;
+                  $334.openFocus = openFocus;
+                  return $334;
                 }))(function() {
                   return discard19(raise(new OpenChanged7(new Just(menu2.value))))(function() {
                     return bind30(map118(map212(toNode))(getHTMLElementRef(contentRef7)))(function(mcNode) {
                       return bind30(scheduleAfterOpen1)(function(psid) {
                         return modify_13(function(v) {
-                          var $327 = {};
-                          for (var $328 in v) {
-                            if ({}.hasOwnProperty.call(v, $328)) {
-                              $327[$328] = v[$328];
+                          var $337 = {};
+                          for (var $338 in v) {
+                            if ({}.hasOwnProperty.call(v, $338)) {
+                              $337[$338] = v[$338];
                             }
                             ;
                           }
                           ;
-                          $327.contentNode = mcNode;
-                          $327.postSub = new Just(psid);
-                          return $327;
+                          $337.contentNode = mcNode;
+                          $337.postSub = new Just(psid);
+                          return $337;
                         });
                       });
                     });
@@ -20604,7 +20795,13 @@
             }
             ;
             return [];
-          }())(portalData6(st.triggerAttrs)))))(map45(fromPlainHTML)(menu2.trigger));
+          }())(append111(function() {
+            if (menu2.disabled) {
+              return [disabled10(true), dataAttr("disabled")("")];
+            }
+            ;
+            return [];
+          }())(portalData6(st.triggerAttrs))))))(map45(fromPlainHTML)(menu2.trigger));
         };
       };
     };
@@ -20614,18 +20811,18 @@
     return bind30(get12)(function(st) {
       return when17(isJust(st.subOpen))(discard19(for_17(st.subPostSub)(unsubscribe2))(function() {
         return discard19(modify_13(function(v) {
-          var $334 = {};
-          for (var $335 in v) {
-            if ({}.hasOwnProperty.call(v, $335)) {
-              $334[$335] = v[$335];
+          var $345 = {};
+          for (var $346 in v) {
+            if ({}.hasOwnProperty.call(v, $346)) {
+              $345[$346] = v[$346];
             }
             ;
           }
           ;
-          $334.subOpen = Nothing.value;
-          $334.subFocused = -1 | 0;
-          $334.subPostSub = Nothing.value;
-          return $334;
+          $345.subOpen = Nothing.value;
+          $345.subFocused = -1 | 0;
+          $345.subPostSub = Nothing.value;
+          return $345;
         }))(function() {
           return bind30(getHTMLElementRef(wrapperRef4))(function(mwrap) {
             return bind30(getHTMLElementRef(itemRef3(st.idPrefix)(st.subAnchorIdx)))(function(mtrig) {
@@ -20642,71 +20839,73 @@
   var closeMenu3 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     var scheduleAfterClose1 = scheduleAfterClose4(dictMonadEffect);
-    return bind30(get12)(function(st) {
-      return when17(current(st.ctrl) !== "")(discard19(traverse_14(unsubscribe2)(st.subs))(function() {
-        return discard19(for_17(st.postSub)(unsubscribe2))(function() {
-          return discard19(for_17(st.restoreEl)(function($466) {
-            return liftEffect7(focus($466));
-          }))(function() {
-            return discard19(modify_13(function(v) {
-              var $337 = {};
-              for (var $338 in v) {
-                if ({}.hasOwnProperty.call(v, $338)) {
-                  $337[$338] = v[$338];
+    return function(restore) {
+      return bind30(get12)(function(st) {
+        return when17(current(st.ctrl) !== "")(discard19(traverse_14(unsubscribe2)(st.subs))(function() {
+          return discard19(for_17(st.postSub)(unsubscribe2))(function() {
+            return discard19(when17(restore)(for_17(st.restoreEl)(function($491) {
+              return liftEffect7(focus($491));
+            })))(function() {
+              return discard19(modify_13(function(v) {
+                var $348 = {};
+                for (var $349 in v) {
+                  if ({}.hasOwnProperty.call(v, $349)) {
+                    $348[$349] = v[$349];
+                  }
+                  ;
                 }
                 ;
-              }
-              ;
-              $337.ctrl = change2("")(st.ctrl).next;
-              $337.presence = present(false)(st.presence);
-              $337.restoreEl = Nothing.value;
-              $337.subs = [];
-              $337.postSub = Nothing.value;
-              $337.contentNode = Nothing.value;
-              $337.openFocus = Nothing.value;
-              $337.search = "";
-              $337.subOpen = Nothing.value;
-              $337.subFocused = -1 | 0;
-              return $337;
-            }))(function() {
-              return discard19(raise(new OpenChanged7(Nothing.value)))(function() {
-                return bind30(scheduleAfterClose1)(function(psid) {
-                  return modify_13(function(v) {
-                    var $340 = {};
-                    for (var $341 in v) {
-                      if ({}.hasOwnProperty.call(v, $341)) {
-                        $340[$341] = v[$341];
+                $348.ctrl = change2("")(st.ctrl).next;
+                $348.presence = present(false)(st.presence);
+                $348.restoreEl = Nothing.value;
+                $348.subs = [];
+                $348.postSub = Nothing.value;
+                $348.contentNode = Nothing.value;
+                $348.openFocus = Nothing.value;
+                $348.search = "";
+                $348.subOpen = Nothing.value;
+                $348.subFocused = -1 | 0;
+                return $348;
+              }))(function() {
+                return discard19(raise(new OpenChanged7(Nothing.value)))(function() {
+                  return bind30(scheduleAfterClose1)(function(psid) {
+                    return modify_13(function(v) {
+                      var $351 = {};
+                      for (var $352 in v) {
+                        if ({}.hasOwnProperty.call(v, $352)) {
+                          $351[$352] = v[$352];
+                        }
+                        ;
                       }
                       ;
-                    }
-                    ;
-                    $340.postSub = new Just(psid);
-                    return $340;
+                      $351.postSub = new Just(psid);
+                      return $351;
+                    });
                   });
                 });
               });
             });
           });
-        });
-      }));
-    });
+        }));
+      });
+    };
   };
   var closeMenuAndSub3 = function(dictMonadEffect) {
     var closeMenu1 = closeMenu3(dictMonadEffect);
     return discard19(modify_13(function(v) {
-      var $343 = {};
-      for (var $344 in v) {
-        if ({}.hasOwnProperty.call(v, $344)) {
-          $343[$344] = v[$344];
+      var $354 = {};
+      for (var $355 in v) {
+        if ({}.hasOwnProperty.call(v, $355)) {
+          $354[$355] = v[$355];
         }
         ;
       }
       ;
-      $343.subOpen = Nothing.value;
-      $343.subFocused = -1 | 0;
-      return $343;
+      $354.subOpen = Nothing.value;
+      $354.subFocused = -1 | 0;
+      return $354;
     }))(function() {
-      return closeMenu1;
+      return closeMenu1(true);
     });
   };
   var handleQuery11 = function(dictMonadEffect) {
@@ -20717,7 +20916,7 @@
         return bind30(get12)(function(st) {
           return discard19(function() {
             if (v.value0 instanceof Nothing) {
-              return closeMenu1;
+              return closeMenu1(true);
             }
             ;
             if (v.value0 instanceof Just) {
@@ -20732,10 +20931,10 @@
                 return pure29(unit);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1207, column 17 - line 1209, column 29): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1273, column 17 - line 1275, column 29): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1205, column 5 - line 1209, column 29): " + [v.value0.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1271, column 5 - line 1275, column 29): " + [v.value0.constructor.name]);
           }())(function() {
             return pure29(new Just(v.value1));
           });
@@ -20746,8 +20945,8 @@
         return bind30(get12)(function(st) {
           var v1 = current(st.ctrl);
           return pure29(new Just(v.value0(function() {
-            var $353 = v1 === "";
-            if ($353) {
+            var $364 = v1 === "";
+            if ($364) {
               return Nothing.value;
             }
             ;
@@ -20756,7 +20955,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1202, column 15 - line 1214, column 62): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1268, column 15 - line 1280, column 62): " + [v.constructor.name]);
     };
   };
   var checkData3 = function(v) {
@@ -20772,12 +20971,12 @@
       return "indeterminate";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 724, column 13 - line 727, column 35): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 730, column 13 - line 733, column 35): " + [v.constructor.name]);
   };
   var renderIndicator3 = function(st) {
     return function(icon) {
       return function(cs) {
-        if (eq34(cs)(Unchecked4.value)) {
+        if (eq52(cs)(Unchecked4.value)) {
           return [];
         }
         ;
@@ -20785,7 +20984,7 @@
           return [span3([classes2(st.style.indicator), dataState(checkData3(cs))])(map45(fromPlainHTML)(icon))];
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 732, column 1 - line 732, column 110): " + [st.constructor.name, icon.constructor.name, cs.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 738, column 1 - line 738, column 110): " + [st.constructor.name, icon.constructor.name, cs.constructor.name]);
       };
     };
   };
@@ -20802,7 +21001,7 @@
       return "mixed";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 718, column 13 - line 721, column 27): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 724, column 13 - line 727, column 27): " + [v.constructor.name]);
   };
   var renderCheckbox3 = function(st) {
     return function(mIdx) {
@@ -20812,8 +21011,8 @@
         })])(append111(maybe([])(function(i2) {
           return [ref2(itemRef3(st.idPrefix)(i2))];
         })(mIdx))(append111(function() {
-          var $360 = eq7(mIdx)(new Just(st.itemFocus));
-          if ($360) {
+          var $371 = eq7(mIdx)(new Just(st.itemFocus));
+          if ($371) {
             return [dataAttr("highlighted")("")];
           }
           ;
@@ -20825,8 +21024,8 @@
           ;
           return [];
         }()))))(append111(renderIndicator3(st)(st.style.checkIndicator)(item.check))(append111(map45(fromPlainHTML)(item.label))(function() {
-          var $362 = $$null(item.shortcut);
-          if ($362) {
+          var $373 = $$null(item.shortcut);
+          if ($373) {
             return [];
           }
           ;
@@ -20840,8 +21039,8 @@
       return function(mIdx) {
         return function(opt) {
           var cs = function() {
-            var $363 = selected2 === opt.value;
-            if ($363) {
+            var $374 = selected2 === opt.value;
+            if ($374) {
               return Checked4.value;
             }
             ;
@@ -20852,8 +21051,8 @@
           })])(append111(maybe([])(function(i2) {
             return [ref2(itemRef3(st.idPrefix)(i2))];
           })(mIdx))(append111(function() {
-            var $364 = eq7(mIdx)(new Just(st.itemFocus));
-            if ($364) {
+            var $375 = eq7(mIdx)(new Just(st.itemFocus));
+            if ($375) {
               return [dataAttr("highlighted")("")];
             }
             ;
@@ -20865,8 +21064,8 @@
             ;
             return [];
           }()))))(append111(renderIndicator3(st)(st.style.radioIndicator)(cs))(append111(map45(fromPlainHTML)(opt.label))(function() {
-            var $366 = $$null(opt.shortcut);
-            if ($366) {
+            var $377 = $$null(opt.shortcut);
+            if ($377) {
               return [];
             }
             ;
@@ -20895,7 +21094,7 @@
               };
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 580, column 3 - line 585, column 10): " + [selected2.constructor.name, innerAcc.constructor.name, opt.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 586, column 3 - line 591, column 10): " + [selected2.constructor.name, innerAcc.constructor.name, opt.constructor.name]);
           };
         };
       };
@@ -20970,7 +21169,7 @@
             ;
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 552, column 14 - line 579, column 12): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 558, column 14 - line 585, column 12): " + [v.constructor.name]);
         };
       };
       return function(v) {
@@ -20986,9 +21185,10 @@
       var menu2 = fromMaybe({
         value: "",
         trigger: [],
-        entries: []
+        entries: [],
+        disabled: false
       })(index(st.menus)(i2));
-      return div3(append111([ref2(contentRef7), id2(contentIdAt(st)(i2)), role("menu"), classes2(st.style.content), aria("labelledby")(triggerIdAt(st)(i2)), aria("orientation")("vertical"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dataAttr("radix-menubar-content")(""), dir4("ltr"), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(MenuKeyDown3.create)])(portalData6(st.portalAttrs)))(renderEntries3(st)(menu2.entries));
+      return div3(append111([ref2(contentRef7), id2(contentIdAt(st)(i2)), role("menu"), classes2(st.style.content), aria("labelledby")(triggerIdAt(st)(i2)), aria("orientation")("vertical"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), dataAttr("orientation")("vertical"), dataAttr("radix-menu-content")(""), dataAttr("radix-menubar-content")(""), dir4(dirName3(st.dir)), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(MenuKeyDown3.create)])(portalData6(st.portalAttrs)))(renderEntries3(st)(menu2.entries));
     };
   };
   var render11 = function(st) {
@@ -20996,7 +21196,7 @@
     var mOpenI = openIndex(st);
     return div3([style("display:contents")])(append111([div3([role("menubar"), classes2(st.style.root), dataAttr("orientation")("horizontal"), style("outline: none;"), tabIndex2(0)])(mapWithIndex2(renderTrigger(st)(mOpenI))(st.menus))])(append111(function() {
       if (rendered) {
-        return [div3([ref2(wrapperRef4), dataAttr("radix-popper-content-wrapper")(""), dir4("ltr"), style("position: fixed;")])(function() {
+        return [div3([ref2(wrapperRef4), dataAttr("radix-popper-content-wrapper")(""), dir4(dirName3(st.dir)), style("position: fixed;")])(function() {
           if (mOpenI instanceof Nothing) {
             return [];
           }
@@ -21005,7 +21205,7 @@
             return [renderContent(st)(mOpenI.value0)];
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 480, column 13 - line 482, column 47): " + [mOpenI.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 482, column 13 - line 484, column 47): " + [mOpenI.constructor.name]);
         }())];
       }
       ;
@@ -21026,35 +21226,58 @@
         }
         ;
         if (v instanceof Just) {
-          var n = length(st.menus);
-          var j = mod4(mod4(v.value0 + delta | 0)(n) + n | 0)(n);
-          return when17(j !== v.value0)(discard19(modify_13(function(v1) {
-            var $379 = {};
-            for (var $380 in v1) {
-              if ({}.hasOwnProperty.call(v1, $380)) {
-                $379[$380] = v1[$380];
-              }
-              ;
+          var enabled = enabledTriggers(st);
+          var ne = length(enabled);
+          var curPos = fromMaybe(-1 | 0)(findIndex(function(v1) {
+            return v1 === v.value0;
+          })(enabled));
+          var rawPos = curPos + delta | 0;
+          var posJ = function() {
+            if (st.loop) {
+              return mod4(mod4(rawPos)(ne) + ne | 0)(ne);
             }
             ;
-            $379.triggerFocus = j;
-            return $379;
-          }))(function() {
-            return switchTo1(j)(-1 | 0)(Nothing.value);
-          }));
+            return rawPos;
+          }();
+          var mJ = function() {
+            var $391 = curPos >= 0 && (posJ >= 0 && posJ < ne);
+            if ($391) {
+              return index(enabled)(posJ);
+            }
+            ;
+            return Nothing.value;
+          }();
+          if (mJ instanceof Just && mJ.value0 !== v.value0) {
+            return discard19(modify_13(function(v1) {
+              var $393 = {};
+              for (var $394 in v1) {
+                if ({}.hasOwnProperty.call(v1, $394)) {
+                  $393[$394] = v1[$394];
+                }
+                ;
+              }
+              ;
+              $393.triggerFocus = mJ.value0;
+              return $393;
+            }))(function() {
+              return switchTo1(mJ.value0)(-1 | 0)(Nothing.value);
+            });
+          }
+          ;
+          return pure29(unit);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 991, column 25 - line 999, column 30): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 1040, column 25 - line 1056, column 21): " + [v.constructor.name]);
       };
     };
   };
   var handleAction11 = function(dictMonadEffect) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
     var useId2 = useId(monadEffectHalogenM2);
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
     var closeMenu1 = closeMenu3(dictMonadEffect);
     var switchTo1 = switchTo(dictMonadEffect);
     var openMenuAt1 = openMenuAt2(dictMonadEffect);
-    var liftEffect7 = liftEffect(monadEffectHalogenM2);
     var reposition1 = reposition4(dictMonadEffect);
     var finalize1 = finalize4(dictMonadEffect);
     var finishClose1 = finishClose6(dictMonadEffect);
@@ -21072,20 +21295,60 @@
             return bind30(traverse4($$const(useId2))(st.menus))(function(cids) {
               return bind30(useId2)(function(stid) {
                 return bind30(useId2)(function(scid) {
-                  return modify_13(function(v1) {
-                    var $384 = {};
-                    for (var $385 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $385)) {
-                        $384[$385] = v1[$385];
+                  return discard19(modify_13(function(v1) {
+                    var $399 = {};
+                    for (var $400 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $400)) {
+                        $399[$400] = v1[$400];
                       }
                       ;
                     }
                     ;
-                    $384.triggerIds = tids;
-                    $384.contentIds = cids;
-                    $384.subGenTriggerId = stid;
-                    $384.subGenContentId = scid;
-                    return $384;
+                    $399.triggerIds = tids;
+                    $399.contentIds = cids;
+                    $399.subGenTriggerId = stid;
+                    $399.subGenContentId = scid;
+                    return $399;
+                  }))(function() {
+                    return bind30(get12)(function(st1) {
+                      return when17(current(st1.ctrl) !== "")(bind30(liftEffect7(bind210(windowImpl)(document)))(function(doc) {
+                        return bind30(liftEffect7(windowTarget))(function(win) {
+                          var docTarget = toEventTarget(doc);
+                          return bind30(subscribe2($$escape(docTarget)(EscapePressed6.value)))(function(escSub) {
+                            return bind30(subscribe2(pointerDown(docTarget)(PointerDown3.create)))(function(ptrSub) {
+                              return bind30(subscribe2(eventListener2("scroll")(win)(function(v1) {
+                                return new Just(Reposition4.value);
+                              })))(function(scrollSub) {
+                                return bind30(subscribe2(eventListener2("resize")(win)(function(v1) {
+                                  return new Just(Reposition4.value);
+                                })))(function(resizeSub) {
+                                  return bind30(liftEffect7(create3))(function(v1) {
+                                    return bind30(subscribe2(voidRight7(AfterStartOpen.value)(v1.emitter)))(function(psid) {
+                                      return discard19(liftEffect7(queueMicrotask2(notify(v1.listener)(unit))))(function() {
+                                        return modify_13(function(v2) {
+                                          var $403 = {};
+                                          for (var $404 in v2) {
+                                            if ({}.hasOwnProperty.call(v2, $404)) {
+                                              $403[$404] = v2[$404];
+                                            }
+                                            ;
+                                          }
+                                          ;
+                                          $403.itemFocus = -1 | 0;
+                                          $403.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                          $403.postSub = new Just(psid);
+                                          return $403;
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      }));
+                    });
                   });
                 });
               });
@@ -21096,67 +21359,67 @@
       ;
       if (v instanceof Receive12) {
         return modify_13(function(st) {
-          var $387 = {};
-          for (var $388 in st) {
-            if ({}.hasOwnProperty.call(st, $388)) {
-              $387[$388] = st[$388];
+          var $408 = {};
+          for (var $409 in st) {
+            if ({}.hasOwnProperty.call(st, $409)) {
+              $408[$409] = st[$409];
             }
             ;
           }
           ;
-          $387.ctrl = sync(v.value0.value)(st.ctrl);
-          $387.menus = v.value0.menus;
-          $387.side = v.value0.side;
-          $387.align = v.value0.align;
-          $387.offset = v.value0.offset;
-          $387.padding = v.value0.padding;
-          $387.loop = v.value0.loop;
-          $387.dir = v.value0.dir;
-          $387.idPrefix = v.value0.idPrefix;
-          $387.style = v.value0.style;
-          $387.contentStyle = v.value0.contentStyle;
-          $387.triggerAttrs = v.value0.triggerAttrs;
-          $387.portalAttrs = v.value0.portalAttrs;
-          return $387;
+          $408.ctrl = sync(v.value0.value)(st.ctrl);
+          $408.menus = v.value0.menus;
+          $408.side = v.value0.side;
+          $408.align = v.value0.align;
+          $408.offset = v.value0.offset;
+          $408.padding = v.value0.padding;
+          $408.loop = v.value0.loop;
+          $408.dir = v.value0.dir;
+          $408.idPrefix = v.value0.idPrefix;
+          $408.style = v.value0.style;
+          $408.contentStyle = v.value0.contentStyle;
+          $408.triggerAttrs = v.value0.triggerAttrs;
+          $408.portalAttrs = v.value0.portalAttrs;
+          return $408;
         });
       }
       ;
       if (v instanceof TriggerFocused) {
         return modify_13(function(v1) {
-          var $391 = {};
-          for (var $392 in v1) {
-            if ({}.hasOwnProperty.call(v1, $392)) {
-              $391[$392] = v1[$392];
+          var $412 = {};
+          for (var $413 in v1) {
+            if ({}.hasOwnProperty.call(v1, $413)) {
+              $412[$413] = v1[$413];
             }
             ;
           }
           ;
-          $391.triggerFocus = v.value0;
-          return $391;
+          $412.triggerFocus = v.value0;
+          return $412;
         });
       }
       ;
       if (v instanceof TriggerClicked4) {
         return bind30(get12)(function(st) {
           return discard19(modify_13(function(v1) {
-            var $395 = {};
-            for (var $396 in v1) {
-              if ({}.hasOwnProperty.call(v1, $396)) {
-                $395[$396] = v1[$396];
+            var $416 = {};
+            for (var $417 in v1) {
+              if ({}.hasOwnProperty.call(v1, $417)) {
+                $416[$417] = v1[$417];
               }
               ;
             }
             ;
-            $395.triggerFocus = v.value0;
-            return $395;
+            $416.triggerFocus = v.value0;
+            return $416;
           }))(function() {
-            var $398 = eq7(openIndex(st))(new Just(v.value0));
-            if ($398) {
-              return closeMenu1;
+            var $419 = eq7(openIndex(st))(new Just(v.value0));
+            if ($419) {
+              return closeMenu1(true);
             }
             ;
-            var $399 = current(st.ctrl) !== "";
-            if ($399) {
+            var $420 = current(st.ctrl) !== "";
+            if ($420) {
               return switchTo1(v.value0)(-1 | 0)(Nothing.value);
             }
             ;
@@ -21171,101 +21434,99 @@
             var v1 = key(v.value1);
             if (v1 === "ArrowDown") {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value1))))(applySecond9(modify_13(function(v22) {
-                var $402 = {};
-                for (var $403 in v22) {
-                  if ({}.hasOwnProperty.call(v22, $403)) {
-                    $402[$403] = v22[$403];
+                var $423 = {};
+                for (var $424 in v22) {
+                  if ({}.hasOwnProperty.call(v22, $424)) {
+                    $423[$424] = v22[$424];
                   }
                   ;
                 }
                 ;
-                $402.triggerFocus = v.value0;
-                return $402;
+                $423.triggerFocus = v.value0;
+                return $423;
               }))(openMenuAt1(v.value0)(0)(new Just(0))));
-            }
-            ;
-            if (v1 === "ArrowUp") {
-              return applySecond9(liftEffect7(preventDefault(toEvent(v.value1))))(applySecond9(modify_13(function(v22) {
-                var $405 = {};
-                for (var $406 in v22) {
-                  if ({}.hasOwnProperty.call(v22, $406)) {
-                    $405[$406] = v22[$406];
-                  }
-                  ;
-                }
-                ;
-                $405.triggerFocus = v.value0;
-                return $405;
-              }))(openMenuAt1(v.value0)(lastItem(st)(v.value0))(new Just(lastItem(st)(v.value0)))));
             }
             ;
             if (v1 === "Enter") {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value1))))(applySecond9(modify_13(function(v22) {
-                var $408 = {};
-                for (var $409 in v22) {
-                  if ({}.hasOwnProperty.call(v22, $409)) {
-                    $408[$409] = v22[$409];
+                var $426 = {};
+                for (var $427 in v22) {
+                  if ({}.hasOwnProperty.call(v22, $427)) {
+                    $426[$427] = v22[$427];
                   }
                   ;
                 }
                 ;
-                $408.triggerFocus = v.value0;
-                return $408;
+                $426.triggerFocus = v.value0;
+                return $426;
               }))(openMenuAt1(v.value0)(0)(new Just(0))));
             }
             ;
             if (v1 === " ") {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value1))))(applySecond9(modify_13(function(v22) {
-                var $411 = {};
-                for (var $412 in v22) {
-                  if ({}.hasOwnProperty.call(v22, $412)) {
-                    $411[$412] = v22[$412];
+                var $429 = {};
+                for (var $430 in v22) {
+                  if ({}.hasOwnProperty.call(v22, $430)) {
+                    $429[$430] = v22[$430];
                   }
                   ;
                 }
                 ;
-                $411.triggerFocus = v.value0;
-                return $411;
+                $429.triggerFocus = v.value0;
+                return $429;
               }))(openMenuAt1(v.value0)(0)(new Just(0))));
             }
             ;
+            var enabled = enabledTriggers(st);
+            var curPos = fromMaybe(-1 | 0)(findIndex(function(v22) {
+              return v22 === st.triggerFocus;
+            })(enabled));
             var cfg = {
               orientation: Horizontal.value,
               dir: st.dir,
               loop: st.loop
             };
             var v2 = navigate(cfg)({
-              count: length(st.menus),
-              current: st.triggerFocus
+              count: length(enabled),
+              current: curPos
             })(v1);
             if (v2 instanceof Stay) {
               return pure29(unit);
             }
             ;
             if (v2 instanceof MoveTo) {
-              return discard19(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
-                return discard19(modify_13(function(v3) {
-                  var $415 = {};
-                  for (var $416 in v3) {
-                    if ({}.hasOwnProperty.call(v3, $416)) {
-                      $415[$416] = v3[$416];
+              var v3 = index(enabled)(v2.value0);
+              if (v3 instanceof Nothing) {
+                return pure29(unit);
+              }
+              ;
+              if (v3 instanceof Just) {
+                return discard19(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
+                  return discard19(modify_13(function(v4) {
+                    var $434 = {};
+                    for (var $435 in v4) {
+                      if ({}.hasOwnProperty.call(v4, $435)) {
+                        $434[$435] = v4[$435];
+                      }
+                      ;
                     }
                     ;
-                  }
-                  ;
-                  $415.triggerFocus = v2.value0;
-                  return $415;
-                }))(function() {
-                  return bind30(getHTMLElementRef(triggerRef5(st.idPrefix)(v2.value0)))(function(mt) {
-                    return for_17(mt)(function($467) {
-                      return liftEffect7(focus($467));
+                    $434.triggerFocus = v3.value0;
+                    return $434;
+                  }))(function() {
+                    return bind30(getHTMLElementRef(triggerRef5(st.idPrefix)(v3.value0)))(function(mt) {
+                      return for_17(mt)(function($492) {
+                        return liftEffect7(focus($492));
+                      });
                     });
                   });
                 });
-              });
+              }
+              ;
+              throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 866, column 26 - line 872, column 57): " + [v3.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 835, column 9 - line 841, column 55): " + [v2.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 864, column 9 - line 872, column 57): " + [v2.constructor.name]);
           }());
         });
       }
@@ -21273,20 +21534,20 @@
       if (v instanceof TriggerPointerEnter) {
         return bind30(get12)(function(st) {
           return when17(current(st.ctrl) !== "" && notEq5(openIndex(st))(new Just(v.value0)))(discard19(modify_13(function(v1) {
-            var $421 = {};
-            for (var $422 in v1) {
-              if ({}.hasOwnProperty.call(v1, $422)) {
-                $421[$422] = v1[$422];
+            var $441 = {};
+            for (var $442 in v1) {
+              if ({}.hasOwnProperty.call(v1, $442)) {
+                $441[$442] = v1[$442];
               }
               ;
             }
             ;
-            $421.triggerFocus = v.value0;
-            return $421;
+            $441.triggerFocus = v.value0;
+            return $441;
           }))(function() {
             return bind30(getHTMLElementRef(triggerRef5(st.idPrefix)(v.value0)))(function(mt) {
-              return discard19(for_17(mt)(function($468) {
-                return liftEffect7(focus($468));
+              return discard19(for_17(mt)(function($493) {
+                return liftEffect7(focus($493));
               }))(function() {
                 return switchTo1(v.value0)(-1 | 0)(Nothing.value);
               });
@@ -21298,6 +21559,12 @@
       if (v instanceof AfterOpen6) {
         return discard19(reposition1)(function() {
           return finalize1(true);
+        });
+      }
+      ;
+      if (v instanceof AfterStartOpen) {
+        return discard19(reposition1)(function() {
+          return finalize1(false);
         });
       }
       ;
@@ -21313,16 +21580,16 @@
                 if (animates) {
                   return bind30(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone7.value)))(function(sub22) {
                     return discard19(modify_13(function(v1) {
-                      var $427 = {};
-                      for (var $428 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $428)) {
-                          $427[$428] = v1[$428];
+                      var $447 = {};
+                      for (var $448 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $448)) {
+                          $447[$448] = v1[$448];
                         }
                         ;
                       }
                       ;
-                      $427.animSub = new Just(sub22);
-                      return $427;
+                      $447.animSub = new Just(sub22);
+                      return $447;
                     }))(function() {
                       return pure29(true);
                     });
@@ -21333,7 +21600,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 856, column 14 - line 864, column 24): " + [mnode.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 890, column 14 - line 898, column 24): " + [mnode.constructor.name]);
           }())(function(armed) {
             if (armed) {
               return bind30(getHTMLElementRef(wrapperRef4))(function(mwrap) {
@@ -21353,14 +21620,14 @@
       }
       ;
       if (v instanceof EscapePressed6) {
-        return closeMenu1;
+        return closeMenu1(true);
       }
       ;
       if (v instanceof PointerDown3) {
         return bind30(get12)(function(st) {
           return for_17(st.contentNode)(function(node) {
             return bind30(liftEffect7(isOutside(node)(v.value0)))(function(outside) {
-              return when17(outside)(closeMenu1);
+              return when17(outside)(closeMenu1(false));
             });
           });
         });
@@ -21377,6 +21644,21 @@
               return pure113(v12);
             });
           });
+          var isRTL = eq42(st.dir)(RTL.value);
+          var nextMenuKey = function() {
+            if (isRTL) {
+              return "ArrowLeft";
+            }
+            ;
+            return "ArrowRight";
+          }();
+          var prevMenuKey = function() {
+            if (isRTL) {
+              return "ArrowRight";
+            }
+            ;
+            return "ArrowLeft";
+          }();
           var cfg = {
             orientation: Vertical.value,
             dir: st.dir,
@@ -21384,11 +21666,11 @@
           };
           var v1 = key(v.value0);
           var v2 = function(v3) {
-            if (v1 === "ArrowRight") {
+            if (v1 === nextMenuKey) {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value0))))(adjacentMenu1(st)(1));
             }
             ;
-            if (v1 === "ArrowLeft") {
+            if (v1 === prevMenuKey) {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value0))))(adjacentMenu1(st)(-1 | 0));
             }
             ;
@@ -21421,13 +21703,13 @@
                   return focusMenuItem1(v6.value0);
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 912, column 24 - line 914, column 44): " + [v6.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 952, column 24 - line 954, column 44): " + [v6.constructor.name]);
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 786, column 1 - line 786, column 94): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 792, column 1 - line 792, column 94): " + [v1.constructor.name]);
             };
-            var $438 = v1 === "Enter" || v1 === " ";
-            if ($438) {
+            var $460 = v1 === "Enter" || v1 === " ";
+            if ($460) {
               if (mFocusedSub instanceof Just) {
                 return applySecond9(liftEffect7(preventDefault(toEvent(v.value0))))(openSub1(mFocusedSub.value0)(st.itemFocus)(new Just(0)));
               }
@@ -21437,7 +21719,8 @@
             ;
             return v4(true);
           };
-          if (v1 === "ArrowRight") {
+          var $464 = v1 === nextMenuKey;
+          if ($464) {
             if (mFocusedSub instanceof Just) {
               return applySecond9(liftEffect7(preventDefault(toEvent(v.value0))))(openSub1(mFocusedSub.value0)(st.itemFocus)(new Just(0)));
             }
@@ -21462,16 +21745,16 @@
           return bind30(get12)(function(st) {
             return bind30(getHTMLElementRef(wrapperRef4))(function(mwrap) {
               return bind30(getHTMLElementRef(subWrapperRef3))(function(mswrap) {
-                return discard19(for_17(mwrap)(function($469) {
-                  return liftEffect7(reAdoptBeforeTrail($469));
+                return discard19(for_17(mwrap)(function($494) {
+                  return liftEffect7(reAdoptBeforeTrail($494));
                 }))(function() {
-                  return discard19(for_17(mswrap)(function($470) {
-                    return liftEffect7(reAdoptBeforeTrail($470));
+                  return discard19(for_17(mswrap)(function($495) {
+                    return liftEffect7(reAdoptBeforeTrail($495));
                   }))(function() {
                     return for_17(st.subOpenFocus)(function(i2) {
                       return bind30(getHTMLElementRef(subItemRef3(st.idPrefix)(i2)))(function(mitem) {
-                        return for_17(mitem)(function($471) {
-                          return liftEffect7(focus($471));
+                        return for_17(mitem)(function($496) {
+                          return liftEffect7(focus($496));
                         });
                       });
                     });
@@ -21494,6 +21777,14 @@
           })(bind116(st.subOpen)(function(v12) {
             return findSub3(v12)(openEntries(st));
           })));
+          var subCloseKey = function() {
+            var $472 = eq42(st.dir)(RTL.value);
+            if ($472) {
+              return "ArrowRight";
+            }
+            ;
+            return "ArrowLeft";
+          }();
           var pos = {
             count: itemCount3(subEntries),
             current: st.subFocused
@@ -21504,7 +21795,7 @@
             dir: st.dir,
             loop: st.loop
           };
-          if (key2 === "ArrowLeft") {
+          if (key2 === subCloseKey) {
             return applySecond9(liftEffect7(preventDefault(toEvent(v.value0))))(closeSub1);
           }
           ;
@@ -21528,16 +21819,16 @@
             ;
             if (v1 instanceof MoveTo) {
               return discard19(modify_13(function(v2) {
-                var $451 = {};
-                for (var $452 in v2) {
-                  if ({}.hasOwnProperty.call(v2, $452)) {
-                    $451[$452] = v2[$452];
+                var $475 = {};
+                for (var $476 in v2) {
+                  if ({}.hasOwnProperty.call(v2, $476)) {
+                    $475[$476] = v2[$476];
                   }
                   ;
                 }
                 ;
-                $451.subFocused = v1.value0;
-                return $451;
+                $475.subFocused = v1.value0;
+                return $475;
               }))(function() {
                 return bind30(getHTMLElementRef(wrapperRef4))(function(mwrap) {
                   return bind30(getHTMLElementRef(subWrapperRef3))(function(mswrap) {
@@ -21553,10 +21844,10 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 943, column 24 - line 953, column 45): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 985, column 24 - line 995, column 45): " + [v1.constructor.name]);
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 936, column 5 - line 953, column 45): " + [key2.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 978, column 5 - line 995, column 45): " + [key2.constructor.name]);
         });
       }
       ;
@@ -21618,7 +21909,7 @@
               item: v.value0
             }));
           }))(function() {
-            return closeMenu1;
+            return closeMenu1(true);
           }));
         });
       }
@@ -21627,7 +21918,7 @@
         return reposition1;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 787, column 16 - line 980, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Menubar (line 793, column 16 - line 1022, column 27): " + [v.constructor.name]);
     };
   };
   var component12 = function(dictMonadEffect) {
@@ -21638,8 +21929,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction11(dictMonadEffect),
         handleQuery: handleQuery11(dictMonadEffect),
-        receive: function($472) {
-          return Just.create(Receive12.create($472));
+        receive: function($497) {
+          return Just.create(Receive12.create($497));
         },
         initialize: new Just(Initialize10.value)
       })
@@ -21668,7 +21959,7 @@
   var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorMaybe);
   var bind211 = /* @__PURE__ */ bind(bindMaybe);
   var eq25 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
-  var eq35 = /* @__PURE__ */ eq(eqDir);
+  var eq34 = /* @__PURE__ */ eq(eqDir);
   var SetValue2 = /* @__PURE__ */ function() {
     function SetValue9(value0, value1) {
       this.value0 = value0;
@@ -22421,7 +22712,7 @@
               return "ArrowDown";
             }
             ;
-            var $161 = eq35(st.dir)(RTL.value);
+            var $161 = eq34(st.dir)(RTL.value);
             if ($161) {
               return "ArrowLeft";
             }
@@ -23894,7 +24185,7 @@
   var type_29 = /* @__PURE__ */ type_17(isPropButtonType);
   var traverse_15 = /* @__PURE__ */ traverse_(applicativeHalogenM)(foldableArray);
   var pure115 = /* @__PURE__ */ pure(applicativeEffect);
-  var elem7 = /* @__PURE__ */ elem2(eqString);
+  var elem9 = /* @__PURE__ */ elem2(eqString);
   var bind212 = /* @__PURE__ */ bind(bindMaybe);
   var SetOpen8 = /* @__PURE__ */ function() {
     function SetOpen12(value0, value1) {
@@ -24084,19 +24375,19 @@
         return discard112(for_26(st.postSub)(unsubscribe2))(function() {
           return discard112(liftEffect7(removeFocusGuards))(function() {
             return modify_17(function(v) {
-              var $95 = {};
-              for (var $96 in v) {
-                if ({}.hasOwnProperty.call(v, $96)) {
-                  $95[$96] = v[$96];
+              var $99 = {};
+              for (var $100 in v) {
+                if ({}.hasOwnProperty.call(v, $100)) {
+                  $99[$100] = v[$100];
                 }
                 ;
               }
               ;
-              $95.presence = finishExit(st.presence);
-              $95.restoreEl = Nothing.value;
-              $95.animSub = Nothing.value;
-              $95.postSub = Nothing.value;
-              return $95;
+              $99.presence = finishExit(st.presence);
+              $99.restoreEl = Nothing.value;
+              $99.animSub = Nothing.value;
+              $99.postSub = Nothing.value;
+              return $99;
             });
           });
         });
@@ -24156,17 +24447,17 @@
       return when111(!current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
         return bind34(liftEffect7(activeElement(doc)))(function(mprev) {
           return discard112(modify_17(function(v) {
-            var $102 = {};
-            for (var $103 in v) {
-              if ({}.hasOwnProperty.call(v, $103)) {
-                $102[$103] = v[$103];
+            var $106 = {};
+            for (var $107 in v) {
+              if ({}.hasOwnProperty.call(v, $107)) {
+                $106[$107] = v[$107];
               }
               ;
             }
             ;
-            $102.ctrl = change2(true)(st.ctrl).next;
-            $102.restoreEl = mprev;
-            return $102;
+            $106.ctrl = change2(true)(st.ctrl).next;
+            $106.restoreEl = mprev;
+            return $106;
           }))(function() {
             return discard112(raise(new OpenChanged8(true)))(function() {
               return bind34(map121(map213(toNode))(getHTMLElementRef(contentRef9)))(function(mcNode) {
@@ -24183,20 +24474,20 @@
                           return discard112(for_26(st.animSub)(unsubscribe2))(function() {
                             return bind34(scheduleAfter1(AfterOpen8.value))(function(psid) {
                               return modify_17(function(v) {
-                                var $105 = {};
-                                for (var $106 in v) {
-                                  if ({}.hasOwnProperty.call(v, $106)) {
-                                    $105[$106] = v[$106];
+                                var $109 = {};
+                                for (var $110 in v) {
+                                  if ({}.hasOwnProperty.call(v, $110)) {
+                                    $109[$110] = v[$110];
                                   }
                                   ;
                                 }
                                 ;
-                                $105.presence = Open.value;
-                                $105.animSub = Nothing.value;
-                                $105.contentNode = mcNode;
-                                $105.subs = [escSub, ptrSub, scrollSub, resizeSub];
-                                $105.postSub = new Just(psid);
-                                return $105;
+                                $109.presence = Open.value;
+                                $109.animSub = Nothing.value;
+                                $109.contentNode = mcNode;
+                                $109.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                                $109.postSub = new Just(psid);
+                                return $109;
                               });
                             });
                           });
@@ -24235,15 +24526,15 @@
       ;
       return [];
     }())(append113(function() {
-      var $111 = isRendered(st.presence);
-      if ($111) {
+      var $115 = isRendered(st.presence);
+      if ($115) {
         return [dataAttr("radix-popper-side")(sideName(st.placedSide)), dataAttr("radix-popper-align")(alignName(st.placedAlign))];
       }
       ;
       return [];
     }())(portalData7(st.triggerAttrs)))))(map49(fromPlainHTML)(st.trigger))])(function() {
-      var $112 = isRendered(st.presence);
-      if ($112) {
+      var $116 = isRendered(st.presence);
+      if ($116) {
         return [div3([ref2(wrapperRef5), dataAttr("radix-popper-content-wrapper")(""), style("position: fixed;")])([div3(append113([ref2(contentRef9), id2(st.contentId), classes2(st.style.content), role("dialog"), dataState(dataStateOf(st.presence)), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), tabIndex2(-1 | 0), style(st.contentStyle), onKeyDown(ContentKeyDown3.create), onClick(ContentClicked3.create)])(portalData7(st.portalAttrs)))(map49(fromPlainHTML)(st.content))])];
       }
       ;
@@ -24267,17 +24558,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return modify_17(function(v) {
-                  var $116 = {};
-                  for (var $117 in v) {
-                    if ({}.hasOwnProperty.call(v, $117)) {
-                      $116[$117] = v[$117];
+                  var $120 = {};
+                  for (var $121 in v) {
+                    if ({}.hasOwnProperty.call(v, $121)) {
+                      $120[$121] = v[$121];
                     }
                     ;
                   }
                   ;
-                  $116.placedSide = placed.placement.side;
-                  $116.placedAlign = placed.placement.align;
-                  return $116;
+                  $120.placedSide = placed.placement.side;
+                  $120.placedAlign = placed.placement.align;
+                  return $120;
                 });
               });
             }
@@ -24294,38 +24585,38 @@
     return bind34(get16)(function(st) {
       return when111(current(st.ctrl))(discard112(traverse_15(unsubscribe2)(st.subs))(function() {
         return discard112(for_26(st.postSub)(unsubscribe2))(function() {
-          return discard112(for_26(st.restoreEl)(function($160) {
-            return liftEffect7(focus($160));
+          return discard112(for_26(st.restoreEl)(function($167) {
+            return liftEffect7(focus($167));
           }))(function() {
             return discard112(modify_17(function(v) {
-              var $122 = {};
-              for (var $123 in v) {
-                if ({}.hasOwnProperty.call(v, $123)) {
-                  $122[$123] = v[$123];
+              var $126 = {};
+              for (var $127 in v) {
+                if ({}.hasOwnProperty.call(v, $127)) {
+                  $126[$127] = v[$127];
                 }
                 ;
               }
               ;
-              $122.ctrl = change2(false)(st.ctrl).next;
-              $122.presence = present(false)(st.presence);
-              $122.subs = [];
-              $122.postSub = Nothing.value;
-              $122.contentNode = Nothing.value;
-              return $122;
+              $126.ctrl = change2(false)(st.ctrl).next;
+              $126.presence = present(false)(st.presence);
+              $126.subs = [];
+              $126.postSub = Nothing.value;
+              $126.contentNode = Nothing.value;
+              return $126;
             }))(function() {
               return discard112(raise(new OpenChanged8(false)))(function() {
                 return bind34(scheduleAfter1(AfterClose7.value))(function(psid) {
                   return modify_17(function(v) {
-                    var $125 = {};
-                    for (var $126 in v) {
-                      if ({}.hasOwnProperty.call(v, $126)) {
-                        $125[$126] = v[$126];
+                    var $129 = {};
+                    for (var $130 in v) {
+                      if ({}.hasOwnProperty.call(v, $130)) {
+                        $129[$130] = v[$130];
                       }
                       ;
                     }
                     ;
-                    $125.postSub = new Just(psid);
-                    return $125;
+                    $129.postSub = new Just(psid);
+                    return $129;
                   });
                 });
               });
@@ -24357,14 +24648,14 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 473, column 15 - line 479, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 487, column 15 - line 493, column 42): " + [v.constructor.name]);
     };
   };
   var closeLabelHit3 = function(content3) {
     return function(labels9) {
       return function(ev) {
-        var wanted = map49(function($161) {
-          return toLower(trim($161));
+        var wanted = map49(function($168) {
+          return toLower(trim($168));
         })(labels9);
         var walk = function(node) {
           if (unsafeRefEq(node)(content3)) {
@@ -24377,7 +24668,7 @@
                 var v3 = fromNode2(node);
                 if (v3 instanceof Just && toLower(tagName(v3.value0)) === "button") {
                   var txt = textContent(node)();
-                  return elem7(toLower(trim(txt)))(wanted);
+                  return elem9(toLower(trim(txt)))(wanted);
                 }
                 ;
                 return false;
@@ -24395,11 +24686,11 @@
                 return false;
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 500, column 39 - line 502, column 32): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 514, column 39 - line 516, column 32): " + [v2.constructor.name]);
             };
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 491, column 3 - line 502, column 32): " + [node.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 505, column 3 - line 516, column 32): " + [node.constructor.name]);
         };
         var v = bind212(target5(ev))(fromEventTarget2);
         if (v instanceof Nothing) {
@@ -24410,67 +24701,103 @@
           return walk(v.value0);
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 486, column 3 - line 488, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 500, column 3 - line 502, column 29): " + [v.constructor.name]);
       };
     };
   };
   var handleAction15 = function(dictMonadEffect) {
     var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
     var useId2 = useId(monadEffectHalogenM2);
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var scheduleAfter1 = scheduleAfter3(dictMonadEffect);
     var closePopover1 = closePopover(dictMonadEffect);
     var openPopover1 = openPopover(dictMonadEffect);
-    var liftEffect7 = liftEffect(monadEffectHalogenM2);
     var reposition1 = reposition5(dictMonadEffect);
     var finalize1 = finalize5(dictMonadEffect);
     var finishClose1 = finishClose7(dictMonadEffect);
     return function(v) {
       if (v instanceof Initialize14) {
         return bind34(useId2)(function(cid) {
-          return modify_17(function(v1) {
-            var $142 = {};
-            for (var $143 in v1) {
-              if ({}.hasOwnProperty.call(v1, $143)) {
-                $142[$143] = v1[$143];
+          return discard112(modify_17(function(v1) {
+            var $146 = {};
+            for (var $147 in v1) {
+              if ({}.hasOwnProperty.call(v1, $147)) {
+                $146[$147] = v1[$147];
               }
               ;
             }
             ;
-            $142.contentId = cid;
-            return $142;
+            $146.contentId = cid;
+            return $146;
+          }))(function() {
+            return bind34(get16)(function(st) {
+              return when111(current(st.ctrl))(bind34(liftEffect7(bind120(windowImpl)(document)))(function(doc) {
+                return bind34(liftEffect7(windowTarget))(function(win) {
+                  var docTarget = toEventTarget(doc);
+                  return bind34(subscribe2($$escape(docTarget)(EscapePressed8.value)))(function(escSub) {
+                    return bind34(subscribe2(pointerDown(docTarget)(PointerDown4.create)))(function(ptrSub) {
+                      return bind34(subscribe2(eventListener2("scroll")(win)(function(v1) {
+                        return new Just(Reposition5.value);
+                      })))(function(scrollSub) {
+                        return bind34(subscribe2(eventListener2("resize")(win)(function(v1) {
+                          return new Just(Reposition5.value);
+                        })))(function(resizeSub) {
+                          return bind34(scheduleAfter1(AfterOpen8.value))(function(psid) {
+                            return modify_17(function(v1) {
+                              var $149 = {};
+                              for (var $150 in v1) {
+                                if ({}.hasOwnProperty.call(v1, $150)) {
+                                  $149[$150] = v1[$150];
+                                }
+                                ;
+                              }
+                              ;
+                              $149.subs = [escSub, ptrSub, scrollSub, resizeSub];
+                              $149.postSub = new Just(psid);
+                              return $149;
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              }));
+            });
           });
         });
       }
       ;
       if (v instanceof Receive16) {
         return modify_17(function(st) {
-          var $145 = {};
-          for (var $146 in st) {
-            if ({}.hasOwnProperty.call(st, $146)) {
-              $145[$146] = st[$146];
+          var $152 = {};
+          for (var $153 in st) {
+            if ({}.hasOwnProperty.call(st, $153)) {
+              $152[$153] = st[$153];
             }
             ;
           }
           ;
-          $145.ctrl = sync(v.value0.open)(st.ctrl);
-          $145.side = v.value0.side;
-          $145.align = v.value0.align;
-          $145.offset = v.value0.offset;
-          $145.padding = v.value0.padding;
-          $145.style = v.value0.style;
-          $145.trigger = v.value0.trigger;
-          $145.content = v.value0.content;
-          $145.closeLabels = v.value0.closeLabels;
-          $145.contentStyle = v.value0.contentStyle;
-          $145.triggerAttrs = v.value0.triggerAttrs;
-          $145.portalAttrs = v.value0.portalAttrs;
-          return $145;
+          $152.ctrl = sync(v.value0.open)(st.ctrl);
+          $152.side = v.value0.side;
+          $152.align = v.value0.align;
+          $152.offset = v.value0.offset;
+          $152.padding = v.value0.padding;
+          $152.style = v.value0.style;
+          $152.trigger = v.value0.trigger;
+          $152.content = v.value0.content;
+          $152.closeLabels = v.value0.closeLabels;
+          $152.contentStyle = v.value0.contentStyle;
+          $152.triggerAttrs = v.value0.triggerAttrs;
+          $152.portalAttrs = v.value0.portalAttrs;
+          return $152;
         });
       }
       ;
       if (v instanceof TriggerClicked6) {
         return bind34(get16)(function(st) {
-          var $149 = current(st.ctrl);
-          if ($149) {
+          var $156 = current(st.ctrl);
+          if ($156) {
             return closePopover1;
           }
           ;
@@ -24508,16 +24835,16 @@
                 if (animates) {
                   return bind34(subscribe2(animationEnd(toEventTarget2(mnode.value0))(AnimDone8.value)))(function(sub3) {
                     return discard112(modify_17(function(v1) {
-                      var $153 = {};
-                      for (var $154 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $154)) {
-                          $153[$154] = v1[$154];
+                      var $160 = {};
+                      for (var $161 in v1) {
+                        if ({}.hasOwnProperty.call(v1, $161)) {
+                          $160[$161] = v1[$161];
                         }
                         ;
                       }
                       ;
-                      $153.animSub = new Just(sub3);
-                      return $153;
+                      $160.animSub = new Just(sub3);
+                      return $160;
                     }))(function() {
                       return pure33(true);
                     });
@@ -24528,7 +24855,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 341, column 14 - line 349, column 24): " + [mnode.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 355, column 14 - line 363, column 24): " + [mnode.constructor.name]);
           }())(function(armed) {
             if (armed) {
               return bind34(getHTMLElementRef(wrapperRef5))(function(mwrap) {
@@ -24577,7 +24904,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 297, column 16 - line 372, column 19): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 297, column 16 - line 386, column 19): " + [v.constructor.name]);
     };
   };
   var component16 = function(dictMonadEffect) {
@@ -24588,8 +24915,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction15(dictMonadEffect),
         handleQuery: handleQuery15(dictMonadEffect),
-        receive: function($162) {
-          return Just.create(Receive16.create($162));
+        receive: function($169) {
+          return Just.create(Receive16.create($169));
         },
         initialize: new Just(Initialize14.value)
       })
@@ -26805,7 +27132,7 @@
   var for_113 = /* @__PURE__ */ for_31(foldableMaybe);
   var eq19 = /* @__PURE__ */ eq(eqOrientation);
   var clamp1 = /* @__PURE__ */ clamp(ordNumber);
-  var eq36 = /* @__PURE__ */ eq(eqDir);
+  var eq35 = /* @__PURE__ */ eq(eqDir);
   var append116 = /* @__PURE__ */ append(semigroupArray);
   var bind123 = /* @__PURE__ */ bind(bindEffect);
   var map53 = /* @__PURE__ */ map(functorMaybe);
@@ -27009,14 +27336,14 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 600, column 1 - line 600, column 41): " + [idx.constructor.name, total.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 613, column 1 - line 613, column 41): " + [idx.constructor.name, total.constructor.name]);
     };
   };
   var snapClamp = function(st) {
     return function(v) {
       var snapped = function() {
-        var $109 = st.step <= 0;
-        if ($109) {
+        var $111 = st.step <= 0;
+        if ($111) {
           return v;
         }
         ;
@@ -27028,16 +27355,16 @@
   var setValue12 = function(v) {
     return bind38(get20)(function(st) {
       return when25(current(st.ctrl) !== v)(discard28(modify_21(function(v1) {
-        var $110 = {};
-        for (var $111 in v1) {
-          if ({}.hasOwnProperty.call(v1, $111)) {
-            $110[$111] = v1[$111];
+        var $112 = {};
+        for (var $113 in v1) {
+          if ({}.hasOwnProperty.call(v1, $113)) {
+            $112[$113] = v1[$113];
           }
           ;
         }
         ;
-        $110.ctrl = change2(v)(st.ctrl).next;
-        return $110;
+        $112.ctrl = change2(v)(st.ctrl).next;
+        return $112;
       }))(function() {
         return raise(new ValueChanged6(v));
       }));
@@ -27073,16 +27400,16 @@
       if (v instanceof SetRangeValue) {
         return bind38(get20)(function(st) {
           return discard28(when25(notEq16(current(st.ctrl))(v.value0))(discard28(modify_21(function(v1) {
-            var $114 = {};
-            for (var $115 in v1) {
-              if ({}.hasOwnProperty.call(v1, $115)) {
-                $114[$115] = v1[$115];
+            var $116 = {};
+            for (var $117 in v1) {
+              if ({}.hasOwnProperty.call(v1, $117)) {
+                $116[$117] = v1[$117];
               }
               ;
             }
             ;
-            $114.ctrl = change2(v.value0)(st.ctrl).next;
-            return $114;
+            $116.ctrl = change2(v.value0)(st.ctrl).next;
+            return $116;
           }))(function() {
             return raise(new RangeValueChanged(v.value0));
           })))(function() {
@@ -27097,15 +27424,15 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 837, column 20 - line 846, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 850, column 20 - line 859, column 42): " + [v.constructor.name]);
     };
   };
   var rangeFocusThumb = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return function(idx) {
       return bind38(getHTMLElementRef(rangeThumbRef(idx)))(function(mel) {
-        return for_113(mel)(function($223) {
-          return liftEffect7(focus($223));
+        return for_113(mel)(function($229) {
+          return liftEffect7(focus($229));
         });
       });
     };
@@ -27126,7 +27453,7 @@
               return true;
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 725, column 15 - line 727, column 22): " + [lower.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 738, column 15 - line 740, column 22): " + [lower.constructor.name]);
           }();
           var okUpper = function() {
             if (upper instanceof Just) {
@@ -27137,10 +27464,10 @@
               return true;
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 728, column 15 - line 730, column 22): " + [upper.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 741, column 15 - line 743, column 22): " + [upper.constructor.name]);
           }();
-          var $124 = okLower && okUpper;
-          if ($124) {
+          var $126 = okLower && okUpper;
+          if ($126) {
             return new Just(proposed);
           }
           ;
@@ -27159,8 +27486,8 @@
       return function(me) {
         var fraction = function() {
           if (eq19(cfg.orientation)(Vertical.value)) {
-            var $125 = rect.height === 0;
-            if ($125) {
+            var $127 = rect.height === 0;
+            if ($127) {
               return 0;
             }
             ;
@@ -27169,22 +27496,22 @@
           ;
           if (otherwise) {
             var f = function() {
-              var $126 = rect.width === 0;
-              if ($126) {
+              var $128 = rect.width === 0;
+              if ($128) {
                 return 0;
               }
               ;
               return clamp1(0)(1)((toNumber(clientX(me)) - rect.x) / rect.width);
             }();
-            var $127 = eq36(cfg.dir)(RTL.value);
-            if ($127) {
+            var $129 = eq35(cfg.dir)(RTL.value);
+            if ($129) {
               return 1 - f;
             }
             ;
             return f;
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 333, column 5 - line 339, column 51): ");
+          throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 344, column 5 - line 350, column 51): ");
         }();
         return round2(toNumber(cfg.min) + fraction * toNumber(cfg.max - cfg.min | 0));
       };
@@ -27194,8 +27521,8 @@
     return function(value17) {
       var span4 = toNumber(st.max - st.min | 0);
       var raw = function() {
-        var $128 = span4 === 0;
-        if ($128) {
+        var $130 = span4 === 0;
+        if ($130) {
           return 0;
         }
         ;
@@ -27239,8 +27566,8 @@
             return false;
           }();
           var mult = function() {
-            var $132 = shiftKey3 && isArrow;
-            if ($132) {
+            var $134 = shiftKey3 && isArrow;
+            if ($134) {
               return 10;
             }
             ;
@@ -27312,6 +27639,7 @@
       orientation: input3.orientation,
       dir: input3.dir,
       disabled: input3.disabled,
+      ariaLabel: input3.ariaLabel,
       idPrefix: input3.idPrefix,
       style: input3.style,
       uid: "",
@@ -27335,14 +27663,14 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 429, column 15 - line 436, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 441, column 15 - line 448, column 42): " + [v.constructor.name]);
     };
   };
   var focusThumb = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind38(getHTMLElementRef(thumbRef))(function(mel) {
-      return for_113(mel)(function($224) {
-        return liftEffect7(focus($224));
+      return for_113(mel)(function($230) {
+        return liftEffect7(focus($230));
       });
     });
   };
@@ -27356,8 +27684,8 @@
               var wrapper = function() {
                 var pct = percent(ts)(value17);
                 var op = function() {
-                  var $142 = pct > 50;
-                  if ($142) {
+                  var $144 = pct > 50;
+                  if ($144) {
                     return "-";
                   }
                   ;
@@ -27373,7 +27701,7 @@
                     return [];
                   }
                   ;
-                  throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 697, column 19 - line 699, column 34): " + [mlabel.constructor.name]);
+                  throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 710, column 19 - line 712, column 34): " + [mlabel.constructor.name]);
                 }())(append116([aria("valuemin")(show16(st.min)), aria("valuenow")(show16(value17)), aria("valuemax")(show16(st.max)), aria("orientation")(orientationName(st.orientation)), dataOrientation(st.orientation), dataAttr("radix-collection-item")(""), attr2("style")(""), onKeyDown(RangeThumbKeyDown.create(idx))])(append116(function() {
                   if (st.disabled) {
                     return [];
@@ -27389,11 +27717,11 @@
                 }())))))([])]);
               }();
               var bubble = function() {
-                var $147 = st.isFormControl && st.name !== "";
-                if ($147) {
+                var $149 = st.isFormControl && st.name !== "";
+                if ($149) {
                   return [rangeBubbleInput(function() {
-                    var $148 = length(current(st.ctrl)) > 1;
-                    if ($148) {
+                    var $150 = length(current(st.ctrl)) > 1;
+                    if ($150) {
                       return st.name + "[]";
                     }
                     ;
@@ -27416,13 +27744,6 @@
     var rangeEnd = fmtPct(100 - pct);
     var thumbStart = fmtPct(pct);
     var isVertical = eq19(st.orientation)(Vertical.value);
-    var startEdge = function() {
-      if (isVertical) {
-        return "bottom";
-      }
-      ;
-      return "left";
-    }();
     var thumbTransform = function() {
       if (isVertical) {
         return "translateY(50%)";
@@ -27430,9 +27751,25 @@
       ;
       return "translateX(-50%)";
     }();
+    var isRTL = eq35(st.dir)(RTL.value);
+    var startEdge = function() {
+      if (isVertical) {
+        return "bottom";
+      }
+      ;
+      if (isRTL) {
+        return "right";
+      }
+      ;
+      return "left";
+    }();
     var endEdge = function() {
       if (isVertical) {
         return "top";
+      }
+      ;
+      if (isRTL) {
+        return "left";
       }
       ;
       return "right";
@@ -27449,13 +27786,20 @@
       }
       ;
       return [attr2("dir")(dirName3(st.dir))];
+    }())(append116(function() {
+      var $158 = st.ariaLabel === "";
+      if ($158) {
+        return [];
+      }
+      ;
+      return [aria("label")(st.ariaLabel)];
     }())(function() {
       if (st.disabled) {
         return [dataAttr("disabled")("")];
       }
       ;
       return [onMouseDown(SlideStart.create)];
-    }())))([span3(append116([classes2(st.style.track), dataOrientation(st.orientation)])(function() {
+    }()))))([span3(append116([classes2(st.style.track), dataOrientation(st.orientation)])(function() {
       if (st.disabled) {
         return [dataAttr("disabled")("")];
       }
@@ -27467,7 +27811,14 @@
       }
       ;
       return [];
-    }()))([])]), span3([attr2("style")("transform: var(--radix-slider-thumb-transform); position: absolute; " + (startEdge + (": calc(" + (thumbStart + "% + 0px);"))))])([span3(append116([classes2(st.style.thumb), ref2(thumbRef), role("slider"), aria("valuemin")(show16(st.min)), aria("valuenow")(show16(value17)), aria("valuemax")(show16(st.max)), aria("orientation")(orientationName(st.orientation)), dataOrientation(st.orientation), dataAttr("radix-collection-item")(""), attr2("style")(""), onKeyDown(ThumbKeyDown.create)])(append116(function() {
+    }()))([])]), span3([attr2("style")("transform: var(--radix-slider-thumb-transform); position: absolute; " + (startEdge + (": calc(" + (thumbStart + ("% " + (function() {
+      var $162 = pct > 50 !== isRTL;
+      if ($162) {
+        return "-";
+      }
+      ;
+      return "+";
+    }() + " 0px);"))))))])([span3(append116([classes2(st.style.thumb), ref2(thumbRef), role("slider"), aria("valuemin")(show16(st.min)), aria("valuenow")(show16(value17)), aria("valuemax")(show16(st.max)), aria("orientation")(orientationName(st.orientation)), dataOrientation(st.orientation), dataAttr("radix-collection-item")(""), attr2("style")(""), onKeyDown(ThumbKeyDown.create)])(append116(function() {
       if (st.disabled) {
         return [];
       }
@@ -27514,6 +27865,7 @@
       orientation: Horizontal.value,
       dir: LTR.value,
       disabled: false,
+      ariaLabel: "",
       idPrefix: "rdx-slider",
       style: defaultStyle16
     };
@@ -27547,40 +27899,41 @@
       if (v instanceof Initialize18) {
         return bind38(useId2)(function(uid) {
           return modify_21(function(v1) {
-            var $160 = {};
-            for (var $161 in v1) {
-              if ({}.hasOwnProperty.call(v1, $161)) {
-                $160[$161] = v1[$161];
+            var $166 = {};
+            for (var $167 in v1) {
+              if ({}.hasOwnProperty.call(v1, $167)) {
+                $166[$167] = v1[$167];
               }
               ;
             }
             ;
-            $160.uid = uid;
-            return $160;
+            $166.uid = uid;
+            return $166;
           });
         });
       }
       ;
       if (v instanceof Receive19) {
         return modify_21(function(st) {
-          var $163 = {};
-          for (var $164 in st) {
-            if ({}.hasOwnProperty.call(st, $164)) {
-              $163[$164] = st[$164];
+          var $169 = {};
+          for (var $170 in st) {
+            if ({}.hasOwnProperty.call(st, $170)) {
+              $169[$170] = st[$170];
             }
             ;
           }
           ;
-          $163.ctrl = sync(v.value0.value)(st.ctrl);
-          $163.min = v.value0.min;
-          $163.max = v.value0.max;
-          $163.step = v.value0.step;
-          $163.orientation = v.value0.orientation;
-          $163.dir = v.value0.dir;
-          $163.disabled = v.value0.disabled;
-          $163.idPrefix = v.value0.idPrefix;
-          $163.style = v.value0.style;
-          return $163;
+          $169.ctrl = sync(v.value0.value)(st.ctrl);
+          $169.min = v.value0.min;
+          $169.max = v.value0.max;
+          $169.step = v.value0.step;
+          $169.orientation = v.value0.orientation;
+          $169.dir = v.value0.dir;
+          $169.disabled = v.value0.disabled;
+          $169.ariaLabel = v.value0.ariaLabel;
+          $169.idPrefix = v.value0.idPrefix;
+          $169.style = v.value0.style;
+          return $169;
         });
       }
       ;
@@ -27600,7 +27953,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 374, column 7 - line 381, column 21): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 386, column 7 - line 393, column 21): " + [v1.constructor.name]);
           }());
         });
       }
@@ -27613,26 +27966,26 @@
                 return bind38(liftEffect7(bind123(windowImpl)(document)))(function(doc) {
                   var docTarget = toEventTarget(doc);
                   return bind38(subscribe2(eventListener2("mousemove")(docTarget)(function() {
-                    var $225 = map53(SlideMove.create);
-                    return function($226) {
-                      return $225(fromEvent2($226));
+                    var $231 = map53(SlideMove.create);
+                    return function($232) {
+                      return $231(fromEvent2($232));
                     };
                   }())))(function(moveSub) {
                     return bind38(subscribe2(eventListener2("mouseup")(docTarget)(function(v1) {
                       return new Just(SlideEnd.value);
                     })))(function(upSub) {
                       return modify_21(function(v1) {
-                        var $170 = {};
-                        for (var $171 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $171)) {
-                            $170[$171] = v1[$171];
+                        var $176 = {};
+                        for (var $177 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $177)) {
+                            $176[$177] = v1[$177];
                           }
                           ;
                         }
                         ;
-                        $170.dragging = true;
-                        $170.dragSubs = [moveSub, upSub];
-                        return $170;
+                        $176.dragging = true;
+                        $176.dragSubs = [moveSub, upSub];
+                        return $176;
                       });
                     });
                   });
@@ -27653,23 +28006,23 @@
         return bind38(get20)(function(st) {
           return discard28(for_210(st.dragSubs)(unsubscribe2))(function() {
             return modify_21(function(v1) {
-              var $175 = {};
-              for (var $176 in v1) {
-                if ({}.hasOwnProperty.call(v1, $176)) {
-                  $175[$176] = v1[$176];
+              var $181 = {};
+              for (var $182 in v1) {
+                if ({}.hasOwnProperty.call(v1, $182)) {
+                  $181[$182] = v1[$182];
                 }
                 ;
               }
               ;
-              $175.dragging = false;
-              $175.dragSubs = [];
-              return $175;
+              $181.dragging = false;
+              $181.dragSubs = [];
+              return $181;
             });
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 355, column 16 - line 402, column 52): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 366, column 16 - line 414, column 52): " + [v.constructor.name]);
     };
   };
   var component20 = function(dictMonadEffect) {
@@ -27680,8 +28033,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction19(dictMonadEffect),
         handleQuery: handleQuery18(dictMonadEffect),
-        receive: function($227) {
-          return Just.create(Receive19.create($227));
+        receive: function($233) {
+          return Just.create(Receive19.create($233));
         },
         initialize: new Just(Initialize18.value)
       })
@@ -27691,8 +28044,8 @@
     return function(target6) {
       var pick = function(best) {
         return function(cur) {
-          var $178 = cur.d < best.d;
-          if ($178) {
+          var $184 = cur.d < best.d;
+          if ($184) {
             return cur;
           }
           ;
@@ -27724,6 +28077,7 @@
       orientation: st.orientation,
       dir: st.dir,
       disabled: st.disabled,
+      ariaLabel: "",
       idPrefix: st.idPrefix,
       style: st.style,
       uid: st.uid,
@@ -27751,26 +28105,26 @@
               ;
               if (v2 instanceof Just) {
                 return discard28(modify_21(function(v3) {
-                  var $181 = {};
-                  for (var $182 in v3) {
-                    if ({}.hasOwnProperty.call(v3, $182)) {
-                      $181[$182] = v3[$182];
+                  var $187 = {};
+                  for (var $188 in v3) {
+                    if ({}.hasOwnProperty.call(v3, $188)) {
+                      $187[$188] = v3[$188];
                     }
                     ;
                   }
                   ;
-                  $181.ctrl = change2(v2.value0)(st.ctrl).next;
-                  return $181;
+                  $187.ctrl = change2(v2.value0)(st.ctrl).next;
+                  return $187;
                 }))(function() {
                   return raise(new RangeValueChanged(v2.value0));
                 });
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 825, column 35 - line 829, column 44): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 838, column 35 - line 842, column 44): " + [v2.constructor.name]);
             }());
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 823, column 5 - line 829, column 44): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 836, column 5 - line 842, column 44): " + [v.constructor.name]);
         });
       });
     };
@@ -27784,43 +28138,43 @@
       if (v instanceof RangeInitialize) {
         return bind38(useId2)(function(uid) {
           return modify_21(function(v1) {
-            var $187 = {};
-            for (var $188 in v1) {
-              if ({}.hasOwnProperty.call(v1, $188)) {
-                $187[$188] = v1[$188];
+            var $193 = {};
+            for (var $194 in v1) {
+              if ({}.hasOwnProperty.call(v1, $194)) {
+                $193[$194] = v1[$194];
               }
               ;
             }
             ;
-            $187.uid = uid;
-            return $187;
+            $193.uid = uid;
+            return $193;
           });
         });
       }
       ;
       if (v instanceof RangeReceive) {
         return modify_21(function(st) {
-          var $190 = {};
-          for (var $191 in st) {
-            if ({}.hasOwnProperty.call(st, $191)) {
-              $190[$191] = st[$191];
+          var $196 = {};
+          for (var $197 in st) {
+            if ({}.hasOwnProperty.call(st, $197)) {
+              $196[$197] = st[$197];
             }
             ;
           }
           ;
-          $190.ctrl = sync(v.value0.value)(st.ctrl);
-          $190.min = v.value0.min;
-          $190.max = v.value0.max;
-          $190.step = v.value0.step;
-          $190.minStepsBetweenThumbs = v.value0.minStepsBetweenThumbs;
-          $190.orientation = v.value0.orientation;
-          $190.dir = v.value0.dir;
-          $190.disabled = v.value0.disabled;
-          $190.idPrefix = v.value0.idPrefix;
-          $190.style = v.value0.style;
-          $190.name = v.value0.name;
-          $190.isFormControl = v.value0.isFormControl;
-          return $190;
+          $196.ctrl = sync(v.value0.value)(st.ctrl);
+          $196.min = v.value0.min;
+          $196.max = v.value0.max;
+          $196.step = v.value0.step;
+          $196.minStepsBetweenThumbs = v.value0.minStepsBetweenThumbs;
+          $196.orientation = v.value0.orientation;
+          $196.dir = v.value0.dir;
+          $196.disabled = v.value0.disabled;
+          $196.idPrefix = v.value0.idPrefix;
+          $196.style = v.value0.style;
+          $196.name = v.value0.name;
+          $196.isFormControl = v.value0.isFormControl;
+          return $196;
         });
       }
       ;
@@ -27856,36 +28210,36 @@
                         ;
                         if (v5 instanceof Just) {
                           return discard28(modify_21(function(v6) {
-                            var $198 = {};
-                            for (var $199 in v6) {
-                              if ({}.hasOwnProperty.call(v6, $199)) {
-                                $198[$199] = v6[$199];
+                            var $204 = {};
+                            for (var $205 in v6) {
+                              if ({}.hasOwnProperty.call(v6, $205)) {
+                                $204[$205] = v6[$205];
                               }
                               ;
                             }
                             ;
-                            $198.ctrl = change2(v5.value0)(st.ctrl).next;
-                            return $198;
+                            $204.ctrl = change2(v5.value0)(st.ctrl).next;
+                            return $204;
                           }))(function() {
                             return raise(new RangeValueChanged(v5.value0));
                           });
                         }
                         ;
-                        throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 769, column 21 - line 773, column 58): " + [v5.constructor.name]);
+                        throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 782, column 21 - line 786, column 58): " + [v5.constructor.name]);
                       }());
                     }
                     ;
-                    throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 765, column 15 - line 773, column 58): " + [v3.constructor.name]);
+                    throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 778, column 15 - line 786, column 58): " + [v3.constructor.name]);
                   }())(function() {
                     return rangeFocusThumb1(v.value0);
                   });
                 });
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 761, column 11 - line 774, column 34): " + [v2.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 774, column 11 - line 787, column 34): " + [v2.constructor.name]);
             }
             ;
-            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 758, column 7 - line 774, column 34): " + [v1.constructor.name]);
+            throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 771, column 7 - line 787, column 34): " + [v1.constructor.name]);
           }());
         });
       }
@@ -27908,27 +28262,27 @@
                       return bind38(liftEffect7(bind123(windowImpl)(document)))(function(doc) {
                         var docTarget = toEventTarget(doc);
                         return bind38(subscribe2(eventListener2("mousemove")(docTarget)(function() {
-                          var $228 = map53(RangeSlideMove.create);
-                          return function($229) {
-                            return $228(fromEvent2($229));
+                          var $234 = map53(RangeSlideMove.create);
+                          return function($235) {
+                            return $234(fromEvent2($235));
                           };
                         }())))(function(moveSub) {
                           return bind38(subscribe2(eventListener2("mouseup")(docTarget)(function(v1) {
                             return new Just(RangeSlideEnd.value);
                           })))(function(upSub) {
                             return modify_21(function(v1) {
-                              var $207 = {};
-                              for (var $208 in v1) {
-                                if ({}.hasOwnProperty.call(v1, $208)) {
-                                  $207[$208] = v1[$208];
+                              var $213 = {};
+                              for (var $214 in v1) {
+                                if ({}.hasOwnProperty.call(v1, $214)) {
+                                  $213[$214] = v1[$214];
                                 }
                                 ;
                               }
                               ;
-                              $207.dragging = true;
-                              $207.dragSubs = [moveSub, upSub];
-                              $207.dragThumb = idx;
-                              return $207;
+                              $213.dragging = true;
+                              $213.dragSubs = [moveSub, upSub];
+                              $213.dragThumb = idx;
+                              return $213;
                             });
                           });
                         });
@@ -27963,23 +28317,23 @@
         return bind38(get20)(function(st) {
           return discard28(for_210(st.dragSubs)(unsubscribe2))(function() {
             return modify_21(function(v1) {
-              var $212 = {};
-              for (var $213 in v1) {
-                if ({}.hasOwnProperty.call(v1, $213)) {
-                  $212[$213] = v1[$213];
+              var $218 = {};
+              for (var $219 in v1) {
+                if ({}.hasOwnProperty.call(v1, $219)) {
+                  $218[$219] = v1[$219];
                 }
                 ;
               }
               ;
-              $212.dragging = false;
-              $212.dragSubs = [];
-              return $212;
+              $218.dragging = false;
+              $218.dragSubs = [];
+              return $218;
             });
           });
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 735, column 21 - line 804, column 52): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Slider (line 748, column 21 - line 817, column 52): " + [v.constructor.name]);
     };
   };
   var rangeRender = function(st) {
@@ -28051,8 +28405,8 @@
         finalize: defaultEval.finalize,
         handleAction: rangeHandleAction(dictMonadEffect),
         handleQuery: rangeHandleQuery(dictMonadEffect),
-        receive: function($230) {
-          return Just.create(RangeReceive.create($230));
+        receive: function($236) {
+          return Just.create(RangeReceive.create($236));
         },
         initialize: new Just(RangeInitialize.value)
       })
@@ -30026,7 +30380,7 @@
   }();
 
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Hydrogen.Radix.ToggleGroup/index.js
-  var elem8 = /* @__PURE__ */ elem2(eqString);
+  var elem10 = /* @__PURE__ */ elem2(eqString);
   var bind43 = /* @__PURE__ */ bind(bindHalogenM);
   var get25 = /* @__PURE__ */ get(monadStateHalogenM);
   var when30 = /* @__PURE__ */ when(applicativeHalogenM);
@@ -30125,7 +30479,7 @@
       return !(st.disabled || i2.disabled);
     };
     var v = findIndex(function(i2) {
-      return elem8(i2.value)(pressedSet) && enabledAt(i2);
+      return elem10(i2.value)(pressedSet) && enabledAt(i2);
     })(st.items);
     if (v instanceof Just) {
       return v.value0;
@@ -30164,7 +30518,7 @@
     return function(idx) {
       return function(item) {
         var pressedSet = current(st.ctrl);
-        var on2 = elem8(item.value)(pressedSet);
+        var on2 = elem10(item.value)(pressedSet);
         var disabled11 = st.disabled || item.disabled;
         var curIdx = tabStopIndex(st);
         var ti = function() {
@@ -30317,7 +30671,7 @@
           return when30(!st.disabled)(function() {
             var cur = current(st.ctrl);
             var next = function() {
-              var $74 = elem8(v.value0)(cur);
+              var $74 = elem10(v.value0)(cur);
               if ($74) {
                 return filter(function(v1) {
                   return v1 !== v.value0;
@@ -30351,7 +30705,7 @@
               return fromMaybe("")(map127(function(v1) {
                 return v1.value;
               })(find2(function(i2) {
-                return elem8(i2.value)(curValue);
+                return elem10(i2.value)(curValue);
               })(enabled)));
             }
             ;
@@ -30427,7 +30781,7 @@
             var curValue = current(st.ctrl);
             var target6 = function() {
               var v1 = findIndex(function(i2) {
-                return elem8(i2.value)(curValue);
+                return elem10(i2.value)(curValue);
               })(enabled);
               if (v1 instanceof Just) {
                 return index(enabled)(v1.value0);
@@ -30524,7 +30878,7 @@
   var modify_27 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var show19 = /* @__PURE__ */ show(showInt);
   var type_37 = /* @__PURE__ */ type_17(isPropButtonType);
-  var elem9 = /* @__PURE__ */ elem2(eqString);
+  var elem11 = /* @__PURE__ */ elem2(eqString);
   var append121 = /* @__PURE__ */ append(semigroupArray);
   var for_35 = /* @__PURE__ */ for_(applicativeHalogenM)(foldableMaybe);
   var when31 = /* @__PURE__ */ when(applicativeHalogenM);
@@ -30914,7 +31268,7 @@
           return false;
         }();
         var pressed2 = fromMaybe([])(index(st.toggleValues)(gi));
-        var on2 = elem9(it.value)(pressed2);
+        var on2 = elem11(it.value)(pressed2);
         var key2 = "g" + (show19(gi) + ("-" + it.value));
         return button(append121([type_37(ButtonButton.value), ref2(itemRef7(key2)), dataAttr("state")(function() {
           if (on2) {
@@ -31031,7 +31385,7 @@
           var groupValue = "g" + show19(v.value0);
           var cur = fromMaybe([])(index(st.toggleValues)(v.value0));
           var next = function() {
-            var $111 = elem9(v.value1)(cur);
+            var $111 = elem11(v.value1)(cur);
             if ($111) {
               return filter(function(v1) {
                 return v1 !== v.value1;
@@ -31466,23 +31820,23 @@
     return bind45(get27)(function(st) {
       return when32(current(st.ctrl))(discard35(traverse_17(unsubscribe2)(st.subs))(function() {
         return discard35(for_36(st.postSub)(unsubscribe2))(function() {
-          return discard35(for_36(st.restoreEl)(function($139) {
-            return liftEffect7(focus($139));
+          return discard35(for_36(st.restoreEl)(function($147) {
+            return liftEffect7(focus($147));
           }))(function() {
             return discard35(modify_28(function(v) {
-              var $91 = {};
-              for (var $92 in v) {
-                if ({}.hasOwnProperty.call(v, $92)) {
-                  $91[$92] = v[$92];
+              var $96 = {};
+              for (var $97 in v) {
+                if ({}.hasOwnProperty.call(v, $97)) {
+                  $96[$97] = v[$97];
                 }
                 ;
               }
               ;
-              $91.ctrl = change2(false)(st.ctrl).next;
-              $91.restoreEl = Nothing.value;
-              $91.subs = [];
-              $91.postSub = Nothing.value;
-              return $91;
+              $96.ctrl = change2(false)(st.ctrl).next;
+              $96.restoreEl = Nothing.value;
+              $96.subs = [];
+              $96.postSub = Nothing.value;
+              return $96;
             }))(function() {
               return raise(new OpenChanged11(false));
             });
@@ -31494,22 +31848,22 @@
   var cancelPending = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind45(get27)(function(st) {
-      return discard35(for_36(st.pendingOpen)(function($140) {
-        return liftEffect7(clearTimeout2($140));
+      return discard35(for_36(st.pendingOpen)(function($148) {
+        return liftEffect7(clearTimeout2($148));
       }))(function() {
         return discard35(for_36(st.pendingSub)(unsubscribe2))(function() {
           return modify_28(function(v) {
-            var $94 = {};
-            for (var $95 in v) {
-              if ({}.hasOwnProperty.call(v, $95)) {
-                $94[$95] = v[$95];
+            var $99 = {};
+            for (var $100 in v) {
+              if ({}.hasOwnProperty.call(v, $100)) {
+                $99[$100] = v[$100];
               }
               ;
             }
             ;
-            $94.pendingOpen = Nothing.value;
-            $94.pendingSub = Nothing.value;
-            return $94;
+            $99.pendingOpen = Nothing.value;
+            $99.pendingSub = Nothing.value;
+            return $99;
           });
         });
       });
@@ -31525,18 +31879,18 @@
           return when32(!current(st.ctrl))(bind45(liftEffect7(bind125(windowImpl)(document)))(function(doc) {
             return bind45(liftEffect7(activeElement(doc)))(function(mprev) {
               return discard35(modify_28(function(v) {
-                var $97 = {};
-                for (var $98 in v) {
-                  if ({}.hasOwnProperty.call(v, $98)) {
-                    $97[$98] = v[$98];
+                var $102 = {};
+                for (var $103 in v) {
+                  if ({}.hasOwnProperty.call(v, $103)) {
+                    $102[$103] = v[$103];
                   }
                   ;
                 }
                 ;
-                $97.ctrl = change2(true)(st.ctrl).next;
-                $97.restoreEl = mprev;
-                $97.wasDelayed = delayed;
-                return $97;
+                $102.ctrl = change2(true)(st.ctrl).next;
+                $102.restoreEl = mprev;
+                $102.wasDelayed = delayed;
+                return $102;
               }))(function() {
                 return discard35(raise(new OpenChanged11(true)))(function() {
                   return bind45(liftEffect7(windowTarget))(function(win) {
@@ -31550,17 +31904,17 @@
                         })))(function(resizeSub) {
                           return bind45(scheduleAfterOpen1)(function(psid) {
                             return modify_28(function(v) {
-                              var $100 = {};
-                              for (var $101 in v) {
-                                if ({}.hasOwnProperty.call(v, $101)) {
-                                  $100[$101] = v[$101];
+                              var $105 = {};
+                              for (var $106 in v) {
+                                if ({}.hasOwnProperty.call(v, $106)) {
+                                  $105[$106] = v[$106];
                                 }
                                 ;
                               }
                               ;
-                              $100.subs = [escSub, scrollSub, resizeSub];
-                              $100.postSub = new Just(psid);
-                              return $100;
+                              $105.subs = [escSub, scrollSub, resizeSub];
+                              $105.postSub = new Just(psid);
+                              return $105;
                             });
                           });
                         });
@@ -31597,7 +31951,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 417, column 15 - line 423, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 432, column 15 - line 438, column 42): " + [v.constructor.name]);
     };
   };
   var scheduleOpen2 = function(dictMonadEffect) {
@@ -31619,17 +31973,17 @@
               return bind45(subscribe2(voidRight12(Opened2.value)(v.emitter)))(function(sid) {
                 return bind45(liftEffect7(setTimeout2(st.delayMs)(notify(v.listener)(unit))))(function(tid) {
                   return modify_28(function(v1) {
-                    var $111 = {};
-                    for (var $112 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $112)) {
-                        $111[$112] = v1[$112];
+                    var $116 = {};
+                    for (var $117 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $117)) {
+                        $116[$117] = v1[$117];
                       }
                       ;
                     }
                     ;
-                    $111.pendingOpen = new Just(tid);
-                    $111.pendingSub = new Just(sid);
-                    return $111;
+                    $116.pendingOpen = new Just(tid);
+                    $116.pendingSub = new Just(sid);
+                    return $116;
                   });
                 });
               });
@@ -31638,7 +31992,7 @@
           ;
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 324, column 5 - line 332, column 74): " + [st.pendingOpen.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 339, column 5 - line 347, column 74): " + [st.pendingOpen.constructor.name]);
       }());
     });
   };
@@ -31681,8 +32035,8 @@
     }()))))(map61(fromPlainHTML)(st.trigger))])(function() {
       if (open) {
         return [div3([ref2(wrapperRef7), dataAttr("radix-popper-content-wrapper")(""), style("position: fixed;")])([div3(append122([ref2(contentRef11), classes2(st.style.content), dataState(stateAttr), dataAttr("side")(sideName(st.placedSide)), dataAttr("align")(alignName(st.placedAlign)), style(st.contentStyle)])(portalData9(st.portalAttrs)))(append122(map61(fromPlainHTML)(st.content))(append122(function() {
-          var $121 = $$null(st.arrow);
-          if ($121) {
+          var $126 = $$null(st.arrow);
+          if ($126) {
             return [];
           }
           ;
@@ -31710,17 +32064,17 @@
                 padding: st.padding
               })))(function(placed) {
                 return discard35(modify_28(function(v) {
-                  var $125 = {};
-                  for (var $126 in v) {
-                    if ({}.hasOwnProperty.call(v, $126)) {
-                      $125[$126] = v[$126];
+                  var $130 = {};
+                  for (var $131 in v) {
+                    if ({}.hasOwnProperty.call(v, $131)) {
+                      $130[$131] = v[$131];
                     }
                     ;
                   }
                   ;
-                  $125.placedSide = placed.placement.side;
-                  $125.placedAlign = placed.placement.align;
-                  return $125;
+                  $130.placedSide = placed.placement.side;
+                  $130.placedAlign = placed.placement.align;
+                  return $130;
                 }))(function() {
                   return bind45(getHTMLElementRef(arrowRef))(function(marrow) {
                     return for_36(marrow)(function(arrow) {
@@ -31744,7 +32098,10 @@
     });
   };
   var handleAction26 = function(dictMonadEffect) {
-    var useId2 = useId(monadEffectHalogenM(dictMonadEffect));
+    var monadEffectHalogenM2 = monadEffectHalogenM(dictMonadEffect);
+    var useId2 = useId(monadEffectHalogenM2);
+    var liftEffect7 = liftEffect(monadEffectHalogenM2);
+    var scheduleAfterOpen1 = scheduleAfterOpen7(dictMonadEffect);
     var scheduleOpen1 = scheduleOpen2(dictMonadEffect);
     var cancelPending1 = cancelPending(dictMonadEffect);
     var openTooltip1 = openTooltip(dictMonadEffect);
@@ -31754,45 +32111,78 @@
     return function(v) {
       if (v instanceof Initialize22) {
         return bind45(useId2)(function(cid) {
-          return modify_28(function(v1) {
-            var $132 = {};
-            for (var $133 in v1) {
-              if ({}.hasOwnProperty.call(v1, $133)) {
-                $132[$133] = v1[$133];
+          return discard35(modify_28(function(v1) {
+            var $137 = {};
+            for (var $138 in v1) {
+              if ({}.hasOwnProperty.call(v1, $138)) {
+                $137[$138] = v1[$138];
               }
               ;
             }
             ;
-            $132.contentId = cid;
-            return $132;
+            $137.contentId = cid;
+            return $137;
+          }))(function() {
+            return bind45(get27)(function(st) {
+              return when32(current(st.ctrl))(bind45(liftEffect7(bind125(windowImpl)(document)))(function(doc) {
+                return bind45(liftEffect7(windowTarget))(function(win) {
+                  var docTarget = toEventTarget(doc);
+                  return bind45(subscribe2($$escape(docTarget)(EscapePressed11.value)))(function(escSub) {
+                    return bind45(subscribe2(eventListener2("scroll")(win)(function(v1) {
+                      return new Just(Reposition7.value);
+                    })))(function(scrollSub) {
+                      return bind45(subscribe2(eventListener2("resize")(win)(function(v1) {
+                        return new Just(Reposition7.value);
+                      })))(function(resizeSub) {
+                        return bind45(scheduleAfterOpen1)(function(psid) {
+                          return modify_28(function(v1) {
+                            var $140 = {};
+                            for (var $141 in v1) {
+                              if ({}.hasOwnProperty.call(v1, $141)) {
+                                $140[$141] = v1[$141];
+                              }
+                              ;
+                            }
+                            ;
+                            $140.subs = [escSub, scrollSub, resizeSub];
+                            $140.postSub = new Just(psid);
+                            return $140;
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              }));
+            });
           });
         });
       }
       ;
       if (v instanceof Receive26) {
         return modify_28(function(st) {
-          var $135 = {};
-          for (var $136 in st) {
-            if ({}.hasOwnProperty.call(st, $136)) {
-              $135[$136] = st[$136];
+          var $143 = {};
+          for (var $144 in st) {
+            if ({}.hasOwnProperty.call(st, $144)) {
+              $143[$144] = st[$144];
             }
             ;
           }
           ;
-          $135.ctrl = sync(v.value0.open)(st.ctrl);
-          $135.side = v.value0.side;
-          $135.align = v.value0.align;
-          $135.offset = v.value0.offset;
-          $135.padding = v.value0.padding;
-          $135.style = v.value0.style;
-          $135.trigger = v.value0.trigger;
-          $135.content = v.value0.content;
-          $135.contentStyle = v.value0.contentStyle;
-          $135.arrow = v.value0.arrow;
-          $135.triggerAttrs = v.value0.triggerAttrs;
-          $135.portalAttrs = v.value0.portalAttrs;
-          $135.delayMs = v.value0.delayMs;
-          return $135;
+          $143.ctrl = sync(v.value0.open)(st.ctrl);
+          $143.side = v.value0.side;
+          $143.align = v.value0.align;
+          $143.offset = v.value0.offset;
+          $143.padding = v.value0.padding;
+          $143.style = v.value0.style;
+          $143.trigger = v.value0.trigger;
+          $143.content = v.value0.content;
+          $143.contentStyle = v.value0.contentStyle;
+          $143.arrow = v.value0.arrow;
+          $143.triggerAttrs = v.value0.triggerAttrs;
+          $143.portalAttrs = v.value0.portalAttrs;
+          $143.delayMs = v.value0.delayMs;
+          return $143;
         });
       }
       ;
@@ -31828,7 +32218,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 279, column 16 - line 314, column 19): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.Tooltip (line 279, column 16 - line 329, column 19): " + [v.constructor.name]);
     };
   };
   var component27 = function(dictMonadEffect) {
@@ -31839,8 +32229,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction26(dictMonadEffect),
         handleQuery: handleQuery25(dictMonadEffect),
-        receive: function($141) {
-          return Just.create(Receive26.create($141));
+        receive: function($149) {
+          return Just.create(Receive26.create($149));
         },
         initialize: new Just(Initialize22.value)
       })
@@ -32955,7 +33345,7 @@
       return visuallyHidden_([text5("required")]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2024, column 1 - line 2024, column 60): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2064, column 1 - line 2064, column 60): " + [s.constructor.name]);
   };
   var tooltipStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
@@ -33288,7 +33678,7 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1403, column 1 - line 1403, column 48): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 1443, column 1 - line 1443, column 48): " + [s.constructor.name]);
   };
   var toggleGroupDisabledInput = /* @__PURE__ */ function() {
     return {
@@ -33546,7 +33936,7 @@
         return append31([kv.before])(splitOn(sep)(drop3(1)(kv.after)));
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2116, column 17 - line 2118, column 91): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2156, column 17 - line 2158, column 91): " + [v.constructor.name]);
     };
   };
   var sliderRangeInput = function(s) {
@@ -33615,16 +34005,38 @@
   var sliderInput = function(s) {
     return {
       value: defaultInput18.value,
-      dir: defaultInput18.dir,
       idPrefix: defaultInput18.idPrefix,
-      defaultValue: 40,
+      defaultValue: function() {
+        var $255 = s === "highvalue";
+        if ($255) {
+          return 80;
+        }
+        ;
+        return 40;
+      }(),
+      ariaLabel: function() {
+        var $256 = s === "arialabel";
+        if ($256) {
+          return "Volume";
+        }
+        ;
+        return "";
+      }(),
+      dir: function() {
+        var $257 = s === "rtl";
+        if ($257) {
+          return RTL.value;
+        }
+        ;
+        return LTR.value;
+      }(),
       min: 0,
       max: 100,
       step: 1,
       disabled: s === "disabled",
       orientation: function() {
-        var $255 = s === "vertical";
-        if ($255) {
+        var $258 = s === "vertical";
+        if ($258) {
           return Vertical.value;
         }
         ;
@@ -33659,12 +34071,12 @@
       return separator2([]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2071, column 1 - line 2071, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2111, column 1 - line 2111, column 57): " + [s.constructor.name]);
   };
   var separatorPrimPage = function(s) {
     var orientation = function() {
-      var $257 = s === "vsem" || s === "vdec";
-      if ($257) {
+      var $260 = s === "vsem" || s === "vdec";
+      if ($260) {
         return Vertical.value;
       }
       ;
@@ -33724,16 +34136,16 @@
       widthPx: 200,
       heightPx: 120,
       scrollbars: function() {
-        var $258 = s === "horizontal";
-        if ($258) {
+        var $261 = s === "horizontal";
+        if ($261) {
           return Horizontal$prime.value;
         }
         ;
         return Both.value;
       }(),
       radius: function() {
-        var $259 = s === "radius";
-        if ($259) {
+        var $262 = s === "radius";
+        if ($262) {
           return "full";
         }
         ;
@@ -33777,8 +34189,8 @@
       idPrefix: defaultInput14.idPrefix,
       rootStyle: defaultInput14.rootStyle,
       items: function() {
-        var $260 = s === "keys" || s === "mixed";
-        if ($260) {
+        var $263 = s === "keys" || s === "mixed";
+        if ($263) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33794,8 +34206,8 @@
           }];
         }
         ;
-        var $261 = s === "loopoff" || s === "rtl";
-        if ($261) {
+        var $264 = s === "loopoff" || s === "rtl";
+        if ($264) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33811,8 +34223,8 @@
           }];
         }
         ;
-        var $262 = s === "alldisabled";
-        if ($262) {
+        var $265 = s === "alldisabled";
+        if ($265) {
           return [{
             value: "1",
             label: [text5(" Default")],
@@ -33837,8 +34249,8 @@
       defaultValue: new Just("1"),
       disabled: s === "disabledgroup",
       orientation: function() {
-        var $263 = s === "horizontal" || s === "rtl";
-        if ($263) {
+        var $266 = s === "horizontal" || s === "rtl";
+        if ($266) {
           return Horizontal.value;
         }
         ;
@@ -33846,8 +34258,8 @@
       }(),
       explicitOrientation: s === "horizontal" || s === "rtl",
       dir: function() {
-        var $264 = s === "rtl";
-        if ($264) {
+        var $267 = s === "rtl";
+        if ($267) {
           return RTL.value;
         }
         ;
@@ -33857,8 +34269,8 @@
       itemIds: false,
       labelOutside: true,
       name: function() {
-        var $265 = s === "form";
-        if ($265) {
+        var $268 = s === "form";
+        if ($268) {
           return "plan";
         }
         ;
@@ -33942,8 +34354,8 @@
             class_: cn("rt-ProgressRoot rt-r-size-2 rt-variant-surface"),
             indicator: cn("rt-ProgressIndicator"),
             rootAttrs: function() {
-              var $266 = styl === "";
-              if ($266) {
+              var $269 = styl === "";
+              if ($269) {
                 return [];
               }
               ;
@@ -33985,13 +34397,20 @@
   var popperContentVars = function(c) {
     return "--radix-" + (c + ("-content-transform-origin: var(--radix-popper-transform-origin); " + ("--radix-" + (c + ("-content-available-width: var(--radix-popper-available-width); " + ("--radix-" + (c + ("-content-available-height: var(--radix-popper-available-height); " + ("--radix-" + (c + ("-trigger-width: var(--radix-popper-anchor-width); " + ("--radix-" + (c + "-trigger-height: var(--radix-popper-anchor-height);")))))))))))));
   };
-  var tooltipInput = /* @__PURE__ */ function() {
+  var tooltipInput = function(s) {
     return {
-      open: defaultInput24.open,
-      defaultOpen: defaultInput24.defaultOpen,
       side: defaultInput24.side,
       align: defaultInput24.align,
       delayMs: defaultInput24.delayMs,
+      open: function() {
+        var $271 = s === "controlled";
+        if ($271) {
+          return new Just(true);
+        }
+        ;
+        return Nothing.value;
+      }(),
+      defaultOpen: s === "defaultopen",
       style: tooltipStyle,
       offset: 8,
       padding: 10,
@@ -34002,35 +34421,42 @@
       content: [textAs("p")([new Size("1"), new Class("rt-TooltipText")])([text5("Add to library")])],
       arrow: [tooltipArrow]
     };
-  }();
+  };
   var popoverStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"),
     content: /* @__PURE__ */ cn("light radix-themes rt-PopoverContent rt-PopperContent rt-r-max-w rt-r-size-2 rt-r-w")
   };
   var popoverInput = function(s) {
     return {
-      open: defaultInput13.open,
-      defaultOpen: defaultInput13.defaultOpen,
       side: defaultInput13.side,
       offset: defaultInput13.offset,
       padding: defaultInput13.padding,
       align: Start.value,
+      open: function() {
+        var $272 = s === "controlled";
+        if ($272) {
+          return new Just(true);
+        }
+        ;
+        return Nothing.value;
+      }(),
+      defaultOpen: s === "defaultopen",
       style: popoverStyle,
       triggerAttrs: [new Tuple("accent-color", "")],
       portalAttrs: portalThemeAttrs,
       contentStyle: "--width: 360px; --max-width: 9999px; " + popperContentVars("popover"),
       trigger: [text5("Comment")],
       closeLabels: function() {
-        var $268 = s === "close";
-        if ($268) {
+        var $273 = s === "close";
+        if ($273) {
           return ["Comment"];
         }
         ;
         return [];
       }(),
       content: [flex([new Gap("3")])([box([new Class("rt-r-fg-1")])(append31([textArea("Write a comment\u2026")([new Height("80px")])])(function() {
-        var $269 = s === "close";
-        if ($269) {
+        var $274 = s === "close";
+        if ($274) {
           return [flex([new Gap("3"), new Mt("3"), new Justify("end")])([button3([new Size("1")])([text5("Comment")])])];
         }
         ;
@@ -34058,24 +34484,24 @@
       showLabel: defaultInput12.showLabel,
       hideLabel: defaultInput12.hideLabel,
       inputId: function() {
-        var $270 = s === "multi";
-        if ($270) {
+        var $275 = s === "multi";
+        if ($275) {
           return Nothing.value;
         }
         ;
         return new Just("password");
       }(),
       toggleVisible: function() {
-        var $271 = s === "autolabel";
-        if ($271) {
+        var $276 = s === "autolabel";
+        if ($276) {
           return [passwordToggleIcon];
         }
         ;
         return [text5("Hide")];
       }(),
       toggleHidden: function() {
-        var $272 = s === "autolabel";
-        if ($272) {
+        var $277 = s === "autolabel";
+        if ($277) {
           return [passwordToggleIcon];
         }
         ;
@@ -34084,8 +34510,8 @@
       iconOnly: s === "autolabel",
       disabled: s === "disabled",
       name: function() {
-        var $273 = s === "passthrough";
-        if ($273) {
+        var $278 = s === "passthrough";
+        if ($278) {
           return new Just("pw");
         }
         ;
@@ -34093,16 +34519,16 @@
       }(),
       required: s === "passthrough",
       placeholder: function() {
-        var $274 = s === "passthrough";
-        if ($274) {
+        var $279 = s === "passthrough";
+        if ($279) {
           return new Just("Enter password");
         }
         ;
         return Nothing.value;
       }(),
       visible: function() {
-        var $275 = s === "controlled";
-        if ($275) {
+        var $280 = s === "controlled";
+        if ($280) {
           return new Just(false);
         }
         ;
@@ -34124,7 +34550,7 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1759, column 1 - line 1759, column 90): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 1799, column 1 - line 1799, column 90): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var onePxPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC";
@@ -34136,24 +34562,24 @@
       withIndicator: defaultInput11.withIndicator,
       style: defaultInput11.style,
       defaultValue: function() {
-        var $278 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
-        if ($278) {
+        var $283 = s === "open" || (s === "clicktoggle" || (s === "vertical" || s === "rtl"));
+        if ($283) {
           return "one";
         }
         ;
         return "";
       }(),
       orientation: function() {
-        var $279 = s === "vertical";
-        if ($279) {
+        var $284 = s === "vertical";
+        if ($284) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $280 = s === "rtl";
-        if ($280) {
+        var $285 = s === "rtl";
+        if ($285) {
           return RTL.value;
         }
         ;
@@ -34185,22 +34611,37 @@
   var menubarSubEntry = /* @__PURE__ */ menuSub3("share")([/* @__PURE__ */ text5("Share")])([/* @__PURE__ */ menuItem("email")([/* @__PURE__ */ text5("Email link")]), /* @__PURE__ */ menuItem("messages")([/* @__PURE__ */ text5("Messages")]), menuSeparator3, /* @__PURE__ */ menuItem("copy-link")([/* @__PURE__ */ text5("Copy link")])]);
   var menubarInput = function(s) {
     return {
-      value: defaultInput10.value,
       defaultValue: defaultInput10.defaultValue,
       side: defaultInput10.side,
       offset: defaultInput10.offset,
       padding: defaultInput10.padding,
-      loop: defaultInput10.loop,
-      dir: defaultInput10.dir,
       idPrefix: defaultInput10.idPrefix,
       style: defaultInput10.style,
       triggerAttrs: defaultInput10.triggerAttrs,
       portalAttrs: defaultInput10.portalAttrs,
       align: Start.value,
+      dir: function() {
+        var $286 = s === "rtl";
+        if ($286) {
+          return RTL.value;
+        }
+        ;
+        return LTR.value;
+      }(),
+      loop: s !== "noloop",
+      value: function() {
+        var $287 = s === "controlled";
+        if ($287) {
+          return new Just("file");
+        }
+        ;
+        return Nothing.value;
+      }(),
       contentStyle: "outline: none; " + popperContentVars("menubar"),
       menus: [{
         value: "file",
         trigger: [text5("File")],
+        disabled: false,
         entries: append31([menuItem("new-tab")([text5("New Tab")]), new MenuItemEntry3({
           value: "new-window",
           label: [text5("New Window")],
@@ -34208,8 +34649,8 @@
           accent: "",
           disabled: s === "disabled"
         }), menuSeparator3])(append31(function() {
-          var $281 = s === "submenu";
-          if ($281) {
+          var $288 = s === "submenu";
+          if ($288) {
             return [menubarSubEntry];
           }
           ;
@@ -34218,10 +34659,12 @@
       }, {
         value: "edit",
         trigger: [text5("Edit")],
+        disabled: s === "distrigger",
         entries: [menuItem("undo")([text5("Undo")]), menuItem("redo")([text5("Redo")])]
       }, {
         value: "view",
         trigger: [text5("View")],
+        disabled: false,
         entries: [menuItem("zoom-in")([text5("Zoom In")]), menuItem("zoom-out")([text5("Zoom Out")])]
       }]
     };
@@ -34260,9 +34703,10 @@
       menus: [{
         value: "view",
         trigger: [text5("View")],
+        disabled: false,
         entries: function() {
-          var $282 = s === "radio";
-          if ($282) {
+          var $289 = s === "radio";
+          if ($289) {
             return [new MenuRadioGroupEntry3({
               value: "medium",
               options: [{
@@ -34368,84 +34812,84 @@
       };
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2083, column 1 - line 2083, column 41): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2123, column 1 - line 2123, column 41): " + [s.constructor.name]);
   };
   var keepDigitsOnly = /* @__PURE__ */ function() {
-    var $341 = filter(function(c) {
+    var $354 = filter(function(c) {
       return c >= "0" && c <= "9";
     });
-    return function($342) {
-      return fromCharArray($341(toCharArray($342)));
+    return function($355) {
+      return fromCharArray($354(toCharArray($355)));
     };
   }();
   var otpInput = function(s) {
     return {
       length: 3,
       value: function() {
-        var $284 = s === "controlled";
-        if ($284) {
+        var $291 = s === "controlled";
+        if ($291) {
           return new Just("12");
         }
         ;
         return Nothing.value;
       }(),
       defaultValue: function() {
-        var $285 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
-        if ($285) {
+        var $292 = s === "empty" || (s === "typed" || (s === "paste" || (s === "form" || (s === "autosubmit" || (s === "autofocus" || s === "placeholder")))));
+        if ($292) {
           return "";
         }
         ;
-        var $286 = s === "alpha";
-        if ($286) {
+        var $293 = s === "alpha";
+        if ($293) {
           return "abc";
         }
         ;
-        var $287 = s === "alphanumeric";
-        if ($287) {
+        var $294 = s === "alphanumeric";
+        if ($294) {
           return "a1b";
         }
         ;
-        var $288 = s === "revalidate";
-        if ($288) {
+        var $295 = s === "revalidate";
+        if ($295) {
           return "a1b2c";
         }
         ;
-        var $289 = s === "sanitizevalue";
-        if ($289) {
+        var $296 = s === "sanitizevalue";
+        if ($296) {
           return "1a2";
         }
         ;
         return "123";
       }(),
       validation: function() {
-        var $290 = s === "alpha" || s === "revalidate";
-        if ($290) {
+        var $297 = s === "alpha" || s === "revalidate";
+        if ($297) {
           return Alpha.value;
         }
         ;
-        var $291 = s === "alphanumeric";
-        if ($291) {
+        var $298 = s === "alphanumeric";
+        if ($298) {
           return Alphanumeric.value;
         }
         ;
-        var $292 = s === "novalidation" || s === "sanitizevalue";
-        if ($292) {
+        var $299 = s === "novalidation" || s === "sanitizevalue";
+        if ($299) {
           return NoValidation.value;
         }
         ;
         return Numeric.value;
       }(),
       sanitize: function() {
-        var $293 = s === "sanitizevalue";
-        if ($293) {
+        var $300 = s === "sanitizevalue";
+        if ($300) {
           return keepDigitsOnly;
         }
         ;
         return identity14;
       }(),
       placeholder: function() {
-        var $294 = s === "placeholder";
-        if ($294) {
+        var $301 = s === "placeholder";
+        if ($301) {
           return new Just("\u25CB");
         }
         ;
@@ -34455,24 +34899,24 @@
       disabled: s === "disabled",
       readOnly: s === "readonly",
       orientation: function() {
-        var $295 = s === "vertical";
-        if ($295) {
+        var $302 = s === "vertical";
+        if ($302) {
           return Vertical.value;
         }
         ;
         return Horizontal.value;
       }(),
       dir: function() {
-        var $296 = s === "rtl";
-        if ($296) {
+        var $303 = s === "rtl";
+        if ($303) {
           return RTL.value;
         }
         ;
         return LTR.value;
       }(),
       name: function() {
-        var $297 = s === "named";
-        if ($297) {
+        var $304 = s === "named";
+        if ($304) {
           return new Just("otp-code");
         }
         ;
@@ -34492,13 +34936,20 @@
   };
   var hoverCardInput = function(s) {
     return {
-      open: defaultInput9.open,
       defaultOpen: defaultInput9.defaultOpen,
       side: defaultInput9.side,
       offset: defaultInput9.offset,
       padding: defaultInput9.padding,
       triggerHref: defaultInput9.triggerHref,
       align: Start.value,
+      open: function() {
+        var $305 = s === "controlled";
+        if ($305) {
+          return new Just(true);
+        }
+        ;
+        return Nothing.value;
+      }(),
       openDelay: 200,
       closeDelay: 150,
       style: hoverCardStyle,
@@ -34510,8 +34961,8 @@
       proseAfter: [text5(" for updates.")],
       trigger: [text5("@radix_ui")],
       content: function() {
-        var $298 = s === "richcontent";
-        if ($298) {
+        var $306 = s === "richcontent";
+        if ($306) {
           return [textAs("div")([new Size("1"), new Color("gray")])([text5("See the "), a([href4("https://radix-ui.com"), class_("rt-Link rt-Text rt-reset rt-underline-auto"), attr2("data-accent-color")("")])([text5("docs")]), text5(" for details.")])];
         }
         ;
@@ -34530,23 +34981,23 @@
         return content3;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2261, column 1 - line 2261, column 87): " + [s.constructor.name, content3.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2301, column 1 - line 2301, column 87): " + [s.constructor.name, content3.constructor.name]);
     };
   };
   var formInput = function(s) {
     return {
       submitLabel: [text5("Submit")],
       resetLabel: function() {
-        var $301 = s === "reset";
-        if ($301) {
+        var $309 = s === "reset";
+        if ($309) {
           return [text5("Reset")];
         }
         ;
         return [];
       }(),
       fields: function() {
-        var $302 = s === "custom";
-        if ($302) {
+        var $310 = s === "custom";
+        if ($310) {
           return [{
             required: defaultField.required,
             serverInvalid: defaultField.serverInvalid,
@@ -34564,8 +35015,8 @@
           }];
         }
         ;
-        var $303 = s === "multi";
-        if ($303) {
+        var $311 = s === "multi";
+        if ($311) {
           return [{
             serverInvalid: defaultField.serverInvalid,
             name: "email",
@@ -34600,8 +35051,8 @@
           required: true,
           serverInvalid: s === "serverInvalid",
           messages: function() {
-            var $304 = s === "defaultMessage";
-            if ($304) {
+            var $312 = s === "defaultMessage";
+            if ($312) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -34610,8 +35061,8 @@
               }];
             }
             ;
-            var $305 = s === "reset";
-            if ($305) {
+            var $313 = s === "reset";
+            if ($313) {
               return [{
                 match: ValueMissing.value,
                 customMatch: Nothing.value,
@@ -34654,7 +35105,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2127, column 12 - line 2129, column 21): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at ThemesInteractive.Main (line 2167, column 12 - line 2169, column 21): " + [v.constructor.name]);
     };
     return function(v) {
       if (v.length === 0) {
@@ -34675,8 +35126,8 @@
         var v = indexOf2("=")(p2);
         if (v instanceof Just) {
           var kv = splitAt2(v.value0)(p2);
-          var $313 = kv.before === key2;
-          if ($313) {
+          var $321 = kv.before === key2;
+          if ($321) {
             return new Just(drop3(1)(kv.after));
           }
           ;
@@ -34687,7 +35138,7 @@
           return Nothing.value;
         }
         ;
-        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2109, column 15 - line 2111, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at ThemesInteractive.Main (line 2149, column 15 - line 2151, column 25): " + [v.constructor.name]);
       };
       var body3 = drop3(1)(search2);
       var pairs = splitOn("&")(body3);
@@ -34723,16 +35174,16 @@
       closeLabels: ["Cancel", "Save"],
       trigger: [text5("Edit profile")],
       open: function() {
-        var $315 = s === "controlled";
-        if ($315) {
+        var $323 = s === "controlled";
+        if ($323) {
           return new Just(true);
         }
         ;
         return Nothing.value;
       }(),
       dir: function() {
-        var $316 = s === "rtl";
-        if ($316) {
+        var $324 = s === "rtl";
+        if ($324) {
           return "rtl";
         }
         ;
@@ -34740,16 +35191,16 @@
       }(),
       forceMount: s === "forcemount",
       title: function() {
-        var $317 = s === "notitle";
-        if ($317) {
+        var $325 = s === "notitle";
+        if ($325) {
           return [];
         }
         ;
         return [text5("Edit profile")];
       }(),
       description: function() {
-        var $318 = s === "notitle";
-        if ($318) {
+        var $326 = s === "notitle";
+        if ($326) {
           return [];
         }
         ;
@@ -34819,13 +35270,29 @@
   };
   var contextMenuInput = function(s) {
     return {
-      open: defaultInput6.open,
       defaultOpen: defaultInput6.defaultOpen,
       align: defaultInput6.align,
       offset: defaultInput6.offset,
       padding: defaultInput6.padding,
       idPrefix: defaultInput6.idPrefix,
       side: Right2.value,
+      modal: s !== "nonmodal",
+      keepOpenValues: function() {
+        var $327 = s === "cancelselect";
+        if ($327) {
+          return ["edit"];
+        }
+        ;
+        return [];
+      }(),
+      open: function() {
+        var $328 = s === "controlled";
+        if ($328) {
+          return new Just(true);
+        }
+        ;
+        return Nothing.value;
+      }(),
       style: contextMenuStyle,
       portalAttrs: portalThemeAttrs,
       contentStyle: "outline: none; " + (popperContentVars("context-menu") + " pointer-events: auto;"),
@@ -34833,8 +35300,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: append31([ctxRow("edit")("Edit")("\u2318 E")("")(false), ctxRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator])(append31(function() {
-        var $319 = s === "submenu";
-        if ($319) {
+        var $329 = s === "submenu";
+        if ($329) {
           return [ctxSubmenuEntry];
         }
         ;
@@ -34846,11 +35313,13 @@
     return {
       open: defaultInput6.open,
       defaultOpen: defaultInput6.defaultOpen,
+      modal: defaultInput6.modal,
       align: defaultInput6.align,
       offset: defaultInput6.offset,
       padding: defaultInput6.padding,
       idPrefix: defaultInput6.idPrefix,
       subContentStyle: defaultInput6.subContentStyle,
+      keepOpenValues: defaultInput6.keepOpenValues,
       side: Right2.value,
       style: contextMenuStyle,
       portalAttrs: portalThemeAttrs,
@@ -34858,8 +35327,8 @@
       triggerStyle: "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);",
       trigger: [textAs("span")([new Size("2"), new Color("gray")])([text5("Right-click here")])],
       entries: function() {
-        var $320 = s === "radio";
-        if ($320) {
+        var $330 = s === "radio";
+        if ($330) {
           return [new MenuRadioGroupEntry({
             value: "medium",
             options: [{
@@ -34900,8 +35369,8 @@
   var collapsibleInput = function(s) {
     return {
       open: function() {
-        var $321 = s === "controlled";
-        if ($321) {
+        var $331 = s === "controlled";
+        if ($331) {
           return new Just(true);
         }
         ;
@@ -34922,8 +35391,8 @@
   };
   var chevronCls = function(klass) {
     return elementNS(svgNS)("svg")(append31(function() {
-      var $322 = klass === "";
-      if ($322) {
+      var $332 = klass === "";
+      if ($332) {
         return [];
       }
       ;
@@ -34935,20 +35404,22 @@
     return {
       open: defaultInput8.open,
       defaultOpen: defaultInput8.defaultOpen,
+      modal: defaultInput8.modal,
       side: defaultInput8.side,
       align: defaultInput8.align,
       offset: defaultInput8.offset,
       padding: defaultInput8.padding,
       idPrefix: defaultInput8.idPrefix,
       subContentStyle: defaultInput8.subContentStyle,
+      keepOpenValues: defaultInput8.keepOpenValues,
       style: menuStyle,
       triggerAttrs: [new Tuple("accent-color", "")],
       portalAttrs: portalThemeAttrs,
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       trigger: [text5("View"), chevron],
       entries: function() {
-        var $323 = s === "radio";
-        if ($323) {
+        var $333 = s === "radio";
+        if ($333) {
           return [new MenuRadioGroupEntry2({
             value: "medium",
             options: [{
@@ -34990,12 +35461,14 @@
     return {
       open: defaultInput8.open,
       defaultOpen: defaultInput8.defaultOpen,
+      modal: defaultInput8.modal,
       side: defaultInput8.side,
       align: defaultInput8.align,
       offset: defaultInput8.offset,
       padding: defaultInput8.padding,
       idPrefix: defaultInput8.idPrefix,
       subContentStyle: defaultInput8.subContentStyle,
+      keepOpenValues: defaultInput8.keepOpenValues,
       style: menuStyle,
       triggerAttrs: [new Tuple("accent-color", "")],
       portalAttrs: portalThemeAttrs,
@@ -35030,7 +35503,6 @@
   }();
   var dropdownMenuInput = function(s) {
     return {
-      open: defaultInput8.open,
       defaultOpen: defaultInput8.defaultOpen,
       side: defaultInput8.side,
       align: defaultInput8.align,
@@ -35038,14 +35510,31 @@
       padding: defaultInput8.padding,
       idPrefix: defaultInput8.idPrefix,
       style: menuStyle,
+      modal: s !== "nonmodal",
+      open: function() {
+        var $334 = s === "controlled";
+        if ($334) {
+          return new Just(true);
+        }
+        ;
+        return Nothing.value;
+      }(),
+      keepOpenValues: function() {
+        var $335 = s === "selectnoclose";
+        if ($335) {
+          return ["edit"];
+        }
+        ;
+        return [];
+      }(),
       triggerAttrs: [new Tuple("accent-color", "")],
       portalAttrs: portalThemeAttrs,
       contentStyle: "outline: none; " + (popperContentVars("dropdown-menu") + " pointer-events: auto;"),
       subContentStyle: "outline: none; pointer-events: auto; " + popperContentVars("dropdown-menu"),
       trigger: [text5("Options"), chevron],
       entries: append31([menuRow("edit")("Edit")("\u2318 E")("")(false), menuRow("duplicate")("Duplicate")("\u2318 D")("")(s === "disabled"), menuSeparator2, menuRow("archive")("Archive")("\u2318 N")("")(false)])(append31(function() {
-        var $324 = s === "submenu";
-        if ($324) {
+        var $336 = s === "submenu";
+        if ($336) {
           return [submenuEntry];
         }
         ;
@@ -35208,8 +35697,8 @@
     return {
       extraAttrs: defaultInput5.extraAttrs,
       checked: function() {
-        var $326 = s === "controlled";
-        if ($326) {
+        var $338 = s === "controlled";
+        if ($338) {
           return new Just(Checked.value);
         }
         ;
@@ -35233,16 +35722,16 @@
       disabled: s === "disabled",
       required: s === "form",
       name: function() {
-        var $328 = s === "form";
-        if ($328) {
+        var $340 = s === "form";
+        if ($340) {
           return "agree";
         }
         ;
         return "";
       }(),
       value: function() {
-        var $329 = s === "form";
-        if ($329) {
+        var $341 = s === "form";
+        if ($341) {
           return "yes";
         }
         ;
@@ -35310,18 +35799,18 @@
     ;
     if (otherwise) {
       var ratio = function() {
-        var $332 = s === "wide";
-        if ($332) {
+        var $344 = s === "wide";
+        if ($344) {
           return 16 / 9;
         }
         ;
-        var $333 = s === "tall";
-        if ($333) {
+        var $345 = s === "tall";
+        if ($345) {
           return 1 / 2;
         }
         ;
-        var $334 = s === "verywide";
-        if ($334) {
+        var $346 = s === "verywide";
+        if ($346) {
           return 21 / 9;
         }
         ;
@@ -35330,7 +35819,7 @@
       return aspectRatio_(ratio)([span_([text5("X")])]);
     }
     ;
-    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2001, column 1 - line 2001, column 57): " + [s.constructor.name]);
+    throw new Error("Failed pattern match at ThemesInteractive.Main (line 2041, column 1 - line 2041, column 57): " + [s.constructor.name]);
   };
   var alertDialogStyle = {
     trigger: /* @__PURE__ */ cn("rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"),
@@ -35341,12 +35830,19 @@
     title: /* @__PURE__ */ cn("rt-Heading rt-r-lt-start rt-r-mb-3 rt-r-size-5"),
     description: /* @__PURE__ */ cn("rt-Text rt-r-size-2")
   };
-  var alertDialogInput = /* @__PURE__ */ function() {
+  var alertDialogInput = function(s) {
     return {
-      open: defaultInput2.open,
-      defaultOpen: defaultInput2.defaultOpen,
       closeOnEscape: defaultInput2.closeOnEscape,
       style: alertDialogStyle,
+      open: function() {
+        var $347 = s === "controlled";
+        if ($347) {
+          return new Just(true);
+        }
+        ;
+        return Nothing.value;
+      }(),
+      defaultOpen: s === "defaultopen",
       triggerAttrs: [new Tuple("accent-color", "red")],
       portalAttrs: portalThemeAttrs,
       contentStyle: "--max-width: 450px; pointer-events: auto;",
@@ -35356,7 +35852,7 @@
       description: [text5("Are you sure? This application will no longer be accessible.")],
       content: [flex([new Gap("3"), new Mt("4"), new Justify("end")])([button3([new Variant("soft"), new Color("gray")])([text5("Cancel")]), button3([new Color("red")])([text5("Revoke access")])])]
     };
-  }();
+  };
   var accordionInput = function(s) {
     return {
       value: defaultInput.value,
@@ -35384,8 +35880,8 @@
       single: s === "single",
       collapsible: false,
       defaultValue: function() {
-        var $335 = s === "single";
-        if ($335) {
+        var $348 = s === "single";
+        if ($348) {
           return ["item-1"];
         }
         ;
@@ -35516,18 +36012,18 @@
     return $$Proxy.value;
   }();
   var passwordTogglePage = function(s) {
-    var $336 = s === "formreset";
-    if ($336) {
+    var $349 = s === "formreset";
+    if ($349) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonReset.value)])([text5("Reset")])])]);
     }
     ;
-    var $337 = s === "multi";
-    if ($337) {
+    var $350 = s === "multi";
+    if ($350) {
       return box([])([slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), slot_22(_passwordtoggleB)(unit)(component28)(passwordToggleInput(s))]);
     }
     ;
-    var $338 = s === "formsubmit";
-    if ($338) {
+    var $351 = s === "formsubmit";
+    if ($351) {
       return box([])([form_([label4([attr2("for")("password")])([text5("Password")]), slot_1(_passwordtoggle)(unit)(component28)(passwordToggleInput(s)), button([type_38(ButtonSubmit.value)])([text5("Submit")])])]);
     }
     ;
@@ -35611,7 +36107,7 @@
         }
         ;
         if (c === "alertdialog") {
-          return slot_4(_alertdialog)(unit)(component32)(alertDialogInput);
+          return slot_4(_alertdialog)(unit)(component32)(alertDialogInput(s));
         }
         ;
         if (c === "popover") {
@@ -35619,7 +36115,7 @@
         }
         ;
         if (c === "tooltip") {
-          return slot_6(_tooltip)(unit)(component52)(tooltipInput);
+          return slot_6(_tooltip)(unit)(component52)(tooltipInput(s));
         }
         ;
         if (c === "hovercard") {
@@ -35647,8 +36143,8 @@
         }
         ;
         if (c === "slider") {
-          var $340 = s === "vertical";
-          if ($340) {
+          var $353 = s === "vertical";
+          if ($353) {
             return box([new StyleProp("height", "160px")])([slot_13(_slider)(unit)(component122)(sliderInput(s))]);
           }
           ;

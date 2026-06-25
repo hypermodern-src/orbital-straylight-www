@@ -280,6 +280,21 @@ handleAction = case _ of
   Initialize -> do
     cid <- useId
     H.modify_ _ { contentId = cid }
+    -- START-OPEN: controlled `open`/`defaultOpen` true at mount renders the tooltip open
+    -- immediately. Initialize only mints the id; it never arms the open envelope, so we
+    -- arm the SAME dismissal/reposition subs + AfterOpen the open path uses — MINUS the
+    -- ctrl change (already open) and the OpenChanged raise. `defaultOpen` → instant-open
+    -- (wasOpenDelayedRef defaults false upstream), so wasDelayed stays false.
+    st <- H.get
+    when (current st.ctrl) do
+      doc <- liftEffect (HTML.window >>= Window.document)
+      win <- liftEffect Popper.windowTarget
+      let docTarget = HTMLDocument.toEventTarget doc
+      escSub <- H.subscribe (Dismiss.escape docTarget EscapePressed)
+      scrollSub <- H.subscribe (eventListener (EventType "scroll") win (\_ -> Just Reposition))
+      resizeSub <- H.subscribe (eventListener (EventType "resize") win (\_ -> Just Reposition))
+      psid <- scheduleAfterOpen
+      H.modify_ _ { subs = [ escSub, scrollSub, resizeSub ], postSub = Just psid }
   Receive input ->
     H.modify_ \st -> st
       { ctrl = sync input.open st.ctrl

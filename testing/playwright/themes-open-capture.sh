@@ -28,6 +28,8 @@ STATES=(
   "popover:closed-attr"
   "tooltip:open"
   "tooltip:closed-rest"
+  "tooltip:controlled"
+  "tooltip:defaultopen"
   "hovercard:open"
   "hovercard:controlled"
   "dropdownmenu:open"

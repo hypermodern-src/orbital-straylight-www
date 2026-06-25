@@ -135,6 +135,17 @@ export const STATES = {
       await pg.getByRole("tooltip").waitFor();
       await pg.locator('button[data-state="instant-open"]').first().waitFor();
     },
+    // START-OPEN (?s=controlled parent-owned, ?s=defaultopen uncontrolled): OPEN at mount, NO
+    // hover/focus. defaultOpen → instant-open (wasOpenDelayedRef defaults false). Same driver
+    // both faces: wait for the role=tooltip copy + the trigger's instant-open data-state.
+    controlled: async (pg) => {
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
+    defaultopen: async (pg) => {
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
   },
   hovercard: {
     open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },

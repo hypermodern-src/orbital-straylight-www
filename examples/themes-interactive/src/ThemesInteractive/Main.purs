@@ -268,7 +268,7 @@ view c s =
             "dialog" -> HH.slot_ _dialog unit Dialog.component (dialogInput s)
             "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component (alertDialogInput s)
             "popover" -> HH.slot_ _popover unit Popover.component (popoverInput s)
-            "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
+            "tooltip" -> HH.slot_ _tooltip unit Tooltip.component (tooltipInput s)
             "hovercard" -> HH.slot_ _hovercard unit HoverCard.component (hoverCardInput s)
             "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component (dropdownMenuInput s)
             "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component (contextMenuInput s)
@@ -560,9 +560,11 @@ popperContentVars c =
 -- | The themed Tooltip: a small floating label opened by hover. Near the top of the
 -- | viewport the preferred Top side collides and Popper flips to bottom (matching the
 -- | golden's data-side=bottom). The driver hovers the trigger to open it.
-tooltipInput :: Tooltip.Input
-tooltipInput = Tooltip.defaultInput
-  { style = tooltipStyle
+tooltipInput :: String -> Tooltip.Input
+tooltipInput s = Tooltip.defaultInput
+  { open = if s == "controlled" then Just true else Nothing
+  , defaultOpen = s == "defaultopen"
+  , style = tooltipStyle
   -- offset 8 holds the 5px arrow; padding 10 = radix's collisionPadding. Near the viewport
   -- top the preferred `top` overflows the gutter and genuinely flips to `bottom` (the
   -- content is now measured at its true max-content size, so the flip fires correctly).
