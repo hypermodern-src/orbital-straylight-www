@@ -133,21 +133,23 @@
       "id": "dropdownmenu.checkboxitem-core",
       "state": "checkbox",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "menu.tsx:782-804 CheckboxItem+ItemIndicator, onCheckedChange does NOT close menu; new port part"
+      "ref": "CO-COVER (2026-06-24): dropdownmenuchecks.checkbox DOM golden (gate-green) byte-pins CheckboxItem \u2014 role=menuitemcheckbox, aria-checked=true, data-state=checked, with the rt-...ItemIndicator (data-state=checked). menu.tsx:782-804",
+      "oracle_file": "dropdownmenuchecks.checkbox"
     },
     {
       "id": "dropdownmenu.radioitem-core",
       "state": "radio",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "menu.tsx:823-872 RadioGroup/RadioItem value-based single selection without close; new port parts"
+      "ref": "CO-COVER (2026-06-24): dropdownmenuchecks.radio DOM golden (gate-green) byte-pins RadioGroup/RadioItem value-based single selection \u2014 three role=menuitemradio rows, exactly one aria-checked=true/data-state=checked, others unchecked. menu.tsx:823-872",
+      "oracle_file": "dropdownmenuchecks.radio"
     },
     {
       "id": "dropdownmenu.disabled-skip",
