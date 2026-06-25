@@ -162,11 +162,12 @@
       "id": "radiogroup.name-prop",
       "state": "form",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "radio-group.tsx:42,93 name prop flows to each bubble input; port has no name"
+      "ref": "CO-COVER (2026-06-24): radiogroup.form DOM golden (gate-green) byte-pins name=plan flowing onto every hidden bubble <input type=radio>. radio-group.tsx:42,93",
+      "oracle_file": "radiogroup.form"
     },
     {
       "id": "radiogroup.rtl",
@@ -226,11 +227,14 @@
       "id": "radiogroup.disabledgroup-noop",
       "state": "disabledgroup",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "dom",
+        "apg"
       ],
-      "ref": "radio-group.tsx:107 disabled group: click \u2192 no aria-checked change, no ValueChanged"
+      "ref": "DONE (2026-06-24): disabled Root \u2192 root + every item data-disabled. radiogroup.disabledgroup DOM golden byte-pins the all-disabled state; new APG check (golden-first) proves clicking a non-checked radio leaves the selection unchanged (originally-checked stays checked). radio-group.tsx:107",
+      "oracle_file": "radiogroup.disabledgroup",
+      "apg_check": "disabled group: clicking a radio does NOT change the selection"
     },
     {
       "id": "radiogroup.recheck",
@@ -246,11 +250,12 @@
       "id": "radiogroup.bubble-form",
       "state": "form",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "radio.tsx:248-318 bubble input dispatch + checkValidity; port has none. PORT FIX."
+      "ref": "CO-COVER (2026-06-24): radiogroup.form DOM golden (gate-green) byte-pins the per-item hidden native <input type=radio aria-hidden name=plan required> bubble nodes (one checked) that participate in form submission/checkValidity. radio.tsx:248-318",
+      "oracle_file": "radiogroup.form"
     },
     {
       "id": "radiogroup.passthrough",

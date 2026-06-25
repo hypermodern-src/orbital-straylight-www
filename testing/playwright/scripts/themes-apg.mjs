@@ -1957,6 +1957,16 @@ const CHECKS = [
     ok((await attrOf(pg, '[role="radio"]', 2, "aria-checked")) === "false", "End must NOT check the focused radio");
     ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "the originally-checked radio must stay checked after End");
   } },
+  // ?s=disabledgroup — the whole group disabled (root + every item data-disabled). Clicking a
+  // non-checked radio must NOT move the selection (radio-group.tsx:107). Validated golden-first.
+  { id: "radiogroup", state: "disabledgroup", apg: "radio", name: "disabled group: clicking a radio does NOT change the selection", run: async (pg) => {
+    await pg.locator('[role="radio"]').first().waitFor();
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "seed: the first radio is checked");
+    await pg.locator('[role="radio"]').nth(1).click({ force: true }).catch(() => {});
+    await pg.waitForTimeout(100);
+    ok((await attrOf(pg, '[role="radio"]', 0, "aria-checked")) === "true", "disabled group: the originally-checked radio must stay checked");
+    ok((await attrOf(pg, '[role="radio"]', 1, "aria-checked")) === "false", "disabled group: clicking a radio must NOT check it");
+  }},
   // Wave D — loop={false}: arrow keys CLAMP at the ends (no wrap). 3-item group, value=1 checked.
   { id: "radiogroup", state: "loopoff", apg: "radio", name: "loop=false: ArrowUp at the first radio does NOT wrap to the last", run: async (pg) => {
     await pg.locator('[role="radio"]').first().waitFor();
