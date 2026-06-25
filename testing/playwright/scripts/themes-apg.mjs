@@ -1467,6 +1467,29 @@ const CHECKS = [
     ok(!(await visible(pg, '.rt-PopoverContent')), "Escape did not close the popover");
     ok(await activeIs(pg, "#root button"), "focus did not return to the trigger after Escape");
   }},
+  // Trigger re-open guard (popover.tsx:335-340): clicking the trigger while OPEN must CLOSE the
+  // popover (a clean toggle), NOT close-then-reopen in the same gesture. Upstream guards the
+  // pointerdown-outside dismiss when the target IS the trigger, so only the click-toggle acts.
+  // Validated golden-first (this caught the port double-firing PointerDown-dismiss + onClick).
+  { id: "popover", apg: "dialog", name: "clicking the trigger while open CLOSES it (re-open guard)", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); await pg.waitForTimeout(180);
+    await triggerBtn(pg).click(); await pg.waitForTimeout(240);
+    ok(!(await visible(pg, '.rt-PopoverContent')), "clicking the trigger while open must close the popover (not re-open)");
+  }},
+  // ?s=close — FocusScope loop=true: Tab past the LAST tabbable in the content wraps to the
+  // FIRST, and Shift+Tab past the first wraps to the last (popover.tsx:404-407). The close story
+  // has two tabbables: the textarea (first) + the "Comment" button (last). Validated golden-first.
+  { id: "popover", apg: "dialog", state: "close", name: "FocusScope loop: Tab from the last content tabbable wraps to the first", run: async (pg) => {
+    await triggerBtn(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); await pg.waitForTimeout(180);
+    // focus the LAST tabbable (the Comment button inside the content), then Tab → wraps to textarea.
+    await pg.locator('.rt-PopoverContent button').last().focus();
+    await pg.keyboard.press("Tab"); await pg.waitForTimeout(60);
+    ok(await activeIs(pg, '.rt-PopoverContent textarea'), "Tab from the last tabbable must wrap to the first (textarea)");
+    // Shift+Tab from the first (textarea) → wraps back to the last (the Comment button).
+    await pg.locator('.rt-PopoverContent textarea').focus();
+    await pg.keyboard.press("Shift+Tab"); await pg.waitForTimeout(60);
+    ok(await activeIs(pg, '.rt-PopoverContent button'), "Shift+Tab from the first tabbable must wrap to the last (button)");
+  }},
   // ?s=modal — a MODAL popover (defaultOpen, modal): the open envelope locks body scroll
   // (RemoveScroll → body[data-scroll-locked]) and aria-hides the siblings (#root). Escape closes
   // it, which must TEAR DOWN the envelope (scroll-lock released, #root un-hidden). A runtime

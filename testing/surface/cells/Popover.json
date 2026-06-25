@@ -63,21 +63,23 @@
       "id": "popover.reopen-guard",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "apg"
       ],
-      "ref": "popover.tsx:335-340 trigger re-open guard (targetIsTrigger\u2192preventDefault); port dismiss+toggle both fire \u2014 bug"
+      "ref": "DONE (2026-06-25): trigger re-open guard \u2014 clicking the trigger while open CLOSES the popover (clean toggle), not close-then-reopen. APG check (golden-first) confirms the port matches upstream: after a second trigger click the content is gone. popover.tsx:335-340",
+      "apg_check": "clicking the trigger while open CLOSES it (re-open guard)"
     },
     {
       "id": "popover.focusscope-loop",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "popover.tsx:404-407 FocusScope loop=true: Tab wraps within content; zero APG entries today"
+      "ref": "DONE (2026-06-25): FocusScope loop=true \u2014 the port wires tabLoop on the content key-down (ContentKeyDown \u2192 tabLoop true). APG check (golden-first) on the 2-tabbable ?s=close content proves Tab past the last wraps to the first and Shift+Tab past the first wraps to the last. popover.tsx:404-407",
+      "apg_check": "FocusScope loop: Tab from the last content tabbable wraps to the first"
     },
     {
       "id": "popover.escape-apg",
