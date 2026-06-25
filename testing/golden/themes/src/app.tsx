@@ -980,12 +980,16 @@ const PAGES: Page[] = [
       // (accordion.tsx:452). Every other state keeps the default type="multiple".
       // `?s=disabledroot` — the whole Root disabled: accordionContext.disabled propagates to
       // every item (data-disabled on item/header/trigger/content + each trigger's disabled attr).
+      // `?s=singlecollapsible` — type=single collapsible: item-1 open at mount, but the open
+      // trigger CAN close (collapsible), so it carries NO aria-disabled (unlike non-collapsible).
       const rootProps =
         s === "single"
           ? ({ type: "single", defaultValue: "item-1" } as const)
-          : s === "disabledroot"
-            ? ({ type: "multiple", disabled: true } as const)
-            : ({ type: "multiple" } as const);
+          : s === "singlecollapsible"
+            ? ({ type: "single", collapsible: true, defaultValue: "item-1" } as const)
+            : s === "disabledroot"
+              ? ({ type: "multiple", disabled: true } as const)
+              : ({ type: "multiple" } as const);
       return (
         <Box style={{ maxWidth: 360 }}>
           <Accordion.Root {...rootProps}>

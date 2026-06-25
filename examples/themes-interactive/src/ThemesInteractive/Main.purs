@@ -1190,11 +1190,11 @@ accordionInput s = Accordion.defaultInput
       ]
   -- `?s=single` → type="single" NON-collapsible with item-1 open: the open trigger can't be
   -- closed, so it carries aria-disabled=true (accordion.tsx:452). Else type="multiple" closed.
-  , single = s == "single"
-  , collapsible = false
+  , single = s == "single" || s == "singlecollapsible"
+  , collapsible = s == "singlecollapsible"
   -- `?s=disabledroot` → the whole Root disabled; propagates to every item.
   , disabled = s == "disabledroot"
-  , defaultValue = if s == "single" then [ "item-1" ] else []
+  , defaultValue = if s == "single" || s == "singlecollapsible" then [ "item-1" ] else []
   , style =
       { root: cn ""
       , item: cn ""

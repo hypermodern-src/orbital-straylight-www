@@ -421,6 +421,12 @@ export const STATES = {
       await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
       await root(pg).locator('button[aria-expanded="true"][aria-disabled="true"]').first().waitFor();
     },
+    // ?s=singlecollapsible: type=single collapsible, item-1 open at mount. The open trigger CAN
+    // close (collapsible) → NO aria-disabled. Wait for the open region + open trigger (no aria-disabled).
+    singlecollapsible: async (pg) => {
+      await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"]:not([aria-disabled])').first().waitFor();
+    },
     // ?s=disabled: the MIDDLE item (item-2) is disabled at the ITEM level (Accordion.Item
     // disabled) → data-disabled on item/header/trigger/content + the trigger's `disabled` attr.
     // Closed-rest snapshot; same locator both faces (the disabled middle trigger).

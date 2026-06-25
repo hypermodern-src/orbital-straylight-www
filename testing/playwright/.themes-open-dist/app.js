@@ -35913,11 +35913,11 @@
         content: [text5("Yes, with CSS.")],
         disabled: false
       }],
-      single: s === "single",
-      collapsible: false,
+      single: s === "single" || s === "singlecollapsible",
+      collapsible: s === "singlecollapsible",
       disabled: s === "disabledroot",
       defaultValue: function() {
-        var $350 = s === "single";
+        var $350 = s === "single" || s === "singlecollapsible";
         if ($350) {
           return ["item-1"];
         }

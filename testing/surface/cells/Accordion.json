@@ -131,11 +131,14 @@
       "id": "accordion.single-collapsible",
       "state": "single-collapsible",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "dom",
+        "apg"
       ],
-      "ref": "accordion.tsx:121 single collapsible: click open trigger closes it (empty open set)"
+      "ref": "DONE (2026-06-25): type=single collapsible \u2014 item-1 open at mount; the open trigger CAN close so it carries NO aria-disabled (unlike single non-collapsible). accordion.singlecollapsible DOM golden byte-identical; new APG check (golden-first) proves clicking the open trigger collapses it (aria-expanded\u2192false). accordion.tsx:121",
+      "oracle_file": "accordion.singlecollapsible",
+      "apg_check": "single collapsible: clicking the open trigger CLOSES it"
     },
     {
       "id": "accordion.controlled",

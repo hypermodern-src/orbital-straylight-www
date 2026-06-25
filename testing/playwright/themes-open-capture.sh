@@ -55,6 +55,7 @@ STATES=(
   "accordion:open"
   "accordion:disabled"
   "accordion:disabledroot"
+  "accordion:singlecollapsible"
   "collapsible:open"
   "toast:open"
   "menubar:open"

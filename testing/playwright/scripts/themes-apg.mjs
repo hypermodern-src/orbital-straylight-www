@@ -2422,6 +2422,17 @@ const CHECKS = [
     ok(await activeIsNth(pg, sel, 0), "Ctrl+ArrowRight must NOT move focus (modifiers ignored)");
   }},
 
+  // Accordion — ?s=singlecollapsible: type=single COLLAPSIBLE, item-1 open at mount. Unlike the
+  // non-collapsible case, the open trigger CAN close → clicking it collapses item-1 (and it is
+  // NOT aria-disabled). Validated golden-first.
+  { id: "accordion", state: "singlecollapsible", apg: "accordion", name: "single collapsible: clicking the open trigger CLOSES it", run: async (pg) => {
+    const t0 = pg.locator('#root button[aria-expanded]').first();
+    await t0.waitFor();
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "true", "item-1 must be open at mount");
+    ok((await attrOf(pg, '#root button[aria-expanded]', 0, "aria-disabled")) === null, "single collapsible: the open trigger must NOT be aria-disabled");
+    await t0.click({ force: true }).catch(() => {});
+    await attrEq(pg, '#root button[aria-expanded]', 0, "aria-expanded", "false", "single collapsible: clicking the open trigger must CLOSE it");
+  }},
   // Accordion — ?s=disabledroot: the whole Root disabled → clicking any trigger does NOT open
   // its panel (every item disabled). Validated golden-first.
   { id: "accordion", state: "disabledroot", apg: "accordion", name: "disabled root: clicking a trigger does NOT open its panel", run: async (pg) => {
