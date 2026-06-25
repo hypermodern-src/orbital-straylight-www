@@ -5,24 +5,181 @@
   "upstream": "primitives avatar.tsx + @radix-ui/themes@3",
   "note": "The STR-381 template: every cell that ties Avatar out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt. Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
   "cells": [
-    { "id": "avatar.fallback",    "state": "fallback",    "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "fallback-only avatar: fallback present, img absent" },
-    { "id": "avatar.loaded",      "state": "loaded",      "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "loaded img present, fallback absent" },
-    { "id": "avatar.loadedattrs", "state": "loadedattrs", "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "loaded img carries src/alt/data-state attrs" },
-    { "id": "avatar.rest",        "state": "rest",        "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree" },
-
-    { "id": "avatar.img-absent-until-loaded", "state": "loading",  "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "avatar.tsx:99-101 img absent during idle/loading/error, mounted only once loaded; port always mounts visible img" },
-    { "id": "avatar.naturalwidth-zero",       "state": "loaded",   "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "avatar.tsx:186-188 load with naturalWidth===0 → error (fallback stays); port unconditionally Loaded" },
-    { "id": "avatar.delay-ms",                "state": "loading",  "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "avatar.tsx:114-129 delayMs gates fallback render; port shows fallback immediately, no Input" },
-    { "id": "avatar.status-change-contract",  "state": "open",     "importance": "common", "status": "open", "oracle": ["apg"],         "ref": "avatar.tsx:84-97 onLoadingStatusChange never fires idle while mounted; empty-src → error; port emits Idle" },
-    { "id": "avatar.empty-src-error",         "state": "fallback", "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "avatar.tsx:156-158 missing/empty src resolves to error not idle; port maps src='' to Idle" },
-    { "id": "avatar.src-change-reset",        "state": "open",     "importance": "common", "status": "open", "oracle": ["dom"],         "ref": "avatar.tsx:155-181 changing src restarts lifecycle (img removed, fallback, reload); unverified" },
-    { "id": "avatar.alt-accessible-name",     "state": "loaded",   "importance": "common", "status": "open", "oracle": ["aria"],        "ref": "avatar.tsx alt spread: loaded img exposes alt/accessible-name; port sets HP.alt unverified" },
-    { "id": "avatar.axe-fallback",            "state": "fallback", "importance": "core",   "status": "open", "oracle": ["aria"],        "ref": "test 24-27 axe clean for fallback-only avatar" },
-    { "id": "avatar.ssr-first-paint",         "state": "fallback", "importance": "core",   "status": "open", "oracle": ["dom"],         "ref": "test 29-36 initial render: img absent, fallback present (exposes gap#1 — port mounts img immediately)" },
-
-    { "id": "avatar.crossorigin-referrer",    "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: crossOrigin/referrerPolicy pass-through to probe + img (avatar.tsx:169-172)" },
-    { "id": "avatar.prop-spread",             "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: arbitrary prop spread (asChild/id/role/style/data-*/handlers) on root/image/fallback" },
-    { "id": "avatar.multi-image-warn",        "state": "open", "importance": "edge", "status": "open", "oracle": ["none"], "ref": "edge: multiple-image dev console.warn (avatar.tsx:195-223) — out of scope" },
-    { "id": "avatar.data-state-placement",    "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: data-state is a THEMES concern not primitive; port emits it on img (Avatar.purs:151)" }
+    {
+      "id": "avatar.fallback",
+      "state": "fallback",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "fallback-only avatar: fallback present, img absent"
+    },
+    {
+      "id": "avatar.loaded",
+      "state": "loaded",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "loaded img present, fallback absent"
+    },
+    {
+      "id": "avatar.loadedattrs",
+      "state": "loadedattrs",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "loaded img carries src/alt/data-state attrs"
+    },
+    {
+      "id": "avatar.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree"
+    },
+    {
+      "id": "avatar.img-absent-until-loaded",
+      "state": "loading",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): avatar.fallback DOM golden (gate-green) byte-pins img-absent in the non-loaded (fallback) state; avatar.loaded byte-pins <img> mounted only once loaded. The two goldens together pin the lifecycle contract. avatar.tsx:99-101",
+      "oracle_file": "avatar.fallback"
+    },
+    {
+      "id": "avatar.naturalwidth-zero",
+      "state": "loaded",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "avatar.tsx:186-188 load with naturalWidth===0 \u2192 error (fallback stays); port unconditionally Loaded"
+    },
+    {
+      "id": "avatar.delay-ms",
+      "state": "loading",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "avatar.tsx:114-129 delayMs gates fallback render; port shows fallback immediately, no Input"
+    },
+    {
+      "id": "avatar.status-change-contract",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "avatar.tsx:84-97 onLoadingStatusChange never fires idle while mounted; empty-src \u2192 error; port emits Idle"
+    },
+    {
+      "id": "avatar.empty-src-error",
+      "state": "fallback",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "avatar.tsx:156-158 missing/empty src resolves to error not idle; port maps src='' to Idle"
+    },
+    {
+      "id": "avatar.src-change-reset",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "avatar.tsx:155-181 changing src restarts lifecycle (img removed, fallback, reload); unverified"
+    },
+    {
+      "id": "avatar.alt-accessible-name",
+      "state": "loaded",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "avatar.tsx alt spread: loaded img exposes alt/accessible-name; port sets HP.alt unverified"
+    },
+    {
+      "id": "avatar.axe-fallback",
+      "state": "fallback",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "CO-COVER (2026-06-24): avatar.fallback ARIA + axe goldens (gate-green via the a11y MATRIX shown(avatar)=fallback) byte-pin a clean axe fingerprint for the fallback-only avatar. test 24-27",
+      "oracle_file": "avatar.fallback"
+    },
+    {
+      "id": "avatar.ssr-first-paint",
+      "state": "fallback",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): avatar.fallback DOM golden (gate-green) byte-pins the first-paint contract \u2014 AvatarRoot renders the AvatarFallback (\"A\") with NO <img> element present. test 29-36",
+      "oracle_file": "avatar.fallback"
+    },
+    {
+      "id": "avatar.crossorigin-referrer",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: crossOrigin/referrerPolicy pass-through to probe + img (avatar.tsx:169-172)"
+    },
+    {
+      "id": "avatar.prop-spread",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: arbitrary prop spread (asChild/id/role/style/data-*/handlers) on root/image/fallback"
+    },
+    {
+      "id": "avatar.multi-image-warn",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: multiple-image dev console.warn (avatar.tsx:195-223) \u2014 out of scope"
+    },
+    {
+      "id": "avatar.data-state-placement",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: data-state is a THEMES concern not primitive; port emits it on img (Avatar.purs:151)"
+    }
   ]
 }

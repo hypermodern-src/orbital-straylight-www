@@ -631,7 +631,7 @@ _Coverage today:_ No interactive or structural oracle exists for the Radix-level
   - aspect-ratio.test.tsx:24-26 → themes-a11y.mjs id `aspectratio.default`: render aspectRatio with a child, run axe, expect zero violations. AspectRatio adds no roles/aria so this is a regression guard that the wrapper/inner styling introduces no violations. Deterministic.
 - _edge (1):_ Fractional/edge ratio handling (very small ratio → very larg
 
-### Avatar — 17 gaps (3 core) · gaps-core
+### Avatar — 17 gaps (0 core) · gaps-core
 _Port-code needed:_ PORT-CODE genuinely missing/divergent (not just unverified):
 
 1. LOAD STRATEGY DIVERGENCE (root cause of most gaps). Upstream useImageLoadingStatus (avatar.tsx:141-184) probes loading with a DETACHED `new window.Image()`, listening for load/error on that probe, and only mounts the real `<Primitive.img>` once status==='loaded' (avatar.tsx:99-101). The port instead ALWAYS mounts a visible `<img>` (when src/="") and reads load status from that visible element's HE.onLoad/HE.onError (Avatar.purs:141-153). Consequences the port cannot reproduce: (a) the real <img> is never in the DOM during loading/idle/error — port leaks a half-loaded/broken <img> into the tree during loading and on error; upstream guarantees `queryByRole('img')` is absent unless loaded (test lines 71-74, 324-327, 351-361). (b) On error the port keeps the broken <img> mounted alongside the fallback; upstream removes it.
