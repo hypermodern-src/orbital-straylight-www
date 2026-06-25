@@ -177,11 +177,13 @@
       "id": "dropdownmenu.aria-controls",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
+        "dom",
         "aria"
       ],
-      "ref": "dropdown-menu.tsx:109-114 aria-controls only when open, aria-labelledby\u2194trigger round-trip"
+      "ref": "CO-COVER (2026-06-24): the dropdownmenu.closed-rest vs dropdownmenu.open DOM goldens (both gate-green) byte-pin the contract \u2014 closed trigger has aria-expanded=false aria-haspopup=menu and NO aria-controls; open trigger gains aria-controls=<menu id> and the menu carries aria-labelledby=<trigger id>. ARIA-tree goldens (rest vs open, a11y MATRIX) corroborate. dropdown-menu.tsx:109-114",
+      "oracle_file": "dropdownmenu.open"
     },
     {
       "id": "dropdownmenu.typeahead",
