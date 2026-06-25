@@ -740,6 +740,21 @@ const CHECKS = [
     await pg.mouse.move(0, 0);
     await pg.waitForFunction(() => document.querySelectorAll(".rt-ScrollAreaScrollbar").length === 0, undefined, { timeout: 4000 });
   }},
+  // thumb SIZE = getThumbSize: max(18, (viewport/content)·track) — the ratio-scaled thumb with
+  // radix's 18px minimum clamp (scroll-area.tsx:916-957). Computed from live geometry → identical
+  // golden + port. Pins the size half of the thumb math the offset check doesn't cover.
+  { id: "scrollarea", state: "shown", apg: "scrollarea", name: "thumb size = getThumbSize (ratio·track, min 18)", run: async (pg) => {
+    await pg.locator(".rt-ScrollAreaThumb").first().waitFor();
+    const { actual, expected } = await pg.evaluate(() => {
+      const vp = document.querySelector(".rt-ScrollAreaViewport");
+      const sb = document.querySelector('.rt-ScrollAreaScrollbar[data-orientation="vertical"]');
+      const th = document.querySelector(".rt-ScrollAreaThumb");
+      const track = sb.clientHeight;
+      const ratio = vp.clientHeight / vp.scrollHeight;
+      return { actual: th.getBoundingClientRect().height, expected: Math.max(18, ratio * track) };
+    });
+    ok(Math.abs(actual - expected) <= 1.5, `thumb size ${actual} != getThumbSize ${expected}`);
+  }},
   { id: "scrollarea", state: "shown", apg: "scrollarea", name: "thumb re-offsets on scroll to getThumbOffsetFromScroll", run: async (pg) => {
     const vp = pg.locator(".rt-ScrollAreaViewport").first();
     const thumb = pg.locator(".rt-ScrollAreaThumb").first();

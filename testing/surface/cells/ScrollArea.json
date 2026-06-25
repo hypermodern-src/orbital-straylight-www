@@ -97,21 +97,23 @@
       "id": "scrollarea.thumb-raf",
       "state": "shown",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "apg"
       ],
-      "ref": "scroll-area.tsx:780-819 rAF unlinked-scroll listener; verify post-scroll thumb translate3d Y matches getThumbOffsetFromScroll (runtime)"
+      "ref": "DONE (2026-06-25): the rAF/onScroll unlinked-scroll listener is pinned by the gate-green \"thumb re-offsets on scroll\" APG check \u2014 after setting viewport scrollTop, the thumb translateY updates (after>before) to the expected getThumbOffsetFromScroll, proving the scroll\u2192thumb recompute fired. scroll-area.tsx:780-819",
+      "apg_check": "thumb re-offsets on scroll to getThumbOffsetFromScroll"
     },
     {
       "id": "scrollarea.thumb-math",
       "state": "shown",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "apg"
       ],
-      "ref": "scroll-area.tsx:916-957 linearScale/clamp/getThumbOffsetFromScroll incl min-18 floor + RTL neg range (pure-fn unit)"
+      "ref": "DONE (2026-06-25): thumb math pinned by two gate-green APG checks (golden-first): SIZE = getThumbSize = max(18, (viewport/content)\u00b7track) [the linearScale + 18px min clamp], and OFFSET = getThumbOffsetFromScroll = (scrollTop/maxScroll)\u00b7(track\u2212thumb) [the re-offsets-on-scroll check]. Both computed from live geometry, identical golden+port. scroll-area.tsx:916-957",
+      "apg_check": "thumb size = getThumbSize (ratio\u00b7track, min 18)"
     },
     {
       "id": "scrollarea.scroll-machine",
