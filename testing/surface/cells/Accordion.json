@@ -172,12 +172,13 @@
       "id": "accordion.controls-open-only",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "aria",
         "dom"
       ],
-      "ref": "accordion.tsx:451-458 aria-controls present only when open; canonical assertion in accordion.open"
+      "ref": "CO-COVER (2026-06-24): accordion.open DOM golden (gate-green) byte-pins the contrast within one render \u2014 the open trigger has aria-controls=<panel id> aria-expanded=true, the two closed triggers have aria-expanded=false and NO aria-controls. accordion.open ARIA golden (a11y MATRIX shown=open) corroborates. accordion.tsx:451-458",
+      "oracle_file": "accordion.open"
     },
     {
       "id": "accordion.rtl-horizontal",
