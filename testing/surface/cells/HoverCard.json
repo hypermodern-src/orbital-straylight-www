@@ -133,11 +133,12 @@
       "id": "hovercard.placement",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "hover-card.tsx:113-119 side/align/sideOffset/collisionPadding (8 vs 10) + collision-flip unverified"
+      "ref": "DONE (2026-06-24): side/align placement props \u2014 ?s=placement opens at mount with side=right align=start. hovercard.placement DOM golden byte-identical: content carries data-side=right data-align=start + data-radix-popper-side/align=right/start and the matching popper transform. hover-card.tsx:113-119",
+      "oracle_file": "hovercard.placement"
     },
     {
       "id": "hovercard.multi-instance",

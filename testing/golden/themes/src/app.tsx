@@ -782,14 +782,20 @@ const PAGES: Page[] = [
       // `?s=controlled` — parent owns open={true}: the hover card is OPEN at mount, anchored to
       // the trigger (hover-card.tsx:67-72).
       const ctlOpen = currentState() === "controlled";
+      // `?s=placement` — non-default side (right) opened at mount; the resolved data-side/
+      // data-align + popper transform reflect the side/align props (hover-card.tsx:113-119).
+      const placement = currentState() === "placement";
+      const contentProps = placement
+        ? { maxWidth: "300px", side: "right" as const, align: "start" as const }
+        : { maxWidth: "300px" };
       return (
         <Text>
           Follow{" "}
-          <HoverCard.Root {...(ctlOpen ? { open: true } : {})}>
+          <HoverCard.Root {...(ctlOpen || placement ? { open: true } : {})}>
             <HoverCard.Trigger>
               <Link href="#">@radix_ui</Link>
             </HoverCard.Trigger>
-            <HoverCard.Content maxWidth="300px">
+            <HoverCard.Content {...contentProps}>
               {rich ? (
                 <Text as="div" size="1" color="gray">
                   See the <Link href="https://radix-ui.com">docs</Link> for details.

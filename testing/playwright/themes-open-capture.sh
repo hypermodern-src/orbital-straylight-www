@@ -33,6 +33,7 @@ STATES=(
   "tooltip:arialabel"
   "hovercard:open"
   "hovercard:controlled"
+  "hovercard:placement"
   "dropdownmenu:open"
   "dropdownmenu:nonmodal"
   "dropdownmenu:controlled"

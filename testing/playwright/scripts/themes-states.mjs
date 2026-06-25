@@ -157,6 +157,8 @@ export const STATES = {
     open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },
     // `?s=controlled` — open at MOUNT (parent owns open); NO hover. Wait for the content.
     controlled: async (pg) => { await pg.locator(".rt-HoverCardContent").first().waitFor(); },
+    // `?s=placement` — open at MOUNT with side=right; wait for the content to settle on the side.
+    placement: async (pg) => { await pg.locator('.rt-HoverCardContent[data-side="right"]').first().waitFor(); },
     // RICH-CONTENT (?s=richcontent): the card holds a tabbable <a>; on open, upstream sets
     // tabindex=-1 on every tabbable content descendant (the card is a preview, not a focus
     // target). Hover the TRIGGER link (the first link in the prose), wait for the content, then

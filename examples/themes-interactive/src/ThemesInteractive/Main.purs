@@ -608,7 +608,10 @@ hoverCardInput :: String -> HoverCard.Input
 hoverCardInput s = HoverCard.defaultInput
   { align = Start
   -- `?s=controlled` — parent owns open (Just true): open at mount, anchored to the trigger.
-  , open = if s == "controlled" then Just true else Nothing
+  -- `?s=placement` — non-default side/offset (right side, larger gap) opened at mount; the
+  -- resolved data-side/data-align + the popper transform reflect the placement props.
+  , open = if s == "controlled" || s == "placement" then Just true else Nothing
+  , side = if s == "placement" then Right else Bottom
   -- Radix Themes' HoverCard wrapper pins openDelay=200/closeDelay=150 (not the bare
   -- primitive's 700/300) — match it so the open/close timing tracks the Themes golden.
   , openDelay = 200
