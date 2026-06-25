@@ -50,11 +50,12 @@
       "id": "hovercard.delays",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "none"
+        "apg"
       ],
-      "ref": "hover-card.tsx:58-84 openDelay/closeDelay timers (200/150 themes); v1 skips them \u2014 timer/runtime"
+      "ref": "DONE/CO-COVER (2026-06-25): the port implements openDelay/closeDelay (armTimer; hoverCardInput openDelay=200/closeDelay=150) \u2014 NOT skipped (the audit \"v1 skips\" note is stale). Two gate-green APG checks pin it: \"hover defers the open by openDelay (no instant flash)\" + \"leaving closes after closeDelay (not instantly)\". hover-card.tsx:58-84",
+      "apg_check": "hover defers the open by openDelay"
     },
     {
       "id": "hovercard.focus-open",
@@ -82,11 +83,12 @@
       "id": "hovercard.pointer-stays",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "apg"
       ],
-      "ref": "hover-card.tsx:217-218 move trigger\u2192content keeps open; defining hover-card contract unverified"
+      "ref": "DONE/CO-COVER (2026-06-25): gate-green APG check \"pointer over the content keeps the card open (hover-card, not tooltip)\" \u2014 moving the pointer from trigger into the content keeps the card open (content onMouseEnter cancels the close timer), the defining hover-card-vs-tooltip behavior. hover-card.tsx:217-218",
+      "apg_check": "pointer over the content keeps the card open"
     },
     {
       "id": "hovercard.controlled",

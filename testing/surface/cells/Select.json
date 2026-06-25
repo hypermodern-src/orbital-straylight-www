@@ -82,11 +82,12 @@
       "id": "select.trigger-keyboard-open",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "select.tsx:31,380-389,703-714 OPEN_KEYS Space/Enter/ArrowUp/Down open + preventDefault, focus selected item; port trigger has only onClick \u2014 keyboard cannot open"
+      "ref": "CO-COVER (2026-06-25): the gate-green parametrized APG checks \"{ArrowDown,ArrowUp,Enter,Space} on the trigger opens the listbox\" cover all four OPEN_KEYS (select.tsx:31) \u2014 a focused trigger opens the listbox on each key and focus lands on the selected option. select.tsx:380-389,703-714",
+      "apg_check": "on the trigger opens the listbox"
     },
     {
       "id": "select.open-focus-selected",
