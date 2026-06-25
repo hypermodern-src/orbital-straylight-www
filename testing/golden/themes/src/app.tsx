@@ -1780,7 +1780,9 @@ const PAGES: Page[] = [
     node: (() => {
       const s = currentState();
       const auto = s === "autofit" || s === "autooverflow";
-      const lines = s === "autofit" ? 1 : 12;
+      // `?s=nothumb` → type="always" with content that FITS: the scrollbar TRACK is present but
+      // there is NO thumb (upstream hasThumb gate — Presence on ScrollAreaThumb).
+      const lines = s === "autofit" || s === "nothumb" ? 1 : 12;
       return (
         <ScrollArea
           type={auto ? "auto" : "always"}

@@ -1173,7 +1173,7 @@ scrollAreaInput s = ScrollArea.defaultInput
       [ box [ P "2", Width "160px" ]
           ( map
               ( \n -> textAs "p" [ Size "2" ] [ HH.text "Line ", HH.text (show n) ] )
-              (Array.range 1 (if s == "autofit" then 1 else 12))
+              (Array.range 1 (if s == "autofit" || s == "nothumb" then 1 else 12))
           )
       ]
   }

@@ -374,6 +374,9 @@ render st =
     if st.input.radius == "" then []
     else [ dataAttr "radius" st.input.radius ]
 
+  -- the THUMB renders only when the axis actually has scrollable overflow (upstream's
+  -- `hasThumb` gate — Presence on ScrollAreaThumb). The scrollbar TRACK can be present
+  -- (type=always) with NO thumb when the content fits. Gated per-axis on the measured overflow.
   vertScrollbar =
     HH.div
       ( [ classes st.input.style.scrollbar
@@ -382,6 +385,7 @@ render st =
         , dataState "visible"
         , HP.attr (HH.AttrName "style") vScrollbarStyle
         ] <> radiusAttr )
+      ( if not st.overflowV then [] else
       [ HH.div
           [ classes st.input.style.thumb
           , dataState "visible"
@@ -389,7 +393,7 @@ render st =
           , HE.onMouseDown (ThumbDown Vertical)
           ]
           []
-      ]
+      ] )
 
   horizScrollbar =
     HH.div
@@ -399,6 +403,7 @@ render st =
         , dataState "visible"
         , HP.attr (HH.AttrName "style") hScrollbarStyle
         ] <> radiusAttr )
+      ( if not st.overflowH then [] else
       [ HH.div
           [ classes st.input.style.thumb
           , dataState "visible"
@@ -406,7 +411,7 @@ render st =
           , HE.onMouseDown (ThumbDown Horizontal)
           ]
           []
-      ]
+      ] )
 
   -- the Corner: only when both scrollbars are present (upstream gates on hasSize too,
   -- but with type="always" + overflow on both axes the bars are always present here).

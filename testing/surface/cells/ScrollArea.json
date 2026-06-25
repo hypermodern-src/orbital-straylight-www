@@ -83,11 +83,12 @@
       "id": "scrollarea.nothumb",
       "state": "fit",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "scroll-area.tsx:419,426,770 hasThumb gate: no overflow (ratio>=1) \u2192 Thumb Presence-absent; port always emits thumb. PORT FIX."
+      "ref": "DONE (2026-06-25): PORT FIX \u2014 hasThumb gate. The THUMB now renders only when its axis has scrollable overflow (measured overflowV/overflowH); a type=\"always\" scrollbar TRACK can be present with NO thumb when content fits. scrollarea.nothumb DOM golden byte-identical + self-stable (1 scrollbar, 0 thumb); existing overflowing stories (shown/scrollareax) keep their thumbs. scroll-area.tsx:419,426,770",
+      "oracle_file": "scrollarea.nothumb"
     },
     {
       "id": "scrollarea.thumb-raf",

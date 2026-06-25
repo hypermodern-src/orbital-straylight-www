@@ -856,6 +856,12 @@ export const STATES = {
       await pg.locator('[data-radix-scroll-area-viewport]').first().waitFor();
       await pg.waitForFunction(() => document.querySelectorAll('.rt-ScrollAreaScrollbar').length === 0);
     },
+    // type="always" + content that FITS: the scrollbar TRACK is present but NO thumb. Wait for
+    // the bar, then assert (after measure) no thumb node exists inside it.
+    nothumb: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelectorAll('.rt-ScrollAreaThumb').length === 0);
+    },
   },
   slider: {
     highvalue: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },

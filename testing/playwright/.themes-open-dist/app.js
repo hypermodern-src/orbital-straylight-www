@@ -25891,7 +25891,14 @@
     };
     var thumbStyle = "width: var(--radix-scroll-area-thumb-width); " + ("height: var(--radix-scroll-area-thumb-height); " + ("transform: translate3d(" + (pxN(st.horiz.offsetPx) + (", " + (pxN(st.vert.offsetPx) + ", 0px);")))));
     var vScrollbarStyle = "position: absolute; top: 0px; right: 0px; " + ("bottom: var(--radix-scroll-area-corner-height); " + ("--radix-scroll-area-thumb-height: " + (pxN(st.vert.sizePx) + ";")));
-    var vertScrollbar = div3(append115([classes2(st.input.style.scrollbar), ref2(vScrollbarRef), dataOrientation(Vertical.value), dataState("visible"), attr2("style")(vScrollbarStyle)])(radiusAttr))([div3([classes2(st.input.style.thumb), dataState("visible"), attr2("style")(thumbStyle), onMouseDown(ThumbDown.create(Vertical.value))])([])]);
+    var vertScrollbar = div3(append115([classes2(st.input.style.scrollbar), ref2(vScrollbarRef), dataOrientation(Vertical.value), dataState("visible"), attr2("style")(vScrollbarStyle)])(radiusAttr))(function() {
+      var $70 = !st.overflowV;
+      if ($70) {
+        return [];
+      }
+      ;
+      return [div3([classes2(st.input.style.thumb), dataState("visible"), attr2("style")(thumbStyle), onMouseDown(ThumbDown.create(Vertical.value))])([])];
+    }());
     var px2 = function(n) {
       return show14(n) + "px";
     };
@@ -25908,10 +25915,17 @@
         return "scroll";
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 423, column 23 - line 426, column 21): " + [st.input.scrollbars.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.ScrollArea (line 428, column 23 - line 431, column 21): " + [st.input.scrollbars.constructor.name]);
     }();
     var hScrollbarStyle = "position: absolute; bottom: 0px; left: 0px; " + ("right: var(--radix-scroll-area-corner-width); " + ("--radix-scroll-area-thumb-width: " + (pxN(st.horiz.sizePx) + ";")));
-    var horizScrollbar = div3(append115([classes2(st.input.style.scrollbar), ref2(hScrollbarRef), dataOrientation(Horizontal.value), dataState("visible"), attr2("style")(hScrollbarStyle)])(radiusAttr))([div3([classes2(st.input.style.thumb), dataState("visible"), attr2("style")(thumbStyle), onMouseDown(ThumbDown.create(Horizontal.value))])([])]);
+    var horizScrollbar = div3(append115([classes2(st.input.style.scrollbar), ref2(hScrollbarRef), dataOrientation(Horizontal.value), dataState("visible"), attr2("style")(hScrollbarStyle)])(radiusAttr))(function() {
+      var $72 = !st.overflowH;
+      if ($72) {
+        return [];
+      }
+      ;
+      return [div3([classes2(st.input.style.thumb), dataState("visible"), attr2("style")(thumbStyle), onMouseDown(ThumbDown.create(Horizontal.value))])([])];
+    }());
     var famVert = eq18(st.input.scrollbars)(Vertical$prime.value) || eq18(st.input.scrollbars)(Both.value);
     var hasVert = famVert && (!st.input.auto || st.overflowV);
     var famHoriz = eq18(st.input.scrollbars)(Horizontal$prime.value) || eq18(st.input.scrollbars)(Both.value);
@@ -25961,8 +25975,8 @@
     return function(track2) {
       return function(thumbSize) {
         var maxThumb = track2 - thumbSize;
-        var $76 = maxThumb > 0;
-        if ($76) {
+        var $78 = maxThumb > 0;
+        if ($78) {
           return maxScroll / maxThumb;
         }
         ;
@@ -26028,26 +26042,26 @@
                 return bind36(liftEffect7(bind121(windowImpl)(document)))(function(doc) {
                   var docTarget = toEventTarget(doc);
                   return bind36(subscribe2(eventListener2("mousemove")(docTarget)(function() {
-                    var $90 = map123(ThumbMove.create);
-                    return function($91) {
-                      return $90(fromEvent2($91));
+                    var $92 = map123(ThumbMove.create);
+                    return function($93) {
+                      return $92(fromEvent2($93));
                     };
                   }())))(function(moveSub) {
                     return bind36(subscribe2(eventListener2("mouseup")(docTarget)(function(v1) {
                       return new Just(ThumbUp.value);
                     })))(function(upSub) {
                       return modify_19(function(v1) {
-                        var $79 = {};
-                        for (var $80 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $80)) {
-                            $79[$80] = v1[$80];
+                        var $81 = {};
+                        for (var $82 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $82)) {
+                            $81[$82] = v1[$82];
                           }
                           ;
                         }
                         ;
-                        $79.drag = new Just(info2);
-                        $79.dragSubs = [moveSub, upSub];
-                        return $79;
+                        $81.drag = new Just(info2);
+                        $81.dragSubs = [moveSub, upSub];
+                        return $81;
                       });
                     });
                   });
@@ -26099,17 +26113,17 @@
         return bind36(get18)(function(st) {
           return discard26(for_29(st.dragSubs)(unsubscribe2))(function() {
             return modify_19(function(v1) {
-              var $87 = {};
-              for (var $88 in v1) {
-                if ({}.hasOwnProperty.call(v1, $88)) {
-                  $87[$88] = v1[$88];
+              var $89 = {};
+              for (var $90 in v1) {
+                if ({}.hasOwnProperty.call(v1, $90)) {
+                  $89[$90] = v1[$90];
                 }
                 ;
               }
               ;
-              $87.drag = Nothing.value;
-              $87.dragSubs = [];
-              return $87;
+              $89.drag = Nothing.value;
+              $89.dragSubs = [];
+              return $89;
             });
           });
         });
@@ -34243,7 +34257,7 @@
       content: [box([new P("2"), new Width("160px")])(map64(function(n) {
         return textAs("p")([new Size("2")])([text5("Line "), text5(show21(n))]);
       })(range2(1)(function() {
-        var $263 = s === "autofit";
+        var $263 = s === "autofit" || s === "nothumb";
         if ($263) {
           return 1;
         }
