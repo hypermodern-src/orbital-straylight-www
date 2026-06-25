@@ -123,6 +123,9 @@ export const STATES = {
       await pg.locator(".rt-PopoverContent").first().waitFor();
       await pg.locator('body[data-scroll-locked]').waitFor();
     },
+    // `?s=flip` — preferred side=top collides at the viewport top and flips to bottom. Open at
+    // mount; wait for the content resolved to data-side=bottom (the flip settled). Both faces.
+    flip: async (pg) => { await pg.locator('.rt-PopoverContent[data-side="bottom"]').first().waitFor(); },
     // ?s=close → the content holds a Popover.Close submit button below the textarea. The open
     // driver is the same (click the trigger); the snapshot pins the extra close-button markup.
     // Keyed off rt-PopoverContent, so the same driver runs golden + port.

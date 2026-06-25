@@ -519,8 +519,10 @@ popoverInput s = Popover.defaultInput
   -- `?s=controlled` (parent owns open) / `?s=defaultopen` (uncontrolled default) — open at mount.
   -- `?s=modal` — modal popover open at mount (scroll-lock + hideOthers + content pointer-events).
   , open = if s == "controlled" then Just true else Nothing
-  , defaultOpen = s == "defaultopen" || s == "modal"
+  , defaultOpen = s == "defaultopen" || s == "modal" || s == "flip"
   , modal = s == "modal"
+  -- `?s=flip` → preferred side=Top near the viewport top collides + flips to bottom.
+  , side = if s == "flip" then Top else Bottom
   , style = popoverStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs

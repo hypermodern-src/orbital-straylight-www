@@ -26,6 +26,7 @@ STATES=(
   "popover:controlled"
   "popover:defaultopen"
   "popover:modal"
+  "popover:flip"
   "popover:closed-attr"
   "tooltip:open"
   "tooltip:closed-rest"

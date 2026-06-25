@@ -727,16 +727,19 @@ const PAGES: Page[] = [
       // `?s=modal` — modal popover OPEN at mount: RemoveScroll (body data-scroll-locked +
       // pointer-events:none), hideOthers (siblings aria-hidden), content pointer-events:auto.
       const modal = currentState() === "modal";
+      // `?s=flip` — preferred side="top" near the viewport top COLLIDES and flips to bottom
+      // (Popper collision → resolved data-side=bottom). Open at mount.
+      const flip = currentState() === "flip";
       return (
         <Popover.Root
           {...(ctlOpen ? { open: true } : {})}
-          {...(defOpen || modal ? { defaultOpen: true } : {})}
+          {...(defOpen || modal || flip ? { defaultOpen: true } : {})}
           {...(modal ? { modal: true } : {})}
         >
           <Popover.Trigger>
             <Button variant="soft">Comment</Button>
           </Popover.Trigger>
-          <Popover.Content width="360px">
+          <Popover.Content width="360px" {...(flip ? { side: "top" as const } : {})}>
             <Flex gap="3">
               <Box flexGrow="1">
                 <TextArea placeholder="Write a comment…" style={{ height: 80 }} />

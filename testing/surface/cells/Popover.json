@@ -151,11 +151,12 @@
       "id": "popover.collision-flip",
       "state": "open",
       "importance": "common",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "Popper collision: near-edge data-side/align flip; golden uses roomy viewport to avoid it"
+      "ref": "DONE (2026-06-25): Popper collision flip \u2014 a preferred side=Top popover near the viewport top collides and flips to bottom (resolved data-side=bottom + data-radix-popper-side=bottom on trigger/content). popover.flip DOM golden byte-identical; the port Float.Popper resolves the same flip as upstream.",
+      "oracle_file": "popover.flip"
     },
     {
       "id": "popover.placement-props",
