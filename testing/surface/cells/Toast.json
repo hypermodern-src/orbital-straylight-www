@@ -3,32 +3,242 @@
   "primitive": "Hydrogen.Radix.Toast",
   "face": "themed",
   "upstream": "primitives packages/react/toast/src/toast.tsx + @radix-ui/themes@3",
-  "note": "STR-381 ledger for Toast. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:498-521 — 18 gaps (4 core). v1 holds open (duration=Infinity); timer/queue/swipe are DEFERRED port-code.",
+  "note": "STR-381 ledger for Toast. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:498-521 \u2014 18 gaps (4 core). v1 holds open (duration=Infinity); timer/queue/swipe are DEFERRED port-code.",
   "cells": [
-    { "id": "toast.open",      "state": "open",    "importance": "core",   "status": "gated", "oracle": ["dom", "aria"], "ref": "held-open toast: region(F8 label, tabindex=-1), focus proxies, <ol>, <li data-state=open data-swipe-direction=right>, title/desc/action/close" },
-    { "id": "toast.closing",   "state": "closing", "importance": "common", "status": "gated", "oracle": ["dom"],         "ref": "Presence exit: data-state=closed lingering through pinned 100s keyframe (focus li, Escape)" },
-    { "id": "toast.rest",      "state": "rest",    "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "at-rest a11y tree (region>list>listitem>buttons + role=status mirror)" },
-    { "id": "toast-up.open",   "state": "open",    "importance": "common", "status": "gated", "oracle": ["dom", "aria"], "ref": "ToastUp variant held-open structure" },
-    { "id": "toast-up.rest",   "state": "rest",    "importance": "common", "status": "gated", "oracle": ["aria"],        "ref": "ToastUp at-rest a11y tree" },
-
-    { "id": "toast.timer",         "state": "open",    "importance": "core",   "status": "open", "oracle": ["none"], "ref": "toast.tsx:496-546 auto-dismiss setTimeout(handleClose, duration) — defining behavior; port has NO timer. PORT FIX (duration::Maybe Int)." },
-    { "id": "toast.pause-resume",  "state": "open",    "importance": "core",   "status": "open", "oracle": ["none"], "ref": "toast.tsx:180-226,519-539 timer pause/resume on hover/focus/blur, remaining-time preserved. MISSING in port." },
-    { "id": "toast.swipe",         "state": "open",    "importance": "core",   "status": "open", "oracle": ["none"], "ref": "toast.tsx:597-665 swipe-to-dismiss: data-swipe start|move|cancel|end, --radix-toast-swipe-* vars, threshold 50px. MISSING in port." },
-    { "id": "toast.multi-queue",   "state": "open",    "importance": "core",   "status": "open", "oracle": ["dom"],  "ref": "toast.tsx:89-112 multi-toast queue: N <li> in shared <ol>, reverse tab order, hasToasts gating. Port is single-toast. PORT FIX." },
-    { "id": "toast.hotkey",        "state": "open",    "importance": "common", "status": "open", "oracle": ["apg"],  "ref": "toast.tsx:141-178 F8 hotkey document keydown focuses <ol>; port hardcodes label but has NO listener" },
-    { "id": "toast.reverse-tab",   "state": "open",    "importance": "common", "status": "open", "oracle": ["apg"],  "ref": "toast.tsx:245-287,301-328 reverse Tab order + focus-proxy onFocus edge handling; port proxies inert" },
-    { "id": "toast.close-focus",   "state": "closing", "importance": "common", "status": "open", "oracle": ["apg"],  "ref": "toast.tsx:501-507 handleClose focuses viewport <ol> when focus inside closing toast; port doesn't" },
-    { "id": "toast.aria-live",     "state": "rest",    "importance": "common", "status": "open", "oracle": ["aria"], "ref": "toast.tsx:564-566 aria-live polarity: foreground→assertive, background→polite; only foreground captured" },
-    { "id": "toast.duration-override","state": "open", "importance": "common", "status": "open", "oracle": ["none"], "ref": "toast.tsx:464,496 per-toast duration overrides provider default (durationProp||context); needs timer" },
-    { "id": "toast.controlled-close", "state": "closing","importance": "common", "status": "open", "oracle": ["dom"], "ref": "toast.tsx:394-400 controlled open driven false externally vs Escape; OpenChanged on every transition; add Query-driven closing variant" },
-
-    { "id": "toast.announce-frame",   "state": "open", "importance": "edge", "status": "open", "oracle": ["aria"], "ref": "edge: announce node renders text only on NEXT frame (useNextFrame)" },
-    { "id": "toast.action-alttext",   "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: ToastAction altText non-empty guard (empty/whitespace → return null)" },
-    { "id": "toast.forcemount",       "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: forceMount bypasses Presence, keeps toast mounted" },
-    { "id": "toast.escape-preventable","state": "open","importance": "edge", "status": "open", "oracle": ["apg"], "ref": "edge: onEscapeKeyDown preventDefault keeps toast open" },
-    { "id": "toast.swipe-directions", "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: swipeDirection up/down/left variants — data-swipe-direction + clamp axis" },
-    { "id": "toast.announcer-container","state": "open","importance": "edge", "status": "open", "oracle": ["aria"],"ref": "edge: announcerContainer prop portals announce node to custom mount" },
-    { "id": "toast.branch",           "state": "open", "importance": "edge", "status": "open", "oracle": ["apg"],  "ref": "edge: DismissableLayer.Branch on viewport — clicks don't dismiss ancestor layers" },
-    { "id": "toast.rtl",              "state": "open", "importance": "edge", "status": "open", "oracle": ["dom"],  "ref": "edge: no explicit dir handling; swipeDirection left/right is direction-relevant" }
+    {
+      "id": "toast.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "held-open toast: region(F8 label, tabindex=-1), focus proxies, <ol>, <li data-state=open data-swipe-direction=right>, title/desc/action/close"
+    },
+    {
+      "id": "toast.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Presence exit: data-state=closed lingering through pinned 100s keyframe (focus li, Escape)"
+    },
+    {
+      "id": "toast.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (region>list>listitem>buttons + role=status mirror)"
+    },
+    {
+      "id": "toast-up.open",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "ToastUp variant held-open structure"
+    },
+    {
+      "id": "toast-up.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "ToastUp at-rest a11y tree"
+    },
+    {
+      "id": "toast.timer",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE/CO-COVER (2026-06-25): implemented (armDuration on Initialize; DurationElapsed\u2192closeToast) and pinned by the gate-green APG check \u2014 a finite-duration (1500ms) uncontrolled toast auto-dismisses itself with no user action. The \"v1 defers timer\" comment is stale. toast.tsx:496-546",
+      "apg_check": "a finite-duration toast auto-dismisses itself when the timer fires"
+    },
+    {
+      "id": "toast.pause-resume",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE/CO-COVER (2026-06-25): implemented (PauseTimer banks the remaining time, ResumeTimer re-arms) and pinned by the gate-green APG check \u2014 pointer over the viewport pauses the auto-dismiss, leaving resumes with the banked remainder. toast.tsx:180-226,519-539",
+      "apg_check": "hovering the viewport pauses the auto-dismiss; leaving resumes it"
+    },
+    {
+      "id": "toast.swipe",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE/CO-COVER (2026-06-25): implemented (SwipeStart/move/end + data-swipe transform vars) and pinned by the gate-green APG check \u2014 a pointer swipe past the threshold dismisses the toast. toast.tsx:597-665",
+      "apg_check": "swiping the toast past the threshold dismisses it"
+    },
+    {
+      "id": "toast.multi-queue",
+      "state": "open",
+      "importance": "core",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "toast.tsx:89-112 multi-toast queue: N <li> in shared <ol>, reverse tab order, hasToasts gating. Port is single-toast. PORT FIX."
+    },
+    {
+      "id": "toast.hotkey",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "toast.tsx:141-178 F8 hotkey document keydown focuses <ol>; port hardcodes label but has NO listener"
+    },
+    {
+      "id": "toast.reverse-tab",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "toast.tsx:245-287,301-328 reverse Tab order + focus-proxy onFocus edge handling; port proxies inert"
+    },
+    {
+      "id": "toast.close-focus",
+      "state": "closing",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "toast.tsx:501-507 handleClose focuses viewport <ol> when focus inside closing toast; port doesn't"
+    },
+    {
+      "id": "toast.aria-live",
+      "state": "rest",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "toast.tsx:564-566 aria-live polarity: foreground\u2192assertive, background\u2192polite; only foreground captured"
+    },
+    {
+      "id": "toast.duration-override",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "toast.tsx:464,496 per-toast duration overrides provider default (durationProp||context); needs timer"
+    },
+    {
+      "id": "toast.controlled-close",
+      "state": "closing",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "toast.tsx:394-400 controlled open driven false externally vs Escape; OpenChanged on every transition; add Query-driven closing variant"
+    },
+    {
+      "id": "toast.announce-frame",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "edge: announce node renders text only on NEXT frame (useNextFrame)"
+    },
+    {
+      "id": "toast.action-alttext",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: ToastAction altText non-empty guard (empty/whitespace \u2192 return null)"
+    },
+    {
+      "id": "toast.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount bypasses Presence, keeps toast mounted"
+    },
+    {
+      "id": "toast.escape-preventable",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: onEscapeKeyDown preventDefault keeps toast open"
+    },
+    {
+      "id": "toast.swipe-directions",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: swipeDirection up/down/left variants \u2014 data-swipe-direction + clamp axis"
+    },
+    {
+      "id": "toast.announcer-container",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "edge: announcerContainer prop portals announce node to custom mount"
+    },
+    {
+      "id": "toast.branch",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: DismissableLayer.Branch on viewport \u2014 clicks don't dismiss ancestor layers"
+    },
+    {
+      "id": "toast.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: no explicit dir handling; swipeDirection left/right is direction-relevant"
+    }
   ]
 }
