@@ -29,6 +29,8 @@ import Type.Proxy (Proxy(..))
 import Hydrogen.Radix.Accordion as Accordion
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn)
+import Hydrogen.Radix.HoverCard as HoverCard
+import Hydrogen.Radix.NavigationMenu as NavigationMenu
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.Toggle as Toggle
 import Hydrogen.Radix.Tooltip as Tooltip
@@ -43,7 +45,7 @@ import Hydrogen.Themes.Typography (textAs)
 -- | live primitive rather than a static Themes render). Kept disjoint from the existing
 -- | `Themes/` display-component story ids so those stories + baselines are untouched.
 ids :: Array String
-ids = [ "toggle", "accordion", "dialog", "popover", "tooltip" ]
+ids = [ "toggle", "accordion", "dialog", "popover", "tooltip", "hovercard", "navigationmenu" ]
 
 type Slots =
   ( toggle :: Toggle.Slot Unit
@@ -51,6 +53,8 @@ type Slots =
   , dialog :: Dialog.Slot Unit
   , popover :: Popover.Slot Unit
   , tooltip :: Tooltip.Slot Unit
+  , hovercard :: HoverCard.Slot Unit
+  , navigationmenu :: NavigationMenu.Slot Unit
   )
 
 _toggle :: Proxy "toggle"
@@ -67,6 +71,12 @@ _popover = Proxy
 
 _tooltip :: Proxy "tooltip"
 _tooltip = Proxy
+
+_hovercard :: Proxy "hovercard"
+_hovercard = Proxy
+
+_navigationmenu :: Proxy "navigationmenu"
+_navigationmenu = Proxy
 
 -- | The slot-host: render the primitive named by the input id, or nothing for an
 -- | unknown id (Mount only routes ids in `ids`).
@@ -87,6 +97,8 @@ render cid = case cid of
   "dialog" -> HH.slot_ _dialog unit Dialog.component dialogInput
   "popover" -> HH.slot_ _popover unit Popover.component popoverInput
   "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
+  "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
+  "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component navigationMenuInput
   _ -> HH.text ""
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -220,6 +232,52 @@ tooltipStyle :: Tooltip.Style
 tooltipStyle =
   { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
   , content: cn "light radix-themes rt-TooltipContent rt-r-max-w"
+  }
+
+hoverCardInput :: HoverCard.Input
+hoverCardInput = HoverCard.defaultInput
+  { align = Start
+  -- Radix Themes' HoverCard pins openDelay=200/closeDelay=150 (not the bare 700/300).
+  , openDelay = 200
+  , closeDelay = 150
+  , style = hoverCardStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--max-width: 9999px; " <> popperContentVars "hover-card"
+  , wrapperClass = cn "rt-Text"
+  , proseBefore = [ HH.text "Follow " ]
+  , proseAfter = [ HH.text " for updates." ]
+  , trigger = [ HH.text "@radix_ui" ]
+  , content =
+      [ textAs "div" [ Size "1", Color "gray" ]
+          [ HH.text "The design system for building modern web applications." ]
+      ]
+  }
+
+hoverCardStyle :: HoverCard.Style
+hoverCardStyle =
+  { trigger: cn "rt-reset rt-Text rt-Link rt-HoverCardTrigger rt-underline-auto"
+  , content: cn "light radix-themes rt-HoverCardContent rt-PopperContent rt-r-max-w rt-r-size-2"
+  }
+
+navigationMenuInput :: NavigationMenu.Input
+navigationMenuInput = NavigationMenu.defaultInput
+  { items =
+      [ { value: "overview"
+        , trigger: [ HH.text "Overview" ]
+        , links:
+            [ { href: "#intro", label: [ HH.text "Introduction" ], active: false }
+            , { href: "#start", label: [ HH.text "Getting started" ], active: false }
+            ]
+        }
+      , { value: "components"
+        , trigger: [ HH.text "Components" ]
+        , links:
+            [ { href: "#primitives", label: [ HH.text "Primitives" ], active: false }
+            , { href: "#themes", label: [ HH.text "Themes" ], active: false }
+            ]
+        }
+      ]
   }
 
 -- | The themed tooltip arrow (rt-TooltipArrow) — a 10×5 triangle the primitive rotates.
