@@ -275,6 +275,7 @@ accordionInput = Accordion.defaultInput
       , { value: "item-2", header: [ HH.text "Is it styled?" ], content: [ HH.text "No. It is unstyled by default." ], disabled: false }
       , { value: "item-3", header: [ HH.text "Is it animated?" ], content: [ HH.text "Yes, with CSS." ], disabled: false }
       ]
+  , defaultValue = [ "item-1" ]   -- the first panel is open at mount
   , style =
       { root: cn ""
       , item: cn ""
@@ -286,7 +287,8 @@ accordionInput = Accordion.defaultInput
 
 dialogInput :: Dialog.Input
 dialogInput = Dialog.defaultInput
-  { style = dialogStyle
+  { defaultOpen = true
+  , style = dialogStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "--max-width: 450px;"
@@ -321,7 +323,8 @@ dialogStyle =
 
 popoverInput :: Popover.Input
 popoverInput = Popover.defaultInput
-  { align = Start
+  { defaultOpen = true
+  , align = Start
   , style = popoverStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
@@ -343,7 +346,8 @@ popoverStyle =
 
 tooltipInput :: Tooltip.Input
 tooltipInput = Tooltip.defaultInput
-  { style = tooltipStyle
+  { defaultOpen = true
+  , style = tooltipStyle
   , offset = 8.0
   , padding = 10.0
   , triggerAttrs = [ Tuple "accent-color" "" ]
@@ -362,7 +366,8 @@ tooltipStyle =
 
 hoverCardInput :: HoverCard.Input
 hoverCardInput = HoverCard.defaultInput
-  { align = Start
+  { defaultOpen = true
+  , align = Start
   -- Radix Themes' HoverCard pins openDelay=200/closeDelay=150 (not the bare 700/300).
   , openDelay = 200
   , closeDelay = 150
@@ -388,6 +393,7 @@ hoverCardStyle =
 
 navigationMenuInput :: NavigationMenu.Input
 navigationMenuInput = NavigationMenu.defaultInput
+  -- bare primitive (no Themes skin) → open content is unstyled; the closed trigger bar is cleanest.
   { items =
       [ { value: "overview"
         , trigger: [ HH.text "Overview" ]
@@ -514,7 +520,8 @@ menuRow value label shortcut accent disabled =
 
 dropdownMenuInput :: DropdownMenu.Input
 dropdownMenuInput = DropdownMenu.defaultInput
-  { style = menuStyle
+  { defaultOpen = true
+  , style = menuStyle
   , triggerAttrs = [ Tuple "accent-color" "" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
@@ -610,6 +617,8 @@ contextMenuStyle =
 
 menubarInput :: Menubar.Input
 menubarInput = Menubar.defaultInput
+  -- bare primitive (Radix Themes ships no Menubar skin) → its open content is unstyled, so the
+  -- cleanest baseline is the closed bar of triggers.
   { align = Start
   , contentStyle = "outline: none; " <> popperContentVars "menubar"
   , menus =
@@ -642,7 +651,8 @@ menubarInput = Menubar.defaultInput
 
 selectInput :: Select.Input
 selectInput = Select.defaultInput
-  { defaultValue = "apple"
+  { defaultOpen = true
+  , defaultValue = "apple"
   , style = selectStyle
   , portalAttrs = portalThemeAttrs
   , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"
@@ -697,7 +707,7 @@ scrollAreaInput = ScrollArea.defaultInput
 
 collapsibleInput :: Collapsible.Input
 collapsibleInput = Collapsible.defaultInput
-  { defaultOpen = false
+  { defaultOpen = true
   , style =
       { root: cn ""
       , trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
@@ -761,7 +771,8 @@ toggleGroupInput = ToggleGroup.defaultInput
 
 alertDialogInput :: AlertDialog.Input
 alertDialogInput = AlertDialog.defaultInput
-  { style = alertDialogStyle
+  { defaultOpen = true
+  , style = alertDialogStyle
   , triggerAttrs = [ Tuple "accent-color" "red" ]
   , portalAttrs = portalThemeAttrs
   , contentStyle = "--max-width: 450px; pointer-events: auto;"
