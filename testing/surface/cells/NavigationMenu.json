@@ -105,13 +105,14 @@
     },
     {
       "id": "navigationmenu.datamotion",
-      "state": "open",
+      "state": "motion",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "navigation-menu.tsx:890-925 data-motion to-start/to-end/from-start/from-end; port emits none"
+      "oracle_file": "navigationmenu.motion",
+      "ref": "DONE (2026-06-26): the data-motion transition-direction machinery — PORT BUILD. Added State.previousValue (radix usePrevious, set on every open/close transition) + motionAttr computing the direction exactly as navigation-menu.tsx:890-916 (item-value order, RTL-reversed; from-end when index>prevIndex, from-start when <; Nothing on initial open). Emitted as data-motion on the content. Pinned DOM-identical by golden navigationmenu.motion (drive Item One→Two → content-two carries data-motion=from-end). SCOPE: under the bare (no-exit-animation) config every NavMenu oracle uses, upstream itself only emits the from-* directions; to-start/to-end live on the LEAVING content as it animates out — part of the exit lifecycle NavMenu deliberately omits (module header; same as select/tooltip/menubar closing oracles). motionAttr also computes from-start (Two→One). NavigationMenu.purs motionAttr/previousValue."
     },
     {
       "id": "navigationmenu.tab-order-proxy",

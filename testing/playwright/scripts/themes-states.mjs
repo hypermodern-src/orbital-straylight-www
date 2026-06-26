@@ -404,6 +404,22 @@ export const STATES = {
       await pg.locator('[aria-labelledby][data-state="open"]').first().waitFor({ state: "attached" });
       await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
     },
+    // MOTION (?s=motion): open Item One at first paint, then CLICK Item Two to transition. The
+    // new (Item Two) content carries data-motion=from-end (index 1 > prevIndex 0). Wait for Item
+    // Two expanded + its content with data-motion=from-end + the viewport size var. Keyed off
+    // upstream data-motion/aria-expanded only, so the same driver runs golden+port.
+    motion: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      // click the SECOND trigger (Item Two) → transition one→two.
+      await root(pg).locator('button[aria-expanded]').nth(1).click();
+      await pg.locator('[data-motion="from-end"]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
     // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
     // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
     // omits defaultValue. No interaction — wait for the closed trigger.

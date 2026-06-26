@@ -162,6 +162,7 @@ type Measure = { width :: Number, height :: Number, left :: Number, top :: Numbe
 type State =
   { items :: Array MenuEntry
   , ctrl :: Controllable String     -- the open menu value ("" = none)
+  , previousValue :: String         -- the value before the latest change (radix usePrevious) → data-motion
   , presence :: Presence            -- viewport/content exit lifecycle
   , orientation :: Orientation
   , dir :: Dir
@@ -219,6 +220,7 @@ initialState :: Input -> State
 initialState input =
   { items: input.items
   , ctrl: controllable input.value startVal
+  , previousValue: ""
   , presence: if startVal /= "" then Open else Closed
   , orientation: input.orientation
   , dir: input.dir
@@ -271,6 +273,22 @@ openIndex :: State -> Maybe Int
 openIndex st =
   let v = openValue st
   in if v == "" then Nothing else Array.findIndex (\m -> m.value == v) st.items
+
+-- | The `data-motion` direction for the ACTIVE content (radix motionAttribute, navigation-menu
+-- | .tsx:890-916). The item-value order is reversed under RTL. For the open content (its value ==
+-- | current), the transition from `previousValue` yields from-end (moved here from an earlier
+-- | item) / from-start (from a later item); the initial open (no previous) yields Nothing — no
+-- | attribute. (to-start/to-end live on the LEAVING content, which needs the multi-mount/exit
+-- | model; the bare port unmounts it synchronously.)
+motionAttr :: State -> String -> Maybe String
+motionAttr st value =
+  let
+    order = (if st.dir == RTL then Array.reverse else identity) (map _.value st.items)
+    index = Array.elemIndex value order
+    prevIndex = Array.elemIndex st.previousValue order
+  in case index, prevIndex of
+    Just i, Just p | i /= p && p >= 0 -> Just (if i > p then "from-end" else "from-start")
+    _, _ -> Nothing
 
 isHorizontal :: State -> Boolean
 isHorizontal st = st.orientation == Horizontal
@@ -433,6 +451,9 @@ renderContent st withState menu =
     , HE.onMouseLeave \_ -> ContentLeave
     ]
       <> (if withState then [ dataState "open" ] else [])
+      <> (case motionAttr st menu.value of
+            Just m -> [ dataAttr "motion" m ]
+            Nothing -> [])
     )
     (Array.mapWithIndex (renderLink st) menu.links)
 
@@ -620,7 +641,9 @@ openMenu value = do
   st <- H.get
   when (openValue st /= value) do
     let already = openValue st /= ""
-    H.modify_ _ { ctrl = (change value st.ctrl).next, presence = Open }
+    -- record the prior open value (radix usePrevious) so the new content's data-motion can read
+    -- the transition direction (from-start/from-end).
+    H.modify_ _ { previousValue = openValue st, ctrl = (change value st.ctrl).next, presence = Open }
     -- radix setValue side-effect on open: cancel the skip-delay timer and (if skipDelay is
     -- enabled) drop into INSTANT-open mode while the menu is open.
     clearSkipTimer
@@ -713,7 +736,8 @@ closeMenu = do
     for_ st.subs H.unsubscribe
     -- the bare primitive has no exit animation → the content unmounts synchronously.
     H.modify_ _
-      { ctrl = (change "" st.ctrl).next
+      { previousValue = openValue st
+      , ctrl = (change "" st.ctrl).next
       , presence = finishExit (present false st.presence)
       , subs = []
       , viewport = Nothing

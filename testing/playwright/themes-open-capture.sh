@@ -75,6 +75,7 @@ STATES=(
   "navigationmenu:controlled"
   "navigationmenu:activelink"
   "navigationmenu:inline"
+  "navigationmenu:motion"
   "tabs:tab2"
   "radiogroup:checked"
   "checkbox:checked"

@@ -1218,9 +1218,13 @@ const PAGES: Page[] = [
       // inside its Item (navigation-menu.tsx:771-787 `!context.viewport` branch) carrying
       // data-state. Opens Item One at first paint via defaultValue.
       const inline = currentState() === "inline";
+      // `?s=motion` → open at first paint (Item One); the driver then CLICKS Item Two (instant
+      // onItemSelect toggle — no timer) so the new content carries data-motion=from-end
+      // (navigation-menu.tsx:890-916). The leaving content unmounts synchronously (bare, no exit).
+      const motion = currentState() === "motion";
       return (
         <NavigationMenu.Root
-          {...(open || vertical || rtl || inline ? { defaultValue: "one" } : {})}
+          {...(open || vertical || rtl || inline || motion ? { defaultValue: "one" } : {})}
           {...(controlled ? { value: "one", onValueChange: () => {} } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
           {...(rtl ? { dir: "rtl" as const } : {})}
