@@ -28,11 +28,13 @@ import Halogen.HTML.Properties as HP
 import Type.Proxy (Proxy(..))
 
 import Hydrogen.Radix.Accordion as Accordion
+import Hydrogen.Radix.AlertDialog as AlertDialog
 import Hydrogen.Radix.Collapsible as Collapsible
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
-import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn)
+import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn)
+import Hydrogen.Radix.Toolbar as Toolbar
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Menubar as Menubar
 import Hydrogen.Radix.NavigationMenu as NavigationMenu
@@ -57,11 +59,14 @@ ids :: Array String
 ids =
   [ "toggle", "accordion", "dialog", "popover", "tooltip", "hovercard", "navigationmenu"
   , "dropdownmenu", "contextmenu", "menubar", "select", "scrollarea", "collapsible", "toast", "togglegroup"
+  , "alertdialog", "toolbar"
   ]
 
 type Slots =
   ( toggle :: Toggle.Slot Unit
   , accordion :: Accordion.Slot Unit
+  , alertdialog :: AlertDialog.Slot Unit
+  , toolbar :: Toolbar.Slot Unit
   , dialog :: Dialog.Slot Unit
   , popover :: Popover.Slot Unit
   , tooltip :: Tooltip.Slot Unit
@@ -82,6 +87,12 @@ _toggle = Proxy
 
 _accordion :: Proxy "accordion"
 _accordion = Proxy
+
+_alertdialog :: Proxy "alertdialog"
+_alertdialog = Proxy
+
+_toolbar :: Proxy "toolbar"
+_toolbar = Proxy
 
 _dialog :: Proxy "dialog"
 _dialog = Proxy
@@ -151,6 +162,8 @@ render cid = case cid of
   "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
   "toast" -> HH.slot_ _toast unit Toast.component toastInput
   "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
+  "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
+  "toolbar" -> HH.slot_ _toolbar unit Toolbar.component toolbarInput
   _ -> HH.text ""
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -679,4 +692,69 @@ toggleGroupInput = ToggleGroup.defaultInput
       , { value: "c", label: [ HH.text "Right" ], disabled: false }
       ]
   , style = { root: cn "", item: cn "" }
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- AlertDialog
+-- ─────────────────────────────────────────────────────────────────────────────
+
+alertDialogInput :: AlertDialog.Input
+alertDialogInput = AlertDialog.defaultInput
+  { style = alertDialogStyle
+  , triggerAttrs = [ Tuple "accent-color" "red" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "--max-width: 450px; pointer-events: auto;"
+  , closeLabels = [ "Cancel", "Revoke access" ]
+  , trigger = [ HH.text "Revoke access" ]
+  , title = [ HH.text "Revoke access" ]
+  , description = [ HH.text "Are you sure? This application will no longer be accessible." ]
+  , content =
+      [ flex [ Gap "3", Mt "4", Justify "end" ]
+          [ button [ Variant "soft", Color "gray" ] [ HH.text "Cancel" ]
+          , button [ Color "red" ] [ HH.text "Revoke access" ]
+          ]
+      ]
+  }
+
+alertDialogStyle :: AlertDialog.Style
+alertDialogStyle =
+  { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-solid"
+  , overlay: cn "light radix-themes rt-BaseDialogOverlay rt-AlertDialogOverlay"
+  , scroll: cn "rt-BaseDialogScroll rt-AlertDialogScroll"
+  , scrollPadding: cn "rt-BaseDialogScrollPadding rt-AlertDialogScrollPadding rt-r-align-center"
+  , content: cn "rt-BaseDialogContent rt-AlertDialogContent rt-r-max-w rt-r-size-3"
+  , title: cn "rt-Heading rt-r-lt-start rt-r-mb-3 rt-r-size-5"
+  , description: cn "rt-Text rt-r-size-2"
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Toolbar (bare @radix-ui primitive — a roving formatting bar)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+toolbarInput :: Toolbar.Input
+toolbarInput = Toolbar.defaultInput
+  { orientation = Horizontal
+  , ariaLabel = Just "Formatting"
+  , items =
+      [ Toolbar.Button { value: "new", label: [ HH.text "New" ], disabled: false }
+      , Toolbar.Link { value: "edit", label: [ HH.text "Edit" ], href: "#", disabled: false }
+      , Toolbar.Sep
+      , Toolbar.ToggleGroup
+          { items:
+              [ { value: "left", label: [ HH.text "L" ], disabled: false }
+              , { value: "center", label: [ HH.text "C" ], disabled: false }
+              ]
+          , single: true
+          , defaultValue: [ "left" ]
+          , ariaLabel: Just "Align"
+          }
+      ]
+  , style =
+      { root: cn ""
+      , button: cn ""
+      , link: cn ""
+      , separator: cn ""
+      , toggleGroup: cn ""
+      , toggleItem: cn ""
+      }
   }
