@@ -420,6 +420,16 @@ export const STATES = {
         return !!vp;
       });
     },
+    // TABPROXY (?s=tabproxy): open at first paint, focus a content link, then move focus back to
+    // the open trigger. Focus leaving the content (staying in root) → removeFromTabOrder, so the
+    // content links get tabindex=-1 + data-tabindex="" while the menu stays open. Wait for that.
+    tabproxy: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby] a').first().waitFor({ state: "attached" });
+      await pg.locator('[aria-labelledby] a').first().focus();          // focus into content
+      await root(pg).locator('button[aria-expanded="true"]').first().focus();  // focus back to trigger
+      await pg.locator('[aria-labelledby] a[tabindex="-1"]').first().waitFor({ state: "attached" });
+    },
     // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
     // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
     // omits defaultValue. No interaction — wait for the closed trigger.

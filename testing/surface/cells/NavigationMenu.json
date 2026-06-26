@@ -116,13 +116,14 @@
     },
     {
       "id": "navigationmenu.tab-order-proxy",
-      "state": "open",
+      "state": "tabproxy",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "navigation-menu.tsx:1194-1205 removeFromTabOrder tabindex=-1 on content tabbables until entry; port no management"
+      "oracle_file": "navigationmenu.tabproxy",
+      "ref": "DONE (2026-06-26): removeFromTabOrder — PORT BUILD. Added State.contentTabRemoved + content onFocusOut/onFocusIn: focus leaving the open content (relatedTarget outside it) pulls its links from the tab order (data-tabindex=\"\" + tabindex=-1, radix removeFromTabOrder); focus re-entering restores them. Pinned DOM-identical by golden navigationmenu.tabproxy (open → focus a link → focus back to the trigger → both links carry data-tabindex= tabindex=-1, menu still open). navigation-menu.tsx:1194-1205. NavigationMenu.purs ContentFocusOut/ContentFocusIn + renderLink."
     },
     {
       "id": "navigationmenu.focusproxy",

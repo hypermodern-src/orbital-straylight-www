@@ -1006,7 +1006,7 @@ navigationMenuInput s = NavigationMenu.defaultInput
   -- OPEN at first paint (defaultValue="one") ONLY for the explicit `open` capture (?s=open);
   -- every other path (the `closed`/`rest` capture, the index) renders at rest — mirroring the
   -- golden story's `currentState() === "open"` switch (so the a11y `rest` baseline matches too).
-  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" || s == "rtl" || s == "activelink" || s == "inline" || s == "motion" then "one" else ""
+  { defaultValue = if s == "open" || s == "clicktoggle" || s == "vertical" || s == "rtl" || s == "activelink" || s == "inline" || s == "motion" || s == "tabproxy" then "one" else ""
   -- `?s=inline` → INLINE (non-viewport) mode: the content renders in-place inside its Item.
   , withViewport = s /= "inline"
   -- `?s=controlled` → parent OWNS value="one" (open at mount, parent-controlled).

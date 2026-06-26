@@ -1222,9 +1222,14 @@ const PAGES: Page[] = [
       // onItemSelect toggle — no timer) so the new content carries data-motion=from-end
       // (navigation-menu.tsx:890-916). The leaving content unmounts synchronously (bare, no exit).
       const motion = currentState() === "motion";
+      // `?s=tabproxy` → open at first paint; the driver focuses a content link then moves focus
+      // back to the trigger. focus leaving the content (but staying in the root) fires
+      // onContentFocusOutside → removeFromTabOrder, so the content's links get tabindex=-1 +
+      // data-tabindex="" (navigation-menu.tsx:1194-1205) while the menu stays open.
+      const tabproxy = currentState() === "tabproxy";
       return (
         <NavigationMenu.Root
-          {...(open || vertical || rtl || inline || motion ? { defaultValue: "one" } : {})}
+          {...(open || vertical || rtl || inline || motion || tabproxy ? { defaultValue: "one" } : {})}
           {...(controlled ? { value: "one", onValueChange: () => {} } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
           {...(rtl ? { dir: "rtl" as const } : {})}

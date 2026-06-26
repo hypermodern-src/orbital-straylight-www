@@ -182,6 +182,9 @@ type State =
   , closeTimer :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)  -- pending leave→close (150ms)
   , skipTimer :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)   -- post-close instant-open window
   , hasPMOpen :: Boolean            -- guards onPointerMove from re-firing the open per trigger
+  , contentTabRemoved :: Boolean    -- the open content's links are pulled from tab order (radix
+                                    -- removeFromTabOrder) after focus left the content but stayed
+                                    -- in the root; restored when focus re-enters the content
   }
 
 data Action
@@ -202,6 +205,8 @@ data Action
   | CloseTimerFired
   | SkipTimerFired
   | ProxyFocus Int FocusEvent   -- the FocusProxy span (after trigger i) received focus
+  | ContentFocusOut FocusEvent  -- focus left the open content → maybe remove its links from tab order
+  | ContentFocusIn              -- focus entered the open content → restore its links to tab order
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -239,6 +244,7 @@ initialState input =
   , closeTimer: Nothing
   , skipTimer: Nothing
   , hasPMOpen: false
+  , contentTabRemoved: false
   }
   where
   startVal = case input.value of
@@ -449,6 +455,9 @@ renderContent st withState menu =
     -- pointer over the open content cancels the pending close; leaving (re)starts it.
     , HE.onMouseEnter \_ -> ContentEnter
     , HE.onMouseLeave \_ -> ContentLeave
+    -- focus leaving/entering the content toggles its links in/out of the tab order (FocusProxy).
+    , HE.onFocusOut ContentFocusOut
+    , HE.onFocusIn \_ -> ContentFocusIn
     ]
       <> (if withState then [ dataState "open" ] else [])
       <> (case motionAttr st menu.value of
@@ -467,6 +476,9 @@ renderLink st i link =
       , HE.onKeyDown (LinkKeyDown i)
       ]
         <> (if link.active then [ dataAttr "active" "", aria "current" "page" ] else [])
+        -- removeFromTabOrder: while focus is outside the open content, its links carry
+        -- data-tabindex="" (the saved prior value) + tabindex=-1 (radix removeFromTabOrder).
+        <> (if st.contentTabRemoved then [ dataAttr "tabindex" "", HP.tabIndex (-1) ] else [])
     )
     (map HH.fromPlainHTML link.label)
 
@@ -565,6 +577,15 @@ handleAction = case _ of
     fromContent <- containsTarget mcont mrel
     when (wasTrigger || not fromContent) $
       if wasTrigger then focusFirstLink else focusLastLink
+  -- focus left the content: if it went OUTSIDE the content (e.g. back to the trigger), pull the
+  -- content's links from the tab order (radix removeFromTabOrder via onContentFocusOutside) so a
+  -- subsequent Tab routes through the FocusProxy rather than straight into the links.
+  ContentFocusOut fe -> do
+    mcont <- H.getHTMLElementRef contentRef
+    inside <- containsTarget mcont (relatedTarget fe)
+    when (not inside) (H.modify_ _ { contentTabRemoved = true })
+  -- focus entered the content: restore its links to the natural tab order (radix restoreContentTabOrder).
+  ContentFocusIn -> H.modify_ _ { contentTabRemoved = false }
 
 -- | A FocusGroup scope: the trigger bar, or the open menu's content links. Upstream wraps the
 -- | List and each Content in SEPARATE FocusGroups, so a horizontal arrow rove stays WITHIN its
