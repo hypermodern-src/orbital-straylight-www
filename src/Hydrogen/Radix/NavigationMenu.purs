@@ -47,6 +47,9 @@ import Data.Foldable (for_)
 import Data.Int (round) as Int
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Tuple (Tuple(..))
+import Unsafe.Reference (unsafeRefEq)
+import Web.Event.EventTarget (EventTarget)
+import Web.UIEvent.FocusEvent (FocusEvent, relatedTarget)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -197,6 +200,7 @@ data Action
   | OpenTimerFired String
   | CloseTimerFired
   | SkipTimerFired
+  | ProxyFocus Int FocusEvent   -- the FocusProxy span (after trigger i) received focus
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -354,6 +358,9 @@ renderItem st mOpenI i menu =
                     [ aria "hidden" "true"
                     , HP.tabIndex 0
                     , HP.style visuallyHiddenStyle
+                    -- Tab from the trigger lands here (next in DOM); onFocus bridges into the
+                    -- content (radix FocusProxy.onFocus → onFocusProxyEnter → focus first/last link).
+                    , HE.onFocus (ProxyFocus i)
                     ]
                     []
                 , HH.span [ aria "owns" (contentId st menu.value) ] []
@@ -514,6 +521,20 @@ handleAction = case _ of
     closeMenu
   -- the skip-delay window elapsed: subsequent hover-opens are delayed again.
   SkipTimerFired -> H.modify_ _ { isOpenDelayed = true, skipTimer = Nothing }
+  -- the FocusProxy span (after the open trigger) received focus: bridge into the content.
+  -- radix: if focus came from the trigger → enter the content from the START (first link); if it
+  -- came from anywhere that ISN'T the content (e.g. shift+tabbing back from after the menu) →
+  -- enter from the END (last link). Focus arriving FROM the content is the natural tab-out → leave it.
+  ProxyFocus i fe -> do
+    mtrig <- H.getHTMLElementRef (triggerRef i)
+    mcont <- H.getHTMLElementRef contentRef
+    let mrel = relatedTarget fe
+        wasTrigger = case mrel, mtrig of
+          Just rt, Just tr -> unsafeRefEq rt (HTMLElement.toEventTarget tr)
+          _, _ -> false
+    fromContent <- containsTarget mcont mrel
+    when (wasTrigger || not fromContent) $
+      if wasTrigger then focusFirstLink else focusLastLink
 
 -- | A FocusGroup scope: the trigger bar, or the open menu's content links. Upstream wraps the
 -- | List and each Content in SEPARATE FocusGroups, so a horizontal arrow rove stays WITHIN its
@@ -563,6 +584,23 @@ focusFirstLink :: forall m. MonadEffect m => H.HalogenM State Action () Output m
 focusFirstLink = do
   mel <- H.getHTMLElementRef (linkRef 0)
   for_ mel (liftEffect <<< HTMLElement.focus)
+
+-- | Focus the LAST link of the open content (the proxy's 'end' entry — shift+tab back into it).
+focusLastLink :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+focusLastLink = do
+  st <- H.get
+  let n = Array.length (fromMaybe [] (openIndex st >>= Array.index st.items <#> _.links))
+  when (n > 0) do
+    mel <- H.getHTMLElementRef (linkRef (n - 1))
+    for_ mel (liftEffect <<< HTMLElement.focus)
+
+-- | Whether `target` is contained within the element at `mel` (relatedTarget-inside-content test).
+containsTarget :: forall m. MonadEffect m => Maybe HTMLElement.HTMLElement -> Maybe EventTarget -> H.HalogenM State Action () Output m Boolean
+containsTarget mel mtarget = case mel, mtarget of
+  Just el, Just t -> case HTMLElement.fromEventTarget t of
+    Just te -> liftEffect (Node.contains (HTMLElement.toNode el) (HTMLElement.toNode te))
+    Nothing -> pure false
+  _, _ -> pure false
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Open / close

@@ -126,11 +126,12 @@
       "id": "navigationmenu.focusproxy",
       "state": "open",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "apg"
       ],
-      "ref": "navigation-menu.tsx:554-568 FocusProxy onFocus bridges tab order; port wires no onFocus"
+      "apg_check": "Tab from the open trigger bridges (FocusProxy) into the content",
+      "ref": "DONE (2026-06-25): the FocusProxy onFocus tab-bridge — PORT BUILD. The span was rendered-but-stubbed (no handler); added HE.onFocus (ProxyFocus i): relatedTarget===trigger → focus first content link (start); from anywhere not the content → focus last link (end); from the content → leave (natural tab-out). Validated on --golden (real radix proxy), green on the port. navigation-menu.tsx:554-568. NavigationMenu.purs ProxyFocus/focusLastLink/containsTarget."
     },
     {
       "id": "navigationmenu.skipdelay",

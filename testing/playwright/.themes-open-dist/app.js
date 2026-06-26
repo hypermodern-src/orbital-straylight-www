@@ -4129,6 +4129,9 @@
   var fromNode = function(x) {
     return _read(Nothing.value, Just.create, x);
   };
+  var fromEventTarget = function(x) {
+    return _read(Nothing.value, Just.create, x);
+  };
   var fromElement = function(x) {
     return _read(Nothing.value, Just.create, x);
   };
@@ -6044,7 +6047,7 @@
     };
   };
   var fromNode2 = /* @__PURE__ */ unsafeReadProtoTagged("Element");
-  var fromEventTarget = /* @__PURE__ */ unsafeReadProtoTagged("Element");
+  var fromEventTarget2 = /* @__PURE__ */ unsafeReadProtoTagged("Element");
   var closest = function(qs) {
     var $9 = map16(toMaybe);
     var $10 = _closest(qs);
@@ -8790,7 +8793,7 @@
       return $15(_nextSibling($16));
     };
   }();
-  var fromEventTarget2 = /* @__PURE__ */ unsafeReadProtoTagged("Node");
+  var fromEventTarget3 = /* @__PURE__ */ unsafeReadProtoTagged("Node");
   var firstChild = /* @__PURE__ */ function() {
     var $25 = map26(toMaybe);
     return function($26) {
@@ -10113,7 +10116,7 @@
       if (v instanceof HeadersKeyDown) {
         return bind5(get2)(function(st) {
           return bind5(liftEffect7(runMaybeT(bind15(pure13(target5(toEvent(v.value0))))(function(tgt) {
-            return bind15(pure13(fromEventTarget(tgt)))(function(el2) {
+            return bind15(pure13(fromEventTarget2(tgt)))(function(el2) {
               return lift3(id(el2));
             });
           }))))(function(mTargetId) {
@@ -10309,7 +10312,7 @@
   };
   var isOutside = function(content3) {
     return function(e) {
-      var v = bind6(target5(e))(fromEventTarget2);
+      var v = bind6(target5(e))(fromEventTarget3);
       if (v instanceof Nothing) {
         return pure11(true);
       }
@@ -11126,7 +11129,7 @@
           ;
           throw new Error("Failed pattern match at Hydrogen.Radix.AlertDialog (line 488, column 3 - line 499, column 32): " + [node.constructor.name]);
         };
-        var v = bind22(target5(ev))(fromEventTarget2);
+        var v = bind22(target5(ev))(fromEventTarget3);
         if (v instanceof Nothing) {
           return pure17(false);
         }
@@ -15334,7 +15337,7 @@
           ;
           throw new Error("Failed pattern match at Hydrogen.Radix.Dialog (line 552, column 3 - line 563, column 32): " + [node.constructor.name]);
         };
-        var v = bind24(target5(ev))(fromEventTarget2);
+        var v = bind24(target5(ev))(fromEventTarget3);
         if (v instanceof Nothing) {
           return pure111(false);
         }
@@ -19505,7 +19508,7 @@
     var handleAction27 = function(v) {
       var ev = toEvent2(v.value0);
       return bind29(liftEffect7(function() {
-        var v1 = bind115(target5(ev))(fromEventTarget);
+        var v1 = bind115(target5(ev))(fromEventTarget2);
         if (v1 instanceof Just) {
           return function __do13() {
             var m = closest("button, input, select, textarea")(v1.value0)();
@@ -21956,6 +21959,14 @@
     });
   };
 
+  // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Web.UIEvent.FocusEvent/foreign.js
+  function _relatedTarget2(e) {
+    return e.relatedTarget;
+  }
+
+  // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Web.UIEvent.FocusEvent/index.js
+  var relatedTarget = /* @__PURE__ */ map(functorFn)(toMaybe)(_relatedTarget2);
+
   // buck-out/v2/gen/root/acdb73369f2e5aa5/examples/themes-interactive/__app__/output/Hydrogen.Radix.NavigationMenu/index.js
   var show11 = /* @__PURE__ */ show(showInt);
   var pure30 = /* @__PURE__ */ pure(applicativeEffect);
@@ -21967,17 +21978,17 @@
   var append112 = /* @__PURE__ */ append(semigroupArray);
   var map119 = /* @__PURE__ */ map(functorArray);
   var eq16 = /* @__PURE__ */ eq(eqOrientation);
-  var pure114 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var bind117 = /* @__PURE__ */ bind(bindEffect);
+  var get13 = /* @__PURE__ */ get(monadStateHalogenM);
+  var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorMaybe);
+  var bind117 = /* @__PURE__ */ bind(bindMaybe);
+  var when19 = /* @__PURE__ */ when(applicativeHalogenM);
   var for_18 = /* @__PURE__ */ for_(applicativeHalogenM);
   var for_19 = /* @__PURE__ */ for_18(foldableMaybe);
-  var get13 = /* @__PURE__ */ get(monadStateHalogenM);
+  var pure114 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var bind211 = /* @__PURE__ */ bind(bindEffect);
   var modify_14 = /* @__PURE__ */ modify_2(monadStateHalogenM);
   var applySecond10 = /* @__PURE__ */ applySecond(applyHalogenM);
-  var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorMaybe);
-  var bind211 = /* @__PURE__ */ bind(bindMaybe);
   var eq25 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqInt));
-  var when19 = /* @__PURE__ */ when(applicativeHalogenM);
   var for_25 = /* @__PURE__ */ for_18(foldableArray);
   var eq34 = /* @__PURE__ */ eq(eqDir);
   var SetValue2 = /* @__PURE__ */ function() {
@@ -22149,6 +22160,19 @@
     SkipTimerFired2.value = new SkipTimerFired2();
     return SkipTimerFired2;
   }();
+  var ProxyFocus = /* @__PURE__ */ function() {
+    function ProxyFocus2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ProxyFocus2.create = function(value0) {
+      return function(value1) {
+        return new ProxyFocus2(value0, value1);
+      };
+    };
+    return ProxyFocus2;
+  }();
   var visuallyHiddenStyle = /* @__PURE__ */ function() {
     return "position: absolute; border: 0px; width: 1px; height: 1px; padding: 0px; margin: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: nowrap; overflow-wrap: normal;";
   }();
@@ -22164,7 +22188,7 @@
       return map46(Just.create)(offsetMetrics(v.value0));
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 711, column 19 - line 713, column 43): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 749, column 19 - line 751, column 43): " + [v.constructor.name]);
   };
   var scheduleAfterOpen5 = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
@@ -22182,8 +22206,8 @@
   };
   var openIndex2 = function(st) {
     var v = openValue(st);
-    var $150 = v === "";
-    if ($150) {
+    var $161 = v === "";
+    if ($161) {
       return Nothing.value;
     }
     ;
@@ -22220,14 +22244,14 @@
         return input3.defaultValue;
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 238, column 14 - line 240, column 34): " + [input3.value.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 242, column 14 - line 244, column 34): " + [input3.value.constructor.name]);
     }();
     return {
       items: input3.items,
       ctrl: controllable(input3.value)(startVal),
       presence: function() {
-        var $154 = startVal !== "";
-        if ($154) {
+        var $165 = startVal !== "";
+        if ($165) {
           return Open.value;
         }
         ;
@@ -22260,8 +22284,8 @@
     if (st.indicator instanceof Just) {
       var visible2 = openValue(st) !== "";
       var pos = function() {
-        var $156 = isHorizontal(st);
-        if ($156) {
+        var $167 = isHorizontal(st);
+        if ($167) {
           return "position: absolute; left: 0px; width: " + (px(st.indicator.value0.width) + ("; transform: translateX(" + (px(st.indicator.value0.left) + ");")));
         }
         ;
@@ -22276,7 +22300,20 @@
       }()), dataOrientation(st.orientation), classes2(st.style.indicator), style(pos)])([])];
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 367, column 20 - line 385, column 8): " + [st.indicator.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 374, column 20 - line 392, column 8): " + [st.indicator.constructor.name]);
+  };
+  var focusLastLink = function(dictMonadEffect) {
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    return bind31(get13)(function(st) {
+      var n = length(fromMaybe([])(mapFlipped5(bind117(openIndex2(st))(index(st.items)))(function(v) {
+        return v.links;
+      })));
+      return when19(n > 0)(bind31(getHTMLElementRef(linkRef(n - 1 | 0)))(function(mel) {
+        return for_19(mel)(function($295) {
+          return liftEffect7(focus($295));
+        });
+      }));
+    });
   };
   var focusInside = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
@@ -22288,7 +22325,7 @@
         ;
         if (mel instanceof Just) {
           return liftEffect7(function __do13() {
-            var doc = bind117(windowImpl)(document)();
+            var doc = bind211(windowImpl)(document)();
             var mact = activeElement(doc)();
             return maybe(pure30(false))(function(a2) {
               return contains2(toNode(mel.value0))(toNode(a2));
@@ -22296,15 +22333,15 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 689, column 3 - line 694, column 99): " + [mel.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 727, column 3 - line 732, column 99): " + [mel.constructor.name]);
       });
     };
   };
   var focusFirstLink = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
     return bind31(getHTMLElementRef(linkRef(0)))(function(mel) {
-      return for_19(mel)(function($271) {
-        return liftEffect7(focus($271));
+      return for_19(mel)(function($296) {
+        return liftEffect7(focus($296));
       });
     });
   };
@@ -22317,7 +22354,7 @@
       return "rtl";
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 275, column 11 - line 277, column 15): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 279, column 11 - line 281, column 15): " + [v.constructor.name]);
   };
   var dirAttr = /* @__PURE__ */ attr2("dir");
   var defaultStyle10 = {
@@ -22360,17 +22397,17 @@
             return bind31(liftEffect7(traverseMeasure(mtrig)))(function(ind) {
               return bind31(liftEffect7(traverseMeasure(mcont)))(function(vp) {
                 return modify_14(function(v1) {
-                  var $163 = {};
-                  for (var $164 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $164)) {
-                      $163[$164] = v1[$164];
+                  var $174 = {};
+                  for (var $175 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $175)) {
+                      $174[$175] = v1[$175];
                     }
                     ;
                   }
                   ;
-                  $163.indicator = ind;
-                  $163.viewport = vp;
-                  return $163;
+                  $174.indicator = ind;
+                  $174.viewport = vp;
+                  return $174;
                 });
               });
             });
@@ -22378,8 +22415,29 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 701, column 3 - line 708, column 53): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 739, column 3 - line 746, column 53): " + [v.constructor.name]);
     });
+  };
+  var containsTarget = function(dictMonadEffect) {
+    var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
+    return function(mel) {
+      return function(mtarget) {
+        if (mel instanceof Just && mtarget instanceof Just) {
+          var v = fromEventTarget(mtarget.value0);
+          if (v instanceof Just) {
+            return liftEffect7(contains2(toNode(mel.value0))(toNode(v.value0)));
+          }
+          ;
+          if (v instanceof Nothing) {
+            return pure114(false);
+          }
+          ;
+          throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 600, column 22 - line 602, column 26): " + [v.constructor.name]);
+        }
+        ;
+        return pure114(false);
+      };
+    };
   };
   var clearSkipTimer = function(dictMonadEffect) {
     var liftEffect7 = liftEffect(monadEffectHalogenM(dictMonadEffect));
@@ -22388,16 +22446,16 @@
         return applySecond10(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_14(function(v) {
-          var $170 = {};
-          for (var $171 in v) {
-            if ({}.hasOwnProperty.call(v, $171)) {
-              $170[$171] = v[$171];
+          var $187 = {};
+          for (var $188 in v) {
+            if ({}.hasOwnProperty.call(v, $188)) {
+              $187[$188] = v[$188];
             }
             ;
           }
           ;
-          $170.skipTimer = Nothing.value;
-          return $170;
+          $187.skipTimer = Nothing.value;
+          return $187;
         });
       });
     });
@@ -22409,16 +22467,16 @@
         return applySecond10(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_14(function(v) {
-          var $176 = {};
-          for (var $177 in v) {
-            if ({}.hasOwnProperty.call(v, $177)) {
-              $176[$177] = v[$177];
+          var $193 = {};
+          for (var $194 in v) {
+            if ({}.hasOwnProperty.call(v, $194)) {
+              $193[$194] = v[$194];
             }
             ;
           }
           ;
-          $176.openTimer = Nothing.value;
-          return $176;
+          $193.openTimer = Nothing.value;
+          return $193;
         });
       });
     });
@@ -22430,23 +22488,23 @@
         return applySecond10(liftEffect7(clearTimeout2(v.value0)))(unsubscribe2(v.value1));
       }))(function() {
         return modify_14(function(v) {
-          var $182 = {};
-          for (var $183 in v) {
-            if ({}.hasOwnProperty.call(v, $183)) {
-              $182[$183] = v[$183];
+          var $199 = {};
+          for (var $200 in v) {
+            if ({}.hasOwnProperty.call(v, $200)) {
+              $199[$200] = v[$200];
             }
             ;
           }
           ;
-          $182.closeTimer = Nothing.value;
-          return $182;
+          $199.closeTimer = Nothing.value;
+          return $199;
         });
       });
     });
   };
   var clampLow = function(i2) {
-    var $185 = i2 < 0;
-    if ($185) {
+    var $202 = i2 < 0;
+    if ($202) {
       return 0;
     }
     ;
@@ -22454,8 +22512,8 @@
   };
   var clampHigh = function(count) {
     return function(i2) {
-      var $186 = i2 >= count;
-      if ($186) {
+      var $203 = i2 >= count;
+      if ($203) {
         return count - 1 | 0;
       }
       ;
@@ -22487,12 +22545,12 @@
                 }
                 ;
                 if (kind2 instanceof Link) {
-                  return length(fromMaybe([])(mapFlipped5(bind211(openIndex2(st))(index(st.items)))(function(v) {
+                  return length(fromMaybe([])(mapFlipped5(bind117(openIndex2(st))(index(st.items)))(function(v) {
                     return v.links;
                   })));
                 }
                 ;
-                throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 530, column 13 - line 532, column 94): " + [kind2.constructor.name]);
+                throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 551, column 13 - line 553, column 94): " + [kind2.constructor.name]);
               }();
               var target6 = function() {
                 if (k === "Home") {
@@ -22552,16 +22610,16 @@
                       return getHTMLElementRef(linkRef(target6.value0));
                     }
                     ;
-                    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 551, column 14 - line 553, column 50): " + [kind2.constructor.name]);
+                    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 572, column 14 - line 574, column 50): " + [kind2.constructor.name]);
                   }())(function(mel) {
-                    return for_19(mel)(function($272) {
-                      return liftEffect7(focus($272));
+                    return for_19(mel)(function($297) {
+                      return liftEffect7(focus($297));
                     });
                   });
                 });
               }
               ;
-              throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 547, column 3 - line 554, column 50): " + [target6.constructor.name]);
+              throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 568, column 3 - line 575, column 50): " + [target6.constructor.name]);
             });
           };
         };
@@ -22581,7 +22639,7 @@
       return st.idPrefix + ("-" + st.uid);
     }
     ;
-    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 242, column 1 - line 242, column 24): " + [st.constructor.name]);
+    throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 246, column 1 - line 246, column 24): " + [st.constructor.name]);
   };
   var contentId = function(st) {
     return function(value17) {
@@ -22613,7 +22671,7 @@
           return "--radix-navigation-menu-viewport-width: " + (px(st.viewport.value0.width) + ("; --radix-navigation-menu-viewport-height: " + (px(st.viewport.value0.height) + ";")));
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 393, column 16 - line 395, column 144): " + [st.viewport.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 400, column 16 - line 402, column 144): " + [st.viewport.constructor.name]);
       }();
       var open = openValue(st) !== "";
       return div3([dataState(function() {
@@ -22623,7 +22681,7 @@
         ;
         return "closed";
       }()), dataOrientation(st.orientation), classes2(st.style.viewport), style(sizeVars)])(function() {
-        var v = bind211(mOpenI)(index(st.items));
+        var v = bind117(mOpenI)(index(st.items));
         if (v instanceof Nothing) {
           return [];
         }
@@ -22632,7 +22690,7 @@
           return [renderContent2(st)(v.value0)];
         }
         ;
-        throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 403, column 9 - line 405, column 49): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 410, column 9 - line 412, column 49): " + [v.constructor.name]);
       }());
     };
   };
@@ -22667,7 +22725,7 @@
             return [];
           }()))(map119(fromPlainHTML)(menu2.trigger))])(function() {
             if (open) {
-              return [span3([aria("hidden")("true"), tabIndex2(0), style(visuallyHiddenStyle)])([]), span3([aria("owns")(contentId(st)(menu2.value))])([])];
+              return [span3([aria("hidden")("true"), tabIndex2(0), style(visuallyHiddenStyle), onFocus(ProxyFocus.create(i2))])([]), span3([aria("owns")(contentId(st)(menu2.value))])([])];
             }
             ;
             return [];
@@ -22686,8 +22744,8 @@
       ;
       return [];
     }()))])(function() {
-      var $209 = st.withViewport && rendered;
-      if ($209) {
+      var $226 = st.withViewport && rendered;
+      if ($226) {
         return [renderViewport(st)(mOpenI)];
       }
       ;
@@ -22725,44 +22783,44 @@
             return pure114(Nothing.value);
           }
           ;
-          throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 662, column 14 - line 664, column 30): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 700, column 14 - line 702, column 30): " + [v.constructor.name]);
         }())(function(mtrig) {
           return bind31(focusInside1(contentRef8))(function(insideContent) {
             return discard20(for_25(st.subs)(unsubscribe2))(function() {
               return discard20(modify_14(function(v) {
-                var $215 = {};
-                for (var $216 in v) {
-                  if ({}.hasOwnProperty.call(v, $216)) {
-                    $215[$216] = v[$216];
+                var $232 = {};
+                for (var $233 in v) {
+                  if ({}.hasOwnProperty.call(v, $233)) {
+                    $232[$233] = v[$233];
                   }
                   ;
                 }
                 ;
-                $215.ctrl = change2("")(st.ctrl).next;
-                $215.presence = finishExit(present(false)(st.presence));
-                $215.subs = [];
-                $215.viewport = Nothing.value;
-                $215.indicator = Nothing.value;
-                return $215;
+                $232.ctrl = change2("")(st.ctrl).next;
+                $232.presence = finishExit(present(false)(st.presence));
+                $232.subs = [];
+                $232.viewport = Nothing.value;
+                $232.indicator = Nothing.value;
+                return $232;
               }))(function() {
                 return discard20(raise(new ValueChanged2("")))(function() {
                   return discard20(clearSkipTimer1)(function() {
                     return discard20(when19(st.skipDelayDuration > 0)(bind31(armTimer1(st.skipDelayDuration)(SkipTimerFired.value))(function(h) {
                       return modify_14(function(v) {
-                        var $218 = {};
-                        for (var $219 in v) {
-                          if ({}.hasOwnProperty.call(v, $219)) {
-                            $218[$219] = v[$219];
+                        var $235 = {};
+                        for (var $236 in v) {
+                          if ({}.hasOwnProperty.call(v, $236)) {
+                            $235[$236] = v[$236];
                           }
                           ;
                         }
                         ;
-                        $218.skipTimer = new Just(h);
-                        return $218;
+                        $235.skipTimer = new Just(h);
+                        return $235;
                       });
                     })))(function() {
-                      return when19(insideContent)(for_19(mtrig)(function($273) {
-                        return liftEffect7(focus($273));
+                      return when19(insideContent)(for_19(mtrig)(function($298) {
+                        return liftEffect7(focus($298));
                       }));
                     });
                   });
@@ -22779,23 +22837,23 @@
     var armTimer1 = armTimer2(dictMonadEffect);
     return function(value17) {
       return bind31(get13)(function(st) {
-        var $221 = openValue(st) === value17;
-        if ($221) {
+        var $238 = openValue(st) === value17;
+        if ($238) {
           return clearCloseTimer1;
         }
         ;
         return bind31(armTimer1(st.delayDuration)(new OpenTimerFired(value17)))(function(h) {
           return modify_14(function(v) {
-            var $222 = {};
-            for (var $223 in v) {
-              if ({}.hasOwnProperty.call(v, $223)) {
-                $222[$223] = v[$223];
+            var $239 = {};
+            for (var $240 in v) {
+              if ({}.hasOwnProperty.call(v, $240)) {
+                $239[$240] = v[$240];
               }
               ;
             }
             ;
-            $222.openTimer = new Just(h);
-            return $222;
+            $239.openTimer = new Just(h);
+            return $239;
           });
         });
       });
@@ -22806,35 +22864,35 @@
     return discard20(clearCloseTimer(dictMonadEffect))(function() {
       return bind31(armTimer1(150)(CloseTimerFired.value))(function(h) {
         return modify_14(function(v) {
-          var $225 = {};
-          for (var $226 in v) {
-            if ({}.hasOwnProperty.call(v, $226)) {
-              $225[$226] = v[$226];
+          var $242 = {};
+          for (var $243 in v) {
+            if ({}.hasOwnProperty.call(v, $243)) {
+              $242[$243] = v[$243];
             }
             ;
           }
           ;
-          $225.closeTimer = new Just(h);
-          return $225;
+          $242.closeTimer = new Just(h);
+          return $242;
         });
       });
     });
   };
   var armOpen = function(dictMonadEffect) {
-    return bind31(liftEffect(monadEffectHalogenM(dictMonadEffect))(bind117(windowImpl)(document)))(function(doc) {
+    return bind31(liftEffect(monadEffectHalogenM(dictMonadEffect))(bind211(windowImpl)(document)))(function(doc) {
       var docTarget = toEventTarget(doc);
       return bind31(subscribe2($$escape(docTarget)(EscapePressed7.value)))(function(escSub) {
         return modify_14(function(s) {
-          var $228 = {};
-          for (var $229 in s) {
-            if ({}.hasOwnProperty.call(s, $229)) {
-              $228[$229] = s[$229];
+          var $245 = {};
+          for (var $246 in s) {
+            if ({}.hasOwnProperty.call(s, $246)) {
+              $245[$246] = s[$246];
             }
             ;
           }
           ;
-          $228.subs = append112(s.subs)([escSub]);
-          return $228;
+          $245.subs = append112(s.subs)([escSub]);
+          return $245;
         });
       });
     });
@@ -22848,30 +22906,30 @@
         return when19(openValue(st) !== value17)(function() {
           var already = openValue(st) !== "";
           return discard20(modify_14(function(v) {
-            var $231 = {};
-            for (var $232 in v) {
-              if ({}.hasOwnProperty.call(v, $232)) {
-                $231[$232] = v[$232];
+            var $248 = {};
+            for (var $249 in v) {
+              if ({}.hasOwnProperty.call(v, $249)) {
+                $248[$249] = v[$249];
               }
               ;
             }
             ;
-            $231.ctrl = change2(value17)(st.ctrl).next;
-            $231.presence = Open.value;
-            return $231;
+            $248.ctrl = change2(value17)(st.ctrl).next;
+            $248.presence = Open.value;
+            return $248;
           }))(function() {
             return discard20(clearSkipTimer1)(function() {
               return discard20(when19(st.skipDelayDuration > 0)(modify_14(function(v) {
-                var $234 = {};
-                for (var $235 in v) {
-                  if ({}.hasOwnProperty.call(v, $235)) {
-                    $234[$235] = v[$235];
+                var $251 = {};
+                for (var $252 in v) {
+                  if ({}.hasOwnProperty.call(v, $252)) {
+                    $251[$252] = v[$252];
                   }
                   ;
                 }
                 ;
-                $234.isOpenDelayed = false;
-                return $234;
+                $251.isOpenDelayed = false;
+                return $251;
               })))(function() {
                 return discard20(raise(new ValueChanged2(value17)))(function() {
                   return discard20(when19(!already)(armOpen1))(function() {
@@ -22922,20 +22980,22 @@
     var clearOpenTimer1 = clearOpenTimer(dictMonadEffect);
     var startCloseTimer1 = startCloseTimer(dictMonadEffect);
     var clearCloseTimer1 = clearCloseTimer(dictMonadEffect);
+    var containsTarget1 = containsTarget(dictMonadEffect);
+    var focusLastLink1 = focusLastLink(dictMonadEffect);
     return function(v) {
       if (v instanceof Initialize11) {
         return bind31(useId2)(function(uid) {
           return discard20(modify_14(function(v1) {
-            var $239 = {};
-            for (var $240 in v1) {
-              if ({}.hasOwnProperty.call(v1, $240)) {
-                $239[$240] = v1[$240];
+            var $256 = {};
+            for (var $257 in v1) {
+              if ({}.hasOwnProperty.call(v1, $257)) {
+                $256[$257] = v1[$257];
               }
               ;
             }
             ;
-            $239.uid = uid;
-            return $239;
+            $256.uid = uid;
+            return $256;
           }))(function() {
             return bind31(get13)(function(st) {
               return when19(openValue(st) !== "")(discard20(armOpen1)(function() {
@@ -22948,33 +23008,33 @@
       ;
       if (v instanceof Receive13) {
         return modify_14(function(st) {
-          var $242 = {};
-          for (var $243 in st) {
-            if ({}.hasOwnProperty.call(st, $243)) {
-              $242[$243] = st[$243];
+          var $259 = {};
+          for (var $260 in st) {
+            if ({}.hasOwnProperty.call(st, $260)) {
+              $259[$260] = st[$260];
             }
             ;
           }
           ;
-          $242.items = v.value0.items;
-          $242.ctrl = sync(v.value0.value)(st.ctrl);
-          $242.orientation = v.value0.orientation;
-          $242.dir = v.value0.dir;
-          $242.idPrefix = v.value0.idPrefix;
-          $242.withViewport = v.value0.withViewport;
-          $242.withIndicator = v.value0.withIndicator;
-          $242.delayDuration = v.value0.delayDuration;
-          $242.skipDelayDuration = v.value0.skipDelayDuration;
-          $242.style = v.value0.style;
-          return $242;
+          $259.items = v.value0.items;
+          $259.ctrl = sync(v.value0.value)(st.ctrl);
+          $259.orientation = v.value0.orientation;
+          $259.dir = v.value0.dir;
+          $259.idPrefix = v.value0.idPrefix;
+          $259.withViewport = v.value0.withViewport;
+          $259.withIndicator = v.value0.withIndicator;
+          $259.delayDuration = v.value0.delayDuration;
+          $259.skipDelayDuration = v.value0.skipDelayDuration;
+          $259.style = v.value0.style;
+          return $259;
         });
       }
       ;
       if (v instanceof TriggerClicked5) {
         return bind31(get13)(function(st) {
           return for_19(index(st.items)(v.value0))(function(menu2) {
-            var $246 = openValue(st) === menu2.value;
-            if ($246) {
+            var $263 = openValue(st) === menu2.value;
+            if ($263) {
               return closeMenu1;
             }
             ;
@@ -22988,20 +23048,20 @@
           var open = eq25(openIndex2(st))(new Just(v.value0));
           var key2 = key(v.value1);
           var entryKey = function() {
-            var $248 = isHorizontal(st);
-            if ($248) {
+            var $265 = isHorizontal(st);
+            if ($265) {
               return "ArrowDown";
             }
             ;
-            var $249 = eq34(st.dir)(RTL.value);
-            if ($249) {
+            var $266 = eq34(st.dir)(RTL.value);
+            if ($266) {
               return "ArrowLeft";
             }
             ;
             return "ArrowRight";
           }();
-          var $250 = open && key2 === entryKey;
-          if ($250) {
+          var $267 = open && key2 === entryKey;
+          if ($267) {
             return discard20(liftEffect7(preventDefault(toEvent(v.value1))))(function() {
               return focusFirstLink1;
             });
@@ -23026,16 +23086,16 @@
       if (v instanceof TriggerEnter) {
         return bind31(get13)(function(st) {
           return when19(!st.hasPMOpen)(discard20(modify_14(function(v1) {
-            var $255 = {};
-            for (var $256 in v1) {
-              if ({}.hasOwnProperty.call(v1, $256)) {
-                $255[$256] = v1[$256];
+            var $272 = {};
+            for (var $273 in v1) {
+              if ({}.hasOwnProperty.call(v1, $273)) {
+                $272[$273] = v1[$273];
               }
               ;
             }
             ;
-            $255.hasPMOpen = true;
-            return $255;
+            $272.hasPMOpen = true;
+            return $272;
           }))(function() {
             return for_19(index(st.items)(v.value0))(function(menu2) {
               return onTriggerEnter1(menu2.value);
@@ -23047,16 +23107,16 @@
       if (v instanceof TriggerLeave) {
         return discard20(clearOpenTimer1)(function() {
           return discard20(modify_14(function(v1) {
-            var $259 = {};
-            for (var $260 in v1) {
-              if ({}.hasOwnProperty.call(v1, $260)) {
-                $259[$260] = v1[$260];
+            var $276 = {};
+            for (var $277 in v1) {
+              if ({}.hasOwnProperty.call(v1, $277)) {
+                $276[$277] = v1[$277];
               }
               ;
             }
             ;
-            $259.hasPMOpen = false;
-            return $259;
+            $276.hasPMOpen = false;
+            return $276;
           }))(function() {
             return startCloseTimer1;
           });
@@ -23087,21 +23147,45 @@
       ;
       if (v instanceof SkipTimerFired) {
         return modify_14(function(v1) {
-          var $263 = {};
-          for (var $264 in v1) {
-            if ({}.hasOwnProperty.call(v1, $264)) {
-              $263[$264] = v1[$264];
+          var $280 = {};
+          for (var $281 in v1) {
+            if ({}.hasOwnProperty.call(v1, $281)) {
+              $280[$281] = v1[$281];
             }
             ;
           }
           ;
-          $263.isOpenDelayed = true;
-          $263.skipTimer = Nothing.value;
-          return $263;
+          $280.isOpenDelayed = true;
+          $280.skipTimer = Nothing.value;
+          return $280;
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 446, column 16 - line 516, column 78): " + [v.constructor.name]);
+      if (v instanceof ProxyFocus) {
+        return bind31(getHTMLElementRef(triggerRef6(v.value0)))(function(mtrig) {
+          return bind31(getHTMLElementRef(contentRef8))(function(mcont) {
+            var mrel = relatedTarget(v.value1);
+            var wasTrigger = function() {
+              if (mrel instanceof Just && mtrig instanceof Just) {
+                return unsafeRefEq(mrel.value0)(toEventTarget2(mtrig.value0));
+              }
+              ;
+              return false;
+            }();
+            return bind31(containsTarget1(mcont)(mrel))(function(fromContent) {
+              return when19(wasTrigger || !fromContent)(function() {
+                if (wasTrigger) {
+                  return focusFirstLink1;
+                }
+                ;
+                return focusLastLink1;
+              }());
+            });
+          });
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 453, column 16 - line 537, column 59): " + [v.constructor.name]);
     };
   };
   var handleQuery12 = function(dictMonadEffect) {
@@ -23110,8 +23194,8 @@
     return function(v) {
       if (v instanceof SetValue2) {
         return discard20(function() {
-          var $267 = v.value0 === "";
-          if ($267) {
+          var $291 = v.value0 === "";
+          if ($291) {
             return closeMenu1;
           }
           ;
@@ -23127,7 +23211,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 716, column 15 - line 722, column 39): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Hydrogen.Radix.NavigationMenu (line 754, column 15 - line 760, column 39): " + [v.constructor.name]);
     };
   };
   var component13 = function(dictMonadEffect) {
@@ -23138,8 +23222,8 @@
         finalize: defaultEval.finalize,
         handleAction: handleAction12(dictMonadEffect),
         handleQuery: handleQuery12(dictMonadEffect),
-        receive: function($274) {
-          return Just.create(Receive13.create($274));
+        receive: function($299) {
+          return Just.create(Receive13.create($299));
         },
         initialize: new Just(Initialize11.value)
       })
@@ -25072,7 +25156,7 @@
           ;
           throw new Error("Failed pattern match at Hydrogen.Radix.Popover (line 534, column 3 - line 545, column 32): " + [node.constructor.name]);
         };
-        var v = bind212(target5(ev))(fromEventTarget2);
+        var v = bind212(target5(ev))(fromEventTarget3);
         if (v instanceof Nothing) {
           return pure115(false);
         }

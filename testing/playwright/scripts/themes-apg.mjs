@@ -422,6 +422,17 @@ const CHECKS = [
     await pg.waitForTimeout(400);                            // past the close timer
     ok((await pg.locator('#root button[aria-expanded="true"]').count()) > 0, "hovering the content did not keep the menu open");
   }},
+  // FocusProxy tab-order bridge (navigation-menu.tsx:551-570): a VisuallyHidden tabIndex=0 span
+  // sits right after the open trigger; Tab from the trigger lands on it and its onFocus moves
+  // focus INTO the content (first tabbable link) — so Tab bridges trigger→content. Non-circular:
+  // validated on --golden (real radix proxy), then green on the port.
+  { id: "navigationmenu", state: "open", apg: "disclosure", name: "Tab from the open trigger bridges (FocusProxy) into the content", run: async (pg) => {
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
+    await focusFirst(pg, '#root button[aria-expanded="true"]');
+    ok(await activeIs(pg, '#root button[aria-expanded="true"]'), "could not focus the open trigger");
+    await press(pg, "Tab");
+    ok(await activeWithin(pg, '[aria-labelledby]'), "Tab did not bridge focus into the content (FocusProxy stubbed?)");
+  }},
   { id: "navigationmenu", state: "open", apg: "disclosure", name: "Escape closes the content and returns focus to the trigger", run: async (pg) => {
     await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
     await focusFirst(pg, '#root button[aria-expanded="true"]');
