@@ -386,6 +386,42 @@ const CHECKS = [
     await press(pg, "ArrowDown");
     ok(await activeWithin(pg, '[aria-labelledby]'), "ArrowDown did not move focus into the open content");
   }},
+  // Pointer open/close TIMER state machine (navigation-menu.tsx:142-200). The `hoveropen` story
+  // starts CLOSED with delayDuration=250: hovering a trigger arms a delayed open (NOT instant —
+  // no flash before the delay), and moving the pointer away closes after the hardcoded 150ms
+  // close timer. Non-circular: validated on --golden (real radix uses the same timers).
+  { id: "navigationmenu", state: "hoveropen", apg: "disclosure", name: "hovering a trigger opens it after delayDuration (no flash before)", run: async (pg) => {
+    const t = pg.locator('#root button[aria-expanded]').first();
+    await t.waitFor();
+    ok(!(await pg.locator('#root button[aria-expanded="true"]').count()), "a menu was open before any hover");
+    await t.hover();
+    await pg.waitForTimeout(100);   // < delayDuration (250ms): must still be closed
+    ok(!(await pg.locator('#root button[aria-expanded="true"]').count()), "menu flashed open before the hover delay elapsed");
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor({ timeout: 3000 });
+    ok(await visible(pg, '[aria-labelledby]'), "the content did not mount on hover-open");
+  }},
+  // The close timer: with the menu hover-opened, moving the pointer off the trigger AND content
+  // closes it after ~150ms (startCloseTimer).
+  { id: "navigationmenu", state: "hoveropen", apg: "disclosure", name: "moving the pointer away closes after the 150ms close timer", run: async (pg) => {
+    const t = pg.locator('#root button[aria-expanded]').first();
+    await t.waitFor();
+    await t.hover();
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor({ timeout: 3000 });
+    await pg.mouse.move(0, 0);       // leave the trigger
+    await pg.waitForTimeout(400);    // well past the 150ms close timer
+    ok(!(await pg.locator('#root button[aria-expanded="true"]').count()), "the menu did not close after the pointer left");
+  }},
+  // onContentEnter cancels the pending close: hover-open, move onto the CONTENT before 150ms, and
+  // the menu stays open (the close timer was cleared).
+  { id: "navigationmenu", state: "hoveropen", apg: "disclosure", name: "hovering the content cancels the pending close", run: async (pg) => {
+    const t = pg.locator('#root button[aria-expanded]').first();
+    await t.waitFor();
+    await t.hover();
+    await pg.locator('#root button[aria-expanded="true"]').first().waitFor({ timeout: 3000 });
+    await pg.locator('[aria-labelledby]').first().hover();   // onto the content (cancels close)
+    await pg.waitForTimeout(400);                            // past the close timer
+    ok((await pg.locator('#root button[aria-expanded="true"]').count()) > 0, "hovering the content did not keep the menu open");
+  }},
   { id: "navigationmenu", state: "open", apg: "disclosure", name: "Escape closes the content and returns focus to the trigger", run: async (pg) => {
     await pg.locator('#root button[aria-expanded="true"]').first().waitFor();
     await focusFirst(pg, '#root button[aria-expanded="true"]');

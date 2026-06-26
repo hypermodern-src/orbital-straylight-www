@@ -72,23 +72,25 @@
     },
     {
       "id": "navigationmenu.hoveropen",
-      "state": "open",
+      "state": "hoveropen",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "apg"
       ],
-      "ref": "navigation-menu.tsx:106 delayDuration=200 handleDelayedOpen; port has NO pointer open at all"
+      "apg_check": "hovering a trigger opens it after delayDuration",
+      "ref": "DONE (2026-06-25): the pointer open TIMER state machine — PORT BUILD. Added delayDuration/skipDelayDuration Input + isOpenDelayed + openTimer; onMouseMove(trigger)→onTriggerEnter→handleDelayedOpen arms a delayDuration timer (instant inside the skip-delay window). Was a pure DOM diff but the behavior is timer-driven (no distinct at-rest DOM vs the open story), so APG-oracled: validated on --golden (real radix delays identically), then green on the port. navigation-menu.tsx:142-200. NavigationMenu.purs onTriggerEnter/handleDelayedOpen."
     },
     {
       "id": "navigationmenu.closetimer",
-      "state": "open",
+      "state": "hoveropen",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
-        "dom"
+        "apg"
       ],
-      "ref": "navigation-menu.tsx:142-198 150ms startCloseTimer on leave; onContentEnter cancels"
+      "apg_check": "moving the pointer away closes after the 150ms close timer",
+      "ref": "DONE (2026-06-25): the 150ms close TIMER + onContentEnter-cancels — PORT BUILD. onMouseLeave(trigger)→onTriggerLeave→startCloseTimer (150ms→close); onMouseEnter(content)→ContentEnter clears it (the 'hovering the content cancels the pending close' check). Validated on --golden, green on the port. navigation-menu.tsx:142-198. NavigationMenu.purs startCloseTimer/clearCloseTimer."
     },
     {
       "id": "navigationmenu.inline",

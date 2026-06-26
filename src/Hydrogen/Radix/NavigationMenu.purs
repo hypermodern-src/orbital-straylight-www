@@ -46,6 +46,7 @@ import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Int (round) as Int
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
@@ -121,6 +122,8 @@ type Input =
   , idPrefix :: String
   , withViewport :: Boolean        -- v1 supports viewport mode (true); inline mode deferred
   , withIndicator :: Boolean
+  , delayDuration :: Int           -- ms a pointer must dwell on a trigger before it opens (radix 200)
+  , skipDelayDuration :: Int       -- ms after closing during which the next open is INSTANT (radix 300)
   , style :: Style
   }
 
@@ -134,6 +137,8 @@ defaultInput =
   , idPrefix: ""
   , withViewport: true
   , withIndicator: true
+  , delayDuration: 200
+  , skipDelayDuration: 300
   , style: defaultStyle
   }
 
@@ -165,6 +170,14 @@ type State =
   , indicator :: Maybe Measure      -- active-trigger offset (Nothing until measured)
   , viewport :: Maybe Measure       -- active-content offset (Nothing until measured)
   , subs :: Array H.SubscriptionId
+  -- ── pointer open/close TIMER state machine (radix delayDuration/skipDelayDuration) ──
+  , delayDuration :: Int
+  , skipDelayDuration :: Int
+  , isOpenDelayed :: Boolean        -- true ⇒ a hover-open waits delayDuration; false ⇒ instant
+  , openTimer :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)   -- pending hover→open
+  , closeTimer :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)  -- pending leave→close (150ms)
+  , skipTimer :: Maybe (Tuple Dom.TimeoutId H.SubscriptionId)   -- post-close instant-open window
+  , hasPMOpen :: Boolean            -- guards onPointerMove from re-firing the open per trigger
   }
 
 data Action
@@ -175,6 +188,15 @@ data Action
   | LinkKeyDown Int KE.KeyboardEvent
   | EscapePressed
   | AfterOpen   -- measure indicator/viewport after the open render flushes
+  -- pointer machine: a mouse over trigger i (onPointerMove), leaving a trigger, entering/leaving
+  -- the open content, and the three timers firing.
+  | TriggerEnter Int
+  | TriggerLeave
+  | ContentEnter
+  | ContentLeave
+  | OpenTimerFired String
+  | CloseTimerFired
+  | SkipTimerFired
 
 component :: forall m. MonadEffect m => H.Component Query Input Output m
 component =
@@ -204,6 +226,13 @@ initialState input =
   , indicator: Nothing
   , viewport: Nothing
   , subs: []
+  , delayDuration: input.delayDuration
+  , skipDelayDuration: input.skipDelayDuration
+  , isOpenDelayed: true
+  , openTimer: Nothing
+  , closeTimer: Nothing
+  , skipTimer: Nothing
+  , hasPMOpen: false
   }
   where
   startVal = case input.value of
@@ -308,6 +337,12 @@ renderItem st mOpenI i menu =
               , classes st.style.trigger
               , HE.onClick \_ -> TriggerClicked i
               , HE.onKeyDown (TriggerKeyDown i)
+              -- pointer (mouse) open/close: onMouseMove arms the (delayed) open, onMouseLeave the
+              -- close — radix's onPointerMove/onPointerLeave gated to mouse (whenMouse). Mouse
+              -- events fire only for mouse input, so this matches whenMouse exactly. Handlers are
+              -- not serialized, so the at-rest DOM oracle is unchanged.
+              , HE.onMouseMove \_ -> TriggerEnter i
+              , HE.onMouseLeave \_ -> TriggerLeave
               ]
                 <> (if open then [ aria "controls" (contentId st menu.value) ] else [])
             )
@@ -379,6 +414,9 @@ renderContent st menu =
     , dataOrientation st.orientation
     , dirAttr (dirName st.dir)
     , classes st.style.content
+    -- pointer over the open content cancels the pending close; leaving (re)starts it.
+    , HE.onMouseEnter \_ -> ContentEnter
+    , HE.onMouseLeave \_ -> ContentLeave
     ]
     (Array.mapWithIndex (renderLink st) menu.links)
 
@@ -424,6 +462,8 @@ handleAction = case _ of
       , idPrefix = input.idPrefix
       , withViewport = input.withViewport
       , withIndicator = input.withIndicator
+      , delayDuration = input.delayDuration
+      , skipDelayDuration = input.skipDelayDuration
       , style = input.style
       }
   TriggerClicked i -> do
@@ -448,6 +488,32 @@ handleAction = case _ of
     focusNav (KE.key ke) (KE.toEvent ke) i Link
   EscapePressed -> closeMenu
   AfterOpen -> measure
+  -- onPointerMove (mouse) over trigger i: open it (delayed or instant per isOpenDelayed). The
+  -- hasPMOpen latch makes the repeated mousemove fire the open exactly once (radix
+  -- hasPointerMoveOpenedRef); it resets on leave.
+  TriggerEnter i -> do
+    st <- H.get
+    when (not st.hasPMOpen) do
+      H.modify_ _ { hasPMOpen = true }
+      for_ (Array.index st.items i) \menu -> onTriggerEnter menu.value
+  -- onPointerLeave (mouse) off a trigger: cancel any pending open, start the close timer.
+  TriggerLeave -> do
+    clearOpenTimer
+    H.modify_ _ { hasPMOpen = false }
+    startCloseTimer
+  -- pointer over the open content cancels the close; leaving it (re)starts it.
+  ContentEnter -> clearCloseTimer
+  ContentLeave -> startCloseTimer
+  -- the delayed-open timer elapsed: cancel any close and open for real.
+  OpenTimerFired value -> do
+    clearOpenTimer
+    clearCloseTimer
+    openMenu value
+  CloseTimerFired -> do
+    clearCloseTimer
+    closeMenu
+  -- the skip-delay window elapsed: subsequent hover-opens are delayed again.
+  SkipTimerFired -> H.modify_ _ { isOpenDelayed = true, skipTimer = Nothing }
 
 -- | A FocusGroup scope: the trigger bar, or the open menu's content links. Upstream wraps the
 -- | List and each Content in SEPARATE FocusGroups, so a horizontal arrow rove stays WITHIN its
@@ -508,11 +574,69 @@ openMenu value = do
   when (openValue st /= value) do
     let already = openValue st /= ""
     H.modify_ _ { ctrl = (change value st.ctrl).next, presence = Open }
+    -- radix setValue side-effect on open: cancel the skip-delay timer and (if skipDelay is
+    -- enabled) drop into INSTANT-open mode while the menu is open.
+    clearSkipTimer
+    when (st.skipDelayDuration > 0) (H.modify_ _ { isOpenDelayed = false })
     H.raise (ValueChanged value)
     when (not already) armOpen
     -- the content/viewport are newly rendered this cycle; measure on the next microtask, once
     -- Halogen has flushed the render (the trigger/content refs only resolve then).
     scheduleAfterOpen
+
+-- | The pointer-open dispatch (radix onTriggerEnter): cancel a pending open, then open delayed
+-- | (a fresh hover waits delayDuration) or instantly (we're inside the skip-delay window).
+onTriggerEnter :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+onTriggerEnter value = do
+  clearOpenTimer
+  st <- H.get
+  if st.isOpenDelayed then handleDelayedOpen value else handleOpen value
+
+handleOpen :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+handleOpen value = clearCloseTimer *> openMenu value
+
+-- | Delayed hover-open: if this item is already open (transitioning content→trigger) just cancel
+-- | the close; otherwise arm the open timer for delayDuration.
+handleDelayedOpen :: forall m. MonadEffect m => String -> H.HalogenM State Action () Output m Unit
+handleDelayedOpen value = do
+  st <- H.get
+  if openValue st == value then clearCloseTimer
+  else do
+    h <- armTimer st.delayDuration (OpenTimerFired value)
+    H.modify_ _ { openTimer = Just h }
+
+-- | Start (or restart) the 150ms close timer (radix startCloseTimer).
+startCloseTimer :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+startCloseTimer = do
+  clearCloseTimer
+  h <- armTimer 150 CloseTimerFired
+  H.modify_ _ { closeTimer = Just h }
+
+-- | Arm a one-shot timer dispatching `act` after `ms`; returns (clock id, emitter sub) to cancel.
+armTimer :: forall m. MonadEffect m => Int -> Action -> H.HalogenM State Action () Output m (Tuple Dom.TimeoutId H.SubscriptionId)
+armTimer ms act = do
+  { emitter, listener } <- liftEffect HS.create
+  sid <- H.subscribe (act <$ emitter)
+  tid <- liftEffect (Dom.setTimeout ms (HS.notify listener unit))
+  pure (Tuple tid sid)
+
+clearOpenTimer :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+clearOpenTimer = do
+  st <- H.get
+  for_ st.openTimer \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
+  H.modify_ _ { openTimer = Nothing }
+
+clearCloseTimer :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+clearCloseTimer = do
+  st <- H.get
+  for_ st.closeTimer \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
+  H.modify_ _ { closeTimer = Nothing }
+
+clearSkipTimer :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
+clearSkipTimer = do
+  st <- H.get
+  for_ st.skipTimer \(Tuple tid sid) -> liftEffect (Dom.clearTimeout tid) *> H.unsubscribe sid
+  H.modify_ _ { skipTimer = Nothing }
 
 armOpen :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 armOpen = do
@@ -529,6 +653,8 @@ scheduleAfterOpen = do
 
 closeMenu :: forall m. MonadEffect m => H.HalogenM State Action () Output m Unit
 closeMenu = do
+  -- cancel any pending hover-open so a close can't be immediately undone by a stale timer.
+  clearOpenTimer
   st <- H.get
   when (openValue st /= "") do
     -- if focus is inside the closing content, restore it to the open trigger (radix's
@@ -547,6 +673,12 @@ closeMenu = do
       , indicator = Nothing
       }
     H.raise (ValueChanged "")
+    -- radix setValue side-effect on close: open the skip-delay window — for skipDelayDuration ms
+    -- the next hover-open is INSTANT; after it elapses, hover-opens are delayed again.
+    clearSkipTimer
+    when (st.skipDelayDuration > 0) do
+      h <- armTimer st.skipDelayDuration SkipTimerFired
+      H.modify_ _ { skipTimer = Just h }
     -- restore focus: to the trigger if focus was in the content (keyboard close), else leave it.
     when insideContent $ for_ mtrig (liftEffect <<< HTMLElement.focus)
 

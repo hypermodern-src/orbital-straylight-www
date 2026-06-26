@@ -1209,12 +1209,18 @@ const PAGES: Page[] = [
       // `?s=controlled` → parent OWNS value="one" (open at first paint, parent-controlled). The
       // first-paint DOM matches the uncontrolled `open` story (navigation-menu.tsx:82-140).
       const controlled = currentState() === "controlled";
+      // `?s=hoveropen` → CLOSED at first paint, with a SHORT delayDuration (50ms) so the
+      // pointer open/close TIMER state machine is exercised deterministically by the APG gate:
+      // hovering a trigger opens it after delayDuration; moving the pointer away closes it after
+      // the (hardcoded) 150ms close timer. skipDelayDuration default (300ms).
+      const hoveropen = currentState() === "hoveropen";
       return (
         <NavigationMenu.Root
           {...(open || vertical || rtl ? { defaultValue: "one" } : {})}
           {...(controlled ? { value: "one", onValueChange: () => {} } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
           {...(rtl ? { dir: "rtl" as const } : {})}
+          {...(hoveropen ? { delayDuration: 250 } : {})}
         >
           <NavigationMenu.List>
             <NavigationMenu.Item value="one">

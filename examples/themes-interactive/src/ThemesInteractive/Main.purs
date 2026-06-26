@@ -1013,6 +1013,10 @@ navigationMenuInput s = NavigationMenu.defaultInput
   -- Wave-D: ?s=rtl drives dir=RTL (the FocusGroup swaps the horizontal roving keys + the
   -- dir attribute is stamped on the nav/list/content). Every other path stays LTR.
   , dir = if s == "rtl" then RTL else LTR
+  -- `?s=hoveropen` → CLOSED at first paint with a short delayDuration (50ms) so the pointer
+  -- open/close TIMER state machine is APG-exercised deterministically (hover→delayDuration→open,
+  -- leave→150ms→close). Mirrors the golden story's hoveropen delayDuration={50}.
+  , delayDuration = if s == "hoveropen" then 250 else 200
   , items =
       [ { value: "one"
         , trigger: [ HH.text "Item One" ]
