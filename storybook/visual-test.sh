@@ -7,7 +7,9 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; HY="$(cd "$HERE/.." && pwd)"
 bash "$HERE/build-bundle.sh" >/dev/null
 ( cd "$HERE" && nix shell nixpkgs#bun -c bunx storybook build >/dev/null 2>&1 )
-export PLAYWRIGHT_BROWSERS_PATH="$(nix build nixpkgs#playwright-driver.browsers --no-link --print-out-paths)"
+# Use the SAME nix-pinned Chromium as the main gate. The floating `nixpkgs#playwright-
+# driver.browsers` drifts off the @playwright/test npm pin → "Executable doesn't exist".
+source "$HY/testing/playwright/pinned-browsers.sh"
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 # run from testing/playwright so the bare @playwright/test import resolves
 ( cd "$HY/testing/playwright" && nix develop "$HY" -c node scripts/storybook-visual.mjs \

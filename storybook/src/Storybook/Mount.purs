@@ -12,6 +12,7 @@ module Storybook.Mount (main) where
 
 import Prelude
 
+import Data.Array (elem)
 import Data.Function.Uncurried (Fn3, mkFn3)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
@@ -46,6 +47,7 @@ import Hydrogen.Themes.Tabs (tabsList, tabsRoot, tabsTrigger)
 import Hydrogen.Themes.TextArea (textArea)
 import Hydrogen.Themes.TextField (textField, textFieldValue)
 import Hydrogen.Themes.Typography (headingAs, text, textAs)
+import Storybook.Showcase as Showcase
 import Web.DOM (Element)
 import Web.HTML.HTMLElement (fromElement)
 
@@ -65,7 +67,11 @@ main = attach (mkFn3 mount)
 mount :: String -> Args -> Element -> Effect Unit
 mount cid args el = case fromElement el of
   Nothing -> pure unit
-  Just he -> HA.runHalogenAff (void (runUI (static (render cid args)) unit he))
+  -- stateful Radix primitives mount as live child components (Showcase slot-host); the
+  -- display Themes components render as static HTML.
+  Just he
+    | cid `elem` Showcase.ids -> HA.runHalogenAff (void (runUI Showcase.component cid he))
+    | otherwise -> HA.runHalogenAff (void (runUI (static (render cid args)) unit he))
   where
   static html =
     H.mkComponent

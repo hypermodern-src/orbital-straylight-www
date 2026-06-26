@@ -14,6 +14,7 @@ purescript_library(
     srcs = [
         "src/Storybook/Mount.js",
         "src/Storybook/Mount.purs",
+        "src/Storybook/Showcase.purs",
     ],
     deps = ["//:lib"],
     visibility = ["PUBLIC"],
