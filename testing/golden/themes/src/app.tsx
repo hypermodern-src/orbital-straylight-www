@@ -1214,9 +1214,13 @@ const PAGES: Page[] = [
       // hovering a trigger opens it after delayDuration; moving the pointer away closes it after
       // the (hardcoded) 150ms close timer. skipDelayDuration default (300ms).
       const hoveropen = currentState() === "hoveropen";
+      // `?s=inline` → INLINE (non-viewport) mode: NO <Viewport>, so each Content renders IN-PLACE
+      // inside its Item (navigation-menu.tsx:771-787 `!context.viewport` branch) carrying
+      // data-state. Opens Item One at first paint via defaultValue.
+      const inline = currentState() === "inline";
       return (
         <NavigationMenu.Root
-          {...(open || vertical || rtl ? { defaultValue: "one" } : {})}
+          {...(open || vertical || rtl || inline ? { defaultValue: "one" } : {})}
           {...(controlled ? { value: "one", onValueChange: () => {} } : {})}
           {...(vertical ? { orientation: "vertical" as const } : {})}
           {...(rtl ? { dir: "rtl" as const } : {})}
@@ -1238,7 +1242,7 @@ const PAGES: Page[] = [
             </NavigationMenu.Item>
             <NavigationMenu.Indicator />
           </NavigationMenu.List>
-          <NavigationMenu.Viewport />
+          {!inline && <NavigationMenu.Viewport />}
         </NavigationMenu.Root>
       );
     })(),

@@ -352,7 +352,9 @@ renderItem st mOpenI i menu =
             )
             (map HH.fromPlainHTML menu.trigger)
         ]
-          -- open only: the FocusProxy span (tab-order bridge) + the aria-owns span (viewport mode).
+          -- open only: the FocusProxy span (tab-order bridge), then EITHER the aria-owns span
+          -- (viewport mode — the content lives in the Viewport) OR the content rendered IN-PLACE
+          -- (inline mode, withViewport=false; navigation-menu.tsx:771-787 carries data-state).
           <> (if open then
                 [ HH.span
                     [ aria "hidden" "true"
@@ -363,8 +365,10 @@ renderItem st mOpenI i menu =
                     , HE.onFocus (ProxyFocus i)
                     ]
                     []
-                , HH.span [ aria "owns" (contentId st menu.value) ] []
                 ]
+                  <> (if st.withViewport
+                        then [ HH.span [ aria "owns" (contentId st menu.value) ] [] ]
+                        else [ renderContent st true menu ])
               else [])
       )
 
@@ -409,13 +413,16 @@ renderViewport st mOpenI =
       ]
       ( case mOpenI >>= Array.index st.items of
           Nothing -> []
-          Just menu -> [ renderContent st menu ]
+          Just menu -> [ renderContent st false menu ]
       )
 
-renderContent :: forall m. State -> MenuEntry -> H.ComponentHTML Action () m
-renderContent st menu =
+-- | The content panel. In VIEWPORT mode (`withState=false`) it is proxied into the Viewport and
+-- | carries NO data-state (the Viewport wrapper does). In INLINE mode (`withState=true`) it
+-- | renders in-place inside its Item and carries data-state=open (navigation-menu.tsx:771-787).
+renderContent :: forall m. State -> Boolean -> MenuEntry -> H.ComponentHTML Action () m
+renderContent st withState menu =
   HH.div
-    [ HP.ref contentRef
+    ( [ HP.ref contentRef
     , HP.id (contentId st menu.value)
     , aria "labelledby" (triggerId st menu.value)
     , dataOrientation st.orientation
@@ -425,6 +432,8 @@ renderContent st menu =
     , HE.onMouseEnter \_ -> ContentEnter
     , HE.onMouseLeave \_ -> ContentLeave
     ]
+      <> (if withState then [ dataState "open" ] else [])
+    )
     (Array.mapWithIndex (renderLink st) menu.links)
 
 renderLink :: forall m. State -> Int -> NavLink -> H.ComponentHTML Action () m

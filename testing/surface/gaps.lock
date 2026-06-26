@@ -7,19 +7,19 @@
     "note": "Goldens are only trustworthy against a fixed upstream. Bumping either value here is a deliberate re-baseline (regenerate goldens, review the diff)."
   },
   "totals": {
-    "gated_cells": 253,
-    "open_core_gaps": 3,
+    "gated_cells": 254,
+    "open_core_gaps": 2,
     "required_behavioral": 256,
-    "coverage_behavioral_pct": 98.8,
+    "coverage_behavioral_pct": 99.2,
     "presets_gated": 1,
     "presets_required": 4,
     "coverage_preset_pct": 25,
     "binding_violations": 0,
     "enumerated_components": 32,
-    "named_open_cells": 184,
-    "closed_cells": 578,
+    "named_open_cells": 183,
+    "closed_cells": 579,
     "total_cells": 762,
-    "coverage_cells_pct": 75.9,
+    "coverage_cells_pct": 76,
     "invariance_subjects": 31
   },
   "per_component": {
@@ -28,7 +28,7 @@
       "core_open": 9
     },
     "NavigationMenu": {
-      "gated": 8,
+      "gated": 9,
       "core_open": 6
     },
     "Form": {

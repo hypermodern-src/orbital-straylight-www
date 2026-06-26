@@ -94,13 +94,14 @@
     },
     {
       "id": "navigationmenu.inline",
-      "state": "open",
+      "state": "inline",
       "importance": "core",
-      "status": "open",
+      "status": "gated",
       "oracle": [
         "dom"
       ],
-      "ref": "navigation-menu.tsx:772-789 non-viewport mode: per-Item DismissableLayer Content; port false path renders nothing"
+      "oracle_file": "navigationmenu.inline",
+      "ref": "DONE (2026-06-26): INLINE (non-viewport) mode — PORT BUILD. When withViewport=false, the open Content renders IN-PLACE inside its Item (after the FocusProxy span) carrying data-state=open, and NO Viewport sibling / NO aria-owns span are emitted. Pinned DOM-identical by golden navigationmenu.inline. navigation-menu.tsx:771-787. NavigationMenu.purs renderContent withState + the renderItem viewport-vs-inline branch."
     },
     {
       "id": "navigationmenu.datamotion",

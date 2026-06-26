@@ -396,6 +396,14 @@ export const STATES = {
         return !!vp;
       });
     },
+    // INLINE (?s=inline): no <Viewport>, so the open Content renders IN-PLACE inside its Item
+    // (data-state=open). Open at first paint via defaultValue. No viewport size-var to await
+    // (there is no viewport); wait for the open trigger, the inline content, and the indicator.
+    inline: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby][data-state="open"]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+    },
     // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
     // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
     // omits defaultValue. No interaction — wait for the closed trigger.
