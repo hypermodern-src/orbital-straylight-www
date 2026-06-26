@@ -18,6 +18,7 @@ module Storybook.Showcase
 
 import Prelude
 
+import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (class MonadAff)
@@ -27,12 +28,20 @@ import Halogen.HTML.Properties as HP
 import Type.Proxy (Proxy(..))
 
 import Hydrogen.Radix.Accordion as Accordion
+import Hydrogen.Radix.Collapsible as Collapsible
+import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
+import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), Side(..), cn)
 import Hydrogen.Radix.HoverCard as HoverCard
+import Hydrogen.Radix.Menubar as Menubar
 import Hydrogen.Radix.NavigationMenu as NavigationMenu
 import Hydrogen.Radix.Popover as Popover
+import Hydrogen.Radix.ScrollArea as ScrollArea
+import Hydrogen.Radix.Select as Select
+import Hydrogen.Radix.Toast as Toast
 import Hydrogen.Radix.Toggle as Toggle
+import Hydrogen.Radix.ToggleGroup as ToggleGroup
 import Hydrogen.Radix.Tooltip as Tooltip
 import Hydrogen.Themes.Button (button)
 import Hydrogen.Themes.Layout (box, flex)
@@ -45,7 +54,10 @@ import Hydrogen.Themes.Typography (textAs)
 -- | live primitive rather than a static Themes render). Kept disjoint from the existing
 -- | `Themes/` display-component story ids so those stories + baselines are untouched.
 ids :: Array String
-ids = [ "toggle", "accordion", "dialog", "popover", "tooltip", "hovercard", "navigationmenu" ]
+ids =
+  [ "toggle", "accordion", "dialog", "popover", "tooltip", "hovercard", "navigationmenu"
+  , "dropdownmenu", "contextmenu", "menubar", "select", "scrollarea", "collapsible", "toast", "togglegroup"
+  ]
 
 type Slots =
   ( toggle :: Toggle.Slot Unit
@@ -55,6 +67,14 @@ type Slots =
   , tooltip :: Tooltip.Slot Unit
   , hovercard :: HoverCard.Slot Unit
   , navigationmenu :: NavigationMenu.Slot Unit
+  , dropdownmenu :: DropdownMenu.Slot Unit
+  , contextmenu :: ContextMenu.Slot Unit
+  , menubar :: Menubar.Slot Unit
+  , select :: Select.Slot Unit
+  , scrollarea :: ScrollArea.Slot Unit
+  , collapsible :: Collapsible.Slot Unit
+  , toast :: Toast.Slot Unit
+  , togglegroup :: ToggleGroup.Slot Unit
   )
 
 _toggle :: Proxy "toggle"
@@ -78,6 +98,30 @@ _hovercard = Proxy
 _navigationmenu :: Proxy "navigationmenu"
 _navigationmenu = Proxy
 
+_dropdownmenu :: Proxy "dropdownmenu"
+_dropdownmenu = Proxy
+
+_contextmenu :: Proxy "contextmenu"
+_contextmenu = Proxy
+
+_menubar :: Proxy "menubar"
+_menubar = Proxy
+
+_select :: Proxy "select"
+_select = Proxy
+
+_scrollarea :: Proxy "scrollarea"
+_scrollarea = Proxy
+
+_collapsible :: Proxy "collapsible"
+_collapsible = Proxy
+
+_toast :: Proxy "toast"
+_toast = Proxy
+
+_togglegroup :: Proxy "togglegroup"
+_togglegroup = Proxy
+
 -- | The slot-host: render the primitive named by the input id, or nothing for an
 -- | unknown id (Mount only routes ids in `ids`).
 component :: forall q o m. MonadAff m => H.Component q String o m
@@ -99,6 +143,14 @@ render cid = case cid of
   "tooltip" -> HH.slot_ _tooltip unit Tooltip.component tooltipInput
   "hovercard" -> HH.slot_ _hovercard unit HoverCard.component hoverCardInput
   "navigationmenu" -> HH.slot_ _navigationmenu unit NavigationMenu.component navigationMenuInput
+  "dropdownmenu" -> HH.slot_ _dropdownmenu unit DropdownMenu.component dropdownMenuInput
+  "contextmenu" -> HH.slot_ _contextmenu unit ContextMenu.component contextMenuInput
+  "menubar" -> HH.slot_ _menubar unit Menubar.component menubarInput
+  "select" -> HH.slot_ _select unit Select.component selectInput
+  "scrollarea" -> HH.slot_ _scrollarea unit ScrollArea.component scrollAreaInput
+  "collapsible" -> HH.slot_ _collapsible unit Collapsible.component collapsibleInput
+  "toast" -> HH.slot_ _toast unit Toast.component toastInput
+  "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
   _ -> HH.text ""
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -295,3 +347,336 @@ tooltipArrow =
         [ HP.attr (HH.AttrName "points") "0,0 30,0 15,10" ]
         []
     ]
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Menu chrome (shared by DropdownMenu / ContextMenu / Menubar / Select)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+-- | The down-chevron (radix TriggerIcon / SelectIcon). Bare = menu trigger icon; classed
+-- | (aria-hidden) = the SelectIcon.
+chevron :: forall w i. HH.HTML w i
+chevron = chevronCls ""
+
+chevronCls :: forall w i. String -> HH.HTML w i
+chevronCls klass =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    ( (if klass == "" then [] else [ HP.attr (HH.AttrName "class") klass, HP.attr (HH.AttrName "aria-hidden") "true" ])
+        <>
+          [ HP.attr (HH.AttrName "width") "9"
+          , HP.attr (HH.AttrName "height") "9"
+          , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+          , HP.attr (HH.AttrName "fill") "currentcolor"
+          , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+          ]
+    )
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "d") "M0.135232 3.15803C0.324102 2.95657 0.640521 2.94637 0.841971 3.13523L4.5 6.56464L8.158 3.13523C8.3595 2.94637 8.6759 2.95657 8.8648 3.15803C9.0536 3.35949 9.0434 3.67591 8.842 3.86477L4.84197 7.6148C4.64964 7.7951 4.35036 7.7951 4.15803 7.6148L0.158031 3.86477C-0.0434285 3.67591 -0.0536285 3.35949 0.135232 3.15803Z" ]
+        []
+    ]
+
+-- | The selected-option check (radix ThickCheckIcon).
+checkSvg :: forall w i. HH.HTML w i
+checkSvg =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") "rt-SelectItemIndicatorIcon"
+    , HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        , HP.attr (HH.AttrName "d") "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z" ]
+        []
+    ]
+
+-- | The SubTrigger chevron (right caret) with a caller-supplied icon class.
+subTriggerChevron :: String -> HH.PlainHTML
+subTriggerChevron iconClass =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") iconClass
+    , HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "d") "M3.23826 0.201711C3.54108 -0.0809141 4.01567 -0.0645489 4.29829 0.238264L7.79829 3.98826C8.06724 4.27642 8.06724 4.72359 7.79829 5.01174L4.29829 8.76174C4.01567 9.06455 3.54108 9.08092 3.23826 8.79829C2.93545 8.51567 2.91909 8.04108 3.20171 7.73826L6.22409 4.5L3.20171 1.26174C2.91909 0.958928 2.93545 0.484337 3.23826 0.201711Z"
+        , HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        ]
+        []
+    ]
+
+-- | The ItemIndicator (check) icon with a caller-supplied class.
+menuIndicatorIcon :: String -> HH.PlainHTML
+menuIndicatorIcon iconClass =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "class") iconClass
+    , HP.attr (HH.AttrName "width") "9"
+    , HP.attr (HH.AttrName "height") "9"
+    , HP.attr (HH.AttrName "viewBox") "0 0 9 9"
+    , HP.attr (HH.AttrName "fill") "currentcolor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        , HP.attr (HH.AttrName "d") "M8.53547 0.62293C8.88226 0.849446 8.97976 1.3142 8.75325 1.66099L4.5083 8.1599C4.38833 8.34356 4.19397 8.4655 3.9764 8.49358C3.75883 8.52167 3.53987 8.45309 3.3772 8.30591L0.616113 5.80777C0.308959 5.52987 0.285246 5.05559 0.563148 4.74844C0.84105 4.44128 1.31533 4.41757 1.62249 4.69547L3.73256 6.60459L7.49741 0.840706C7.72393 0.493916 8.18868 0.396414 8.53547 0.62293Z" ]
+        []
+    ]
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- DropdownMenu
+-- ─────────────────────────────────────────────────────────────────────────────
+
+menuRow :: String -> String -> String -> String -> Boolean -> DropdownMenu.MenuEntry
+menuRow value label shortcut accent disabled =
+  DropdownMenu.MenuItemEntry
+    { value, label: [ HH.text label ], shortcut: [ HH.text shortcut ], accent, disabled }
+
+dropdownMenuInput :: DropdownMenu.Input
+dropdownMenuInput = DropdownMenu.defaultInput
+  { style = menuStyle
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "dropdown-menu" <> " pointer-events: auto;"
+  , subContentStyle = "outline: none; pointer-events: auto; " <> popperContentVars "dropdown-menu"
+  , trigger = [ HH.text "Options", chevron ]
+  , entries =
+      [ menuRow "edit" "Edit" "⌘ E" "" false
+      , menuRow "duplicate" "Duplicate" "⌘ D" "" false
+      , DropdownMenu.menuSeparator
+      , menuRow "archive" "Archive" "⌘ N" "" false
+      , DropdownMenu.menuSeparator
+      , menuRow "delete" "Delete" "⌘ ⌫" "red" false
+      ]
+  }
+
+menuStyle :: DropdownMenu.Style
+menuStyle =
+  { trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+  , content: cn "light radix-themes rt-BaseMenuContent rt-DropdownMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , subTrigger: cn "rt-BaseMenuItem rt-BaseMenuSubTrigger rt-DropdownMenuItem rt-DropdownMenuSubTrigger"
+  , subContent: cn "light radix-themes rt-BaseMenuContent rt-BaseMenuSubContent rt-DropdownMenuContent rt-DropdownMenuSubContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , subContentColor: "indigo"
+  , subIcon: [ subTriggerChevron "rt-BaseMenuSubTriggerIcon rt-DropdownMenuSubtriggerIcon" ]
+  , scrollRoot: cn "rt-ScrollAreaRoot"
+  , scrollViewport: cn "rt-ScrollAreaViewport"
+  , menuViewport: cn "rt-BaseMenuViewport rt-DropdownMenuViewport"
+  , focusRing: cn "rt-ScrollAreaViewportFocusRing"
+  , item: cn "rt-BaseMenuItem rt-DropdownMenuItem rt-reset"
+  , shortcut: cn "rt-BaseMenuShortcut rt-DropdownMenuShortcut"
+  , separator: cn "rt-BaseMenuSeparator rt-DropdownMenuSeparator"
+  , checkboxItem: cn "rt-BaseMenuCheckboxItem rt-BaseMenuItem rt-DropdownMenuCheckboxItem rt-DropdownMenuItem"
+  , radioGroup: cn "rt-BaseMenuRadioGroup rt-DropdownMenuRadioGroup"
+  , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-DropdownMenuItem rt-DropdownMenuRadioItem"
+  , indicator: cn "rt-BaseMenuItemIndicator rt-DropdownMenuItemIndicator"
+  , group: cn "rt-BaseMenuGroup rt-DropdownMenuGroup"
+  , groupLabel: cn "rt-BaseMenuLabel rt-DropdownMenuLabel"
+  , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-DropdownMenuItemIndicatorIcon" ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- ContextMenu
+-- ─────────────────────────────────────────────────────────────────────────────
+
+ctxRow :: String -> String -> String -> String -> Boolean -> ContextMenu.MenuEntry
+ctxRow value label shortcut accent disabled =
+  ContextMenu.MenuItemEntry
+    { value, label: [ HH.text label ], shortcut: [ HH.text shortcut ], accent, disabled }
+
+contextMenuInput :: ContextMenu.Input
+contextMenuInput = ContextMenu.defaultInput
+  { side = Right
+  , style = contextMenuStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "outline: none; " <> popperContentVars "context-menu" <> " pointer-events: auto;"
+  , subContentStyle = "outline: none; pointer-events: auto; " <> popperContentVars "context-menu"
+  , triggerStyle = "width: 240px; height: 120px; border: 1px dashed var(--gray-6); border-radius: var(--radius-3);"
+  , trigger = [ textAs "span" [ Size "2", Color "gray" ] [ HH.text "Right-click here" ] ]
+  , entries =
+      [ ctxRow "edit" "Edit" "⌘ E" "" false
+      , ctxRow "duplicate" "Duplicate" "⌘ D" "" false
+      , ContextMenu.menuSeparator
+      , ctxRow "delete" "Delete" "⌘ ⌫" "red" false
+      ]
+  }
+
+contextMenuStyle :: ContextMenu.Style
+contextMenuStyle =
+  { trigger: cn "rt-Flex rt-r-ai-center rt-r-jc-center"
+  , content: cn "light radix-themes rt-BaseMenuContent rt-ContextMenuContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , scrollRoot: cn "rt-ScrollAreaRoot"
+  , scrollViewport: cn "rt-ScrollAreaViewport"
+  , menuViewport: cn "rt-BaseMenuViewport rt-ContextMenuViewport"
+  , focusRing: cn "rt-ScrollAreaViewportFocusRing"
+  , item: cn "rt-BaseMenuItem rt-ContextMenuItem rt-reset"
+  , shortcut: cn "rt-BaseMenuShortcut rt-ContextMenuShortcut"
+  , separator: cn "rt-BaseMenuSeparator rt-ContextMenuSeparator"
+  , checkboxItem: cn "rt-BaseMenuCheckboxItem rt-BaseMenuItem rt-ContextMenuCheckboxItem rt-ContextMenuItem"
+  , radioGroup: cn "rt-BaseMenuRadioGroup rt-ContextMenuRadioGroup"
+  , radioItem: cn "rt-BaseMenuItem rt-BaseMenuRadioItem rt-ContextMenuItem rt-ContextMenuRadioItem"
+  , indicator: cn "rt-BaseMenuItemIndicator rt-ContextMenuItemIndicator"
+  , checkIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , radioIndicator: [ menuIndicatorIcon "rt-BaseMenuItemIndicatorIcon rt-ContextMenuItemIndicatorIcon" ]
+  , subTrigger: cn "rt-BaseMenuItem rt-BaseMenuSubTrigger rt-ContextMenuItem rt-ContextMenuSubTrigger"
+  , subContent: cn "light radix-themes rt-BaseMenuContent rt-BaseMenuSubContent rt-ContextMenuContent rt-ContextMenuSubContent rt-PopperContent rt-r-size-2 rt-variant-solid"
+  , subContentColor: "indigo"
+  , subIcon: [ subTriggerChevron "rt-BaseMenuSubTriggerIcon rt-ContextMenuSubTriggerIcon" ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Menubar (bare @radix-ui primitive — no rt-* chrome)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+menubarInput :: Menubar.Input
+menubarInput = Menubar.defaultInput
+  { align = Start
+  , contentStyle = "outline: none; " <> popperContentVars "menubar"
+  , menus =
+      [ { value: "file"
+        , trigger: [ HH.text "File" ]
+        , disabled: false
+        , entries:
+            [ Menubar.menuItem "new-tab" [ HH.text "New Tab" ]
+            , Menubar.menuItem "new-window" [ HH.text "New Window" ]
+            , Menubar.menuSeparator
+            , Menubar.menuItem "print" [ HH.text "Print" ]
+            ]
+        }
+      , { value: "edit"
+        , trigger: [ HH.text "Edit" ]
+        , disabled: false
+        , entries: [ Menubar.menuItem "undo" [ HH.text "Undo" ], Menubar.menuItem "redo" [ HH.text "Redo" ] ]
+        }
+      , { value: "view"
+        , trigger: [ HH.text "View" ]
+        , disabled: false
+        , entries: [ Menubar.menuItem "zoom-in" [ HH.text "Zoom In" ], Menubar.menuItem "zoom-out" [ HH.text "Zoom Out" ] ]
+        }
+      ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Select
+-- ─────────────────────────────────────────────────────────────────────────────
+
+selectInput :: Select.Input
+selectInput = Select.defaultInput
+  { defaultValue = "apple"
+  , style = selectStyle
+  , portalAttrs = portalThemeAttrs
+  , contentStyle = "box-sizing: border-box; max-height: 100%; display: flex; flex-direction: column; outline: none; pointer-events: auto;"
+  , trigger = [ chevronCls "rt-SelectIcon" ]
+  , groupLabel = [ HH.text "Fruits" ]
+  , checkIcon = [ checkSvg ]
+  , items =
+      [ { value: "apple", label: [ HH.text "Apple" ], disabled: false }
+      , { value: "orange", label: [ HH.text "Orange" ], disabled: false }
+      , { value: "grape", label: [ HH.text "Grape" ], disabled: false }
+      ]
+  }
+
+selectStyle :: Select.Style
+selectStyle =
+  { trigger: cn "rt-reset rt-SelectTrigger rt-r-size-2 rt-variant-surface"
+  , value: cn "rt-SelectTriggerInner"
+  , content: cn "light radix-themes rt-SelectContent rt-r-size-2 rt-variant-solid"
+  , scrollRoot: cn "rt-ScrollAreaRoot"
+  , scrollViewport: cn "rt-ScrollAreaViewport rt-SelectViewport"
+  , group: cn "rt-SelectGroup"
+  , label: cn "rt-SelectLabel"
+  , item: cn "rt-SelectItem"
+  , indicator: cn "rt-SelectItemIndicator"
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- ScrollArea
+-- ─────────────────────────────────────────────────────────────────────────────
+
+scrollAreaInput :: ScrollArea.Input
+scrollAreaInput = ScrollArea.defaultInput
+  { widthPx = 200
+  , heightPx = 120
+  , style =
+      { root: cn "rt-ScrollAreaRoot"
+      , viewport: cn "rt-ScrollAreaViewport"
+      , focusRing: cn "rt-ScrollAreaViewportFocusRing"
+      , scrollbar: cn "rt-ScrollAreaScrollbar rt-r-size-1"
+      , thumb: cn "rt-ScrollAreaThumb"
+      , corner: cn "rt-ScrollAreaCorner"
+      }
+  , content =
+      [ box [ P "2", Width "160px" ]
+          ( map (\n -> textAs "p" [ Size "2" ] [ HH.text "Line ", HH.text (show n) ]) (Array.range 1 12) )
+      ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Collapsible
+-- ─────────────────────────────────────────────────────────────────────────────
+
+collapsibleInput :: Collapsible.Input
+collapsibleInput = Collapsible.defaultInput
+  { defaultOpen = false
+  , style =
+      { root: cn ""
+      , trigger: cn "rt-reset rt-BaseButton rt-Button rt-r-size-2 rt-variant-soft"
+      , content: cn ""
+      }
+  , triggerAttrs = [ Tuple "accent-color" "" ]
+  , trigger = [ HH.text "Toggle content" ]
+  , content = [ box [ Pt "2" ] [ textAs "div" [ Size "2" ] [ HH.text "Disclosed content line one." ] ] ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Toast (bare @radix-ui primitive — open at first paint)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+toastInput :: Toast.Input
+toastInput = Toast.defaultInput
+  { open = Nothing
+  , defaultOpen = true
+  , duration = Nothing
+  , label = "Notifications (F8)"
+  , swipeDirection = "right"
+  , announceLabel = "Notification"
+  , announceText = "Notification ScheduledFriday at 5pmUndo"
+  , altText = "Undo"
+  , closeLabel = "Close"
+  , style =
+      { viewport: cn ""
+      , wrapper: cn ""
+      , root: cn ""
+      , title: cn ""
+      , description: cn ""
+      , action: cn ""
+      , close: cn ""
+      }
+  , title = [ HH.text "Scheduled" ]
+  , description = [ HH.text "Friday at 5pm" ]
+  , action = [ HH.text "Undo" ]
+  , close = [ HH.text "×" ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- ToggleGroup (bare @radix-ui primitive — single-select, Center pressed)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+toggleGroupInput :: ToggleGroup.Input
+toggleGroupInput = ToggleGroup.defaultInput
+  { single = true
+  , defaultValue = [ "b" ]
+  , ariaLabel = Just "Text alignment"
+  , items =
+      [ { value: "a", label: [ HH.text "Left" ], disabled: false }
+      , { value: "b", label: [ HH.text "Center" ], disabled: false }
+      , { value: "c", label: [ HH.text "Right" ], disabled: false }
+      ]
+  , style = { root: cn "", item: cn "" }
+  }
