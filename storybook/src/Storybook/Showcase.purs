@@ -27,9 +27,12 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Type.Proxy (Proxy(..))
 
+import Hydrogen.Radix.AccessibleIcon (accessibleIcon)
 import Hydrogen.Radix.Accordion as Accordion
 import Hydrogen.Radix.AlertDialog as AlertDialog
+import Hydrogen.Radix.AspectRatio (aspectRatio_)
 import Hydrogen.Radix.Collapsible as Collapsible
+import Hydrogen.Radix.Label (label) as Label
 import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
@@ -63,6 +66,7 @@ ids =
   [ "toggle", "accordion", "dialog", "popover", "tooltip", "hovercard", "navigationmenu"
   , "dropdownmenu", "contextmenu", "menubar", "select", "scrollarea", "collapsible", "toast", "togglegroup"
   , "alertdialog", "toolbar", "form", "otp", "passwordtoggle"
+  , "label", "aspectratio", "accessibleicon"
   ]
 
 type Slots =
@@ -182,7 +186,46 @@ render cid = case cid of
   "form" -> HH.div [ HP.style "max-width: 320px;" ] [ HH.slot_ _form unit Form.component formInput ]
   "otp" -> HH.slot_ _otp unit Otp.component otpInput
   "passwordtoggle" -> HH.div [ HP.style "max-width: 320px;" ] [ HH.slot_ _passwordtoggle unit PasswordToggleField.component passwordToggleInput ]
+  -- stateless display primitives: plain render fns, no slot needed.
+  "label" ->
+    HH.div [ HP.style "max-width: 320px; display: flex; flex-direction: column; gap: 6px;" ]
+      [ Label.label { for: "email", class_: cn "rt-Text rt-r-size-2 rt-r-weight-medium" } [ HH.text "Email address" ]
+      , HH.input
+          [ HP.id "email"
+          , HP.placeholder "you@example.com"
+          , HP.style "padding: 6px 8px; border: 1px solid var(--gray-7); border-radius: var(--radius-2); font: inherit;"
+          ]
+      ]
+  "aspectratio" ->
+    HH.div [ HP.style "max-width: 300px;" ]
+      [ aspectRatio_ (16.0 / 9.0)
+          [ HH.div
+              [ HP.style "width: 100%; height: 100%; background: var(--accent-9); border-radius: var(--radius-2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;" ]
+              [ HH.text "16 / 9" ]
+          ]
+      ]
+  "accessibleicon" ->
+    HH.div [ HP.style "display: flex; align-items: center; gap: 8px;" ]
+      (accessibleIcon { label: "Settings" } [ gearIconPlain ])
   _ -> HH.text ""
+
+-- | A small gear icon (PlainHTML) for the AccessibleIcon demo.
+gearIconPlain :: HH.PlainHTML
+gearIconPlain =
+  HH.elementNS svgNS (HH.ElemName "svg")
+    [ HP.attr (HH.AttrName "width") "20"
+    , HP.attr (HH.AttrName "height") "20"
+    , HP.attr (HH.AttrName "viewBox") "0 0 15 15"
+    , HP.attr (HH.AttrName "fill") "currentColor"
+    , HP.attr (HH.AttrName "xmlns") "http://www.w3.org/2000/svg"
+    ]
+    [ HH.elementNS svgNS (HH.ElemName "path")
+        [ HP.attr (HH.AttrName "fill-rule") "evenodd"
+        , HP.attr (HH.AttrName "clip-rule") "evenodd"
+        , HP.attr (HH.AttrName "d") "M7.5 0a1 1 0 0 0-1 1v.51a6 6 0 0 0-1.32.55l-.36-.36a1 1 0 1 0-1.42 1.42l.36.36a6 6 0 0 0-.55 1.32H1.7a1 1 0 1 0 0 2h.51c.12.47.3.91.55 1.32l-.36.36a1 1 0 1 0 1.42 1.42l.36-.36c.41.25.85.43 1.32.55v.51a1 1 0 1 0 2 0v-.51a6 6 0 0 0 1.32-.55l.36.36a1 1 0 0 0 1.42-1.42l-.36-.36c.25-.41.43-.85.55-1.32h.51a1 1 0 1 0 0-2h-.51a6 6 0 0 0-.55-1.32l.36-.36a1 1 0 0 0-1.42-1.42l-.36.36a6 6 0 0 0-1.32-.55V1a1 1 0 0 0-1-1Zm0 5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"
+        ]
+        []
+    ]
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Shared themed helpers (mirrored from the verification harness)
