@@ -34,13 +34,16 @@ import Hydrogen.Radix.ContextMenu as ContextMenu
 import Hydrogen.Radix.Dialog as Dialog
 import Hydrogen.Radix.DropdownMenu as DropdownMenu
 import Hydrogen.Radix.Foundation.Style (Align(..), Orientation(..), Side(..), cn)
-import Hydrogen.Radix.Toolbar as Toolbar
+import Hydrogen.Radix.Form as Form
 import Hydrogen.Radix.HoverCard as HoverCard
 import Hydrogen.Radix.Menubar as Menubar
 import Hydrogen.Radix.NavigationMenu as NavigationMenu
+import Hydrogen.Radix.OneTimePasswordField as Otp
+import Hydrogen.Radix.PasswordToggleField as PasswordToggleField
 import Hydrogen.Radix.Popover as Popover
 import Hydrogen.Radix.ScrollArea as ScrollArea
 import Hydrogen.Radix.Select as Select
+import Hydrogen.Radix.Toolbar as Toolbar
 import Hydrogen.Radix.Toast as Toast
 import Hydrogen.Radix.Toggle as Toggle
 import Hydrogen.Radix.ToggleGroup as ToggleGroup
@@ -59,7 +62,7 @@ ids :: Array String
 ids =
   [ "toggle", "accordion", "dialog", "popover", "tooltip", "hovercard", "navigationmenu"
   , "dropdownmenu", "contextmenu", "menubar", "select", "scrollarea", "collapsible", "toast", "togglegroup"
-  , "alertdialog", "toolbar"
+  , "alertdialog", "toolbar", "form", "otp", "passwordtoggle"
   ]
 
 type Slots =
@@ -67,6 +70,9 @@ type Slots =
   , accordion :: Accordion.Slot Unit
   , alertdialog :: AlertDialog.Slot Unit
   , toolbar :: Toolbar.Slot Unit
+  , form :: Form.Slot Unit
+  , otp :: Otp.Slot Unit
+  , passwordtoggle :: PasswordToggleField.Slot Unit
   , dialog :: Dialog.Slot Unit
   , popover :: Popover.Slot Unit
   , tooltip :: Tooltip.Slot Unit
@@ -93,6 +99,15 @@ _alertdialog = Proxy
 
 _toolbar :: Proxy "toolbar"
 _toolbar = Proxy
+
+_form :: Proxy "form"
+_form = Proxy
+
+_otp :: Proxy "otp"
+_otp = Proxy
+
+_passwordtoggle :: Proxy "passwordtoggle"
+_passwordtoggle = Proxy
 
 _dialog :: Proxy "dialog"
 _dialog = Proxy
@@ -164,6 +179,9 @@ render cid = case cid of
   "togglegroup" -> HH.slot_ _togglegroup unit ToggleGroup.component toggleGroupInput
   "alertdialog" -> HH.slot_ _alertdialog unit AlertDialog.component alertDialogInput
   "toolbar" -> HH.slot_ _toolbar unit Toolbar.component toolbarInput
+  "form" -> HH.div [ HP.style "max-width: 320px;" ] [ HH.slot_ _form unit Form.component formInput ]
+  "otp" -> HH.slot_ _otp unit Otp.component otpInput
+  "passwordtoggle" -> HH.div [ HP.style "max-width: 320px;" ] [ HH.slot_ _passwordtoggle unit PasswordToggleField.component passwordToggleInput ]
   _ -> HH.text ""
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -757,4 +775,50 @@ toolbarInput = Toolbar.defaultInput
       , toggleGroup: cn ""
       , toggleItem: cn ""
       }
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Form (bare @radix-ui primitive — a validated email field)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+formInput :: Form.Input
+formInput = Form.defaultInput
+  { submitLabel = [ HH.text "Submit" ]
+  , fields =
+      [ Form.defaultField
+          { name = "email"
+          , label = [ HH.text "Email" ]
+          , inputType = "email"
+          , required = true
+          , messages =
+              [ { match: Form.ValueMissing, customMatch: Nothing, forceMatch: false, text: [ HH.text "This value is missing" ] }
+              , { match: Form.TypeMismatch, customMatch: Nothing, forceMatch: false, text: [ HH.text "Provide a valid email" ] }
+              ]
+          }
+      ]
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- OneTimePasswordField (bare @radix-ui primitive — a 3-slot numeric code)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+otpInput :: Otp.Input
+otpInput = Otp.defaultInput
+  { length = 3
+  , defaultValue = "123"
+  , validation = Otp.Numeric
+  , style = { root: cn "", input: cn "" }
+  }
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- PasswordToggleField (bare @radix-ui primitive — input + show/hide toggle)
+-- ─────────────────────────────────────────────────────────────────────────────
+
+passwordToggleInput :: PasswordToggleField.Input
+passwordToggleInput = PasswordToggleField.defaultInput
+  { inputId = Just "password"
+  , toggleVisible = [ HH.text "Hide" ]
+  , toggleHidden = [ HH.text "Show" ]
+  , placeholder = Just "Enter password"
+  , style = { input: cn "", toggle: cn "" }
   }
