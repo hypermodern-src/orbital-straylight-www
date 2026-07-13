@@ -7,5 +7,6 @@
 .ea-form input[type="email"]:focus,.ea-form select:focus{border-color:var(--accent-d)}
 .ea-row{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap}
 .ea-msg{font-size:.7rem;color:var(--accent);letter-spacing:.02em}
+.ea-hint{font-size:.62rem;letter-spacing:.06em;color:var(--ink-f)}
 .ea-count{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-f);margin-top:1rem}
 .ea-count b{color:var(--accent);font-weight:600}

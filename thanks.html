@@ -71,6 +71,7 @@
 <ul class="tk-rewards" id="tkRewards">
 <li data-at="1"><b>1 referral:</b> a boosted free-tier allowance for your first month at launch. Exact allowance publishes with pricing.</li>
 <li data-at="3"><b>3 referrals:</b> access ahead of the public release, and a priority slot for the proof bot, which opens a pull request against your repo and reports before and after times measured on your own code. The proof bot is in development; planned, not yet shipped.</li>
+<li><b>Both sides win:</b> rewards apply to the teammate who joins through your link too, not only to you. Details publish with pricing.</li>
 </ul>
 <!-- TODO(team): confirm reward details once pricing and proof-bot timelines resolve -->
 </div>
@@ -78,7 +79,12 @@
 <h3>Tell the thread that sent you</h3>
 <p>If you found us where build pain was being discussed, this is ready to paste:</p>
 <textarea class="tk-share" id="tkShare" readonly rows="4"></textarea>
-<div class="ea-row"><button class="copybtn" id="tkCopyShare">Copy text</button></div>
+<div class="ea-row">
+<button class="copybtn" id="tkCopyShare">Copy text</button>
+<a class="copybtn" id="tkShareX" target="_blank" rel="noopener">Post on X</a>
+<a class="copybtn" id="tkShareHn" target="_blank" rel="noopener">Hacker News</a>
+<a class="copybtn" id="tkShareLi" target="_blank" rel="noopener">LinkedIn</a>
+</div>
 </div>
 </div>
 
@@ -125,6 +131,12 @@
   }
   wireCopy('tkCopyLink',function(){return link;});
   wireCopy('tkCopyShare',function(){return document.getElementById('tkShare').value;});
+
+  /* one-tap shares, prefilled at the moment intent is highest */
+  var shareText=document.getElementById('tkShare').value;
+  document.getElementById('tkShareX').href='https://x.com/intent/post?text='+encodeURIComponent(shareText);
+  document.getElementById('tkShareHn').href='https://news.ycombinator.com/submitlink?u='+encodeURIComponent(link)+'&t='+encodeURIComponent('Orbital: verified build infrastructure, early access');
+  document.getElementById('tkShareLi').href='https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(link);
 
   /* live referral progress */
   window.ORBITALWaitlist.rpc('referral_count',{p_code:data.code}).then(function(n){

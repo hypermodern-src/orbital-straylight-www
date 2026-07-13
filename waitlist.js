@@ -32,6 +32,22 @@
     if (ref && /^[a-f0-9]{6,32}$/i.test(ref)) localStorage.setItem('orbital-ref', ref);
   } catch (e) {}
 
+  /* source attribution: first-touch UTM params + external referrer, kept until signup */
+  try {
+    if (!localStorage.getItem('orbital-src')) {
+      var q = new URLSearchParams(location.search);
+      var src = {};
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content'].forEach(function (k) {
+        var v = q.get(k);
+        if (v) src[k] = v.slice(0, 80);
+      });
+      if (document.referrer && document.referrer.indexOf(location.origin) !== 0) {
+        src.referrer = document.referrer.slice(0, 200);
+      }
+      if (Object.keys(src).length) localStorage.setItem('orbital-src', JSON.stringify(src));
+    }
+  } catch (e) {}
+
   /* live counter: [data-waitlist-count] elements stay hidden below threshold */
   document.querySelectorAll('[data-waitlist-count]').forEach(function (el) {
     rpc('waitlist_count').then(function (n) {
@@ -57,7 +73,8 @@
         p_email: email,
         p_product: form.dataset.waitlist,
         p_builds_with: sel ? sel.value : null,
-        p_referred_by: (function () { try { return localStorage.getItem('orbital-ref'); } catch (e) { return null; } })()
+        p_referred_by: (function () { try { return localStorage.getItem('orbital-ref'); } catch (e) { return null; } })(),
+        p_source: (function () { try { return localStorage.getItem('orbital-src'); } catch (e) { return null; } })()
       }).then(function (res) {
         try {
           localStorage.setItem('orbital-waitlist', JSON.stringify({
