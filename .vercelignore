@@ -1,0 +1,5 @@
+# Internal documents: never serve these from the public site
+CLAUDE.md
+02-Sales-Page-Handoff.md
+docs/
+.gitignore
