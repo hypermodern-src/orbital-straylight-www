@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BUILD · The typed build system · Orbital</title>
-<meta name="description" content="ORBITAL BUILD is a typed build system: it describes how your software is assembled and the build logic itself is machine-checked. Start free, no credit card.">
+<title>BUILD · The typed build system, and the platform behind it · Orbital</title>
+<meta name="description" content="ORBITAL BUILD is free to use. An Orbital account adds the platform: team-shared verified caching, scale, retention, and guarantees. Start free, upgrade on your own numbers.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,6 +17,21 @@
 .claim-slot{border:1px dashed var(--border);border-left:3px solid var(--accent-d);border-radius:var(--radius);background:var(--gf);padding:1rem 1.2rem}
 .claim-slot .ck{font-size:.56rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-d);margin-bottom:.4rem}
 .claim-slot p{font-size:.76rem;color:var(--ink-f);line-height:1.7}
+/* github strip */
+.gh-strip{display:flex;align-items:baseline;gap:1.2rem;padding:.9rem 1.2rem;border:1px solid var(--ge);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--gf);flex-wrap:wrap}
+.gh-strip .gk{font-size:.58rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.gh-strip p{font-size:.76rem;color:var(--ink-m);line-height:1.65;flex:1;min-width:240px;margin:0}
+/* premium benefit cards */
+.plusgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+@media(max-width:820px){.plusgrid{grid-template-columns:1fr}}
+.plus{display:flex;flex-direction:column;gap:.5rem;padding:1.5rem 1.6rem;border-radius:var(--radius-lg)}
+.plus .pk{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+.plus h3{font-family:var(--serif);font-weight:500;font-size:1.3rem;color:var(--ink)}
+.plus .tier-tag{font-size:.52rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-d);border:1px solid hsla(var(--hue),40%,58%,.4);border-radius:1px;padding:.18rem .45rem;white-space:nowrap}
+.plus p{font-size:.8rem;color:var(--ink-m);line-height:1.75}
+.plus .pfoot{margin-top:auto;padding-top:.8rem;font-size:.62rem;letter-spacing:.06em;color:var(--ink-f)}
+.plus .pfoot b{color:var(--ink-m)}
+/* quickstart steps */
 .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
 @media(max-width:880px){.steps{grid-template-columns:1fr}}
 .step{display:flex;flex-direction:column;gap:.7rem;padding:1.4rem 1.5rem;border-radius:var(--radius-lg)}
@@ -25,16 +40,12 @@
 .step p{font-size:.78rem;color:var(--ink-m);line-height:1.7}
 .step .codeblk{font-size:.7rem;padding:.8rem .9rem}
 .qs-note{margin-top:1rem;font-size:.66rem;color:var(--ink-f);letter-spacing:.03em}
+/* trust row */
 .trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
 @media(max-width:880px){.trust{grid-template-columns:repeat(2,1fr)}}
 .trust a{display:flex;flex-direction:column;gap:.35rem;padding:1.1rem 1.2rem;border-radius:var(--radius-lg)}
 .trust .tk{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
 .trust .td{font-size:.7rem;color:var(--ink-f);line-height:1.6}
-.xsell{display:flex;gap:1.6rem;align-items:baseline;padding:1.4rem 1.6rem;border-radius:var(--radius-lg);flex-wrap:wrap}
-.xsell .xn{font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
-.xsell .xn .ns{color:var(--ink-g);font-weight:500}
-.xsell .xn .sep{color:var(--accent);margin:0 .22rem}
-.xsell p{font-size:.8rem;color:var(--ink-m);line-height:1.7;flex:1;min-width:240px}
 </style>
 </head>
 <body class="grain" data-ambient>
@@ -55,22 +66,22 @@
 <header class="phero">
 <div>
 <div class="eyebrow" data-reveal><span class="ns">ORBITAL</span><span class="sep">//</span><span class="nm">build</span>&nbsp;&nbsp;<span class="badge2 is-accent" data-orbital="badge"><span class="badge2-dot"></span>public release Sep 2026, target</span></div>
-<h1 data-reveal>A build system that is checked before it runs.</h1>
-<p class="sub" data-reveal><b>BUILD</b> is a typed build system. It describes how your software is assembled, and the description itself is machine-checked: if the build logic is wrong, it fails at check time, not twenty minutes into a pipeline.</p>
+<h1 data-reveal>You have the build system. This is the platform behind it.</h1>
+<p class="sub" data-reveal><b>BUILD</b>, the typed build system, is free to use and always will be. An Orbital account connects it to the platform: verified artifacts your whole team reuses, capacity that grows past one machine, and guarantees when the stakes ask for them.</p>
 <div class="cta" data-reveal>
 <!-- TODO(team): real signup URL -->
-<a class="btn primary" href="#">Start free</a>
-<a class="link-cta" href="verification.html">Verification for regulated teams</a>
+<a class="btn primary" href="#">Create your free account</a>
+<a class="btn" href="pricing.html">See pricing</a>
 </div>
-<div class="hero-note" data-reveal>No credit card. Free tier limits usage, never features.</div>
-<div class="meta" data-reveal><span><b>Docs</b> one click away</span><span><b>Seats</b> free</span><span><b>SSO</b> included on every tier</span></div>
+<div class="hero-note" data-reveal>No credit card. Every feature on every tier; you pay for capacity, never capability.</div>
+<div class="meta" data-reveal><span><b>Seats</b> free</span><span><b>SSO</b> included on every tier</span><span><b>Docs</b> one click away</span></div>
 </div>
 <div class="hero-visual" data-reveal>
 <div class="clone" data-orbital="clone">
-<div class="clone-h"><span class="lbl">One line to adopt</span>
+<div class="clone-h"><span class="lbl">Connect your account, one line</span>
 <div class="clone-tabs"><button class="on" data-pane="cli">cli</button><button data-pane="ci">ci</button></div></div>
 <!-- TODO(team): confirm exact commands and CI syntax against docs before launch -->
-<div class="clone-body" data-pane-for="cli"><code>orbital build</code><button class="copybtn">Copy</button></div>
+<div class="clone-body" data-pane-for="cli"><code>orbital login</code><button class="copybtn">Copy</button></div>
 <div class="clone-body" data-pane-for="ci" hidden><code>run: orbital build</code><button class="copybtn">Copy</button></div>
 </div>
 <div class="claim-slot">
@@ -81,25 +92,67 @@
 </div>
 </header>
 
-<!-- 01 why -->
-<div class="sh" data-reveal><span class="n">01</span><h2>Why a typed build system</h2></div>
-<div class="grid-cards3" data-reveal-stagger="70">
-<div class="glass card3 feat" data-reveal>
-<div class="fk">a</div><h3>Errors before execution</h3>
-<p>Ordinary build scripts fail while they run, on your time. BUILD's configuration has types, the way a modern programming language does, so a whole class of mistakes is caught the moment you write them.</p>
+<div class="gh-strip" data-reveal>
+<span class="gk">Coming from GitHub?</span>
+<!-- TODO(team): "free to use" wording pending license sign-off (Q&A 1.5); link the repo when public -->
+<p>Everything in the repository stays free. Nothing on this page takes features away from the tool you already run; an account adds the hosted layer around it.</p>
 </div>
-<div class="glass card3 feat" data-reveal>
-<div class="fk">b</div><h3>Same inputs, same outputs</h3>
-<p>Builds are described declaratively and produce the same result on your laptop, in CI, and on a colleague's machine. No hidden state, no "works on my machine".</p>
+
+<!-- 01 premium benefits -->
+<div class="sh" data-reveal><span class="n">01</span><h2>What an account adds</h2></div>
+<div class="plusgrid" data-reveal-stagger="70">
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>Your team stops rebuilding each other's work</h3><span class="tier-tag">free and up</span></div>
+<p>Connect BUILD to <b>CACHE</b>, verified binary storage, and an artifact any teammate or CI job has built, nobody builds again: everyone else pulls it in seconds, re-verified on every fetch so nothing tampered with ever enters a build. This is the speedup the tool alone cannot give you; it only exists with an account.</p>
+<div class="pfoot"><b>Free tier:</b> usage allowance TBD &middot; paid tiers raise it</div>
 </div>
-<div class="glass card3 feat" data-reveal>
-<div class="fk">c</div><h3>Checked logic, not conventions</h3>
-<p>The rules that assemble your software are verified by machine, not enforced by code review and hope. What passed the check is what runs.</p>
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>Capacity that grows with you</h3><span class="tier-tag">team</span></div>
+<p>The free tier is sized for individuals and small projects. Paid tiers raise throughput and concurrency so busy repositories never queue behind their own success: more simultaneous builds, more transfer, no feature differences.</p>
+<!-- TODO(team): throughput/concurrency allowances TBD (pricing blocked) -->
+<div class="pfoot"><b>Allowances:</b> TBD, publish before general availability</div>
+</div>
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>History that stays around</h3><span class="tier-tag">team</span></div>
+<p>Paid tiers keep artifacts and build history longer. When a release from months ago needs rebuilding, auditing, or bisecting, the evidence is still there instead of aged out.</p>
+<!-- TODO(team): retention windows TBD (pricing blocked) -->
+<div class="pfoot"><b>Retention windows:</b> TBD, publish before general availability</div>
+</div>
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>Guarantees in writing</h3><span class="tier-tag">enterprise</span></div>
+<p>When builds are on the critical path of your business, Enterprise adds service-level agreements, priority support, and enterprise controls, priced to your footprint rather than a rate card.</p>
+<div class="pfoot"><b>Also:</b> the <a href="verification.html" style="color:var(--accent)">verification path</a> for regulated and safety-critical teams</div>
 </div>
 </div>
 
-<!-- 02 benchmarks -->
-<div class="sh" data-reveal><span class="n">02</span><h2>Benchmarks</h2></div>
+<!-- 02 what is never charged for -->
+<div class="sh" data-reveal><span class="n">02</span><h2>What we never charge for</h2></div>
+<div class="metalist" data-reveal>
+<div class="metarow"><span class="my">The tool</span><span class="mt"><b>BUILD itself.</b> The typed build system you cloned is complete. There is no crippled community edition; the paid product is the platform around it, not a better binary.</span></div>
+<div class="metarow"><span class="my">Features</span><span class="mt"><b>Every feature, every tier.</b> Tiers change how much account you get: throughput, retention, guarantees. Never which capabilities you may use.</span></div>
+<div class="metarow"><span class="my">Seats</span><span class="mt"><b>Unlimited, free.</b> Add your whole team on day one; you pay for what the account uses, not who logs in.</span></div>
+<div class="metarow"><span class="my">Security</span><span class="mt"><b>No SSO tax.</b> Single sign-on and audit logs are included at every tier, including Free. Security basics are not an upsell.</span></div>
+</div>
+
+<!-- 03 upgrade on your numbers -->
+<div class="sh" data-reveal><span class="n">03</span><h2>Upgrade on your own numbers</h2></div>
+<div class="grid-cards3" data-reveal-stagger="70">
+<div class="glass card3 feat" data-reveal>
+<div class="fk">a</div><h3>Receipts, not pressure</h3>
+<p>When you approach the free allowance, Orbital shows what it measured for your account that month: hours of rebuilding avoided, what that usage would cost on each tier. Measured from your builds, never estimated.</p>
+</div>
+<div class="glass card3 feat" data-reveal>
+<div class="fk">b</div><h3>Advice from your build graph</h3>
+<p>BUILD sees which artifacts you rebuild that you could be fetching. When caching or more capacity would actually save you time, it says so inside the product, with your own figures attached.</p>
+</div>
+<div class="glass card3 feat" data-reveal>
+<div class="fk">c</div><h3>Nothing degrades silently</h3>
+<p>Hitting a limit never corrupts or slows a build behind your back. You see the receipt, you decide. Downgrading is as easy as upgrading, and your tool keeps working either way.</p>
+</div>
+</div>
+
+<!-- 04 benchmarks -->
+<div class="sh" data-reveal><span class="n">04</span><h2>Benchmarks</h2></div>
 <div class="statband" data-reveal>
 <!-- TODO(team): all four figures blocked pending measured benchmarks (handoff: no unmeasured numbers) -->
 <div class="st"><span class="v">TBD</span><span class="k">Clean build, reference repo</span></div>
@@ -113,23 +166,23 @@
 <!-- TODO(team): link methodology repo when public -->
 </div>
 
-<!-- 03 quickstart -->
-<div class="sh" data-reveal><span class="n">03</span><h2>Quickstart</h2></div>
+<!-- 05 quickstart -->
+<div class="sh" data-reveal><span class="n">05</span><h2>From clone to connected</h2></div>
 <div class="steps" data-reveal-stagger="70">
 <div class="glass step" data-reveal>
 <div class="sn">1</div><h3>Create an account</h3>
-<p>Sign up free, no credit card. One Orbital account covers BUILD and every other Orbital product.</p>
+<p>Free, no credit card. One Orbital account covers BUILD, CACHE, and every Orbital product that follows.</p>
 <!-- TODO(team): real signup URL -->
 <div class="codeblk" data-lang="shell"><code>orbital login</code></div>
 </div>
 <div class="glass step" data-reveal>
-<div class="sn">2</div><h3>Describe your build</h3>
-<p>Initialize a typed build description in your repository. Existing project layouts are detected and scaffolded.</p>
+<div class="sn">2</div><h3>Connect your repository</h3>
+<p>Point the tool you already run at your account. Existing build descriptions keep working unchanged.</p>
 <div class="codeblk" data-lang="shell"><code>orbital build init</code></div>
 </div>
 <div class="glass step" data-reveal>
-<div class="sn">3</div><h3>Build, checked</h3>
-<p>The description is type-checked, then executed. Wrong logic fails before anything runs.</p>
+<div class="sn">3</div><h3>Build once, as a team</h3>
+<p>From the next build on, verified artifacts are shared: what any teammate or CI job built, everyone else fetches.</p>
 <div class="codeblk" data-lang="shell"><code>orbital build</code></div>
 </div>
 </div>
@@ -137,31 +190,23 @@
 <!-- TODO(team): replace with exact commands from docs; keep the under-5-minutes path -->
 </p>
 
-<!-- 04 cross-sell -->
-<div class="sh" data-reveal><span class="n">04</span><h2>Better together</h2></div>
-<div class="glass xsell" data-reveal>
-<span class="xn"><span class="ns">ORBITAL</span><span class="sep">//</span>cache</span>
-<p>BUILD knows your build graph, so it can see exactly which artifacts you rebuild that you could be fetching. When <b>CACHE</b> would save you time, BUILD tells you so inside the product, with figures measured from your own builds, never a generic promise. Turning it on is one more config line on the same account and the same bill.</p>
-<a class="link-cta" href="cache.html">See CACHE</a>
-</div>
-
-<!-- 05 trust -->
-<div class="sh" data-reveal><span class="n">05</span><h2>Look for yourself</h2></div>
+<!-- 06 trust -->
+<div class="sh" data-reveal><span class="n">06</span><h2>Look for yourself</h2></div>
 <div class="trust" data-reveal-stagger="60">
 <!-- TODO(team): real URLs for all four -->
-<a class="glass orbital-lift" data-reveal href="#"><span class="tk">GitHub</span><span class="td">Source and issue tracker, in the open.</span></a>
+<a class="glass orbital-lift" data-reveal href="#"><span class="tk">GitHub</span><span class="td">The source you came from, and the issue tracker.</span></a>
 <a class="glass orbital-lift" data-reveal href="#"><span class="tk">Changelog</span><span class="td">Every release, public and dated.</span></a>
 <a class="glass orbital-lift" data-reveal href="#"><span class="tk">Status</span><span class="td">Live service status and incident history.</span></a>
-<a class="glass orbital-lift" data-reveal href="#"><span class="tk">Licenses</span><span class="td">What is open source and under which license.</span></a>
+<a class="glass orbital-lift" data-reveal href="#"><span class="tk">Licenses</span><span class="td">What is open and under which license.</span></a>
 </div>
 
 <div class="ctaband" data-reveal>
-<h2>Describe the build once. Trust it everywhere.</h2>
-<p>Start free, no credit card. The free tier is gated on usage, never on features.</p>
+<h2>Keep the tool. Add the platform.</h2>
+<p>Free account, no credit card, every feature. Upgrade only when your own receipts say it pays.</p>
 <div class="cta">
 <!-- TODO(team): real signup URL -->
-<a class="btn primary" href="#">Start free</a>
-<a class="btn" href="pricing.html">See pricing</a>
+<a class="btn primary" href="#">Create your free account</a>
+<a class="btn" href="pricing.html">Compare tiers</a>
 </div>
 </div>
 
