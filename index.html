@@ -72,8 +72,8 @@
 <p class="lede" data-reveal>Most developer tools ask for your trust. Orbital products are built so they do not have to: storage that re-checks every artifact it hands you, and builds whose own logic is machine-checked. One account, one subscription, and every product available on every tier.</p>
 <form class="ea-form" id="early-access" data-waitlist="platform" data-reveal>
 <div class="ea-fields">
-<input type="email" required placeholder="you@company.com" aria-label="Work email">
-<select aria-label="What do you build with">
+<input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@company.com" aria-label="Work email">
+<select name="builds-with" autocomplete="off" aria-label="What do you build with">
 <option value="" disabled selected>What do you build with? (optional)</option>
 <option>Nix</option>
 <option>Bazel or Buck2</option>

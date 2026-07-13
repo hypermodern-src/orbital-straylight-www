@@ -71,8 +71,8 @@
 <p class="sub" data-reveal><b>BUILD</b>, the typed build system, is free to use and always will be. An Orbital account connects it to the platform: verified artifacts your whole team reuses, capacity that grows past one machine, and guarantees when the stakes ask for them.</p>
 <form class="ea-form" id="early-access" data-waitlist="build" data-reveal>
 <div class="ea-fields">
-<input type="email" required placeholder="you@company.com" aria-label="Work email">
-<select aria-label="What do you build with">
+<input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@company.com" aria-label="Work email">
+<select name="builds-with" autocomplete="off" aria-label="What do you build with">
 <option value="" disabled selected>What do you build with? (optional)</option>
 <option>Nix</option>
 <option>Bazel or Buck2</option>
