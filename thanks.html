@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You are on the list · Orbital</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="halogen-orbital/orbital.css">
+<link rel="stylesheet" href="waitlist.css">
+<style>
+.tk-hero{padding:clamp(3rem,9vh,6rem) 0 clamp(1.5rem,4vh,2.5rem)}
+.tk-hero .eyebrow{font-size:.66rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
+.tk-hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,6vw,4.4rem);line-height:1.04;letter-spacing:-.02em;max-width:20ch}
+.tk-hero .lede{font-size:.9rem;color:var(--ink-m);max-width:58ch;margin-top:1.4rem;line-height:1.85}
+.tk-pos{font-family:var(--serif);font-weight:300;font-size:1.4rem;color:var(--accent);margin-top:1rem}
+.tk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:2.4rem}
+@media(max-width:860px){.tk-grid{grid-template-columns:1fr}}
+.tk-card{display:flex;flex-direction:column;gap:.8rem;padding:1.6rem 1.7rem;border-radius:var(--radius-lg)}
+.tk-card h3{font-family:var(--serif);font-weight:500;font-size:1.3rem;color:var(--ink)}
+.tk-card p{font-size:.78rem;color:var(--ink-m);line-height:1.75}
+.tk-linkrow{display:flex;gap:.6rem;align-items:center}
+.tk-linkrow code{flex:1;font-size:.7rem;color:var(--ink);background:var(--gf);border:1px solid var(--ge);border-radius:var(--radius);padding:.6rem .8rem;overflow-x:auto;white-space:nowrap}
+/* referral progress */
+.tk-prog{margin-top:.4rem}
+.tk-track{position:relative;height:5px;border-radius:3px;background:hsla(var(--hue),15%,60%,.16)}
+.tk-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent);box-shadow:0 0 10px hsla(var(--hue),58%,38%,.45);transition:width .6s var(--ease);width:0}
+.tk-marks{display:flex;justify-content:space-between;margin-top:.6rem;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-f)}
+.tk-rewards{list-style:none;display:flex;flex-direction:column;gap:.6rem;padding:0;margin-top:.4rem}
+.tk-rewards li{font-size:.74rem;color:var(--ink-m);line-height:1.65;padding-left:1.1rem;position:relative}
+.tk-rewards li::before{content:'';position:absolute;left:0;top:.55em;width:5px;height:5px;background:var(--accent-d);border-radius:1px}
+.tk-rewards li.done::before{background:var(--accent)}
+.tk-rewards b{color:var(--ink)}
+.tk-share{width:100%;font-family:var(--sans);font-size:.72rem;color:var(--ink-m);background:var(--gf);border:1px solid var(--ge);border-radius:var(--radius);padding:.8rem .9rem;line-height:1.7;resize:vertical;min-height:88px}
+.tk-next{margin-top:2.6rem}
+</style>
+</head>
+<body class="grain" data-ambient>
+
+<nav class="bar">
+<span class="brand"><span class="mk"><svg viewBox="0 0 96 66" fill="currentColor"><path d="m 18,18 v 20 l -17.32,10 10,17.32 h 40 l 10,-17.32 17.32,10 17.32,-10 -10,-17.32 h -20 v -20 L 48,.68 l -10,17.32 z"/></svg></span><span class="t">Orbital</span></span>
+<div class="topnav">
+<a href="index.html">Overview</a>
+<a href="cache.html">Cache</a>
+<a href="build.html">Build</a>
+<a href="pricing.html">Pricing</a>
+<a href="verification.html">Verification</a>
+</div>
+</nav>
+
+<main class="wrap narrow">
+
+<header class="tk-hero">
+<div class="eyebrow" data-reveal>Early access</div>
+<h1 data-reveal>You are on the list.</h1>
+<div class="tk-pos" data-reveal id="tkPos" hidden></div>
+<p class="lede" data-reveal>Expect a handful of emails between now and launch: what we are building, how the benchmarks are run, and one early-access offer before the public release. Reply to any of them; a founder reads the replies. Unsubscribe anytime.</p>
+</header>
+
+<div class="tk-grid">
+<div class="glass tk-card" data-reveal>
+<h3>Move up by bringing your team</h3>
+<p>Your personal link, for the teammates who share your build. Rewards stack as they join:</p>
+<div class="tk-linkrow"><code id="tkLink">&nbsp;</code><button class="copybtn" id="tkCopyLink">Copy</button></div>
+<div class="tk-prog">
+<div class="tk-track"><div class="tk-fill" id="tkFill"></div></div>
+<div class="tk-marks"><span>0</span><span>1</span><span>2</span><span>3+</span></div>
+</div>
+<ul class="tk-rewards" id="tkRewards">
+<li data-at="1"><b>1 referral:</b> a boosted free-tier allowance for your first month at launch. Exact allowance publishes with pricing.</li>
+<li data-at="3"><b>3 referrals:</b> access ahead of the public release, and a priority slot for the proof bot, which opens a pull request against your repo and reports before and after times measured on your own code. The proof bot is in development; planned, not yet shipped.</li>
+</ul>
+<!-- TODO(team): confirm reward details once pricing and proof-bot timelines resolve -->
+</div>
+<div class="glass tk-card" data-reveal>
+<h3>Tell the thread that sent you</h3>
+<p>If you found us where build pain was being discussed, this is ready to paste:</p>
+<textarea class="tk-share" id="tkShare" readonly rows="4"></textarea>
+<div class="ea-row"><button class="copybtn" id="tkCopyShare">Copy text</button></div>
+</div>
+</div>
+
+<div class="tk-next" data-reveal>
+<div class="metalist">
+<div class="metarow"><span class="my">Next</span><span class="mt">Watch for the first email; it confirms your spot and repeats your referral link.</span></div>
+<div class="metarow"><span class="my">Sooner</span><span class="mt">Regulated or safety-critical team? Skip the line: <a href="verification.html" style="color:var(--accent)">talk to a founder</a>.</span></div>
+</div>
+</div>
+
+</main>
+
+<div class="wrap"><div class="foot">
+<span>ORBITAL &copy; 2026</span>
+<span><a href="#">GitHub</a> &middot; <a href="#">Changelog</a> &middot; <a href="#">Status</a> &middot; <a href="#">Licenses</a> &middot; <a href="pricing.html">Pricing</a></span>
+</div></div>
+
+<script src="halogen-orbital/orbital.js"></script>
+<script src="waitlist.js"></script>
+<script>
+(function(){
+  'use strict';
+  var data=null;
+  try{ data=JSON.parse(localStorage.getItem('orbital-waitlist')||'null'); }catch(e){}
+  if(!data||!data.code){
+    document.getElementById('tkLink').textContent='Join the list first: orbital cache or build page';
+    return;
+  }
+  var page=data.product==='build'?'build.html':(data.product==='cache'?'cache.html':'index.html');
+  /* TODO(team): swap origin for the production domain at launch */
+  var link=location.origin+location.pathname.replace(/thanks\.html$/,page)+'?r='+data.code;
+  var pos=document.getElementById('tkPos');
+  var pname=data.product==='platform'?'Orbital':data.product.toUpperCase();
+  if(typeof data.position==='number'){ pos.textContent='#'+data.position+' on the '+pname+' early-access list'; pos.hidden=false; }
+  document.getElementById('tkLink').textContent=link;
+  document.getElementById('tkShare').value='Orbital is shipping verified build infrastructure: binary storage that re-verifies every artifact it serves, and a typed build system that is checked before it runs. Early access: '+link;
+
+  function wireCopy(btnId,getText){
+    var btn=document.getElementById(btnId);
+    btn.addEventListener('click',function(){
+      navigator.clipboard.writeText(getText()).then(function(){btn.dataset.state='copied';btn.textContent='Copied';},function(){btn.dataset.state='error';});
+      setTimeout(function(){delete btn.dataset.state;btn.textContent=btnId==='tkCopyLink'?'Copy':'Copy text';},1600);
+    });
+  }
+  wireCopy('tkCopyLink',function(){return link;});
+  wireCopy('tkCopyShare',function(){return document.getElementById('tkShare').value;});
+
+  /* live referral progress */
+  window.ORBITALWaitlist.rpc('referral_count',{p_code:data.code}).then(function(n){
+    if(typeof n!=='number')return;
+    var pct=Math.min(n,3)/3*100;
+    document.getElementById('tkFill').style.width=pct+'%';
+    document.querySelectorAll('#tkRewards li').forEach(function(li){
+      if(n>=parseInt(li.dataset.at,10)) li.classList.add('done');
+    });
+  }).catch(function(){});
+})();
+</script>
+<script src="halogen-orbital/orbital-theme.js"></script>
+</body>
+</html>

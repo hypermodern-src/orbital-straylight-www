@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="halogen-orbital/orbital.css">
+<link rel="stylesheet" href="waitlist.css">
 <style>
 .hero-orb{padding:clamp(3rem,10vh,7rem) 0 clamp(1.5rem,4vh,3rem)}
 .hero-orb .eyebrow{font-size:.66rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
@@ -69,10 +70,25 @@
 <h1 data-split="char" data-split-step="36">ORBITAL</h1>
 <p class="sub" data-reveal>Infrastructure that proves itself.</p>
 <p class="lede" data-reveal>Most developer tools ask for your trust. Orbital products are built so they do not have to: storage that re-checks every artifact it hands you, and builds whose own logic is machine-checked. One account, one subscription, and every product available on every tier.</p>
+<form class="ea-form" id="early-access" data-waitlist="platform" data-reveal>
+<div class="ea-fields">
+<input type="email" required placeholder="you@company.com" aria-label="Work email">
+<select aria-label="What do you build with">
+<option value="" disabled selected>What do you build with? (optional)</option>
+<option>Nix</option>
+<option>Bazel or Buck2</option>
+<option>GitHub Actions</option>
+<option>Something else</option>
+<option>Compliance or safety-critical work</option>
+</select>
+</div>
+<div class="ea-row"><button type="submit" class="btn primary">Get early access</button><a class="link-cta" href="verification.html">For regulated teams</a></div>
+<p class="ea-msg" hidden>That did not go through. Check the address and try again.</p>
+</form>
+<div class="ea-count" data-waitlist-count hidden data-reveal><b></b> signups on the early-access list</div>
 <div class="cta" data-reveal>
-<a class="btn primary" href="cache.html">Explore CACHE</a>
+<a class="btn" href="cache.html">Explore CACHE</a>
 <a class="btn" href="build.html">Explore BUILD</a>
-<a class="link-cta" href="verification.html">For regulated teams</a>
 </div>
 </header>
 
@@ -126,11 +142,11 @@
 </div>
 
 <div class="ctaband" data-reveal>
-<h2>Start with the product you need today.</h2>
-<p>One Orbital account covers every product. Usage stays itemized on one bill.</p>
+<h2>Be first in when it ships.</h2>
+<p>One Orbital account covers every product. Early access opens before the public release.</p>
 <div class="cta">
-<a class="btn primary" href="cache.html">CACHE, verified storage</a>
-<a class="btn" href="build.html">BUILD, the typed build system</a>
+<a class="btn primary" href="#early-access">Get early access</a>
+<a class="btn" href="pricing.html">See pricing</a>
 </div>
 </div>
 
@@ -143,6 +159,7 @@
 </div></div>
 
 <script src="halogen-orbital/orbital.js"></script>
+<script src="waitlist.js"></script>
 <script src="halogen-orbital/orbital-theme.js"></script>
 </body>
 </html>

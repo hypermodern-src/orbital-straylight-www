@@ -22,6 +22,12 @@ Static HTML pages on the ORBITAL design system, vendored in `halogen-orbital/` (
 
 `TODO(team)` comments in the HTML mark every placeholder that needs a real value, link, or confirmation before launch.
 
+## Pre-launch waitlist (live)
+
+Until GA the primary CTA sitewide is "Get early access": a two-field form (email + optional "what do you build with") on index, cache, and build pages, posting to Supabase project `orbital-site` (`lhmodcikykyoxpaojeyn`, org jwpr). `waitlist.js` holds the project URL and publishable key (public by design). The `waitlist_signups` table has RLS enabled with no policies and all direct grants revoked; the browser can only call three RPCs: `join_waitlist` (insert, returns position + referral code), `waitlist_count`, and `referral_count`. Emails are not readable with the shipped key; exports for the mail tool need the service-role key. Supabase security advisors flag the anon-executable SECURITY DEFINER functions; that is the intended access path.
+
+`thanks.html` is the confirmation page: queue position, referral link (`?r=CODE`, attributed via localStorage), reward progress, pre-written share text. Reward copy is placeholder-labeled until pricing resolves. Live signup counters render only at 25+ signups (threshold in `waitlist.js`); counts are always real, never seeded. Email drafts live in `docs/email-sequence.md`. At launch: swap forms back to "Start free" signup CTAs and update the origin in thanks.html referral links to the production domain.
+
 ## Run locally
 
 Any static server, e.g. `python3 -m http.server 4173`, then open `http://localhost:4173/`.
