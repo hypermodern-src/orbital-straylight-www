@@ -1,0 +1,51 @@
+# hydrogen — spago build (the buck2 build in BUCK/defs.bzl is the canonical
+# hermetic path; this manifest keeps the framework consumable as a plain spago
+# path/git dependency for fast downstream iteration).
+package:
+  name: hydrogen
+  dependencies:
+    - aff
+    - affjax
+    - affjax-web
+    - argonaut
+    - argonaut-codecs
+    - argonaut-core
+    - arrays
+    - console
+    - const
+    - control
+    - datetime
+    - dom-indexed
+    - effect
+    - either
+    - enums
+    - foldable-traversable
+    - halogen
+    - halogen-subscriptions
+    - halogen-vdom
+    - http-methods
+    - integers
+    - maybe
+    - newtype
+    - now
+    - nullable
+    - numbers
+    - ordered-collections
+    - prelude
+    - refs
+    - strings
+    - transformers
+    - tuples
+    - unsafe-coerce
+    - unsafe-reference
+    - web-dom
+    - web-events
+    - web-html
+    - web-pointerevents
+    - web-storage
+    - web-touchevents
+    - web-uievents
+
+workspace:
+  package_set:
+    registry: 73.2.0
