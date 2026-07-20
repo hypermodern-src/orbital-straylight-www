@@ -63,6 +63,7 @@ type DocConfig =
   , favicon :: Maybe String     -- ^ Favicon URL
   , stylesheets :: Array String -- ^ CSS file URLs
   , scripts :: Array String     -- ^ JavaScript file URLs (loaded at end of body)
+  , extraHead :: Array HH.PlainHTML -- ^ Arbitrary head nodes (blocking scripts, preloads, …)
   }
 
 -- | Default document configuration
@@ -77,6 +78,7 @@ defaultDocConfig =
   , manifest: Nothing
   , stylesheets: []
   , scripts: []
+  , extraHead: []
   }
 
 -- ============================================================
@@ -128,6 +130,7 @@ renderDocument config meta content =
           <> faviconLink config
           <> manifestLink config
           <> themeColorMeta config
+          <> map HH.fromPlainHTML config.extraHead
         )
     , HH.body_
         ( [ content ] <> scriptTags config )
