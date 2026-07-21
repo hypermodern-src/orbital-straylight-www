@@ -1,0 +1,19 @@
+{
+  "name": "hypermodern.consulting",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun run build:client && bun run build:ssg && bun run build:html && bun run build:css",
+    "build:client": "cd purescript && spago bundle --minify",
+    "build:ssg": "cd purescript && spago bundle --module SSG.Main --platform node --bundle-type app --outfile ../.build/ssg.mjs",
+    "build:html": "node .build/ssg.mjs",
+    "build:css": "cp styles/orbital-deck.css dist/orbital-deck.css",
+    "clean": "rm -rf dist .build",
+    "serve": "cd dist && python3 -m http.server 8739"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "spago": "^1.0.4"
+  }
+}

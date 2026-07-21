@@ -1,0 +1,33 @@
+# hypermodern.consulting — the ORBITAL deck mock, reproduced on hydrogen.
+package:
+  name: hypermodern-consulting
+  dependencies:
+    - aff
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - halogen
+    - halogen-subscriptions
+    - hydrogen
+    - integers
+    - maybe
+    - prelude
+    - refs
+    - strings
+    - web-dom
+    - web-events
+    - web-html
+    - web-uievents
+  bundle:
+    platform: browser
+    type: app
+    module: Main
+    outfile: ../dist/deck.js
+
+workspace:
+  package_set:
+    registry: 73.2.0
+  extra_packages:
+    hydrogen:
+      path: ../../../straylight/hydrogen
