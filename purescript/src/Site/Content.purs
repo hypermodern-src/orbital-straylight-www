@@ -34,7 +34,7 @@ dAttr n = HP.attr (AttrName n)
 
 -- watermark ink fill, as in the mock
 inkWm :: forall w i. HH.HTML w i
-inkWm = HH.div [ cls "mono-wm" ] [ monogram "hsl(211,32%,12%)" ]
+inkWm = HH.div [ cls "mono-wm" ] [ monogram "var(--ink)" ]
 
 sl :: forall w i. String -> String -> HH.HTML w i
 sl num name = HH.div [ cls "sl" ] [ HH.span [ cls "sln" ] [ HH.text num ], HH.text (" " <> name) ]
@@ -87,7 +87,7 @@ hero =
                         ]
                     , HH.div [ cls "hg" ]
                         [ HH.div [ style "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60%;opacity:.04" ]
-                            [ monogram "hsl(211,58%,38%)" ]
+                            [ monogram "var(--accent)" ]
                         , HH.div [ cls "gl" ] []
                         , HH.div [ cls "gl" ] []
                         , HH.div [ cls "gl" ] []

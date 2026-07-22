@@ -2368,3 +2368,76 @@ a.pub-entry {
 .nav.dk .theme-tog:hover {
   color: hsl(var(--hue), 58%, 68%);
 }
+
+/* ============================================================
+   ONO-SENDAI, COMPLETE — extension beyond the mock. The original
+   dark block only re-skins nav/footer; here the token set itself
+   is re-derived (ORBITAL onosendai values), so every var-driven
+   component follows. Below: the handful of surfaces that hardcode
+   light-mode glass/blooms, given their carbon equivalents.
+   ============================================================ */
+:root[data-theme="onosendai"] {
+  --ink: hsl(var(--hue), 18%, 96%);
+  --ink-m: hsl(var(--hue), 12%, 68%);
+  --ink-f: hsl(var(--hue), 10%, 52%);
+  --ink-g: hsl(var(--hue), 8%, 38%);
+  --accent: hsl(var(--hue), 70%, 72%);
+  --accent-d: hsl(var(--hue), 50%, 64%);
+  --white: hsl(var(--hue), 24%, 6.5%);
+  --border: hsl(var(--hue), 18%, 18%);
+  --border-f: hsl(var(--hue), 16%, 14%);
+  --ge: hsla(var(--hue), 40%, 60%, 0.13);
+  --gf: hsla(var(--hue), 30%, 14%, 0.5);
+  --gfh: hsla(var(--hue), 30%, 18%, 0.6);
+}
+
+/* ambient blooms: aurora on carbon, not glare */
+:root[data-theme="onosendai"] .amb div:nth-child(1) {
+  background: radial-gradient(ellipse, hsla(var(--hue), 45%, 28%, 0.22), transparent 70%);
+}
+:root[data-theme="onosendai"] .amb div:nth-child(2) {
+  background: radial-gradient(ellipse, hsla(var(--hue), 40%, 24%, 0.16), transparent 65%);
+}
+:root[data-theme="onosendai"] .amb div:nth-child(3) {
+  background: radial-gradient(ellipse, hsla(var(--hue), 55%, 30%, 0.14), transparent 60%);
+}
+
+/* the dark sections keep their own depth against the carbon page */
+:root[data-theme="onosendai"] .pn--dk {
+  background: hsl(var(--hue), 22%, 9%);
+}
+
+/* hero glass panel: carbon glass instead of paper glass */
+:root[data-theme="onosendai"] .hg {
+  background: linear-gradient(
+    135deg,
+    hsla(var(--hue), 30%, 16%, 0.5),
+    hsla(var(--hue), 26%, 10%, 0.2)
+  );
+  border-color: hsla(var(--hue), 40%, 60%, 0.16);
+  box-shadow: 0 12px 40px hsla(var(--hue), 30%, 2%, 0.4), inset 0 1px 0
+    hsla(var(--hue), 40%, 80%, 0.08);
+}
+:root[data-theme="onosendai"] .hg::before {
+  background: linear-gradient(180deg, hsla(var(--hue), 40%, 70%, 0.05), transparent 40%);
+}
+:root[data-theme="onosendai"] .gl {
+  background: linear-gradient(90deg, transparent, hsla(var(--hue), 50%, 70%, 0.12), transparent);
+}
+
+/* rails + scroll cue: the dark recipes, regardless of section */
+:root[data-theme="onosendai"] .vrail-track {
+  background: hsla(var(--hue), 20%, 99%, 0.08);
+}
+:root[data-theme="onosendai"] .vrail-thumb {
+  background: hsla(var(--hue), 50%, 65%, 0.85);
+  box-shadow: 0 0 12px hsla(var(--hue), 50%, 65%, 0.45);
+}
+:root[data-theme="onosendai"] .shint {
+  color: hsla(var(--hue), 20%, 99%, 0.45);
+}
+
+/* grain: a touch softer on carbon */
+:root[data-theme="onosendai"] body::after {
+  opacity: 0.012;
+}

@@ -23,10 +23,12 @@ circle attrs = HH.elementNS svgNS (HH.ElemName "circle") attrs []
 attr :: forall i. String -> String -> HH.IProp () i
 attr n = HH.attr (AttrName n)
 
--- | The mark, parameterized by fill (currentColor / ink / accent).
+-- | The mark, parameterized by fill. Set as a style (not the presentation
+-- | attribute) so CSS custom properties work — the watermarks follow the
+-- | theme's ink instead of freezing light-mode values into the markup.
 monogram :: forall w i. String -> HH.HTML w i
 monogram fill =
-  svg [ attr "viewBox" "0 0 96 66", attr "fill" fill ]
+  svg [ attr "viewBox" "0 0 96 66", attr "style" ("fill:" <> fill) ]
     [ path [ attr "d" "m 18,18 v 20 l -17.32,10 10,17.32 h 40 l 10,-17.32 17.32,10 17.32,-10 -10,-17.32 h -20 v -20 L 48,.68 l -10,17.32 z" ] ]
 
 sun :: forall w i. HH.HTML w i

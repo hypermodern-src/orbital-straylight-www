@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.25.0",
+    "playwright-core": "^1.61.1",
     "spago": "^1.0.4"
   }
 }
