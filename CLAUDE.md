@@ -30,4 +30,8 @@ Until GA the primary CTA sitewide is "Get early access": a two-field form (email
 
 ## Run locally
 
-Any static server, e.g. `python3 -m http.server 4173`, then open `http://localhost:4173/`.
+Any static server against the repo root, e.g. `python3 -m http.server 4173`, then open `http://localhost:4173/`. No build needed for development.
+
+## Deploy
+
+Vercel runs `npm run build` (see `build.mjs`): it copies the site into `dist/` and minifies CSS/JS there with esbuild. Source files, including the vendored `halogen-orbital/` design system, stay byte-identical to upstream in git; never commit minified copies or edit the vendored files. Deploy with `npx vercel@latest deploy --prod --yes --scope mclbbk-1351s-projects`.
