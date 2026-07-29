@@ -1,9 +1,17 @@
 /* ORBITAL waitlist: early-access form + counter, on design-system tokens */
+
+/* Site-level accessibility stopgap: the design system's faint ink token
+   (--ink-f, hsl(211,10%,58%)) lands near 3.3:1 against the paper background,
+   under the 4.5:1 WCAG AA minimum for small text (flagged by PageSpeed
+   Insights). Darkened here until the token is fixed upstream in
+   halogen-orbital; the dark theme's own value already passes and keeps it. */
+:root{--ink-f:hsl(211,12%,44%)}
+html[data-theme="onosendai"]{--ink-f:hsl(211,11%,52%)}
 .ea-form{margin-top:2rem;display:flex;flex-direction:column;gap:.8rem;max-width:460px}
 .ea-fields{display:flex;flex-direction:column;gap:.8rem}
 .ea-form input[type="email"],.ea-form select{font-family:var(--sans);font-size:.8rem;color:var(--ink);background:var(--gf);border:1px solid var(--ge);border-radius:var(--radius);padding:.75rem .9rem;outline:none;transition:border-color .3s;width:100%;appearance:none;-webkit-appearance:none}
-.ea-form input[type="email"]::placeholder{color:var(--ink-g)}
-.ea-form select:invalid{color:var(--ink-g)}
+.ea-form input[type="email"]::placeholder{color:var(--ink-f)}
+.ea-form select:invalid{color:var(--ink-f)}
 .ea-form input[type="email"]:focus,.ea-form select:focus{border-color:var(--accent-d)}
 .ea-row{display:flex;gap:.9rem;align-items:center;flex-wrap:wrap}
 .ea-msg{font-size:.7rem;color:var(--accent);letter-spacing:.02em}
