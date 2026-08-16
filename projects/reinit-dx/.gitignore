@@ -1,0 +1,22 @@
+.spago/
+output/
+node_modules/
+.psci_modules/
+.psc-ide-port
+*.lock
+public/reinit.js
+
+# straylight-prelude buck2 project
+buck-out/
+nix/build/
+.buckconfig.local
+result
+result-*
+# devshell-symlinked editor configs (from nix/configs)
+.clangd
+.clang-format
+.clang-tidy
+.rustfmt.toml
+.stylua.toml
+hie.yaml
+compile_commands.json
