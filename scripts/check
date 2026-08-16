@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+check_hydrogen() {
+  nix flake check "$repo_root/projects/hydrogen"
+}
+
+check_reinit_dx() {
+  nix flake check "$repo_root/projects/reinit-dx"
+}
+
+check_hypermodern_consulting() {
+  (
+    cd "$repo_root/projects/hypermodern-consulting"
+    bun install --frozen-lockfile
+    bun run build
+  )
+}
+
+check_straylight_web() {
+  nix flake check "$repo_root/projects/straylight-web"
+}
+
+check_one() {
+  case "$1" in
+    hydrogen) check_hydrogen ;;
+    reinit-dx) check_reinit_dx ;;
+    hypermodern-consulting) check_hypermodern_consulting ;;
+    straylight-web) check_straylight_web ;;
+    *)
+      printf 'unknown project: %s\n' "$1" >&2
+      exit 2
+      ;;
+  esac
+}
+
+if (($#)); then
+  for project in "$@"; do
+    check_one "$project"
+  done
+else
+  check_one hydrogen
+  check_one reinit-dx
+  check_one hypermodern-consulting
+  check_one straylight-web
+fi

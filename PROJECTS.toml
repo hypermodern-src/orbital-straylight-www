@@ -1,0 +1,26 @@
+schema_version = 1
+
+[projects.hydrogen]
+path = "projects/hydrogen"
+kind = "framework"
+source = "ssh://git@git.s4.gl/straylight/hydrogen.git"
+vercel = ["orbital-showroom"]
+
+[projects.straylight-web]
+path = "projects/straylight-web"
+kind = "application"
+source = "git@github.com:sensenet-ai/straylight-web.git"
+vercel = ["straylight-web"]
+
+[projects.reinit-dx]
+path = "projects/reinit-dx"
+kind = "application"
+source = "git@github.com:sensenet-ai/reinit-dx.git"
+vercel = ["reinit-dx"]
+
+[projects.hypermodern-consulting]
+path = "projects/hypermodern-consulting"
+kind = "application"
+source = "ssh://git@git.s4.gl/hypermodern/hypermodern.consulting.git"
+vercel = ["hypermodern-website"]
+

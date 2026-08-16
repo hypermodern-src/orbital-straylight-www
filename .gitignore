@@ -1,0 +1,8 @@
+.direnv/
+.env
+.env.*
+!.env.example
+node_modules/
+result
+result-*
+
