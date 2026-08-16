@@ -16,7 +16,7 @@ dependency.
 | `straylight-web` | Straylight product and company web application | `straylight-web` |
 | `reinit-dx` | Reference Hydrogen SSG application | `reinit-dx` after cutover |
 | `hypermodern-consulting` | Hydrogen SSG consultancy site | `hypermodern-website` |
-| `orbital-web-jw` | Orbital product marketing Hydrogen SSG | Vercel project pending recovery |
+| `orbital-web-jw` | Orbital product marketing Hydrogen SSG | `orbital-web-jw` |
 
 The old `reinit-dx-website` Next.js wrapper remains outside the monorepo while
 it serves production. It is deployment history, not the canonical application.

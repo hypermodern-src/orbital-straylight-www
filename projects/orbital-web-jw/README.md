@@ -47,6 +47,10 @@ vercel link
 nix run .#deploy-orbital-web-jw-site-vercel --accept-flake-config
 ```
 
-Do not link or promote production until the legacy Vercel project owner and
-project name have been recovered. See `docs/launch-blockers.md` for the product
-and content decisions that must be resolved before launch.
+The app is linked locally to `b7r6s-projects/orbital-web-jw`; `.vercel/` and its
+OIDC credentials remain untracked. The current Vercel alias is
+`https://orbital-web-jw.vercel.app`. The legacy GitHub auto-deploy remains in an
+unavailable team and is not modified by this deployment path.
+
+Do not attach a custom domain until the intended production origin and the
+items in `docs/launch-blockers.md` have been resolved.

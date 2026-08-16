@@ -8,3 +8,6 @@ buck-out/
 nix/build/
 result
 result-*
+.env
+.env.local
+.env.*.local

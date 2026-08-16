@@ -28,4 +28,4 @@ vercel = ["hypermodern-website"]
 path = "projects/orbital-web-jw"
 kind = "application"
 source = "git@github.com:sensenet-ai/orbital-web-jw.git"
-vercel = []
+vercel = ["orbital-web-jw"]
