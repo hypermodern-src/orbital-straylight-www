@@ -17,6 +17,7 @@ dependency.
 | `reinit-dx` | Reference Hydrogen SSG application | `reinit-dx` after cutover |
 | `hypermodern-consulting` | Hydrogen SSG consultancy site | `hypermodern-website` |
 | `orbital-web-jw` | Orbital product marketing Hydrogen SSG | `orbital-web-jw` |
+| `web-middleware` | Language-neutral HTTP policy contract with a Haskell/WAI adapter | — |
 
 The old `reinit-dx-website` Next.js wrapper remains outside the monorepo while
 it serves production. It is deployment history, not the canonical application.
@@ -31,6 +32,7 @@ Run one project's native check:
 ./scripts/check hypermodern-consulting
 ./scripts/check straylight-web
 ./scripts/check orbital-web-jw
+./scripts/check web-middleware
 ```
 
 Run every check:

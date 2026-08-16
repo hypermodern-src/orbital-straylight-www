@@ -1,0 +1,140 @@
+openapi: 3.1.0
+info:
+  title: Straylight web middleware contract
+  version: 0.1.0
+  description: >-
+    Language-neutral operational and error behavior implemented by the current
+    Haskell/WAI adapter and intended to remain stable across a future Lean port.
+paths:
+  /healthz:
+    get:
+      operationId: getLiveness
+      summary: Process liveness
+      responses:
+        "200":
+          description: The process can serve HTTP.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            text/plain:
+              schema:
+                type: string
+                const: "ok\n"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+  /readyz:
+    get:
+      operationId: getReadiness
+      summary: Traffic readiness
+      responses:
+        "200":
+          description: The listener and required dependencies are warm.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            text/plain:
+              schema:
+                type: string
+                const: "ready\n"
+        "503":
+          description: The process is warming or draining and must not receive new traffic.
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum:
+                  - "warming\n"
+                  - "draining\n"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+components:
+  headers:
+    RequestId:
+      description: Canonical request correlation ID, generated when the inbound value is absent or unsafe.
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+        pattern: "^[A-Za-z0-9._/:_-]+$"
+  schemas:
+    ApiError:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
+  responses:
+    InvalidText:
+      description: A path, query, or JSON string contains invalid or unstoreable text.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    PayloadTooLarge:
+      description: A JSON request body exceeds the configured hard limit.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ServerError:
+      description: An unexpected synchronous application failure with opaque wire detail.
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    MethodNotAllowed:
+      description: The operational resource only accepts GET.
+      headers:
+        Allow:
+          schema:
+            type: string
+            const: GET
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+x-straylight-middleware:
+  json_body_limit_default_bytes: 1048576
+  inbound_request_id_pattern: "^[A-Za-z0-9._/:_-]{1,128}$"
+  response_headers:
+    X-Content-Type-Options: nosniff
+    Referrer-Policy: no-referrer
+    X-Frame-Options: DENY
+    Cross-Origin-Opener-Policy: same-origin
+    Cross-Origin-Resource-Policy: same-origin
+    Permissions-Policy: "camera=(), microphone=(), geolocation=()"

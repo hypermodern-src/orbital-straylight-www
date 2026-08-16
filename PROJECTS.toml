@@ -29,3 +29,9 @@ path = "projects/orbital-web-jw"
 kind = "application"
 source = "git@github.com:sensenet-ai/orbital-web-jw.git"
 vercel = ["orbital-web-jw"]
+
+[projects.web-middleware]
+path = "projects/web-middleware"
+kind = "library"
+source = "monorepo://projects/web-middleware"
+vercel = []

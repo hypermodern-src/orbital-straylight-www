@@ -27,6 +27,10 @@ check_orbital_web_jw() {
   nix flake check --accept-flake-config "$repo_root/projects/orbital-web-jw"
 }
 
+check_web_middleware() {
+  nix flake check --accept-flake-config "$repo_root/projects/web-middleware"
+}
+
 check_one() {
   case "$1" in
     hydrogen) check_hydrogen ;;
@@ -34,6 +38,7 @@ check_one() {
     hypermodern-consulting) check_hypermodern_consulting ;;
     straylight-web) check_straylight_web ;;
     orbital-web-jw) check_orbital_web_jw ;;
+    web-middleware) check_web_middleware ;;
     *)
       printf 'unknown project: %s\n' "$1" >&2
       exit 2
@@ -51,4 +56,5 @@ else
   check_one hypermodern-consulting
   check_one straylight-web
   check_one orbital-web-jw
+  check_one web-middleware
 fi

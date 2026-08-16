@@ -1,0 +1,96 @@
+cabal-version: 3.0
+name:          straylight-web-middleware
+version:       0.1.0.0
+synopsis:      Straylight's language-neutral HTTP policy boundary
+description:
+  A small WAI implementation of Straylight's shared HTTP middleware contract.
+  The contract is intentionally independent of Haskell so the implementation
+  can move to Lean without changing applications or callers.
+license:       BSD-3-Clause
+license-file:  LICENSE
+author:        Straylight Software
+maintainer:    dev@straylight.ai
+copyright:
+  2026 Straylight Software
+  Portions adapted from Hypermodern LLC house code; see NOTICE.md
+category:      Web
+build-type:    Simple
+
+extra-doc-files:
+  README.md
+  NOTICE.md
+  docs/ARCHITECTURE.md
+  docs/PROVENANCE.md
+  contract/openapi.yaml
+
+common house
+  default-language: GHC2021
+  default-extensions:
+    DerivingStrategies
+    NamedFieldPuns
+    OverloadedStrings
+    RecordWildCards
+    StrictData
+
+  ghc-options:
+    -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates
+    -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules
+    -Wpartial-fields -Wredundant-constraints
+
+library
+  import:         house
+  hs-source-dirs: src
+  exposed-modules:
+    Straylight.Web.Middleware
+    Straylight.Web.Middleware.Config
+    Straylight.Web.Middleware.Error
+    Straylight.Web.Middleware.Sanitize
+  other-modules:
+    Straylight.Web.Middleware.Core
+    Straylight.Web.Middleware.Operational
+    Straylight.Web.Middleware.Runtime
+
+  build-depends:
+    , aeson       >=2.0  && <2.3
+    , base        >=4.18 && <5
+    , bytestring  >=0.11 && <0.13
+    , http-types  >=0.12 && <0.13
+    , stm         >=2.5  && <2.6
+    , text        >=2.0  && <2.2
+    , time        >=1.12 && <1.15
+    , uuid        >=1.3  && <1.4
+    , vault       >=0.3  && <0.4
+    , wai         >=3.2  && <3.3
+
+executable straylight-web-middleware
+  import:         house
+  hs-source-dirs: app
+  main-is:        Main.hs
+  ghc-options:    -threaded -rtsopts "-with-rtsopts=-N"
+  build-depends:
+    , aeson
+    , base
+    , bytestring
+    , http-types
+    , straylight-web-middleware
+    , text
+    , unix        >=2.8 && <2.9
+    , wai
+    , warp        >=3.3 && <3.5
+
+test-suite middleware-spec
+  import:         house
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Spec.hs
+  ghc-options:    -threaded
+  build-depends:
+    , aeson
+    , base
+    , bytestring
+    , hspec       >=2.10 && <2.12
+    , http-types
+    , straylight-web-middleware
+    , text
+    , wai
+    , wai-extra   >=3.1 && <3.2
