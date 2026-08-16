@@ -1,4 +1,4 @@
-module Straylight.Cms.Store (
+module Orbital.Cms.Store (
     EditorialQuery (..),
     PublicationQuery (..),
     Store (..),
@@ -9,7 +9,7 @@ import Data.Aeson (Value)
 import Data.Text (Text)
 import Data.UUID (UUID)
 
-import Straylight.Cms.Domain (
+import Orbital.Cms.Domain (
     AppendRevision,
     CreateDocument,
     Defect,

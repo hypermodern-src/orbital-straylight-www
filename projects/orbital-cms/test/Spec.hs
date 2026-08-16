@@ -13,8 +13,8 @@ import Network.Wai (Application, Request (..), defaultRequest)
 import Network.Wai.Test (SRequest (SRequest), SResponse (..), runSession, setPath, srequest)
 import Test.Hspec (Spec, describe, hspec, it, shouldBe, shouldContain)
 
-import Straylight.Cms.Application (AppEnv (..), application)
-import Straylight.Cms.Domain (
+import Orbital.Cms.Application (AppEnv (..), application)
+import Orbital.Cms.Domain (
     AuthorInput (..),
     Defect (..),
     DocumentKind (..),
@@ -25,7 +25,7 @@ import Straylight.Cms.Domain (
     publicationDefects,
     transitionAllowed,
  )
-import Straylight.Cms.Store (Store (..))
+import Orbital.Cms.Store (Store (..))
 
 main :: IO ()
 main = hspec spec
@@ -48,14 +48,14 @@ spec = do
 
     describe "public delivery" $ do
         it "returns cache metadata and honors the exact revision ETag" $ do
-            first <- perform methodGet "/v1/publications/straylight/native-inference" [] "" publicApp
+            first <- perform methodGet "/v1/publications/orbital/native-inference" [] "" publicApp
             simpleStatus first `shouldBe` status200
             lookup "ETag" (simpleHeaders first) `shouldBe` Just quotedHash
 
             cached <-
                 perform
                     methodGet
-                    "/v1/publications/straylight/native-inference"
+                    "/v1/publications/orbital/native-inference"
                     [("If-None-Match", quotedHash)]
                     ""
                     publicApp
@@ -145,7 +145,7 @@ samplePublication :: Value
 samplePublication =
     object
         [ "id" .= documentId
-        , "channel" .= ("straylight" :: Text)
+        , "channel" .= ("orbital" :: Text)
         , "kind" .= ("paper" :: Text)
         , "slug" .= ("native-inference" :: Text)
         , "revision" .= (2 :: Int)
@@ -195,17 +195,17 @@ completePaper =
         { revisionTitle = "Native inference"
         , revisionSummary = "A systems paper."
         , revisionBody = "# Native inference"
-        , revisionAuthors = [AuthorInput "straylight-research" "Straylight Research" Nothing 0 "author" Nothing]
+        , revisionAuthors = [AuthorInput "orbital-research" "Orbital Research" Nothing 0 "author" Nothing]
         , revisionPaper = Just (PaperInput Nothing Nothing Nothing (Just "preprint") (Just "CC-BY-4.0") Nothing [] Nothing)
         }
 
 validCreate :: LBS.ByteString
 validCreate =
-    "{\"channel\":\"straylight\",\"kind\":\"paper\",\"slug\":\"native-inference\",\"revision\":{\"title\":\"\",\"summary\":\"\",\"body\":\"\",\"source_format\":\"markdown\",\"language\":\"en\",\"authors\":[],\"tags\":[]}}"
+    "{\"channel\":\"orbital\",\"kind\":\"paper\",\"slug\":\"native-inference\",\"revision\":{\"title\":\"\",\"summary\":\"\",\"body\":\"\",\"source_format\":\"markdown\",\"language\":\"en\",\"authors\":[],\"tags\":[]}}"
 
 invalidCreate :: LBS.ByteString
 invalidCreate =
-    "{\"channel\":\"straylight\",\"kind\":\"paper\",\"slug\":\"Not Fine\",\"revision\":{\"title\":\"\",\"summary\":\"\",\"body\":\"\",\"source_format\":\"markdown\",\"language\":\"en\",\"authors\":[],\"tags\":[]}}"
+    "{\"channel\":\"orbital\",\"kind\":\"paper\",\"slug\":\"Not Fine\",\"revision\":{\"title\":\"\",\"summary\":\"\",\"body\":\"\",\"source_format\":\"markdown\",\"language\":\"en\",\"authors\":[],\"tags\":[]}}"
 
 perform :: ByteString -> ByteString -> [(HeaderName, ByteString)] -> LBS.ByteString -> Application -> IO SResponse
 perform method path headers body app =

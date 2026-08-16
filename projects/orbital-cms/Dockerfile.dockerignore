@@ -1,0 +1,6 @@
+**
+!projects/
+!projects/orbital-cms/
+!projects/orbital-cms/**
+!projects/web-middleware/
+!projects/web-middleware/**

@@ -1,4 +1,4 @@
-module Straylight.Cms.Application (
+module Orbital.Cms.Application (
     AppEnv (..),
     application,
 ) where
@@ -42,7 +42,7 @@ import Network.Wai (
  )
 import Text.Read (readMaybe)
 
-import Straylight.Cms.Domain (
+import Orbital.Cms.Domain (
     Defect,
     DocumentKind,
     parseDocumentKind,
@@ -51,7 +51,7 @@ import Straylight.Cms.Domain (
     validateCreateDocument,
     validateTransitionDocument,
  )
-import Straylight.Cms.Store (EditorialQuery (..), PublicationQuery (..), Store (..), StoreError (..))
+import Orbital.Cms.Store (EditorialQuery (..), PublicationQuery (..), Store (..), StoreError (..))
 import Straylight.Web.Middleware qualified as Web
 
 data AppEnv = AppEnv
@@ -226,7 +226,7 @@ publicationQuery request = do
     offset <- optionalBoundedIntQuery "offset" 0 1000000 0 request
     pure
         PublicationQuery
-            { publicationChannel = fromMaybe "straylight" channel
+            { publicationChannel = fromMaybe "orbital" channel
             , publicationKind = kind
             , publicationLimit = limit
             , publicationOffset = offset
@@ -251,7 +251,7 @@ editorialQuery request = do
     offset <- optionalBoundedIntQuery "offset" 0 1000000 0 request
     pure
         EditorialQuery
-            { editorialChannel = fromMaybe "straylight" channel
+            { editorialChannel = fromMaybe "orbital" channel
             , editorialKind = kind
             , editorialState = state
             , editorialLimit = limit

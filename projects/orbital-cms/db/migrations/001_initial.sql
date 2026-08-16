@@ -609,7 +609,7 @@ end;
 $$;
 
 insert into cms.channels (slug, name)
-values ('straylight', 'Straylight');
+values ('orbital', 'Orbital');
 
 insert into cms.schema_migrations (version) values (1);
 

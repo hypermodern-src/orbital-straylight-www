@@ -1,5 +1,5 @@
 {
-  description = "Straylight publishing core";
+  description = "Orbital publishing core";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -15,23 +15,53 @@
         "aarch64-linux"
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
+      pkgsFor = system: import nixpkgs { inherit system; };
       packageSetFor =
         system:
         let
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = pkgsFor system;
         in
         pkgs.haskellPackages.override {
           overrides = hself: _hsuper: {
             straylight-web-middleware = hself.callCabal2nix "straylight-web-middleware" web-middleware { };
-            straylight-cms = hself.callCabal2nix "straylight-cms" ./. { };
+            orbital-cms = hself.callCabal2nix "orbital-cms" ./. { };
           };
         };
-      packageFor = system: (packageSetFor system).straylight-cms;
+      fullPackageFor = system: (packageSetFor system).orbital-cms;
+      packageFor =
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        pkgs.haskell.lib.justStaticExecutables (fullPackageFor system);
+      migrationFor =
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        pkgs.writeShellApplication {
+          name = "orbital-cms-migrate";
+          runtimeInputs = [ pkgs.postgresql_17 ];
+          text = ''
+            : "''${DATABASE_URL:?DATABASE_URL is required}"
+            schema_exists="$(psql -X -A -t "$DATABASE_URL" -c "select to_regclass('cms.schema_migrations') is not null")"
+            if [[ "$schema_exists" == "t" ]]; then
+              migration_exists="$(psql -X -A -t "$DATABASE_URL" -c "select exists(select 1 from cms.schema_migrations where version = 1)")"
+              if [[ "$migration_exists" == "t" ]]; then
+                printf '%s\n' 'orbital-cms: schema is current'
+                exit 0
+              fi
+            fi
+            psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/001_initial.sql}
+          '';
+        };
     in
     {
       packages = forAllSystems (system: {
         default = packageFor system;
         cms = packageFor system;
+        migrate = migrationFor system;
+        cacert = (pkgsFor system).cacert;
       });
 
       checks = forAllSystems (
@@ -67,40 +97,18 @@
         }
       );
 
-      apps = forAllSystems (
-        system:
-        let
-          pkgs = import nixpkgs { inherit system; };
-          migrate = pkgs.writeShellApplication {
-            name = "straylight-cms-migrate";
-            runtimeInputs = [ pkgs.postgresql_17 ];
-            text = ''
-              : "''${DATABASE_URL:?DATABASE_URL is required}"
-              schema_exists="$(psql -X -A -t "$DATABASE_URL" -c "select to_regclass('cms.schema_migrations') is not null")"
-              if [[ "$schema_exists" == "t" ]]; then
-                migration_exists="$(psql -X -A -t "$DATABASE_URL" -c "select exists(select 1 from cms.schema_migrations where version = 1)")"
-                if [[ "$migration_exists" == "t" ]]; then
-                  printf '%s\n' 'straylight-cms: schema is current'
-                  exit 0
-                fi
-              fi
-              psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/001_initial.sql}
-            '';
-          };
-        in
-        {
-          default = {
-            type = "app";
-            program = "${packageFor system}/bin/straylight-cms";
-            meta.description = "Run the Straylight publishing service";
-          };
-          migrate = {
-            type = "app";
-            program = "${migrate}/bin/straylight-cms-migrate";
-            meta.description = "Apply the Straylight CMS PostgreSQL schema";
-          };
-        }
-      );
+      apps = forAllSystems (system: {
+        default = {
+          type = "app";
+          program = "${packageFor system}/bin/orbital-cms";
+          meta.description = "Run the Orbital publishing service";
+        };
+        migrate = {
+          type = "app";
+          program = "${migrationFor system}/bin/orbital-cms-migrate";
+          meta.description = "Apply the Orbital CMS PostgreSQL schema";
+        };
+      });
 
       devShells = forAllSystems (
         system:
@@ -110,7 +118,7 @@
         in
         {
           default = haskellPackages.shellFor {
-            packages = _: [ haskellPackages.straylight-cms ];
+            packages = _: [ haskellPackages.orbital-cms ];
             withHoogle = false;
             nativeBuildInputs = [
               pkgs.cabal-install

@@ -1,0 +1,35 @@
+app = "orbital-cms"
+primary_region = "iad"
+kill_signal = "SIGTERM"
+kill_timeout = 30
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  release_command = "/bin/orbital-cms-migrate"
+  strategy = "rolling"
+
+[env]
+  HOST = "*6"
+  PORT = "8080"
+  DATABASE_POOL_SIZE = "8"
+  SHUTDOWN_TIMEOUT_SECONDS = "30"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "5s"
+    grace_period = "20s"
+    method = "GET"
+    path = "/readyz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

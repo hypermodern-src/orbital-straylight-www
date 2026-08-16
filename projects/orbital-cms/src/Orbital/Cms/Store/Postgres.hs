@@ -1,11 +1,11 @@
 {- |
-Module      : Straylight.Cms.Store.Postgres
+Module      : Orbital.Cms.Store.Postgres
 Description : Bounded PostgreSQL store with transaction-local guardrails.
 
 The small pool boundary is adapted from Hypermodern LLC house code in Looking
 Local. CMS-specific queries and transaction functions are new Straylight work.
 -}
-module Straylight.Cms.Store.Postgres (
+module Orbital.Cms.Store.Postgres (
     PostgresStore,
     closePostgresStore,
     newPostgresStore,
@@ -35,7 +35,7 @@ import Database.PostgreSQL.Simple (
     withTransaction,
  )
 
-import Straylight.Cms.Domain (
+import Orbital.Cms.Domain (
     AppendRevision (..),
     CreateDocument (..),
     Defect (..),
@@ -45,7 +45,7 @@ import Straylight.Cms.Domain (
     revisionValue,
     workflowStateText,
  )
-import Straylight.Cms.Store (EditorialQuery (..), PublicationQuery (..), Store (..), StoreError (..))
+import Orbital.Cms.Store (EditorialQuery (..), PublicationQuery (..), Store (..), StoreError (..))
 
 newtype PostgresStore = PostgresStore (Pool Connection)
 

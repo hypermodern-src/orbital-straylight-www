@@ -2,7 +2,7 @@
 
 ## Boundary
 
-`cms` is an independent publishing service. It consumes the released
+`orbital-cms` is an independent publishing service. It consumes the released
 `straylight-web-middleware` package through a locked forge input and does not
 import sibling source. It can be extracted from the monorepo without changing
 its build.

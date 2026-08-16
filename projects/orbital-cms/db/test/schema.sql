@@ -9,7 +9,7 @@ declare
   v_failed boolean := false;
 begin
   v_draft := cms.create_document(
-    'straylight',
+    'orbital',
     'paper',
     'native-inference',
     'schema-test',
@@ -50,11 +50,11 @@ begin
       "source_format": "markdown",
       "language": "en",
       "authors": [{
-        "slug": "straylight-research",
-        "display_name": "Straylight Research",
+        "slug": "orbital-research",
+        "display_name": "Orbital Research",
         "position": 0,
         "role": "author",
-        "affiliation": "Straylight Software"
+        "affiliation": "Orbital"
       }],
       "tags": ["inference", "systems"],
       "paper": {
@@ -92,8 +92,8 @@ begin
       "source_format": "markdown",
       "language": "en",
       "authors": [{
-        "slug": "straylight-research",
-        "display_name": "Straylight Research Team",
+        "slug": "orbital-research",
+        "display_name": "Orbital Research Team",
         "position": 0,
         "role": "author"
       }],
@@ -113,7 +113,7 @@ begin
     raise exception 'published revision changed under a new draft';
   end if;
 
-  if cms.document_json(v_id, 2, false)->'authors'->0->>'display_name' <> 'Straylight Research' then
+  if cms.document_json(v_id, 2, false)->'authors'->0->>'display_name' <> 'Orbital Research' then
     raise exception 'published author snapshot changed under a new revision';
   end if;
 

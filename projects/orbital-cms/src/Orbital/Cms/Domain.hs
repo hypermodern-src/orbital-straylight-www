@@ -1,4 +1,4 @@
-module Straylight.Cms.Domain (
+module Orbital.Cms.Domain (
     AppendRevision (..),
     AuthorInput (..),
     CreateDocument (..),

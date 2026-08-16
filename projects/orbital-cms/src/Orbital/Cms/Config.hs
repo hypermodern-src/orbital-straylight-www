@@ -1,4 +1,4 @@
-module Straylight.Cms.Config (
+module Orbital.Cms.Config (
     Config (..),
     ConfigError (..),
     loadConfig,
@@ -28,8 +28,8 @@ newtype ConfigError = ConfigError Text
 loadConfig :: IO (Either [ConfigError] Config)
 loadConfig = do
     databaseUrl <- lookupEnv "DATABASE_URL"
-    editorToken <- lookupEnv "STRAYLIGHT_CMS_EDITOR_TOKEN"
-    editorActor <- lookupEnv "STRAYLIGHT_CMS_EDITOR_ID"
+    editorToken <- lookupEnv "ORBITAL_CMS_EDITOR_TOKEN"
+    editorActor <- lookupEnv "ORBITAL_CMS_EDITOR_ID"
     host <- lookupEnv "HOST"
     port <- lookupEnv "PORT"
     shutdownSeconds <- lookupEnv "SHUTDOWN_TIMEOUT_SECONDS"
@@ -37,7 +37,7 @@ loadConfig = do
     pure $ do
         parsedDatabaseUrl <- required "DATABASE_URL" databaseUrl
         parsedToken <- validateToken editorToken
-        parsedActor <- nonEmpty "STRAYLIGHT_CMS_EDITOR_ID" (maybe "bootstrap" id editorActor)
+        parsedActor <- nonEmpty "ORBITAL_CMS_EDITOR_ID" (maybe "bootstrap" id editorActor)
         parsedPort <- boundedInt "PORT" 1 65535 8090 port
         parsedShutdown <- boundedInt "SHUTDOWN_TIMEOUT_SECONDS" 1 300 30 shutdownSeconds
         parsedPoolSize <- boundedInt "DATABASE_POOL_SIZE" 1 64 8 poolSize
@@ -66,7 +66,7 @@ validateToken :: Maybe String -> Either [ConfigError] (Maybe String)
 validateToken Nothing = Right Nothing
 validateToken (Just token)
     | ByteString.length (ByteString.pack token) < 32 =
-        Left [ConfigError "STRAYLIGHT_CMS_EDITOR_TOKEN must contain at least 32 bytes"]
+        Left [ConfigError "ORBITAL_CMS_EDITOR_TOKEN must contain at least 32 bytes"]
     | otherwise = Right (Just token)
 
 boundedInt :: Text -> Int -> Int -> Int -> Maybe String -> Either [ConfigError] Int

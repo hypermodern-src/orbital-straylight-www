@@ -14,10 +14,10 @@ import System.Exit (exitFailure)
 import System.IO (stderr)
 import System.Posix.Signals (Handler (Catch), installHandler, sigINT, sigTERM)
 
-import Straylight.Cms.Application (AppEnv (..), application)
-import Straylight.Cms.Config (Config (..), ConfigError (..), loadConfig)
-import Straylight.Cms.Store (StoreError (..))
-import Straylight.Cms.Store.Postgres (
+import Orbital.Cms.Application (AppEnv (..), application)
+import Orbital.Cms.Config (Config (..), ConfigError (..), loadConfig)
+import Orbital.Cms.Store (StoreError (..))
+import Orbital.Cms.Store.Postgres (
     PostgresStore,
     closePostgresStore,
     newPostgresStore,
@@ -67,7 +67,7 @@ settings :: Web.Runtime -> Config -> Warp.Settings
 settings runtime config =
     Warp.setPort (configPort config)
         . Warp.setHost (fromString (configHost config))
-        . Warp.setServerName "straylight"
+        . Warp.setServerName "orbital-cms"
         . Warp.setGracefulShutdownTimeout (Just (configShutdownSeconds config))
         . Warp.setInstallShutdownHandler (installSignalHandlers runtime)
         . Warp.setBeforeMainLoop (Web.markReady runtime >> reportListening config)

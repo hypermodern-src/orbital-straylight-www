@@ -31,8 +31,8 @@ check_web_middleware() {
   nix flake check --accept-flake-config "$repo_root/projects/web-middleware"
 }
 
-check_cms() {
-  nix flake check --accept-flake-config "$repo_root/projects/cms"
+check_orbital_cms() {
+  nix flake check --accept-flake-config "$repo_root/projects/orbital-cms"
 }
 
 check_one() {
@@ -43,7 +43,7 @@ check_one() {
     straylight-web) check_straylight_web ;;
     orbital-web-jw) check_orbital_web_jw ;;
     web-middleware) check_web_middleware ;;
-    cms) check_cms ;;
+    orbital-cms) check_orbital_cms ;;
     *)
       printf 'unknown project: %s\n' "$1" >&2
       exit 2
@@ -62,5 +62,5 @@ else
   check_one straylight-web
   check_one orbital-web-jw
   check_one web-middleware
-  check_one cms
+  check_one orbital-cms
 fi

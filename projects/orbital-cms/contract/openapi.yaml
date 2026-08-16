@@ -1,12 +1,12 @@
 openapi: 3.1.0
 info:
-  title: Straylight Publishing API
+  title: Orbital Publishing API
   version: 0.1.0
   description: >-
     Immutable editorial revisions and public delivery for articles and research
     papers. Public responses contain canonical source, not executable HTML.
 servers:
-  - url: https://cms.straylight.ai
+  - url: https://orbital-cms.fly.dev
 paths:
   /healthz:
     get:
@@ -30,7 +30,7 @@ paths:
           in: query
           schema:
             type: string
-            default: straylight
+            default: orbital
         - name: kind
           in: query
           schema:
@@ -95,7 +95,7 @@ paths:
           in: query
           schema:
             type: string
-            default: straylight
+            default: orbital
         - name: kind
           in: query
           schema:
