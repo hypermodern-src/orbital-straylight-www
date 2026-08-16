@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUILD · The typed build system, and the platform behind it · Orbital</title>
+<meta name="description" content="ORBITAL BUILD is free to use. An Orbital account adds the platform: team-shared verified caching, scale, retention, and guarantees. Start free, upgrade on your own numbers.">
+<link rel="canonical" href="https://orbital.foo/build.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Orbital">
+<meta property="og:title" content="BUILD · The typed build system, and the platform behind it · Orbital">
+<meta property="og:description" content="ORBITAL BUILD is free to use. An Orbital account adds the platform: team-shared verified caching, scale, retention, and guarantees. Start free, upgrade on your own numbers.">
+<meta property="og:url" content="https://orbital.foo/build.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preload" href="fonts/CormorantGaramond-normal-300-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/IBMPlexMono-normal-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="halogen-orbital/orbital.css">
+<link rel="stylesheet" href="waitlist.css">
+<style>
+.phero{align-items:start}
+.phero-head{grid-column:1/-1;padding-bottom:.4rem}
+.phero-head h1{max-width:32ch;text-wrap:balance}
+.phero .hero-note{margin-top:.8rem;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-f)}
+.hero-visual{display:flex;flex-direction:column;gap:1rem}
+.hero-visual .clone{max-width:none}
+.clone-body[hidden]{display:none}
+.claim-slot{border:1px dashed var(--border);border-left:3px solid var(--accent-d);border-radius:var(--radius);background:var(--gf);padding:1rem 1.2rem}
+.claim-slot .ck{font-size:.56rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-d);margin-bottom:.4rem}
+.claim-slot p{font-size:.76rem;color:var(--ink-f);line-height:1.7}
+/* github strip */
+.gh-strip{display:flex;align-items:baseline;gap:1.2rem;padding:.9rem 1.2rem;border:1px solid var(--ge);border-left:3px solid var(--accent);border-radius:var(--radius);background:var(--gf);flex-wrap:wrap}
+.gh-strip .gk{font-size:.58rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+.gh-strip p{font-size:.76rem;color:var(--ink-m);line-height:1.65;flex:1;min-width:240px;margin:0}
+/* premium benefit cards */
+.plusgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+@media(max-width:820px){.plusgrid{grid-template-columns:1fr}}
+.plus{display:flex;flex-direction:column;gap:.5rem;padding:1.5rem 1.6rem;border-radius:var(--radius-lg)}
+.plus .pk{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+.plus h3{font-family:var(--serif);font-weight:500;font-size:1.3rem;color:var(--ink)}
+.plus .tier-tag{font-size:.52rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-d);border:1px solid hsla(var(--hue),40%,58%,.4);border-radius:1px;padding:.18rem .45rem;white-space:nowrap}
+.plus p{font-size:.8rem;color:var(--ink-m);line-height:1.75}
+.plus .pfoot{margin-top:auto;padding-top:.8rem;font-size:.62rem;letter-spacing:.06em;color:var(--ink-f)}
+.plus .pfoot b{color:var(--ink-m)}
+/* quickstart steps */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+@media(max-width:880px){.steps{grid-template-columns:1fr}}
+.step{display:flex;flex-direction:column;gap:.7rem;padding:1.4rem 1.5rem;border-radius:var(--radius-lg)}
+.step .sn{font-family:var(--serif);font-size:1.7rem;font-weight:300;color:hsla(var(--hue),15%,72%,.6);line-height:1}
+.step h3{font-family:var(--serif);font-weight:500;font-size:1.2rem;color:var(--ink)}
+.step p{font-size:.78rem;color:var(--ink-m);line-height:1.7}
+.step .codeblk{font-size:.7rem;padding:.8rem .9rem}
+.qs-note{margin-top:1rem;font-size:.66rem;color:var(--ink-f);letter-spacing:.03em}
+/* trust row */
+.trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+@media(max-width:880px){.trust{grid-template-columns:repeat(2,1fr)}}
+.trust a{display:flex;flex-direction:column;gap:.35rem;padding:1.1rem 1.2rem;border-radius:var(--radius-lg)}
+.trust .tk{font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
+.trust .td{font-size:.7rem;color:var(--ink-f);line-height:1.6}
+</style>
+</head>
+<body class="grain" data-ambient>
+
+<nav class="bar">
+<span class="brand"><span class="mk"><svg viewBox="0 0 96 66" fill="currentColor"><path d="m 18,18 v 20 l -17.32,10 10,17.32 h 40 l 10,-17.32 17.32,10 17.32,-10 -10,-17.32 h -20 v -20 L 48,.68 l -10,17.32 z"/></svg></span><span class="t">Orbital</span></span>
+<div class="topnav">
+<a href="index.html">Overview</a>
+<a href="cache.html">Cache</a>
+<a href="build.html" class="here">Build</a>
+<a href="pricing.html">Pricing</a>
+<a href="verification.html">Verification</a>
+<a href="about.html">About</a>
+</div>
+</nav>
+
+<main class="wrap narrow">
+
+<header class="phero">
+<div class="phero-head">
+<div class="eyebrow" data-reveal><span class="ns">ORBITAL</span><span class="sep">//</span><span class="nm">build</span>&nbsp;&nbsp;<span class="badge2 is-accent" data-orbital="badge"><span class="badge2-dot"></span>public release Sep 2026, target</span></div>
+<h1 data-reveal>You have the build system. This is the platform behind it.</h1>
+</div>
+<div>
+<p class="sub" data-reveal style="margin-top:0"><b>BUILD</b>, the typed build system, is free to use and always will be. An Orbital account connects it to the platform: verified artifacts your whole team reuses, capacity that grows past one machine, and guarantees when the stakes ask for them.</p>
+<form class="ea-form" id="early-access" data-waitlist="build" data-reveal>
+<div class="ea-fields">
+<input type="email" name="email" autocomplete="email" inputmode="email" required placeholder="you@company.com" aria-label="Work email">
+<select name="builds-with" autocomplete="off" aria-label="What do you build with">
+<option value="" disabled selected>What do you build with? (optional)</option>
+<option>Nix</option>
+<option>Bazel or Buck2</option>
+<option>GitHub Actions</option>
+<option>Something else</option>
+<option>Compliance or safety-critical work</option>
+</select>
+</div>
+<div class="ea-row"><button type="submit" class="btn primary">Get early access</button><a class="link-cta" href="pricing.html">See pricing</a></div>
+<p class="ea-hint">Referrals unlock launch rewards, including access ahead of the release.</p>
+<p class="ea-msg" hidden>That did not go through. Check the address and try again.</p>
+</form>
+<div class="hero-note" data-reveal>Launches September 2026, target. Every feature on every tier; you pay for capacity, never capability.</div>
+<div class="ea-count" data-waitlist-count hidden data-reveal><b></b> signups on the early-access list</div>
+<div class="meta" data-reveal><span><b>Seats</b> free</span><span><b>SSO</b> included on every tier</span><span><b>Docs</b> one click away</span></div>
+</div>
+<div class="hero-visual" data-reveal>
+<div class="clone" data-orbital="clone">
+<div class="clone-h"><span class="lbl">Connect your account, one line</span>
+<div class="clone-tabs"><button class="on" data-pane="cli">cli</button><button data-pane="ci">ci</button></div></div>
+<!-- TODO(team): confirm exact commands and CI syntax against docs before launch -->
+<div class="clone-body" data-pane-for="cli"><code>orbital login</code><button class="copybtn">Copy</button></div>
+<div class="clone-body" data-pane-for="ci" hidden><code>run: orbital build</code><button class="copybtn">Copy</button></div>
+</div>
+<div class="claim-slot">
+<div class="ck">Measured claim &middot; pending</div>
+<p>This slot ships with one measured performance figure and a link to the methodology behind it. Benchmarks are being finalized for the public release; we do not publish numbers we have not measured.</p>
+<!-- TODO(team): replace with the launch measured claim + basis link (blocked per handoff) -->
+</div>
+</div>
+</header>
+
+<div class="gh-strip" data-reveal>
+<span class="gk">Coming from GitHub?</span>
+<!-- TODO(team): "free to use" wording pending license sign-off (Q&A 1.5); link the repo when public -->
+<p>Everything in the repository stays free. Nothing on this page takes features away from the tool you already run; an account adds the hosted layer around it.</p>
+</div>
+
+<!-- 01 premium benefits -->
+<div class="sh" data-reveal><span class="n">01</span><h2>What an account adds</h2></div>
+<div class="plusgrid" data-reveal-stagger="70">
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>Your team stops rebuilding each other's work</h3><span class="tier-tag">free and up</span></div>
+<p>Connect BUILD to <b>CACHE</b>, verified binary storage, and an artifact any teammate or CI job has built, nobody builds again: everyone else pulls it in seconds, re-verified on every fetch so nothing tampered with ever enters a build. This is the speedup the tool alone cannot give you; it only exists with an account.</p>
+<div class="pfoot"><b>Free tier:</b> usage allowance TBD &middot; paid tiers raise it</div>
+</div>
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>Capacity that grows with you</h3><span class="tier-tag">team</span></div>
+<p>The free tier is sized for individuals and small projects. Paid tiers raise throughput and concurrency so busy repositories never queue behind their own success: more simultaneous builds, more transfer, no feature differences.</p>
+<!-- TODO(team): throughput/concurrency allowances TBD (pricing blocked) -->
+<div class="pfoot"><b>Allowances:</b> TBD, publish before general availability</div>
+</div>
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>History that stays around</h3><span class="tier-tag">team</span></div>
+<p>Paid tiers keep artifacts and build history longer. When a release from months ago needs rebuilding, auditing, or bisecting, the evidence is still there instead of aged out.</p>
+<!-- TODO(team): retention windows TBD (pricing blocked) -->
+<div class="pfoot"><b>Retention windows:</b> TBD, publish before general availability</div>
+</div>
+<div class="glass plus" data-reveal>
+<div class="pk"><h3>Guarantees in writing</h3><span class="tier-tag">enterprise</span></div>
+<p>When builds are on the critical path of your business, Enterprise adds service-level agreements, priority support, and enterprise controls, priced to your footprint rather than a rate card.</p>
+<div class="pfoot"><b>Also:</b> the <a href="verification.html" style="color:var(--accent)">verification path</a> for regulated and safety-critical teams</div>
+</div>
+</div>
+
+<!-- 02 what is never charged for -->
+<div class="sh" data-reveal><span class="n">02</span><h2>What we never charge for</h2></div>
+<div class="metalist" data-reveal>
+<div class="metarow"><span class="my">The tool</span><span class="mt"><b>BUILD itself.</b> The typed build system you cloned is complete. There is no crippled community edition; the paid product is the platform around it, not a better binary.</span></div>
+<div class="metarow"><span class="my">Features</span><span class="mt"><b>Every feature, every tier.</b> Tiers change how much account you get: throughput, retention, guarantees. Never which capabilities you may use.</span></div>
+<div class="metarow"><span class="my">Seats</span><span class="mt"><b>Unlimited, free.</b> Add your whole team on day one; you pay for what the account uses, not who logs in.</span></div>
+<div class="metarow"><span class="my">Security</span><span class="mt"><b>No SSO tax.</b> Single sign-on and audit logs are included at every tier, including Free. Security basics are not an upsell.</span></div>
+</div>
+
+<!-- 03 upgrade on your numbers -->
+<div class="sh" data-reveal><span class="n">03</span><h2>Upgrade on your own numbers</h2></div>
+<div class="grid-cards3" data-reveal-stagger="70">
+<div class="glass card3 feat" data-reveal>
+<div class="fk">a</div><h3>Receipts, not pressure</h3>
+<p>When you approach the free allowance, Orbital shows what it measured for your account that month: hours of rebuilding avoided, what that usage would cost on each tier. Measured from your builds, never estimated.</p>
+</div>
+<div class="glass card3 feat" data-reveal>
+<div class="fk">b</div><h3>Advice from your build graph</h3>
+<p>BUILD sees which artifacts you rebuild that you could be fetching. When caching or more capacity would actually save you time, it says so inside the product, with your own figures attached.</p>
+</div>
+<div class="glass card3 feat" data-reveal>
+<div class="fk">c</div><h3>Nothing degrades silently</h3>
+<p>Hitting a limit never corrupts or slows a build behind your back. You see the receipt, you decide. Downgrading is as easy as upgrading, and your tool keeps working either way.</p>
+</div>
+</div>
+
+<!-- 04 benchmarks -->
+<div class="sh" data-reveal><span class="n">04</span><h2>Benchmarks</h2></div>
+<div class="statband" data-reveal>
+<!-- TODO(team): all four figures blocked pending measured benchmarks (handoff: no unmeasured numbers) -->
+<div class="st"><span class="v">TBD</span><span class="k">Clean build, reference repo</span></div>
+<div class="st"><span class="v">TBD</span><span class="k">Incremental rebuild</span></div>
+<div class="st"><span class="v">TBD</span><span class="k">Check time</span></div>
+<div class="st"><span class="v">TBD</span><span class="k">Cache hit rate, with CACHE</span></div>
+</div>
+<div class="metalist" data-reveal style="margin-top:1.2rem">
+<div class="metarow"><span class="my">Status</span><span class="mt">Figures publish with the September release. Each will be labeled <b>measured</b> and link to its basis.</span></div>
+<div class="metarow"><span class="my">Method</span><span class="mt">Published, reproducible methodology: pinned hardware, pinned workloads, raw logs, and the harness to rerun the whole suite yourself.</span></div>
+<!-- TODO(team): link methodology repo when public -->
+</div>
+
+<!-- 05 quickstart -->
+<div class="sh" data-reveal><span class="n">05</span><h2>From clone to connected</h2></div>
+<div class="steps" data-reveal-stagger="70">
+<div class="glass step" data-reveal>
+<div class="sn">1</div><h3>Create an account</h3>
+<p>Free, no credit card. One Orbital account covers BUILD, CACHE, and every Orbital product that follows.</p>
+<!-- TODO(team): real signup URL -->
+<div class="codeblk" data-lang="shell"><code>orbital login</code></div>
+</div>
+<div class="glass step" data-reveal>
+<div class="sn">2</div><h3>Connect your repository</h3>
+<p>Point the tool you already run at your account. Existing build descriptions keep working unchanged.</p>
+<div class="codeblk" data-lang="shell"><code>orbital build init</code></div>
+</div>
+<div class="glass step" data-reveal>
+<div class="sn">3</div><h3>Build once, as a team</h3>
+<p>From the next build on, verified artifacts are shared: what any teammate or CI job built, everyone else fetches.</p>
+<div class="codeblk" data-lang="shell"><code>orbital build</code></div>
+</div>
+</div>
+<p class="qs-note" data-reveal>Commands shown are illustrative until the docs publish with the release; the final quickstart ships alongside them.
+<!-- TODO(team): replace with exact commands from docs; keep the under-5-minutes path -->
+</p>
+
+<!-- 06 trust -->
+<div class="sh" data-reveal><span class="n">06</span><h2>Look for yourself</h2></div>
+<div class="trust" data-reveal-stagger="60">
+<!-- TODO(team): real URLs for all four -->
+<a class="glass orbital-lift" data-reveal href="https://github.com/sensenet-ai" target="_blank" rel="noopener"><span class="tk">GitHub</span><span class="td">The source you came from, and the issue tracker.</span></a>
+<a class="glass orbital-lift" data-reveal href="#"><span class="tk">Changelog</span><span class="td">Every release, public and dated.</span></a>
+<a class="glass orbital-lift" data-reveal href="#"><span class="tk">Status</span><span class="td">Live service status and incident history.</span></a>
+<a class="glass orbital-lift" data-reveal href="#"><span class="tk">Licenses</span><span class="td">What is open and under which license.</span></a>
+</div>
+
+<div class="ctaband" data-reveal>
+<h2>Keep the tool. Add the platform.</h2>
+<p>Shipping September 2026, target. Join the early-access list; upgrade later only when your own receipts say it pays.</p>
+<div class="cta">
+<a class="btn primary" href="#early-access">Get early access</a>
+<a class="btn" href="pricing.html">Compare tiers</a>
+</div>
+</div>
+
+</main>
+
+<div class="wrap"><div class="foot">
+<span>ORBITAL &copy; 2026</span>
+<span><a href="about.html">About</a> &middot; <a href="https://github.com/sensenet-ai" target="_blank" rel="noopener">GitHub</a> &middot; <a href="#">Changelog</a> &middot; <a href="#">Status</a> &middot; <a href="#">Licenses</a> &middot; <a href="pricing.html">Pricing</a></span>
+</div></div>
+
+<script src="halogen-orbital/orbital.js"></script>
+<script src="waitlist.js"></script>
+<script>
+(function(){
+  document.querySelectorAll('[data-orbital="clone"]').forEach(function(cl){
+    var tabs=cl.querySelectorAll('.clone-tabs button');
+    tabs.forEach(function(b){
+      b.addEventListener('click',function(){
+        tabs.forEach(function(x){x.classList.toggle('on',x===b);});
+        cl.querySelectorAll('[data-pane-for]').forEach(function(p){p.hidden=p.getAttribute('data-pane-for')!==b.dataset.pane;});
+      });
+    });
+    cl.querySelectorAll('.copybtn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var code=btn.parentElement.querySelector('code').textContent;
+        navigator.clipboard.writeText(code).then(function(){btn.dataset.state='copied';btn.textContent='Copied';},
+          function(){btn.dataset.state='error';});
+        setTimeout(function(){delete btn.dataset.state;btn.textContent='Copy';},1600);
+      });
+    });
+  });
+})();
+</script>
+<script src="halogen-orbital/orbital-theme.js"></script>
+</body>
+</html>
