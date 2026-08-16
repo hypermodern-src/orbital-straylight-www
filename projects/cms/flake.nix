@@ -1,0 +1,127 @@
+{
+  description = "Straylight publishing core";
+
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    web-middleware.url = "git+ssh://git@git.s4.gl/straylight/www.git?ref=main&dir=projects/web-middleware";
+    web-middleware.inputs.nixpkgs.follows = "nixpkgs";
+  };
+
+  outputs =
+    { nixpkgs, web-middleware, ... }:
+    let
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+      packageSetFor =
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        pkgs.haskellPackages.override {
+          overrides = hself: _hsuper: {
+            straylight-web-middleware = hself.callCabal2nix "straylight-web-middleware" web-middleware { };
+            straylight-cms = hself.callCabal2nix "straylight-cms" ./. { };
+          };
+        };
+      packageFor = system: (packageSetFor system).straylight-cms;
+    in
+    {
+      packages = forAllSystems (system: {
+        default = packageFor system;
+        cms = packageFor system;
+      });
+
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          package = packageFor system;
+          contract = pkgs.runCommand "cms-contract" { nativeBuildInputs = [ pkgs.yq-go ]; } ''
+            yq eval '.' ${./contract/openapi.yaml} >/dev/null
+            touch $out
+          '';
+          schema = pkgs.runCommand "cms-schema" { nativeBuildInputs = [ pkgs.postgresql_17 ]; } ''
+            export CMS_PGDATA="$TMPDIR/postgres"
+            export CMS_SOCKET="$TMPDIR/socket"
+            mkdir -p "$CMS_SOCKET"
+            initdb --auth=trust --no-locale --encoding=UTF8 -D "$CMS_PGDATA" >/dev/null
+            pg_ctl -D "$CMS_PGDATA" -o "-k $CMS_SOCKET" -w start >/dev/null
+            trap 'pg_ctl -D "$CMS_PGDATA" -m immediate stop >/dev/null' EXIT
+            createdb -h "$CMS_SOCKET" cms_test
+            psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/migrations/001_initial.sql} >/dev/null
+            psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/test/schema.sql} >/dev/null
+            touch $out
+          '';
+          format = pkgs.runCommand "cms-format" { nativeBuildInputs = [ pkgs.haskellPackages.fourmolu ]; } ''
+            cp -R ${./.} source
+            chmod -R u+w source
+            cd source
+            find app src test -name '*.hs' -print0 | xargs -0 fourmolu --mode check
+            touch $out
+          '';
+        }
+      );
+
+      apps = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          migrate = pkgs.writeShellApplication {
+            name = "straylight-cms-migrate";
+            runtimeInputs = [ pkgs.postgresql_17 ];
+            text = ''
+              : "''${DATABASE_URL:?DATABASE_URL is required}"
+              schema_exists="$(psql -X -A -t "$DATABASE_URL" -c "select to_regclass('cms.schema_migrations') is not null")"
+              if [[ "$schema_exists" == "t" ]]; then
+                migration_exists="$(psql -X -A -t "$DATABASE_URL" -c "select exists(select 1 from cms.schema_migrations where version = 1)")"
+                if [[ "$migration_exists" == "t" ]]; then
+                  printf '%s\n' 'straylight-cms: schema is current'
+                  exit 0
+                fi
+              fi
+              psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/001_initial.sql}
+            '';
+          };
+        in
+        {
+          default = {
+            type = "app";
+            program = "${packageFor system}/bin/straylight-cms";
+            meta.description = "Run the Straylight publishing service";
+          };
+          migrate = {
+            type = "app";
+            program = "${migrate}/bin/straylight-cms-migrate";
+            meta.description = "Apply the Straylight CMS PostgreSQL schema";
+          };
+        }
+      );
+
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          haskellPackages = packageSetFor system;
+        in
+        {
+          default = haskellPackages.shellFor {
+            packages = _: [ haskellPackages.straylight-cms ];
+            withHoogle = false;
+            nativeBuildInputs = [
+              pkgs.cabal-install
+              pkgs.postgresql_17
+              pkgs.haskellPackages.fourmolu
+              pkgs.haskell-language-server
+            ];
+          };
+        }
+      );
+
+      formatter = forAllSystems (system: (import nixpkgs { inherit system; }).nixfmt-tree);
+    };
+}

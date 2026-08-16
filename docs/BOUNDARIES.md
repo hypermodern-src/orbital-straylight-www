@@ -25,3 +25,7 @@ git filter-repo \
 Do not add a direct sibling dependency for convenience. If a boundary is not
 stable enough for a package, keep the implementation local until it is.
 
+`projects/cms` demonstrates a released internal dependency: its flake locks the
+forge-hosted `projects/web-middleware` subdirectory to an exact Git revision.
+That preserves independent builds and makes a later repository split a URL
+change rather than a source-tree surgery.

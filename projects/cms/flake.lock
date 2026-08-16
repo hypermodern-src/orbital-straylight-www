@@ -1,0 +1,51 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1786862985,
+        "narHash": "sha256-FBJRXmbGXiSUDvYEbfLYRkckayyZ6SK1UEqhCrIZ2Cs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e5bdc4a41d4c072fe1e3787eaa0320a384741d44",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "web-middleware": "web-middleware"
+      }
+    },
+    "web-middleware": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "projects/web-middleware",
+        "lastModified": 1786917854,
+        "narHash": "sha256-UxrY4Nnlmz25Zx3eFQv7syoMHON83u+4mgJOCWC4Va8=",
+        "ref": "main",
+        "rev": "8599b82985c6123686ee499e65a99cfd0eb783eb",
+        "revCount": 470,
+        "type": "git",
+        "url": "ssh://git@git.s4.gl/straylight/www.git"
+      },
+      "original": {
+        "dir": "projects/web-middleware",
+        "ref": "main",
+        "type": "git",
+        "url": "ssh://git@git.s4.gl/straylight/www.git"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

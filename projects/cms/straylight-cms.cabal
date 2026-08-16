@@ -1,0 +1,100 @@
+cabal-version: 3.0
+name:          straylight-cms
+version:       0.1.0.0
+synopsis:      Straylight publishing core for articles and papers
+description:
+  A PostgreSQL-backed editorial workflow and public delivery API. Revisions are
+  immutable, publication is explicitly gated, and rendered sites remain
+  independent consumers of a language-neutral contract.
+license:       BSD-3-Clause
+license-file:  LICENSE
+author:        Straylight Software
+maintainer:    dev@straylight.ai
+copyright:
+  2026 Straylight Software
+  Portions adapted from Hypermodern LLC house code; see NOTICE.md
+category:      Web
+build-type:    Simple
+
+extra-doc-files:
+  README.md
+  NOTICE.md
+  docs/ARCHITECTURE.md
+  docs/EDITORIAL-MODEL.md
+  docs/PROVENANCE.md
+  contract/openapi.yaml
+  db/migrations/001_initial.sql
+
+common house
+  default-language: GHC2021
+  default-extensions:
+    DeriveGeneric
+    DerivingStrategies
+    LambdaCase
+    NamedFieldPuns
+    OverloadedStrings
+    RecordWildCards
+    StrictData
+
+  ghc-options:
+    -Wall -Werror -Wcompat -Widentities -Wincomplete-record-updates
+    -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules
+    -Wpartial-fields -Wredundant-constraints
+
+library
+  import:         house
+  hs-source-dirs: src
+  exposed-modules:
+    Straylight.Cms.Application
+    Straylight.Cms.Config
+    Straylight.Cms.Domain
+    Straylight.Cms.Store
+    Straylight.Cms.Store.Postgres
+  build-depends:
+    , aeson                     >=2.0  && <2.3
+    , base                      >=4.18 && <5
+    , bytestring                >=0.11 && <0.13
+    , http-types                >=0.12 && <0.13
+    , memory                    >=0.18 && <0.19
+    , postgresql-simple         >=0.6  && <0.8
+    , resource-pool             >=0.4  && <0.5
+    , straylight-web-middleware ==0.1.0.0
+    , text                      >=2.0  && <2.2
+    , time                      >=1.12 && <1.15
+    , uuid                      >=1.3  && <1.4
+    , wai                       >=3.2  && <3.3
+
+executable straylight-cms
+  import:         house
+  hs-source-dirs: app
+  main-is:        Main.hs
+  ghc-options:    -threaded -rtsopts "-with-rtsopts=-N"
+  build-depends:
+    , aeson
+    , base
+    , bytestring
+    , straylight-cms
+    , straylight-web-middleware
+    , text
+    , unix        >=2.8 && <2.9
+    , wai
+    , warp        >=3.3 && <3.5
+
+test-suite cms-spec
+  import:         house
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Spec.hs
+  ghc-options:    -threaded
+  build-depends:
+    , aeson
+    , base
+    , bytestring
+    , hspec       >=2.10 && <2.12
+    , http-types
+    , straylight-cms
+    , text
+    , time
+    , uuid
+    , wai
+    , wai-extra   >=3.1 && <3.2

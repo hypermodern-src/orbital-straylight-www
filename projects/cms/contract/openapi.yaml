@@ -1,0 +1,784 @@
+openapi: 3.1.0
+info:
+  title: Straylight Publishing API
+  version: 0.1.0
+  description: >-
+    Immutable editorial revisions and public delivery for articles and research
+    papers. Public responses contain canonical source, not executable HTML.
+servers:
+  - url: https://cms.straylight.ai
+paths:
+  /healthz:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: Process is alive.
+  /readyz:
+    get:
+      operationId: ready
+      responses:
+        "200":
+          description: Service is accepting traffic.
+        "503":
+          description: Service is warming or draining.
+  /v1/publications:
+    get:
+      operationId: listPublications
+      parameters:
+        - name: channel
+          in: query
+          schema:
+            type: string
+            default: straylight
+        - name: kind
+          in: query
+          schema:
+            $ref: "#/components/schemas/DocumentKind"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Published revisions, newest publication first.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicationPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /v1/publications/{channel}/{slug}:
+    get:
+      operationId: getPublication
+      parameters:
+        - $ref: "#/components/parameters/Channel"
+        - $ref: "#/components/parameters/Slug"
+      responses:
+        "200":
+          description: The current public revision.
+          headers:
+            ETag:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Publication"
+        "304":
+          description: The caller already has this exact revision.
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/editorial/documents:
+    get:
+      operationId: listEditorialDocuments
+      security:
+        - bootstrapBearer: []
+      parameters:
+        - name: channel
+          in: query
+          schema:
+            type: string
+            default: straylight
+        - name: kind
+          in: query
+          schema:
+            $ref: "#/components/schemas/DocumentKind"
+        - name: state
+          in: query
+          schema:
+            $ref: "#/components/schemas/WorkflowState"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Current editorial revisions, newest edit first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
+    post:
+      operationId: createDocument
+      security:
+        - bootstrapBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDocument"
+      responses:
+        "201":
+          description: Draft document and its first immutable revision.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialDocument"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
+  /v1/editorial/documents/{documentId}:
+    get:
+      operationId: getEditorialDocument
+      security:
+        - bootstrapBearer: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: The current editorial revision and workflow pointers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialDocument"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
+  /v1/editorial/documents/{documentId}/readiness:
+    get:
+      operationId: getPublicationReadiness
+      security:
+        - bootstrapBearer: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+        - name: revision
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: The exact defects used by publish and schedule transitions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Readiness"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
+  /v1/editorial/documents/{documentId}/revisions:
+    post:
+      operationId: appendRevision
+      security:
+        - bootstrapBearer: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppendRevision"
+      responses:
+        "201":
+          description: A new immutable draft revision.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialDocument"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
+  /v1/editorial/documents/{documentId}/transitions:
+    post:
+      operationId: transitionDocument
+      security:
+        - bootstrapBearer: []
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransitionDocument"
+      responses:
+        "200":
+          description: The document after its audited workflow transition.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditorialDocument"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          description: The revision is not ready or the transition is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
+components:
+  securitySchemes:
+    bootstrapBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque bootstrap token
+  parameters:
+    Channel:
+      name: channel
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Slug"
+    Slug:
+      name: slug
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/Slug"
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: The request shape or parameters are invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: The editorial bearer token is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: The requested document or publication does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Conflict:
+      description: A slug exists or the caller edited a stale revision.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    EditorialDisabled:
+      description: No editorial identity provider is configured on this process.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Slug:
+      type: string
+      pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+      maxLength: 120
+    DocumentKind:
+      type: string
+      enum: [post, paper]
+    SourceFormat:
+      type: string
+      enum: [markdown, typst, latex]
+    WorkflowState:
+      type: string
+      enum: [draft, review, scheduled, published, archived]
+    Author:
+      type: object
+      additionalProperties: false
+      required: [slug, display_name, position, role]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          $ref: "#/components/schemas/Slug"
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        orcid:
+          type: string
+          pattern: "^0000-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        position:
+          type: integer
+          minimum: 0
+        role:
+          type: string
+          enum: [author, editor, translator, contributor]
+        affiliation:
+          type: string
+          maxLength: 300
+    AuthorInput:
+      allOf:
+        - $ref: "#/components/schemas/Author"
+      description: The optional generated `id` is ignored on input; slug is identity.
+    PaperMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        doi:
+          type: string
+        arxiv_id:
+          type: string
+        venue:
+          type: string
+        version_label:
+          type: string
+        license_spdx:
+          type: string
+        bibliography_bibtex:
+          type: string
+        references_csl:
+          type: array
+          items:
+            type: object
+        pdf_asset_id:
+          type: string
+          format: uuid
+    Asset:
+      type: object
+      additionalProperties: false
+      required: [id, kind, purpose, position, media_type]
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum: [image, video, audio, pdf, source, dataset, archive]
+        purpose:
+          type: string
+          enum: [hero, inline, attachment, source, pdf, dataset]
+        position:
+          type: integer
+        media_type:
+          type: string
+        object_key:
+          type: string
+        external_url:
+          type: string
+          format: uri
+        byte_size:
+          type: integer
+        sha256:
+          type: string
+        alt_text:
+          type: string
+        caption:
+          type: string
+        credit:
+          type: string
+        license_spdx:
+          type: string
+    RevisionInput:
+      type: object
+      additionalProperties: false
+      required: [title, summary, body, source_format, language, authors, tags]
+      properties:
+        title:
+          type: string
+          maxLength: 300
+        subtitle:
+          type: string
+          maxLength: 500
+        summary:
+          type: string
+          maxLength: 4000
+        body:
+          type: string
+          maxLength: 900000
+        source_format:
+          $ref: "#/components/schemas/SourceFormat"
+        language:
+          type: string
+          pattern: "^[a-z]{2,3}(-[A-Za-z0-9]+)*$"
+        authors:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/AuthorInput"
+        tags:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/Slug"
+        paper:
+          $ref: "#/components/schemas/PaperMetadata"
+    Publication:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - channel
+        - kind
+        - slug
+        - revision
+        - title
+        - summary
+        - body
+        - source_format
+        - language
+        - content_sha256
+        - authors
+        - tags
+        - assets
+        - revision_created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        channel:
+          $ref: "#/components/schemas/Slug"
+        kind:
+          $ref: "#/components/schemas/DocumentKind"
+        slug:
+          $ref: "#/components/schemas/Slug"
+        revision:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: string
+        body:
+          type: string
+        source_format:
+          $ref: "#/components/schemas/SourceFormat"
+        language:
+          type: string
+        content_sha256:
+          type: string
+          pattern: "^[0-9a-f]{64}$"
+        authors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Author"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Slug"
+        paper:
+          $ref: "#/components/schemas/PaperMetadata"
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+        published_at:
+          type: string
+          format: date-time
+        revision_created_at:
+          type: string
+          format: date-time
+    EditorialDocument:
+      allOf:
+        - $ref: "#/components/schemas/Publication"
+        - type: object
+          required: [workflow_state, current_revision, created_at, updated_at]
+          properties:
+            workflow_state:
+              $ref: "#/components/schemas/WorkflowState"
+            current_revision:
+              type: integer
+            published_revision:
+              type: integer
+            scheduled_for:
+              type: string
+              format: date-time
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    PublicationPage:
+      type: object
+      additionalProperties: false
+      required: [items, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicationSummary"
+        limit:
+          type: integer
+        offset:
+          type: integer
+    PublicationSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - channel
+        - kind
+        - slug
+        - revision
+        - title
+        - summary
+        - source_format
+        - language
+        - content_sha256
+        - authors
+        - tags
+        - revision_created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        channel:
+          $ref: "#/components/schemas/Slug"
+        kind:
+          $ref: "#/components/schemas/DocumentKind"
+        slug:
+          $ref: "#/components/schemas/Slug"
+        revision:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: string
+        source_format:
+          $ref: "#/components/schemas/SourceFormat"
+        language:
+          type: string
+        content_sha256:
+          type: string
+          pattern: "^[0-9a-f]{64}$"
+        authors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Author"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Slug"
+        paper:
+          $ref: "#/components/schemas/PaperMetadata"
+        published_at:
+          type: string
+          format: date-time
+        revision_created_at:
+          type: string
+          format: date-time
+    EditorialPage:
+      type: object
+      additionalProperties: false
+      required: [items, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EditorialSummary"
+        limit:
+          type: integer
+        offset:
+          type: integer
+    EditorialSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - channel
+        - kind
+        - slug
+        - revision
+        - title
+        - summary
+        - source_format
+        - language
+        - content_sha256
+        - authors
+        - tags
+        - workflow_state
+        - current_revision
+        - created_at
+        - updated_at
+        - revision_created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        channel:
+          $ref: "#/components/schemas/Slug"
+        kind:
+          $ref: "#/components/schemas/DocumentKind"
+        slug:
+          $ref: "#/components/schemas/Slug"
+        revision:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        summary:
+          type: string
+        source_format:
+          $ref: "#/components/schemas/SourceFormat"
+        language:
+          type: string
+        content_sha256:
+          type: string
+          pattern: "^[0-9a-f]{64}$"
+        authors:
+          type: array
+          items:
+            $ref: "#/components/schemas/Author"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Slug"
+        paper:
+          $ref: "#/components/schemas/PaperMetadata"
+        workflow_state:
+          $ref: "#/components/schemas/WorkflowState"
+        current_revision:
+          type: integer
+        published_revision:
+          type: integer
+        scheduled_for:
+          type: string
+          format: date-time
+        published_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        revision_created_at:
+          type: string
+          format: date-time
+    CreateDocument:
+      type: object
+      additionalProperties: false
+      required: [channel, kind, slug, revision]
+      properties:
+        channel:
+          $ref: "#/components/schemas/Slug"
+        kind:
+          $ref: "#/components/schemas/DocumentKind"
+        slug:
+          $ref: "#/components/schemas/Slug"
+        revision:
+          $ref: "#/components/schemas/RevisionInput"
+    AppendRevision:
+      type: object
+      additionalProperties: false
+      required: [expected_revision, revision]
+      properties:
+        expected_revision:
+          type: integer
+          minimum: 1
+        revision:
+          $ref: "#/components/schemas/RevisionInput"
+    TransitionDocument:
+      type: object
+      additionalProperties: false
+      required: [expected_revision, target]
+      properties:
+        expected_revision:
+          type: integer
+          minimum: 1
+        target:
+          $ref: "#/components/schemas/WorkflowState"
+        scheduled_for:
+          type: string
+          format: date-time
+    Defect:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    Readiness:
+      type: object
+      additionalProperties: false
+      required: [document_id, revision, ready, defects]
+      properties:
+        document_id:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+        ready:
+          type: boolean
+        defects:
+          type: array
+          items:
+            $ref: "#/components/schemas/Defect"
+    Error:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details: {}
