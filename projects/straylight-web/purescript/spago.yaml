@@ -1,0 +1,30 @@
+package:
+  name: straylight-web
+  dependencies:
+    - aff
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - halogen
+    - halogen-vdom
+    - hydrogen
+    - maybe
+    - prelude
+    - strings
+    - web-dom
+    - web-html
+    - web-events
+  bundle:
+    platform: browser
+    type: app
+    module: Main
+    outfile: ../public/straylight.js
+
+workspace:
+  package_set:
+    registry: 73.2.0
+  extra_packages:
+    hydrogen:
+      git: https://github.com/straylight-software/hydrogen.git
+      ref: main

@@ -1,0 +1,131 @@
+cabal-version: 3.0
+name:          straylight-api
+version:       0.1.0.0
+synopsis:      OpenAPI 3.1.0 specifications for Straylight products
+description:
+  Servant-based API definitions with OpenAPI 3.1.0 generation for all
+  Straylight products:
+  .
+  * sensenet//cache - Attestation-aware binary cache
+  * sensenet//build - Typed build system with Lean4 proofs
+  * sensenet//converge - Desired-state infrastructure
+  * sensenet//confirm - CI with proof obligations
+  * sensenet//forge - Stacked diffs code review
+  * sensenet//publish - Scope-graph documentation
+  * omega//code - Native TUI AI coding agent
+  * omega//work - Desktop AI for teams
+  * omega//proxy - Verified inference proxy
+  * omega//boost - Managed CUTLASS inference
+
+license:       MIT
+license-file:  LICENSE
+author:        Straylight Software
+maintainer:    dev@straylight.ai
+copyright:     2026 Straylight Software
+category:      Web, API
+build-type:    Simple
+
+extra-doc-files:
+  README.md
+
+source-repository head
+  type:     git
+  location: https://github.com/straylight-software/straylight-web.git
+
+-- ════════════════════════════════════════════════════════════════════════════
+--                                                                  // library
+-- ════════════════════════════════════════════════════════════════════════════
+
+library
+  exposed-modules:
+    -- // core
+    Api
+    Api.Types
+    Api.OpenApi
+    -- // sensenet products
+    Api.Sensenet.Cache
+    Api.Sensenet.Build
+    Api.Sensenet.Converge
+    Api.Sensenet.Confirm
+    Api.Sensenet.Forge
+    Api.Sensenet.Publish
+    -- // omega products
+    Api.Omega.Code
+    Api.Omega.Work
+    Api.Omega.Proxy
+    Api.Omega.Boost
+
+  hs-source-dirs:     src
+  default-language:   GHC2021
+
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Widentities
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wmissing-export-lists
+    -Wmissing-home-modules
+    -Wpartial-fields
+    -Wredundant-constraints
+    -O2
+
+  build-depends:
+    , aeson               >=2.0     && <2.3
+    , base                >=4.17    && <5
+    , bytestring          >=0.11    && <0.13
+    , containers          >=0.6     && <0.8
+    , http-api-data       >=0.5     && <0.7
+    , insert-ordered-containers >=0.2 && <0.3
+    , lens                >=5.0     && <5.4
+    , openapi3            >=3.2     && <3.3
+    , servant             >=0.20    && <0.21
+    , servant-openapi3    >=2.0     && <2.1
+    , servant-server      >=0.20    && <0.21
+    , text                >=2.0     && <2.2
+    , time                >=1.12    && <1.15
+
+  default-extensions:
+    DataKinds
+    DeriveGeneric
+    DerivingStrategies
+    DuplicateRecordFields
+    GeneralizedNewtypeDeriving
+    LambdaCase
+    OverloadedStrings
+    RecordWildCards
+    StrictData
+    TypeOperators
+
+-- ════════════════════════════════════════════════════════════════════════════
+--                                                               // executable
+-- ════════════════════════════════════════════════════════════════════════════
+
+executable straylight-api
+  main-is:          Main.hs
+  hs-source-dirs:   app
+  default-language: GHC2021
+
+  ghc-options:
+    -Wall
+    -Wcompat
+    -O2
+    -threaded
+    -rtsopts
+    "-with-rtsopts=-N -T"
+
+  build-depends:
+    , aeson
+    , base                >=4.17 && <5
+    , bytestring
+    , http-types          >=0.12 && <0.13
+    , openapi3
+    , servant-server
+    , straylight-api
+    , text
+    , wai
+    , warp                >=3.3 && <3.5
+
+  default-extensions:
+    OverloadedStrings
+    RecordWildCards
