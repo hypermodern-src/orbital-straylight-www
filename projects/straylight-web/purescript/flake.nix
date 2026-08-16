@@ -8,7 +8,7 @@
     systems.follows = "straylight-prelude/systems";
 
     hydrogen = {
-      url = "git+ssh://git@github.com/sensenet-ai/hydrogen?ref=main&rev=a41434e71c5be49b357f1119bbb1089a60f9b0af";
+      url = "git+ssh://git@git.s4.gl/straylight/hydrogen?ref=main&rev=8afd5e6358609e8532bdef56e2f21545064df8cc";
       flake = false;
     };
   };
@@ -28,6 +28,7 @@
             src = ./.;
             cells.hydrogen = inputs.hydrogen;
             targets = [ "//:web" ];
+            gates.bundle.target = "//:web";
             toolchain = {
               cxx.enable = false;
               purescript.enable = true;

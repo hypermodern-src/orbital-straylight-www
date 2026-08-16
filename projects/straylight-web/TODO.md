@@ -3,7 +3,7 @@
 ## Status
 - [x] Add hydrogen as git dependency in spago.yaml
 - [x] Update registry to 73.2.0
-- [x] Migrate Router to use `Hydrogen.Router` (IsRoute, RouteMetadata)
+- [x] Migrate Router to use `Hydrogen.Runtime.Router` (IsRoute, RouteMetadata)
 
 ---
 
@@ -174,7 +174,7 @@ Each product needs:
 ## Shared Infrastructure
 
 ### Router
-- [x] `Hydrogen.Router` integrated
+- [x] `Hydrogen.Runtime.Router` integrated
 - [x] `IsRoute` instance
 - [x] `RouteMetadata` instance
 - [ ] Expand routes for all 70 pages
@@ -201,7 +201,7 @@ Each product needs:
 
 ```
 Hydrogen                    -- Main re-export module
-Hydrogen.Router             -- Type-safe routing (IsRoute, RouteMetadata)
+Hydrogen.Runtime.Router     -- Type-safe routing (IsRoute, RouteMetadata)
 Hydrogen.Query              -- Data fetching with caching
 Hydrogen.API.Client         -- HTTP API client (Affjax + Argonaut)
 Hydrogen.SSG                -- Static site generation

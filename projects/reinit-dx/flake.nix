@@ -13,7 +13,7 @@
     # hydrogen as a first-class library cell — pinned source whose BUCK exposes
     # purescript_library (STR-234). Just the source tree, not a flake.
     hydrogen = {
-      url = "git+ssh://git@github.com/sensenet-ai/hydrogen?ref=main&rev=9f02b5b7db6f5dc3f5363996526ba6ac93cf8f26";
+      url = "git+ssh://git@git.s4.gl/straylight/hydrogen?ref=main&rev=8afd5e6358609e8532bdef56e2f21545064df8cc";
       flake = false;
     };
   };
@@ -29,7 +29,10 @@
       ];
 
       perSystem =
-        { ... }:
+        { pkgs, ... }:
+        let
+          vercelDeployTarget = import ./nix/vercel-deploy-target.nix { inherit pkgs; };
+        in
         {
           straylight-prelude.projects.reinit-dx = {
             src = ./.;
@@ -40,6 +43,7 @@
             # input is the cell directly.
             cells.hydrogen = inputs.hydrogen;
             targets = [ "//:site" ];
+            gates.site.target = "//:site";
             toolchain = {
               # Pure PureScript — no C++ toolchain / clang-tidy gate.
               cxx.enable = false;
@@ -48,7 +52,13 @@
             # The deployable static site (SSG index.html + reinit.js), pushed to
             # Vercel as a Build-Output-API prebuilt tree:
             #   nix run .#deploy-reinit-dx-site-vercel
-            deploy.site.target = "//:site";
+            deploy.site = {
+              target = "//:site";
+              # The current prelude helper still references the removed
+              # pkgs.nodePackages set. Keep the provider app-local until that
+              # upstream boundary is repaired.
+              provider = vercelDeployTarget;
+            };
           };
         };
     };

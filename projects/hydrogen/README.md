@@ -47,8 +47,8 @@ Build & contributor guide: [`CLAUDE.md`](CLAUDE.md).
 workspace:
   extra_packages:
     hydrogen:
-      git: https://github.com/straylight-software/hydrogen.git
-      ref: main
+      git: https://git.s4.gl/straylight/hydrogen.git
+      ref: 8afd5e6358609e8532bdef56e2f21545064df8cc
       dependencies:
         - prelude
         - aff

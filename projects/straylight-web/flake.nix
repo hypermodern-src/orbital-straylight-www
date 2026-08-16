@@ -85,9 +85,11 @@
             echo "Staging buck2 straylight.js..."
             install -D -m644 ${straylightJs}/straylight.js public/straylight.js
 
-            # Build Next.js
+            # Build Next.js under Node. The bun2nix hook exposes Bun as a
+            # node-compatible shim, but Next's build workers are not stable on
+            # that runtime yet (Bun 1.3.6 crashes while collecting page data).
             echo "Building Next.js..."
-            next build
+            ${pkgs.nodejs_22}/bin/node node_modules/next/dist/bin/next build
 
             runHook postBuild
           '';
@@ -131,6 +133,7 @@
         apps.default = {
           type = "app";
           program = "${straylight-web}/bin/straylight-web";
+          meta.description = "Run the production Straylight web server";
         };
 
         # Dev runner - runs in current directory. PureScript is built by buck2 in
@@ -158,6 +161,7 @@
               ${pkgs.bun}/bin/bun run dev
             ''
           );
+          meta.description = "Build PureScript and start the Straylight development server";
         };
 
         # PureScript bundle (buck2, no spago): one `purs compile` + esbuild over
@@ -174,6 +178,7 @@
               ls -lh public/straylight.js
             ''
           );
+          meta.description = "Build the Straylight PureScript browser bundle";
         };
 
         # Root devshell = the Next/node/Haskell side. PureScript has its own

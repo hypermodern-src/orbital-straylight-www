@@ -24,14 +24,14 @@ import Effect (Effect)
 import Effect.Console (log)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Hydrogen.HTML.Renderer as Renderer
+import Hydrogen.Runtime.Renderer as Renderer
 import Reinit.Page as Page
 
 -- | SSG entrypoint (node), run by the prelude's purs_site rule (STR-235). The
 -- | rule is pure mechanism: it hands us the shell path on argv and captures our
 -- | stdout as index.html. ALL policy lives here — reinit is a single static page,
 -- | so we prerender it unconditionally; a multi-route app would consult
--- | Hydrogen.Router's RouteMetadata (isStaticRoute) and any late/CMS config to
+-- | Hydrogen.Runtime.Router's RouteMetadata (isStaticRoute) and any late/CMS config to
 -- | decide per route. "Served to googlebot as SSG" is just: prerender it.
 main :: Effect Unit
 main = do

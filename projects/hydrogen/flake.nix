@@ -2,9 +2,9 @@
   description = "hydrogen — PureScript/Halogen framework + component library (Hydrogen.Radix.*), on the straylight-prelude buck2 build. `nix develop -c buck2 build //check:hydrogen_check` typechecks the whole tree (cached).";
 
   inputs = {
-    # LOCAL prelude checkout so the purescript_library `_check` co-design change
-    # (cached library typecheck) flows through. Repoint to the git URL once pushed.
-    straylight-prelude.url = "path:/home/b7r6/src/straylight/straylight-prelude";
+    # Canonical build rules. Keep this remote so the project builds from a fresh
+    # checkout and when extracted from the web monorepo.
+    straylight-prelude.url = "git+ssh://git@github.com/sensenet-ai/straylight-prelude";
     flake-parts.follows = "straylight-prelude/flake-parts";
     nixpkgs.follows = "straylight-prelude/nixpkgs";
     systems.follows = "straylight-prelude/systems";

@@ -4,11 +4,11 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 check_hydrogen() {
-  nix flake check "$repo_root/projects/hydrogen"
+  nix flake check --accept-flake-config "$repo_root/projects/hydrogen"
 }
 
 check_reinit_dx() {
-  nix flake check "$repo_root/projects/reinit-dx"
+  nix flake check --accept-flake-config "$repo_root/projects/reinit-dx"
 }
 
 check_hypermodern_consulting() {
@@ -20,7 +20,7 @@ check_hypermodern_consulting() {
 }
 
 check_straylight_web() {
-  nix flake check "$repo_root/projects/straylight-web"
+  nix flake check --accept-flake-config "$repo_root/projects/straylight-web"
 }
 
 check_one() {

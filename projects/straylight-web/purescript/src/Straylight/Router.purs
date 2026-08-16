@@ -1,16 +1,16 @@
--- | Client-side routing using Hydrogen.Router
+-- | Client-side routing using Hydrogen.Runtime.Router
 module Straylight.Router 
   ( Route(..)
   , ProductPage(..)
   , Product(..)
-  , module Hydrogen.Router
+  , module Hydrogen.Runtime.Router
   ) where
 
 import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..), stripPrefix)
-import Hydrogen.Router (class IsRoute, class RouteMetadata, parseRoute, routeToPath, getPathname, pushState, onPopState, navigate, normalizeTrailingSlash, interceptLinks)
+import Hydrogen.Runtime.Router (class IsRoute, class RouteMetadata, parseRoute, routeToPath, getPathname, pushState, onPopState, navigate, normalizeTrailingSlash, interceptLinks)
 
 -- ============================================================
 -- PRODUCT & PAGE TYPES

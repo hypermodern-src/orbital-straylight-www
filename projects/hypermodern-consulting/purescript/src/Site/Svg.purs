@@ -5,6 +5,8 @@ module Site.Svg
   , moon
   ) where
 
+import Prelude ((<>))
+
 import Halogen.HTML as HH
 import Halogen.HTML.Core (AttrName(..), Namespace(..))
 

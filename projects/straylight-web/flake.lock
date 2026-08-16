@@ -376,19 +376,19 @@
     "hydrogen": {
       "flake": false,
       "locked": {
-        "lastModified": 1781378156,
-        "narHash": "sha256-SoCijOXGxME+kv4ZZ6bIqdWMWRo5RiUDTW3nIfT3ZWA=",
+        "lastModified": 1784589619,
+        "narHash": "sha256-XTyiebd8vh2UzoPRqaQw2kMpPzsc8h7HSElLbwrQWdw=",
         "ref": "main",
-        "rev": "e91113f117241a99951d8e4f0b287888bb2ee3e4",
-        "revCount": 9,
+        "rev": "8afd5e6358609e8532bdef56e2f21545064df8cc",
+        "revCount": 401,
         "type": "git",
-        "url": "ssh://git@github.com/sensenet-ai/hydrogen"
+        "url": "ssh://git@git.s4.gl/straylight/hydrogen"
       },
       "original": {
         "ref": "main",
-        "rev": "e91113f117241a99951d8e4f0b287888bb2ee3e4",
+        "rev": "8afd5e6358609e8532bdef56e2f21545064df8cc",
         "type": "git",
-        "url": "ssh://git@github.com/sensenet-ai/hydrogen"
+        "url": "ssh://git@git.s4.gl/straylight/hydrogen"
       }
     },
     "llvm-project": {
@@ -590,16 +590,15 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1768127708,
-        "narHash": "sha256-1Sm77VfZh3mU0F5OqKABNLWxOuDeHIlcFjsXeeiPazs=",
-        "owner": "NixOS",
+        "lastModified": 1782135133,
+        "narHash": "sha256-CKuR0GpkICF4MIfCfZug0pk+F2k/5sRquvO3h7oS0Bs=",
+        "owner": "sensenet-ai",
         "repo": "nixpkgs",
-        "rev": "ffbc9f8cbaacfb331b6017d5a5abb21a492c9a38",
+        "rev": "7f5aa8815f4802279c2982ee1a95a32ce059ee8b",
         "type": "github"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "owner": "sensenet-ai",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -632,16 +631,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1777407138,
-        "narHash": "sha256-1FpSQJtxZ7fdUUgLvRNmaG4u3oszz6LlDDak78jrl8Y=",
+        "lastModified": 1782181843,
+        "narHash": "sha256-OE+VyP/LsohMS30Ji1O9/TAeQztnGsdjPZK2Isd+ex8=",
         "owner": "sensenet-ai",
-        "repo": "nvidia-sdk",
-        "rev": "88155ebff082cd122d9afaa078992fc1675db4bc",
+        "repo": "nvidia-opensdk",
+        "rev": "274284a693c8851df049a77480b588468572464c",
         "type": "github"
       },
       "original": {
         "owner": "sensenet-ai",
-        "repo": "nvidia-sdk",
+        "repo": "nvidia-opensdk",
         "type": "github"
       }
     },
@@ -690,11 +689,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1781374234,
-        "narHash": "sha256-lcVTIiO4OEGiNhw4oknSVnPyWZ3id69Z7pyl+vOUCvM=",
+        "lastModified": 1786551800,
+        "narHash": "sha256-aEdwaMxXuf/GXZyppl/K3rIP676B2to8FmRe8oODmsA=",
         "ref": "refs/heads/main",
-        "rev": "5aa8e134aa66ad926993c00abdd5f38f938b2819",
-        "revCount": 122,
+        "rev": "ec3c4d6f54b68a0441d3f6f238a89dab42bd3ea5",
+        "revCount": 145,
         "type": "git",
         "url": "ssh://git@github.com/sensenet-ai/straylight-prelude"
       },

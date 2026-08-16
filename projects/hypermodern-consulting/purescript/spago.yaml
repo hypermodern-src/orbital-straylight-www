@@ -26,8 +26,9 @@ package:
     outfile: ../dist/deck.js
 
 workspace:
-  package_set:
+  packageSet:
     registry: 73.2.0
-  extra_packages:
+  extraPackages:
     hydrogen:
-      path: ../../../straylight/hydrogen
+      git: ssh://git@git.s4.gl/straylight/hydrogen.git
+      ref: 8afd5e6358609e8532bdef56e2f21545064df8cc
