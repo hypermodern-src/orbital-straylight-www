@@ -51,6 +51,7 @@ docConfig route =
     , stylesheets =
         [ "fonts.css"
         , "halogen-orbital/orbital.css"
+        , "styles/typography.css"
         , "waitlist.css"
         , pageStylesheet route
         ]
@@ -103,13 +104,6 @@ thanksScript _ = []
 preloadFonts :: Array HH.PlainHTML
 preloadFonts =
   [ HH.link
-      [ HP.rel "preload"
-      , HP.href "fonts/CormorantGaramond-normal-300-latin.woff2"
-      , HP.attr (HH.AttrName "as") "font"
-      , HP.attr (HH.AttrName "type") "font/woff2"
-      , HP.attr (HH.AttrName "crossorigin") ""
-      ]
-  , HH.link
       [ HP.rel "preload"
       , HP.href "fonts/IBMPlexMono-normal-400-latin.woff2"
       , HP.attr (HH.AttrName "as") "font"

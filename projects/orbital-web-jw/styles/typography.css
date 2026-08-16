@@ -1,0 +1,4 @@
+/* Temporary single-family direction: keep the display scale, use mono throughout. */
+:root {
+  --serif: var(--sans);
+}
