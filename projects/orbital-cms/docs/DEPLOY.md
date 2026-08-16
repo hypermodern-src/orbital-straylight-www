@@ -6,7 +6,8 @@ region: editorial and delivery queries should not cross an ocean.
 
 The production service is `orbital-cms.fly.dev`. Its Supabase project is
 `orbital-cms` (`zorahcnswubdvqehhxve`) in organization
-`uxdcpziilyyyhjejxsqe`.
+`uxdcpziilyyyhjejxsqe`. One application Machine remains continuously warm in
+`iad`; automatic stopping is disabled to avoid cold-start latency.
 
 The image is built by Fly's x86_64 remote builder from the monorepo root. The
 Docker build overrides the locked private middleware input with the exact
