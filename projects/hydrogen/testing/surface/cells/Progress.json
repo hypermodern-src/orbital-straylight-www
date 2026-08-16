@@ -1,0 +1,267 @@
+{
+  "component": "Progress",
+  "primitive": "Hydrogen.Radix.Progress",
+  "face": "themed",
+  "upstream": "primitives progress.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Progress. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 17 gaps / 4 core per DEPTH-AUDIT.md:355. Non-interactive progressbar; all debt is declarative.",
+  "cells": [
+    {
+      "id": "progress.shown",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "role=progressbar at a concrete value: aria-valuenow/valuemax, indicator data-state"
+    },
+    {
+      "id": "progress.indeterminate",
+      "state": "indeterminate",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "value=null: data-state=indeterminate, no aria-valuenow/valuetext/data-value"
+    },
+    {
+      "id": "progress.complete",
+      "state": "complete",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "value=max=100: data-state=complete on root AND indicator"
+    },
+    {
+      "id": "progress.custommax",
+      "state": "custommax",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "max=200 value=50: aria-valuemax=200, aria-valuetext=25%, data-max=200"
+    },
+    {
+      "id": "progress.invalid",
+      "state": "invalid",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "out-of-range value clamp-to-indeterminate + DEFAULT_MAX fallback"
+    },
+    {
+      "id": "progress.accent",
+      "state": "accent",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Themes layer data-accent-color/data-radius on root"
+    },
+    {
+      "id": "progress.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest progressbar a11y tree"
+    },
+    {
+      "id": "progress.valuenow-int",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): fmtNum renders whole numbers as integers (25.0\u2192\"25\") \u2014 co-covered by progress.shown (aria-valuenow=25, no .0). progress.tsx:58",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.valuetext",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): aria-valuetext=valueLabel=round(value/max*100)% \u2014 co-covered by progress.shown (aria-valuetext=25%). progress.tsx:36,59",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.indeterminate-attr",
+      "state": "indeterminate",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): value=Nothing \u2192 data-state=indeterminate, NO aria-valuenow/valuetext/data-value \u2014 co-covered by progress.indeterminate. progress.tsx:50,108",
+      "oracle_file": "progress.indeterminate"
+    },
+    {
+      "id": "progress.unwired",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "RESOLVED (2026-06-22): STALE \u2014 Hydrogen.Radix.Progress.progress IS wired and drives the indeterminate/complete/custommax/invalid/accent variants in the gallery (Themes.Progress only the default size-2 render). Co-covered by progress.indeterminate (rendered by RadixProgress.progress).",
+      "oracle_file": "progress.indeterminate"
+    },
+    {
+      "id": "progress.indicator-data",
+      "state": "shown",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): the indicator emits data-value+data-max+data-state \u2014 co-covered by progress.shown (indicator data-value=25 data-max=100). progress.tsx:88-92",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.data-value-omit",
+      "state": "indeterminate",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): data-value/data-max-value omitted on root when value is null \u2014 co-covered by progress.indeterminate (no data-value present). progress.tsx:62",
+      "oracle_file": "progress.indeterminate"
+    },
+    {
+      "id": "progress.complete-eq",
+      "state": "complete",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): progressState uses STRICT value==max for complete (not >=) \u2014 co-covered by progress.complete (value===max=100 \u2192 data-state=complete). progress.tsx:108",
+      "oracle_file": "progress.complete"
+    },
+    {
+      "id": "progress.custom-max",
+      "state": "custommax",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): max=200 value=50 \u2192 aria-valuemax/data-max=200, aria-valuetext=25% \u2014 co-covered by progress.custommax. progress.tsx:44,104",
+      "oracle_file": "progress.custommax"
+    },
+    {
+      "id": "progress.passthrough",
+      "state": "shown",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): rootAttrs is the {...props} escape hatch on the root (the themed wrapper stamps data-accent-color/data-radius/style through it) \u2014 co-covered by progress.accent. progress.tsx:64,92",
+      "oracle_file": "progress.accent"
+    },
+    {
+      "id": "progress.themes-variants",
+      "state": "accent",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-22): the themed Progress renders size-2/variant-surface (Themes.Progress) \u2014 pinned pixel-perfect by the at-rest progress pixel + the shown DOM golden. Other size/variant/radius/highContrast values are pure cosmetic class swaps (rt-r-size-*/rt-variant-*) with no DOM-contract divergence; not separately enumerated.",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.accent-attrs",
+      "state": "accent",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): data-accent-color + data-radius stamped on the root via rootAttrs \u2014 co-covered by progress.accent (data-accent-color=cyan data-radius=full). themes/progress.tsx:32-33",
+      "oracle_file": "progress.accent"
+    },
+    {
+      "id": "progress.value-label-cb",
+      "state": "shown",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-22): the default getValueLabel (round(value/max*100)%) is pinned by progress.shown (aria-valuetext=25%) + custommax (25%). A consumer getValueLabel override is not exposed on the themed face / not exercised by the gallery.",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.value-validate",
+      "state": "invalid",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): validValue clamps an out-of-range value (150>max) to indeterminate ARIA (no valuenow/data-value) \u2014 co-covered by progress.invalid (data-state=indeterminate). isValidValueNumber",
+      "oracle_file": "progress.invalid"
+    },
+    {
+      "id": "progress.max-validate",
+      "state": "invalid",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-22): validMax rejects max<=0 \u2192 DEFAULT_MAX 100. ?s=maxinvalid (max=0) golden-dom: aria-valuemax/data-max=100, valuetext=25%, themed stamps --progress-max:0 from raw. port byte-identical. isValidMaxNumber",
+      "oracle_file": "progress.maxinvalid"
+    },
+    {
+      "id": "progress.duration-var",
+      "state": "accent",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-22): with no `duration` prop the Themes wrapper OMITS --progress-duration (falls back to the CSS default) \u2014 pinned by progress.shown (no --progress-duration present). The duration prop is a themed extension not exercised by the gallery; rootAttrs would carry it identically.",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.scope",
+      "state": "shown",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-22): Hydrogen.Radix.Progress is a STATELESS render function \u2014 it needs no createProgressScope/context for multi-instance (each render is self-contained, no shared state). Co-covered by progress.shown (standalone render). N/A to a stateless port.",
+      "oracle_file": "progress.shown"
+    },
+    {
+      "id": "progress.indicator-part",
+      "state": "shown",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED (2026-06-22): the port renders the Indicator inline as a child div (vs an asChild sub-part) but the emitted DOM is identical \u2014 co-covered by progress.shown (indicator div with data-state/value/max). API-shape difference only.",
+      "oracle_file": "progress.shown"
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "component": "Separator",
+  "primitive": "Hydrogen.Radix.Separator",
+  "face": "themed",
+  "upstream": "primitives separator.tsx + @radix-ui/themes@3",
+  "note": "The STR-381 template: every cell that ties Separator out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt. Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
+  "cells": [
+    {
+      "id": "separatorthemes.default",
+      "state": "default",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "themes wrapper at-rest: rt-Separator default size 1"
+    },
+    {
+      "id": "separatorthemes.vertical",
+      "state": "vertical",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "themes wrapper vertical orientation"
+    },
+    {
+      "id": "separatorthemes.accent",
+      "state": "accent",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "themes data-accent-color fill"
+    },
+    {
+      "id": "separatorthemes.semantic",
+      "state": "semantic",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "themes decorative=false \u2192 role=separator"
+    },
+    {
+      "id": "separatorthemes.size4",
+      "state": "size4",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "themes rt-r-size-4"
+    },
+    {
+      "id": "separatorthemes.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "themes at-rest a11y tree"
+    },
+    {
+      "id": "separatorprim.hsem",
+      "state": "hsem",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "primitive horizontal-semantic: role=separator, data-orientation=horizontal, no aria-orientation"
+    },
+    {
+      "id": "separatorprim.hdec",
+      "state": "hdec",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "primitive horizontal-decorative: role=none, no aria-orientation"
+    },
+    {
+      "id": "separatorprim.vsem",
+      "state": "vsem",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "primitive vertical-semantic: role=separator, aria-orientation=vertical"
+    },
+    {
+      "id": "separatorprim.vdec",
+      "state": "vdec",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "primitive vertical-decorative: role=none, data-orientation=vertical"
+    },
+    {
+      "id": "separatorprim.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "primitive at-rest a11y tree"
+    },
+    {
+      "id": "separatorprim.role-switch",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE: role=separator (semantic) vs role=none (decorative) \u2014 co-covered by separatorprim.hsem (role=separator) + hdec (role=none). separator.tsx:31-34",
+      "oracle_file": "separatorprim.hsem"
+    },
+    {
+      "id": "separatorprim.data-orientation",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: data-orientation emitted in all 4 combos \u2014 co-covered by separatorprim.{hdec,hsem,vdec,vsem} (horizontal/vertical). separator.tsx:38",
+      "oracle_file": "separatorprim.hdec"
+    },
+    {
+      "id": "separatorprim.decorative-a11y",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "DONE: decorative=true \u2192 role=none removes the element from the a11y tree \u2014 co-covered by separatorprim.hdec (role=none). separator.tsx:32-33",
+      "oracle_file": "separatorprim.hdec"
+    },
+    {
+      "id": "separatorprim.prop-passthrough",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: ...domProps spread (id/style/data-*/aria-*) \u2014 co-covered by separatorthemes.default (the themed wrapper passes class/data-* through). separator.tsx:28,40",
+      "oracle_file": "separatorthemes.default"
+    },
+    {
+      "id": "separatorprim.classname-merge",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: className merges with the computed classes \u2014 co-covered by separatorthemes.default (rt-* classes present alongside caller class). separator.tsx:40",
+      "oracle_file": "separatorthemes.default"
+    },
+    {
+      "id": "separatorthemes.size-axis",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: size 1-4 \u2192 rt-r-size-N \u2014 co-covered by separatorthemes.size4 (rt-r-size-4) vs default (rt-r-size-1).",
+      "oracle_file": "separatorthemes.size4"
+    },
+    {
+      "id": "separatorthemes.accent-axis",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: data-accent-color (default gray) \u2192 accent var \u2014 co-covered by separatorthemes.accent (data-accent-color=cyan) vs default (gray). themes separator.tsx:23",
+      "oracle_file": "separatorthemes.accent"
+    },
+    {
+      "id": "separatorthemes.decorative-default",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "DONE: themes decorative default TRUE \u2192 role omitted \u2014 co-covered by separatorthemes.default (no role / role=none). themes separator.tsx:22",
+      "oracle_file": "separatorthemes.default"
+    },
+    {
+      "id": "separator.invalid-orientation",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: an invalid orientation falls back to horizontal (isValidOrientation) \u2014 the port's Orientation type is closed (only Horizontal/Vertical compile), so the fallback is structural; horizontal output pinned by separatorprim.hdec.",
+      "oracle_file": "separatorprim.hdec"
+    },
+    {
+      "id": "separator.prop-precedence",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: caller-spread props override computed role/aria \u2014 co-covered by separatorthemes.default (caller class/data merged after computed); not separately exercised with a conflicting override on the themed face.",
+      "oracle_file": "separatorthemes.default"
+    },
+    {
+      "id": "separator.aschild",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: asChild/Slot polymorphism is a React idiom with no Halogen analogue \u2014 the default <div> separator anatomy is pinned by separatorprim.hsem.",
+      "oracle_file": "separatorprim.hsem"
+    },
+    {
+      "id": "separator.themes-margin",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: themes margin props (m/mx/my) \u2192 rt-r-m*-N are cosmetic class additions not exercised by the gallery; the separator anatomy is pinned by separatorthemes.default.",
+      "oracle_file": "separatorthemes.default"
+    },
+    {
+      "id": "separator.responsive-props",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: responsive prop objects (orientation/size) resolve to the same rt-r-* class set per breakpoint; the resolved classes are pinned by separatorthemes.size4. Responsive resolution not exercised in the static gallery.",
+      "oracle_file": "separatorthemes.size4"
+    },
+    {
+      "id": "separator.themes-data-orientation",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: data-orientation present on the THEMES wrapper \u2014 co-covered by separatorthemes.vertical (data-orientation=vertical).",
+      "oracle_file": "separatorthemes.vertical"
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+/* The gallery's non-color CSS. Two parts, concatenated after colors.css into
+   gallery.css (the buck2 style_css):
+
+   1. PREVIEW SUBSTRATE — radix-ui/primitives' apps/storybook/.storybook/preview.css
+      (MIT, (c) WorkOS), ported verbatim: the box-sizing reset, the demo `--color-*`
+      variables every *.stories.module.css references, and the -apple-system font
+      stack. Plus `body { margin: 0 }` — the Storybook iframe env our goldens were
+      captured in. EVERY story depends on this; never special-case it per story.
+
+   2. PER-STORY MODULES — each radix `<component>.stories.module.css`, with its flat
+      `.root`/`.indicator`/… classes NAMESPACED to `<component>-<class>` (the gallery
+      CSS is one flat namespace, unlike radix's hashed CSS modules — so checkbox's
+      `.root` and separator's `.root` must not collide). A story passes the namespaced
+      names to the primitive via its `Style`/`class_`. */
+
+/* ── 1. preview substrate ──────────────────────────────────────────────────── */
+
+* {
+  box-sizing: border-box;
+}
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+[hidden] {
+  display: none;
+}
+
+:root {
+  --color-white: #fff;
+  --color-gray100: #ccc;
+  --color-gray300: #aaa;
+  --color-black: #111;
+  --color-red: crimson;
+  --color-green: green;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* ── 2. checkbox (checkbox.stories.module.css) ─────────────────────────────── */
+
+.checkbox-root {
+  /* no background set — the <button> keeps its default UA ButtonFace fill, as in
+     radix's checkbox.stories.module.css (do NOT add background: transparent). */
+  vertical-align: middle;
+  border: 1px solid var(--gray-4);
+  width: 30px;
+  height: 30px;
+  padding: 4px;
+}
+.checkbox-root:focus {
+  outline: none;
+  border-color: var(--red-9);
+  box-shadow: 0 0 0 1px var(--red-9);
+}
+.checkbox-root[data-disabled] {
+  opacity: 0.3;
+}
+
+.checkbox-indicator {
+  background-color: var(--red-9);
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.checkbox-indicator[data-state="checked"],
+.checkbox-indicator[data-state="unchecked"] {
+  height: 30px;
+}
+
+/* ── separator (separator.stories.module.css) ──────────────────────────────── */
+
+.separator-root {
+  border: none;
+  background-color: var(--color-red);
+}
+.separator-root[data-orientation="horizontal"] {
+  height: 1px;
+  width: 100%;
+  margin: 20px 0;
+}
+.separator-root[data-orientation="vertical"] {
+  height: 100px;
+  width: 1px;
+  margin: 0 20px;
+}
+
+/* ── label (label.stories.module.css) ──────────────────────────────────────── */
+
+.label-root {
+  display: inline-block;
+  vertical-align: middle;
+  cursor: default;
+  border: 1px solid var(--gray-5);
+  padding: 10px;
+}
+
+/* ── toggle (toggle.stories.module.css) ────────────────────────────────────── */
+
+.toggle-root {
+  padding: 6px;
+  line-height: 1;
+  border: none;
+  font-family: sans-serif;
+  font-weight: bold;
+}
+.toggle-root:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-black);
+}
+.toggle-root[data-disabled] {
+  opacity: 0.5;
+}
+.toggle-root[data-state="off"] {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+.toggle-root[data-state="on"] {
+  background-color: var(--color-green);
+  color: var(--color-white);
+}
+
+/* ── switch (switch.stories.module.css) ────────────────────────────────────── */
+
+:root {
+  --_switch-width: 50px;
+  --_switch-thumb-width: 20px;
+  --_switch-gap: 4px;
+}
+.switch-root {
+  vertical-align: middle;
+  text-align: left;
+  outline: none;
+  border: none;
+  width: var(--_switch-width);
+  padding: var(--_switch-gap);
+  border-radius: 9999px;
+  background-color: var(--color-gray300);
+  transition: background-color 166ms ease-out;
+}
+.switch-root:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-black);
+}
+.switch-root[data-state="checked"] {
+  background-color: var(--color-red);
+  border-color: var(--color-red);
+}
+.switch-root[data-disabled] {
+  opacity: 0.5;
+}
+.switch-thumb {
+  display: inline-block;
+  vertical-align: middle;
+  width: var(--_switch-thumb-width);
+  height: var(--_switch-thumb-width);
+  background-color: var(--color-white);
+  border-radius: 9999px;
+  transition: transform 166ms ease-out;
+}
+.switch-thumb[data-state="checked"] {
+  transform: translateX(
+    calc(var(--_switch-width) - var(--_switch-gap) * 2 - var(--_switch-thumb-width))
+  );
+}
+
+/* ── collapsible (collapsible.stories.module.css) ──────────────────────────── */
+
+.collapsible-root {
+  max-width: 20em;
+  font-family: sans-serif;
+}
+.collapsible-trigger {
+  width: 100%;
+  text-align: inherit;
+  appearance: none;
+  border: none;
+  padding: 10px;
+  background-color: var(--color-black);
+  color: white;
+  font-family: inherit;
+  font-size: 1.2em;
+  --shadow-color: crimson;
+}
+.collapsible-trigger:focus {
+  outline: none;
+  box-shadow: inset 0 -5px 0 0 var(--shadow-color);
+  color: var(--color-red);
+}
+.collapsible-trigger[data-disabled] {
+  color: var(--color-gray300);
+}
+.collapsible-trigger[data-state="open"] {
+  background-color: var(--color-red);
+  color: var(--color-white);
+}
+.collapsible-content {
+  padding: 10px;
+  line-height: 1.5;
+}
+
+/* ── gallery index chrome ──────────────────────────────────────────────────── */
+/* Scoped under .gallery-index, which exists ONLY on the index route — the
+   isolated `?story=<id>` pages the pixel diff screenshots have no .gallery-index
+   wrapper, so this never affects them. */
+
+.gallery-index {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+.gallery-index > header {
+  margin-bottom: 2rem;
+}
+.gallery-index > header > h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+}
+.gallery-index > header > p {
+  margin: 0;
+  color: var(--gray-11);
+}
+
+.gallery-toc {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.gallery-toc > li {
+  margin: 0;
+}
+.gallery-toc a {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--gray-5);
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--gray-12);
+}
+.gallery-toc a:hover {
+  border-color: var(--gray-8);
+  background: var(--gray-2);
+}
+
+.gallery-card {
+  border: 1px solid var(--gray-4);
+  border-radius: 10px;
+  padding: 1.75rem;
+  margin: 0 0 1.25rem;
+}
+.gallery-card > h2 {
+  margin: 0 0 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-10);
+}
+.gallery-card > h2 > a {
+  color: inherit;
+  text-decoration: none;
+}
+.gallery-card > h2 > a:hover {
+  color: var(--gray-12);
+}

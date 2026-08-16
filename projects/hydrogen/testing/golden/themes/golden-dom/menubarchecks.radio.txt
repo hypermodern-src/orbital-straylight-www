@@ -1,0 +1,21 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <span data-radix-focus-guard= style=outline: none; opacity: 0; position: fixed; pointer-events: none; tabindex=0>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div data-orientation=horizontal role=menubar style=outline: none; tabindex=0>
+          <button aria-controls=<id0> aria-expanded=true aria-haspopup=menu data-orientation=horizontal data-radix-collection-item= data-radix-popper-align=start data-radix-popper-side=bottom data-state=open id=<id1> role=menuitem tabindex=0 type=button>
+            #View
+  <div data-radix-popper-content-wrapper= dir=ltr style=position: fixed; left: <px>; top: <px>; transform: translate(<px>, <px>); min-width: max-content; z-index: auto; --radix-popper-available-width: <px>; --radix-popper-available-height: <px>; --radix-popper-anchor-width: <px>; --radix-popper-anchor-height: <px>; --radix-popper-transform-origin: 0% <px>;>
+    <div aria-labelledby=<id1> aria-orientation=vertical data-align=start data-orientation=vertical data-radix-menu-content= data-radix-menubar-content= data-side=bottom data-state=open dir=ltr id=<id0> role=menu style=outline: none; --radix-menubar-content-transform-origin: var(--radix-popper-transform-origin); --radix-menubar-content-available-width: var(--radix-popper-available-width); --radix-menubar-content-available-height: var(--radix-popper-available-height); --radix-menubar-trigger-width: var(--radix-popper-anchor-width); --radix-menubar-trigger-height: var(--radix-popper-anchor-height); tabindex=-1>
+      <div role=group>
+        <div aria-checked=false data-orientation=vertical data-radix-collection-item= data-state=unchecked role=menuitemradio tabindex=-1>
+          #Small
+        <div aria-checked=true data-orientation=vertical data-radix-collection-item= data-state=checked role=menuitemradio tabindex=-1>
+          <span data-state=checked>
+            #✓
+          #Medium
+        <div aria-checked=false data-orientation=vertical data-radix-collection-item= data-state=unchecked role=menuitemradio tabindex=-1>
+          #Large
+  <span data-radix-focus-guard= style=outline: none; opacity: 0; position: fixed; pointer-events: none; tabindex=0>

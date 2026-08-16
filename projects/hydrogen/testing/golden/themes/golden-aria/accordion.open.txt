@@ -1,0 +1,7 @@
+- heading "Is it accessible?" [level=3]:
+  - button "Is it accessible?" [expanded]
+- region "Is it accessible?": Yes. It adheres to the WAI-ARIA design pattern.
+- heading "Is it styled?" [level=3]:
+  - button "Is it styled?"
+- heading "Is it animated?" [level=3]:
+  - button "Is it animated?"

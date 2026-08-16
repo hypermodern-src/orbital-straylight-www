@@ -1,0 +1,15 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-Box">
+          <form>
+            <div data-invalid=true>
+              <label data-invalid=true for=<id0>>
+                #Email
+              <input aria-describedby=<id1> data-invalid=true id=<id0> name=email required= title= type=email>
+              <span id=<id1>>
+                #Provide a valid email
+            <button type=submit>
+              #Submit

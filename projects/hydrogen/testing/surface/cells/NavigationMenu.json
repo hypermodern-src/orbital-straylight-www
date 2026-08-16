@@ -1,0 +1,336 @@
+{
+  "component": "NavigationMenu",
+  "primitive": "Hydrogen.Radix.NavigationMenu",
+  "face": "themed",
+  "upstream": "primitives packages/react/navigation-menu/src/navigation-menu.tsx + @radix-ui/themes@3",
+  "note": "Per-component surface ledger for NavigationMenu. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 28 gaps (6 core).",
+  "cells": [
+    {
+      "id": "navigationmenu.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "defaultValue open: trigger aria-expanded, FocusProxy span, Indicator translateX, Viewport vars, proxied Content"
+    },
+    {
+      "id": "navigationmenu.closed",
+      "state": "closed",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "both triggers data-state=closed/aria-expanded=false, no content/viewport/indicator"
+    },
+    {
+      "id": "navigationmenu.clicktoggle",
+      "state": "clicktoggle",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "navigation-menu.tsx:199-201 root toggle: click open trigger closes (aria-expanded=false)"
+    },
+    {
+      "id": "navigationmenu.rtl",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "dir=rtl on nav/list/content, arrow swap, motion values reversed"
+    },
+    {
+      "id": "navigationmenu.vertical",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "data-orientation=vertical, indicator top/height/translateY, ArrowDown roves"
+    },
+    {
+      "id": "navigationmenu.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (FocusProxy aria-hidden-focus)"
+    },
+    {
+      "id": "navigationmenu.hoveropen",
+      "state": "hoveropen",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "hovering a trigger opens it after delayDuration",
+      "ref": "DONE (2026-06-25): the pointer open TIMER state machine — PORT BUILD. Added delayDuration/skipDelayDuration Input + isOpenDelayed + openTimer; onMouseMove(trigger)→onTriggerEnter→handleDelayedOpen arms a delayDuration timer (instant inside the skip-delay window). Was a pure DOM diff but the behavior is timer-driven (no distinct at-rest DOM vs the open story), so APG-oracled: validated on --golden (real radix delays identically), then green on the port. navigation-menu.tsx:142-200. NavigationMenu.purs onTriggerEnter/handleDelayedOpen."
+    },
+    {
+      "id": "navigationmenu.closetimer",
+      "state": "hoveropen",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "moving the pointer away closes after the 150ms close timer",
+      "ref": "DONE (2026-06-25): the 150ms close TIMER + onContentEnter-cancels — PORT BUILD. onMouseLeave(trigger)→onTriggerLeave→startCloseTimer (150ms→close); onMouseEnter(content)→ContentEnter clears it (the 'hovering the content cancels the pending close' check). Validated on --golden, green on the port. navigation-menu.tsx:142-198. NavigationMenu.purs startCloseTimer/clearCloseTimer."
+    },
+    {
+      "id": "navigationmenu.inline",
+      "state": "inline",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "navigationmenu.inline",
+      "ref": "DONE (2026-06-26): INLINE (non-viewport) mode — PORT BUILD. When withViewport=false, the open Content renders IN-PLACE inside its Item (after the FocusProxy span) carrying data-state=open, and NO Viewport sibling / NO aria-owns span are emitted. Pinned DOM-identical by golden navigationmenu.inline. navigation-menu.tsx:771-787. NavigationMenu.purs renderContent withState + the renderItem viewport-vs-inline branch."
+    },
+    {
+      "id": "navigationmenu.datamotion",
+      "state": "motion",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "navigationmenu.motion",
+      "ref": "DONE (2026-06-26): the data-motion transition-direction machinery — PORT BUILD. Added State.previousValue (radix usePrevious, set on every open/close transition) + motionAttr computing the direction exactly as navigation-menu.tsx:890-916 (item-value order, RTL-reversed; from-end when index>prevIndex, from-start when <; Nothing on initial open). Emitted as data-motion on the content. Pinned DOM-identical by golden navigationmenu.motion (drive Item One→Two → content-two carries data-motion=from-end). SCOPE: under the bare (no-exit-animation) config every NavMenu oracle uses, upstream itself only emits the from-* directions; to-start/to-end live on the LEAVING content as it animates out — part of the exit lifecycle NavMenu deliberately omits (module header; same as select/tooltip/menubar closing oracles). motionAttr also computes from-start (Two→One). NavigationMenu.purs motionAttr/previousValue."
+    },
+    {
+      "id": "navigationmenu.tab-order-proxy",
+      "state": "tabproxy",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "navigationmenu.tabproxy",
+      "ref": "DONE (2026-06-26): removeFromTabOrder — PORT BUILD. Added State.contentTabRemoved + content onFocusOut/onFocusIn: focus leaving the open content (relatedTarget outside it) pulls its links from the tab order (data-tabindex=\"\" + tabindex=-1, radix removeFromTabOrder); focus re-entering restores them. Pinned DOM-identical by golden navigationmenu.tabproxy (open → focus a link → focus back to the trigger → both links carry data-tabindex= tabindex=-1, menu still open). navigation-menu.tsx:1194-1205. NavigationMenu.purs ContentFocusOut/ContentFocusIn + renderLink."
+    },
+    {
+      "id": "navigationmenu.focusproxy",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Tab from the open trigger bridges (FocusProxy) into the content",
+      "ref": "DONE (2026-06-25): the FocusProxy onFocus tab-bridge — PORT BUILD. The span was rendered-but-stubbed (no handler); added HE.onFocus (ProxyFocus i): relatedTarget===trigger → focus first content link (start); from anywhere not the content → focus last link (end); from the content → leave (natural tab-out). Validated on --golden (real radix proxy), green on the port. navigation-menu.tsx:554-568. NavigationMenu.purs ProxyFocus/focusLastLink/containsTarget."
+    },
+    {
+      "id": "navigationmenu.skipdelay",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:107 skipDelayDuration=300 re-enter opens immediately (isOpenDelayed=false)"
+    },
+    {
+      "id": "navigationmenu.clickclose-latch",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:490-535 wasClickCloseRef: click-close then pointer-move stays closed until re-enter"
+    },
+    {
+      "id": "navigationmenu.escclose-latch",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:430-516 wasEscapeCloseRef: Escape-close then pointer-move stays closed until re-enter"
+    },
+    {
+      "id": "navigationmenu.sub",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:222-272 NavigationMenuSub nested provider (isRootMenu=false), immediate open on trigger-enter"
+    },
+    {
+      "id": "navigationmenu.viewport-multi",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:1037-1083 viewport keeps last-active mounted + registers all items; port renders single open content"
+    },
+    {
+      "id": "navigationmenu.content-tab",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "navigation-menu.tsx:949-971 Content Tab/Shift+Tab walks candidates, exits via proxy; port LinkKeyDown arrows only"
+    },
+    {
+      "id": "navigationmenu.link-select",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:584-630 Link onSelect + ROOT_CONTENT_DISMISS closes menu; port renderLink no onClick"
+    },
+    {
+      "id": "navigationmenu.link-active",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-25): active Link \u2014 the active content link carries data-active=\"\" + aria-current=\"page\" (navigation-menu.tsx:589-604). navigationmenu.activelink DOM golden byte-identical; ARIA tree + axe fingerprint match upstream (navigationmenu:activelink added to the a11y MATRIX).",
+      "oracle_file": "navigationmenu.activelink"
+    },
+    {
+      "id": "navigationmenu.disabled",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:482-500 disabled trigger data-disabled, skipped by pointer-open + roving; port no support"
+    },
+    {
+      "id": "navigationmenu.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-25): controlled value \u2014 parent OWNS value=\"one\" (open at first paint). The port already arms the open path at mount when openValue/=\"\" (Initialize armOpen+measure) for controlled value just as for defaultValue; navigationmenu.controlled DOM golden byte-identical to the uncontrolled open render. navigation-menu.tsx:82-140",
+      "oracle_file": "navigationmenu.controlled"
+    },
+    {
+      "id": "navigationmenu.dismissable",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "navigation-menu.tsx:937-948 onPointerDownOutside/onFocusOutside with trigger/viewport guards; port Escape only"
+    },
+    {
+      "id": "navigationmenu.home-end",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Home/End jump trigger roving to first/last",
+      "ref": "navigation-menu.tsx:1130-1135 Home\u2192first / End\u2192last trigger roving; APG tests only arrows"
+    },
+    {
+      "id": "navigationmenu.content-roving",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "content-link roving: Arrow keys move between content links (CLAMPED, non-looping)",
+      "ref": "navigation-menu.tsx:921-1149 content links FocusGroup arrows clamped non-loop; only trigger roving APG-tested"
+    },
+    {
+      "id": "navigationmenu.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Content/Viewport/Indicator"
+    },
+    {
+      "id": "navigationmenu.clear-restore",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: value-clear focus restore only when focus is inside content"
+    },
+    {
+      "id": "navigationmenu.aria-owns",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "edge: aria-owns span only in VIEWPORT mode (restructures)"
+    },
+    {
+      "id": "navigationmenu.indicator-hidden",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Indicator data-state=hidden while value empty but forceMount"
+    },
+    {
+      "id": "navigationmenu.single-item",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: single-item/empty-list roving (one trigger, End)"
+    },
+    {
+      "id": "navigationmenu.arrow-noop",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowUp on a trigger is a no-op (horizontal axis only)",
+      "ref": "edge: ArrowUp/ArrowDown in horizontal roving are no-ops on trigger"
+    }
+  ]
+}

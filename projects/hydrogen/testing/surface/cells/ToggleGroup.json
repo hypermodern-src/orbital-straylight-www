@@ -1,0 +1,254 @@
+{
+  "component": "ToggleGroup",
+  "primitive": "Hydrogen.Radix.ToggleGroup",
+  "face": "themed",
+  "upstream": "primitives packages/react/toggle-group/src/toggle-group.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger: every cell tying ToggleGroup out against upstream. status=gated have committed goldens; status=open are named debt. 2 open-core cells.",
+  "cells": [
+    {
+      "id": "togglegroup.pressed",
+      "state": "pressed",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "single-mode item pressed: role=radio, aria-checked, data-state=on, roving tabindex"
+    },
+    {
+      "id": "togglegroup.multiple",
+      "state": "multiple",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "type=multiple: aria-pressed items, two on simultaneously"
+    },
+    {
+      "id": "togglegroup.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest single-mode a11y tree (role=group, radio items)"
+    },
+    {
+      "id": "segmentedcontrol.selected",
+      "state": "selected",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "themes SegmentedControl selected segment DOM + aria"
+    },
+    {
+      "id": "segmentedcontrol.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "SegmentedControl at-rest a11y tree"
+    },
+    {
+      "id": "togglegroup.root-role",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "CO-COVER (2026-06-24): togglegroup.pressed DOM + ARIA goldens (both gate-green, a11y MATRIX shown=pressed) byte-pin single-mode roles \u2014 root role=group (NB: upstream renders role=group here, not radiogroup; the golden corrects the stale audit prose), items role=radio with aria-checked + roving tabindex. toggle-group.tsx:40",
+      "oracle_file": "togglegroup.pressed"
+    },
+    {
+      "id": "togglegroup.multiple-mode",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-24): togglegroup.multiple DOM golden byte-pins type=multiple \u2014 root role=group, items role=button with aria-pressed (NOT radio), independent on/off data-state; togglegroup:multiple added to the a11y MATRIX (ARIA tree + axe captured, port matches upstream). toggle-group.tsx:43-46,148-157",
+      "oracle_file": "togglegroup.multiple"
+    },
+    {
+      "id": "togglegroup.deselect",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "toggle-group.tsx:106 single-mode toggle active item OFF clears to empty; no oracle clicks active item twice"
+    },
+    {
+      "id": "togglegroup.disabled",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "toggle-group.tsx:205,215,249,256 group/item disabled: data-disabled, not focusable; no oracle seeds disabled"
+    },
+    {
+      "id": "togglegroup.disabled-skip",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowRight SKIPS a disabled item to the next enabled one",
+      "ref": "roving-focus-group.tsx:271 disabled item must be SKIPPED by roving; port STALLS (focusItemAt guard) instead of advancing"
+    },
+    {
+      "id": "togglegroup.vertical",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "vertical: ArrowDown navigates, ArrowRight is inert",
+      "ref": "orientation=vertical: ArrowUp/Down rove, Left/Right inert, data-orientation stamped; port never stamps it"
+    },
+    {
+      "id": "togglegroup.noloop",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "loop=false: ArrowLeft at the first item does NOT wrap to the last",
+      "ref": "toggle-group.tsx:208 loop=false stops at ends; loop=true wrap also never exercised end-to-end"
+    },
+    {
+      "id": "togglegroup.enter-activate",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter activates the focused item (single-mode radio move)",
+      "ref": "toggle.tsx:49-53 native Enter activates focused item; APG only checks Space, not Enter, not multiple mode"
+    },
+    {
+      "id": "togglegroup.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "toggle-group.tsx:93-98 controlled value: click emits ValueChanged but DOM stays until parent re-feeds; SetValue/GetValue queries"
+    },
+    {
+      "id": "togglegroup.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "rtl: ArrowLeft roves to the NEXT item, ArrowRight to the previous",
+      "ref": "edge: RTL flips horizontal arrows (ArrowLeft\u2192next)"
+    },
+    {
+      "id": "togglegroup.home-end",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: Home/End first/last; PageUp/PageDown map to first/last"
+    },
+    {
+      "id": "togglegroup.modifier-keys",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Ctrl+ArrowRight does NOT navigate (modifier keys ignored)",
+      "ref": "edge: Arrow nav must IGNORE modifier keys (meta/ctrl/alt/shift)"
+    },
+    {
+      "id": "togglegroup.shift-tab-out",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: Shift+Tab sets isTabbingBackOut \u2192 group tabindex=-1, focus exits"
+    },
+    {
+      "id": "togglegroup.entry-focus",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: entry focus lands on FIRST FOCUSABLE item when nothing pressed"
+    },
+    {
+      "id": "togglegroup.no-roving",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: rovingFocus=false mode renders items without RovingFocus.Item"
+    },
+    {
+      "id": "togglegroup.missing-type",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: missing type prop throws at runtime upstream"
+    },
+    {
+      "id": "togglegroup.disabled-attr",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: data-disabled emitted as empty-string attribute on disabled item"
+    },
+    {
+      "id": "togglegroup.tabstop-choice",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: roving tab stop = first item when nothing pressed"
+    }
+  ]
+}

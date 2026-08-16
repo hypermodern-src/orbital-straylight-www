@@ -1,0 +1,418 @@
+{
+  "component": "DropdownMenu",
+  "primitive": "Hydrogen.Radix.DropdownMenu",
+  "face": "themed",
+  "upstream": "primitives packages/react/dropdown-menu/src/dropdown-menu.tsx + menu.tsx + @radix-ui/themes@3",
+  "note": "Per-component surface ledger for DropdownMenu (incl. checks + group sub-primitives). status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows. 29 gaps (5 core).",
+  "cells": [
+    {
+      "id": "dropdownmenu.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "open content: role=menu, 3 menuitems, modal envelope (scroll-lock, focus guards, hideOthers)"
+    },
+    {
+      "id": "dropdownmenu.closed-rest",
+      "state": "closed-rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "FIXED (2026-06-21): wrapper gated on isRendered \u2192 content UNMOUNTED at closed-rest (was display:none always-mounted); trigger popper-side/align also gated. golden-dom/dropdownmenu.closed-rest.txt; open/item2/disabled/submenu/closing no regression. (systemic popper-overlay closed-rest bug)"
+    },
+    {
+      "id": "dropdownmenu.item2",
+      "state": "item2",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "ArrowDown\u00d72 \u2192 Duplicate data-highlighted + tabindex=0, roving tabindex=-1 elsewhere"
+    },
+    {
+      "id": "dropdownmenu.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "disabled item data-disabled+aria-disabled, corrected roving tabindex distribution"
+    },
+    {
+      "id": "dropdownmenu.submenu",
+      "state": "submenu",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "ArrowRight on SubTrigger \u2192 nested role=menu + aria-expanded/aria-controls"
+    },
+    {
+      "id": "dropdownmenu.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "pinned-anim closing node: data-state=closed lingering, body pointer-events released"
+    },
+    {
+      "id": "dropdownmenu.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest trigger (data-state=closed, aria-expanded=false) a11y tree"
+    },
+    {
+      "id": "dropdownmenuchecks.checkbox",
+      "state": "checkbox",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "role=menuitemcheckbox, aria-checked, data-state, ItemIndicator gated on checked, stays-open select"
+    },
+    {
+      "id": "dropdownmenuchecks.radio",
+      "state": "radio",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "role=menuitemradio, aria-checked on selected only, ItemIndicator, stays-open"
+    },
+    {
+      "id": "dropdownmenuchecks.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "checks variant at-rest a11y tree"
+    },
+    {
+      "id": "dropdownmenugroup.open",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "role=group wrapper + Label non-interactive labelling div"
+    },
+    {
+      "id": "dropdownmenugroup.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "group variant at-rest a11y tree"
+    },
+    {
+      "id": "dropdownmenu.checkboxitem-core",
+      "state": "checkbox",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): dropdownmenuchecks.checkbox DOM golden (gate-green) byte-pins CheckboxItem \u2014 role=menuitemcheckbox, aria-checked=true, data-state=checked, with the rt-...ItemIndicator (data-state=checked). menu.tsx:782-804",
+      "oracle_file": "dropdownmenuchecks.checkbox"
+    },
+    {
+      "id": "dropdownmenu.radioitem-core",
+      "state": "radio",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): dropdownmenuchecks.radio DOM golden (gate-green) byte-pins RadioGroup/RadioItem value-based single selection \u2014 three role=menuitemradio rows, exactly one aria-checked=true/data-state=checked, others unchecked. menu.tsx:823-872",
+      "oracle_file": "dropdownmenuchecks.radio"
+    },
+    {
+      "id": "dropdownmenu.disabled-skip",
+      "state": "disabled",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowDown SKIPS a disabled item to the next enabled one",
+      "ref": "menu.tsx:540 items.filter(!disabled); PORT BUG itemCount counts disabled \u2192 roving lands on it"
+    },
+    {
+      "id": "dropdownmenu.space-enter",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Space selects the highlighted item and closes the menu",
+      "ref": "menu.tsx:667-680 Space/Enter selects focused item + close; port MenuKeyDown only navigates"
+    },
+    {
+      "id": "dropdownmenu.aria-controls",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "CO-COVER (2026-06-24): the dropdownmenu.closed-rest vs dropdownmenu.open DOM goldens (both gate-green) byte-pin the contract \u2014 closed trigger has aria-expanded=false aria-haspopup=menu and NO aria-controls; open trigger gains aria-controls=<menu id> and the menu carries aria-labelledby=<trigger id>. ARIA-tree goldens (rest vs open, a11y MATRIX) corroborate. dropdown-menu.tsx:109-114",
+      "oracle_file": "dropdownmenu.open"
+    },
+    {
+      "id": "dropdownmenu.typeahead",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "typeahead: a letter focuses the next matching item, repeats cycle",
+      "ref": "IMPLEMENTED (2026-06-21): Behavior.Typeahead.nextMatch (radix getNextMatch port; unit-tested) + DropdownMenu wiring (search buffer, performance.now 1s lazy reset, space-guard, DOM textValue read). menu.tsx:411-434"
+    },
+    {
+      "id": "dropdownmenu.select-noclose",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-24): FEATURE (ContextMenu pattern) \u2014 keepOpenValues Input field models cancelable onSelect-preventDefault; both select paths (click + keyboard Enter/Space) skip closeMenu when the value is in keepOpenValues. ?s=selectnoclose apg green both faces; normal select-and-close unregressed. menu.tsx:637-648",
+      "apg_check": "cancelable item select (preventDefault) keeps the menu OPEN"
+    },
+    {
+      "id": "dropdownmenu.loop",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "loop off (default): ArrowDown on the last item does NOT wrap",
+      "ref": "FIXED (2026-06-21): cfg loop true\u2192false in MenuKeyDown + SubKeyDown (menu.tsx:362 default false). ArrowDown on last stays put; golden-validated"
+    },
+    {
+      "id": "dropdownmenu.page-keys",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "PageDown focuses the last item, PageUp the first",
+      "ref": "IMPLEMENTED (2026-06-21): RovingFocus.navigatePaged (PageUp\u2261Home/PageDown\u2261End, opt-in for menus; Slider/Select keep plain navigate). menu.tsx:28-30. golden-validated"
+    },
+    {
+      "id": "dropdownmenu.nonmodal",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): FEATURE (ContextMenu pattern replicated) \u2014 added modal field; finalize gates lockScroll+hideOthers on st.modal (focus guards both modes; order lock\u2192guards\u2192hideOthers), content pointer-events:auto stripped when non-modal (stripPE), finishClose gates showOthers+unlockScroll on modal. ?s=nonmodal golden byte-identical (no data-scroll-locked, no #root aria-hidden, guards present, content no pointer-events:auto); modal states unregressed. menu.tsx:253-324",
+      "oracle_file": "dropdownmenu.nonmodal"
+    },
+    {
+      "id": "dropdownmenu.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): FIXED start-open (ContextMenu pattern) \u2014 controlled open=Just true at mount renders the menu OPEN (presence=Open from initialState) anchored to the trigger. Initialize arms the open envelope (subs + scheduleAfterOpen) when current ctrl, mirroring openMenuWith without the ctrl change. golden dropdownmenu.controlled byte-identical; open/submenu unregressed. dropdown-menu.tsx:62-67",
+      "oracle_file": "dropdownmenu.controlled"
+    },
+    {
+      "id": "dropdownmenu.trigger-keys",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowUp on the closed trigger does NOT open the menu",
+      "ref": "FIXED (2026-06-21): removed the ArrowUp-opens deviation from TriggerKeyDown (dropdown-menu.tsx:127-134: only ArrowDown opens; Enter/Space via native click). golden-validated"
+    },
+    {
+      "id": "dropdownmenu.tab-prevented",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Tab is prevented (focus stays in the menu)",
+      "ref": "IMPLEMENTED (2026-06-21): MenuKeyDown intercepts Tab (and Shift+Tab, same key) \u2192 preventDefault, focus trapped. menu.tsx:531-532. golden-validated"
+    },
+    {
+      "id": "dropdownmenu.focus-trap",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-24): co-covered \u2014 the FocusScope trap (menu.tsx:273-307) keeps focus in the open menu; Tab/Shift+Tab are preventDefault-ed (DropdownMenu.purs:994-996). Existing apg check Tab is prevented green both faces.",
+      "apg_check": "Tab is prevented (focus stays in the menu)"
+    },
+    {
+      "id": "dropdownmenu.keyboard-entry",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "menu.tsx:507-510 isUsingKeyboardRef: key-open highlights first item, pointer-open focuses content only"
+    },
+    {
+      "id": "dropdownmenu.hover-highlight",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "menu.tsx:739-758 pointerMove item.focus\u2192data-highlighted; port has no pointer-hover wiring"
+    },
+    {
+      "id": "dropdownmenu.multi-instance",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "dropdown-menu.tsx:72-74 useId per instance; port module-level RefLabel constants may collide across instances"
+    },
+    {
+      "id": "dropdownmenu.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: dir=rtl content+items+RovingFocus"
+    },
+    {
+      "id": "dropdownmenu.left-button",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: trigger pointerDown only left button (button===0)"
+    },
+    {
+      "id": "dropdownmenu.window-blur",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: window blur closes menu + submenus"
+    },
+    {
+      "id": "dropdownmenu.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Portal/Content/ItemIndicator"
+    },
+    {
+      "id": "dropdownmenu.container",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Portal container prop (custom mount node)"
+    },
+    {
+      "id": "dropdownmenu.arrow",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Arrow sub-part (DropdownMenuArrow \u2192 PopperPrimitive.Arrow)"
+    },
+    {
+      "id": "dropdownmenu.textvalue",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: textValue prop overrides typeahead match text"
+    },
+    {
+      "id": "dropdownmenu.css-props",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: re-namespaced content CSS custom properties"
+    },
+    {
+      "id": "dropdownmenu.sub-align",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: submenu align prop (start default, exclude center) + side"
+    },
+    {
+      "id": "dropdownmenu.dismiss-cbs",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: onEscapeKeyDown/onPointerDownOutside/onInteractOutside callbacks"
+    }
+  ]
+}

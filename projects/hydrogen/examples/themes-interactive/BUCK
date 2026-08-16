@@ -1,0 +1,18 @@
+# Hydrogen.Themes interactive port — the INTERACTIVE Radix Themes components (Dialog, …)
+# as styled wrappers over the Hydrogen.Radix primitives, bundled to a browser app and
+# diffed/screenshotted (testing/playwright) against the golden's open-state. Shares the
+# golden's ?c=<id> contract + compiled themes.css.
+#   nix develop -c buck2 build //examples/themes-interactive:app
+load("//:registry.bzl", "PURS_REGISTRY")
+
+purescript_app(
+    name = "app",
+    srcs = [
+        "src/ThemesInteractive/Main.purs",
+    ],
+    main = "ThemesInteractive.Main",
+    deps = ["//:lib"],
+    index_html = "index.html",
+    style_css = "themes.css",
+    packages = PURS_REGISTRY,
+)

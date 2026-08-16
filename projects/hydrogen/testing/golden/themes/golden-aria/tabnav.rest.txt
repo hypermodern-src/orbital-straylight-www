@@ -1,0 +1,11 @@
+- navigation "Main":
+  - list:
+    - listitem:
+      - link "Account":
+        - /url: "#account"
+    - listitem:
+      - link "Documents":
+        - /url: "#documents"
+    - listitem:
+      - link "Settings":
+        - /url: "#settings"

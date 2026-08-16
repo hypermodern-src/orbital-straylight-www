@@ -1,0 +1,4 @@
+- group "Text alignment":
+  - radio "Left"
+  - radio "Center" [checked]
+  - radio "Right"

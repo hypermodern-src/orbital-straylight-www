@@ -1,0 +1,12 @@
+# Hydrogen.Data — the data layer: the typed API client (Client), value formatting
+# (Format), query state (Query), and RemoteData. Leaf layer.
+purescript_library(
+    name = "data",
+    srcs = [
+        "Client.purs",
+        "Format.purs",
+        "Query.purs",
+        "RemoteData.purs",
+    ],
+    visibility = ["PUBLIC"],
+)

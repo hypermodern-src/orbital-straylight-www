@@ -1,0 +1,9 @@
+- menubar:
+  - menuitem "File" [expanded]
+  - menuitem "Edit"
+  - menuitem "View"
+- menu "File":
+  - menuitem "New Tab"
+  - menuitem "New Window"
+  - separator
+  - menuitem "Print"

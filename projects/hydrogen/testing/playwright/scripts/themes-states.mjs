@@ -1,0 +1,1625 @@
+// themes-states.mjs — the per-component state driver shared by every interactive gate
+// (themes-open-dom.mjs DOM oracle, themes-a11y.mjs a11y oracle). ONE source of truth for
+// "how to drive component <id> into state <state>", keyed off the upstream class/role
+// selectors the Halogen port must reproduce — so the DOM-structure gate, the a11y-tree
+// gate, and (separately) the APG keyboard gate can never drift on what "open" means.
+import { createServer } from "node:http";
+import { readFile } from "node:fs/promises";
+import { join, extname } from "node:path";
+
+// A tiny static file server (ephemeral port so parallel runs never collide).
+export async function serve(dir) {
+  const MIME = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css" };
+  const srv = createServer(async (q, s) => {
+    let p = q.url.split("?")[0]; if (p === "/") p = "/index.html";
+    try { const b = await readFile(join(dir, p)); s.setHeader("Content-Type", MIME[extname(p)] ?? "application/octet-stream"); s.setHeader("Cache-Control", "no-store"); s.end(b); }
+    catch { s.statusCode = 404; s.end("nf"); }
+  }).listen(0);
+  await new Promise((r) => srv.once("listening", r));
+  return { port: srv.address().port, close: () => srv.close() };
+}
+
+export const root = (pg) => pg.locator("#root");
+export const triggerButton = (pg) => root(pg).getByRole("button").first();
+export const settle = (pg) => pg.waitForTimeout(300); // let Popper position + presence flush
+
+const openMenu = async (pg, click) => { await click(); await pg.locator('[role="menu"]').first().waitFor(); };
+
+// Press Escape — the DismissableLayer/RemoveScroll close path shared by every modal/popper
+// overlay (dialog, alertdialog, popover, *menu, select). Keyed off no port internals.
+const escClose = (pg) => pg.keyboard.press("Escape");
+
+// CLOSE actions (STR-335 closing oracle): given an OPEN overlay, drive it into its exit
+// (data-state="closed") lifecycle. Keyed off UPSTREAM role/rt-* selectors only, so the same
+// action runs against golden AND port. The closing driver pins the exit animation to 100s
+// BEFORE invoking this, so the closing node lingers mounted for the snapshot.
+export const CLOSE = {
+  dialog: escClose,
+  alertdialog: escClose,
+  popover: escClose,
+  dropdownmenu: escClose,
+  contextmenu: escClose,
+  // HoverCard hides on pointer-leave of BOTH trigger and content. Move the mouse off-anchor;
+  // the rt-HoverCardContent (rt-PopperContent) then lingers mounted with data-state="closed".
+  hovercard: async (pg) => { await pg.mouse.move(0, 0); await pg.mouse.move(2, 2); },
+  // Toast closes via Escape on the FOCUSED toast (onEscapeKeyDown → handleClose). Focus the
+  // <li> first (it is tabindex=0), then Escape. The golden story adds a 100ms exit keyframe on
+  // li[data-state="closed"] so Presence keeps the li MOUNTED (data-state=closed) through the
+  // pinned (100s) exit — the lingering closing node the oracle captures. Keyed off UPSTREAM
+  // selectors only (the tabbable li), so the same action runs against golden AND port.
+  toast: async (pg) => {
+    const li = pg.locator('li[data-state="open"][data-swipe-direction]').first();
+    await li.focus();
+    await pg.keyboard.press("Escape");
+  },
+  // Collapsible closes by re-clicking its (now open) trigger → onOpenToggle(false). The golden
+  // story injects a 100ms exit keyframe on the closing content (div[data-state="closed"][id])
+  // so Presence keeps the content MOUNTED (data-state="closed", hidden, size-vars retained,
+  // EMPTY children) through the pinned (100s) exit — the lingering closing node the oracle
+  // captures. Keyed off the UPSTREAM trigger only, so the same action runs against golden AND
+  // port. (Without the injected keyframe the bare unstyled content has animation-name:none and
+  // unmounts synchronously, like menubar/select.)
+  collapsible: async (pg) => { await root(pg).getByRole("button").first().click(); },
+
+  // ── DELIBERATELY NO closing oracle (verified against real @radix-ui/themes) ───────────────
+  // select  — Radix Select.Content does NOT wrap its content in Presence: on Escape the
+  //           rt-SelectContent listbox unmounts SYNCHRONOUSLY (only the rt-SelectTrigger flips
+  //           to data-state="closed"). There is no lingering data-state="closed" content node
+  //           to capture, so a closing-DOM oracle would be empty. Dropped from the matrix.
+  // tooltip — Radix Tooltip.Content likewise unmounts on hide (pointer-leave/blur) with no
+  //           lingering data-state="closed" content node — only the trigger flips to closed.
+  //           No exit lifecycle node exists to snapshot. Dropped from the matrix.
+  // menubar — the BARE @radix-ui/react-menubar primitive carries NO rt-* exit CSS, so its
+  //           MenubarContent has animation-name:none. Presence therefore unmounts it
+  //           SYNCHRONOUSLY on Escape (verified: the role=menu node is GONE the next frame,
+  //           even with animations pinned to 100s — the pin only stalls nodes that HAVE an
+  //           animation). Unlike the THEMED DropdownMenu (whose rt-* content animates and so
+  //           lingers), there is no closing node to capture. Dropped from the matrix, same as
+  //           select/tooltip. (The OPEN/item1 oracles cover the menubar DOM contract.)
+  // navigationmenu — the bare @radix-ui/react-navigation-menu primitive ships NO exit CSS, so
+  //           its viewport-proxied Content (Presence present={isActive}) has animation-name:none.
+  //           On value-clear (Escape / re-click) the active content node UNMOUNTS SYNCHRONOUSLY —
+  //           verified empirically: the next frame the open trigger is gone (aria-expanded=true
+  //           count → 0), no lingering data-state="closed" / data-motion node exists, even with
+  //           animations pinned. Same call as menubar/select/tooltip — dropped from the matrix.
+  //           (The closed/open DOM oracles cover the full DOM contract; the keyboard close path
+  //           is the APG "Escape closes + restores focus" gate.)
+};
+
+// id → { state → (pg) => drive into that state }. `open` is the canonical "shown" state
+// every overlay has; richer states (item highlighted, option selected) extend per component.
+export const STATES = {
+  dialog: {
+    open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
+    // `?s=notitle` — Title + Description omitted: the open dialog content has NO <h1>/<p> and
+    // (the contract under test) NO aria-labelledby/describedby.
+    notitle: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
+    // `?s=rtl` — open dialog whose Content carries dir="rtl" (direction passthrough).
+    rtl: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("dialog").waitFor(); },
+    // `?s=forcemount` — NO interaction: forceMount keeps the content mounted while CLOSED.
+    // Wait for the closed content node (data-state=closed) to exist in the (portaled) DOM.
+    forcemount: async (pg) => { await pg.locator('[role="dialog"][data-state="closed"]').first().waitFor({ state: "attached" }); },
+    // at-rest CLOSED disclosure (no interaction): pins the closed-trigger contract —
+    // aria-expanded=false and NO aria-controls (present only while open). Keyed off the
+    // upstream closed trigger only, so the same driver runs golden + port.
+    "closed-attr": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
+  },
+  alertdialog: {
+    open: async (pg) => { await triggerButton(pg).click(); await pg.getByRole("alertdialog").waitFor(); },
+    // `?s=controlled` / `?s=defaultopen` — open at MOUNT (no interaction); wait for the dialog.
+    controlled: async (pg) => { await pg.getByRole("alertdialog").waitFor(); },
+    defaultopen: async (pg) => { await pg.getByRole("alertdialog").waitFor(); },
+    // at-rest CLOSED disclosure: aria-controls present only when open, aria-expanded=false.
+    "aria-controls": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
+  },
+  popover: {
+    open: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
+    // `?s=controlled` / `?s=defaultopen` — open at MOUNT (no interaction); wait for the content.
+    controlled: async (pg) => { await pg.locator(".rt-PopoverContent").first().waitFor(); },
+    defaultopen: async (pg) => { await pg.locator(".rt-PopoverContent").first().waitFor(); },
+    // `?s=modal` — open at MOUNT, modal: wait for the content AND the body scroll-lock marker
+    // (RemoveScroll) so the modal envelope has settled. Same selectors both faces.
+    modal: async (pg) => {
+      await pg.locator(".rt-PopoverContent").first().waitFor();
+      await pg.locator('body[data-scroll-locked]').waitFor();
+    },
+    // `?s=flip` — preferred side=top collides at the viewport top and flips to bottom. Open at
+    // mount; wait for the content resolved to data-side=bottom (the flip settled). Both faces.
+    flip: async (pg) => { await pg.locator('.rt-PopoverContent[data-side="bottom"]').first().waitFor(); },
+    // ?s=close → the content holds a Popover.Close submit button below the textarea. The open
+    // driver is the same (click the trigger); the snapshot pins the extra close-button markup.
+    // Keyed off rt-PopoverContent, so the same driver runs golden + port.
+    close: async (pg) => { await triggerButton(pg).click(); await pg.locator(".rt-PopoverContent").waitFor(); },
+    // at-rest CLOSED trigger: aria-controls absent when closed (present only when open).
+    "closed-attr": async (pg) => { await root(pg).locator('button[aria-expanded="false"]').first().waitFor(); },
+  },
+  tooltip: {
+    "closed-rest": async (pg) => { await root(pg).getByRole("button").first().waitFor(); },
+    open: async (pg) => { await triggerButton(pg).hover(); await pg.getByRole("tooltip").waitFor(); },
+    // FOCUS-open path: upstream `onFocus → onOpen → handleOpen` sets wasOpenDelayedRef=false,
+    // so the stateAttribute is "instant-open" (NOT the hover path's "delayed-open"). Keyed off
+    // the upstream role=tooltip + the trigger's data-state, so the same driver runs golden+port.
+    focusopen: async (pg) => {
+      await triggerButton(pg).focus();
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
+    // START-OPEN (?s=controlled parent-owned, ?s=defaultopen uncontrolled): OPEN at mount, NO
+    // hover/focus. defaultOpen → instant-open (wasOpenDelayedRef defaults false). Same driver
+    // both faces: wait for the role=tooltip copy + the trigger's instant-open data-state.
+    controlled: async (pg) => {
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
+    defaultopen: async (pg) => {
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
+    // ARIA-LABEL (?s=arialabel): aria-label overrides the role=tooltip copy's text. Opened at
+    // mount (instant-open); wait for the tooltip copy to carry the override text.
+    arialabel: async (pg) => {
+      await pg.getByRole("tooltip").waitFor();
+      await pg.locator('button[data-state="instant-open"]').first().waitFor();
+    },
+  },
+  hovercard: {
+    open: async (pg) => { await root(pg).getByRole("link").first().hover(); await pg.locator(".rt-HoverCardContent").waitFor(); },
+    // `?s=controlled` — open at MOUNT (parent owns open); NO hover. Wait for the content.
+    controlled: async (pg) => { await pg.locator(".rt-HoverCardContent").first().waitFor(); },
+    // `?s=placement` — open at MOUNT with side=right; wait for the content to settle on the side.
+    placement: async (pg) => { await pg.locator('.rt-HoverCardContent[data-side="right"]').first().waitFor(); },
+    // RICH-CONTENT (?s=richcontent): the card holds a tabbable <a>; on open, upstream sets
+    // tabindex=-1 on every tabbable content descendant (the card is a preview, not a focus
+    // target). Hover the TRIGGER link (the first link in the prose), wait for the content, then
+    // wait until the in-content link has tabindex=-1 (the getTabbableNodes effect ran). Keyed
+    // off the rt-HoverCardContent + the inner anchor's tabindex, so the same driver runs
+    // golden+port.
+    richcontent: async (pg) => {
+      await root(pg).getByRole("link").first().hover();
+      await pg.locator(".rt-HoverCardContent").waitFor();
+      await pg.locator('.rt-HoverCardContent a[tabindex="-1"]').first().waitFor();
+    },
+  },
+  dropdownmenu: {
+    "closed-rest": async (pg) => { await root(pg).getByRole("button").first().waitFor(); },
+    open: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
+    // `?s=nonmodal` — modal=false: open via click; snapshot pins the NON-modal envelope (body
+    // no data-scroll-locked, #root not aria-hidden), focus guards still present.
+    nonmodal: async (pg) => openMenu(pg, () => triggerButton(pg).click()),
+    // `?s=controlled` — open at mount (parent owns open); NO interaction.
+    controlled: async (pg) => { await pg.locator('[role="menu"]').first().waitFor(); },
+    item2: async (pg) => {
+      await openMenu(pg, () => triggerButton(pg).click());
+      await pg.keyboard.press("ArrowDown");
+      await pg.keyboard.press("ArrowDown");
+    },
+    // ?s=disabled disables Duplicate. Open via ArrowDown (highlights Edit), then ArrowDown
+    // SKIPS the disabled Duplicate to Archive — the snapshot pins the disabled item's
+    // data-disabled/aria-disabled + tabindex=-1 and the roving tabindex distribution.
+    disabled: async (pg) => {
+      await triggerButton(pg).focus();
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitem"][data-highlighted]').first().waitFor();
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Archive");
+      });
+    },
+    // ?s=submenu → root + Sub are BOTH defaultOpen, so the nested role=menu (SubContent)
+    // renders at rest. No click (that would toggle the root closed) — just wait for both the
+    // root menu and the nested submenu to be present.
+    // ?s=submenu → click the trigger to open the root menu, then hover the SubTrigger ("More")
+    // to open the nested SubContent (a second role=menu). Same driver runs golden + port, so the
+    // open-sub DOM (SubTrigger aria-expanded/data-state + the nested menu) is oracle'd non-circularly.
+    submenu: async (pg) => {
+      await openMenu(pg, () => triggerButton(pg).click());
+      await pg.locator('[role="menuitem"][aria-haspopup="menu"]').first().hover();
+      await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 5000 });
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]');
+        return t && t.getAttribute("data-state") === "open";
+      });
+    },
+  },
+  contextmenu: {
+    "closed-rest": async (pg) => { await root(pg).locator(".rt-BaseMenuTrigger, [data-state]").first().waitFor(); },
+    open: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),
+    // `?s=nonmodal` — modal={false}: right-click open; the snapshot pins the NON-modal envelope
+    // (body has no data-scroll-locked, #root not aria-hidden) with focus guards still present.
+    nonmodal: async (pg) => openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" })),
+    // `?s=controlled` — open at mount (parent owns open={true}), NO interaction; anchors top-left.
+    controlled: async (pg) => { await pg.locator('[role="menu"]').first().waitFor(); },
+    // right-click open then ArrowDown ×2 → the second enabled item (Duplicate) lands
+    // data-highlighted (roving tabindex=0). Mirrors dropdownmenu.item2. Keyed off
+    // role/data-* only, so the same driver runs against golden and port.
+    item2: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.keyboard.press("ArrowDown");
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Duplicate");
+      });
+    },
+    // ?s=disabled disables Duplicate. Open via right-click, ArrowDown highlights Edit,
+    // ArrowDown SKIPS the disabled Duplicate to Delete — the snapshot pins the disabled
+    // item's data-disabled/aria-disabled + tabindex=-1 and the roving tabindex distribution.
+    disabled: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menuitem"][data-highlighted]').first().waitFor();
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Delete");
+      });
+    },
+    // ?s=submenu → right-click open the root, then hover the SubTrigger ("More") to open the
+    // nested SubContent (a second role=menu). Same driver runs golden + port.
+    submenu: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitem"][aria-haspopup="menu"]').first().hover();
+      await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 5000 });
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('[role="menuitem"][aria-haspopup="menu"]');
+        return t && t.getAttribute("data-state") === "open";
+      });
+    },
+  },
+  menubar: {
+    "closed-rest": async (pg) => { await root(pg).getByRole("menuitem").first().waitFor(); },
+    // Menubar is a horizontal roving bar of DropdownMenu-style menus. Open the FIRST menu
+    // (File) by clicking its trigger (role=menuitem); the menus are non-modal so no scroll-lock.
+    // Keyed off upstream role/data-* only, so the same driver runs against golden and port.
+    open: async (pg) => openMenu(pg, () => root(pg).getByRole("menuitem").first().click()),
+    // `?s=rtl` — open the FIRST menu under dir=rtl; pins dir propagation onto the bar + content
+    // (the cross-menu ArrowLeft/ArrowRight swap is adjudicated by the APG harness).
+    rtl: async (pg) => openMenu(pg, () => root(pg).getByRole("menuitem").first().click()),
+    // `?s=controlled` — File is open at mount (parent owns value="file"); NO interaction.
+    controlled: async (pg) => { await pg.locator('[role="menu"]').first().waitFor(); },
+    // `?s=distrigger` — at-rest closed bar with the Edit (middle) trigger DISABLED: pins the
+    // disabled trigger's attrs (disabled / data-disabled / tabindex out of the roving order).
+    distrigger: async (pg) => { await root(pg).getByRole("menuitem").first().waitFor(); },
+    // `?s=hoverswitch` — open File (click), then HOVER Edit: open-on-hover switches the open
+    // menu to Edit while the bar is already open (menubar.tsx:253-259). Snapshot has Edit open.
+    hoverswitch: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").nth(0).click());
+      await root(pg).getByRole("menuitem").nth(1).hover();
+      await pg.waitForTimeout(180);
+      await pg.locator('[role="menu"]').first().waitFor();
+    },
+    // open then ArrowDown → the first menu item lands data-highlighted (roving tabindex=0).
+    item1: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menu"] [role="menuitem"][data-highlighted]').first().waitFor();
+    },
+    // ?s=disabled disables "New Window" (item-2 of File). Open via ArrowDown (highlights New
+    // Tab), ArrowDown SKIPS the disabled New Window to Print — the snapshot pins the disabled
+    // item's data-disabled/aria-disabled + tabindex=-1 and the roving tabindex distribution.
+    disabled: async (pg) => {
+      await root(pg).getByRole("menuitem").first().focus();
+      await pg.keyboard.press("ArrowDown");
+      await pg.locator('[role="menu"] [role="menuitem"][data-highlighted]').first().waitFor();
+      await pg.keyboard.press("ArrowDown");
+      await pg.waitForFunction(() => {
+        const hl = document.querySelector('[role="menu"] [role="menuitem"][data-highlighted]');
+        return hl && (hl.textContent || "").startsWith("Print");
+      });
+    },
+    // ?s=submenu → open the File menu, then hover the SubTrigger ("Share") to open the nested
+    // SubContent (a 2nd role=menu). Same driver runs golden + port.
+    submenu: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      // the SubTrigger is INSIDE the open content (the menubar TRIGGERS also carry
+      // aria-haspopup=menu, so scope to within a [role=menu]).
+      await pg.locator('[role="menu"] [role="menuitem"][aria-haspopup="menu"]').first().hover();
+      await pg.waitForFunction(() => document.querySelectorAll('[role="menu"]').length >= 2, null, { timeout: 5000 });
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('[role="menu"] [role="menuitem"][aria-haspopup="menu"]');
+        return t && t.getAttribute("data-state") === "open";
+      });
+    },
+  },
+  select: {
+    "closed-rest": async (pg) => { await pg.locator(".rt-SelectTrigger").first().waitFor(); },
+    open: async (pg) => { await pg.locator(".rt-SelectTrigger").click(); await pg.locator('[role="listbox"]').waitFor(); },
+    // DISABLED trigger (?s=disabledtrigger): the trigger is button[disabled] + data-disabled and
+    // the popup never opens. Closed-rest snapshot — wait for the disabled trigger to settle.
+    disabledtrigger: async (pg) => { await pg.locator('.rt-SelectTrigger[disabled]').first().waitFor(); },
+  },
+  toast: {
+    // Toast is rendered CONTROLLED open={true} duration={Infinity} (golden story), so it is
+    // MOUNTED open at first paint — NO click, NO queue timing. The driver just waits for the
+    // portaled <li> to be in the DOM. The <li> is a PLAIN <li> (NO role; the separate role=
+    // status node is the SR announce mirror, normalized out — see themes-open-dom.mjs). Key
+    // off the li's stable data-* (data-state=open + data-swipe-direction) inside the role=
+    // region viewport, never any port-internal class, so the same driver runs golden + port.
+    // The role=status announce node self-unmounts 1000ms after open (radix isAnnounced timer);
+    // it is also stripped symmetrically in the normalizer, so the snapshot is stable either way.
+    open: async (pg) => {
+      await pg.locator('li[data-state="open"][data-swipe-direction]').first().waitFor();
+    },
+    // `?s=multi` — the queue: two toasts held open in the one viewport <ol>. Wait until BOTH
+    // <li data-state=open> are mounted (keyed off upstream data-* only, same as `open`).
+    multi: async (pg) => {
+      await pg.waitForFunction(
+        () => document.querySelectorAll('li[data-state="open"][data-swipe-direction]').length >= 2
+      );
+    },
+  },
+  navigationmenu: {
+    // OPEN at first paint via defaultValue="one" — NO click/hover, so the delayDuration/
+    // skipDelayDuration open timers never run (the toast-like racy part is off the capture
+    // path). Wait for the open trigger (aria-expanded=true), the mounted content (data-state=
+    // open), the Viewport's measured size var to resolve (offsetWidth/Height via ResizeObserver
+    // → rAF), AND the Indicator node ([data-state="visible"], which renders null until its
+    // position is measured). Then settle() flushes the ResizeObserver rAF. Keyed off UPSTREAM
+    // role/data-* selectors only, so the same driver runs against golden and port.
+    open: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      // the active content (proxied into the viewport) — has aria-labelledby, NO data-state.
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      // the indicator renders null until its position is measured (it's an absolutely-
+      // positioned zero-flow node, so wait for ATTACHED, not visible).
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      // the viewport sets its size var only after measuring the active content's offset dims.
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // CONTROLLED (?s=controlled): parent OWNS value="one" → open at first paint, same DOM as
+    // `open`. Same open-state wait (no interaction). Keyed off upstream role/data-* only.
+    controlled: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // ACTIVELINK (?s=activelink): OPEN with the first content link active (aria-current="page"
+    // + data-active). Same open-state wait, then wait for the active link to be present.
+    activelink: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('a[aria-current="page"]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // INLINE (?s=inline): no <Viewport>, so the open Content renders IN-PLACE inside its Item
+    // (data-state=open). Open at first paint via defaultValue. No viewport size-var to await
+    // (there is no viewport); wait for the open trigger, the inline content, and the indicator.
+    inline: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby][data-state="open"]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+    },
+    // MOTION (?s=motion): open Item One at first paint, then CLICK Item Two to transition. The
+    // new (Item Two) content carries data-motion=from-end (index 1 > prevIndex 0). Wait for Item
+    // Two expanded + its content with data-motion=from-end + the viewport size var. Keyed off
+    // upstream data-motion/aria-expanded only, so the same driver runs golden+port.
+    motion: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      // click the SECOND trigger (Item Two) → transition one→two.
+      await root(pg).locator('button[aria-expanded]').nth(1).click();
+      await pg.locator('[data-motion="from-end"]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // TABPROXY (?s=tabproxy): open at first paint, focus a content link, then move focus back to
+    // the open trigger. Focus leaving the content (staying in root) → removeFromTabOrder, so the
+    // content links get tabindex=-1 + data-tabindex="" while the menu stays open. Wait for that.
+    tabproxy: async (pg) => {
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby] a').first().waitFor({ state: "attached" });
+      await pg.locator('[aria-labelledby] a').first().focus();          // focus into content
+      await root(pg).locator('button[aria-expanded="true"]').first().focus();  // focus back to trigger
+      await pg.locator('[aria-labelledby] a[tabindex="-1"]').first().waitFor({ state: "attached" });
+    },
+    // At rest: no value, the trigger is data-state=closed aria-expanded=false with NO
+    // aria-controls; no content/viewport/indicator mounted. The `?s=closed` golden variant
+    // omits defaultValue. No interaction — wait for the closed trigger.
+    closed: async (pg) => {
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+    },
+    // VERTICAL orientation (?s=vertical): OPEN at first paint (defaultValue="one") with
+    // data-orientation=vertical. Same open-state wait as `open`, plus assert the nav carries
+    // data-orientation=vertical (the Indicator then measures top/height/translateY). Keyed off
+    // UPSTREAM data-orientation/data-state selectors so the same driver runs golden+port.
+    vertical: async (pg) => {
+      await root(pg).locator('[data-orientation="vertical"]').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+    // TOGGLE-CLOSE (?s=open): open at first paint, then CLICK the open trigger → onItemSelect
+    // root toggle (prevValue===itemValue ? '' : itemValue) closes it. Snapshot the post-click
+    // at-rest nav (both triggers aria-expanded=false, content unmounted). Keyed off the open
+    // trigger's aria-expanded=true then waiting for it to flip to false.
+    clicktoggle: async (pg) => {
+      const openTrig = root(pg).locator('button[aria-expanded="true"]').first();
+      await openTrig.waitFor();
+      await openTrig.click();
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelectorAll('button[aria-expanded="true"]').length === 0);
+    },
+    // Wave-D: RTL (?s=rtl) — OPEN at first paint (defaultValue="one") under dir="rtl". Same
+    // open-state wait as `open`, plus assert dir=rtl is stamped on the nav. The FocusGroup
+    // then swaps the horizontal roving keys. Keyed off UPSTREAM dir/data-state selectors so
+    // the same driver runs golden + port.
+    rtl: async (pg) => {
+      await root(pg).locator('[dir="rtl"]').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"]').first().waitFor();
+      await pg.locator('[aria-labelledby]').first().waitFor({ state: "attached" });
+      await pg.locator('[data-state="visible"]').first().waitFor({ state: "attached" });
+      await pg.waitForFunction(() => {
+        const vp = [...document.querySelectorAll('[data-state="open"]')]
+          .find((e) => e.style.getPropertyValue("--radix-navigation-menu-viewport-width") !== "");
+        return !!vp;
+      });
+    },
+  },
+
+  // ── Interactive (stateful, non-overlay) components ──────────────────────────────
+  // Driven into a single post-interaction state, keyed off UPSTREAM role/class/data-state
+  // selectors only (never port-internal classes) so the same driver runs against golden
+  // and port. These have no `open` state — themes-a11y guards on STATES[id].open.
+  accordion: {
+    open: async (pg) => {
+      const trig = root(pg).locator('button[aria-expanded]').first();
+      await trig.click();
+      await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
+    },
+    // ?s=single: type=single NON-collapsible, item-1 OPEN at first paint. STATELESS — wait for
+    // the open region AND the aria-disabled=true open trigger (the un-closable single open item).
+    single: async (pg) => {
+      await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"][aria-disabled="true"]').first().waitFor();
+    },
+    // ?s=singlecollapsible: type=single collapsible, item-1 open at mount. The open trigger CAN
+    // close (collapsible) → NO aria-disabled. Wait for the open region + open trigger (no aria-disabled).
+    singlecollapsible: async (pg) => {
+      await pg.locator('[role="region"][data-state="open"]:not([hidden])').first().waitFor();
+      await root(pg).locator('button[aria-expanded="true"]:not([aria-disabled])').first().waitFor();
+    },
+    // ?s=disabled: the MIDDLE item (item-2) is disabled at the ITEM level (Accordion.Item
+    // disabled) → data-disabled on item/header/trigger/content + the trigger's `disabled` attr.
+    // Closed-rest snapshot; same locator both faces (the disabled middle trigger).
+    disabled: async (pg) => {
+      await root(pg).locator('button[aria-expanded][disabled]').first().waitFor();
+    },
+    // ?s=disabledroot: the whole Root disabled → EVERY item disabled (data-disabled on
+    // item/header/trigger/content + each trigger's disabled attr). Wait until all three
+    // triggers are disabled. Same locator both faces.
+    disabledroot: async (pg) => {
+      const trigs = root(pg).locator('button[aria-expanded]');
+      await trigs.first().waitFor();
+      await pg.waitForFunction(
+        () => {
+          const bs = Array.from(document.querySelectorAll('#root button[aria-expanded]'));
+          return bs.length === 3 && bs.every((b) => b.hasAttribute('disabled'));
+        },
+        undefined,
+        { timeout: 5000 }
+      );
+    },
+    // ?s=multiple (the default type): open TWO items (item-1 then item-3) and assert BOTH
+    // regions are open simultaneously (independent toggles, set semantics). Keyed off upstream
+    // aria-expanded/role=region only, so the same driver runs against golden and port.
+    multiple: async (pg) => {
+      const trigs = root(pg).locator('button[aria-expanded]');
+      await trigs.nth(0).click();
+      await trigs.nth(2).click();
+      await pg.waitForFunction(() => {
+        const open = [...document.querySelectorAll('[role="region"][data-state="open"]')].filter((e) => !e.hasAttribute("hidden"));
+        return open.length === 2;
+      });
+    },
+  },
+  collapsible: {
+    open: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[data-state="open"]:not([hidden])').first().waitFor();
+    },
+    // `?s=disabled` renders the Root disabled — NO interaction. The at-rest CLOSED DOM is the
+    // oracle: root+trigger carry data-disabled="" and the trigger the `disabled` attr (the
+    // content is absent while closed). Keyed off the UPSTREAM disabled+closed trigger only, so
+    // the same driver runs against golden and port.
+    disabled: async (pg) => {
+      await root(pg).locator('button[disabled][data-state="closed"]').first().waitFor();
+    },
+    // `?s=rest` — the at-rest CLOSED disclosure (NO interaction). The oracle pins the
+    // closed-DOM contract: trigger aria-expanded=false with NO aria-controls, and (per
+    // upstream Presence) the content node ABSENT from the document while closed. Keyed
+    // off the UPSTREAM closed trigger only, so the same driver runs golden + port.
+    rest: async (pg) => {
+      await root(pg).locator('button[aria-expanded="false"][data-state="closed"]').first().waitFor();
+    },
+  },
+  tabs: {
+    tab2: async (pg) => {
+      const tabs = root(pg).getByRole("tab");
+      await tabs.nth(1).click();
+      await pg.locator('[role="tabpanel"]:not([hidden])').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelectorAll('[role="tab"]')[1];
+        return t && t.getAttribute("data-state") === "active";
+      });
+    },
+    // `?s=disabled-skip` disables the MIDDLE tab (Documents): at rest it carries data-disabled=''
+    // + disabled + tabindex=-1. The at-rest DOM is the oracle (data-disabled empty-string contract).
+    "disabled-skip": async (pg) => {
+      await root(pg).getByRole("tab").first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelectorAll('[role="tab"]')[1];
+        return t && t.hasAttribute("data-disabled") && t.hasAttribute("disabled");
+      });
+    },
+  },
+  tabsmulti: {
+    // two Tabs instances at rest — assert two tablists and that the two instances' trigger ids
+    // differ (distinct id base per mount). The at-rest DOM (both instances) is the oracle.
+    multi: async (pg) => {
+      await pg.waitForFunction(() => {
+        const lists = document.querySelectorAll('[role="tablist"]');
+        if (lists.length !== 2) return false;
+        const a = lists[0].querySelector('[role="tab"]')?.id;
+        const b = lists[1].querySelector('[role="tab"]')?.id;
+        return a && b && a !== b;
+      });
+    },
+  },
+  radiogroup: {
+    checked: async (pg) => {
+      const target = pg.locator('[role="radio"][value="2"]').first();
+      await target.waitFor();
+      await target.click();
+      await pg.locator('[role="radio"][value="2"][data-state="checked"]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-state="unchecked"]').first().waitFor();
+    },
+    // ?s=keys / ?s=mixed seed — at-rest 3-item group, middle item disabled (data-disabled='').
+    // value=1 checked, value=2 disabled+unchecked, value=3 enabled+unchecked.
+    keys: async (pg) => {
+      await pg.locator('[role="radio"][value="1"][data-state="checked"]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="3"][data-state="unchecked"]').first().waitFor();
+    },
+    mixed: async (pg) => {
+      await pg.locator('[role="radio"][value="1"][data-state="checked"]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="3"][data-state="unchecked"]').first().waitFor();
+    },
+    // ?s=disabledgroup seed — whole group disabled: root + every item data-disabled=''.
+    disabledgroup: async (pg) => {
+      await pg.locator('[role="radiogroup"][data-disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=horizontal seed — explicit horizontal orientation on root + items.
+    horizontal: async (pg) => {
+      await pg.locator('[role="radiogroup"][aria-orientation="horizontal"][data-orientation="horizontal"]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-orientation="horizontal"]').first().waitFor();
+    },
+    // ?s=form seed (Wave C) — the radio group inside a <form>; radix renders a hidden bubble
+    // <input type=radio aria-hidden tabindex=-1> per item (name shared, value per item,
+    // required on each, the CHECKED item's input is `checked`). aria-required on the root.
+    // At rest (value=1 checked). Wait for the root, a trigger, and a bubble input.
+    form: async (pg) => {
+      await pg.locator('form [role="radiogroup"][aria-required="true"]').first().waitFor();
+      await pg.locator('form [role="radio"][value="1"][data-state="checked"]').first().waitFor();
+      await pg.locator('form input[type="radio"][aria-hidden="true"][name="plan"][value="1"]').first().waitFor({ state: "attached" });
+    },
+    // ?s=alldisabled seed (Wave D) — every ITEM disabled but the group NOT disabled:
+    // focusableItemsCount===0 ⇒ the root drops to tabindex=-1 (not tabbable). Each item
+    // carries disabled + data-disabled=''; the root has NO data-disabled (distinct from
+    // disabledgroup, where the Root.disabled prop stamps data-disabled on the root).
+    alldisabled: async (pg) => {
+      await pg.locator('[role="radiogroup"][tabindex="-1"]').first().waitFor();
+      await pg.locator('[role="radio"][value="1"][data-disabled][disabled]').first().waitFor();
+      await pg.locator('[role="radio"][value="2"][data-disabled][disabled]').first().waitFor();
+    },
+  },
+  checkbox: {
+    checked: async (pg) => {
+      const cb = root(pg).getByRole("checkbox").first();
+      await cb.waitFor();
+      await cb.click();
+      await root(pg).locator('[role="checkbox"][data-state="checked"]').first().waitFor();
+    },
+    // ?s=indeterminate seed — at rest the checkbox is mixed (aria-checked=mixed, indicator shown).
+    indeterminate: async (pg) => {
+      await root(pg).locator('[role="checkbox"][aria-checked="mixed"][data-state="indeterminate"]').first().waitFor();
+    },
+    // ?s=disabled seed — at rest a checked + disabled checkbox (data-disabled='' on root).
+    disabled: async (pg) => {
+      await root(pg).locator('[role="checkbox"][data-state="checked"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=form seed (Wave C) — the checkbox inside a <form>; radix renders the hidden bubble
+    // <input type=checkbox aria-hidden tabindex=-1 checked> sibling for native form
+    // participation. At rest (checked); wait for both the trigger AND the bubble input.
+    form: async (pg) => {
+      await root(pg).locator('form [role="checkbox"][data-state="checked"]').first().waitFor();
+      await root(pg).locator(`form input[type="checkbox"][aria-hidden="true"][name="agree"]`).first().waitFor({ state: "attached" });
+    },
+  },
+  switch: {
+    on: async (pg) => {
+      const sw = root(pg).locator('button.rt-SwitchRoot[role="switch"]').first();
+      await sw.waitFor();
+      await sw.click();
+      await root(pg).locator('button.rt-SwitchRoot[data-state="checked"]').first().waitFor();
+    },
+    // at-rest, off — no click. Locks the unchecked root+thumb surface.
+    rest: async (pg) => {
+      await root(pg).locator('button.rt-SwitchRoot[role="switch"][data-state="unchecked"]').first().waitFor();
+    },
+    // ?s=disabled seed — disabled off switch (data-disabled='' on root + thumb).
+    disabled: async (pg) => {
+      await root(pg).locator('button.rt-SwitchRoot[data-state="unchecked"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=required seed — aria-required=true on the switch button (documents the divergence:
+    // port emits aria-required only when required; upstream always emits it).
+    required: async (pg) => {
+      await root(pg).locator('button.rt-SwitchRoot[role="switch"][aria-required="true"]').first().waitFor();
+    },
+    // ?s=form seed (Wave C) — the switch inside a <form>; radix renders the hidden bubble
+    // <input type=checkbox aria-hidden tabindex=-1 checked> sibling carrying name/value/
+    // required for native form submission. At rest (checked). Wait for both.
+    form: async (pg) => {
+      await root(pg).locator('form button.rt-SwitchRoot[data-state="checked"]').first().waitFor();
+      await root(pg).locator('form input[type="checkbox"][aria-hidden="true"][name="notify"]').first().waitFor({ state: "attached" });
+    },
+  },
+  toggle: {
+    pressed: async (pg) => {
+      const btn = root(pg).locator('button[aria-pressed]').first();
+      await btn.waitFor();
+      await btn.click();
+      await pg.locator('button[aria-pressed="true"][data-state="on"]').first().waitFor();
+    },
+    // at-rest, unpressed — no click. Locks the off half of the aria-pressed/data-state contract.
+    rest: async (pg) => {
+      await root(pg).locator('button[aria-pressed="false"][data-state="off"]').first().waitFor();
+    },
+    // ?s=disabled seed — assert the disabled toggle renders disabled + data-disabled='' at rest.
+    disabled: async (pg) => {
+      await root(pg).locator('button[aria-pressed="false"][data-state="off"][data-disabled][disabled]').first().waitFor();
+    },
+    // ?s=disabledpressed seed (Wave C) — the disabled-AND-pressed combination: data-state=on /
+    // aria-pressed=true AND disabled + data-disabled='' simultaneously, at rest (no click).
+    disabledpressed: async (pg) => {
+      await root(pg).locator('button[aria-pressed="true"][data-state="on"][data-disabled][disabled]').first().waitFor();
+    },
+  },
+  togglegroup: {
+    // Single-mode bare ToggleGroup renders the root as role=group (NOT radiogroup) with
+    // role=radio items. Click the FIRST item ("Left") so exactly one lands data-state=on /
+    // aria-checked=true, away from the defaultValue="b" seed.
+    pressed: async (pg) => {
+      const first = root(pg).locator('[role="radio"]').first();
+      await first.waitFor();
+      await first.click();
+      await root(pg).locator('[role="radio"][data-state="on"][aria-checked="true"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const r = [...document.querySelectorAll('[role="radio"]')];
+        return r.length === 3 && r[0].getAttribute("data-state") === "on"
+          && r[1].getAttribute("data-state") === "off";
+      });
+    },
+    // multiple-mode (?s=multiple): TWO items pressed at first paint (defaultValue=[a,c]).
+    // Items keep aria-pressed (NOT role=radio/aria-checked); root role=group. STATELESS —
+    // just wait for the two pressed items so the at-rest multi-select DOM is the oracle.
+    multiple: async (pg) => {
+      await root(pg).locator('button[aria-pressed]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const b = [...document.querySelectorAll('button[aria-pressed]')];
+        return b.length === 3 && b[0].getAttribute("aria-pressed") === "true"
+          && b[1].getAttribute("aria-pressed") === "false"
+          && b[2].getAttribute("aria-pressed") === "true"
+          && !document.querySelector('[role="radio"]');
+      });
+    },
+  },
+  segmentedcontrol: {
+    selected: async (pg) => {
+      const items = pg.locator(".rt-SegmentedControlRoot button.rt-SegmentedControlItem");
+      await items.nth(1).waitFor();
+      await items.nth(1).click();
+      await pg.locator('button.rt-SegmentedControlItem[data-state="on"]').nth(0).waitFor();
+      await pg.waitForFunction(() => {
+        const btns = [...document.querySelectorAll("button.rt-SegmentedControlItem")];
+        return btns.length === 3 && btns[1].getAttribute("data-state") === "on"
+          && btns[0].getAttribute("data-state") === "off";
+      });
+    },
+  },
+  checkboxgroup: {
+    checked: async (pg) => {
+      const item = pg.locator('.rt-CheckboxGroupItemCheckbox[data-state="unchecked"]').first();
+      await item.waitFor();
+      await item.click();
+      await pg.locator('.rt-CheckboxGroupItemCheckbox[data-state="checked"]').first().waitFor();
+    },
+  },
+  radiocards: {
+    selected: async (pg) => {
+      const items = pg.locator('#root [role="radio"].rt-RadioCardsItem');
+      await items.nth(1).waitFor();
+      await items.nth(1).click();
+      await pg.locator('#root [role="radio"].rt-RadioCardsItem[data-state="checked"][aria-checked="true"][value="2"]').waitFor();
+      await pg.locator('#root [role="radio"].rt-RadioCardsItem[data-state="unchecked"][value="1"]').waitFor();
+    },
+  },
+  checkboxcards: {
+    selected: async (pg) => {
+      const card = pg.locator('label.rt-CheckboxCardsItem').first();
+      await card.waitFor();
+      await card.click();
+      await pg.locator('button.rt-CheckboxCardCheckbox[data-state="checked"]').first().waitFor();
+    },
+  },
+  tabnav: {
+    active: async (pg) => {
+      await pg.locator('a.rt-TabNavLink[data-active]').first().waitFor();
+      await pg.locator('a.rt-TabNavLink[aria-current="page"]').first().waitFor();
+    },
+  },
+  accessibleicon: {
+    // STATELESS: the svg carries aria-hidden="true"+focusable="false" (injected ONTO the
+    // icon, not a wrapper), followed by a VisuallyHidden label span. `shown` just waits for
+    // the hidden svg; rest and shown snapshot the SAME static DOM.
+    shown: async (pg) => {
+      await pg.locator('svg[aria-hidden="true"]').first().waitFor({ state: "attached" });
+    },
+  },
+  avatar: {
+    // Fallback-only avatar — STATELESS. No src ⇒ Radix reports 'error' immediately ⇒ the
+    // at-rest DOM is the fallback branch (rt-AvatarFallback span, NO <img>). The `fallback`
+    // state waits for the fallback span and asserts the <img> is ABSENT (the load-strategy
+    // contract: the real img is never in the DOM unless loaded). Keyed off the UPSTREAM
+    // rt-AvatarFallback class only, so the same driver runs against golden and port.
+    fallback: async (pg) => {
+      await root(pg).locator('.rt-AvatarFallback').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root img') === null);
+    },
+    // `?s=loaded` — a data-URI src loads instantly; the LOADED steady-state is the oracle:
+    // the <img> is mounted (rt-AvatarImage, alt present, NO data-state — the primitive img
+    // carries none) and the fallback is GONE. Keyed off the UPSTREAM rt-AvatarImage only,
+    // so the same driver runs golden + port.
+    loaded: async (pg) => {
+      await root(pg).locator('img.rt-AvatarImage').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
+    },
+    // `?s=loadedattrs` (wave D) — the loaded img PLUS the themes Avatar.Image rest-spread:
+    // referrerPolicy/crossOrigin land as real attributes on the <img>. Keyed off the
+    // UPSTREAM referrerpolicy attr so golden + port share the same wait.
+    loadedattrs: async (pg) => {
+      await root(pg).locator('img.rt-AvatarImage[referrerpolicy="no-referrer"][crossorigin="anonymous"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector('#root .rt-AvatarFallback') === null);
+    },
+  },
+  progress: {
+    // Determinate progress bar — STATELESS (no interaction). The `shown` state just
+    // waits for the role=progressbar to be laid out; rest and shown snapshot the SAME
+    // static DOM. The oracle pins the integer-formatted aria-valuenow/data-value + the
+    // aria-valuetext + the data-state/value/max wiring on root AND indicator.
+    shown: async (pg) => {
+      await pg.locator('[role="progressbar"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
+    },
+    // `?s=maxinvalid` — max=0 invalid → DEFAULT_MAX=100: aria-valuemax/data-max=100, valuenow=25.
+    maxinvalid: async (pg) => {
+      await pg.locator('[role="progressbar"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const p = document.querySelector('[role="progressbar"]');
+        return p?.getAttribute("aria-valuemax") === "100" && p?.getAttribute("aria-valuenow") === "25";
+      });
+    },
+    // `?s=indeterminate` — no value: data-state=indeterminate, NO aria-valuenow/data-value.
+    indeterminate: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
+    },
+    // `?s=complete` — value===max: data-state=complete (strict equality).
+    complete: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="complete"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "100");
+    },
+    // `?s=custommax` — max=200,value=50: aria-valuemax=200, aria-valuetext=25%, data-max=200.
+    custommax: async (pg) => {
+      await pg.locator('[role="progressbar"][aria-valuemax="200"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuetext") === "25%");
+    },
+    // `?s=invalid` — value=150 > max=100: upstream clamps to indeterminate. The oracle
+    // pins data-state=indeterminate + the ABSENCE of aria-valuenow/data-value (the
+    // value/max validation gap). Keyed off the UPSTREAM indeterminate state.
+    invalid: async (pg) => {
+      await pg.locator('[role="progressbar"][data-state="indeterminate"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === null);
+    },
+    // `?s=accent` (wave D) — explicit color + radius: the themes wrapper stamps
+    // data-accent-color=cyan + data-radius=full on the rt-ProgressRoot (omitted in the
+    // other states). Keyed off the UPSTREAM data-accent-color so golden + port share it.
+    accent: async (pg) => {
+      await pg.locator('[role="progressbar"][data-accent-color="cyan"][data-radius="full"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow") === "25");
+    },
+  },
+  scrollarea: {
+    // type="always" renders the scrollbar at rest — no click/hover/scroll needed. The
+    // testable value is the SCROLLBAR + THUMB anatomy, deterministic because `always`
+    // mounts the scrollbar unconditionally and the fixed 120px box overflows vertically.
+    // Wait (keyed off UPSTREAM selectors) for the vertical scrollbar AND its thumb to be
+    // laid out + sized (hasThumb requires a measured viewport/content ratio), so the
+    // post-measure DOM has settled before the snapshot.
+    shown: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaThumb[data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('.rt-ScrollAreaThumb');
+        // thumb must be measured: its height var resolves to a non-zero px (ratio applied).
+        return t && t.getBoundingClientRect().height > 1;
+      });
+    },
+    // type="auto" + OVERFLOWING content: the vertical scrollbar mounts (measured overflow).
+    // Wait for it to appear, same as `shown`.
+    autooverflow: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+    },
+    // type="auto" + content that FITS: NO scrollbar ever mounts. Wait for the viewport to be
+    // present, then assert (after the measure settles) that no scrollbar is in the DOM.
+    autofit: async (pg) => {
+      await pg.locator('[data-radix-scroll-area-viewport]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelectorAll('.rt-ScrollAreaScrollbar').length === 0);
+    },
+    // type="always" + content that FITS: the scrollbar TRACK is present but NO thumb. Wait for
+    // the bar, then assert (after measure) no thumb node exists inside it.
+    nothumb: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelectorAll('.rt-ScrollAreaThumb').length === 0);
+    },
+    // type="hover": hidden at rest. Hover the Root → the vertical bar mounts (data-state=visible).
+    // Snapshot the HOVERED state (both faces key off the upstream rt-ScrollAreaScrollbar selector).
+    hover: async (pg) => {
+      await pg.locator('.rt-ScrollAreaRoot').first().hover();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+    },
+  },
+  slider: {
+    highvalue: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },
+    arialabel: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },
+    rtl: async (pg) => { await pg.locator('[role="slider"]').first().waitFor(); },
+    // Single-thumb slider (role=slider, defaultValue=[40], min 0 max 100 step 1). Drive it
+    // purely by KEYBOARD: focus the thumb, press ArrowRight 5× → a deterministic value of 45
+    // (40 + 5·step). The landed value is exact, so the thumb's `left: calc(45% + …)` and the
+    // range's `right: 55%` percentages (which the normalizer does NOT touch) are stable.
+    stepped: async (pg) => {
+      const thumb = root(pg).locator('[role="slider"]').first();
+      await thumb.waitFor();
+      await thumb.focus();
+      for (let i = 0; i < 5; i++) await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "45");
+    },
+    // At-rest single-thumb DOM (no interaction): defaultValue=40 → aria-valuenow=40, range
+    // right:60%, thumb left:calc(40% + <px>). Pins the initial-render geometry + defaultValue
+    // passthrough at the DOM level (the stepped oracle only proves the post-keyboard state).
+    rest: async (pg) => {
+      const thumb = root(pg).locator('[role="slider"]').first();
+      await thumb.waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-valuenow") === "40");
+    },
+    // `?s=disabled` → aria-disabled on root + data-disabled='' on root/track/range/thumb, and
+    // the thumb's tabindex is dropped (non-focusable). No interaction; the at-rest DOM is the oracle.
+    disabled: async (pg) => {
+      await root(pg).locator('[aria-disabled="true"]').first().waitFor();
+      await pg.locator('[role="slider"][data-disabled]').first().waitFor();
+      await pg.waitForFunction(() =>
+        !document.querySelector('[role="slider"]')?.hasAttribute("tabindex"));
+    },
+    // `?s=vertical` → orientation flip: data-orientation=vertical on root/track/range/thumb,
+    // --radix-slider-thumb-transform: translateY(50%), range uses bottom/top edges, thumb wrapper
+    // uses `bottom: calc(40% + <px>)`. No interaction; the at-rest vertical DOM is the oracle.
+    vertical: async (pg) => {
+      await root(pg).locator('[role="slider"][data-orientation="vertical"]').first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector('[role="slider"]')?.getAttribute("aria-orientation") === "vertical");
+    },
+  },
+
+  // ── Bare @radix-ui/react-* primitives (toolbar / passwordtoggle / otp / form) ─────────
+  // Radix Themes ships no component for these; the golden renders the genuine upstream
+  // primitive unstyled. Drivers key ONLY off upstream role/data-*/aria/type selectors so the
+  // same driver runs against golden and port. No overlay → no CLOSE-table entry for any of them.
+  toolbar: {
+    // APG Toolbar (https://www.w3.org/WAI/ARIA/apg/patterns/toolbar/). At rest (before focus enters)
+    // RovingFocusGroup carries tabindex=0 on the toolbar ROOT and -1 on every item; the tabindex=0
+    // migrates onto an item only once focus enters (the `roved` state proves that). The at-rest DOM
+    // is fully deterministic — wait for the toolbar root + its (-1) items to be laid out.
+    default: async (pg) => {
+      await root(pg).locator('[role="toolbar"][tabindex="0"]').first().waitFor();
+      await pg.locator('[role="toolbar"] > button').first().waitFor();
+    },
+    // `?s=vertical` golden variant → orientation flip (aria-orientation/data-orientation=vertical).
+    vertical: async (pg) => {
+      await root(pg).locator('[role="toolbar"][aria-orientation="vertical"]').first().waitFor();
+      await pg.locator('[role="toolbar"] > button').first().waitFor();
+    },
+    // ArrowRight rotates the roving tabindex=0 from item 0 → item 1 (deterministic: focus + keydown
+    // are synchronous). Keyed off the focusable toolbar items (those carrying a tabindex attr).
+    roved: async (pg) => {
+      const items = root(pg).locator('[role="toolbar"] > *[tabindex]');
+      await items.first().waitFor();
+      await items.first().focus();
+      await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() => {
+        const it = [...document.querySelectorAll('[role="toolbar"] > *')].filter((e) => e.hasAttribute("tabindex"));
+        return it[1]?.getAttribute("tabindex") === "0" && it[0]?.getAttribute("tabindex") === "-1";
+      });
+    },
+    // `?s=disabled` golden variant → the first BUTTON (New) carries the native disabled attr
+    // and is excluded from the roving order (RovingFocusGroup.Item focusable={!disabled}).
+    // STATELESS at-rest — wait for the disabled button to be laid out.
+    disabled: async (pg) => {
+      await root(pg).locator('[role="toolbar"][tabindex="0"]').first().waitFor();
+      await pg.locator('[role="toolbar"] > button[disabled]').first().waitFor();
+    },
+  },
+  passwordtoggle: {
+    // At rest: input type=password (the load-bearing state signal). No interaction.
+    hidden: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.locator('input[type="password"]').first().waitFor();
+    },
+    // Click the toggle → flushSync flips type=password→text and Slot text Show→Hide synchronously.
+    visible: async (pg) => {
+      const btn = root(pg).getByRole("button").first();
+      await btn.waitFor();
+      await btn.click();
+      await pg.locator('input[type="text"]').first().waitFor();
+      await pg.waitForFunction(() => document.querySelector("button")?.textContent?.trim() === "Hide");
+    },
+    // `?s=autolabel` → icon-only toggle (no inner text): the auto aria-label "Show password"
+    // names the button. No interaction; the post-hydration DOM is the oracle.
+    autolabel: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector("button")?.getAttribute("aria-label") === "Show password");
+    },
+    // `?s=passthrough` → name/required/placeholder spread onto the input ({...props}). At rest.
+    passthrough: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector("input");
+        return i && i.getAttribute("name") === "pw" && i.hasAttribute("required") && i.getAttribute("placeholder") === "Enter password";
+      });
+    },
+    // `?s=multi` → two no-id fields; each mints a distinct input id (id-fallback + multi-instance).
+    multi: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() => {
+        const ins = [...document.querySelectorAll("#root input")];
+        return ins.length === 2 && ins[0].id && ins[1].id && ins[0].id !== ins[1].id;
+      });
+    },
+    // `?s=disabled` → native disabled passed through to BOTH the input and the toggle button.
+    disabled: async (pg) => {
+      await root(pg).locator("input").first().waitFor();
+      await pg.waitForFunction(() =>
+        document.querySelector("input")?.disabled === true && document.querySelector("button")?.disabled === true);
+    },
+    // Wave-D form RESET: reveal the password (click the toggle → type=text) then click the
+    // form's Reset button. The enclosing form's `reset` event forces visibility back to hidden
+    // (type=text→password) — the security round-trip. The post-reset DOM (input type=password,
+    // toggle text "Show") is the oracle; keyed off upstream selectors only.
+    formreset: async (pg) => {
+      const toggle = root(pg).getByRole("button", { name: /show|hide/i }).first();
+      await toggle.waitFor();
+      await toggle.click();
+      await pg.locator('input[type="text"]').first().waitFor();
+      await root(pg).locator('button[type="reset"]').click();
+      await pg.locator('input[type="password"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const b = [...document.querySelectorAll("button")].find((x) => x.type !== "reset");
+        return document.querySelector('input[type="password"]') && b?.textContent?.trim() === "Show";
+      });
+    },
+  },
+  otp: {
+    // defaultValue="123" 3-slot at rest: inputs carry value 1/2/3, hidden input value=123, roving
+    // tabstop = clamp(len,0,size-1). No interaction; the at-rest DOM is the oracle.
+    filled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => document.querySelector('input[type="hidden"]')?.value === "123");
+    },
+    // `?s=empty` golden variant → no defaultValue: every slot empty, hidden input empty. (At rest,
+    // before focus enters, RovingFocusGroup carries tabindex=-1 on every input; tabindex=0 migrates
+    // onto a slot only on focus — the `typed` state proves that. The at-rest DOM is deterministic.)
+    empty: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.value === "")
+          && document.querySelector('input[type="hidden"]')?.value === "";
+      });
+    },
+    // Type "45" into the empty story → inputs[0]=4 inputs[1]=5, roving tabstop advanced to index 2
+    // (deterministic: value-driven, no timing). Drive against `?s=empty` (see capture matrix).
+    typed: async (pg) => {
+      const first = root(pg).locator('input[data-radix-otp-input][data-radix-index="0"]');
+      await first.waitFor();
+      await first.focus();
+      await pg.keyboard.type("45");
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a[0].value === "4" && a[1].value === "5" && a[2].getAttribute("tabindex") === "0";
+      });
+    },
+    // `?s=alpha` golden variant → validationType="alpha": every slot inputmode=text +
+    // pattern=[a-zA-Z]{1}, defaultValue "abc". No interaction; the at-rest DOM is the oracle.
+    alpha: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("pattern") === "[a-zA-Z]{1}" && i.getAttribute("inputmode") === "text")
+          && document.querySelector('input[type="hidden"]')?.value === "abc";
+      });
+    },
+    // `?s=alphanumeric` → validationType="alphanumeric": every slot inputmode=text +
+    // pattern=[a-zA-Z0-9]{1} (accepts letters AND digits), defaultValue "a1b". At rest.
+    alphanumeric: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("pattern") === "[a-zA-Z0-9]{1}" && i.getAttribute("inputmode") === "text")
+          && document.querySelector('input[type="hidden"]')?.value === "a1b";
+      });
+    },
+    // `?s=named` → Root name="otp-code": the hidden aggregate input carries that form name
+    // and value=join().trim() ("123"). At rest; the hidden input's attrs are the oracle.
+    named: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const h = document.querySelector('input[type="hidden"]');
+        return !!h && h.getAttribute("name") === "otp-code" && h.value === "123";
+      });
+    },
+    // `?s=placeholder` → empty field, every slot carries placeholder="○" (shown while empty).
+    placeholder: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        // placeholder lives on the autocomplete slot (index 0 at rest) only.
+        return a.length === 3 && a[0].getAttribute("placeholder") === "○"
+          && !a[1].hasAttribute("placeholder") && !a[2].hasAttribute("placeholder") && a[0].value === "";
+      });
+    },
+    // `?s=novalidation` → validationType="none": slots carry NO inputmode and NO pattern.
+    novalidation: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => !i.hasAttribute("inputmode") && !i.hasAttribute("pattern"))
+          && document.querySelector('input[type="hidden"]')?.value === "123";
+      });
+    },
+    // `?s=controlled` → controlled value "12": slots 1/2/"" at rest, hidden input "12".
+    controlled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "1" && a[1].value === "2" && a[2].value === ""
+          && document.querySelector('input[type="hidden"]')?.value === "12";
+      });
+    },
+    // `?s=revalidate` → alpha validation + junk defaultValue "a1b2c": sanitizeValue drops the
+    // digits at mount → slots a/b/c, hidden "abc" (same sanitize re-validation re-applies on change).
+    revalidate: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "a" && a[1].value === "b" && a[2].value === "c"
+          && document.querySelector('input[type="hidden"]')?.value === "abc";
+      });
+    },
+    // `?s=sanitizevalue` → validationType="none" + custom sanitizer keeping only digits:
+    // defaultValue "1a2" → "12" (slots 1/2/"", hidden "12"), no inputmode/pattern.
+    sanitizevalue: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.locator('input[data-radix-otp-input][data-radix-index="2"]').waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "1" && a[1].value === "2" && a[2].value === ""
+          && !a[0].hasAttribute("pattern") && document.querySelector('input[type="hidden"]')?.value === "12";
+      });
+    },
+    // `?s=password` → every slot is type=password (masked). defaultValue "123". At rest.
+    password: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.getAttribute("type") === "password")
+          && document.querySelector('input[type="hidden"]')?.value === "123";
+      });
+    },
+    // `?s=disabled` → every slot carries the disabled attr and is dropped from the roving
+    // order (tabindex=-1 on all; no slot is the tab stop). At rest.
+    disabled: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.disabled && i.getAttribute("tabindex") === "-1");
+      });
+    },
+    // `?s=readonly` → every slot carries the readonly attr. At rest.
+    readonly: async (pg) => {
+      await root(pg).locator('[role="group"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a.every((i) => i.readOnly);
+      });
+    },
+    // Wave-D PASTE: drive the EMPTY field (?s=empty) and dump a full code "456" into the
+    // first slot as ONE input event (value.length>1 ⇒ radix dispatches PASTE: sanitize +
+    // slice to size, fill from index 0, focus the last filled slot). Set the slot's value
+    // then fire a native `input` so BOTH golden and port take the same code path. The
+    // deterministic outcome — slots 4/5/6, hidden input "456", roving tab stop on slot 2 —
+    // is the oracle; keyed off upstream selectors only.
+    paste: async (pg) => {
+      const first = root(pg).locator('input[data-radix-otp-input][data-radix-index="0"]');
+      await first.waitFor();
+      await first.focus();
+      await pg.evaluate(() => {
+        const el = document.querySelector('input[data-radix-otp-input][data-radix-index="0"]');
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        setter.call(el, "456");
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("input[data-radix-otp-input]")];
+        return a.length === 3 && a[0].value === "4" && a[1].value === "5" && a[2].value === "6"
+          && document.querySelector('input[type="hidden"]')?.value === "456"
+          && a[2].getAttribute("tabindex") === "0";
+      });
+    },
+  },
+  form: {
+    // `?s=multi` — TWO required fields, submit empty → BOTH controls independently data-invalid
+    // with their own valueMissing Message + aria-describedby (per-field validity, no cross-talk).
+    multi: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll("form input")];
+        return a.length === 2 && a.every((i) => {
+          const db = i.getAttribute("aria-describedby");
+          return i.getAttribute("data-invalid") === "true" && db && document.getElementById(db.split(" ")[0]);
+        });
+      });
+    },
+    // serverInvalid is a PURE PROP (no event, no async): field/label/control carry data-invalid=true
+    // and the control carries aria-invalid=true. NOTE — a bare match="valueMissing" Message does NOT
+    // render here (validity.valueMissing is false; serverInvalid is a separate flag), so there is no
+    // aria-describedby on this path; the Message+describedby anatomy is the `forceMatch` state's job.
+    // This state's distinct contract is the data-invalid/aria-invalid stamping.
+    serverInvalid: async (pg) => {
+      await root(pg).locator('input[aria-invalid="true"][data-invalid="true"]').first().waitFor();
+      await pg.locator('label[data-invalid]').first().waitFor();
+    },
+    // forceMatch renders the Message unconditionally on first paint (no event) → proves the <span id>
+    // anatomy + aria-describedby registration. data-invalid is NOT set (validity still valid).
+    forceMatch: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        return !!(db && db.split(" ").some((id) => document.getElementById(id)));
+      });
+    },
+    // At rest: no data-valid/invalid anywhere, control has title="" + id + name, NO aria-describedby,
+    // NO Message span. Just wait for the control to be present (no interaction).
+    "rest-valid": async (pg) => {
+      await root(pg).locator('input[name="email"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i && !i.hasAttribute("aria-describedby") && !i.hasAttribute("data-invalid");
+      });
+    },
+    // Event-gated: press Submit on the required-empty Control → native `invalid` fires → the
+    // valueMissing Message mounts and registers into aria-describedby. Capture ONLY after the
+    // aria-describedby link RESOLVES (message id present AND getElementById exists), never a timeout.
+    valueMissing: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        return !!(db && db.split(" ").some((id) => document.getElementById(id)));
+      });
+    },
+    // Event-gated TYPE-mismatch: type a non-email into the required email Control + submit →
+    // native validity.typeMismatch=true (NOT valueMissing) → the TypeMismatch Message
+    // ("Provide a valid email") mounts and registers into aria-describedby. Proves the field
+    // reads the LIVE ValidityState, not just valueMissing. Wait for the typeMismatch message
+    // span to exist AND be linked, never a timeout.
+    typeMismatch: async (pg) => {
+      const email = root(pg).locator('input[name="email"]');
+      await email.fill("abc");
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
+        // the TypeMismatch message text must be present among the described-by targets.
+        return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").includes("valid email"));
+      });
+    },
+    // `?s=multiMessage` forceMatches BOTH messages on first paint → aria-describedby lists TWO
+    // ids, space-joined in registration order (valueMissing then typeMismatch), each resolving
+    // to a mounted span. Proves the multi-id describedby join/ordering. No interaction.
+    multiMessage: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!db) return false;
+        const ids = db.split(" ").filter(Boolean);
+        if (ids.length !== 2) return false;
+        const els = ids.map((id) => document.getElementById(id));
+        if (!els.every(Boolean)) return false;
+        // registration order: first id's span is the valueMissing text, second the typeMismatch.
+        return (els[0].textContent || "").includes("missing")
+          && (els[1].textContent || "").includes("valid email");
+      });
+    },
+    // Event-gated data-valid: fill a VALID email into the required Control + fire native `change`
+    // → validity.valid===true → the field/label/control stamp data-valid="true" (radix
+    // getValidAttribute). Proves the validated-and-valid branch. Wait until data-valid resolves.
+    validValid: async (pg) => {
+      const email = root(pg).locator('input[name="email"]');
+      await email.waitFor();
+      await email.fill("a@b.com");
+      // dispatch a real `change` (blur-equivalent) so the field records validity===valid.
+      await pg.evaluate(() => {
+        const i = document.querySelector('input[name="email"]');
+        i.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i?.getAttribute("data-valid") === "true" && !i.hasAttribute("data-invalid");
+      });
+    },
+    // `?s=defaultMessage` forceMatches a childless valueMissing Message → the span shows the
+    // default built-in text "This value is missing". No interaction; first paint is the oracle.
+    defaultMessage: async (pg) => {
+      await root(pg).locator("form").first().waitFor();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        const db = i?.getAttribute("aria-describedby");
+        if (!(db && db.split(" ").some((id) => document.getElementById(id)))) return false;
+        return db.split(" ").some((id) => (document.getElementById(id)?.textContent || "").trim() === "This value is missing");
+      });
+    },
+    // Wave-D form RESET: submit the empty required Control (valueMissing Message mounts +
+    // data-invalid stamps + aria-describedby links), THEN click the Reset button. The form
+    // `reset` event clears the field's validity, so the Message UNMOUNTS and data-invalid /
+    // aria-describedby are dropped — the form returns to its pristine rest-valid DOM. That
+    // cleared DOM is the oracle; keyed off upstream selectors only.
+    reset: async (pg) => {
+      await root(pg).locator('button[type="submit"]').click();
+      await pg.locator('input[data-invalid="true"]').first().waitFor();
+      await root(pg).locator('button[type="reset"]').click();
+      await pg.waitForFunction(() => {
+        const i = document.querySelector('input[name="email"]');
+        return i && !i.hasAttribute("data-invalid") && !i.hasAttribute("aria-describedby")
+          && !document.querySelector('input[data-invalid]');
+      });
+    },
+  },
+  // ── Wave-B stateless depth oracles (bare primitives) ─────────────────────────────
+  separatorprim: {
+    // STATELESS: four at-rest combos selected by ?s=. Wait (keyed off UPSTREAM selectors)
+    // for the div carrying data-orientation — the only structural marker present in all four.
+    hsem: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+    vsem: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+    hdec: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+    vdec: async (pg) => { await pg.locator('div[data-orientation]').first().waitFor({ state: "attached" }); },
+  },
+  aspectratioprim: {
+    // STATELESS: wait for the wrapper marker attribute (present in every variant).
+    default: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    wide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    tall: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    styled: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+    // Wave-C edge ratio: 21/9 → padding-bottom:42.857142857142854% (pins the non-terminating
+    // decimal serialization — exercises the 100/ratio number formatting at a non-round ratio).
+    verywide: async (pg) => { await pg.locator('[data-radix-aspect-ratio-wrapper]').first().waitFor({ state: "attached" }); },
+  },
+  visuallyhiddenprim: {
+    // STATELESS: wait for the sr-only span (clip-based hiding ⇒ overflow:hidden in inline style).
+    plain: async (pg) => { await pg.locator('span[style*="overflow"]').first().waitFor({ state: "attached" }); },
+    props: async (pg) => { await pg.locator('span[style*="overflow"]').first().waitFor({ state: "attached" }); },
+    stylemerge: async (pg) => { await pg.locator('span[style*="overflow"]').first().waitFor({ state: "attached" }); },
+  },
+  labelprim: {
+    // STATELESS: wait for the <label> carrying the for-association attribute.
+    forattrs: async (pg) => { await pg.locator('label[for]').first().waitFor({ state: "attached" }); },
+    // Wave-C runtime contract: clicking the label FOCUSES the for-associated control
+    // (native <label for=…> behavior the port's for attribute must enable). Click the
+    // label text, then assert document.activeElement is the input#email — the gate is the
+    // waitForFunction (throws/times out if focus didn't transfer); the post-click DOM is
+    // unchanged (focus isn't in the normalized snapshot) so golden==port DOM trivially.
+    forfocus: async (pg) => {
+      const lbl = pg.locator("label[for]").first();
+      await lbl.waitFor({ state: "attached" });
+      await lbl.click();
+      await pg.waitForFunction(() => {
+        const a = document.activeElement;
+        return a && a.tagName === "INPUT" && a.id === "email";
+      });
+    },
+  },
+  // ── Wave-C: Themes.Separator WRAPPER (rt-Separator) depth oracle ─────────────────
+  // STATELESS: wait for the rt-Separator span (present in every state). The contract
+  // (role omitted when decorative-default, data-accent-color, size class, orientation
+  // class) is judged by the DOM snapshot, not the wait.
+  separatorthemes: {
+    default: async (pg) => { await pg.locator("span.rt-Separator").first().waitFor({ state: "attached" }); },
+    semantic: async (pg) => { await pg.locator('span.rt-Separator[role="separator"]').first().waitFor({ state: "attached" }); },
+    size4: async (pg) => { await pg.locator("span.rt-Separator.rt-r-size-4").first().waitFor({ state: "attached" }); },
+    accent: async (pg) => { await pg.locator('span.rt-Separator[data-accent-color="cyan"]').first().waitFor({ state: "attached" }); },
+    vertical: async (pg) => { await pg.locator("span.rt-Separator.rt-r-orientation-vertical").first().waitFor({ state: "attached" }); },
+  },
+  // ── Wave-C menus depth (STR-330): DropdownMenu CheckboxItem / RadioItem ──────────
+  // The story is defaultOpen, so the menu is mounted open at first paint — NO click. Wait for
+  // the role=menu, then for the variant's items: checkbox → a role=menuitemcheckbox carrying
+  // aria-checked=true (the checked ItemIndicator present); radio → a role=menuitemradio with
+  // aria-checked=true (the selected indicator). Keyed off UPSTREAM role/aria-checked only, so
+  // the same driver runs against golden and port.
+  dropdownmenuchecks: {
+    // CLICK-open (no defaultOpen) so the open→portal→scroll-lock lifecycle runs and the
+    // content lands in body with no item highlighted (pointer-open) — same path as
+    // dropdownmenu:open. Then wait for the variant's checked/unchecked item pair.
+    checkbox: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await triggerButton(pg).click();
+      await pg.locator('[role="menu"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
+  // ── Wave-C menus depth (STR-330): ContextMenu CheckboxItem / RadioItem ───────────
+  // RIGHT-CLICK-open (point-anchored) then wait for the variant's checked/unchecked pair.
+  // Keyed off UPSTREAM role/aria-checked only, so the same driver runs golden + port.
+  contextmenuchecks: {
+    checkbox: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await openMenu(pg, () => pg.locator("#root .rt-BaseMenuTrigger, #root [data-state]").first().click({ button: "right" }));
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
+  // ── Wave-C menus depth (STR-330): Menubar CheckboxItem / RadioItem ───────────────
+  // Click the "View" trigger (role=menuitem) to open the menu (non-modal, no scroll-lock),
+  // then wait for the variant's checked/unchecked pair. Keyed off UPSTREAM role/aria-checked.
+  menubarchecks: {
+    checkbox: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemcheckbox"][aria-checked="false"]').first().waitFor();
+    },
+    radio: async (pg) => {
+      await openMenu(pg, () => root(pg).getByRole("menuitem").first().click());
+      await pg.locator('[role="menuitemradio"][aria-checked="true"]').first().waitFor();
+      await pg.locator('[role="menuitemradio"][aria-checked="false"]').first().waitFor();
+    },
+  },
+  // ── Wave-C menus depth (STR-330): Select placeholder ─────────────────────────────
+  // No defaultValue + a placeholder. OPEN the listbox (click the trigger) so the oracle is the
+  // open-state DOM: the trigger keeps `data-placeholder` (nothing selected), and every option is
+  // aria-selected=false (no checked item). Click-open avoids the closed-Select content-mount
+  // strategy divergence (the port always mounts the wrapper; upstream mounts content on open),
+  // which is an orthogonal Select-architecture gap tracked separately. Keyed off UPSTREAM
+  // role=listbox + data-placeholder only, so the same driver runs golden + port.
+  selectplaceholder: {
+    placeholder: async (pg) => {
+      await pg.locator('button[data-placeholder]').first().waitFor();
+      await pg.locator(".rt-SelectTrigger").click();
+      await pg.locator('[role="listbox"]').waitFor();
+    },
+  },
+  // Wave-C ScrollArea family (horizontal + both+corner). type="always" mounts the
+  // bar(s) unconditionally; content overflows both axes. Keyed off UPSTREAM
+  // data-orientation/data-state + the rt-ScrollAreaCorner class, so the SAME driver
+  // runs against golden and port; wait until the thumb(s) are measured (height/width
+  // ratio applied) so the post-measure DOM has settled before the snapshot.
+  scrollareax: {
+    horizontal: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const t = document.querySelector('.rt-ScrollAreaThumb');
+        return t && t.getBoundingClientRect().width > 1;
+      });
+    },
+    both: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaCorner').first().waitFor();
+      await pg.waitForFunction(() => {
+        const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
+        return ts.length >= 2 &&
+          [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
+      });
+    },
+    // `?s=radius` (wave D) — the themes `radius` prop stamps data-radius=full on BOTH
+    // scrollbars (the default is undefined ⇒ the attr is absent in the horizontal/both
+    // states). Wait for both bars to carry data-radius=full + measured thumbs.
+    radius: async (pg) => {
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="vertical"][data-radius="full"][data-state="visible"]').first().waitFor();
+      await pg.locator('.rt-ScrollAreaScrollbar[data-orientation="horizontal"][data-radius="full"][data-state="visible"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const ts = document.querySelectorAll('.rt-ScrollAreaThumb');
+        return ts.length >= 2 &&
+          [...ts].every((t) => { const r = t.getBoundingClientRect(); return r.width > 1 && r.height > 1; });
+      });
+    },
+  },
+  // Wave-D: Select FORM integration. STATELESS at-rest oracle (no popup). `?s=required`
+  // mounts the hidden native <select> (BubbleSelect) sibling + aria-required on the
+  // trigger; `?s=disabledtrigger` makes the trigger a disabled <button>. The driver only
+  // waits for the trigger to be present; keyed off the UPSTREAM rt-SelectTrigger class so
+  // the same wait runs against golden and port.
+  selectform: {
+    // OPEN the select (so the content listbox is mounted in golden + port) AND assert the
+    // hidden native <select> (BubbleSelect) sibling is present — the new form-participation
+    // contract. Keyed off the UPSTREAM rt-SelectTrigger / role=listbox / select[aria-hidden]
+    // selectors so the same driver runs against golden and port.
+    required: async (pg) => {
+      await pg.locator("select[aria-hidden]").first().waitFor({ state: "attached" });
+      await pg.locator(".rt-SelectTrigger").first().click();
+      await pg.locator('[role="listbox"]').waitFor();
+    },
+  },
+  // Wave-D: DropdownMenu Group/Label parts. Open the menu (click the trigger) and wait
+  // for the role=group wrappers + their aria-labelledby Label divs. Keyed off the
+  // UPSTREAM role=group / role=menu selectors so the same driver runs golden + port.
+  dropdownmenugroup: {
+    open: async (pg) => {
+      await openMenu(pg, () => triggerButton(pg).click());
+      await pg.locator('[role="menu"] [role="group"]').first().waitFor();
+    },
+  },
+
+  // Wave-D: Toast swipeDirection="up" variant — same controlled-open-at-first-paint defusing
+  // as `toast` (duration=Infinity, no queue/timer race). Wait for the open <li>, keyed off
+  // its data-swipe-direction (now "up"). Same driver runs golden + port.
+  "toast-up": {
+    open: async (pg) => {
+      await pg.locator('li[data-state="open"][data-swipe-direction="up"]').first().waitFor();
+    },
+  },
+  // Wave-D Tabs zero-selected: NO defaultValue → active value '' (upstream value??default??'').
+  // STATELESS — at rest NO tab is aria-selected and EVERY panel is hidden. Wait for the tablist
+  // with zero selected tabs (the zero-selected DOM is the oracle).
+  tabsnone: {
+    none: async (pg) => {
+      await pg.locator('[role="tablist"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const tabs = [...document.querySelectorAll('[role="tab"]')];
+        const sel = tabs.filter((t) => t.getAttribute("aria-selected") === "true");
+        const panels = [...document.querySelectorAll('[role="tabpanel"]')];
+        return tabs.length === 3 && sel.length === 0 && panels.every((p) => p.hasAttribute("hidden"));
+      });
+    },
+  },
+  // ── Wave-D: multi-thumb / RANGE slider (value is number[]) ───────────────────────
+  // Upstream renders one role=slider thumb PER value. Drivers key ONLY off the upstream
+  // role/aria-label selectors so the same driver runs against golden and port.
+  sliderrange: {
+    // default [25,75]: two thumbs labelled Minimum/Maximum; range spans between them
+    // (left:25%; right:25%). No interaction — the at-rest 2-thumb DOM is the oracle.
+    default: async (pg) => {
+      await root(pg).locator('[role="slider"][aria-label="Minimum"]').first().waitFor();
+      await root(pg).locator('[role="slider"][aria-label="Maximum"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a.length === 2
+          && a[0].getAttribute("aria-valuenow") === "25"
+          && a[1].getAttribute("aria-valuenow") === "75";
+      });
+    },
+    // ?s=triple [20,50,80]: three thumbs labelled "Value 1/2/3 of 3"; range left:20%; right:20%.
+    triple: async (pg) => {
+      await root(pg).locator('[role="slider"][aria-label="Value 1 of 3"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a.length === 3
+          && a[2].getAttribute("aria-label") === "Value 3 of 3"
+          && a[1].getAttribute("aria-valuenow") === "50";
+      });
+    },
+    // ?s=minsteps [40,60] minStepsBetweenThumbs=10: focus the LOWER thumb (Minimum, value 40)
+    // and press ArrowRight 25×. Each step is +1 until the thumb is 10 steps below its neighbour
+    // (60-50=10), then the constraint REJECTS further moves — it parks at exactly 50. The landed
+    // value (Minimum=50, Maximum=60) is the deterministic oracle; range becomes left:50%; right:40%.
+    minsteps: async (pg) => {
+      const lo = root(pg).locator('[role="slider"][aria-label="Minimum"]').first();
+      await lo.waitFor();
+      await lo.focus();
+      for (let i = 0; i < 25; i++) await pg.keyboard.press("ArrowRight");
+      await pg.waitForFunction(() => {
+        const a = [...document.querySelectorAll('[role="slider"]')];
+        return a[0].getAttribute("aria-valuenow") === "50"
+          && a[1].getAttribute("aria-valuenow") === "60";
+      });
+    },
+  },
+  // ── STR-330: multi-thumb Slider FORM participation (SliderBubbleInput) ────────────
+  // The named range slider inside a <form>: each thumb renders a hidden SliderBubbleInput
+  // sibling (a bare `<input style="display:none" name="band[]">`, NO type/aria-hidden/
+  // tabindex, defaultValue = the thumb's value). At rest [25,75] ⇒ two thumbs + two bubble
+  // inputs. Wait for the thumbs AND both bubble inputs before snapshotting (golden==port).
+  sliderrangeform: {
+    default: async (pg) => {
+      await root(pg).locator('form [role="slider"][aria-label="Minimum"]').first().waitFor();
+      await root(pg).locator('form [role="slider"][aria-label="Maximum"]').first().waitFor();
+      await pg.waitForFunction(() => {
+        const inputs = [...document.querySelectorAll('form input[name="band[]"]')];
+        return inputs.length === 2 && inputs.every((i) => i.style.display === "none");
+      });
+    },
+  },
+  // ── Wave-D: Label onMouseDown guard — DOM snapshot only ──────────────────────────
+  // The guard (preventDefault on multi-click / early-return inside a control) leaves NO
+  // DOM trace, so this driver only settles the static <label>+children for the snapshot
+  // (golden==port). The actual preventDefault behavior is adjudicated in themes-apg.mjs.
+  // Keyed off the UPSTREAM <label for> only, so the same driver runs golden + port.
+  labelguard: {
+    plain: async (pg) => { await pg.locator("label[for]").first().waitFor({ state: "attached" }); },
+    control: async (pg) => { await pg.locator("label[for] input").first().waitFor({ state: "attached" }); },
+  },
+};

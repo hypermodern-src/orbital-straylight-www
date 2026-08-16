@@ -1,0 +1,161 @@
+{
+  "component": "Label",
+  "primitive": "Hydrogen.Radix.Label",
+  "face": "primitive",
+  "upstream": "primitives packages/react/label/src/label.tsx",
+  "note": "STR-381 ledger for Label: 8 gaps (2 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    {
+      "id": "labelprim.forattrs",
+      "state": "forattrs",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "label[for=...] attribute emitted on render"
+    },
+    {
+      "id": "labelprim.forfocus",
+      "state": "forfocus",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "click label focuses associated control by id"
+    },
+    {
+      "id": "labelprim.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest label a11y tree"
+    },
+    {
+      "id": "labelguard.control",
+      "state": "control",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "label wrapping interactive control render"
+    },
+    {
+      "id": "labelguard.plain",
+      "state": "plain",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "plain label render (no inner control)"
+    },
+    {
+      "id": "labelguard.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "label guard at-rest a11y tree"
+    },
+    {
+      "id": "labelprim.dblclick-noselect",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "guard: multi-click mousedown on bare label is preventDefault-ed; single-click is not",
+      "ref": "label.tsx:19-27,25-26 onMouseDown preventDefault when detail>1 stops text selection on multi-click \u2014 the bespoke behavior; port has no handler"
+    },
+    {
+      "id": "labelprim.wrapped-control-passthrough",
+      "state": "control",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "guard: multi-click mousedown INSIDE wrapped control early-returns (NOT preventDefault-ed)",
+      "ref": "label.tsx:21-22 mousedown target.closest(button,input,select,textarea) returns early \u2014 inner control interaction unaltered"
+    },
+    {
+      "id": "labelprim.passthrough-attrs",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: {...props} spread (id/data-*/aria-*/title) \u2014 co-covered by labelprim.forattrs (id=email-label data-foo=bar title=Your). label.tsx:11-12,17",
+      "oracle_file": "labelprim.forattrs"
+    },
+    {
+      "id": "labelprim.for-focuses-control",
+      "state": "forfocus",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: the label's for= targets the control id; clicking the label focuses that control is NATIVE <label for> browser behavior \u2014 co-covered by labelprim.forattrs (for=email == the email control id). No port JS needed. label.tsx for association",
+      "oracle_file": "labelprim.forattrs"
+    },
+    {
+      "id": "labelprim.composed-mousedown",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE: mousedown handling (multi-click preventDefault; user handlers compose) \u2014 co-covered by the labelguard plain APG check (mousedown preventDefault discipline).",
+      "apg_check": "guard: multi-click mousedown on bare label is preventDefault-ed; single-click is not"
+    },
+    {
+      "id": "labelprim.aschild-merge",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: asChild/Primitive-identity merge is a React idiom; the port renders a native <label> \u2014 the labelled anatomy is pinned by labelprim.forattrs. N/A to the Halogen render.",
+      "oracle_file": "labelprim.forattrs"
+    },
+    {
+      "id": "labelprim.ref-forward",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: ref forwarding has no Halogen analogue; the rendered <label> is pinned by labelprim.forattrs.",
+      "oracle_file": "labelprim.forattrs"
+    },
+    {
+      "id": "labelprim.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: native <label> is direction-agnostic (no dir-dependent DOM) \u2014 co-covered by labelprim.rest.",
+      "oracle_file": "labelprim.rest"
+    }
+  ]
+}

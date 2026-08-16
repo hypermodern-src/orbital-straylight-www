@@ -1,0 +1,256 @@
+{
+  "component": "Tooltip",
+  "primitive": "Hydrogen.Radix.Tooltip",
+  "face": "themed",
+  "upstream": "primitives packages/react/tooltip/src/tooltip.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger: every cell tying Tooltip out against upstream. status=gated have committed goldens; status=open are named debt. 1 open-core cell.",
+  "cells": [
+    {
+      "id": "tooltip.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "open via hover: trigger aria-describedby, data-state=delayed-open, popper wrapper, role=tooltip VisuallyHidden copy"
+    },
+    {
+      "id": "tooltip.focusopen",
+      "state": "focusopen",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "focus-open: data-state=instant-open on trigger+content (vs delayed-open hover)"
+    },
+    {
+      "id": "tooltip.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (button only)"
+    },
+    {
+      "id": "tooltip.aria-describedby-closed",
+      "state": "closed-rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "tooltip.closed-rest",
+      "ref": "VERIFIED (2026-06-21): describedby already gated on open; closed-rest trigger has NO aria-describedby (and no popper-side/align) \u2014 golden-dom/tooltip.closed-rest.txt; port==upstream."
+    },
+    {
+      "id": "tooltip.delay",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "tooltip.tsx:29,207-214 delayDuration 700ms timer; port opens synchronously on mouseenter"
+    },
+    {
+      "id": "tooltip.touch-guard",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "tooltip.tsx:294-307 onPointerMove early-returns on touch; port uses mouseenter, touch wrongly opens"
+    },
+    {
+      "id": "tooltip.pointerdown-suppress",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "tooltip.tsx:308-317 pointerdown suppresses focus-open flash; port has no such guard"
+    },
+    {
+      "id": "tooltip.click-close",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "clicking the trigger dismisses an open tooltip",
+      "ref": "tooltip.tsx:308-319 pointerdown/click closes open tooltip; port leaves it open"
+    },
+    {
+      "id": "tooltip.multi-instance",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "tooltip.tsx:182,524-527 TOOLTIP_OPEN CustomEvent closes other tooltips; port has no cross-instance coordination"
+    },
+    {
+      "id": "tooltip.scroll-close",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "tooltip.tsx:530-540 trigger-scroll closes; port repositions instead"
+    },
+    {
+      "id": "tooltip.pointerdown-outside",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "tooltip.tsx:543-549 pointerdown-outside dismiss; port is Escape-only (deliberate divergence to confirm)"
+    },
+    {
+      "id": "tooltip.aria-label",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-24): added ariaLabel field \u2014 a non-empty aria-label on Content overrides the role=tooltip VisuallyHidden copy accessible name (ariaLabel||children, tooltip.tsx:570-572); consumed, never spread onto the content node. tooltip.arialabel DOM golden byte-identical (visible text \"Add to library\", role=tooltip copy \"Add this item to your library\"); ARIA tree + axe fingerprint match upstream (a11y MATRIX). tooltip.open/controlled unregressed.",
+      "oracle_file": "tooltip.arialabel"
+    },
+    {
+      "id": "tooltip.forcemount-unmount",
+      "state": "closed-rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "tooltip.closed-rest",
+      "ref": "FIXED (2026-06-21): wrapper gated on open \u2192 content UNMOUNTED at closed-rest (was display:none always-mounted). golden-dom/tooltip.closed-rest.txt; open/focusopen no regression."
+    },
+    {
+      "id": "tooltip.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): FIXED start-open (overlay pattern) \u2014 controlled open=Just true OR uncontrolled defaultOpen=true at mount renders the tooltip open (instant-open, wasOpenDelayedRef defaults false). Initialize arms the open envelope (Escape + scroll/resize reposition subs + AfterOpen) when current ctrl, mirroring openTooltip minus the ctrl change/raise. Both tooltip.controlled and tooltip.defaultopen goldens byte-identical; tooltip.open (hover, delayed-open) unregressed. tooltip.tsx:173-189",
+      "oracle_file": "tooltip.controlled"
+    },
+    {
+      "id": "tooltip.skip-delay",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: skipDelayDuration window (default 300) after a close"
+    },
+    {
+      "id": "tooltip.hoverable-content",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: hoverable content + pointer grace polygon"
+    },
+    {
+      "id": "tooltip.disable-hoverable",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: disableHoverableContent prop (Provider or per-Tooltip)"
+    },
+    {
+      "id": "tooltip.preventable-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: onEscapeKeyDown / onPointerDownOutside preventable callbacks"
+    },
+    {
+      "id": "tooltip.portal-container",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Portal container prop (custom mount node)"
+    },
+    {
+      "id": "tooltip.no-type-button",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: trigger has NO type=button (deliberate)"
+    },
+    {
+      "id": "tooltip.aschild-trigger",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: trigger is Popper.Anchor asChild \u2014 consumer trigger composition"
+    },
+    {
+      "id": "tooltip.arrow-suppressed",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: arrow suppressed inside VisuallyHidden copy"
+    },
+    {
+      "id": "tooltip.css-custom-props",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: exposed CSS custom properties on content (--radix-tooltip-*)"
+    },
+    {
+      "id": "tooltip.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: RTL Popper positioning honors dir for left/right"
+    }
+  ]
+}

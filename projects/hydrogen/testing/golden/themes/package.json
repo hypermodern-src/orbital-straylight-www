@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@radix-ui/react-form": "^0.1.9",
+    "@radix-ui/react-navigation-menu": "^1.2.15",
+    "@radix-ui/react-one-time-password-field": "^0.1.9",
+    "@radix-ui/react-password-toggle-field": "^0.1.4",
+    "@radix-ui/react-toast": "^1.2.16",
+    "@radix-ui/react-toolbar": "^1.1.12",
+    "@radix-ui/themes": "3",
+    "react": "18",
+    "react-dom": "18"
+  },
+  "devDependencies": {
+    "@types/react": "18",
+    "@types/react-dom": "18"
+  }
+}

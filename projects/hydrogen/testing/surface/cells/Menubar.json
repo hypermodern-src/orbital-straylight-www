@@ -1,0 +1,378 @@
+{
+  "component": "Menubar",
+  "primitive": "Hydrogen.Radix.Menubar",
+  "face": "themed",
+  "upstream": "primitives packages/react/menubar/src/menubar.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger: every cell tying Menubar out against upstream. status=gated have committed goldens; status=open are named debt. 1 open-core cell.",
+  "cells": [
+    {
+      "id": "menubar.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "File menu open: trigger bar role=menuitem, aria-expanded/controls/haspopup, role=menu with entries + separator"
+    },
+    {
+      "id": "menubar.closed-rest-tabindex",
+      "state": "closed-rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "oracle_file": "menubar.closed-rest",
+      "ref": "FIXED (2026-06-21): (1) wrapper gated on rendered \u2192 content unmounted at closed-rest; (2) triggerFocus init 0\u2192-1 \u2192 all triggers tabindex=-1, root tabindex=0 (upstream RovingFocus entry semantics). golden-dom/menubar.closed-rest.txt; open/item1/disabled/submenu no regression."
+    },
+    {
+      "id": "menubar.item1",
+      "state": "item1",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "ArrowDown highlights first item \u2192 data-highlighted + roving tabindex=0"
+    },
+    {
+      "id": "menubar.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled trigger: disabled + data-disabled, tabindex=-1, skipped by roving"
+    },
+    {
+      "id": "menubar.submenu",
+      "state": "submenu",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "SubTrigger data-state=open aria-expanded + nested role=menu"
+    },
+    {
+      "id": "menubar.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (3 menuitems, no menu)"
+    },
+    {
+      "id": "menubarchecks.checkbox",
+      "state": "checkbox",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "CheckboxItem role=menuitemcheckbox, aria-checked, ItemIndicator when checked"
+    },
+    {
+      "id": "menubarchecks.radio",
+      "state": "radio",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "RadioItem role=menuitemradio, single aria-checked in group"
+    },
+    {
+      "id": "menubarchecks.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest checkbox/radio menu a11y tree"
+    },
+    {
+      "id": "menubar.trigger-enter",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter on a trigger opens the menu and highlights the first item",
+      "ref": "menubar.tsx:260-269 Enter/Space on closed trigger opens + highlights first item (wasKeyboardTriggerOpenRef); port only handles ArrowDown/Up. THE core gap."
+    },
+    {
+      "id": "menubar.kbopen-highlight",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): co-covered. KEYBOARD-open highlights the first item \u2014 menubar.item1 golden (ArrowDown) has data-highlighted on item 0, + Enter/Space/ArrowDown APG checks assert it. CLICK-open does NOT highlight \u2014 menubar.open (click-driven) golden has 0 data-highlighted. Both committed + port DOM-identical.",
+      "oracle_file": "menubar.item1"
+    },
+    {
+      "id": "menubar.rtl-cross",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 port hardcoded ArrowRight=next + dir=ltr. Now dir-aware: nextMenuKey/prevMenuKey + subOpen/subClose keys mirror in RTL (menubar.tsx:358, menu.tsx:31-38), and content/popper emit dir=dirName st.dir. DOM golden menubar.rtl byte-identical + apg cross-menu mirror green both faces.",
+      "apg_check": "RTL: ArrowLeft opens the NEXT menu, ArrowRight the PREVIOUS",
+      "oracle_file": "menubar.rtl"
+    },
+    {
+      "id": "menubar.noloop-cross",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 adjacentMenu now respects st.loop (menubar.tsx:373 wrapArray vs slice): loop=false slices past the end (no wrap), loop=true (default) wraps. ?s=noloop apg green both faces.",
+      "apg_check": "loop=false: ArrowRight from the LAST open menu does NOT wrap to the first"
+    },
+    {
+      "id": "menubar.disabled-trigger",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): FEATURE \u2014 added disabled field to Menu; trigger emits disabled+data-disabled (menubar.tsx:239-240), and enabledTriggers filters disabled out of BOTH bar roving and adjacentMenu cross-menu (focusable={!disabled}, getItems().filter(!disabled)). DOM golden menubar.distrigger + apg skip green both faces.",
+      "apg_check": "disabled trigger is skipped by bar roving and cross-menu",
+      "oracle_file": "menubar.distrigger"
+    },
+    {
+      "id": "menubar.disabled-item",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "ArrowDown SKIPS a disabled item to the next enabled one",
+      "ref": "disabled item skipped by vertical roving + typeahead; port navigate has no disabled-skip, ItemClicked still fires"
+    },
+    {
+      "id": "menubar.typeahead",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "typeahead: a letter focuses the next matching item in the open menu, repeats cycle",
+      "ref": "IMPLEMENTED (2026-06-21): shared Behavior.Typeahead.nextMatch + Menubar wiring (open-menu search buffer, performance.now 1s lazy reset). menu.tsx:411-434"
+    },
+    {
+      "id": "menubar.checkbox-item",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): committed golden menubarchecks.checkbox byte-pins the item (role=menuitemcheckbox + aria-checked + data-state + ItemIndicator); port DOM-identical (verified). Stale ref (port DID implement it). ",
+      "oracle_file": "menubarchecks.checkbox"
+    },
+    {
+      "id": "menubar.radio-item",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): committed golden menubarchecks.radio byte-pins the item (role=menuitemradio + aria-checked + data-state + ItemIndicator); port DOM-identical (verified). Stale ref (port DID implement it). ",
+      "oracle_file": "menubarchecks.radio"
+    },
+    {
+      "id": "menubar.submenu-impl",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "ArrowRight opens the submenu (not the adjacent menu); ArrowLeft closes it",
+      "ref": "menubar.tsx:586-678 Sub/SubTrigger/SubContent: nested layer-stack, ArrowRight opens sub vs cross-menu guard; entirely missing"
+    },
+    {
+      "id": "menubar.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): FIXED start-open \u2014 a controlled value=\"file\" at mount renders File OPEN (presence=Open from initialState), but Initialize did not arm the open envelope. Now Initialize, when current ctrl /= \"\", sets up the dismiss subs + schedules AfterStartOpen (reposition + finalize false: portal+position+guards, NO focus move). finalize now adds focus guards independent of focusToo. golden menubar.controlled byte-identical; all other menubar states unregressed.",
+      "oracle_file": "menubar.controlled"
+    },
+    {
+      "id": "menubar.hover-switch",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): FIXED a real envelope-ordering bug \u2014 open-on-hover switch (menubar.tsx:253-259) re-adopted the new content via Portal.adopt (appendChild to body END), landing it AFTER the existing trail focus-guard. finalize now uses reAdoptBeforeTrail (inserts before the trail guard on switch, appends on initial open). ?s=hoverswitch golden byte-identical; open/submenu unregressed.",
+      "oracle_file": "menubar.hoverswitch"
+    },
+    {
+      "id": "menubar.outside-norestore",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 closeMenu now takes a restore flag; the outside pointer-dismiss path passes false (menubar.tsx:317,328-345 hasInteractedOutsideRef), Escape/selection/programmatic close pass true. apg green both faces.",
+      "apg_check": "outside-click close does NOT restore focus to the trigger"
+    },
+    {
+      "id": "menubar.bar-tabindex",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): golden VERIFIED the concern was a non-issue \u2014 upstream menubar div carries tabindex=0 (style=outline:none) with roving on the triggers (all -1 closed; active 0 when open). Port matches byte-identically in menubar.closed-rest + menubar.open. Co-covered.",
+      "oracle_file": "menubar.closed-rest"
+    },
+    {
+      "id": "menubar.arrowup-last",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): CORRECTED + FIXED \u2014 the cell premise was wrong (ArrowUp-opens-to-last is DropdownMenu behavior). The menubar trigger opens ONLY on Enter/Space/ArrowDown (menubar.tsx:260-269); ArrowUp does NOT open. Removed the port ArrowUp open branch; apg green both faces.",
+      "apg_check": "ArrowUp on a closed trigger does NOT open the menu"
+    },
+    {
+      "id": "menubar.item-shortcut",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: item shortcut / accent rendering"
+    },
+    {
+      "id": "menubar.pointerdown-guard",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: pointerDown left-button-only + ctrlKey guard"
+    },
+    {
+      "id": "menubar.closeautofocus",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: onCloseAutoFocus restore only when whole menubar closed"
+    },
+    {
+      "id": "menubar.presence-exit",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Presence exit / closing animation (bare content unmounts)"
+    },
+    {
+      "id": "menubar.align-default",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): co-covered by menubar.open \u2014 the open trigger carries data-radix-popper-align=start + data-radix-popper-side=bottom and the content data-align=start data-side=bottom (default align=start, side=bottom), port DOM-identical.",
+      "oracle_file": "menubar.open"
+    },
+    {
+      "id": "menubar.arrow-part",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: MenubarArrow positioned arrow sub-part"
+    },
+    {
+      "id": "menubar.group-label",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "edge: MenubarGroup/MenubarLabel sub-parts (role=group wrapper)"
+    },
+    {
+      "id": "menubar.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Portal/Content"
+    },
+    {
+      "id": "menubar.empty-single",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: empty menubar (zero menus) and single-menu (no cross-menu wrap)"
+    },
+    {
+      "id": "menubar.bar-home-end",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Home focuses the first trigger, End the last",
+      "ref": "edge: bar roving Home/End and ArrowUp/Down keys"
+    }
+  ]
+}

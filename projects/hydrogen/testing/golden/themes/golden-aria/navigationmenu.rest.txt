@@ -1,0 +1,6 @@
+- navigation "Main":
+  - list:
+    - listitem:
+      - button "Item One"
+    - listitem:
+      - button "Item Two"

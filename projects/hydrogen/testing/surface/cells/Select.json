@@ -1,0 +1,305 @@
+{
+  "component": "Select",
+  "primitive": "Hydrogen.Radix.Select",
+  "face": "themed",
+  "upstream": "primitives packages/react/select/src/select.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Select: 21 gaps (3 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    {
+      "id": "select.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "open listbox: group Fruits, Apple selected/highlighted, modal envelope"
+    },
+    {
+      "id": "select.closed-rest",
+      "state": "closed-rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "FIXED (2026-06-21): position wrapper gated on open \u2192 listbox UNMOUNTED at closed-rest (was display:none always-mounted). golden-dom/select.closed-rest.txt; select.open no regression. (systemic popper-overlay closed-rest bug \u2014 6th & last)"
+    },
+    {
+      "id": "select.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest combobox a11y tree (Apple)"
+    },
+    {
+      "id": "selectform.required",
+      "state": "required",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "form/required: aria-required on trigger render"
+    },
+    {
+      "id": "selectform.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "form select at-rest a11y tree"
+    },
+    {
+      "id": "selectplaceholder.placeholder",
+      "state": "placeholder",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "placeholder: trigger data-placeholder + placeholder text render"
+    },
+    {
+      "id": "selectplaceholder.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "placeholder select at-rest a11y tree"
+    },
+    {
+      "id": "select.trigger-keyboard-open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "CO-COVER (2026-06-25): the gate-green parametrized APG checks \"{ArrowDown,ArrowUp,Enter,Space} on the trigger opens the listbox\" cover all four OPEN_KEYS (select.tsx:31) \u2014 a focused trigger opens the listbox on each key and focus lands on the selected option. select.tsx:380-389,703-714",
+      "apg_check": "on the trigger opens the listbox"
+    },
+    {
+      "id": "select.open-focus-selected",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "open moves focus to the SELECTED option",
+      "ref": "select.tsx:683-714 on open focus lands on SELECTED option (focusSelectedItem); port focuses content/listbox \u2014 wrong roving origin"
+    },
+    {
+      "id": "select.typeahead",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "typeahead: a letter focuses the matching option (idle reset)",
+      "ref": "IMPLEMENTED (2026-06-21): shared Behavior.Typeahead.nextMatch + Select listbox wiring (option search buffer, performance.now 1s lazy reset, space-guard). select.tsx:1834-1883"
+    },
+    {
+      "id": "select.home-end-tab",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Home highlights the first option, End the last",
+      "ref": "select.tsx:882-910 Home/End + ArrowUp edge over enabled items; Tab preventDefault; port lacks Home/End + Tab guard"
+    },
+    {
+      "id": "select.disabled-item-skip",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg",
+        "dom"
+      ],
+      "apg_check": "ArrowDown SKIPS a disabled option to the next enabled one",
+      "ref": "IMPLEMENTED (2026-06-21): ListKeyDown roving switched to RovingFocus.navigateMask over a focusable mask (map !disabled st.items); arrows skip disabled options. New golden story ?s=disabled (Orange disabled). golden-validated. select.tsx focusable={!disabled}"
+    },
+    {
+      "id": "select.placeholder",
+      "state": "placeholder",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): selectplaceholder.placeholder golden (gate-green) byte-pins the empty-value trigger \u2014 data-placeholder= present and the placeholder text rendered when no value is selected. select.tsx:344,423-435,1830",
+      "oracle_file": "selectplaceholder.placeholder"
+    },
+    {
+      "id": "select.aria-required",
+      "state": "required",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): selectform.required golden (gate-green) byte-pins aria-required=true on the trigger combobox. select.tsx:338,1803",
+      "oracle_file": "selectform.required"
+    },
+    {
+      "id": "select.native-bubble-select",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): selectform.required golden (gate-green) byte-pins the hidden native <select aria-hidden required name=fruit tabindex=-1> BubbleSelect for form participation. select.tsx:1780-1822",
+      "oracle_file": "selectform.required"
+    },
+    {
+      "id": "select.disabled-trigger",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-24): disabled Root \u2192 trigger button[disabled]+data-disabled, popup never opens (port already had the disabled field; added the story state). select.disabledtrigger DOM golden byte-identical; APG check (golden-first) proves clicking the disabled trigger opens 0 listbox nodes. select.tsx:299-302,342-343",
+      "oracle_file": "select.disabledtrigger",
+      "apg_check": "disabled trigger click does NOT open the listbox"
+    },
+    {
+      "id": "select.aria-selected-focus-gated",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "select.tsx:1404 aria-selected gated on isFocused (VoiceOver fix); port emits unconditionally"
+    },
+    {
+      "id": "select.pointer-hover-focus",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "select.tsx:1413-1440,792 pointer hover focuses item, leave returns to content, pointerup commits for mouse; port plain onClick only"
+    },
+    {
+      "id": "select.multi-group-separator",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "select.tsx:1285-1330,1696-1707 SelectSeparator + multiple groups/labels; port hard-codes one group, one label, flat array"
+    },
+    {
+      "id": "select.close-autofocus-trap",
+      "state": "open",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "select.tsx:846-862 onCloseAutoFocus restores trigger preventScroll + real focus trap; port uses focus() + envelope guards, no re-trap"
+    },
+    {
+      "id": "select.trigger-pointer-policy",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: trigger opens on mouse pointerdown (button 0)"
+    },
+    {
+      "id": "select.scroll-buttons",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: SelectScrollUpButton/SelectScrollDownButton + viewport auto-scroll"
+    },
+    {
+      "id": "select.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: dir=rtl flips arrow semantics + item-aligned horizontal"
+    },
+    {
+      "id": "select.item-aligned-position",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: item-aligned positioning aligns selected item TEXT"
+    },
+    {
+      "id": "select.popper-position",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: position='popper' (non-item-aligned) mode"
+    },
+    {
+      "id": "select.empty-string-clearable",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: empty-string value as clearable selection (#2706)"
+    },
+    {
+      "id": "select.typeahead-space-swallow",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: space mid-typeahead swallowed (does not commit) on trigger + content"
+    },
+    {
+      "id": "select.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Portal/Content keeps content mounted while closed"
+    }
+  ]
+}

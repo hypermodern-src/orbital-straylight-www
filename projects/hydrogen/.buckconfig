@@ -1,0 +1,33 @@
+# hydrogen PureScript — buck2 project (its own cell `root`), so the framework +
+# component library (Hydrogen.Radix.*) can typecheck themselves via the cached
+# `_check` affordance (straylight-prelude purescript_library). prelude + toolchains
+# cells are the generated straylight-prelude package, symlinked into nix/build/ by
+# the project mechanism; toolchain paths live in .buckconfig.local (generated).
+#   nix develop -c buck2 build //check:hydrogen_check   ->  typecheck, cached
+[cells]
+root = .
+prelude = nix/build/prelude
+straylight_prelude = prelude
+toolchains = nix/build/toolchains
+none = none
+
+[cell_aliases]
+config = prelude
+ovr_config = prelude
+fbcode = none
+fbsource = none
+fbcode_macros = none
+buck = none
+
+[parser]
+target_platform_detector_spec = target:root//...->prelude//platforms:default
+
+[buck2]
+materializations = deferred
+digest_algorithms = BLAKE3
+
+[project]
+ignore = .direnv
+
+[build]
+execution_platforms = toolchains//:local

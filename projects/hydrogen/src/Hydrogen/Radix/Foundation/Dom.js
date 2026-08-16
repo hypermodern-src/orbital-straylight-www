@@ -1,0 +1,57 @@
+// Hydrogen.Radix.Dom — the ONLY foreign code in the radix port.
+//
+// A handful of primitives, kept here because purescript-web-* exposes no binding
+// for them (see Dom.purs for the why of each). DOM-only: standard browser APIs, no
+// external dependency, no module state. Before adding another, check it almost
+// certainly already exists in Web.DOM.* / Web.HTML.* — use that instead.
+
+// getComputedStyle(el).getPropertyValue(prop): the engine's resolved value (the
+// only source of truth for visibility and running-animation queries).
+export const computedStyle = el => prop => () =>
+  window.getComputedStyle(el).getPropertyValue(prop);
+
+// el.style.getPropertyValue(prop): the inline value, "" if unset — read back a
+// property before overwriting it so it can be restored exactly.
+export const inlineStyle = el => prop => () =>
+  el.style.getPropertyValue(prop);
+
+// el.style.setProperty(prop, value): the port's single style mutation. "" clears.
+export const setInlineStyle = el => prop => value => () => {
+  el.style.setProperty(prop, value);
+};
+
+// queueMicrotask(eff): run eff after the current task + synchronous render flush but BEFORE
+// the next macrotask (a fired event). No web-* binding exposes it; used to move focus into a
+// just-opened menu before a driver/user keypress lands (a requestAnimationFrame is too late).
+export const queueMicrotask_ = eff => () => {
+  queueMicrotask(eff);
+};
+
+// { width: el.offsetWidth, height: el.offsetHeight, left: el.offsetLeft, top: el.offsetTop }:
+// the element's layout-box geometry (integral, transform-independent). NavigationMenu measures
+// these (NOT getBoundingClientRect) to size its viewport (active content) and place its
+// indicator (active trigger), so the port must read the same to match upstream.
+export const offsetMetrics = el => () => ({
+  width: el.offsetWidth,
+  height: el.offsetHeight,
+  left: el.offsetLeft,
+  top: el.offsetTop,
+});
+
+// window.setTimeout(eff, ms): the cancellable open/close delay timer. Returns the numeric
+// id so a pending open can be cleared if the pointer leaves first. js-timers is not in the
+// closure and no web-* binding exposes a cancellable timer, so it lives here.
+export const setTimeout = ms => eff => () => window.setTimeout(eff, ms);
+
+// window.clearTimeout(id): cancel a pending timer; a no-op once it has fired.
+export const clearTimeout = id => () => { window.clearTimeout(id); };
+
+// performance.now(): a monotonic high-resolution millisecond timestamp — used to measure how
+// much of a timer's duration elapsed before a pause, so resume can arm the REMAINING time.
+export const now = () => performance.now();
+
+// form.requestSubmit(): submit the form AS IF a submit button were pressed — fires the `submit`
+// event (so onSubmit handlers run) and runs constraint validation first. Distinct from the bound
+// HTMLFormElement.submit(), which bypasses BOTH. OneTimePasswordField's Enter/autoSubmit path
+// needs this exact semantic; purescript-web-html exposes submit() but not requestSubmit().
+export const requestSubmit = form => () => { form.requestSubmit(); };

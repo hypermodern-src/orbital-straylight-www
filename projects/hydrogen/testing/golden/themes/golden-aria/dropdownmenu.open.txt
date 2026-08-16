@@ -1,0 +1,7 @@
+- menu "Options":
+  - menuitem "Edit ⌘ E"
+  - menuitem "Duplicate ⌘ D"
+  - separator
+  - menuitem "Archive ⌘ N"
+  - separator
+  - menuitem "Delete ⌘ ⌫"

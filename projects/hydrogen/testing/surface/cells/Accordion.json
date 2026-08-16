@@ -1,0 +1,230 @@
+{
+  "component": "Accordion",
+  "primitive": "Hydrogen.Radix.Accordion",
+  "face": "themed",
+  "upstream": "primitives packages/react/accordion/src/accordion.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Accordion. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:417-446 \u2014 17 gaps (4 core).",
+  "cells": [
+    {
+      "id": "accordion.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "open/closed structure: data-state, aria-expanded, aria-controls(open-only), id\u2194labelledby, role=region, heading level=3"
+    },
+    {
+      "id": "accordion.single",
+      "state": "single",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "single non-collapsible, one open: open trigger has aria-disabled=true"
+    },
+    {
+      "id": "accordion.multiple",
+      "state": "multiple",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "type=multiple: two items open simultaneously"
+    },
+    {
+      "id": "accordion.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (headings/buttons, axe clean)"
+    },
+    {
+      "id": "accordion.arrow-from-focus",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowDown moves relative to the FOCUSED trigger (nav origin = event.target)",
+      "ref": "accordion.tsx:235-240 nav relative to FOCUSED trigger (event.target), not open/first; port uses tabStopIndex. PORT BUG."
+    },
+    {
+      "id": "accordion.disabled-skip",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowDown SKIPS OVER a disabled trigger to the next enabled one",
+      "ref": "accordion.tsx:236 disabled triggers excluded; arrows skip OVER to next enabled; port lands on disabled\u2192no-op. PORT BUG."
+    },
+    {
+      "id": "accordion.aria-disabled",
+      "state": "single",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "aria",
+        "dom"
+      ],
+      "ref": "DONE (2026-06-24): accordion.single DOM golden byte-pins aria-disabled=true on the open single-non-collapsible trigger; accordion:single added to the a11y MATRIX (ARIA tree + axe captured, port matches upstream). accordion.tsx:452",
+      "oracle_file": "accordion.single"
+    },
+    {
+      "id": "accordion.single-noclose",
+      "state": "single",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): accordion.single DOM golden (gate-green) byte-pins type=single non-collapsible \u2014 exactly one item open and the OPEN trigger carries aria-disabled=true (it cannot be closed), the DOM proof of the no-close contract. accordion.tsx:99-129",
+      "oracle_file": "accordion.single"
+    },
+    {
+      "id": "accordion.home-end",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Home/End focus the first/last trigger",
+      "ref": "accordion.tsx:264-268 Home\u2192first enabled, End\u2192last enabled over filtered set"
+    },
+    {
+      "id": "accordion.vertical-wrap",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "vertical loop: ArrowDown on the last trigger wraps to the first",
+      "ref": "accordion.tsx:279-298 vertical ArrowDown/Up rove + loop-wrap at ends"
+    },
+    {
+      "id": "accordion.horizontal",
+      "state": "horizontal",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "horizontal: ArrowRight roves to the next trigger; ArrowDown is inert",
+      "ref": "accordion.tsx:270-292 horizontal: L/R rove, U/D inert, data-orientation=horizontal everywhere"
+    },
+    {
+      "id": "accordion.single-collapsible",
+      "state": "single-collapsible",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-25): type=single collapsible \u2014 item-1 open at mount; the open trigger CAN close so it carries NO aria-disabled (unlike single non-collapsible). accordion.singlecollapsible DOM golden byte-identical; new APG check (golden-first) proves clicking the open trigger collapses it (aria-expanded\u2192false). accordion.tsx:121",
+      "oracle_file": "accordion.singlecollapsible",
+      "apg_check": "single collapsible: clicking the open trigger CLOSES it"
+    },
+    {
+      "id": "accordion.controlled",
+      "state": "controlled",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "accordion.tsx:109-114 controlled value + onValueChange: reflects parent, emits per toggle (runtime)"
+    },
+    {
+      "id": "accordion.disabled-root",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-25): root-level disable (<Accordion.Root disabled>) propagates to every item \u2014 data-disabled on item/header/trigger/content + each trigger disabled attr. accordion.disabledroot DOM golden byte-identical; new APG check (golden-first) proves clicking any trigger leaves aria-expanded=false. accordion.tsx:316,363",
+      "oracle_file": "accordion.disabledroot",
+      "apg_check": "disabled root: clicking a trigger does NOT open its panel"
+    },
+    {
+      "id": "accordion.item-disabled",
+      "state": "item-disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-25): item-level disable (<Accordion.Item disabled>) \u2014 golden-first capture; PORT FIX: the content region (role=region) now also stamps data-disabled when the item is disabled (collapsible.tsx:209), matching the item/header/trigger which already did. accordion.disabled DOM golden byte-identical: data-disabled on item/header/trigger/content + the trigger disabled attr. accordion.tsx:363,378,418",
+      "oracle_file": "accordion.disabled"
+    },
+    {
+      "id": "accordion.controls-open-only",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria",
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): accordion.open DOM golden (gate-green) byte-pins the contrast within one render \u2014 the open trigger has aria-controls=<panel id> aria-expanded=true, the two closed triggers have aria-expanded=false and NO aria-controls. accordion.open ARIA golden (a11y MATRIX shown=open) corroborates. accordion.tsx:451-458",
+      "oracle_file": "accordion.open"
+    },
+    {
+      "id": "accordion.rtl-horizontal",
+      "state": "horizontal",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: horizontal+rtl flips arrows \u2014 ArrowRight moves prev"
+    },
+    {
+      "id": "accordion.content-vars",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: --radix-accordion-content-height/width CSS custom props"
+    },
+    {
+      "id": "accordion.closed-unmount",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: closed content UNMOUNTED (Presence) upstream, not persistent hidden node"
+    },
+    {
+      "id": "accordion.collection-order",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: trigger registers in collection in DOM order"
+    }
+  ]
+}

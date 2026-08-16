@@ -1,0 +1,6 @@
+- text: Email
+- textbox "Email"
+- text: Email is missing Name
+- textbox "Name"
+- text: Name is missing
+- button "Submit"

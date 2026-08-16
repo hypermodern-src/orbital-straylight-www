@@ -1,0 +1,27 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-TabsRoot" data-orientation=horizontal dir=ltr>
+          <div class="rt-BaseTabList rt-TabsList rt-r-size-2" aria-orientation=horizontal data-orientation=horizontal role=tablist style=outline: none; tabindex=0>
+            <button class="rt-BaseTabListTrigger rt-TabsTrigger rt-reset" aria-controls=<id0>-content-account aria-selected=true data-orientation=horizontal data-radix-collection-item= data-state=active id=<id0>-trigger-account role=tab tabindex=-1 type=button>
+              <span class="rt-BaseTabListTriggerInner rt-TabsTriggerInner">
+                #Account
+              <span class="rt-BaseTabListTriggerInnerHidden rt-TabsTriggerInnerHidden">
+                #Account
+            <button class="rt-BaseTabListTrigger rt-TabsTrigger rt-reset" aria-controls=<id0>-content-documents aria-selected=false data-disabled= data-orientation=horizontal data-radix-collection-item= data-state=inactive disabled= id=<id0>-trigger-documents role=tab tabindex=-1 type=button>
+              <span class="rt-BaseTabListTriggerInner rt-TabsTriggerInner">
+                #Documents
+              <span class="rt-BaseTabListTriggerInnerHidden rt-TabsTriggerInnerHidden">
+                #Documents
+            <button class="rt-BaseTabListTrigger rt-TabsTrigger rt-reset" aria-controls=<id0>-content-settings aria-selected=false data-orientation=horizontal data-radix-collection-item= data-state=inactive id=<id0>-trigger-settings role=tab tabindex=-1 type=button>
+              <span class="rt-BaseTabListTriggerInner rt-TabsTriggerInner">
+                #Settings
+              <span class="rt-BaseTabListTriggerInnerHidden rt-TabsTriggerInnerHidden">
+                #Settings
+          <div class="rt-TabsContent" aria-labelledby=<id0>-trigger-account data-orientation=horizontal data-state=active id=<id0>-content-account role=tabpanel style=animation-duration: 0s; tabindex=0>
+            <span class="rt-Text rt-r-size-2">
+              #Make changes to your account.
+          <div class="rt-TabsContent" aria-labelledby=<id0>-trigger-documents data-orientation=horizontal data-state=inactive hidden= id=<id0>-content-documents role=tabpanel tabindex=0>
+          <div class="rt-TabsContent" aria-labelledby=<id0>-trigger-settings data-orientation=horizontal data-state=inactive hidden= id=<id0>-content-settings role=tabpanel tabindex=0>

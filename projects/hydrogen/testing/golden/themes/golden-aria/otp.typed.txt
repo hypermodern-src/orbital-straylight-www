@@ -1,0 +1,4 @@
+- group:
+  - textbox "Character 1 of 3": "4"
+  - textbox "Character 2 of 3": "5"
+  - textbox "Character 3 of 3"

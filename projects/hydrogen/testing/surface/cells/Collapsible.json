@@ -1,0 +1,151 @@
+{
+  "component": "Collapsible",
+  "primitive": "Hydrogen.Radix.Collapsible",
+  "face": "themed",
+  "upstream": "primitives packages/react/collapsible/src/collapsible.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Collapsible: 9 gaps (3 core). status=gated cells have a committed golden; status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    {
+      "id": "collapsible.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "open render: trigger aria-expanded=true + content div data-state=open"
+    },
+    {
+      "id": "collapsible.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Presence exit: lingering content data-state=closed through pinned anim"
+    },
+    {
+      "id": "collapsible.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled surface: root/trigger/content data-disabled, button disabled"
+    },
+    {
+      "id": "collapsible.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "closed at-rest a11y tree"
+    },
+    {
+      "id": "collapsible.root-data-disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: root div carries data-disabled='' when disabled \u2014 co-covered by collapsible.disabled (data-disabled= on root). collapsible.tsx:67-72",
+      "oracle_file": "collapsible.disabled"
+    },
+    {
+      "id": "collapsible.disabled-non-interactive",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE: the whole disabled surface is non-interactive (data-disabled propagated, trigger disabled, aria-expanded=false) \u2014 co-covered by collapsible.disabled. collapsible.tsx:69,100-101,209",
+      "oracle_file": "collapsible.disabled"
+    },
+    {
+      "id": "collapsible.rest-dom",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: closed DOM \u2014 aria-expanded=false, data-state=closed, content hidden, no stray aria \u2014 co-covered by collapsible.rest. collapsible.tsx:97",
+      "oracle_file": "collapsible.rest"
+    },
+    {
+      "id": "collapsible.closing-empty",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: the closing frame's content state \u2014 co-covered by collapsible.closing (committed closing-state golden). collapsible.tsx:165,211-220",
+      "oracle_file": "collapsible.closing"
+    },
+    {
+      "id": "collapsible.keyboard-toggle",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter on the trigger toggles aria-expanded and discloses the content",
+      "ref": "collapsible.tsx:95-105 Enter/Space on trigger toggle with aria-expanded/aria-controls round-trip"
+    },
+    {
+      "id": "collapsible.controlled-no-close",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "controlled mode: clicking the trigger does NOT close the parent-owned content",
+      "ref": "collapsible.test.tsx:105-131 controlled: click fires onOpenChange(false) but does NOT close (parent owns open)"
+    },
+    {
+      "id": "collapsible.unique-content-id",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: contentId is minted via useId and wired into the trigger's aria-controls (== content id) \u2014 co-covered by collapsible.rest (aria-controls links the minted content id). Cross-instance uniqueness follows from useId, proven structurally by the tabs/passwordtoggle multi-instance cells. collapsible.tsx:63",
+      "oracle_file": "collapsible.rest"
+    },
+    {
+      "id": "collapsible.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the port keeps the content mounted (hidden) when closed \u2014 co-covered by collapsible.rest (content present with hidden), the forceMount-equivalent always-mounted DOM.",
+      "oracle_file": "collapsible.rest"
+    },
+    {
+      "id": "collapsible.prop-passthrough",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: Trigger/Content emit their stable data-state/aria anatomy (the pass-through surface on the themed face) \u2014 co-covered by collapsible.open; arbitrary consumer props not exercised by the gallery.",
+      "oracle_file": "collapsible.open"
+    }
+  ]
+}

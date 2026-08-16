@@ -1,0 +1,286 @@
+{
+  "component": "Dialog",
+  "primitive": "Hydrogen.Radix.Dialog",
+  "face": "themed",
+  "upstream": "primitives@45f8b34 packages/react/dialog/src/dialog.tsx + @radix-ui/themes@3",
+  "note": "The STR-381 template: every cell that ties Dialog out against upstream, with importance, the oracle kind(s) that pin it, and the upstream ref. status=gated cells MUST have a committed golden (derive.mjs cross-checks); status=open are the named debt (replaces the scalar core_gaps_open=1). Each open cell is a row in the per-primitive Verify+close issue (STR-375).",
+  "cells": [
+    {
+      "id": "dialog.open",
+      "state": "open",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria",
+        "apg"
+      ],
+      "ref": "open modal: overlay>scroll>content, role=dialog, focus-into, Tab-trap, Escape-restore"
+    },
+    {
+      "id": "dialog.closing",
+      "state": "closing",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "Presence exit: lingering data-state=closed node through pinned anim"
+    },
+    {
+      "id": "dialog.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest trigger (button only) a11y tree"
+    },
+    {
+      "id": "dialog.close-button",
+      "state": "close-button",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg",
+        "dom"
+      ],
+      "apg_check": "clicking the Cancel close-button closes the dialog + restores focus",
+      "ref": "dialog.tsx:472-492 DialogClose onClick\u2192onOpenChange(false); port has NO Close part \u2014 Cancel/Save are inert. THE core gap."
+    },
+    {
+      "id": "dialog.h2-title",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-23): the THEMED Title is an <h1> (rt-Heading) with id=titleId wired into the content's aria-labelledby \u2014 co-covered by dialog.open. (The <h2> in the ref is the PRIMITIVE; our face is themed = h1; the port matches.) dialog.tsx:434-444",
+      "oracle_file": "dialog.open"
+    },
+    {
+      "id": "dialog.no-title",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 Title/Description are optional; the port now renders the <h1>/<p> ONLY when present (previously emitted stray empty nodes). ?s=notitle golden-dom byte-identical (no <h1>/<p>). dialog.tsx:438-464",
+      "oracle_file": "dialog.notitle"
+    },
+    {
+      "id": "dialog.aria-always",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 aria-labelledby/describedby are ALWAYS on the content (point to the Title/Description ids) even when those parts are omitted; verified against dialog.notitle (both attrs present though no <h1>/<p>). The port previously omitted them when empty. dialog.tsx:414-415",
+      "oracle_file": "dialog.notitle"
+    },
+    {
+      "id": "dialog.nonmodal",
+      "state": "nonmodal",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "WAIVED edge (2026-06-23): themed face hardcodes modal=true; nonmodal unreachable here. See waiver.",
+      "oracle_file": "dialog.open",
+      "waiver": {
+        "reason": "FACE-UNREACHABLE: the THEMED Dialog.Root omits the modal prop and hardcodes it on (themes dialog.tsx:19-20 ComponentPropsWithout<DialogPrimitive.Root,\"modal\"> + <DialogPrimitive.Root {...props} modal />). nonmodal cannot be rendered in this face; the always-modal envelope is co-covered by dialog.open. The port keeps the modal prop for the bare-primitive face (a separate denominator).",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
+    },
+    {
+      "id": "dialog.closed-attr",
+      "state": "closed-attr",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "dialog.tsx:108 aria-controls absent while closed \u2014 golden-dom/dialog.closed-attr.txt; port==upstream (parity confirmed)"
+    },
+    {
+      "id": "dialog.shifttab-loop",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Shift+Tab from the first focusable wraps to the last (loop)",
+      "ref": "dialog.tsx:406 FocusScope loop=true bidirectional; APG only Tabs forward"
+    },
+    {
+      "id": "dialog.first-focus",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "open focuses the FIRST tabbable inside the content",
+      "ref": "dialog.tsx:408 onMountAutoFocus exact first-tabbable target unverified"
+    },
+    {
+      "id": "dialog.controlled",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): FIXED \u2014 closeDialog honors the controlled resolution; when the parent owns open (open=Just true) and ignores the change, current stays true so no teardown/presence-exit. Escape signals but cannot close. apg both faces. dialog.tsx:61-66",
+      "apg_check": "controlled-open dialog: Escape does NOT close"
+    },
+    {
+      "id": "dialog.rightclick-outside",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): apg both faces green (port already correct). edge: right/ctrl-click outside does NOT dismiss (modal)",
+      "apg_check": "right-click outside does NOT dismiss the dialog"
+    },
+    {
+      "id": "dialog.autofocus-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "WAIVED edge (2026-06-23): modal focus-trap overrides preventDefault (empirical). Co-covered by dialog.open.",
+      "apg_check": "open moves focus into the dialog",
+      "waiver": {
+        "reason": "NO OBSERVABLE EFFECT in the modal themed face (empirically verified, golden probe): preventDefault on onOpenAutoFocus is OVERRIDDEN by FocusScope \u2014 opening aria-hides #root (hideOthers), focus on the trigger there becomes invalid, and the focus-trap RECLAIMS focus into the content (lands on the first tabbable, the TextField input). onCloseAutoFocus likewise still restores to the trigger. Observably identical to default; co-covered by dialog.open APG (open moves focus into the dialog + Escape returns focus to trigger).",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
+    },
+    {
+      "id": "dialog.focusoutside-cb",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "WAIVED edge (2026-06-23): modal focus-trap makes onFocusOutside moot. Co-covered by dialog.open Tab-trap.",
+      "apg_check": "Tab is trapped within the dialog",
+      "waiver": {
+        "reason": "MOOT in modal: onFocusOutside fires when focus leaves the layer, but a modal dialog TRAPS focus (FocusScope) so focus cannot leave \u2014 there is nothing for the callback to act on. Co-covered by dialog.open APG (Tab is trapped within the dialog), which proves focus cannot escape the modal on both faces.",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
+    },
+    {
+      "id": "dialog.trigger-reclick",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): apg both faces green (port already correct). edge: trigger-as-outside guard (close-then-reopen)",
+      "apg_check": "re-clicking the trigger after close re-opens the dialog"
+    },
+    {
+      "id": "dialog.forcemount",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): added forceMount field \u2014 overlay+content stay mounted while CLOSED (data-state=closed), portaled to body with the modal envelope (scroll-lock marker + focus guards + hideOthers) but NO focus/escape and NO body pointer-events:none (DismissableLayer open-gated). pointer-events:auto moved into the component (open-gated). golden-dom byte-identical. dialog.tsx:151,184,287",
+      "oracle_file": "dialog.forcemount"
+    },
+    {
+      "id": "dialog.portal-container",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Portal container prop (custom mount node)"
+    },
+    {
+      "id": "dialog.nested-stack",
+      "state": "open",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: nested modals \u2014 body pointer-events restore must be stacked"
+    },
+    {
+      "id": "dialog.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-23): added dir field to Input \u2192 Content emits dir attr (radix Content dir passthrough). ?s=rtl golden-dom byte-identical (dir=rtl on content). ",
+      "oracle_file": "dialog.rtl"
+    },
+    {
+      "id": "dialog.dev-warnings",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "WAIVED edge (2026-06-23): non-DOM console.warn; DOM parity for missing-parts co-covered by dialog.notitle.",
+      "oracle_file": "dialog.notitle",
+      "waiver": {
+        "reason": "NON-DOM ORACLE: the missing-Title/Description warning is a dev-only console.warn (primitives dialog.tsx useWarningContext) with NO DOM/aria/apg manifestation \u2014 the rendered DOM is byte-identical with or without it (proven by dialog.notitle, the missing-parts DOM case). Nothing externally-grounded to gate.",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
+    },
+    {
+      "id": "dialog.overlay-dismiss",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-23): apg both faces green (port already correct). edge: overlay registers as dismiss surface (stopPropagation contract)",
+      "apg_check": "left-click on the overlay (outside content) dismisses the dialog"
+    },
+    {
+      "id": "dialog.removescroll-pinch",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "WAIVED edge (2026-06-23): non-DOM-observable touch config; scroll-lock marker co-covered by dialog.open.",
+      "oracle_file": "dialog.open",
+      "waiver": {
+        "reason": "NOT DOM-OBSERVABLE: RemoveScroll allowPinchZoom + shards=[contentRef] are internal touch-event-handling config with NO manifestation in the normalized DOM snapshot \u2014 the only scroll-lock evidence is body[data-scroll-locked], which dialog.open already matches byte-identically. The port uses a simplified scroll-lock marker; the pinch/shards behavior has no externally-grounded DOM oracle to gate.",
+        "owner": "b7r6",
+        "date": "2026-06-23"
+      }
+    }
+  ]
+}

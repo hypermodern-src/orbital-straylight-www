@@ -1,0 +1,39 @@
+# Spago
+.spago/
+output/
+spago.lock
+
+# Node
+node_modules/
+
+# IDE
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+
+# buck2 + straylight-prelude generated/symlinked (machine-specific). nix/build at
+# any depth — the playwright harness is its own buck2 root with its own cells.
+.buckconfig.local
+buck-out/
+**/buck-out/
+nix/build/
+**/nix/build/
+
+# nix build result symlinks
+/result
+result-*
+
+# PureScript IDE server (purs ide) port file
+.psc-ide-port
+
+# Playwright harness generated outputs (the gallery bundle + run artifacts)
+.gallery-dist/
+test-results/
+playwright-report/
+testing/playwright/.themes-a11y-dist/
+testing/playwright/.themes-apg-dist/
+testing/playwright/.themes-open-dist/
+testing/playwright/.themes-closing-dist/

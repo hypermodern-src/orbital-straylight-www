@@ -1,0 +1,10 @@
+- navigation "Main":
+  - list:
+    - listitem:
+      - button "Item One" [expanded]
+      - link "Content One":
+        - /url: "#one"
+      - link "Content Two":
+        - /url: "#two"
+    - listitem:
+      - button "Item Two"

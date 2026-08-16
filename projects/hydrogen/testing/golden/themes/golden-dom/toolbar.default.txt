@@ -1,0 +1,16 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div aria-label=Formatting aria-orientation=horizontal data-orientation=horizontal dir=ltr role=toolbar style=outline: none; tabindex=0>
+          <button data-orientation=horizontal data-radix-collection-item= tabindex=-1 type=button>
+            #New
+          <a data-orientation=horizontal data-radix-collection-item= href=# tabindex=-1>
+            #Edit
+          <div aria-orientation=vertical data-orientation=vertical role=separator>
+          <div aria-label=Align data-orientation=horizontal dir=ltr role=group>
+            <button aria-checked=true data-orientation=horizontal data-radix-collection-item= data-state=on role=radio tabindex=-1 type=button>
+              #L
+            <button aria-checked=false data-orientation=horizontal data-radix-collection-item= data-state=off role=radio tabindex=-1 type=button>
+              #C

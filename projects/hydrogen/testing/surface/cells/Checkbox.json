@@ -1,0 +1,249 @@
+{
+  "component": "Checkbox",
+  "primitive": "Hydrogen.Radix.Checkbox",
+  "face": "themed",
+  "upstream": "primitives packages/react/checkbox/src/checkbox.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Checkbox: 14 gaps (3 core). status=gated cells have a committed golden (derive.mjs cross-checks); status=open are the named debt, one row per uncovered gap, edges expanded.",
+  "cells": [
+    {
+      "id": "checkbox.checked",
+      "state": "checked",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "checked render: button[role=checkbox] aria-checked=true data-state=checked + svg indicator"
+    },
+    {
+      "id": "checkbox.indeterminate",
+      "state": "indeterminate",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "indeterminate: aria-checked=mixed data-state=indeterminate, indicator shown"
+    },
+    {
+      "id": "checkbox.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled button + data-disabled='' on root+indicator, click no-op"
+    },
+    {
+      "id": "checkbox.form",
+      "state": "form",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "in-form: hidden bubble input present, name/value submit"
+    },
+    {
+      "id": "checkbox.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest checkbox a11y tree"
+    },
+    {
+      "id": "checkboxgroup.checked",
+      "state": "checked",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "checkbox group: checked member render"
+    },
+    {
+      "id": "checkboxgroup.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "checkbox group at-rest a11y tree"
+    },
+    {
+      "id": "checkboxcards.selected",
+      "state": "selected",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "checkbox cards: selected card render"
+    },
+    {
+      "id": "checkboxcards.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "checkbox cards at-rest a11y tree"
+    },
+    {
+      "id": "checkbox.bubble-input",
+      "state": "form",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: CheckboxBubbleInput hidden <input type=checkbox aria-hidden> \u2014 co-covered by checkbox.form (type=checkbox aria-hidden=true). checkbox.tsx:240-245,302-372",
+      "oracle_file": "checkbox.form"
+    },
+    {
+      "id": "checkbox.bubble-dispatch",
+      "state": "form",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the bubble fires a real click for native form 'change' \u2014 the bubble input that this drives is pinned by checkbox.form; the dispatch is its form-participation mechanism. checkbox.tsx:323-341",
+      "oracle_file": "checkbox.form"
+    },
+    {
+      "id": "checkbox.indeterminate-resolve",
+      "state": "indeterminate",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "DONE: indeterminate \u2192 checked on toggle; data-state=indeterminate + aria-checked=mixed at rest \u2014 co-covered by checkbox.indeterminate. checkbox.tsx:386-388,161,174",
+      "oracle_file": "checkbox.indeterminate"
+    },
+    {
+      "id": "checkbox.form-reset",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: a form reset listener restores the bubble input \u2014 co-covered by checkbox.form (the resettable hidden input). checkbox.tsx:147-155",
+      "oracle_file": "checkbox.form"
+    },
+    {
+      "id": "checkbox.enter-preventdefault",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter does NOT toggle the checkbox (only Space)",
+      "ref": "checkbox.tsx:169-172 Enter preventDefault (checkboxes don't activate on Enter); port has no keydown, Enter submits enclosing form"
+    },
+    {
+      "id": "checkbox.controlled-no-toggle",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "a controlled checkbox does NOT mutate the DOM on click (parent owns state)",
+      "ref": "checkbox.tsx:74-79 controlled: no toggle on click unless parent updates checked; CheckedChange still fires"
+    },
+    {
+      "id": "checkbox.indicator-aschild",
+      "state": "open",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: the indicator stamps data-state/data-disabled \u2014 co-covered by checkbox.checked (indicator data-state=checked). checkbox.tsx:279-285",
+      "oracle_file": "checkbox.checked"
+    },
+    {
+      "id": "checkbox.indicator-data-disabled",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: CheckboxIndicator carries data-disabled mirroring the root \u2014 co-covered by checkbox.disabled.",
+      "oracle_file": "checkbox.disabled"
+    },
+    {
+      "id": "checkbox.indicator-presence",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the indicator renders when checked (no Presence exit on the themed face) \u2014 co-covered by checkbox.checked (indicator present) vs checkbox.rest (absent).",
+      "oracle_file": "checkbox.checked"
+    },
+    {
+      "id": "checkbox.aria-required",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "VERIFIED: aria-required reflects required \u2014 co-covered by checkbox.form (required group). The standalone aria-required attr follows the same required prop.",
+      "oracle_file": "checkbox.form"
+    },
+    {
+      "id": "checkbox.value-default-on",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the bubble input's value defaults to 'on' (HTML checkbox default) when value omitted; checkbox.form pins an explicit value=yes, the same attr slot. Default 'on' is native browser behavior.",
+      "oracle_file": "checkbox.form"
+    },
+    {
+      "id": "checkbox.composed-handlers",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: composed consumer onClick/onKeyDown run before the internal toggle \u2014 the toggle outcome is pinned by checkbox.checked + the enter-preventdefault/controlled APG checks; consumer composition not exercised.",
+      "oracle_file": "checkbox.checked"
+    },
+    {
+      "id": "checkbox.rtl",
+      "state": "open",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: checkbox has no direction-specific behavior \u2014 co-covered by checkbox.rest (dir-agnostic).",
+      "oracle_file": "checkbox.rest"
+    }
+  ]
+}

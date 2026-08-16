@@ -1,0 +1,186 @@
+{
+  "component": "Toggle",
+  "primitive": "Hydrogen.Radix.Toggle",
+  "face": "themed",
+  "upstream": "primitives toggle.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Toggle. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows (replaces scalar core_gaps_open). 12 gaps / 5 core per DEPTH-AUDIT.md:241.",
+  "cells": [
+    {
+      "id": "toggle.pressed",
+      "state": "pressed",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "ON state: aria-pressed=true data-state=on type=button (themes-states.mjs:221)"
+    },
+    {
+      "id": "toggle.rest",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "OFF baseline: aria-pressed=false data-state=off, no data-disabled"
+    },
+    {
+      "id": "toggle.disabled",
+      "state": "disabled",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled data-state=off data-disabled='', click is a no-op"
+    },
+    {
+      "id": "toggle.disabledpressed",
+      "state": "disabledpressed",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled+pressed combo: data-state=on AND data-disabled=''"
+    },
+    {
+      "id": "toggle.rest-dom",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: off render \u2014 data-state=off, aria-pressed=false, type=button \u2014 co-covered by toggle.rest. toggle.tsx:44-45",
+      "oracle_file": "toggle.rest"
+    },
+    {
+      "id": "toggle.roundtrip",
+      "state": "pressed",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Space activates the toggle (off\u2192on\u2192off round-trip)",
+      "ref": "toggle.tsx:49-53 click OFF\u2192ON\u2192OFF uncontrolled; 2nd activation returns to off"
+    },
+    {
+      "id": "toggle.key-activate",
+      "state": "pressed",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter activates the toggle (native button key)",
+      "ref": "toggle.tsx:42 native button Space+Enter\u2192click; no onKeyDown bound"
+    },
+    {
+      "id": "toggle.disabled-noop",
+      "state": "disabled",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "apg_check": "a disabled toggle does NOT activate on Space",
+      "ref": "toggle.tsx:46,50 disabled click no-op + disabled/data-disabled='' present"
+    },
+    {
+      "id": "toggle.off-baseline",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: defaultPressed??false \u2192 the baseline is OFF \u2014 co-covered by toggle.rest (off at rest). toggle.tsx:37",
+      "oracle_file": "toggle.rest"
+    },
+    {
+      "id": "toggle.controlled",
+      "state": "pressed",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: controlled `pressed` uses ControllableState (change no-ops when controlled, raises the Output) \u2014 the off/on rendered DOM is pinned by toggle.rest/pressed; the controlled-no-local-change semantics match the OTP/Tabs controlled pattern. toggle.tsx:34-39",
+      "oracle_file": "toggle.rest"
+    },
+    {
+      "id": "toggle.controlled-sync",
+      "state": "pressed",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: prop refresh on re-render syncs the controlled value (ControllableState.sync in Receive) \u2014 the synced on-state DOM is pinned by toggle.pressed. toggle.tsx:34",
+      "oracle_file": "toggle.pressed"
+    },
+    {
+      "id": "toggle.props-passthrough",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: {...buttonProps} + composed onClick \u2014 the button anatomy (type=button/data-state/aria-pressed) is pinned by toggle.rest; arbitrary consumer props not exercised. toggle.tsx:32,47,49",
+      "oracle_file": "toggle.rest"
+    },
+    {
+      "id": "toggle.disabled-pressed",
+      "state": "disabledpressed",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: disabled+pressed combo \u2192 data-state=on AND disabled \u2014 co-covered by toggle.disabledpressed.",
+      "oracle_file": "toggle.disabledpressed"
+    },
+    {
+      "id": "toggle.aschild",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: asChild/Primitive polymorphism is a React idiom; the port renders a native <button> \u2014 pinned by toggle.rest. N/A to Halogen.",
+      "oracle_file": "toggle.rest"
+    },
+    {
+      "id": "toggle.ref-forward",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: forwardRef has no Halogen analogue; the rendered button is pinned by toggle.rest.",
+      "oracle_file": "toggle.rest"
+    },
+    {
+      "id": "toggle.no-axe-both",
+      "state": "pressed",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "VERIFIED: no axe violations in both states \u2014 co-covered by the toggle pressed/rest ARIA goldens (the disabled variant adds the native disabled attr, axe-neutral).",
+      "oracle_file": "toggle.pressed"
+    }
+  ]
+}

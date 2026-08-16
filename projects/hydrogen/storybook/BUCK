@@ -1,0 +1,79 @@
+# Storybook FFI bundle. The mount module + its FFI `.js` live in a
+# purescript_library (which globs *.purs and stages the .js for FFI — an app's own
+# srcs are passed verbatim to `purs compile`, which would try to parse the .js).
+# The bundle is a srcs-less browser app whose `main` is the library's module; it
+# self-runs on load and publishes `window.hydrogenStorybook.mount(id, args, el)`,
+# which the (standalone, bun/Vite) Storybook stories call to render the Halogen
+# Hydrogen.Themes components into their canvas.
+#   nix develop -c buck2 build //storybook:bundle
+load("//:registry.bzl", "PURS_REGISTRY")
+load(":storybook.bzl", "storybook_dev", "storybook_static")
+
+purescript_library(
+    name = "mount_lib",
+    srcs = [
+        "src/Storybook/Mount.js",
+        "src/Storybook/Mount.purs",
+        "src/Storybook/Showcase.purs",
+    ],
+    deps = ["//:lib"],
+    visibility = ["PUBLIC"],
+)
+
+purescript_app(
+    name = "bundle",
+    main = "Storybook.Mount",
+    deps = [
+        "//:lib",
+        ":mount_lib",
+    ],
+    packages = PURS_REGISTRY,
+    browser_bundle = True,
+    bundle_name = "hydrogen-stories.js",
+    minify = False,
+)
+
+# Hermetic Storybook build: `npm_build` stages the sources + the buck2-built FFI
+# bundle + a bun2nix node_modules (//flake toolchain.purescript.bun2nix.storybook)
+# into a writable tree and runs the Storybook CLI, capturing the static site. No
+# ambient `bun install` — the node_modules is nix-provided + sha512-pinned (bun.nix).
+#   nix develop -c buck2 build //storybook:static
+storybook_static(
+    name = "static",
+    srcs = [
+        ".storybook",
+        "stories",
+        "package.json",
+        "themes.css",
+        ":bundle",
+    ],
+    bun2nix = "storybook",
+    out_dir = "sb-out",
+    # staticDirs is ../dist relative to .storybook → stage the bundle + stylesheet
+    # there, then build. node_modules/storybook/bin/index.cjs is the v8 CLI entry.
+    cmd = "mkdir -p dist && cp hydrogen-stories.js dist/hydrogen-stories.js && cp themes.css dist/themes.css && node node_modules/storybook/bin/index.cjs build -o sb-out",
+)
+
+# Dev server: `nix develop -c buck2 run //storybook:dev` (HMR over the live stories
+# + preview, hermetic node_modules, the buck2-built bundle staged into dist/).
+storybook_dev(
+    name = "dev",
+    bundle = ":bundle",
+    bun2nix = "storybook",
+)
+
+# Warm Halogen dev loop (STR-327): `nix develop -c buck2 run //storybook:watch`.
+# Compiles the registry closure once, then recompiles the LIVE repo sources
+# (src + storybook/src) on every save (~1s incremental) straight into the bundle
+# the dev server serves (storybook/dist/hydrogen-stories.js) — Vite HMRs it.
+# Run alongside //storybook:dev: edit a Hydrogen.Themes module, save, see it.
+purs_watch(
+    name = "watch",
+    main = "Storybook.Mount",
+    packages = PURS_REGISTRY,
+    watch_dirs = [
+        "src",
+        "storybook/src",
+    ],
+    bundle_out = "storybook/dist/hydrogen-stories.js",
+)

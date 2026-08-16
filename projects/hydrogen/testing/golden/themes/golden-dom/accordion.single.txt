@@ -1,0 +1,23 @@
+ℵ straylight project: hydrogen-ps
+<body>
+  <div id=root>
+    <div class="light radix-themes" data-accent-color=indigo data-gray-color=slate data-has-background=true data-is-root-theme=true data-panel-background=translucent data-radius=medium data-scaling=100% style=--default-font-family: 'Inter Variable', sans-serif;>
+      <div class="rt-Box rt-r-p-6">
+        <div class="rt-Box" style=max-width: <px>;>
+          <div data-orientation=vertical>
+            <div data-orientation=vertical data-state=open>
+              <h3 data-orientation=vertical data-state=open>
+                <button aria-controls=<id0> aria-disabled=true aria-expanded=true data-orientation=vertical data-radix-collection-item= data-state=open id=<id1> type=button>
+                  #Is it accessible?
+              <div aria-labelledby=<id1> data-orientation=vertical data-state=open id=<id0> role=region style=--radix-accordion-content-height: var(--radix-collapsible-content-height); --radix-accordion-content-width: var(--radix-collapsible-content-width); transition-duration: 0s; animation-name: none; --radix-collapsible-content-height: <px>; --radix-collapsible-content-width: <px>;>
+                #Yes. It adheres to the WAI-ARIA design pattern.
+            <div data-orientation=vertical data-state=closed>
+              <h3 data-orientation=vertical data-state=closed>
+                <button aria-expanded=false data-orientation=vertical data-radix-collection-item= data-state=closed id=<id2> type=button>
+                  #Is it styled?
+              <div aria-labelledby=<id2> data-orientation=vertical data-state=closed hidden= id=<id3> role=region style=--radix-accordion-content-height: var(--radix-collapsible-content-height); --radix-accordion-content-width: var(--radix-collapsible-content-width);>
+            <div data-orientation=vertical data-state=closed>
+              <h3 data-orientation=vertical data-state=closed>
+                <button aria-expanded=false data-orientation=vertical data-radix-collection-item= data-state=closed id=<id4> type=button>
+                  #Is it animated?
+              <div aria-labelledby=<id4> data-orientation=vertical data-state=closed hidden= id=<id5> role=region style=--radix-accordion-content-height: var(--radix-collapsible-content-height); --radix-accordion-content-width: var(--radix-collapsible-content-width);>

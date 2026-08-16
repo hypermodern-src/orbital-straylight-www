@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Radix Themes — golden source</title>
+    <link rel="stylesheet" href="./app.css" />
+    <!-- Inter on EVERY .radix-themes root, including the body-level portal roots radix
+         re-themes (overlays/menus/select) — otherwise portaled content falls back to the
+         monospace default in headless Chromium. Makes the open-state target faithful. -->
+    <style>.radix-themes { --default-font-family: 'Inter Variable', sans-serif; }</style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

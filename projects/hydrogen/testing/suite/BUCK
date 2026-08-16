@@ -1,0 +1,31 @@
+# The hydrogen test suite — a purescript_test (prelude): compile the suite + the
+# assertion/property harness + the library under test + the registry+QuickCheck
+# closure, run Test.Main under node, report pass/fail by exit code to `buck2 test`.
+#   buck2 test //testing/suite:test    (or `buck2 test //...`)
+load("//:registry.bzl", "PURS_REGISTRY_TEST")
+
+purescript_test(
+    name = "test",
+    srcs = [
+        "Test/Color.purs",
+        "Test/Compute.purs",
+        "Test/Format.purs",
+        "Test/Main.purs",
+        "Test/Prop/Compute.purs",
+        "Test/Prop/Format.purs",
+        "Test/Prop/RemoteData.purs",
+        "Test/Prop/Router.purs",
+        "Test/Prop/Style.purs",
+        "Test/RemoteData.purs",
+        "Test/Router.purs",
+        "Test/Style.purs",
+        "Test/Typeahead.purs",
+    ],
+    main = "Test.Main",
+    deps = [
+        "//:lib",
+        "//testing/support:support",
+    ],
+    packages = PURS_REGISTRY_TEST,
+    visibility = ["PUBLIC"],
+)

@@ -1,0 +1,361 @@
+{
+  "component": "RadioGroup",
+  "primitive": "Hydrogen.Radix.RadioGroup",
+  "face": "themed",
+  "upstream": "primitives packages/react/radio-group/src/radio-group.tsx + radio.tsx + roving-focus-group.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for RadioGroup (incl. RadioCards). status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in the Verify+close issue (STR-375). DEPTH-AUDIT.md:382-415 \u2014 24 gaps (4 core).",
+  "cells": [
+    {
+      "id": "radiogroup.checked",
+      "state": "checked",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "single-selection: click value=2, data-state checked/unchecked + aria-checked"
+    },
+    {
+      "id": "radiogroup.keys",
+      "state": "keys",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "vertical roving: Tab entry-focus tabindex + ArrowDown/Up move+check, wrap"
+    },
+    {
+      "id": "radiogroup.mixed",
+      "state": "mixed",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "item[1] disabled: [disabled][data-disabled], siblings enabled"
+    },
+    {
+      "id": "radiogroup.disabledgroup",
+      "state": "disabledgroup",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "group disabled: root+items [data-disabled], no check on click"
+    },
+    {
+      "id": "radiogroup.horizontal",
+      "state": "horizontal",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "orientation=horizontal: aria-orientation/data-orientation, L/R live axis"
+    },
+    {
+      "id": "radiogroup.form",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "inside <form>: hidden bubble radios type=radio aria-hidden tabindex=-1 name/value"
+    },
+    {
+      "id": "radiogroup.alldisabled",
+      "state": "alldisabled",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "every item disabled: root tabindex=-1 (not tabbable)"
+    },
+    {
+      "id": "radiogroup.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (radiogroup + radios)"
+    },
+    {
+      "id": "radiocards.selected",
+      "state": "selected",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "RadioCards skin: selected card data-state checked"
+    },
+    {
+      "id": "radiocards.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "RadioCards at-rest a11y tree"
+    },
+    {
+      "id": "radiogroup.disabled-skip",
+      "state": "keys",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "ArrowDown SKIPS a disabled radio to the next enabled one",
+      "ref": "radio-group.tsx:203/roving:271 disabled item SKIPPED \u2014 ArrowDown from item[0] lands+checks item[2]; port treats disabled as a wall. PORT FIX."
+    },
+    {
+      "id": "radiogroup.enter-inert",
+      "state": "keys",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter does NOT activate/select a radio",
+      "ref": "radio-group.tsx:210-214 Enter preventDefault \u2014 selection unchanged; correct but unverified"
+    },
+    {
+      "id": "radiogroup.focus-no-check",
+      "state": "keys",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "programmatic focus (no arrow) does NOT check the radio",
+      "ref": "radio-group.tsx:182-225 selection-follows-focus gated on arrow held: .focus()/Tab does NOT check"
+    },
+    {
+      "id": "radiogroup.aria-coupling",
+      "state": "checked",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "aria",
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): radiogroup.checked DOM + ARIA goldens (both gate-green, a11y MATRIX shown=checked) byte-pin the group coupling \u2014 role=radiogroup root, role=radio items, exactly one aria-checked=true/data-state=checked, others unchecked. radio.tsx:127-128",
+      "oracle_file": "radiogroup.checked"
+    },
+    {
+      "id": "radiogroup.name-prop",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): radiogroup.form DOM golden (gate-green) byte-pins name=plan flowing onto every hidden bubble <input type=radio>. radio-group.tsx:42,93",
+      "oracle_file": "radiogroup.form"
+    },
+    {
+      "id": "radiogroup.rtl",
+      "state": "horizontal",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg",
+        "dom"
+      ],
+      "apg_check": "RTL horizontal: ArrowLeft moves to the NEXT radio (direction-swapped)",
+      "ref": "radio-group.tsx:79,108 dir=rtl: ArrowLeft=>Next; dir=rtl on root"
+    },
+    {
+      "id": "radiogroup.loop-false",
+      "state": "keys",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "loop=false: ArrowUp at the first radio does NOT wrap to the last",
+      "ref": "radio-group.tsx:101 loop=false: ArrowUp at first clamps (no wrap), no selection change"
+    },
+    {
+      "id": "radiogroup.home-end",
+      "state": "keys",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "End moves focus but does NOT check (3-item seed)",
+      "ref": "Home/End: upstream MOVES focus only (no check); port checks on move \u2014 DIVERGENCE"
+    },
+    {
+      "id": "radiogroup.controlled-null",
+      "state": "controlled",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "radio-group.tsx:80-85 controlled value=null unchecks all; Maybe conflates uncontrolled w/ controlled-empty"
+    },
+    {
+      "id": "radiogroup.controlled-block",
+      "state": "controlled",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "radio-group.test.tsx:202-209 blocked parent: selection must NOT move locally"
+    },
+    {
+      "id": "radiogroup.disabledgroup-noop",
+      "state": "disabledgroup",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-24): disabled Root \u2192 root + every item data-disabled. radiogroup.disabledgroup DOM golden byte-pins the all-disabled state; new APG check (golden-first) proves clicking a non-checked radio leaves the selection unchanged (originally-checked stays checked). radio-group.tsx:107",
+      "oracle_file": "radiogroup.disabledgroup",
+      "apg_check": "disabled group: clicking a radio does NOT change the selection"
+    },
+    {
+      "id": "radiogroup.recheck",
+      "state": "checked",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "radio.tsx:135-136 re-click checked radio fires no duplicate onCheck"
+    },
+    {
+      "id": "radiogroup.bubble-form",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "CO-COVER (2026-06-24): radiogroup.form DOM golden (gate-green) byte-pins the per-item hidden native <input type=radio aria-hidden name=plan required> bubble nodes (one checked) that participate in form submission/checkValidity. radio.tsx:248-318",
+      "oracle_file": "radiogroup.form"
+    },
+    {
+      "id": "radiogroup.passthrough",
+      "state": "rest",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "upstream spreads remaining DOM props + ref; port is a closed record"
+    },
+    {
+      "id": "radiogroup.root-untabbable",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: root tabindex=-1 when every item disabled"
+    },
+    {
+      "id": "radiogroup.form-prop",
+      "state": "form",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: form prop associates bubble input with a form by id"
+    },
+    {
+      "id": "radiogroup.stop-propagation",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: consumer stopPropagation on item onClick suppresses focus/select"
+    },
+    {
+      "id": "radiogroup.indicator-state",
+      "state": "checked",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: data-state on the INDICATOR span (checked|unchecked)"
+    },
+    {
+      "id": "radiogroup.orientation-omit",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: aria-orientation/data-orientation omitted unless explicit"
+    },
+    {
+      "id": "radiogroup.item-keydown",
+      "state": "keys",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "edge: consumer onKeyDown on an item still fires (composeEventHandlers)"
+    },
+    {
+      "id": "radiogroup.value-default",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: value attribute defaults to 'on' when unset"
+    },
+    {
+      "id": "radiogroup.mousedown-disabled",
+      "state": "mixed",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: mousedown on a disabled item is preventDefaulted"
+    },
+    {
+      "id": "radiogroup.collection-attr",
+      "state": "rest",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: data-radix-collection-item stamped on every item button"
+    }
+  ]
+}

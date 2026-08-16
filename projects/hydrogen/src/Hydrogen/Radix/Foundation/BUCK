@@ -1,0 +1,15 @@
+# Hydrogen.Radix.Foundation — the unstyled-primitive bedrock: the FFI surface
+# (Dom), the styling-preset contract (Style), and the radix color palette (Color).
+# Leaf of the Radix layer — Behavior, Float, and the primitives all sit on top.
+purescript_library(
+    name = "foundation",
+    srcs = [
+        "Color.purs",
+        "Dom.js",
+        "Dom.purs",
+        "Envelope.purs",
+        "Portal.purs",
+        "Style.purs",
+    ],
+    visibility = ["PUBLIC"],
+)

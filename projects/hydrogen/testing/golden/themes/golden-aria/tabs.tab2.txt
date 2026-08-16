@@ -1,0 +1,5 @@
+- tablist:
+  - tab "Account"
+  - tab "Documents" [selected]
+  - tab "Settings"
+- tabpanel "Documents": Access and update your documents.

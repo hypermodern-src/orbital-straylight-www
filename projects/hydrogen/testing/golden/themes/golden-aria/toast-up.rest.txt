@@ -1,0 +1,7 @@
+- region "Notifications (F8)":
+  - list:
+    - listitem:
+      - text: Scheduled Friday at 5pm
+      - button "Undo"
+      - button "Close": ×
+- status: Notification ScheduledFriday at 5pmUndo

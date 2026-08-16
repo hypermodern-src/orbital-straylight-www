@@ -1,0 +1,262 @@
+{
+  "component": "ScrollArea",
+  "primitive": "Hydrogen.Radix.ScrollArea",
+  "face": "themed",
+  "upstream": "primitives packages/react/scroll-area/src/scroll-area.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for ScrollArea. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:448-473 \u2014 19 gaps (4 core).",
+  "cells": [
+    {
+      "id": "scrollarea.shown",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "type=always vertical LTR anatomy: Root>Viewport>content, Scrollbar[data-state=visible]>Thumb translate3d"
+    },
+    {
+      "id": "scrollarea.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (structurally mirrors shown; no DOM rest exists)"
+    },
+    {
+      "id": "scrollareax.both",
+      "state": "both",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "scrollbars=both (Themes default): TWO scrollbars X+Y + Corner"
+    },
+    {
+      "id": "scrollareax.horizontal",
+      "state": "horizontal",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "horizontal scrollbar: data-orientation=horizontal, X inline style, thumb translate3d X"
+    },
+    {
+      "id": "scrollareax.radius",
+      "state": "radius",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "data-radius attribute on scrollbar (Themes radius prop)"
+    },
+    {
+      "id": "scrollareax.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "ScrollAreaX at-rest a11y tree"
+    },
+    {
+      "id": "scrollarea.hover",
+      "state": "hover",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "apg"
+      ],
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 type=\"hover\" (the `hover` field). Hidden at rest; the Root pointerenter (RootEnter) mounts the bar (gated on hovered && overflow), pointerleave (RootLeave) hides it. scrollarea.hover DOM golden byte-identical + self-stable (hovered state, data-state=visible); APG check (golden-first) proves rest=0 bars \u2192 pointerenter=1 \u2192 leave=0. scroll-area.tsx:228-287",
+      "oracle_file": "scrollarea.hover",
+      "apg_check": "type=hover: bar hidden at rest, pointerenter shows it, leave hides it"
+    },
+    {
+      "id": "scrollarea.nothumb",
+      "state": "fit",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-25): PORT FIX \u2014 hasThumb gate. The THUMB now renders only when its axis has scrollable overflow (measured overflowV/overflowH); a type=\"always\" scrollbar TRACK can be present with NO thumb when content fits. scrollarea.nothumb DOM golden byte-identical + self-stable (1 scrollbar, 0 thumb); existing overflowing stories (shown/scrollareax) keep their thumbs. scroll-area.tsx:419,426,770",
+      "oracle_file": "scrollarea.nothumb"
+    },
+    {
+      "id": "scrollarea.thumb-raf",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-25): the rAF/onScroll unlinked-scroll listener is pinned by the gate-green \"thumb re-offsets on scroll\" APG check \u2014 after setting viewport scrollTop, the thumb translateY updates (after>before) to the expected getThumbOffsetFromScroll, proving the scroll\u2192thumb recompute fired. scroll-area.tsx:780-819",
+      "apg_check": "thumb re-offsets on scroll to getThumbOffsetFromScroll"
+    },
+    {
+      "id": "scrollarea.thumb-math",
+      "state": "shown",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "ref": "DONE (2026-06-25): thumb math pinned by two gate-green APG checks (golden-first): SIZE = getThumbSize = max(18, (viewport/content)\u00b7track) [the linearScale + 18px min clamp], and OFFSET = getThumbOffsetFromScroll = (scrollTop/maxScroll)\u00b7(track\u2212thumb) [the re-offsets-on-scroll check]. Both computed from live geometry, identical golden+port. scroll-area.tsx:916-957",
+      "apg_check": "thumb size = getThumbSize (ratio\u00b7track, min 18)"
+    },
+    {
+      "id": "scrollarea.scroll-machine",
+      "state": "scroll",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "scroll-area.tsx:294-359 type=scroll state machine hidden\u2192scrolling\u2192idle\u2192hidden; at-rest hidden DOM deterministic. MISSING in port."
+    },
+    {
+      "id": "scrollarea.auto-overflow",
+      "state": "auto",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 added type=\"auto\" (the `auto` field). type=auto + overflowing content mounts the vertical scrollbar (measured overflow: content scrollHeight > viewport offsetHeight). scrollarea.autooverflow DOM golden byte-identical + self-stable. scroll-area.tsx:366-394",
+      "oracle_file": "scrollarea.autooverflow"
+    },
+    {
+      "id": "scrollarea.auto-fit",
+      "state": "auto",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE (2026-06-25): PORT FEATURE \u2014 type=\"auto\" + content that FITS (no overflow) mounts NO scrollbar (and no corner). scrollarea.autofit DOM golden byte-identical + self-stable (0 scrollbar nodes). scroll-area.tsx:366-394",
+      "oracle_file": "scrollarea.autofit"
+    },
+    {
+      "id": "scrollarea.thumb-drag",
+      "state": "shown",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "scroll-area.tsx:677-744 thumb drag: pointerdown\u2192capture, linear-scale pointer\u2192scroll, release+restore (runtime). MISSING in port."
+    },
+    {
+      "id": "scrollarea.axe-focusable",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "CO-COVER (2026-06-25): the scrollarea.rest + scrollarea.shown ARIA/axe goldens (gate-green via the a11y MATRIX) carry the scrollable-region-focusable axe finding SYMMETRICALLY on both faces \u2014 radix does not put a tabbable focus on the scroll viewport, so axe flags it identically for port and upstream. The port matches the upstream axe fingerprint (a11y verify green). decided: match upstream (no tabindex=0), not silence the finding.",
+      "oracle_file": "scrollarea.shown"
+    },
+    {
+      "id": "scrollarea.keyboard-scroll",
+      "state": "shown",
+      "importance": "common",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "scroll-area.tsx:807-816 focus viewport, PageDown \u2192 scrollTop>0 + thumb tracks (runtime)"
+    },
+    {
+      "id": "scrollarea.corner",
+      "state": "both",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Corner rendered iff type!=='scroll' && both scrollbars present (hasSize gate)"
+    },
+    {
+      "id": "scrollarea.rtl",
+      "state": "rtl",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: dir=rtl flips vertical scrollbar to left:0, horizontal/corner side, scroll-range sign"
+    },
+    {
+      "id": "scrollarea.viewport-style",
+      "state": "shown",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: Viewport injects <style> hiding native scrollbar (scrollbar-width:none) + nonce"
+    },
+    {
+      "id": "scrollarea.forcemount",
+      "state": "shown",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: forceMount on Scrollbar/Thumb (force-present even when hidden)"
+    },
+    {
+      "id": "scrollarea.wheel",
+      "state": "shown",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: wheel-scroll on scrollbar: document-level passive:false wheel listener"
+    },
+    {
+      "id": "scrollarea.radius-attr",
+      "state": "shown",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: data-radius attribute on Scrollbar (Themes radius)"
+    },
+    {
+      "id": "scrollarea.size",
+      "state": "shown",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "edge: size prop (rt-r-size-1|2|3, responsive) on scrollbar"
+    },
+    {
+      "id": "scrollarea.hide-delay",
+      "state": "shown",
+      "importance": "edge",
+      "status": "open",
+      "oracle": [
+        "none"
+      ],
+      "ref": "edge: scrollHideDelay prop (Themes overrides to 0 unless type=scroll)"
+    }
+  ]
+}

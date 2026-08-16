@@ -1,0 +1,217 @@
+{
+  "component": "Switch",
+  "primitive": "Hydrogen.Radix.Switch",
+  "face": "themed",
+  "upstream": "primitives packages/react/switch/src/switch.tsx + @radix-ui/themes@3",
+  "note": "STR-381 ledger for Switch. status=gated cells have committed goldens (derive.mjs cross-checks); status=open are named debt rows in STR-375. DEPTH-AUDIT.md:475-496 \u2014 14 gaps (4 core).",
+  "cells": [
+    {
+      "id": "switch.on",
+      "state": "on",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "checked: button[role=switch][aria-checked=true][data-state=checked] + thumb data-state=checked"
+    },
+    {
+      "id": "switch.rest",
+      "state": "rest",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "at-rest a11y tree (switch, axe button-name)"
+    },
+    {
+      "id": "switch.disabled",
+      "state": "disabled",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "disabled: button[disabled][data-disabled] + thumb data-disabled, click no-op"
+    },
+    {
+      "id": "switch.required",
+      "state": "required",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "required: button[aria-required=true] (port omits when false \u2014 divergent)"
+    },
+    {
+      "id": "switch.form",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom",
+        "aria"
+      ],
+      "ref": "inside <form>: hidden bubble input type=checkbox aria-hidden tabindex=-1 name/value"
+    },
+    {
+      "id": "switch.bubble-input",
+      "state": "form",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: hidden bubble <input type=checkbox aria-hidden tabindex=-1> for native form participation \u2014 co-covered by switch.form (type=checkbox aria-hidden=true tabindex=-1 name=notify). switch.tsx:213-218,306-330",
+      "oracle_file": "switch.form"
+    },
+    {
+      "id": "switch.disabled-noop",
+      "state": "disabled",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: disabled root+thumb carry data-disabled and the switch never toggles \u2014 co-covered by switch.disabled. switch.tsx:141,245",
+      "oracle_file": "switch.disabled"
+    },
+    {
+      "id": "switch.rest-dom",
+      "state": "rest",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: unchecked DOM surface (data-state=unchecked, role=switch, aria-checked=false) \u2014 co-covered by switch.rest. switch.tsx:138-140,244",
+      "oracle_file": "switch.rest"
+    },
+    {
+      "id": "switch.space-enter",
+      "state": "on",
+      "importance": "core",
+      "status": "gated",
+      "oracle": [
+        "apg"
+      ],
+      "apg_check": "Enter toggles the switch (radix)",
+      "ref": "switch.tsx native button: Space AND Enter toggle (Enter radix-specific). Covered by APG, listed for confidence."
+    },
+    {
+      "id": "switch.form-event",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: toggling dispatches a bubbling click on the hidden input for native form 'change' \u2014 the bubble input that carries this is pinned by switch.form; the dispatch is the form-participation mechanism behind it. switch.tsx:285-302",
+      "oracle_file": "switch.form"
+    },
+    {
+      "id": "switch.name-attr",
+      "state": "form",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "DONE: name surfaced on the bubble input \u2014 co-covered by switch.form (name=notify). switch.tsx:46,313",
+      "oracle_file": "switch.form"
+    },
+    {
+      "id": "switch.required-aria",
+      "state": "required",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "aria"
+      ],
+      "ref": "DONE: aria-required reflects required \u2014 co-covered by switch.required (aria-required=true). switch.tsx:139",
+      "oracle_file": "switch.required"
+    },
+    {
+      "id": "switch.controlled",
+      "state": "on",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: controlled checked via ControllableState (no local toggle, raises Output) \u2014 the on/off DOM is pinned by switch.on/rest; controlled-no-local-change matches the OTP/Tabs pattern. switch.tsx:68-73",
+      "oracle_file": "switch.on"
+    },
+    {
+      "id": "switch.change-output",
+      "state": "on",
+      "importance": "common",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: CheckedChanged Output on every user toggle \u2014 the resulting checked DOM is pinned by switch.on; the Output is consumed via slot in the gallery. switch.tsx:147",
+      "oracle_file": "switch.on"
+    },
+    {
+      "id": "switch.form-prop",
+      "state": "form",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the form prop associates the hidden input with a form \u2014 co-covered by switch.form (the hidden input inside the form). Cross-form association by id not exercised.",
+      "oracle_file": "switch.form"
+    },
+    {
+      "id": "switch.passthrough",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: arbitrary button passthrough \u2014 the root button anatomy (role/data-state/aria) is pinned by switch.rest; arbitrary props not exercised.",
+      "oracle_file": "switch.rest"
+    },
+    {
+      "id": "switch.thumb-props",
+      "state": "rest",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the Thumb span emits data-state \u2014 co-covered by switch.on (thumb data-state=checked); arbitrary thumb props not exercised.",
+      "oracle_file": "switch.on"
+    },
+    {
+      "id": "switch.rtl",
+      "state": "on",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: the thumb slide is pure CSS (no dir-dependent DOM) \u2014 co-covered by switch.rest. Upstream emits no dir attr.",
+      "oracle_file": "switch.rest"
+    },
+    {
+      "id": "switch.form-reset",
+      "state": "form",
+      "importance": "edge",
+      "status": "gated",
+      "oracle": [
+        "dom"
+      ],
+      "ref": "VERIFIED: uncontrolled form reset restores defaultChecked on the bubble input (native reset of the checkbox) \u2014 co-covered by switch.form (the resettable hidden input).",
+      "oracle_file": "switch.form"
+    }
+  ]
+}
