@@ -24,3 +24,8 @@ kind = "application"
 source = "ssh://git@git.s4.gl/hypermodern/hypermodern.consulting.git"
 vercel = ["hypermodern-website"]
 
+[projects.orbital-web-jw]
+path = "projects/orbital-web-jw"
+kind = "application"
+source = "git@github.com:sensenet-ai/orbital-web-jw.git"
+vercel = []

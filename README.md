@@ -16,6 +16,7 @@ dependency.
 | `straylight-web` | Straylight product and company web application | `straylight-web` |
 | `reinit-dx` | Reference Hydrogen SSG application | `reinit-dx` after cutover |
 | `hypermodern-consulting` | Hydrogen SSG consultancy site | `hypermodern-website` |
+| `orbital-web-jw` | Orbital product marketing Hydrogen SSG | Vercel project pending recovery |
 
 The old `reinit-dx-website` Next.js wrapper remains outside the monorepo while
 it serves production. It is deployment history, not the canonical application.
@@ -29,6 +30,7 @@ Run one project's native check:
 ./scripts/check reinit-dx
 ./scripts/check hypermodern-consulting
 ./scripts/check straylight-web
+./scripts/check orbital-web-jw
 ```
 
 Run every check:
@@ -40,4 +42,3 @@ Run every check:
 See [`docs/BOUNDARIES.md`](docs/BOUNDARIES.md) before introducing a shared
 dependency, and [`docs/VERCEL.md`](docs/VERCEL.md) before relinking a Vercel
 project.
-

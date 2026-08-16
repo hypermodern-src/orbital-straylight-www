@@ -1,0 +1,84 @@
+module Orbital.Route
+  ( Route(..)
+  , allRoutes
+  , fileName
+  , canonicalUrl
+  , pageStylesheet
+  ) where
+
+import Prelude
+
+import Data.Maybe (Maybe(..))
+import Hydrogen.Runtime.Router (class IsRoute, class RouteMetadata)
+
+data Route
+  = Overview
+  | Cache
+  | Build
+  | Pricing
+  | Verification
+  | About
+  | Thanks
+
+derive instance eqRoute :: Eq Route
+
+allRoutes :: Array Route
+allRoutes = [ Overview, Cache, Build, Pricing, Verification, About, Thanks ]
+
+fileName :: Route -> String
+fileName Overview = "index.html"
+fileName Cache = "cache.html"
+fileName Build = "build.html"
+fileName Pricing = "pricing.html"
+fileName Verification = "verification.html"
+fileName About = "about.html"
+fileName Thanks = "thanks.html"
+
+pageStylesheet :: Route -> String
+pageStylesheet Overview = "styles/pages/index.css"
+pageStylesheet Cache = "styles/pages/cache.css"
+pageStylesheet Build = "styles/pages/build.css"
+pageStylesheet Pricing = "styles/pages/pricing.css"
+pageStylesheet Verification = "styles/pages/verification.css"
+pageStylesheet About = "styles/pages/about.css"
+pageStylesheet Thanks = "styles/pages/thanks.css"
+
+canonicalUrl :: Route -> String
+canonicalUrl Overview = "https://orbital.foo/"
+canonicalUrl route = "https://orbital.foo/" <> fileName route
+
+instance isRouteRoute :: IsRoute Route where
+  parseRoute "/" = Overview
+  parseRoute "/index.html" = Overview
+  parseRoute "/cache.html" = Cache
+  parseRoute "/build.html" = Build
+  parseRoute "/pricing.html" = Pricing
+  parseRoute "/verification.html" = Verification
+  parseRoute "/about.html" = About
+  parseRoute "/thanks.html" = Thanks
+  parseRoute _ = Overview
+
+  routeToPath Overview = "/"
+  routeToPath route = "/" <> fileName route
+
+instance routeMetadataRoute :: RouteMetadata Route where
+  isProtected _ = false
+  isStaticRoute _ = true
+
+  routeTitle Overview = "Orbital · Infrastructure that proves itself"
+  routeTitle Cache = "CACHE · Verified binary storage · Orbital"
+  routeTitle Build = "BUILD · The typed build system, and the platform behind it · Orbital"
+  routeTitle Pricing = "Pricing · One subscription, every product · Orbital"
+  routeTitle Verification = "Verification · For regulated and safety-critical teams · Orbital"
+  routeTitle About = "About · Orbital"
+  routeTitle Thanks = "You are on the list · Orbital"
+
+  routeDescription Overview = "Orbital builds verified developer infrastructure. CACHE, verified binary storage. BUILD, the typed build system. One account, one subscription, usage-based billing."
+  routeDescription Cache = "ORBITAL CACHE is verified binary storage: a content-addressed artifact store that re-verifies every artifact each time it is fetched. Start free, no credit card."
+  routeDescription Build = "ORBITAL BUILD is free to use. An Orbital account adds the platform: team-shared verified caching, scale, retention, and guarantees. Start free, upgrade on your own numbers."
+  routeDescription Pricing = "One Orbital subscription covers every product. Tiers gate throughput, retention, and enterprise controls, never which products you may use. Seats free, SSO included."
+  routeDescription Verification = "Orbital's verification path for regulated and safety-critical software: machine-checked guarantees for teams whose specifications already exist. Founder-led. Talk to us."
+  routeDescription About = "Orbital builds verified developer infrastructure in San Juan, Puerto Rico. Meet the team and see what we are building: CACHE, BUILD, and the Orbital Confirm runner."
+  routeDescription Thanks = "Your place on the Orbital early-access list is confirmed."
+
+  routeOgImage _ = Nothing

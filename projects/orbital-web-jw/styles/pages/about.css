@@ -1,0 +1,23 @@
+.ab-hero{padding:clamp(3rem,9vh,6rem) 0 clamp(1.5rem,4vh,2.5rem)}
+.ab-hero .eyebrow{font-size:.66rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
+.ab-hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,6vw,4.6rem);line-height:1.04;letter-spacing:-.02em;max-width:24ch}
+.ab-hero .lede{font-size:.9rem;color:var(--ink-m);max-width:62ch;margin-top:1.6rem;line-height:1.85}
+.ab-prose{font-size:.88rem;color:var(--ink-m);line-height:1.9;max-width:70ch}
+.ab-prose b{color:var(--ink)}
+/* team cards */
+.team{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+@media(max-width:860px){.team{grid-template-columns:1fr}}
+.member{display:flex;flex-direction:column;gap:.6rem;padding:1.7rem 1.8rem;border-radius:var(--radius-lg)}
+.member .mn{font-family:var(--serif);font-weight:500;font-size:1.5rem;color:var(--ink)}
+.member .mr{font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+.member p{font-size:.8rem;color:var(--ink-m);line-height:1.8}
+.member .mfoot{margin-top:auto;padding-top:1rem}
+.team-note{margin-top:1rem;font-size:.62rem;color:var(--ink-f);letter-spacing:.04em}
+/* product rows */
+.prow{display:grid;grid-template-columns:11rem 1fr auto;gap:1.5rem;align-items:baseline;padding:1.2rem .4rem;border-bottom:1px solid var(--border-f)}
+@media(max-width:680px){.prow{grid-template-columns:1fr;gap:.5rem}}
+.prow .pn{font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);white-space:nowrap}
+.prow .pn .ns{color:var(--ink-g);font-weight:500}
+.prow .pn .sep{color:var(--accent);margin:0 .22rem}
+.prow p{font-size:.8rem;color:var(--ink-m);line-height:1.7}
+.prow .pl{color:var(--accent);font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}

@@ -1,0 +1,24 @@
+.tk-hero{padding:clamp(3rem,9vh,6rem) 0 clamp(1.5rem,4vh,2.5rem)}
+.tk-hero .eyebrow{font-size:.66rem;font-weight:600;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem}
+.tk-hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.6rem,6vw,4.4rem);line-height:1.04;letter-spacing:-.02em;max-width:20ch}
+.tk-hero .lede{font-size:.9rem;color:var(--ink-m);max-width:58ch;margin-top:1.4rem;line-height:1.85}
+.tk-pos{font-family:var(--serif);font-weight:300;font-size:1.4rem;color:var(--accent);margin-top:1rem}
+.tk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:2.4rem}
+@media(max-width:860px){.tk-grid{grid-template-columns:1fr}}
+.tk-card{display:flex;flex-direction:column;gap:.8rem;padding:1.6rem 1.7rem;border-radius:var(--radius-lg)}
+.tk-card h3{font-family:var(--serif);font-weight:500;font-size:1.3rem;color:var(--ink)}
+.tk-card p{font-size:.78rem;color:var(--ink-m);line-height:1.75}
+.tk-linkrow{display:flex;gap:.6rem;align-items:center}
+.tk-linkrow code{flex:1;font-size:.7rem;color:var(--ink);background:var(--gf);border:1px solid var(--ge);border-radius:var(--radius);padding:.6rem .8rem;overflow-x:auto;white-space:nowrap}
+/* referral progress */
+.tk-prog{margin-top:.4rem}
+.tk-track{position:relative;height:5px;border-radius:3px;background:hsla(var(--hue),15%,60%,.16)}
+.tk-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--accent);box-shadow:0 0 10px hsla(var(--hue),58%,38%,.45);transition:width .6s var(--ease);width:0}
+.tk-marks{display:flex;justify-content:space-between;margin-top:.6rem;font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-f)}
+.tk-rewards{list-style:none;display:flex;flex-direction:column;gap:.6rem;padding:0;margin-top:.4rem}
+.tk-rewards li{font-size:.74rem;color:var(--ink-m);line-height:1.65;padding-left:1.1rem;position:relative}
+.tk-rewards li::before{content:'';position:absolute;left:0;top:.55em;width:5px;height:5px;background:var(--accent-d);border-radius:1px}
+.tk-rewards li.done::before{background:var(--accent)}
+.tk-rewards b{color:var(--ink)}
+.tk-share{width:100%;font-family:var(--sans);font-size:.72rem;color:var(--ink-m);background:var(--gf);border:1px solid var(--ge);border-radius:var(--radius);padding:.8rem .9rem;line-height:1.7;resize:vertical;min-height:88px}
+.tk-next{margin-top:2.6rem}

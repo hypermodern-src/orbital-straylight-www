@@ -2,3 +2,9 @@
 node_modules
 dist
 .DS_Store
+.buckconfig.local
+.direnv/
+buck-out/
+nix/build/
+result
+result-*
