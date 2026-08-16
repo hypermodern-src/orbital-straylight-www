@@ -17,6 +17,7 @@ import Orbital.Pages.About as About
 import Orbital.Pages.Build as Build
 import Orbital.Pages.Cache as Cache
 import Orbital.Pages.Index as Index
+import Orbital.Pages.Infer as Infer
 import Orbital.Pages.Pricing as Pricing
 import Orbital.Pages.Thanks as Thanks
 import Orbital.Pages.Verification as Verification
@@ -28,7 +29,7 @@ main = do
   output <- outputDirectory
   mkdirp output
   traverse_ (writeRoute output) allRoutes
-  log "orbital-ssg: rendered 7 routes"
+  log "orbital-ssg: rendered 8 routes"
 
 writeRoute :: String -> Route -> Effect Unit
 writeRoute output route = do
@@ -72,6 +73,7 @@ content :: forall w i. Route -> HH.HTML w i
 content Overview = Index.content
 content Cache = Cache.content
 content Build = Build.content
+content Infer = Infer.content
 content Pricing = Pricing.content
 content Verification = Verification.content
 content About = About.content
@@ -89,6 +91,7 @@ waitlistScript :: Route -> Array String
 waitlistScript Overview = [ "waitlist.js" ]
 waitlistScript Cache = [ "waitlist.js" ]
 waitlistScript Build = [ "waitlist.js" ]
+waitlistScript Infer = [ "waitlist.js" ]
 waitlistScript Thanks = [ "waitlist.js" ]
 waitlistScript _ = []
 

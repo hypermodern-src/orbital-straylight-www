@@ -30,7 +30,7 @@ content =
                 []
                 [ HH.text "Orbital"
                 ]
-            , HH.text " builds developer infrastructure for the age of AI-written software: storage that re-verifies every build artifact it serves, a build system whose own logic is machine-checked, and a CI runner to follow. Founded in 2026, based in San Juan, Puerto Rico."
+            , HH.text " builds developer infrastructure for the age of AI-written software: storage that re-verifies every build artifact, a build system whose own logic is machine-checked, native language and diffusion inference, and a CI runner to follow. Founded in 2026, based in San Juan, Puerto Rico."
             ]
         ]
     , HH.element (HH.ElemName "div")
@@ -126,7 +126,7 @@ content =
             , HH.element (HH.ElemName "span")
                 [ HP.attr (HH.AttrName "class") "mt"
                 ]
-                [ HH.text "Developer tools; continuous integration, build systems, and software verification."
+                [ HH.text "Developer tools; AI inference, continuous integration, build systems, and software verification."
                 ]
             ]
         ]
@@ -294,6 +294,35 @@ content =
             ]
         , HH.element (HH.ElemName "a")
             [ HP.attr (HH.AttrName "class") "prow"
+            , HP.attr (HH.AttrName "href") "infer.html"
+            ]
+            [ HH.element (HH.ElemName "span")
+                [ HP.attr (HH.AttrName "class") "pn"
+                ]
+                [ HH.element (HH.ElemName "span")
+                    [ HP.attr (HH.AttrName "class") "ns"
+                    ]
+                    [ HH.text "ORBITAL"
+                    ]
+                , HH.element (HH.ElemName "span")
+                    [ HP.attr (HH.AttrName "class") "sep"
+                    ]
+                    [ HH.text "//"
+                    ]
+                , HH.text "infer"
+                ]
+            , HH.element (HH.ElemName "p")
+                []
+                [ HH.text "A native inference engine for language and diffusion models, with no Python runtime and a purpose-built binary protocol. In development; performance targets publish with reproducible benchmarks."
+                ]
+            , HH.element (HH.ElemName "span")
+                [ HP.attr (HH.AttrName "class") "pl"
+                ]
+                [ HH.text "Details →"
+                ]
+            ]
+        , HH.element (HH.ElemName "a")
+            [ HP.attr (HH.AttrName "class") "prow"
             , HP.attr (HH.AttrName "href") "index.html"
             ]
             [ HH.element (HH.ElemName "span")
@@ -330,7 +359,7 @@ content =
         [ HP.attr (HH.AttrName "class") "team-note"
         , HP.attr (HH.AttrName "data-reveal") ""
         ]
-        [ HH.text "Each product page carries feature detail, a quickstart, and the benchmark methodology. Product screenshots are being prepared and will appear there."
+        [ HH.text "Each product page carries feature detail and its benchmark methodology. Product screenshots are being prepared and will appear there."
         ]
     , HH.element (HH.ElemName "div")
         [ HP.attr (HH.AttrName "class") "ctaband"

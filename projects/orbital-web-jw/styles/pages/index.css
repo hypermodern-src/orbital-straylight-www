@@ -12,8 +12,8 @@
 .fam .fn .sl{margin:0 .22rem;color:var(--ink-m)}
 .fam .fn b{font-weight:500;color:var(--accent)}
 .fam .fd{margin-left:auto;font-size:.72rem;color:var(--ink-f);letter-spacing:.04em;text-align:right;max-width:34ch;line-height:1.6}
-.suite-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
-@media(max-width:980px){.suite-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.suite-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+@media(max-width:1080px){.suite-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.suite-grid{grid-template-columns:1fr}}
 .prod{display:flex;flex-direction:column;gap:.5rem;padding:1.4rem 1.5rem;text-decoration:none;min-height:190px}
 .glass.prod{border-radius:var(--radius-lg)}

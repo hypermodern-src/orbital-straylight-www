@@ -58,7 +58,7 @@
     }).catch(function () {});
   });
 
-  /* signup forms: <form data-waitlist="cache|build|platform"> */
+  /* signup forms: <form data-waitlist="cache|build|infer|platform"> */
   document.querySelectorAll('form[data-waitlist]').forEach(function (form) {
     var msg = form.querySelector('.ea-msg');
     form.addEventListener('submit', function (e) {

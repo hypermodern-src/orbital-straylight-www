@@ -368,7 +368,7 @@ content =
                 ]
             , HH.element (HH.ElemName "p")
                 []
-                [ HH.text "No. One subscription covers CACHE, BUILD, and every Orbital product that ships after them. Adding a product to your account is a configuration change, not a checkout."
+                [ HH.text "No. One subscription covers CACHE, BUILD, INFER, and every Orbital product that ships after them. Adding a product to your account is a configuration change, not a checkout."
                 ]
             ]
         , HH.element (HH.ElemName "div")

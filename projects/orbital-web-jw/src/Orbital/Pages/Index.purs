@@ -33,7 +33,7 @@ content =
             [ HP.attr (HH.AttrName "class") "lede"
             , HP.attr (HH.AttrName "data-reveal") ""
             ]
-            [ HH.text "Most developer tools ask for your trust. Orbital products are built so they do not have to: storage that re-checks every artifact it hands you, and builds whose own logic is machine-checked. One account, one subscription, and every product available on every tier."
+            [ HH.text "Most developer tools ask for your trust. Orbital products are built so they do not have to: storage that re-checks every artifact, builds whose own logic is machine-checked, and native AI inference without a Python runtime. One account, one subscription, and every product available on every tier."
             ]
         , HH.element (HH.ElemName "form")
             [ HP.attr (HH.AttrName "class") "ea-form"
@@ -77,6 +77,10 @@ content =
                     , HH.element (HH.ElemName "option")
                         []
                         [ HH.text "GitHub Actions"
+                        ]
+                    , HH.element (HH.ElemName "option")
+                        []
+                        [ HH.text "LLM or diffusion inference"
                         ]
                     , HH.element (HH.ElemName "option")
                         []
@@ -142,6 +146,12 @@ content =
                 , HP.attr (HH.AttrName "href") "build.html"
                 ]
                 [ HH.text "Explore BUILD"
+                ]
+            , HH.element (HH.ElemName "a")
+                [ HP.attr (HH.AttrName "class") "btn"
+                , HP.attr (HH.AttrName "href") "infer.html"
+                ]
+                [ HH.text "Explore INFER"
                 ]
             ]
         ]
@@ -265,6 +275,56 @@ content =
                         ]
                         []
                     , HH.text "Sep 2026 target"
+                    ]
+                , HH.element (HH.ElemName "span")
+                    [ HP.attr (HH.AttrName "class") "parrow"
+                    ]
+                    [ HH.text "→"
+                    ]
+                ]
+            ]
+        , HH.element (HH.ElemName "a")
+            [ HP.attr (HH.AttrName "class") "glass prod orbital-lift orbital-sweep"
+            , HP.attr (HH.AttrName "data-reveal") ""
+            , HP.attr (HH.AttrName "href") "infer.html"
+            ]
+            [ HH.element (HH.ElemName "div")
+                [ HP.attr (HH.AttrName "class") "pn"
+                ]
+                [ HH.element (HH.ElemName "span")
+                    [ HP.attr (HH.AttrName "class") "ns"
+                    ]
+                    [ HH.text "ORBITAL"
+                    ]
+                , HH.element (HH.ElemName "span")
+                    [ HP.attr (HH.AttrName "class") "sep"
+                    ]
+                    [ HH.text "//"
+                    ]
+                , HH.text "infer"
+                ]
+            , HH.element (HH.ElemName "div")
+                [ HP.attr (HH.AttrName "class") "pt"
+                ]
+                [ HH.text "Native AI inference"
+                ]
+            , HH.element (HH.ElemName "div")
+                [ HP.attr (HH.AttrName "class") "pd"
+                ]
+                [ HH.text "A pure native runtime for language and diffusion models. No Python dependency, no JSON in the hot path, and a custom binary protocol."
+                ]
+            , HH.element (HH.ElemName "div")
+                [ HP.attr (HH.AttrName "class") "pmeta"
+                ]
+                [ HH.element (HH.ElemName "span")
+                    [ HP.attr (HH.AttrName "class") "badge2 is-warn"
+                    , HP.attr (HH.AttrName "data-orbital") "badge"
+                    ]
+                    [ HH.element (HH.ElemName "span")
+                        [ HP.attr (HH.AttrName "class") "badge2-dot"
+                        ]
+                        []
+                    , HH.text "in development"
                     ]
                 , HH.element (HH.ElemName "span")
                     [ HP.attr (HH.AttrName "class") "parrow"

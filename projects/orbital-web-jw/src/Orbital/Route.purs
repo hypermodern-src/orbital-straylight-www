@@ -15,6 +15,7 @@ data Route
   = Overview
   | Cache
   | Build
+  | Infer
   | Pricing
   | Verification
   | About
@@ -23,12 +24,13 @@ data Route
 derive instance eqRoute :: Eq Route
 
 allRoutes :: Array Route
-allRoutes = [ Overview, Cache, Build, Pricing, Verification, About, Thanks ]
+allRoutes = [ Overview, Cache, Build, Infer, Pricing, Verification, About, Thanks ]
 
 fileName :: Route -> String
 fileName Overview = "index.html"
 fileName Cache = "cache.html"
 fileName Build = "build.html"
+fileName Infer = "infer.html"
 fileName Pricing = "pricing.html"
 fileName Verification = "verification.html"
 fileName About = "about.html"
@@ -38,6 +40,7 @@ pageStylesheet :: Route -> String
 pageStylesheet Overview = "styles/pages/index.css"
 pageStylesheet Cache = "styles/pages/cache.css"
 pageStylesheet Build = "styles/pages/build.css"
+pageStylesheet Infer = "styles/pages/infer.css"
 pageStylesheet Pricing = "styles/pages/pricing.css"
 pageStylesheet Verification = "styles/pages/verification.css"
 pageStylesheet About = "styles/pages/about.css"
@@ -52,6 +55,7 @@ instance isRouteRoute :: IsRoute Route where
   parseRoute "/index.html" = Overview
   parseRoute "/cache.html" = Cache
   parseRoute "/build.html" = Build
+  parseRoute "/infer.html" = Infer
   parseRoute "/pricing.html" = Pricing
   parseRoute "/verification.html" = Verification
   parseRoute "/about.html" = About
@@ -68,17 +72,19 @@ instance routeMetadataRoute :: RouteMetadata Route where
   routeTitle Overview = "Orbital · Infrastructure that proves itself"
   routeTitle Cache = "CACHE · Verified binary storage · Orbital"
   routeTitle Build = "BUILD · The typed build system, and the platform behind it · Orbital"
+  routeTitle Infer = "INFER · Native inference for language and diffusion models · Orbital"
   routeTitle Pricing = "Pricing · One subscription, every product · Orbital"
   routeTitle Verification = "Verification · For regulated and safety-critical teams · Orbital"
   routeTitle About = "About · Orbital"
   routeTitle Thanks = "You are on the list · Orbital"
 
-  routeDescription Overview = "Orbital builds verified developer infrastructure. CACHE, verified binary storage. BUILD, the typed build system. One account, one subscription, usage-based billing."
+  routeDescription Overview = "Orbital builds verified developer infrastructure: CACHE for binary storage, BUILD for typed builds, and INFER for native language and diffusion inference."
   routeDescription Cache = "ORBITAL CACHE is verified binary storage: a content-addressed artifact store that re-verifies every artifact each time it is fetched. Start free, no credit card."
   routeDescription Build = "ORBITAL BUILD is free to use. An Orbital account adds the platform: team-shared verified caching, scale, retention, and guarantees. Start free, upgrade on your own numbers."
+  routeDescription Infer = "ORBITAL INFER is a native inference engine for language and diffusion models, with no Python runtime and a purpose-built binary protocol."
   routeDescription Pricing = "One Orbital subscription covers every product. Tiers gate throughput, retention, and enterprise controls, never which products you may use. Seats free, SSO included."
   routeDescription Verification = "Orbital's verification path for regulated and safety-critical software: machine-checked guarantees for teams whose specifications already exist. Founder-led. Talk to us."
-  routeDescription About = "Orbital builds verified developer infrastructure in San Juan, Puerto Rico. Meet the team and see what we are building: CACHE, BUILD, and the Orbital Confirm runner."
+  routeDescription About = "Orbital builds verified developer infrastructure in San Juan, Puerto Rico. Meet the team and see CACHE, BUILD, INFER, and the Orbital Confirm runner."
   routeDescription Thanks = "Your place on the Orbital early-access list is confirmed."
 
   routeOgImage _ = Nothing

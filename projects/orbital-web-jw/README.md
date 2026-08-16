@@ -1,7 +1,7 @@
 # Orbital web
 
-The marketing site for Orbital CACHE, BUILD, pricing, verification, and the
-early-access waitlist.
+The marketing site for Orbital CACHE, BUILD, INFER, pricing, verification, and
+the early-access waitlist.
 
 ## Stack
 
@@ -24,7 +24,7 @@ nix flake check --accept-flake-config
 nix develop --accept-flake-config -c buck2 build //:site --show-output
 ```
 
-The Buck2 target emits a complete static site with seven routes. Page markup
+The Buck2 target emits a complete static site with eight routes. Page markup
 lives under `src/Orbital/Pages`, route metadata under `src/Orbital/Route.purs`,
 and page-specific styles under `styles/pages`.
 

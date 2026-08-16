@@ -12,7 +12,7 @@ Segmentation available from the signup form: product list joined (cache, build, 
 
 Subject: You're on the Orbital early-access list
 
-You're in. **CACHE**, verified binary storage, targets an August 2026 public release; **BUILD**, the typed build system, targets September. You'll hear from us a handful of times between now and then: what we're building, how the benchmarks are run, and one early-access offer before the public release.
+You're in. **CACHE**, verified binary storage, targets an August 2026 public release; **BUILD**, the typed build system, targets September. **INFER**, native language and diffusion inference, is in development with its release date still open. You'll hear from us a handful of times between now and then: what we're building, how the benchmarks are run, and one early-access offer before the public release.
 
 Your referral link, if teammates share your build: {{referral_link}}
 One referral: a boosted free-tier allowance for your first launch month (exact allowance publishes with pricing). Three: access ahead of the public release, plus a priority slot for the proof bot when it ships (planned; it opens a pull request against your repo and reports before and after times measured on your own code).

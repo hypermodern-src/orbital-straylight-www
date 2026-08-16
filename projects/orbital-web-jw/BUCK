@@ -107,6 +107,7 @@ orbital_static_site(
         "index.html",
         "cache.html",
         "build.html",
+        "infer.html",
         "pricing.html",
         "verification.html",
         "about.html",

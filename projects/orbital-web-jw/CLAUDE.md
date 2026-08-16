@@ -1,9 +1,10 @@
 # orbital-web-jw
 
-Marketing site for the Orbital product launches: **CACHE** (verified binary
-storage, target August 2026), **BUILD** (typed build system, target September
-2026), the shared pricing page, and the verification path. The **Orbital
-Confirm** runner follows later in 2026; leave room for it.
+Marketing site for the Orbital products: **CACHE** (verified binary storage,
+target August 2026), **BUILD** (typed build system, target September 2026),
+**INFER** (native language and diffusion inference, date pending), the shared
+pricing page, and the verification path. The **Orbital Confirm** runner follows
+later in 2026; leave room for it.
 
 Read `02-Sales-Page-Handoff.md` before copy or design work. Its decisions and
 style rules are binding. Unresolved launch work is tracked in
@@ -51,7 +52,7 @@ Motion hooks include `data-reveal`, `data-reveal-stagger`, and
 ## Waitlist contract
 
 Until general availability, the primary CTA is "Get early access". Forms on the
-overview, CACHE, and BUILD pages post to Supabase project `orbital-site`
+overview, CACHE, BUILD, and INFER pages post to Supabase project `orbital-site`
 (`lhmodcikykyoxpaojeyn`, organization `jwpr`). The publishable key in
 `waitlist.js` is public by design.
 

@@ -3,17 +3,18 @@
   var data=null;
   try{ data=JSON.parse(localStorage.getItem('orbital-waitlist')||'null'); }catch(e){}
   if(!data||!data.code){
-    document.getElementById('tkLink').textContent='Join the list first: orbital cache or build page';
+    document.getElementById('tkLink').textContent='Join the list first: orbital cache, build, or infer page';
     return;
   }
-  var page=data.product==='build'?'build.html':(data.product==='cache'?'cache.html':'index.html');
+  var pages={build:'build.html',cache:'cache.html',infer:'infer.html',platform:'index.html'};
+  var page=pages[data.product]||'index.html';
   /* TODO(team): swap origin for the production domain at launch */
   var link=location.origin+location.pathname.replace(/thanks\.html$/,page)+'?r='+data.code;
   var pos=document.getElementById('tkPos');
   var pname=data.product==='platform'?'Orbital':data.product.toUpperCase();
   if(typeof data.position==='number'){ pos.textContent='#'+data.position+' on the '+pname+' early-access list'; pos.hidden=false; }
   document.getElementById('tkLink').textContent=link;
-  document.getElementById('tkShare').value='Orbital is shipping verified build infrastructure: binary storage that re-verifies every artifact it serves, and a typed build system that is checked before it runs. Early access: '+link;
+  document.getElementById('tkShare').value='Orbital is shipping native, verifiable developer infrastructure for storage, builds, and AI inference. Early access: '+link;
 
   function wireCopy(btnId,getText){
     var btn=document.getElementById(btnId);

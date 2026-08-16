@@ -39,6 +39,7 @@ navigation route =
         [ navLink route Overview "Overview"
         , navLink route Cache "Cache"
         , navLink route Build "Build"
+        , navLink route Infer "Infer"
         , navLink route Pricing "Pricing"
         , navLink route Verification "Verification"
         , navLink route About "About"

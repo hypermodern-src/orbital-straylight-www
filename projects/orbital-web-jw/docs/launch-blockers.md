@@ -41,6 +41,16 @@ remain intentionally unresolved after the Hydrogen migration.
 - Replace the illustrative login and quickstart commands with released docs.
 - Supply the real signup and trust-page URLs.
 
+## INFER
+
+- Publish the supported model, accelerator, quantization, and client matrix.
+- Confirm the public binary-protocol and SDK contract.
+- Replace all four performance placeholders with measured results and their
+  basis.
+- Publish raw benchmark logs and a reproducible comparison harness.
+- Confirm the launch date, service endpoint, quickstart, and availability
+  limits.
+
 ## Email sequence
 
 - Link the benchmark methodology when it is public.
