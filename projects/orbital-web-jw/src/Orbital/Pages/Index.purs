@@ -393,6 +393,57 @@ content =
             ]
         , HH.element (HH.ElemName "h2")
             []
+            [ HH.text "From the lab"
+            ]
+        ]
+    , HH.element (HH.ElemName "div")
+        [ HP.attr (HH.AttrName "class") "publishing-grid"
+        , HP.attr (HH.AttrName "data-reveal-stagger") "80"
+        ]
+        [ HH.element (HH.ElemName "a")
+            [ HP.attr (HH.AttrName "class") "glass publication-link orbital-lift orbital-sweep"
+            , HP.attr (HH.AttrName "href") "journal.html"
+            , HP.attr (HH.AttrName "data-reveal") ""
+            ]
+            [ HH.element (HH.ElemName "div")
+                [ HP.attr (HH.AttrName "class") "publication-link__kind" ]
+                [ HH.text "Journal" ]
+            , HH.element (HH.ElemName "h3") [] [ HH.text "Notes from the machinery." ]
+            , HH.element (HH.ElemName "p")
+                []
+                [ HH.text "Engineering dispatches, product decisions, and field notes from the people building Orbital." ]
+            , HH.element (HH.ElemName "span")
+                [ HP.attr (HH.AttrName "class") "publication-link__arrow" ]
+                [ HH.text "Read the journal →" ]
+            ]
+        , HH.element (HH.ElemName "a")
+            [ HP.attr (HH.AttrName "class") "glass publication-link orbital-lift orbital-sweep"
+            , HP.attr (HH.AttrName "href") "papers.html"
+            , HP.attr (HH.AttrName "data-reveal") ""
+            ]
+            [ HH.element (HH.ElemName "div")
+                [ HP.attr (HH.AttrName "class") "publication-link__kind" ]
+                [ HH.text "Research" ]
+            , HH.element (HH.ElemName "h3") [] [ HH.text "Papers with receipts." ]
+            , HH.element (HH.ElemName "p")
+                []
+                [ HH.text "Technical papers, specifications, and results behind Orbital's verified infrastructure." ]
+            , HH.element (HH.ElemName "span")
+                [ HP.attr (HH.AttrName "class") "publication-link__arrow" ]
+                [ HH.text "Browse the papers →" ]
+            ]
+        ]
+    , HH.element (HH.ElemName "div")
+        [ HP.attr (HH.AttrName "class") "sh"
+        , HP.attr (HH.AttrName "data-reveal") ""
+        ]
+        [ HH.element (HH.ElemName "span")
+            [ HP.attr (HH.AttrName "class") "n"
+            ]
+            [ HH.text "02"
+            ]
+        , HH.element (HH.ElemName "h2")
+            []
             [ HH.text "Two ways in"
             ]
         ]
@@ -454,7 +505,7 @@ content =
         [ HH.element (HH.ElemName "span")
             [ HP.attr (HH.AttrName "class") "n"
             ]
-            [ HH.text "02"
+            [ HH.text "03"
             ]
         , HH.element (HH.ElemName "h2")
             []
