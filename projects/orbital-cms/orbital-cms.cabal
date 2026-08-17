@@ -25,6 +25,7 @@ extra-doc-files:
   docs/PROVENANCE.md
   contract/openapi.yaml
   db/migrations/001_initial.sql
+  db/migrations/002_historical_publication_dates.sql
 
 common house
   default-language: GHC2021

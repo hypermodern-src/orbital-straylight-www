@@ -116,6 +116,16 @@ spec = do
                     (appWithToken (Just editorToken))
             simpleStatus response `shouldBe` status400
 
+        it "only accepts historical publication dates on publish transitions" $ do
+            response <-
+                perform
+                    methodPost
+                    "/v1/editorial/documents/11111111-1111-4111-8111-111111111111/transitions"
+                    [(hAuthorization, "Bearer " <> editorToken)]
+                    invalidHistoricalTransition
+                    (appWithToken (Just editorToken))
+            simpleStatus response `shouldBe` status400
+
 publicApp :: Application
 publicApp = appWithToken Nothing
 
@@ -206,6 +216,10 @@ validCreate =
 invalidCreate :: LBS.ByteString
 invalidCreate =
     "{\"channel\":\"orbital\",\"kind\":\"paper\",\"slug\":\"Not Fine\",\"revision\":{\"title\":\"\",\"summary\":\"\",\"body\":\"\",\"source_format\":\"markdown\",\"language\":\"en\",\"authors\":[],\"tags\":[]}}"
+
+invalidHistoricalTransition :: LBS.ByteString
+invalidHistoricalTransition =
+    "{\"expected_revision\":2,\"target\":\"draft\",\"published_at\":\"2026-01-08T00:00:00Z\"}"
 
 perform :: ByteString -> ByteString -> [(HeaderName, ByteString)] -> LBS.ByteString -> Application -> IO SResponse
 perform method path headers body app =

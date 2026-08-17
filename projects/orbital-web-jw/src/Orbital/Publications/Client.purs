@@ -4,8 +4,10 @@ import Prelude
 
 import Data.Array as Array
 import Data.Either (Either(..))
+import Data.Int as Int
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
+import Data.String.CodeUnits as CodeUnits
 import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
@@ -48,7 +50,7 @@ type PublicationSummary =
   , summary :: String
   , authors :: Array Author
   , tags :: Array String
-  , revision_created_at :: String
+  , published_at :: String
   }
 
 type Publication =
@@ -60,7 +62,7 @@ type Publication =
   , source_format :: String
   , authors :: Array Author
   , tags :: Array String
-  , revision_created_at :: String
+  , published_at :: String
   }
 
 type PublicationPage =
@@ -214,7 +216,7 @@ renderSummary publication =
         [ HH.span
             [ className ("badge " <> badgeClass publication.kind) ]
             [ HH.text (kindDisplay publication.kind) ]
-        , HH.time_ [ HH.text (shortDate publication.revision_created_at) ]
+        , HH.time_ [ HH.text (shortDate publication.published_at) ]
         ]
     , HH.h2_
         [ HH.a
@@ -245,7 +247,7 @@ renderPublication publication =
             [ HH.span
                 [ className ("badge " <> badgeClass publication.kind) ]
                 [ HH.text (kindDisplay publication.kind) ]
-            , HH.time_ [ HH.text (shortDate publication.revision_created_at) ]
+            , HH.time_ [ HH.text (shortDate publication.published_at) ]
             , HH.span_ [ HH.text publication.source_format ]
             ]
         , HH.h1_ [ HH.text publication.title ]
@@ -264,9 +266,7 @@ renderBody publication =
   if publication.source_format == "markdown" then
     HH.div
       [ className "publication-body" ]
-      ( map renderMarkdownBlock
-          (Array.filter (not <<< String.null) (map String.trim (String.split (Pattern "\n\n") publication.body)))
-      )
+      (map renderMarkdownBlock (parseMarkdown publication.body))
   else
     HH.div
       [ className "publication-source" ]
@@ -276,20 +276,183 @@ renderBody publication =
       , HH.pre_ [ HH.code_ [ HH.text publication.body ] ]
       ]
 
-renderMarkdownBlock :: String -> H.ComponentHTML Action () Aff
-renderMarkdownBlock block =
-  case String.stripPrefix (Pattern "### ") block of
-    Just heading -> HH.h4_ [ HH.text heading ]
-    Nothing -> case String.stripPrefix (Pattern "## ") block of
-      Just heading -> HH.h3_ [ HH.text heading ]
-      Nothing -> case String.stripPrefix (Pattern "# ") block of
-        Just heading -> HH.h2_ [ HH.text heading ]
-        Nothing -> case String.stripPrefix (Pattern "> ") block of
-          Just quote -> HH.blockquote_ [ HH.text quote ]
-          Nothing -> case String.stripPrefix (Pattern "```" ) block of
-            Just source ->
-              HH.pre_ [ HH.code_ [ HH.text (String.trim (fromMaybe source (String.stripSuffix (Pattern "```") source))) ] ]
-            Nothing -> HH.p_ [ HH.text block ]
+data MarkdownBlock
+  = Heading Int String
+  | Paragraph String
+  | Quote String
+  | CodeBlock String String
+  | UnorderedList (Array String)
+  | OrderedList (Array String)
+  | Rule
+
+parseMarkdown :: String -> Array MarkdownBlock
+parseMarkdown = parseLines <<< String.split (Pattern "\n")
+
+parseLines :: Array String -> Array MarkdownBlock
+parseLines lines = case Array.uncons lines of
+  Nothing -> []
+  Just { head, tail }
+    | String.null (String.trim head) -> parseLines tail
+    | Just language <- strip "```" (String.trim head) ->
+        let code = Array.span (not <<< isFence <<< String.trim) tail
+            remaining = dropClosingFence code.rest
+        in [ CodeBlock (String.trim language) (String.joinWith "\n" code.init) ] <> parseLines remaining
+    | Just heading <- strip "#### " (String.trim head) -> [ Heading 4 heading ] <> parseLines tail
+    | Just heading <- strip "### " (String.trim head) -> [ Heading 3 heading ] <> parseLines tail
+    | Just heading <- strip "## " (String.trim head) -> [ Heading 2 heading ] <> parseLines tail
+    | Just heading <- strip "# " (String.trim head) -> [ Heading 1 heading ] <> parseLines tail
+    | isRule (String.trim head) -> [ Rule ] <> parseLines tail
+    | isQuote head ->
+        let quoted = Array.span isQuote tail
+            body = String.joinWith " " (map stripQuote ([ head ] <> quoted.init))
+        in [ Quote body ] <> parseLines quoted.rest
+    | isUnordered head ->
+        let items = Array.span isUnordered tail
+        in [ UnorderedList (map stripUnordered ([ head ] <> items.init)) ] <> parseLines items.rest
+    | isOrdered head ->
+        let items = Array.span isOrdered tail
+        in [ OrderedList (map stripOrdered ([ head ] <> items.init)) ] <> parseLines items.rest
+    | otherwise ->
+        let paragraph = Array.span (not <<< startsBlock) tail
+            body = String.joinWith " " (map String.trim ([ head ] <> paragraph.init))
+        in [ Paragraph body ] <> parseLines paragraph.rest
+
+renderMarkdownBlock :: MarkdownBlock -> H.ComponentHTML Action () Aff
+renderMarkdownBlock = case _ of
+  Heading 1 source -> HH.h2_ (renderInline source)
+  Heading 2 source -> HH.h3_ (renderInline source)
+  Heading _ source -> HH.h4_ (renderInline source)
+  Paragraph source -> HH.p_ (renderInline source)
+  Quote source -> HH.blockquote_ (renderInline source)
+  CodeBlock language source ->
+    HH.pre
+      [ HP.attr (HH.AttrName "data-language") (if String.null language then "text" else language) ]
+      [ HH.code_ [ HH.text source ] ]
+  UnorderedList items -> HH.ul_ (map (HH.li_ <<< renderInline) items)
+  OrderedList items -> HH.ol_ (map (HH.li_ <<< renderInline) items)
+  Rule -> HH.hr_
+
+renderInline :: String -> Array (H.ComponentHTML Action () Aff)
+renderInline source
+  | String.null source = []
+  | Just match <- bracketed "![" source =
+      [ HH.img
+          [ HP.src match.destination
+          , HP.alt match.label
+          , HP.attr (HH.AttrName "loading") "lazy"
+          ]
+      ] <> renderInline match.rest
+  | Just match <- bracketed "[" source =
+      [ HH.a [ HP.href match.destination ] (renderInline match.label) ] <> renderInline match.rest
+  | Just match <- enclosed "**" "**" source =
+      [ HH.strong_ (renderInline match.contents) ] <> renderInline match.rest
+  | Just match <- enclosed "`" "`" source =
+      [ HH.code_ [ HH.text match.contents ] ] <> renderInline match.rest
+  | Just match <- enclosed "*" "*" source =
+      [ HH.em_ (renderInline match.contents) ] <> renderInline match.rest
+  | otherwise =
+      case nextSpecial source of
+        Just 0 -> [ HH.text (String.take 1 source) ] <> renderInline (String.drop 1 source)
+        Just index -> [ HH.text (String.take index source) ] <> renderInline (String.drop index source)
+        Nothing -> [ HH.text source ]
+
+type Bracketed =
+  { label :: String
+  , destination :: String
+  , rest :: String
+  }
+
+bracketed :: String -> String -> Maybe Bracketed
+bracketed opening source = do
+  afterOpening <- strip opening source
+  labelEnd <- String.indexOf (Pattern "](") afterOpening
+  let labelParts = String.splitAt labelEnd afterOpening
+      afterLabel = String.drop 2 labelParts.after
+  destinationEnd <- String.indexOf (Pattern ")") afterLabel
+  let destinationParts = String.splitAt destinationEnd afterLabel
+  pure
+    { label: labelParts.before
+    , destination: destinationParts.before
+    , rest: String.drop 1 destinationParts.after
+    }
+
+type Enclosed =
+  { contents :: String
+  , rest :: String
+  }
+
+enclosed :: String -> String -> String -> Maybe Enclosed
+enclosed opening closing source = do
+  afterOpening <- strip opening source
+  closingIndex <- String.indexOf (Pattern closing) afterOpening
+  let parts = String.splitAt closingIndex afterOpening
+  pure
+    { contents: parts.before
+    , rest: String.drop (String.length closing) parts.after
+    }
+
+nextSpecial :: String -> Maybe Int
+nextSpecial = Array.findIndex isSpecial <<< CodeUnits.toCharArray
+  where
+  isSpecial character = character == '`' || character == '*' || character == '[' || character == '!'
+
+startsBlock :: String -> Boolean
+startsBlock source =
+  let line = String.trim source
+  in String.null line
+      || isFence line
+      || isRule line
+      || isQuote line
+      || isUnordered line
+      || isOrdered line
+      || starts "# " line
+      || starts "## " line
+      || starts "### " line
+      || starts "#### " line
+
+isFence :: String -> Boolean
+isFence = starts "```"
+
+isRule :: String -> Boolean
+isRule source = String.length source >= 3 && Array.all (_ == '-') (CodeUnits.toCharArray source)
+
+isQuote :: String -> Boolean
+isQuote = starts ">" <<< String.trim
+
+stripQuote :: String -> String
+stripQuote source = String.trim (fromMaybe source (strip ">" (String.trim source)))
+
+isUnordered :: String -> Boolean
+isUnordered source = starts "- " (String.trim source) || starts "* " (String.trim source)
+
+stripUnordered :: String -> String
+stripUnordered = String.drop 2 <<< String.trim
+
+isOrdered :: String -> Boolean
+isOrdered = case _ of
+  source -> case String.indexOf (Pattern ". ") (String.trim source) of
+    Nothing -> false
+    Just index -> case Int.fromString (String.take index (String.trim source)) of
+      Nothing -> false
+      Just _ -> true
+
+stripOrdered :: String -> String
+stripOrdered source = case String.indexOf (Pattern ". ") (String.trim source) of
+  Nothing -> source
+  Just index -> String.drop (index + 2) (String.trim source)
+
+dropClosingFence :: Array String -> Array String
+dropClosingFence lines = case Array.uncons lines of
+  Just { head, tail } | isFence (String.trim head) -> tail
+  _ -> lines
+
+starts :: String -> String -> Boolean
+starts prefix source = case strip prefix source of
+  Just _ -> true
+  Nothing -> false
+
+strip :: String -> String -> Maybe String
+strip prefix = String.stripPrefix (Pattern prefix)
 
 renderTags :: Array String -> H.ComponentHTML Action () Aff
 renderTags tags =

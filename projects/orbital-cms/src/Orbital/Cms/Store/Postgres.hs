@@ -117,7 +117,7 @@ listPublications database PublicationQuery{..} =
                 \where d.published_revision is not null and d.state <> 'archived' \
                 \and c.slug = ? \
                 \and (?::text is null or d.kind::text = ?::text) \
-                \order by d.last_published_at desc, d.id \
+                \order by d.last_published_at desc, d.created_at asc, d.id \
                 \limit ? offset ?"
                 ( publicationChannel
                 , documentKindText <$> publicationKind
@@ -190,12 +190,13 @@ transitionDocument database actor documentId TransitionDocument{..} =
     oneJson database $ \connection ->
         query
             connection
-            "select cms.transition_document(?, ?, ?::cms.document_state, ?, ?)::text"
+            "select cms.transition_document(?, ?, ?::cms.document_state, ?, ?, ?)::text"
             ( documentId
             , transitionExpectedRevision
             , workflowStateText transitionTarget
             , actor
             , transitionScheduledFor :: Maybe UTCTime
+            , transitionPublishedAt :: Maybe UTCTime
             )
 
 oneJson :: PostgresStore -> (Connection -> IO [Only Text]) -> IO (Either StoreError Value)

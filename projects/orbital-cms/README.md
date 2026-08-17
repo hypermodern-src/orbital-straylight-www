@@ -23,12 +23,23 @@ DATABASE_URL=postgresql://localhost/orbital_cms nix run .#migrate
 nix run
 ```
 
-The migration runner records version `1` in `cms.schema_migrations` and is safe
-to run again after the schema is current.
+The migration runner records every applied version in `cms.schema_migrations`
+and is safe to run again after the schema is current.
 
 Editorial routes are disabled unless `ORBITAL_CMS_EDITOR_TOKEN` is set to at
 least 32 bytes. The bootstrap token is intentionally a narrow seam: replace its
 authorizer with the internal OIDC identity service before exposing the studio.
+
+The Weyl `.plan` importer fetches the authoritative RSS metadata and article
+HTML, converts the bodies to safe canonical Markdown, and is dry-run by default:
+
+```console
+nix run .#import-weyl-plan -- --output-dir /tmp/weyl-plan
+ORBITAL_CMS_EDITOR_TOKEN=... nix run .#import-weyl-plan -- --publish
+```
+
+Published imports retain their original publication timestamp and a link to the
+source article. Re-running the importer skips slugs that are already published.
 
 ```console
 nix flake check

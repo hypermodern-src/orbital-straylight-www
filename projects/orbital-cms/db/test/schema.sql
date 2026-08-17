@@ -69,9 +69,13 @@ begin
     raise exception 'complete paper still has publication defects';
   end if;
 
-  v_published := cms.transition_document(v_id, 2, 'published', 'schema-test');
+  v_published := cms.transition_document(v_id, 2, 'published', 'schema-test', null, '2026-01-08T12:00:00Z');
   if v_published->>'published_revision' <> '2' then
     raise exception 'published revision was not recorded';
+  end if;
+
+  if v_published->>'published_at' <> '2026-01-08T12:00:00+00:00' then
+    raise exception 'historical publication date was not recorded: %', v_published->>'published_at';
   end if;
 
   if not exists (

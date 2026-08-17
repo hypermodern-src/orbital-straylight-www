@@ -101,6 +101,7 @@ data TransitionDocument = TransitionDocument
     { transitionExpectedRevision :: Int
     , transitionTarget :: WorkflowState
     , transitionScheduledFor :: Maybe UTCTime
+    , transitionPublishedAt :: Maybe UTCTime
     }
     deriving stock (Eq, Show)
 
@@ -227,6 +228,7 @@ instance FromJSON TransitionDocument where
             <$> value .: "expected_revision"
             <*> value .: "target"
             <*> value .:? "scheduled_for"
+            <*> value .:? "published_at"
 
 instance ToJSON Defect where
     toJSON Defect{..} = object ["code" .= defectCode, "message" .= defectMessage]
@@ -279,6 +281,7 @@ validateTransitionDocument :: TransitionDocument -> [Defect]
 validateTransitionDocument TransitionDocument{..} =
     positive "expected_revision" transitionExpectedRevision
         <> scheduleDefects transitionTarget transitionScheduledFor
+        <> publicationDateDefects transitionTarget transitionPublishedAt
 
 publicationDefects :: DocumentKind -> RevisionInput -> [Defect]
 publicationDefects kind RevisionInput{..} =
@@ -404,6 +407,11 @@ scheduleDefects Scheduled Nothing = [Defect "missing_schedule" "scheduled_for is
 scheduleDefects Scheduled (Just _) = []
 scheduleDefects _ Nothing = []
 scheduleDefects _ (Just _) = [Defect "unexpected_schedule" "scheduled_for is only valid for a scheduled transition"]
+
+publicationDateDefects :: WorkflowState -> Maybe UTCTime -> [Defect]
+publicationDateDefects Published _ = []
+publicationDateDefects _ Nothing = []
+publicationDateDefects _ (Just _) = [Defect "unexpected_publication_date" "published_at is only valid for a published transition"]
 
 required :: Text -> Text -> [Defect]
 required field value = [Defect ("missing_" <> field) (field <> " is required") | Text.null (Text.strip value)]

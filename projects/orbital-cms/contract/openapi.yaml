@@ -481,6 +481,7 @@ components:
         - authors
         - tags
         - assets
+        - published_at
         - revision_created_at
       properties:
         id:
@@ -699,6 +700,10 @@ components:
         scheduled_for:
           type: string
           format: date-time
+        published_at:
+          type: string
+          format: date-time
+          description: Optional original publication time for a published import; future dates are rejected.
         published_at:
           type: string
           format: date-time

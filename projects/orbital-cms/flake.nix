@@ -45,14 +45,29 @@
           text = ''
             : "''${DATABASE_URL:?DATABASE_URL is required}"
             schema_exists="$(psql -X -A -t "$DATABASE_URL" -c "select to_regclass('cms.schema_migrations') is not null")"
-            if [[ "$schema_exists" == "t" ]]; then
-              migration_exists="$(psql -X -A -t "$DATABASE_URL" -c "select exists(select 1 from cms.schema_migrations where version = 1)")"
-              if [[ "$migration_exists" == "t" ]]; then
-                printf '%s\n' 'orbital-cms: schema is current'
-                exit 0
-              fi
+            if [[ "$schema_exists" != "t" ]]; then
+              psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/001_initial.sql}
             fi
-            psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/001_initial.sql}
+            migration_exists="$(psql -X -A -t "$DATABASE_URL" -c "select exists(select 1 from cms.schema_migrations where version = 2)")"
+            if [[ "$migration_exists" != "t" ]]; then
+              psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/002_historical_publication_dates.sql}
+            fi
+            printf '%s\n' 'orbital-cms: schema is current'
+          '';
+        };
+      importWeylPlanFor =
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        pkgs.writeShellApplication {
+          name = "orbital-cms-import-weyl-plan";
+          runtimeInputs = [
+            pkgs.bun
+            pkgs.pandoc
+          ];
+          text = ''
+            exec bun ${./tools/import-weyl-plan.mjs} "$@"
           '';
         };
     in
@@ -84,6 +99,7 @@
             trap 'pg_ctl -D "$CMS_PGDATA" -m immediate stop >/dev/null' EXIT
             createdb -h "$CMS_SOCKET" cms_test
             psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/migrations/001_initial.sql} >/dev/null
+            psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/migrations/002_historical_publication_dates.sql} >/dev/null
             psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/test/schema.sql} >/dev/null
             touch $out
           '';
@@ -107,6 +123,11 @@
           type = "app";
           program = "${migrationFor system}/bin/orbital-cms-migrate";
           meta.description = "Apply the Orbital CMS PostgreSQL schema";
+        };
+        import-weyl-plan = {
+          type = "app";
+          program = "${importWeylPlanFor system}/bin/orbital-cms-import-weyl-plan";
+          meta.description = "Import Weyl .plan articles into Orbital CMS";
         };
       });
 
