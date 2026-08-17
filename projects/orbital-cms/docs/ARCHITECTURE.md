@@ -33,10 +33,18 @@ from a request header, and leaves editorial routes unavailable when the token
 is absent. The `authorizeEditorial` seam is where internal OIDC verification
 will land; the store and contract already carry stable actor IDs.
 
+## Asset boundary
+
+Publication binaries live in object storage. Editorial clients upload a
+content-addressed object first, then register its immutable hash, size, media
+type, credit, and license through the CMS. Paper revisions reference the
+registered PDF by UUID; PostgreSQL attaches that asset to the revision while
+allocating the revision, so a published revision never acquires assets later.
+
 ## Not in the first slice
 
 - the Hydrogen editorial studio;
-- object-storage upload signing and artifact builders;
+- browser upload signing and artifact builders;
 - scheduled-publication worker and webhook/outbox delivery;
 - import of the existing hard-coded MDX papers;
 - DOI registration, Crossref, ORCID, and citation-resolution integrations.

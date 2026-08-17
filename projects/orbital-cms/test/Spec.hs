@@ -15,6 +15,7 @@ import Test.Hspec (Spec, describe, hspec, it, shouldBe, shouldContain)
 
 import Orbital.Cms.Application (AppEnv (..), application)
 import Orbital.Cms.Domain (
+    AssetInput (..),
     AuthorInput (..),
     Defect (..),
     DocumentKind (..),
@@ -24,6 +25,7 @@ import Orbital.Cms.Domain (
     WorkflowState (..),
     publicationDefects,
     transitionAllowed,
+    validateAssetInput,
  )
 import Orbital.Cms.Store (Store (..))
 
@@ -32,6 +34,14 @@ main = hspec spec
 
 spec :: Spec
 spec = do
+    describe "asset registration" $ do
+        it "accepts a content-addressed public PDF" $ do
+            validateAssetInput completeAsset `shouldBe` []
+
+        it "requires credit for externally delivered assets" $ do
+            fmap defectCode (validateAssetInput completeAsset{assetCredit = Nothing})
+                `shouldBe` ["missing_asset_credit"]
+
     describe "publication workflow" $ do
         it "keeps draft authoring permissive but names every publication defect" $ do
             fmap defectCode (publicationDefects Paper emptyPaper)
@@ -96,6 +106,16 @@ spec = do
                     (appWithToken (Just editorToken))
             simpleStatus response `shouldBe` status201
 
+        it "registers an authenticated immutable asset" $ do
+            response <-
+                perform
+                    methodPost
+                    "/v1/editorial/assets"
+                    [(hAuthorization, "Bearer " <> editorToken)]
+                    validAsset
+                    (appWithToken (Just editorToken))
+            simpleStatus response `shouldBe` status201
+
         it "lists drafts for an authenticated editorial studio" $ do
             response <-
                 perform
@@ -141,7 +161,8 @@ appWithToken token =
 fakeStore :: Store
 fakeStore =
     Store
-        { storeListEditorialDocuments = \_ -> pure (Right [sampleEditorialDocument])
+        { storeRegisterAsset = \_ _ -> pure (Right sampleAsset)
+        , storeListEditorialDocuments = \_ -> pure (Right [sampleEditorialDocument])
         , storeListPublications = \_ -> pure (Right [samplePublication])
         , storeGetPublication = \_ _ -> pure (Right samplePublication)
         , storeGetEditorialDocument = \_ -> pure (Right sampleEditorialDocument)
@@ -172,6 +193,31 @@ sampleEditorialDocument =
         , "current_revision" .= (2 :: Int)
         , "content_sha256" .= contentHash
         ]
+
+sampleAsset :: Value
+sampleAsset =
+    object
+        [ "id" .= documentId
+        , "kind" .= ("pdf" :: Text)
+        , "object_key" .= ("papers/native-inference/test.pdf" :: Text)
+        , "media_type" .= ("application/pdf" :: Text)
+        , "sha256" .= contentHash
+        ]
+
+completeAsset :: AssetInput
+completeAsset =
+    AssetInput
+        { assetKind = "pdf"
+        , assetObjectKey = Just "papers/native-inference/test.pdf"
+        , assetExternalUrl = Just "https://example.invalid/test.pdf"
+        , assetMediaType = "application/pdf"
+        , assetByteSize = Just 42
+        , assetSha256 = Just contentHash
+        , assetAltText = Nothing
+        , assetCaption = Nothing
+        , assetCredit = Just "Orbital Research"
+        , assetLicenseSpdx = Just "CC-BY-4.0"
+        }
 
 documentId :: UUID
 documentId = maybe (error "spec UUID is invalid") id (UUID.fromString "11111111-1111-4111-8111-111111111111")
@@ -212,6 +258,10 @@ completePaper =
 validCreate :: LBS.ByteString
 validCreate =
     "{\"channel\":\"orbital\",\"kind\":\"paper\",\"slug\":\"native-inference\",\"revision\":{\"title\":\"\",\"summary\":\"\",\"body\":\"\",\"source_format\":\"markdown\",\"language\":\"en\",\"authors\":[],\"tags\":[]}}"
+
+validAsset :: LBS.ByteString
+validAsset =
+    "{\"kind\":\"pdf\",\"object_key\":\"papers/native-inference/test.pdf\",\"external_url\":\"https://example.invalid/test.pdf\",\"media_type\":\"application/pdf\",\"byte_size\":42,\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"credit\":\"Orbital Research\",\"license_spdx\":\"CC-BY-4.0\"}"
 
 invalidCreate :: LBS.ByteString
 invalidCreate =

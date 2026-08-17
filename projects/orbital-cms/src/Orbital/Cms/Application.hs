@@ -43,11 +43,13 @@ import Network.Wai (
 import Text.Read (readMaybe)
 
 import Orbital.Cms.Domain (
+    AssetInput,
     Defect,
     DocumentKind,
     parseDocumentKind,
     parseWorkflowState,
     validateAppendRevision,
+    validateAssetInput,
     validateCreateDocument,
     validateTransitionDocument,
  )
@@ -72,6 +74,8 @@ route environment request
         getPublicationRoute environment request channel slug
     | requestMethod request == methodPost && pathInfo request == ["v1", "editorial", "documents"] =
         editorial environment request (createDocumentRoute environment request)
+    | requestMethod request == methodPost && pathInfo request == ["v1", "editorial", "assets"] =
+        editorial environment request (registerAssetRoute environment request)
     | requestMethod request == methodGet && pathInfo request == ["v1", "editorial", "documents"] =
         editorial environment request (listEditorialDocumentsRoute environment request)
     | requestMethod request == methodGet
@@ -87,6 +91,17 @@ route environment request
     , ["v1", "editorial", "documents", rawDocumentId, "transitions"] <- pathInfo request =
         editorial environment request (withDocumentId rawDocumentId (transitionDocumentRoute environment request))
     | otherwise = pure (Web.jsonErrorResponse status404 "not_found" "resource not found")
+
+registerAssetRoute :: AppEnv -> Request -> IO Response
+registerAssetRoute AppEnv{appStore = Store{storeRegisterAsset}, appEditorActor} request = do
+    decoded <- decodeBody request
+    case decoded of
+        Left response -> pure response
+        Right input -> case validateAssetInput input of
+            defects@(_ : _) -> pure (inputDefectsResponse defects)
+            [] -> do
+                result <- storeRegisterAsset appEditorActor (input :: AssetInput)
+                pure (either storeErrorResponse (jsonResponse status201 []) result)
 
 listEditorialDocumentsRoute :: AppEnv -> Request -> IO Response
 listEditorialDocumentsRoute AppEnv{appStore = Store{storeListEditorialDocuments}} request =

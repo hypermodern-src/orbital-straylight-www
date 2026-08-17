@@ -11,6 +11,7 @@ import Data.UUID (UUID)
 
 import Orbital.Cms.Domain (
     AppendRevision,
+    AssetInput,
     CreateDocument,
     Defect,
     DocumentKind,
@@ -43,7 +44,8 @@ data StoreError
     deriving stock (Eq, Show)
 
 data Store = Store
-    { storeListEditorialDocuments :: EditorialQuery -> IO (Either StoreError [Value])
+    { storeRegisterAsset :: Text -> AssetInput -> IO (Either StoreError Value)
+    , storeListEditorialDocuments :: EditorialQuery -> IO (Either StoreError [Value])
     , storeListPublications :: PublicationQuery -> IO (Either StoreError [Value])
     , storeGetPublication :: Text -> Text -> IO (Either StoreError Value)
     , storeGetEditorialDocument :: UUID -> IO (Either StoreError Value)

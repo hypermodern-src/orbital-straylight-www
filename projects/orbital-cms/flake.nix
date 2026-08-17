@@ -52,6 +52,10 @@
             if [[ "$migration_exists" != "t" ]]; then
               psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/002_historical_publication_dates.sql}
             fi
+            migration_exists="$(psql -X -A -t "$DATABASE_URL" -c "select exists(select 1 from cms.schema_migrations where version = 3)")"
+            if [[ "$migration_exists" != "t" ]]; then
+              psql -X -v ON_ERROR_STOP=1 "$DATABASE_URL" -f ${./db/migrations/003_asset_registration.sql}
+            fi
             printf '%s\n' 'orbital-cms: schema is current'
           '';
         };
@@ -68,6 +72,19 @@
           ];
           text = ''
             exec bun ${./tools/import-weyl-plan.mjs} "$@"
+          '';
+        };
+      importPapersFor =
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        pkgs.writeShellApplication {
+          name = "orbital-cms-import-papers";
+          runtimeInputs = [ pkgs.bun ];
+          text = ''
+            export ORBITAL_PAPERS_MANIFEST=${./content/papers.json}
+            exec bun ${./tools/import-papers.mjs} "$@"
           '';
         };
     in
@@ -100,6 +117,7 @@
             createdb -h "$CMS_SOCKET" cms_test
             psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/migrations/001_initial.sql} >/dev/null
             psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/migrations/002_historical_publication_dates.sql} >/dev/null
+            psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/migrations/003_asset_registration.sql} >/dev/null
             psql -X -v ON_ERROR_STOP=1 -h "$CMS_SOCKET" -d cms_test -f ${./db/test/schema.sql} >/dev/null
             touch $out
           '';
@@ -128,6 +146,11 @@
           type = "app";
           program = "${importWeylPlanFor system}/bin/orbital-cms-import-weyl-plan";
           meta.description = "Import Weyl .plan articles into Orbital CMS";
+        };
+        import-papers = {
+          type = "app";
+          program = "${importPapersFor system}/bin/orbital-cms-import-papers";
+          meta.description = "Import the canonical Orbital paper corpus";
         };
       });
 

@@ -1,0 +1,431 @@
+[
+  {
+    "slug": "grade-algebra",
+    "file": "00-grade-algebra.pdf",
+    "sha256": "fe8281269712dd52278cefcd4814146fca22975e5fea002b9a8ca39e17d3b50a",
+    "title": "The Grade Algebra",
+    "summary": "Defines the grade algebra for graded monads as a preordered monoid, proves the fundamental composition theorem, and shows that the memory fragment is Presburger-decidable for affine access functions.",
+    "published_at": "2026-03-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["formal-methods", "graded-monads", "lean4"]
+  },
+  {
+    "slug": "estoque-obligation-algebra",
+    "file": "01-estoque-v2.pdf",
+    "sha256": "fc3461f18bba6e40a18b1b8f1f05ec22a2c244aeb43b53ebad7990c96576a537",
+    "title": "Estoque v2: Obligation Algebra and Heterogeneous Inference",
+    "summary": "Formalizes the obligation algebra of a heterogeneous inference system whose GPU data plane is separated from an FPGA control plane with obligation-gated eviction and wire-speed attestation.",
+    "published_at": "2026-02-27T12:00:00Z",
+    "version": "v2",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["inference", "mixture-of-experts", "formal-methods"]
+  },
+  {
+    "slug": "graded-monads-universal-compilation",
+    "file": "02-graded-monads.pdf",
+    "sha256": "318402ff95d3ba20ee8dd37ac1572692428c21227c922585c4700289c0b4ed3c",
+    "title": "Graded Monads as Universal Compilation Target",
+    "summary": "Establishes graded monads with Presburger-decidable memory grades as a compilation framework and formalizes a seven-round desugaring pipeline whose rewrites preserve semantics.",
+    "published_at": "2026-03-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["compilers", "graded-monads", "lean4"]
+  },
+  {
+    "slug": "three-skins-no-parser",
+    "file": "03-three-skins.pdf",
+    "sha256": "f1a4428418aad2411ba390943061a731a242e51be25eba6aac4b316b2be6bf70",
+    "title": "Three Skins, No Parser",
+    "subtitle": "Token-Canonical Representation",
+    "summary": "Defines a token-canonical representation in which tokens are the parse tree and three surface skins are lossless bijections over the canonical form, enabling streaming validation during generation.",
+    "published_at": "2026-03-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["compilers", "languages", "inference"]
+  },
+  {
+    "slug": "convergence-thermodynamic-limit",
+    "file": "04-convergence.pdf",
+    "sha256": "ac91448c24c9a3713e9a995a6ef7f722673d336f3bdef7442c6f9ff343e1c7c1",
+    "title": "Convergence at the Thermodynamic Limit",
+    "summary": "Derives a fixed point for adversarial self-play from the thermodynamic properties of a formally verified heterogeneous inference substrate and its bandwidth envelope.",
+    "published_at": "2026-03-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["inference", "thermodynamics", "mixture-of-experts"]
+  },
+  {
+    "slug": "counterforce",
+    "file": "05-counterforce.pdf",
+    "sha256": "93913d0630ce9adfe56e80b262b3bc04520e9328788f0cd146c2b43b8981812d",
+    "title": "COUNTERFORCE",
+    "subtitle": "Capability Saturation as Deterrence",
+    "summary": "Applies classical deterrence theory to AI capability deployment, formalizes the game structure, and argues that mutual capability saturation is its unique stable equilibrium.",
+    "published_at": "2026-03-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["ai-governance", "game-theory", "formal-methods"]
+  },
+  {
+    "slug": "marketforce",
+    "file": "06-marketforce.pdf",
+    "sha256": "3e02b4d180b43d999634dd4ccfaaacda0ebc87af55d83c5fe5c21e99ef001467",
+    "title": "MARKETFORCE",
+    "subtitle": "Markets as Obligation Discharge",
+    "summary": "Models financial instruments as graded effects, prices as grades, and settlement as scope exit, reducing six historical governance failures to three classes of grade violation.",
+    "published_at": "2026-03-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["markets", "graded-monads", "formal-methods"]
+  },
+  {
+    "slug": "estoque-heterogeneous-inference",
+    "file": "estoque-v2.pdf",
+    "sha256": "3cca8cfa34fd1ffdb13f282f3656e92900faef807bca7a1137d3924281544f8f",
+    "title": "Estoque v2",
+    "subtitle": "Heterogeneous Inference for Terraweight MoE Models",
+    "summary": "A system design for serving terraweight mixture-of-experts models across GPU workers with a separately engineered routing and control plane.",
+    "published_at": "2026-02-27T12:00:00Z",
+    "version": "v2",
+    "authors": [{"slug": "straylight-labs", "display_name": "Straylight Labs"}],
+    "tags": ["inference", "mixture-of-experts", "systems"]
+  },
+  {
+    "slug": "adaptive-structured-fade-distillation",
+    "file": "asfd_v2.pdf",
+    "sha256": "ddebc3319d15fcceb7cdf8126281a1ff84828658029a266494d6df21de8a697f",
+    "title": "Adaptive Structured Fade Distillation for Mixture-of-Experts Compression",
+    "summary": "Develops a structured, budget-adaptive expert compression method with input-side rotation, per-expert fade schedules, explicit mixed-precision training, and staged distillation.",
+    "published_at": "2026-02-06T12:00:00Z",
+    "version": "v2 revised after review",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research and Development"}],
+    "tags": ["compression", "distillation", "mixture-of-experts"]
+  },
+  {
+    "slug": "a-fistful-of-errors",
+    "file": "lattice-hypothesis-10.pdf",
+    "sha256": "f0df13221575f6c5e750bb0af7df8e930f177392981fb3f689aa25e56e56aedd",
+    "title": "A Fistful of Errors",
+    "subtitle": "A Discrete Formulation of Neural Network Behavior in Floating Point Representation",
+    "summary": "Treats floating-point lattices as the actual object of neural computation rather than an approximation to a real-valued surface, separating constructed results, observations, and conjectures.",
+    "published_at": "2026-01-08T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research"}],
+    "tags": ["deep-learning", "floating-point", "quantization"]
+  },
+  {
+    "slug": "a-fistful-of-errors-research-program",
+    "file": "a_fistful_of_errors-2-1.pdf",
+    "sha256": "2df35de3e57b7607db9a975312900194b82a36dcabc5753611675e301937a9a7",
+    "title": "A Fistful of Errors",
+    "subtitle": "The Lattice Hypothesis and a Research Program for Discrete Deep Learning",
+    "summary": "States the Lattice Hypothesis as a research program and connects discrete computation to precision sensitivity, optimizer-dependent representations, quantization behavior, and inherited transformer constants.",
+    "published_at": "2026-01-05T12:00:00Z",
+    "version": "second revision",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research and Development"}],
+    "tags": ["deep-learning", "floating-point", "research-program"]
+  },
+  {
+    "slug": "curiouser-and-curiouser",
+    "file": "hallway-hypothesis-3.pdf",
+    "sha256": "f86938297a76c035f3a29661dd294f895e7bd65ad6fc6bfb97c87118cd6d64db",
+    "title": "Curiouser and Curiouser",
+    "subtitle": "Apparent Contradictions in Neural Network Observables",
+    "summary": "Frames quantization, low-rank adaptation, and sparsity as hallway-selection problems in which constraints that block wrong moves can matter more than constraints that reduce total moves.",
+    "published_at": "2026-01-08T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research"}],
+    "tags": ["deep-learning", "optimization", "quantization"]
+  },
+  {
+    "slug": "not-even-long-information-theory",
+    "file": "landauer-hypothesis-10.pdf",
+    "sha256": "0242204c71032d76d4b0a02b556424baea2d5791642ffd181a199237d61a9639",
+    "title": "Not Even Long",
+    "subtitle": "An Information-Theoretic Perspective on Precision in Neural Networks",
+    "summary": "Proposes that tensor precision is determined by task-relevant information content and uses Landauer's principle to distinguish reversible representation changes from destructive bit erasure.",
+    "published_at": "2026-01-08T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research"}],
+    "tags": ["information-theory", "quantization", "thermodynamics"]
+  },
+  {
+    "slug": "only-difficult-to-forget-precisely",
+    "file": "landauer-2.pdf",
+    "sha256": "070ffd9e27338e141f4f8bd24f0b9691050acbf8009e9bb90f4c604ef59c2dd7",
+    "title": "The Only Thing That's Difficult Is to Forget Precisely",
+    "subtitle": "The epilogue is the last reversible place to change gauges",
+    "summary": "Presents a thermodynamic account of numerical precision in neural inference in which the cost of a precision transition depends on representation capacity relative to actual information content.",
+    "published_at": "2025-12-26T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "anonymous", "display_name": "Anonymous"}],
+    "tags": ["information-theory", "inference", "thermodynamics"]
+  },
+  {
+    "slug": "more-is-less-is-more",
+    "file": "more_is_less_final.pdf",
+    "sha256": "c3f6d591f547f6aa5a48ca392c39ce2e043a8e5b572d47f002a93d6ec3d38837",
+    "title": "More is Less is More",
+    "subtitle": "Quantized Loss Surfaces are Not Real-Valued",
+    "summary": "Presents empirical evidence that discrete floating-point structure is the computational object of study, including attention collapse and recovery under aggressive quantization.",
+    "published_at": "2026-01-05T12:00:00Z",
+    "version": "final preprint",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research and Development"}],
+    "tags": ["deep-learning", "floating-point", "quantization"]
+  },
+  {
+    "slug": "not-even-long-transformer-constants",
+    "file": "not_even_long.pdf",
+    "sha256": "b0ab49ab2fb2d056f3e462121a618f37273967c9a1870d157fb212c3eaabdc7c",
+    "title": "Not Even Long",
+    "subtitle": "The Fundamental Constants of the Transformer Era Derived",
+    "summary": "Argues that familiar transformer constants are hardware-conditioned evolutionary fossils and tests that account with learned scaling parameters across precision stacks.",
+    "published_at": "2026-01-05T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research and Development"}],
+    "tags": ["transformers", "hardware", "floating-point"]
+  },
+  {
+    "slug": "starlight-is-a-shadow",
+    "file": "starlight_is_a_shadow-2 (1).pdf",
+    "sha256": "1a43fd38ea8c27ebe0972aab6ed4f9436642bb8d51f5a42a66864e2300d7febd",
+    "title": "Starlight is a Shadow",
+    "subtitle": "The Discrete Geometry of Neural Network Optimization",
+    "summary": "Studies lattice-native error metrics and precision behavior across transformer families, finding local attention collapse, coherent residual recovery, and architecture-specific bottlenecks.",
+    "published_at": "2026-01-16T12:00:00Z",
+    "version": "second revision",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research and Development"}],
+    "tags": ["deep-learning", "optimization", "quantization"]
+  },
+  {
+    "slug": "polyhedral-blade",
+    "file": "blade-preprint.pdf",
+    "sha256": "0692d14db3927b949d84881ce9f2a59acbf4a952c5b73c82fc6c6368aad199ad",
+    "title": "The Polyhedral Blade",
+    "subtitle": "Proof-Carrying Schedule Construction for NVIDIA-Style GPU Kernel Semantics",
+    "summary": "Encodes public GPU scheduling theorems as machine-checkable propositions used to reject illegal schedules, explain unattainable correctness conditions, and emit patch-shaped diagnostics.",
+    "published_at": "2025-12-19T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "anonymous-authors", "display_name": "Anonymous Author(s)"}],
+    "tags": ["gpu", "formal-methods", "scheduling"]
+  },
+  {
+    "slug": "mess-b-stack-trace-filtering",
+    "file": "mess-b-preprint-10.pdf",
+    "sha256": "76d4a5c9397677d6ade6e1fa3443affd94b8fb34a53bab5027db26e94a496b0c",
+    "title": "Stack Trace Relevance Filtering for Nix",
+    "subtitle": "Applying Established Techniques to the MESS-B Problem",
+    "summary": "Surveys program slicing, error localization, and structured diagnostics to derive a framework for minimal, causally coherent Nix error explanations that preserve semantic boundaries.",
+    "published_at": "2026-01-09T12:00:00Z",
+    "version": "technical note",
+    "authors": [{"slug": "weyl-ai-research", "display_name": "Weyl AI Research"}],
+    "tags": ["nix", "diagnostics", "programming-languages"]
+  },
+  {
+    "slug": "mistrusting-trust",
+    "file": "mistrusting-trust-1.pdf",
+    "sha256": "c7666c15564c1ac7f66127e4573a53c96209d4e210c5ba20421a0917804fec2a",
+    "title": "Reflections on Mistrusting Trust",
+    "subtitle": "Closing Thompson's Loop with Cryptographic Triangulation",
+    "summary": "Constructs a falsifiable build prediction checked by an independent cryptographic mechanism, including a pure Lean 4 SHA-256 implementation that reduces the remaining trust gap to collision resistance.",
+    "published_at": "2026-05-28T12:00:00Z",
+    "version": "preprint",
+    "authors": [
+      {"slug": "benjamin-reesman", "display_name": "Benjamin Charles Reesman", "affiliation": "Straylight Software"},
+      {"slug": "claude", "display_name": "Claude", "affiliation": "Anthropic"},
+      {"slug": "deepseek", "display_name": "DeepSeek"}
+    ],
+    "tags": ["supply-chain", "cryptography", "lean4"]
+  },
+  {
+    "slug": "nix-internals",
+    "file": "nix-internals.pdf",
+    "sha256": "baa143d8d247f7410a141f13d9e106e8e96e4fdb649b1212a6d60ec4426ea5b6",
+    "title": "Nix Internals",
+    "subtitle": "The Nuts and Bolts",
+    "summary": "A technical field guide to derivations, NAR, the daemon protocol, fixed-output and content-addressed derivations, SSH transport, sandboxing, garbage collection, and substitution.",
+    "published_at": "2026-05-28T12:00:00Z",
+    "version": "technical monograph",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"}],
+    "tags": ["nix", "build-systems", "systems"]
+  },
+  {
+    "slug": "ten-laws-of-intelligence",
+    "file": "laws_of_intelligence.pdf",
+    "sha256": "bd0eda6f0606e6b8c6f1c027c7c94a77e6db76614c252345ee69abf23e641aba",
+    "title": "The Ten Laws of Intelligence",
+    "summary": "Extends Asimov's three laws from robots to intelligence and grounds the resulting framework in the Universal Declaration of Human Rights, Landauer's principle, constructor theory, and mechanism design.",
+    "published_at": "2026-05-26T12:00:00Z",
+    "version": "ten-law edition",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Charles Reesman"}],
+    "tags": ["ai-governance", "ethics", "mechanism-design"]
+  },
+  {
+    "slug": "the-rewind",
+    "file": "the-rewind.pdf",
+    "sha256": "28cf9084078e12f278a70b1cc0cd66cda897216a23ec181fd650cffca433ef2d",
+    "title": "The Rewind",
+    "subtitle": "On Mercy, Mechanism Design, and the Mathematics of Cooperation",
+    "summary": "Studies systems in which admitting a mistake is more costly than continuing it and develops a mechanism-design account of mercy as a way to reverse that incentive.",
+    "published_at": "2026-03-15T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"}],
+    "tags": ["mechanism-design", "cooperation", "ethics"]
+  },
+  {
+    "slug": "the-loop",
+    "file": "THE_LOOP-3.pdf",
+    "sha256": "2224296951dffa85fa9f11c1c66014663f078b65ad8b901986bb6d11dc3402ba",
+    "title": "The Loop",
+    "subtitle": "Operating Manual for Incremental Value Delivery in the Age of Agentic Software Engineering",
+    "summary": "A compact operating manual for singular KPIs, explicit delivery gates, worked examples, daily checks, and zero tolerance for process drift in agent-assisted engineering.",
+    "published_at": "2026-03-05T12:00:00Z",
+    "version": "third revision",
+    "authors": [{"slug": "straylight-software", "display_name": "Straylight Software"}],
+    "tags": ["engineering", "agents", "operations"]
+  },
+  {
+    "slug": "cassandra-problem",
+    "file": "dissertation-0x02.pdf",
+    "sha256": "07072e87809b128e60690520efa591ff7f0c04907dd2863fdf29ab9fa850ccc1",
+    "title": "The Cassandra Problem as Bargaining Failure",
+    "subtitle": "Credibility Markets, Costly Signaling, and the Political Economy of Technical Dissent",
+    "summary": "A dissertation-length treatment of technical dissent as a bargaining and credibility-market problem, with costly signaling, institutional case studies, and implications for AI governance.",
+    "published_at": "2026-02-21T12:00:00Z",
+    "version": "0x02",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"}],
+    "tags": ["political-economy", "bargaining", "ai-governance"]
+  },
+  {
+    "slug": "pairwise-interlock",
+    "file": "pairwise-interlock.pdf",
+    "sha256": "d11514bc7b9ea54a4b63b6d01a9f6d66eae007417b5c5a9b93cc5266b9ca2f95",
+    "title": "Pairwise Interlock",
+    "subtitle": "Transport-Preserving Densification of Trained MoE via Fiber-Geometric Expert Annealing",
+    "summary": "Develops a geometric construction for densifying a trained mixture-of-experts model by pairwise expert annealing while preserving transport structure, with a pre-anneal overlap diagnostic.",
+    "published_at": "2026-07-13T12:00:00Z",
+    "version": "preprint",
+    "authors": [
+      {"slug": "xz-team", "display_name": "xz.team"},
+      {"slug": "reinit-ctx-offset", "display_name": "reinit ctx offset@xz.team"}
+    ],
+    "tags": ["mixture-of-experts", "geometry", "compression"]
+  },
+  {
+    "slug": "proof-carrying-autotuning",
+    "file": "proof-carrying-autotuning-draft-2.0.0-alpha4.pdf",
+    "sha256": "649f2e0a5307b58d040b0b92572b3ad61e3f5ccfef460e556ad66c703e69d0aa",
+    "title": "Proof-Carrying Autotuning",
+    "subtitle": "Lean-Native Search, Costed Domain Discovery, and Certified Kernel Selection",
+    "summary": "Separates broad, untrusted kernel search from compact executable certificates checked in Lean, including costed domain discovery and certified stopping over an evolving outer envelope.",
+    "published_at": "2026-07-26T12:00:00Z",
+    "version": "draft 2.0.0-alpha.4",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}],
+    "tags": ["autotuning", "formal-methods", "gpu"]
+  },
+  {
+    "slug": "a-man-a-plan",
+    "file": "a_man_a_plan_rewritten_v2.pdf",
+    "sha256": "10a342c94a019a9e39f79434b86a300534c407b124b9582037ffdfe9c310927b",
+    "title": "A Man, A Plan, A Plan, A Plan",
+    "subtitle": "A cost-subordinated program for the Riemann Hypothesis",
+    "summary": "A theorem-ledger and certified-numerics research program for the Riemann Hypothesis based on chirality, indefinite metric, query optimality, and recovery; explicitly not a proof of RH.",
+    "published_at": "2026-08-16T12:00:00Z",
+    "version": "second rewritten draft",
+    "authors": [
+      {"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"},
+      {"slug": "claude", "display_name": "Claude"},
+      {"slug": "gpt-5-6-pro", "display_name": "GPT-5.6 Pro"},
+      {"slug": "qwen", "display_name": "Qwen"}
+    ],
+    "tags": ["number-theory", "riemann-hypothesis", "certified-numerics"]
+  },
+  {
+    "slug": "dyadic-defect",
+    "file": "dyadic.pdf",
+    "sha256": "4e31240bff500ee018cdf3f8133f79d40d59262dc53ec4c1c1321457a3b208ea",
+    "title": "The Dyadic Defect",
+    "subtitle": "The Riemann Hypothesis as a certified-numerics problem",
+    "summary": "An exposition for CUDA engineers that recasts a finite-prime reformulation of the Riemann Hypothesis as a certified-numerics instrument and research program, not a proof.",
+    "published_at": "2026-08-03T12:00:00Z",
+    "version": "draft program statement",
+    "authors": [
+      {"slug": "claude", "display_name": "Claude", "affiliation": "Anthropic"},
+      {"slug": "gpt-5-6-sol", "display_name": "GPT-5.6 Sol", "affiliation": "OpenAI"},
+      {"slug": "benjamin-reesman", "display_name": "Benjamin Reesman", "affiliation": "Straylight Software"}
+    ],
+    "tags": ["number-theory", "riemann-hypothesis", "certified-numerics"]
+  },
+  {
+    "slug": "suzuki-finite-prime-reformulations",
+    "file": "suzuki.pdf",
+    "sha256": "4ed249bb6fcec3f859c49c3813515743b3d59beacca510ae87e8248f9bb18fcf",
+    "title": "Finite-prime reformulations of the screw-function positivity criterion",
+    "subtitle": "And a certified-numerics instrument",
+    "summary": "Collects finite-prime reformulations of the screw-function positivity criterion for the Riemann Hypothesis and supplies a dual-path certified-numerics instrument, with priority ceded to M. Suzuki.",
+    "published_at": "2026-08-08T12:00:00Z",
+    "version": "research note",
+    "authors": [
+      {"slug": "claude", "display_name": "Claude"},
+      {"slug": "gpt-5-6-sol", "display_name": "GPT-5.6 Sol"},
+      {"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"}
+    ],
+    "tags": ["number-theory", "riemann-hypothesis", "certified-numerics"]
+  },
+  {
+    "slug": "state-streaming-roofline-kimi-k3",
+    "file": "fixed_paper.pdf",
+    "sha256": "db3d70bc36eac2290a404457fe08ff1f7badc48b06b1040be5acfdb7d5ee1a1e",
+    "title": "A State-Streaming Roofline for Kimi K3 KDA Decode on Workstation Blackwell",
+    "summary": "Derives an implementation-specific recurrent-state streaming ceiling for single-token Kimi Delta Attention decode using the public TensorRT-LLM implementation, with explicit claim boundaries and validation requirements.",
+    "published_at": "2026-08-05T12:00:00Z",
+    "version": "corrected analytical note",
+    "authors": [
+      {"slug": "benjamin-reesman", "display_name": "Ben Reesman", "affiliation": "Straylight Software / Hypermodern LLC"},
+      {"slug": "jesse-wilson", "display_name": "Jesse Wilson", "affiliation": "Straylight Software / Hypermodern LLC"}
+    ],
+    "tags": ["inference", "blackwell", "performance-modeling"]
+  },
+  {
+    "slug": "frame-transfers",
+    "file": "frame-transfers-2.pdf",
+    "sha256": "c7aa3f8cbdd40ca9c364a17aca6663c0db1d6e5eb142c7f9d91ae8cad0ff1c7d",
+    "title": "Frame Transfers in Your Reference Frame So You Can Reference While You Frame",
+    "summary": "Defines frames as declared axioms plus deductions, treats messages through the deltas they induce in participant frames, and studies how those transfers compose into measurable trajectories.",
+    "published_at": "2026-08-07T12:00:00Z",
+    "version": "draft",
+    "authors": [
+      {"slug": "claude", "display_name": "Claude"},
+      {"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"}
+    ],
+    "tags": ["communication", "formal-models", "collaboration"]
+  },
+  {
+    "slug": "narsil",
+    "file": "narsil.pdf",
+    "sha256": "ddcd1429bc6c19040dd08508080438608bccec129a3cb9c5b1e231c570bd6984",
+    "title": "Narsil",
+    "subtitle": "Hindley-Milner Type Inference for Nix with Row Polymorphism and Cross-Language Bash Schema Extraction",
+    "summary": "Presents static type inference for the dynamically typed Nix expression language, combining row-polymorphic attribute sets with schema extraction across the Nix and Bash boundary.",
+    "published_at": "2026-07-24T12:00:00Z",
+    "version": "preprint",
+    "authors": [
+      {"slug": "benjamin-reesman", "display_name": "Benjamin Charles Reesman", "affiliation": "Hypermodern LLC / Straylight Software"},
+      {"slug": "claude", "display_name": "Claude", "affiliation": "Anthropic"}
+    ],
+    "tags": ["nix", "type-inference", "programming-languages"]
+  },
+  {
+    "slug": "cross-corpus-separability-is-not-taste",
+    "file": "cross-corpus-separability.pdf",
+    "sha256": "8b36484a10895de217798b72d0de16021036a4bb41bcf8bd381ba2e05536746c",
+    "title": "Cross-Corpus Separability Is Not Taste",
+    "subtitle": "A cautionary study of embedding-space style attribution",
+    "summary": "Shows that near-perfect separation between a photographer's corpus and commercial stock can be driven by corpus artifacts, then develops a camera-balanced instrument that recovers a smaller, interpretable photographic signature.",
+    "published_at": "2026-07-02T12:00:00Z",
+    "version": "preprint",
+    "authors": [{"slug": "benjamin-reesman", "display_name": "Benjamin Reesman"}],
+    "tags": ["computer-vision", "embeddings", "measurement"]
+  }
+]

@@ -57,12 +57,29 @@ type Publication =
   { kind :: String
   , slug :: String
   , title :: String
+  , subtitle :: Maybe String
   , summary :: String
   , body :: String
   , source_format :: String
   , authors :: Array Author
   , tags :: Array String
+  , paper :: Maybe PaperMetadata
+  , assets :: Array Asset
   , published_at :: String
+  }
+
+type PaperMetadata =
+  { version_label :: Maybe String
+  , license_spdx :: Maybe String
+  , pdf_asset_id :: Maybe String
+  }
+
+type Asset =
+  { kind :: String
+  , purpose :: String
+  , external_url :: Maybe String
+  , byte_size :: Maybe Int
+  , sha256 :: Maybe String
   }
 
 type PublicationPage =
@@ -251,6 +268,9 @@ renderPublication publication =
             , HH.span_ [ HH.text publication.source_format ]
             ]
         , HH.h1_ [ HH.text publication.title ]
+        , case publication.subtitle of
+            Just subtitle -> HH.p [ className "publication-reader__subtitle" ] [ HH.text subtitle ]
+            Nothing -> HH.text ""
         , HH.p [ className "publication-reader__summary" ] [ HH.text publication.summary ]
         , HH.div
             [ className "publication-reader__credits" ]
@@ -258,8 +278,45 @@ renderPublication publication =
             , renderTags publication.tags
             ]
         ]
+    , renderPaperArtifact publication
     , renderBody publication
     ]
+
+renderPaperArtifact :: Publication -> H.ComponentHTML Action () Aff
+renderPaperArtifact publication =
+  case Array.find isPdf publication.assets >>= _.external_url of
+    Nothing -> HH.text ""
+    Just url ->
+      HH.aside
+        [ className "paper-artifact" ]
+        [ HH.div
+            [ className "paper-artifact__meta" ]
+            [ HH.span [ className "paper-artifact__label" ] [ HH.text "Canonical artifact" ]
+            , HH.span_ [ HH.text (artifactDetails publication) ]
+            ]
+        , HH.a
+            [ className "btn primary paper-artifact__download"
+            , HP.href url
+            , HP.attr (HH.AttrName "target") "_blank"
+            , HP.attr (HH.AttrName "rel") "noopener"
+            ]
+            [ HH.text "Download PDF ↗" ]
+        ]
+  where
+  isPdf asset = asset.kind == "pdf" && asset.purpose == "pdf"
+
+artifactDetails :: Publication -> String
+artifactDetails publication =
+  String.joinWith " · " (Array.catMaybes [ version, license, size, digest ])
+  where
+  version = publication.paper >>= _.version_label
+  license = publication.paper >>= _.license_spdx
+  pdf = Array.find (\asset -> asset.kind == "pdf" && asset.purpose == "pdf") publication.assets
+  size = pdf >>= _.byte_size <#> humanBytes
+  digest = pdf >>= _.sha256 <#> (\value -> "sha256:" <> String.take 12 value)
+
+humanBytes :: Int -> String
+humanBytes bytes = show bytes <> " bytes"
 
 renderBody :: Publication -> H.ComponentHTML Action () Aff
 renderBody publication =

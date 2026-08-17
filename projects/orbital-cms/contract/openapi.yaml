@@ -85,6 +85,36 @@ paths:
           description: The caller already has this exact revision.
         "404":
           $ref: "#/components/responses/NotFound"
+  /v1/editorial/assets:
+    post:
+      operationId: registerAsset
+      description: >-
+        Register immutable metadata for an object that has already been uploaded
+        to the publication object store. Repeating an identical object key is
+        idempotent; conflicting content is rejected.
+      security:
+        - bootstrapBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetInput"
+      responses:
+        "201":
+          description: Registered immutable asset metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisteredAsset"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "503":
+          $ref: "#/components/responses/EditorialDisabled"
   /v1/editorial/documents:
     get:
       operationId: listEditorialDocuments
@@ -428,6 +458,47 @@ components:
           type: string
         license_spdx:
           type: string
+    AssetInput:
+      type: object
+      additionalProperties: false
+      required: [kind, media_type]
+      properties:
+        kind:
+          type: string
+          enum: [image, video, audio, pdf, source, dataset, archive]
+        object_key:
+          type: string
+        external_url:
+          type: string
+          format: uri
+        media_type:
+          type: string
+        byte_size:
+          type: integer
+          minimum: 0
+        sha256:
+          type: string
+          pattern: "^[0-9a-f]{64}$"
+        alt_text:
+          type: string
+        caption:
+          type: string
+        credit:
+          type: string
+        license_spdx:
+          type: string
+    RegisteredAsset:
+      allOf:
+        - $ref: "#/components/schemas/AssetInput"
+        - type: object
+          required: [id, created_at]
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
     RevisionInput:
       type: object
       additionalProperties: false

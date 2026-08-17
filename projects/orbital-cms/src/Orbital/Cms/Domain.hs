@@ -1,5 +1,6 @@
 module Orbital.Cms.Domain (
     AppendRevision (..),
+    AssetInput (..),
     AuthorInput (..),
     CreateDocument (..),
     Defect (..),
@@ -16,6 +17,7 @@ module Orbital.Cms.Domain (
     revisionValue,
     transitionAllowed,
     validateAppendRevision,
+    validateAssetInput,
     validateCreateDocument,
     validateTransitionDocument,
     workflowStateText,
@@ -55,6 +57,20 @@ data AuthorInput = AuthorInput
     , authorPosition :: Int
     , authorRole :: Text
     , authorAffiliation :: Maybe Text
+    }
+    deriving stock (Eq, Show)
+
+data AssetInput = AssetInput
+    { assetKind :: Text
+    , assetObjectKey :: Maybe Text
+    , assetExternalUrl :: Maybe Text
+    , assetMediaType :: Text
+    , assetByteSize :: Maybe Integer
+    , assetSha256 :: Maybe Text
+    , assetAltText :: Maybe Text
+    , assetCaption :: Maybe Text
+    , assetCredit :: Maybe Text
+    , assetLicenseSpdx :: Maybe Text
     }
     deriving stock (Eq, Show)
 
@@ -154,6 +170,35 @@ instance ToJSON AuthorInput where
             , "position" .= authorPosition
             , "role" .= authorRole
             , "affiliation" .= authorAffiliation
+            ]
+
+instance FromJSON AssetInput where
+    parseJSON = withObject "AssetInput" $ \value ->
+        AssetInput
+            <$> value .: "kind"
+            <*> value .:? "object_key"
+            <*> value .:? "external_url"
+            <*> value .: "media_type"
+            <*> value .:? "byte_size"
+            <*> value .:? "sha256"
+            <*> value .:? "alt_text"
+            <*> value .:? "caption"
+            <*> value .:? "credit"
+            <*> value .:? "license_spdx"
+
+instance ToJSON AssetInput where
+    toJSON AssetInput{..} =
+        object
+            [ "kind" .= assetKind
+            , "object_key" .= assetObjectKey
+            , "external_url" .= assetExternalUrl
+            , "media_type" .= assetMediaType
+            , "byte_size" .= assetByteSize
+            , "sha256" .= assetSha256
+            , "alt_text" .= assetAltText
+            , "caption" .= assetCaption
+            , "credit" .= assetCredit
+            , "license_spdx" .= assetLicenseSpdx
             ]
 
 instance FromJSON PaperInput where
@@ -264,6 +309,50 @@ parseWorkflowState _ = Nothing
 
 revisionValue :: RevisionInput -> Value
 revisionValue = toJSON
+
+validateAssetInput :: AssetInput -> [Defect]
+validateAssetInput AssetInput{..} =
+    concat
+        [ [Defect "invalid_asset_kind" "asset kind is not supported" | assetKind `notElem` assetKinds]
+        , [Defect "missing_asset_location" "object_key or external_url is required" | noLocation]
+        , maybe [] (bounded "object_key" 1000) assetObjectKey
+        , maybe [] externalUrlDefects assetExternalUrl
+        , mediaTypeDefects assetMediaType
+        , [Defect "invalid_byte_size" "byte_size must be non-negative" | maybe False (< 0) assetByteSize]
+        , maybe [] sha256Defects assetSha256
+        , maybe [] (bounded "alt_text" 1000) assetAltText
+        , maybe [] (bounded "caption" 4000) assetCaption
+        , maybe [] (bounded "credit" 1000) assetCredit
+        , [Defect "missing_asset_credit" "external assets require credit" | externalWithoutCredit]
+        ]
+  where
+    assetKinds = ["image", "video", "audio", "pdf", "source", "dataset", "archive"]
+    noLocation = maybe True (Text.null . Text.strip) assetObjectKey && maybe True (Text.null . Text.strip) assetExternalUrl
+    externalWithoutCredit =
+        maybe False (not . Text.null . Text.strip) assetExternalUrl
+            && maybe True (Text.null . Text.strip) assetCredit
+
+externalUrlDefects :: Text -> [Defect]
+externalUrlDefects value =
+    [Defect "invalid_external_url" "external_url must use https" | not ("https://" `Text.isPrefixOf` value)]
+
+mediaTypeDefects :: Text -> [Defect]
+mediaTypeDefects value =
+    [ Defect "invalid_media_type" "media_type must be a type/subtype value"
+    | Text.null major || Text.null minor || Text.any (== ' ') value
+    ]
+  where
+    (major, suffix) = Text.breakOn "/" value
+    minor = Text.drop 1 suffix
+
+sha256Defects :: Text -> [Defect]
+sha256Defects value =
+    [ Defect "invalid_sha256" "sha256 must contain 64 lower-case hexadecimal characters"
+    | Text.length value /= 64 || not (Text.all lowerHex value)
+    ]
+  where
+    lowerHex character =
+        (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f')
 
 validateCreateDocument :: CreateDocument -> [Defect]
 validateCreateDocument CreateDocument{..} =

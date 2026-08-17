@@ -26,6 +26,7 @@ extra-doc-files:
   contract/openapi.yaml
   db/migrations/001_initial.sql
   db/migrations/002_historical_publication_dates.sql
+  db/migrations/003_asset_registration.sql
 
 common house
   default-language: GHC2021

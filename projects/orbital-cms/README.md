@@ -41,6 +41,17 @@ ORBITAL_CMS_EDITOR_TOKEN=... nix run .#import-weyl-plan -- --publish
 Published imports retain their original publication timestamp and a link to the
 source article. Re-running the importer skips slugs that are already published.
 
+Paper import registers content-addressed PDF metadata through the editorial API
+after uploading objects to the public `orbital-publications` bucket. The CMS
+attaches the registered PDF to the immutable paper revision in the same
+transaction that creates that revision.
+
+```console
+nix run .#import-papers -- --source-dir /path/to/canonical-pdfs
+SUPABASE_SERVICE_ROLE_KEY=... ORBITAL_CMS_EDITOR_TOKEN=... \
+  nix run .#import-papers -- --source-dir /path/to/canonical-pdfs --publish
+```
+
 ```console
 nix flake check
 ```

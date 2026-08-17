@@ -2,8 +2,44 @@ begin;
 
 do $$
 declare
+  v_asset jsonb;
+  v_repeat jsonb;
+begin
+  v_asset := cms.register_asset('schema-test', jsonb_build_object(
+    'kind', 'pdf',
+    'object_key', 'papers/native-inference/test.pdf',
+    'external_url', 'https://example.invalid/test.pdf',
+    'media_type', 'application/pdf',
+    'byte_size', 42,
+    'sha256', repeat('a', 64),
+    'credit', 'Orbital Research',
+    'license_spdx', 'CC-BY-4.0'
+  ));
+  if v_asset->>'id' is null then
+    raise exception 'asset registration did not return an id';
+  end if;
+  v_repeat := cms.register_asset('schema-test', jsonb_build_object(
+    'kind', 'pdf',
+    'object_key', 'papers/native-inference/test.pdf',
+    'external_url', 'https://example.invalid/test.pdf',
+    'media_type', 'application/pdf',
+    'byte_size', 42,
+    'sha256', repeat('a', 64),
+    'credit', 'Orbital Research',
+    'license_spdx', 'CC-BY-4.0'
+  ));
+  if v_repeat->>'id' <> v_asset->>'id' then
+    raise exception 'asset registration is not idempotent';
+  end if;
+end;
+$$;
+
+do $$
+declare
+  v_asset jsonb;
   v_draft jsonb;
   v_published jsonb;
+  v_revision_payload jsonb;
   v_id uuid;
   v_defects integer;
   v_failed boolean := false;
@@ -39,10 +75,17 @@ begin
     raise exception 'incomplete publication was not rejected';
   end if;
 
-  perform cms.append_revision(
-    v_id,
-    1,
-    'schema-test',
+  v_asset := cms.register_asset('schema-test', jsonb_build_object(
+    'kind', 'pdf',
+    'object_key', 'papers/native-inference/test.pdf',
+    'external_url', 'https://example.invalid/test.pdf',
+    'media_type', 'application/pdf',
+    'byte_size', 42,
+    'sha256', repeat('a', 64),
+    'credit', 'Orbital Research',
+    'license_spdx', 'CC-BY-4.0'
+  ));
+  v_revision_payload := jsonb_set(
     '{
       "title": "Native inference",
       "summary": "A fast systems paper.",
@@ -62,8 +105,26 @@ begin
         "license_spdx": "CC-BY-4.0",
         "references_csl": []
       }
-    }'::jsonb
+    }'::jsonb,
+    '{paper,pdf_asset_id}',
+    to_jsonb(v_asset->>'id')
   );
+
+  perform cms.append_revision(v_id, 1, 'schema-test', v_revision_payload);
+
+  if not exists (
+    select 1 from cms.revision_assets
+    where document_id = v_id
+      and revision = 2
+      and asset_id = (v_asset->>'id')::uuid
+      and purpose = 'pdf'
+  ) then
+    raise exception 'paper PDF was not attached to its immutable revision';
+  end if;
+
+  if jsonb_array_length(cms.document_json(v_id, 2, false)->'assets') <> 1 then
+    raise exception 'paper PDF is absent from public document JSON';
+  end if;
 
   if exists (select 1 from cms.publication_defects(v_id, 2)) then
     raise exception 'complete paper still has publication defects';

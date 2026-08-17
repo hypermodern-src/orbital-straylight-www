@@ -15,7 +15,7 @@ module Orbital.Cms.Store.Postgres (
 
 import Control.Exception (IOException, catch)
 import Control.Monad (void)
-import Data.Aeson (Value, eitherDecodeStrict', encode)
+import Data.Aeson (Value, eitherDecodeStrict', encode, toJSON)
 import Data.ByteString (ByteString)
 import Data.ByteString.Lazy qualified as LBS
 import Data.Pool (Pool, defaultPoolConfig, destroyAllResources, newPool, setNumStripes, withResource)
@@ -37,6 +37,7 @@ import Database.PostgreSQL.Simple (
 
 import Orbital.Cms.Domain (
     AppendRevision (..),
+    AssetInput,
     CreateDocument (..),
     Defect (..),
     DocumentKind,
@@ -70,7 +71,8 @@ pingPostgresStore database = runDatabase database $ \connection -> do
 postgresStore :: PostgresStore -> Store
 postgresStore database =
     Store
-        { storeListEditorialDocuments = listEditorialDocuments database
+        { storeRegisterAsset = registerAsset database
+        , storeListEditorialDocuments = listEditorialDocuments database
         , storeListPublications = listPublications database
         , storeGetPublication = getPublication database
         , storeGetEditorialDocument = getEditorialDocument database
@@ -79,6 +81,14 @@ postgresStore database =
         , storeAppendRevision = appendDocumentRevision database
         , storeTransitionDocument = transitionDocument database
         }
+
+registerAsset :: PostgresStore -> Text -> AssetInput -> IO (Either StoreError Value)
+registerAsset database actor asset =
+    oneJson database $ \connection ->
+        query
+            connection
+            "select cms.register_asset(?, ?::jsonb)::text"
+            (actor, jsonText (toJSON asset))
 
 listEditorialDocuments :: PostgresStore -> EditorialQuery -> IO (Either StoreError [Value])
 listEditorialDocuments database EditorialQuery{..} =
@@ -237,6 +247,7 @@ classifySqlError SqlError{sqlState, sqlErrorMsg, sqlErrorDetail}
 
 classifyRaised :: Text -> ByteString -> StoreError
 classifyRaised "revision_conflict" _ = StoreConflict "revision_conflict"
+classifyRaised "asset_conflict" _ = StoreConflict "asset_conflict"
 classifyRaised "publication_incomplete" detail =
     StoreInvalid "publication_incomplete" (decodeDetail detail)
 classifyRaised code _ = StoreInvalid code Nothing
