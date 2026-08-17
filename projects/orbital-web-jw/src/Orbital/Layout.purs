@@ -42,6 +42,8 @@ navigation route =
         , navLink route Infer "Infer"
         , navLink route Pricing "Pricing"
         , navLink route Verification "Verification"
+        , navLink route Journal "Journal"
+        , navLink route Papers "Papers"
         , navLink route About "About"
         ]
     ]
@@ -68,6 +70,8 @@ footer route =
             ]
         , HH.span_
             ( footerLink "about.html" "About"
+                <> separator
+                <> footerLink "journal.html" "Journal"
                 <> separator
                 <> externalLink "https://github.com/sensenet-ai" "GitHub"
                 <> separator

@@ -99,6 +99,18 @@ purescript_app(
     packages = PACKAGES,
 )
 
+# The CMS-facing browser surface stays in PureScript. It shares the route and
+# document types with the SSG, then compiles to one minified Halogen bundle.
+purescript_app(
+    name = "publications_client",
+    srcs = glob(["src/**/*.purs"]),
+    main = "Orbital.Publications.Client",
+    deps = ["hydrogen//:lib"],
+    packages = PACKAGES,
+    browser_bundle = True,
+    bundle_name = "publications.js",
+)
+
 orbital_static_site(
     name = "site",
     generator = ":generator",
@@ -110,9 +122,13 @@ orbital_static_site(
         "infer.html",
         "pricing.html",
         "verification.html",
+        "journal.html",
+        "papers.html",
+        "publication.html",
         "about.html",
         "thanks.html",
     ],
+    client_bundles = [":publications_client"],
     assets = glob([
         "favicon.svg",
         "fonts.css",

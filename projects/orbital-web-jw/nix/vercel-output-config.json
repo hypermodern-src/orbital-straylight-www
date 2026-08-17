@@ -1,0 +1,16 @@
+{
+  "version": 3,
+  "routes": [
+    {
+      "src": "/api/publications",
+      "methods": ["GET"],
+      "dest": "https://orbital-cms.fly.dev/v1/publications"
+    },
+    {
+      "src": "/api/publications/(.*)",
+      "methods": ["GET"],
+      "dest": "https://orbital-cms.fly.dev/v1/publications/$1"
+    },
+    { "handle": "filesystem" }
+  ]
+}

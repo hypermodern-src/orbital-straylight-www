@@ -1,7 +1,7 @@
 # Orbital web
 
-The marketing site for Orbital CACHE, BUILD, INFER, pricing, verification, and
-the early-access waitlist.
+The marketing and publishing site for Orbital CACHE, BUILD, INFER, pricing,
+verification, research, the journal, and the early-access waitlist.
 
 ## Stack
 
@@ -24,9 +24,14 @@ nix flake check --accept-flake-config
 nix develop --accept-flake-config -c buck2 build //:site --show-output
 ```
 
-The Buck2 target emits a complete static site with eight routes. Page markup
+The Buck2 target emits a complete static site with eleven routes. Page markup
 lives under `src/Orbital/Pages`, route metadata under `src/Orbital/Route.purs`,
 and page-specific styles under `styles/pages`.
+
+Journal and paper indexes plus the publication reader are a PureScript/Halogen
+browser bundle. They read the `orbital` channel from `orbital-cms` through the
+same-origin, GET-only `/api/publications` Vercel route; editorial endpoints are
+not exposed through the site.
 
 ## Preview
 

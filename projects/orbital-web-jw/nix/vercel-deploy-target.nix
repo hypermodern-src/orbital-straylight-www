@@ -6,7 +6,7 @@
   pack = ''
     mkdir -p "$out/.vercel/output/static"
     cp -rL --no-preserve=mode site/. "$out/.vercel/output/static/"
-    printf '{ "version": 3 }\n' > "$out/.vercel/output/config.json"
+    cp ${./vercel-output-config.json} "$out/.vercel/output/config.json"
   '';
 
   push =

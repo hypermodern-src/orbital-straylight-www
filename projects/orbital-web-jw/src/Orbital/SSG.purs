@@ -19,6 +19,7 @@ import Orbital.Pages.Cache as Cache
 import Orbital.Pages.Index as Index
 import Orbital.Pages.Infer as Infer
 import Orbital.Pages.Pricing as Pricing
+import Orbital.Pages.Publications as Publications
 import Orbital.Pages.Thanks as Thanks
 import Orbital.Pages.Verification as Verification
 import Orbital.Route (Route(..), allRoutes, canonicalUrl, fileName, pageStylesheet)
@@ -29,7 +30,7 @@ main = do
   output <- outputDirectory
   mkdirp output
   traverse_ (writeRoute output) allRoutes
-  log "orbital-ssg: rendered 8 routes"
+  log "orbital-ssg: rendered 11 routes"
 
 writeRoute :: String -> Route -> Effect Unit
 writeRoute output route = do
@@ -76,6 +77,9 @@ content Build = Build.content
 content Infer = Infer.content
 content Pricing = Pricing.content
 content Verification = Verification.content
+content Journal = Publications.journalContent
+content Papers = Publications.papersContent
+content Publication = Publications.publicationContent
 content About = About.content
 content Thanks = Thanks.content
 
@@ -85,6 +89,7 @@ routeScripts route =
     <> waitlistScript route
     <> productScript route
     <> thanksScript route
+    <> publicationsScript route
     <> [ "halogen-orbital/orbital-theme.js" ]
 
 waitlistScript :: Route -> Array String
@@ -103,6 +108,12 @@ productScript _ = []
 thanksScript :: Route -> Array String
 thanksScript Thanks = [ "scripts/thanks.js" ]
 thanksScript _ = []
+
+publicationsScript :: Route -> Array String
+publicationsScript Journal = [ "publications.js" ]
+publicationsScript Papers = [ "publications.js" ]
+publicationsScript Publication = [ "publications.js" ]
+publicationsScript _ = []
 
 preloadFonts :: Array HH.PlainHTML
 preloadFonts =

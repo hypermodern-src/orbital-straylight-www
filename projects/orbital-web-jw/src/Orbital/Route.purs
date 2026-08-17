@@ -18,13 +18,28 @@ data Route
   | Infer
   | Pricing
   | Verification
+  | Journal
+  | Papers
+  | Publication
   | About
   | Thanks
 
 derive instance eqRoute :: Eq Route
 
 allRoutes :: Array Route
-allRoutes = [ Overview, Cache, Build, Infer, Pricing, Verification, About, Thanks ]
+allRoutes =
+  [ Overview
+  , Cache
+  , Build
+  , Infer
+  , Pricing
+  , Verification
+  , Journal
+  , Papers
+  , Publication
+  , About
+  , Thanks
+  ]
 
 fileName :: Route -> String
 fileName Overview = "index.html"
@@ -33,6 +48,9 @@ fileName Build = "build.html"
 fileName Infer = "infer.html"
 fileName Pricing = "pricing.html"
 fileName Verification = "verification.html"
+fileName Journal = "journal.html"
+fileName Papers = "papers.html"
+fileName Publication = "publication.html"
 fileName About = "about.html"
 fileName Thanks = "thanks.html"
 
@@ -43,6 +61,9 @@ pageStylesheet Build = "styles/pages/build.css"
 pageStylesheet Infer = "styles/pages/infer.css"
 pageStylesheet Pricing = "styles/pages/pricing.css"
 pageStylesheet Verification = "styles/pages/verification.css"
+pageStylesheet Journal = "styles/pages/publications.css"
+pageStylesheet Papers = "styles/pages/publications.css"
+pageStylesheet Publication = "styles/pages/publications.css"
 pageStylesheet About = "styles/pages/about.css"
 pageStylesheet Thanks = "styles/pages/thanks.css"
 
@@ -58,6 +79,9 @@ instance isRouteRoute :: IsRoute Route where
   parseRoute "/infer.html" = Infer
   parseRoute "/pricing.html" = Pricing
   parseRoute "/verification.html" = Verification
+  parseRoute "/journal.html" = Journal
+  parseRoute "/papers.html" = Papers
+  parseRoute "/publication.html" = Publication
   parseRoute "/about.html" = About
   parseRoute "/thanks.html" = Thanks
   parseRoute _ = Overview
@@ -75,6 +99,9 @@ instance routeMetadataRoute :: RouteMetadata Route where
   routeTitle Infer = "INFER · Native inference for language and diffusion models · Orbital"
   routeTitle Pricing = "Pricing · One subscription, every product · Orbital"
   routeTitle Verification = "Verification · For regulated and safety-critical teams · Orbital"
+  routeTitle Journal = "Journal · Orbital"
+  routeTitle Papers = "Research papers · Orbital"
+  routeTitle Publication = "Publication · Orbital"
   routeTitle About = "About · Orbital"
   routeTitle Thanks = "You are on the list · Orbital"
 
@@ -84,6 +111,9 @@ instance routeMetadataRoute :: RouteMetadata Route where
   routeDescription Infer = "ORBITAL INFER is a native inference engine for language and diffusion models, with no Python runtime and a purpose-built binary protocol."
   routeDescription Pricing = "One Orbital subscription covers every product. Tiers gate throughput, retention, and enterprise controls, never which products you may use. Seats free, SSO included."
   routeDescription Verification = "Orbital's verification path for regulated and safety-critical software: machine-checked guarantees for teams whose specifications already exist. Founder-led. Talk to us."
+  routeDescription Journal = "Engineering dispatches, product decisions, and field notes from the people building Orbital."
+  routeDescription Papers = "Technical papers, specifications, and results behind Orbital's verified infrastructure."
+  routeDescription Publication = "A publication from the Orbital journal and research archive."
   routeDescription About = "Orbital builds verified developer infrastructure in San Juan, Puerto Rico. Meet the team and see CACHE, BUILD, INFER, and the Orbital Confirm runner."
   routeDescription Thanks = "Your place on the Orbital early-access list is confirmed."
 

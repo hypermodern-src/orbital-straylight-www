@@ -41,6 +41,8 @@ def _orbital_static_site_impl(ctx):
     command.add(ctx.attrs.required_pages)
     for asset in ctx.attrs.assets:
         command.add(asset.short_path, asset)
+    for bundle in ctx.attrs.client_bundles:
+        command.add(bundle.basename, bundle)
     ctx.actions.run(command, category = "orbital_static_site", identifier = ctx.attrs.name)
     return [DefaultInfo(default_output = site)]
 
@@ -51,6 +53,7 @@ _orbital_static_site = rule(
         "main": attrs.string(default = "Orbital.SSG"),
         "required_pages": attrs.list(attrs.string(), default = []),
         "assets": attrs.list(attrs.source(), default = []),
+        "client_bundles": attrs.list(attrs.source(), default = []),
         "_purescript_toolchain": attrs.toolchain_dep(
             default = "toolchains//:purescript",
             providers = [PureScriptToolchainInfo],
@@ -58,12 +61,13 @@ _orbital_static_site = rule(
     },
 )
 
-def orbital_static_site(name, generator, main = "Orbital.SSG", required_pages = [], assets = [], visibility = ["PUBLIC"]):
+def orbital_static_site(name, generator, main = "Orbital.SSG", required_pages = [], assets = [], client_bundles = [], visibility = ["PUBLIC"]):
     _orbital_static_site(
         name = name,
         generator = generator,
         main = main,
         required_pages = required_pages,
         assets = assets,
+        client_bundles = client_bundles,
         visibility = visibility,
     )
