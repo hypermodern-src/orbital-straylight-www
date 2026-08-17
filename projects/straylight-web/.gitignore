@@ -38,5 +38,5 @@ next-env.d.ts
 .devshell
 result
 
-# buck2-built browser bundle (staged into public/ at build time, STR-242/236)
+# Spago-built browser bundle (staged into public/ at build time)
 public/straylight.js

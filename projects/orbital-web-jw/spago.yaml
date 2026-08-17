@@ -1,0 +1,25 @@
+package:
+  name: orbital-web
+  dependencies:
+    - aff
+    - arrays
+    - console
+    - effect
+    - either
+    - foldable-traversable
+    - halogen
+    - hydrogen
+    - integers
+    - js-uri
+    - maybe
+    - prelude
+    - strings
+    - web-dom
+    - web-html
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../hydrogen

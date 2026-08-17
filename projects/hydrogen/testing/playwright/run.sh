@@ -3,20 +3,15 @@
 #  * Chromium comes from nix `playwright-driver.browsers` — version-matched to the
 #    @playwright/test in package.json (no system binary, no download, no drift).
 #  * deps (bun, node, python3) come from nix; nothing assumed on PATH.
-#  * the gallery is rebuilt from buck2 each run so the diff is never stale.
+#  * the gallery is rebuilt from Spago each run so the diff is never stale.
 # Usage: testing/playwright/run.sh [playwright args]   (e.g. --update-snapshots)
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 HYDROGEN="$(cd "$HERE/../.." && pwd)"
 
-echo "ℵ building //examples:gallery → .gallery-dist"
-# wipe first: `buck2 build --out` over an EXISTING directory does not cleanly
-# replace it (stale files survive and get served → the diff silently passes).
-rm -rf "$HERE/.gallery-dist"
-# Absolute --out so the harness directory can move without breaking the path.
-( cd "$HYDROGEN" && nix develop -c buck2 build //examples:gallery \
-    --out "$HERE/.gallery-dist" >/dev/null )
+echo "ℵ building the gallery with Spago → .gallery-dist"
+( cd "$HYDROGEN" && npm run --silent bundle:gallery )
 
 # version-matched browser set — PINNED to match @playwright/test in package.json
 # (NOT the floating nixpkgs# registry, which drifts and breaks both the launch and the
@@ -73,7 +68,7 @@ for spec in \
 done
 
 # Port-vs-upstream PARITY verifies (STR-330): the ratchet above proves the goldens EXIST;
-# these prove the Halogen port (//examples/themes-interactive:app) actually MATCHES them —
+# these prove the Halogen port actually MATCHES them —
 # the real "DOM-identical to @radix-ui/themes" claim, enforced on the merge path (not manual).
 # themes-open-verify diffs every open-state golden (skips *.closing — those have their own
 # pinned-animation oracle). Hard step: a divergence aborts via set -euo pipefail.

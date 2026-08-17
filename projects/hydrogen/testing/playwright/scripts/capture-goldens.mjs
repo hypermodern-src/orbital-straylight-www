@@ -3,7 +3,7 @@
 // MIT, (c) WorkOS). Run once when the story set changes; goldens are committed.
 //
 // Flow (heavy — the only step that touches radix's React/pnpm toolchain, kept
-// here at the test edge, never in the buck2 core):
+// here at the test edge, never in the PureScript application dependency graph):
 //   1. Build radix's storybook to static HTML in the vendor clone:
 //        ( cd ~/src/vendor/primitives && pnpm install && pnpm run storybook:build )
 //      → ~/src/vendor/primitives/apps/storybook/storybook-static

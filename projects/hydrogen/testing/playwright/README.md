@@ -1,11 +1,12 @@
 # tests/playwright — pixel-perfect gallery tests
 
-The Node/bun toolchain lives **here only** (isolated at the test edge — never in the
-buck2 core, which stays 100% PureScript). Deps are nixified with **bun2nix v2**.
+The Node/bun toolchain lives **here only**, isolated at the browser-test edge. The
+application and component code remain native PureScript. Browser-test dependencies
+are nixified with **bun2nix v2**.
 
 ## What it does
 
-Pixel-diffs the **Hydrogen.Radix Halogen gallery** (`//examples:gallery`) against
+Pixel-diffs the **Hydrogen.Radix Halogen gallery** (`npm run bundle:gallery`) against
 the **golden set** — radix-ui's own Storybook render of each story. radix-ui is MIT
 ((c) WorkOS); goldens are captured from their Storybook, not redistributed source.
 
@@ -29,7 +30,7 @@ tests/playwright/run.sh                 # build gallery + compare vs golden
 tests/playwright/run.sh --update-snapshots   # (re)seed snapshots
 ```
 
-`run.sh` is the bulletproof entry point: it rebuilds `//examples:gallery`, wires
+`run.sh` is the entry point: it rebuilds the gallery with the pinned Spago CLI, wires
 the **version-matched** Chromium from nix `playwright-driver.browsers` (so the
 `@playwright/test` version and the browser revision can never drift — a mismatch is
 what made the naive `executablePath` approach hang), provides bun/node/python from

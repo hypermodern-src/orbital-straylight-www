@@ -1,6 +1,4 @@
-# hydrogen — spago build (the buck2 build in BUCK/defs.bzl is the canonical
-# hermetic path; this manifest keeps the framework consumable as a plain spago
-# path/git dependency for fast downstream iteration).
+# Hydrogen's canonical build, test, and dependency manifest.
 package:
   name: hydrogen
   dependencies:
@@ -45,7 +43,12 @@ package:
     - web-storage
     - web-touchevents
     - web-uievents
+  test:
+    main: Test.Main
+    dependencies:
+      - quickcheck
 
 workspace:
-  package_set:
+  packageSet:
     registry: 73.2.0
+  extraPackages: {}

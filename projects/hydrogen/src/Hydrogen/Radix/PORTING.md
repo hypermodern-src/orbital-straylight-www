@@ -21,8 +21,8 @@ npm deps.
 > that exercises it; the golden adjudicates. Never blind-fix from prose. Presets only
 > supply classes — behavior lives in the primitive, and the invariance gate proves it.**
 
-`buck = namespace = disk`, 1:1: everything here is `Hydrogen.Radix.*` at
-`hydrogen/src/Hydrogen/Radix/`, covered by `hydrogen//:lib`.
+Everything here is `Hydrogen.Radix.*` under `src/Hydrogen/Radix/` and is covered
+by the root Spago package.
 
 ## Layout
 
@@ -82,7 +82,7 @@ template). Rules:
 4. Emit every `data-*`/ARIA attribute radix emits (grep the TS for `data-` and
    `aria-`). These are the contract.
 5. `defaultStyle` = semantic names. `defaultInput`. `Slot`/`Query`/`Output`.
-6. Typecheck: `cd hydrogen && nix develop --command bash -c 'spago build 2>&1 | tail'`.
+6. Typecheck: `cd hydrogen && npm run build`.
    Zero errors; keep warnings at zero.
 
 ## Float/ — the native floating-ui port (design note)

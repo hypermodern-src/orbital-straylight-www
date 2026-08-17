@@ -1,5 +1,5 @@
 /* The gallery's non-color CSS. Two parts, concatenated after colors.css into
-   gallery.css (the buck2 style_css):
+   gallery.css (the Spago gallery stylesheet):
 
    1. PREVIEW SUBSTRATE — radix-ui/primitives' apps/storybook/.storybook/preview.css
       (MIT, (c) WorkOS), ported verbatim: the box-sizing reset, the demo `--color-*`

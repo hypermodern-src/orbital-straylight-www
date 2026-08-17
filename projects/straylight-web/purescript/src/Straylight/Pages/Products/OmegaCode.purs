@@ -9,7 +9,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 
-import Straylight.UI (cls, codeBlock, inlineCode)
+import Straylight.UI (cls, codeBlock)
 
 -- ============================================================
 -- COMPONENT

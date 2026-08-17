@@ -1,0 +1,23 @@
+{
+  "name": "@straylight/hydrogen",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "spago build --strict",
+    "test": "spago test --strict",
+    "check": "npm run build && npm test && npm run build:integrations",
+    "build:integrations": "npm run build:integration:supabase && npm run build:integration:clerk",
+    "build:integration:supabase": "cd integrations/supabase && ../../node_modules/.bin/spago build --strict",
+    "build:integration:clerk": "cd integrations/clerk && ../../node_modules/.bin/spago build --strict",
+    "bundle:gallery": "node tooling/build-example.mjs gallery",
+    "bundle:themes-port": "node tooling/build-example.mjs themes-port",
+    "bundle:themes-interactive": "node tooling/build-example.mjs themes-interactive"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "spago": "1.0.4"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

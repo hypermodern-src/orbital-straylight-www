@@ -1,0 +1,18 @@
+package:
+  name: hydrogen-themes-port
+  dependencies:
+    - aff
+    - arrays
+    - halogen
+    - hydrogen
+    - maybe
+    - prelude
+    - strings
+    - web-html
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../..

@@ -4,9 +4,21 @@ The working monorepo for Straylight's Hydrogen-based web stack.
 
 The repository is deliberately shallow: every project remains an independent
 build root under `projects/`, and root-level files only inventory and orchestrate
-those projects. Projects must not import source directly from sibling projects.
-Shared code crosses a project boundary through an explicit package or build-cell
-dependency.
+those projects. Shared code crosses a project boundary through an explicit
+package dependency.
+
+## PureScript build standard
+
+Spago is the sole PureScript dependency graph throughout this repository. Each
+PureScript project owns a checked-in `spago.yaml` and `spago.lock`, pins its local
+Spago CLI, and treats warnings as errors. Nix may provide Node, `purs`, and a
+hermetic dependency closure, but always delegates compilation and bundling to
+Spago.
+
+Applications currently resolve Hydrogen through an explicit local Spago package
+path. That is the planned repository-split seam: extraction replaces the path
+with a pinned forge source without changing application imports or introducing a
+second build definition.
 
 ## Projects
 

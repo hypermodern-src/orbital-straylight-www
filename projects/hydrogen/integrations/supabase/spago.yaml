@@ -1,0 +1,14 @@
+package:
+  name: hydrogen-supabase
+  dependencies:
+    - effect
+    - hydrogen
+    - maybe
+    - prelude
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../..

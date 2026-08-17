@@ -10,7 +10,7 @@
 // data-attr, this gate goes red.
 //
 //   node invariance.mjs <dist> <story-id>   # diff every [data-preset] subtree on the page
-//   node invariance.mjs --selftest          # prove the gate passes/bites (no gallery/buck2)
+//   node invariance.mjs --selftest          # prove the gate passes/bites (no gallery build)
 //
 // The page is expected to render the same component once per preset, each wrapped in a
 // node carrying `data-preset="<name>"`. The gate extracts each subtree's behavioral DOM

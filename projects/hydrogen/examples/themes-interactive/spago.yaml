@@ -1,0 +1,21 @@
+package:
+  name: hydrogen-themes-interactive
+  dependencies:
+    - aff
+    - arrays
+    - foldable-traversable
+    - halogen
+    - hydrogen
+    - maybe
+    - prelude
+    - strings
+    - tuples
+    - web-dom
+    - web-html
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../..

@@ -1,7 +1,6 @@
 # Spago
 .spago/
 output/
-spago.lock
 
 # Node
 node_modules/
@@ -14,8 +13,8 @@ node_modules/
 # OS
 .DS_Store
 
-# buck2 + straylight-prelude generated/symlinked (machine-specific). nix/build at
-# any depth — the playwright harness is its own buck2 root with its own cells.
+# Unsupported legacy build residue. These paths are ignored only so an old
+# checkout cannot pollute status; they are not build inputs.
 .buckconfig.local
 buck-out/
 **/buck-out/
@@ -37,3 +36,5 @@ testing/playwright/.themes-a11y-dist/
 testing/playwright/.themes-apg-dist/
 testing/playwright/.themes-open-dist/
 testing/playwright/.themes-closing-dist/
+testing/playwright/.themes-port-dist/
+testing/playwright/.themes-interactive-dist/

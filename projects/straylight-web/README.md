@@ -35,3 +35,16 @@ razorgirl on railgun ~
 ```
 
 conceptual computers are free now.
+
+#### // `web build`
+
+The Halogen surface builds exclusively with the pinned Spago CLI; Next.js owns
+the outer document and content layer.
+
+```sh
+bun install
+bun run build:purs
+bun run build
+```
+
+`nix build` and `nix flake check` invoke the same Spago package graph.

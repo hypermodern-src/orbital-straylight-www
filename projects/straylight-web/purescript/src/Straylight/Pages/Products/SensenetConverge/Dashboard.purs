@@ -4,14 +4,12 @@ module Straylight.Pages.Products.SensenetConverge.Dashboard where
 
 import Prelude
 
-import Data.Array (length)
 import Effect.Aff.Class (class MonadAff)
 
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Type.Proxy (Proxy(..))
 
 import Straylight.UI (cls, codeBlock)
 
@@ -215,10 +213,10 @@ activityItem action detail time =
     ]
 
 codeLine :: forall w i. String -> String -> HH.HTML w i
-codeLine prompt content =
+codeLine prompt lineContent =
   HH.div_
     [ HH.span [ cls [ "text-muted-foreground" ] ] [ HH.text prompt ]
-    , HH.span [ cls [ "text-text" ] ] [ HH.text content ]
+    , HH.span [ cls [ "text-text" ] ] [ HH.text lineContent ]
     ]
 
 -- ============================================================

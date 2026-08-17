@@ -229,13 +229,13 @@ comparison =
     ]
 
 comparisonRow :: forall w i. String -> String -> String -> String -> HH.HTML w i
-comparisonRow feature free team enterprise =
+comparisonRow feature free team enterpriseValue =
   HH.tr
     [ cls [ "border-b border-border" ] ]
     [ HH.td [ cls [ "py-3 text-muted-foreground font-medium" ] ] [ HH.text feature ]
     , HH.td [ cls [ "py-3 text-center text-muted-foreground" ] ] [ HH.text free ]
     , HH.td [ cls [ "py-3 text-center text-indigo-400 font-semibold" ] ] [ HH.text team ]
-    , HH.td [ cls [ "py-3 text-center text-muted-foreground" ] ] [ HH.text enterprise ]
+    , HH.td [ cls [ "py-3 text-center text-muted-foreground" ] ] [ HH.text enterpriseValue ]
     ]
 
 -- ============================================================

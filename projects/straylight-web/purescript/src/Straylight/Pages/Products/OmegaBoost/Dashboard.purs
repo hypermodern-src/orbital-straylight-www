@@ -585,8 +585,8 @@ codeBlock children =
     children
 
 codeLine :: forall w i. String -> String -> HH.HTML w i
-codeLine prefix content =
+codeLine prefix lineContent =
   HH.div_
     [ HH.span [ cls [ "text-muted-foreground" ] ] [ HH.text prefix ]
-    , HH.span [ cls [ "text-text" ] ] [ HH.text content ]
+    , HH.span [ cls [ "text-text" ] ] [ HH.text lineContent ]
     ]

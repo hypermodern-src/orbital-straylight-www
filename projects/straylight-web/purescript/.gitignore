@@ -1,4 +1,4 @@
-# buck2 + straylight-prelude generated/symlinked artifacts (machine-specific)
+# Unsupported legacy build residue (machine-specific)
 .buckconfig.local
 buck-out/
 nix/
@@ -13,7 +13,7 @@ compile_commands.json
 rust-project.json
 hie.yaml
 
-# spago/purs outputs, in case the legacy toolchain is run alongside
+# Spago/PureScript outputs
 .spago/
 output/
 .psci_modules/

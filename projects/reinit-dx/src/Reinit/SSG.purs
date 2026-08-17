@@ -5,10 +5,7 @@
 -- | - SEO (crawlers see content immediately)  
 -- | - Progressive enhancement (works without JS)
 -- |
--- | Usage:
--- | ```
--- | bun script/ssg.ts
--- | ```
+-- | Bundled and executed by `npm run build`.
 module Reinit.SSG
   ( renderStatic
   , staticPage
@@ -27,8 +24,8 @@ import Halogen.HTML.Properties as HP
 import Hydrogen.Runtime.Renderer as Renderer
 import Reinit.Page as Page
 
--- | SSG entrypoint (node), run by the prelude's purs_site rule (STR-235). The
--- | rule is pure mechanism: it hands us the shell path on argv and captures our
+-- | SSG entrypoint (node), run by the Spago site builder. The builder hands us
+-- | the shell path on argv and captures our
 -- | stdout as index.html. ALL policy lives here — reinit is a single static page,
 -- | so we prerender it unconditionally; a multi-route app would consult
 -- | Hydrogen.Runtime.Router's RouteMetadata (isStaticRoute) and any late/CMS config to
@@ -40,8 +37,8 @@ main = do
   log (injectApp shell renderStatic)
 
 -- | Inject prerendered content into the shell's `<div id="app">…</div>` — the
--- | `</div>` immediately before the client `reinit.js` script tag (the same
--- | boundaries the legacy script/ssg.ts used). App-specific by design.
+-- | `</div>` immediately before the client `reinit.js` script tag. App-specific
+-- | by design.
 injectApp :: String -> String -> String
 injectApp shell content =
   case CU.indexOf (Pattern appOpen) shell, CU.indexOf (Pattern scriptTag) shell of
@@ -58,7 +55,7 @@ injectApp shell content =
   appOpen = "<div id=\"app\">"
   scriptTag = "<script src=\"/reinit.js\">"
 
--- | argv[1] under `node -e`: the shell HTML path the purs_site rule passes.
+-- | argv[1] under `node -e`: the shell HTML path the site builder passes.
 foreign import argv1 :: Effect String
 
 -- | Read a UTF-8 file (node fs). Used only at SSG time (node), never in the

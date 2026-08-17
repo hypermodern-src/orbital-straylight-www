@@ -180,7 +180,7 @@ providersTab =
     ]
 
 providerRow :: forall w i. String -> String -> String -> String -> HH.HTML w i
-providerRow name status latency requests =
+providerRow name _status latency requests =
   HH.div
     [ cls [ "flex items-center justify-between py-3 border-b border-border last:border-0" ] ]
     [ HH.div [ cls [ "flex items-center gap-3" ] ]

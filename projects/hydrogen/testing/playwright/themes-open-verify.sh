@@ -20,9 +20,9 @@ if [ "$#" -eq 0 ]; then
   set -- $(cd "$OUT" && for f in *.txt; do case "$f" in *.closing.txt) continue;; esac; b="${f%.txt}"; echo "${b%.*}:${b##*.}"; done)
 fi
 
-echo "ℵ building the Halogen port (//examples/themes-interactive:app)"
-DIST="$HERE/.themes-open-dist"; rm -rf "$DIST"
-( cd "$HY" && nix develop -c buck2 build //examples/themes-interactive:app --out "$DIST" >/tmp/themes-open-build.log 2>&1 ) \
+echo "ℵ building the Halogen port with Spago"
+DIST="$HERE/.themes-open-dist"
+( cd "$HY" && npm run --silent bundle:themes-interactive -- --out "$DIST" >/tmp/themes-open-build.log 2>&1 ) \
   || { echo "BUILD FAILED:"; grep -nE 'Error|in module|not in scope' /tmp/themes-open-build.log | grep -v Compiling | head; exit 1; }
 
 source "$HERE/pinned-browsers.sh"  # pinned, version-matched browser set (see that file)

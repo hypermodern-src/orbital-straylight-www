@@ -7,26 +7,28 @@ verification, research, the journal, and the early-access waitlist.
 
 - PureScript and Halogen for typed page structure
 - Hydrogen for routing and static HTML generation
-- Buck2 for the build graph
-- Nix for pinned tools, framework source, checks, and deployment packaging
+- Spago for the PureScript build and dependency graph
+- Nix for the Node and PureScript toolchain and command wrappers
 - The vendored `halogen-orbital` design system
 
-There is no npm dependency graph. Small browser scripts remain assets for the
-vendored design-system runtime, tab and clipboard behavior, and the existing
-Supabase waitlist integration.
+`package.json` pins Spago, esbuild, and the Vercel CLI. Small browser scripts
+remain assets for the vendored design-system runtime, tab and clipboard behavior,
+and the existing Supabase waitlist integration.
 
 ## Check and build
 
 From this directory:
 
 ```console
-nix flake check --accept-flake-config
-nix develop --accept-flake-config -c buck2 build //:site --show-output
+npm ci
+npm run check
 ```
 
-The Buck2 target emits a complete static site with eleven routes. Page markup
+The build emits a complete static site with eleven routes in `dist/`. Page markup
 lives under `src/Orbital/Pages`, route metadata under `src/Orbital/Route.purs`,
 and page-specific styles under `styles/pages`.
+
+`nix run .#build` runs the same npm/Spago build in the pinned toolchain.
 
 Journal and paper indexes plus the publication reader are a PureScript/Halogen
 browser bundle. They read the `orbital` channel from `orbital-cms` through the
@@ -35,21 +37,22 @@ not exposed through the site.
 
 ## Preview
 
-Build the site, find the output path printed by Buck2, and serve that directory:
+Build and serve the generated directory:
 
 ```console
-nix develop --accept-flake-config -c buck2 build //:site --show-output
-python3 -m http.server 4173 --directory <output-path-from-the-last-line>
+npm run build
+python3 -m http.server 4173 --directory dist
 ```
 
 ## Deploy
 
-The flake packages the site as Vercel Build Output API v3 and exposes a prebuilt
-deploy app. Deployment is intentionally separate from the build gate:
+The deploy command packages the site as Vercel Build Output API v3 and sends the
+prebuilt output. Deployment is intentionally separate from the build gate:
 
 ```console
 vercel link
-nix run .#deploy-orbital-web-jw-site-vercel --accept-flake-config
+npm run deploy
+# or: nix run .#deploy
 ```
 
 The app is linked locally to `b7r6s-projects/orbital-web-jw`; `.vercel/` and its

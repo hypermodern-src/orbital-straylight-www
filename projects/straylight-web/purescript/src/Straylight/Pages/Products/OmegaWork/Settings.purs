@@ -433,7 +433,7 @@ integrationsTab =
     ]
 
 integrationRow :: forall w i. String -> String -> Boolean -> HH.HTML w i
-integrationRow name status connected =
+integrationRow name status _connected =
   HH.div
     [ cls [ "flex items-center justify-between py-3 border-b border-border last:border-0" ] ]
     [ HH.div_
@@ -574,5 +574,4 @@ invoiceRow date amount status =
     , HH.span [ cls [ "text-sm text-text" ] ] [ HH.text amount ]
     , HH.span [ cls [ "text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-400" ] ] [ HH.text status ]
     ]
-
 

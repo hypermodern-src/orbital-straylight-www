@@ -9,6 +9,7 @@ package:
     - halogen
     - halogen-vdom
     - hydrogen
+    - hydrogen-supabase
     - maybe
     - prelude
     - strings
@@ -22,9 +23,10 @@ package:
     outfile: ../public/straylight.js
 
 workspace:
-  package_set:
+  packageSet:
     registry: 73.2.0
-  extra_packages:
+  extraPackages:
     hydrogen:
-      git: https://github.com/straylight-software/hydrogen.git
-      ref: main
+      path: ../../hydrogen
+    hydrogen-supabase:
+      path: ../../hydrogen/integrations/supabase

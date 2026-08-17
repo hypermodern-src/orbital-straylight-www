@@ -5,7 +5,7 @@
 #               testing/golden/themes/golden-aria/ (run when the component set changes).
 #   --golden  : build the golden, verify it against its own committed baselines
 #               (self-consistency + ARIA-snapshot stability — the non-circular check).
-#   (default) : build //examples/themes-interactive:app and verify the port — ARIA tree ==
+#   (default) : build the interactive port with Spago and verify it — ARIA tree ==
 #               upstream and no axe violation beyond upstream's fingerprint. The gate.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"; HY="$(cd "$HERE/../.." && pwd)"
@@ -23,9 +23,9 @@ if [ "$GOLDEN" -eq 1 ]; then
     ( cd "$HY/testing/golden/themes" && rm -rf dist && mkdir dist && nix shell nixpkgs#bun -c bun build ./src/app.tsx --outdir dist --minify >/dev/null && cp index.html dist/ )
   fi
 else
-  echo "ℵ building the Halogen port (//examples/themes-interactive:app)"
-  DIST="$HERE/.themes-a11y-dist"; rm -rf "$DIST"
-  ( cd "$HY" && nix develop -c buck2 build //examples/themes-interactive:app --out "$DIST" >/tmp/themes-a11y-build.log 2>&1 ) \
+  echo "ℵ building the Halogen port with Spago"
+  DIST="$HERE/.themes-a11y-dist"
+  ( cd "$HY" && npm run --silent bundle:themes-interactive -- --out "$DIST" >/tmp/themes-a11y-build.log 2>&1 ) \
     || { echo "BUILD FAILED:"; grep -nE 'Error|in module|not in scope' /tmp/themes-a11y-build.log | grep -v Compiling | head; exit 1; }
 fi
 

@@ -36,11 +36,9 @@ export default defineConfig({
     viewport: { width: 900, height: 600 },
     deviceScaleFactor: 1,
   },
-  // Serve the pre-built gallery dist (buck2 build //examples:gallery --out
-  // tests/playwright/.gallery-dist). reuseExistingServer for local iteration.
+  // Serve the pre-built Spago gallery dist in .gallery-dist.
   webServer: {
-    // no-cache static server (see scripts/serve.mjs) — buck2's constant output
-    // mtimes make python http.server serve stale cached CSS.
+    // no-cache static server (see scripts/serve.mjs) keeps CSS deterministic.
     command: "bun scripts/serve.mjs .gallery-dist 3940",
     url: "http://127.0.0.1:3940",
     // NEVER reuse: an orphaned server (e.g. from a killed run) serving a stale

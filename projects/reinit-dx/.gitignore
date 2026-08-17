@@ -1,14 +1,14 @@
 .spago/
 output/
 node_modules/
+.build/
+dist/
+.vercel/
 .psci_modules/
 .psc-ide-port
-# This project builds through Buck2; ignore Spago's generated lock, but keep
-# flake.lock committed so framework and toolchain inputs remain reproducible.
-spago.lock
 public/reinit.js
 
-# straylight-prelude buck2 project
+# Unsupported legacy build residue
 buck-out/
 nix/build/
 .buckconfig.local

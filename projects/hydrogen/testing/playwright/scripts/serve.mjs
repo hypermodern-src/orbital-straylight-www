@@ -1,8 +1,6 @@
 // No-cache static server for the gallery dist. python http.server sends a
-// Last-Modified from the file mtime — but buck2 stamps REPRODUCIBLE (constant)
-// mtimes on its outputs, so the browser revalidates with If-Modified-Since, gets
-// 304, and serves a STALE style.css from a prior run (→ the diff silently passes
-// against old content). This server sends `Cache-Control: no-store` and no
+// Last-Modified from the file mtime can make a browser revalidate and serve a
+// stale style.css from a prior run. This server sends `Cache-Control: no-store` and no
 // Last-Modified, so every load is fresh. Bulletproof.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";

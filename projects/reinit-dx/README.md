@@ -15,19 +15,19 @@ Built on the real stack to dogfood the tools:
 - **PureScript** + **Halogen** — Type-safe UI
 - **Hydrogen** — SSG, routing, HTML rendering
 - **Tailwind** — Styling (CDN)
-- **Bun** — Build scripts
+- **Spago** — PureScript build and dependency graph
 
 ## Development
 
 ```bash
-# Enter nix shell
-nix develop
+# Install the pinned Spago and esbuild CLIs
+npm ci
 
-# Build and bundle
-spago bundle
+# Typecheck, prerender, and bundle into dist/
+npm run check
 
 # Dev server
-npx serve public -l 3333
+npx serve dist -l 3333
 
 # Expose via Tailscale
 sudo tailscale funnel 3333
@@ -37,13 +37,8 @@ sudo tailscale funnel 3333
 
 Pre-renders the landing page to static HTML for faster FCP and SEO:
 
-```bash
-# Full build (compile + SSG + bundle)
-bun script/ssg.ts
-
-# Quick mode (just inject, assumes already compiled)
-bun script/ssg.ts --quick
-```
+`npm run build` performs the complete SSG and client build. `nix run .#build`
+delegates to the same command inside the pinned Node/PureScript toolchain.
 
 The SSG process:
 
@@ -75,7 +70,8 @@ public/
   index.html          # HTML shell + CSS + diagnostic demo JS
   reinit.js           # Bundled PureScript app
 script/
-  ssg.ts              # SSG build script (Bun)
+tooling/
+  build-site.mjs       # Spago SSG and client bundler
 ```
 
 ## Features

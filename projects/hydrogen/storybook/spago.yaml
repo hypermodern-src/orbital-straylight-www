@@ -1,0 +1,20 @@
+package:
+  name: hydrogen-storybook-bridge
+  dependencies:
+    - aff
+    - arrays
+    - effect
+    - halogen
+    - hydrogen
+    - maybe
+    - prelude
+    - tuples
+    - web-dom
+    - web-html
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ..

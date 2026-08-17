@@ -1,0 +1,13 @@
+package:
+  name: hydrogen-clerk
+  dependencies:
+    - effect
+    - hydrogen
+    - prelude
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../..

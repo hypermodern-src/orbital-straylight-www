@@ -802,8 +802,8 @@ handleAction = case _ of
     -- start-open: a controlled/default value present at mount renders a menu OPEN (presence=Open
     -- from initialState). Arm the open envelope (dismiss subs + portal/position on the next tick)
     -- so the content portals to body + positions, WITHOUT moving focus into it (no interaction).
-    st <- H.get
-    when (current st.ctrl /= "") do
+    initialized <- H.get
+    when (current initialized.ctrl /= "") do
       doc <- liftEffect (HTML.window >>= Window.document)
       win <- liftEffect Popper.windowTarget
       let docTarget = HTMLDocument.toEventTarget doc
@@ -1020,12 +1020,6 @@ handleAction = case _ of
         H.raise (ItemSelected { menu: menu.value, item: value })
       closeMenu true
   Reposition -> reposition
-
--- | The last focusable item index of menu `i` (for ArrowUp-open → highlight last).
-lastItem :: State -> Int -> Int
-lastItem st i = case Array.index st.menus i of
-  Just menu -> itemCount menu.entries - 1
-  Nothing -> 0
 
 -- | Move to the menu `delta` away from the open one (wrapping), closing the current content
 -- | and opening the adjacent one focused into its content. The cross-menu arrow behavior.

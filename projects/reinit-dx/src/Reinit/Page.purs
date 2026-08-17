@@ -401,9 +401,6 @@ proofStat value label =
     , HH.p [ cls "text-[10px] md:text-[11px] tracking-[1px] text-white/30 mt-1" ] [ HH.text label ]
     ]
 
-railDivider :: forall w i. HH.HTML w i
-railDivider = HH.div [ cls "rail-shimmer my-2" ] []
-
 -- ============================================================
 -- LOGOS
 -- ============================================================

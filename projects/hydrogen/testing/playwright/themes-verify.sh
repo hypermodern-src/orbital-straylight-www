@@ -7,8 +7,8 @@ id="$1"
 HERE="$(cd "$(dirname "$0")" && pwd)"; HY="$(cd "$HERE/../.." && pwd)"
 GOLD="$HY/testing/golden/themes/golden/$id.png"
 [ -f "$GOLD" ] || { echo "no golden for '$id' ($GOLD)"; exit 2; }
-DIST="$HERE/.themes-dist"; rm -rf "$DIST"
-( cd "$HY" && nix develop -c buck2 build //examples/themes-port:app --out "$DIST" >/tmp/themes-verify-build.log 2>&1 ) || { echo "BUILD FAILED:"; grep -nE 'Error|in module|not in scope' /tmp/themes-verify-build.log | grep -v Compiling | head; exit 1; }
+DIST="$HERE/.themes-dist"
+( cd "$HY" && npm run --silent bundle:themes-port -- --out "$DIST" >/tmp/themes-verify-build.log 2>&1 ) || { echo "BUILD FAILED:"; grep -nE 'Error|in module|not in scope' /tmp/themes-verify-build.log | grep -v Compiling | head; exit 1; }
 source "$HERE/pinned-browsers.sh"  # pinned, version-matched browser set (see that file)
 export PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS=1
 OURS="/tmp/ours-$id.png"

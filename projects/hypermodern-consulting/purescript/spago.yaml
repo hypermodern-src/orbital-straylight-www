@@ -30,5 +30,4 @@ workspace:
     registry: 73.2.0
   extraPackages:
     hydrogen:
-      git: ssh://git@git.s4.gl/straylight/hydrogen.git
-      ref: 8afd5e6358609e8532bdef56e2f21545064df8cc
+      path: ../../hydrogen

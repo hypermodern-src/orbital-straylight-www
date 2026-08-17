@@ -377,7 +377,7 @@ memberUsageRow name conversations percentage =
     ]
 
 usageCard :: forall w i. String -> Int -> Int -> String -> HH.HTML w i
-usageCard label current limit unit =
+usageCard label current _limit unit =
   HH.div
     [ cls [ "bg-card border border-border rounded-lg p-6" ] ]
     [ HH.div
@@ -390,5 +390,4 @@ usageCard label current limit unit =
         , HH.span [ cls [ "text-sm text-muted-foreground" ] ] [ HH.text unit ]
         ]
     ]
-
 

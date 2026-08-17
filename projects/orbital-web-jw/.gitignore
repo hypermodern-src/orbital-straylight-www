@@ -1,6 +1,9 @@
 .vercel
 node_modules
 dist
+.build
+.spago
+output
 .DS_Store
 .buckconfig.local
 .direnv/

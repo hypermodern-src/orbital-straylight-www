@@ -6,8 +6,9 @@ This monorepo is a staging shape, not a permanent coupling mechanism.
    deployment configuration, environment contract, and checks.
 2. A project must build from its own directory. Root orchestration may dispatch
    a build, but a production build must not require root-only runtime files.
-3. Projects do not import files from sibling directories. Reusable code is
-   exposed as a declared package, Buck2 cell, or pinned source dependency.
+3. Projects do not reach into arbitrary files in sibling directories. Reusable
+   code is exposed as a declared package: a local Spago path while the monorepo
+   is intact, or a pinned source dependency after extraction.
 4. Vercel project configuration names one project root and an app-local output.
 5. Secrets stay in the deployment provider. Only `.env.example` contracts are
    committed.
@@ -22,8 +23,9 @@ git filter-repo \
   --path-rename projects/reinit-dx/:
 ```
 
-Do not add a direct sibling dependency for convenience. If a boundary is not
-stable enough for a package, keep the implementation local until it is.
+Do not reach through a sibling package's internal paths for convenience. A local
+dependency must target the sibling package root and remain replaceable by one
+pinned source declaration when that project is extracted.
 
 `projects/orbital-cms` demonstrates a released internal dependency: its flake locks the
 forge-hosted `projects/web-middleware` subdirectory to an exact Git revision.

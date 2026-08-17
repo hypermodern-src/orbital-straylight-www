@@ -3,8 +3,8 @@ module Straylight.Pages.Plan where
 
 import Prelude
 
-import Data.Array (filter, head, tail)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Array (filter, head)
+import Data.Maybe (Maybe(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP

@@ -17,7 +17,6 @@ import Data.Array (filter, find)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (drop, indexOf, splitAt) as Str
 import Data.String.Pattern (Pattern(..))
-import Data.Void (Void)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Gallery.Story (GallerySlots, Story, _story)

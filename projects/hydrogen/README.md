@@ -45,21 +45,35 @@ Build & contributor guide: [`CLAUDE.md`](CLAUDE.md).
 ```yaml
 # spago.yaml
 workspace:
-  extra_packages:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
     hydrogen:
-      git: https://git.s4.gl/straylight/hydrogen.git
-      ref: 8afd5e6358609e8532bdef56e2f21545064df8cc
-      dependencies:
-        - prelude
-        - aff
-        - argonaut
-        - halogen
-        # ... see spago.yaml in this repo for full list
+      path: ../hydrogen
 
 package:
   dependencies:
     - hydrogen
 ```
+
+## Development
+
+Spago is the only supported PureScript build graph. The pinned local CLI requires
+Node 22.5 or newer.
+
+```sh
+npm ci
+npm run check
+npm run bundle:gallery
+npm run bundle:themes-port
+npm run bundle:themes-interactive
+```
+
+`npm run check` also compiles the Supabase and Clerk integration packages, so
+their separate Spago graphs cannot drift from the core library.
+
+`nix develop` supplies Node and `purs`; it does not introduce a second build
+system. `nix run .#check` executes the same npm/Spago check.
 
 ## Quick Start
 

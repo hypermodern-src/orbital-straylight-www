@@ -45,7 +45,7 @@ import Hydrogen.Themes.Switch (switch)
 import Hydrogen.Themes.Table (tableBody, tableCell, tableColumnHeaderCell, tableHeader, tableRoot, tableRow, tableRowHeaderCell)
 import Hydrogen.Themes.Tabs (tabsList, tabsRoot, tabsTrigger)
 import Hydrogen.Themes.TextArea (textArea)
-import Hydrogen.Themes.TextField (textField, textFieldValue)
+import Hydrogen.Themes.TextField (textField)
 import Hydrogen.Themes.Typography (headingAs, text, textAs)
 import Storybook.Showcase as Showcase
 import Web.DOM (Element)

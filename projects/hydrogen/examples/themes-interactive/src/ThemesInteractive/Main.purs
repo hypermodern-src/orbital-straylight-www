@@ -63,7 +63,7 @@ import Hydrogen.Radix.Progress (progress) as RadixProgress
 import Hydrogen.Themes.Prop (Prop(..))
 import Hydrogen.Themes.TabNav (tabNavLink, tabNavRoot)
 import Hydrogen.Themes.TextArea (textArea)
-import Hydrogen.Themes.TextField (textField, textFieldValue)
+import Hydrogen.Themes.TextField (textFieldValue)
 import Hydrogen.Themes.Typography (textAs)
 import Hydrogen.Themes.Separator (separator) as ThemesSeparator
 import Type.Proxy (Proxy(..))
