@@ -1,0 +1,32 @@
+/* Bridge — the React kit's token names (@looking-local/tokens, packages/tokens/src/theme.css)
+   mapped onto the vanilla orbital.css names this design system runs on. Same design language,
+   two vocabularies: the static surfaces use --ink / --accent / --serif; the Tailwind kit uses
+   --color-ink / --color-accent / --font-display. Anything you copy out of app code keeps working. */
+:root{
+  --color-ink:var(--ink);
+  --color-ink-muted:var(--ink-m);
+  --color-ink-faint:var(--ink-f);
+  --color-ink-ghost:var(--ink-g);
+  --color-accent:var(--accent);
+  --color-accent-d:var(--accent-d);
+  --color-surface:var(--white);
+  --color-paper:var(--paper);
+  --color-border:var(--border);
+  --color-border-faint:var(--border-f);
+  --color-glass-edge:var(--ge);
+  --color-glass-fill:var(--gf);
+  --color-glass-fill-hover:var(--gfh);
+  --color-success:hsl(150 46% 42%);
+  --color-warn:hsl(38 70% 48%);
+  --color-error:hsl(2 60% 55%);
+  /* titles are monospace; --font-serif below is prose-only */
+  --font-display:var(--sans); /* @kind font */
+  --font-mono:var(--sans); /* @kind font */
+  --font-serif:var(--serif); /* @kind font */
+  --ease-orbital:var(--ease); /* @kind other */
+  /* the ONE adaptivity breakpoint; media queries hard-code 900px and cite this */
+  --bp-lap:900px;
+  --shadow-glass:0 1px 2px hsla(var(--hue),30%,20%,.05),0 8px 24px hsla(var(--hue),30%,20%,.08);
+  --shadow-dialog:0 24px 70px hsla(var(--hue),30%,20%,.22),inset 0 1px 0 hsla(var(--hue),40%,100%,.4);
+  --shadow-menu:0 12px 38px hsla(var(--hue),30%,20%,.16);
+}

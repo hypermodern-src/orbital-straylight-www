@@ -10,6 +10,7 @@
     "build:integration:supabase": "cd integrations/supabase && ../../node_modules/.bin/spago build --strict",
     "build:integration:clerk": "cd integrations/clerk && ../../node_modules/.bin/spago build --strict",
     "bundle:gallery": "node tooling/build-example.mjs gallery",
+    "bundle:orbital": "node tooling/build-example.mjs orbital",
     "bundle:themes-port": "node tooling/build-example.mjs themes-port",
     "bundle:themes-interactive": "node tooling/build-example.mjs themes-interactive"
   },

@@ -1,0 +1,15 @@
+package:
+  name: hydrogen-orbital-reference
+  dependencies:
+    - aff
+    - halogen
+    - hydrogen
+    - maybe
+    - prelude
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../..

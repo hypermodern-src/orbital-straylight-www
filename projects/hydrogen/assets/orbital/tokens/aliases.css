@@ -1,0 +1,87 @@
+/* Semantic aliases over the ORBITAL token set (halogen-orbital/orbital.css).
+   The base tokens (--hue, --ink*, --accent*, --white/--paper, --ge/--gf, --serif/--sans,
+   --radius, --ease) are declared there and flip wholesale under html[data-theme="onosendai"].
+   These aliases name the INTENT so designs read without memorising the base names.
+   Nothing here introduces a new colour: every value routes through a base token. */
+:root{
+  /* text */
+  --text-body:var(--ink-m);
+  --text-strong:var(--ink);
+  --text-muted:var(--ink-f);
+  --text-faint:var(--ink-g);
+  --text-accent:var(--accent);
+  --text-inverse:hsla(var(--hue),20%,99%,.92);
+
+  /* surfaces */
+  --surface-page:var(--white);
+  --surface-raised:var(--paper);
+  --surface-glass:var(--gf);
+  --surface-glass-hover:var(--gfh);
+  --surface-carbon:hsl(var(--hue),18%,8%);      /* terminal + cta band, theme-independent */
+  --surface-code:var(--code-bg);
+
+  /* lines */
+  --line:var(--border);
+  --line-faint:var(--border-f);
+  --line-glass:var(--ge);
+  --line-accent:hsla(var(--hue),58%,38%,.4);
+
+  /* interaction */
+  --interactive:var(--accent);
+  --interactive-hover:hsl(var(--hue),58%,32%);
+  --focus-ring:var(--accent-d);
+  --selection:var(--accent);
+
+  /* status — the four signal colours used by badge2 / statusdot / meter / toast */
+  --signal-accent:var(--accent);
+  --signal-success:hsl(150,46%,42%);
+  --signal-warn:hsl(38,70%,48%);
+  --signal-error:hsl(2,60%,52%);
+
+  /* type roles — monospace is the system voice: titles, numerals, labels, body, UI.
+     The serif appears only where a reader settles into nontrivial prose. */
+  --font-display:var(--sans);        /* IBM Plex Mono — headings, titles, numerals, UI */
+  --font-ui:var(--sans);             /* IBM Plex Mono — everything else */
+  --font-prose:var(--serif);         /* Cormorant Garamond — essays, pull quotes, axioms. Never titles or UI */
+  --size-display:clamp(1.85rem,3.5vw,2.85rem);
+  --size-h2:clamp(1.25rem,2.3vw,1.8rem);
+  --size-h3:.95rem;
+  --size-body:.82rem;
+  --size-ui:.74rem;
+  --size-label:.62rem;               /* uppercase, tracked labels */
+  --size-micro:.54rem;               /* badge / status / eyebrow micro-caps */
+  --track-display:-.045em;           /* mono display wants tightening */
+  --track-title:-.02em;
+  --track-label:.14em;
+  --track-eyebrow:.34em;
+
+  /* space — the page rhythm actually used across the marketing + app surfaces */
+  --space-1:.25rem;
+  --space-2:.5rem;
+  --space-3:.7rem;
+  --space-4:1rem;
+  --space-5:1.4rem;
+  --space-6:1.7rem;
+  --space-7:2.4rem;
+  --space-section:clamp(2.6rem,6vh,4.5rem);
+  --gutter:var(--pad);
+  --measure:65ch;
+
+  /* form */
+  --radius-sm:var(--radius);         /* 2px  — controls, chips, badges */
+  --radius-md:var(--radius-lg);      /* 3px  — cards, panels, dialogs */
+  --shadow-card:0 4px 20px hsla(var(--hue),20%,50%,.03),inset 0 1px 0 hsla(var(--hue),40%,100%,.2);
+  --shadow-lift:0 10px 36px hsla(var(--hue),25%,50%,.06);
+  --shadow-overlay:0 24px 70px hsla(var(--hue),30%,20%,.22);
+  --glow-accent:0 0 12px hsla(var(--hue),58%,38%,.5);
+
+  /* motion */
+  --dur-fast:.2s; /* @kind other */
+  --dur-ui:.35s; /* @kind other */
+  --dur-slow:.7s; /* @kind other */
+}
+
+/* links: default to the house underline sweep so ad-hoc anchors never render browser blue */
+a{color:var(--accent)}
+a:hover{color:var(--interactive-hover)}
+html[data-theme="onosendai"] a:hover{color:hsl(var(--hue),72%,74%)}

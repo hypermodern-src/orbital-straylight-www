@@ -14,6 +14,7 @@ import Hydrogen.Test.Assert (runSuite)
 import Test.Color as Color
 import Test.Compute as Compute
 import Test.Format as Format
+import Test.Orbital as Orbital
 import Test.RemoteData as RemoteData
 import Test.Prop.Compute as PropCompute
 import Test.Prop.Format as PropFormat
@@ -33,6 +34,7 @@ main = runSuite "hydrogen" do
   Router.suite
   Color.suite
   Typeahead.suite
+  Orbital.suite
   PropRemoteData.suite
   PropFormat.suite
   PropCompute.suite

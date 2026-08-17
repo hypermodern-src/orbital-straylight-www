@@ -1,0 +1,20 @@
+/* HERITAGE — Ono-Sendai Base24 + High Modernism, from the weyl brand archive.
+   Kept for continuity: the archive posters, the dual-mode brand manuals and the
+   monotile documentation are all specified in these values. NOT the working palette
+   for new Orbital surfaces (use the aliases in tokens/aliases.css); reach for these
+   only when reproducing archive material or a heritage poster. */
+:root{
+  /* grayscale */
+  --base00:#090b0e; --base01:#13161a; --base02:#1a1f24; --base03:#23292f;
+  --base04:#596775; --base05:#d8e0e7; --base06:#e0f4ff; --base07:#e6f7ff;
+  /* blues — base0A is the historical primary */
+  --base08:#b0e1ff; --base09:#80ccff; --base0A:#54aeff; --base0B:#218bff;
+  --base0C:#40e0d0; --base0D:#6dd9ff; --base0E:#8ecbff; --base0F:#1166b0;
+  /* signals */
+  --base10:#ffa657; --base11:#f0c020; --base12:#ff7b72; --base13:#c41e3a;
+  --base14:#3fb950; --base15:#2d5a27; --base16:#76b900; --base17:#a371f7;
+  /* High Modernism — institutional light */
+  --hm-ground:#f4f1eb; --hm-aged:#e8e4d9; --hm-patina:#c9b896;
+  --hm-executive:#1a1a1a; --hm-administration:#1a5276; --hm-priority:#c41e3a;
+  --hm-operations:#2d5a27; --hm-heritage:#8b7355; --hm-gilt:#d4a017;
+}

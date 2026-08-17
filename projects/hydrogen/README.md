@@ -25,6 +25,12 @@ Hydrogen is two things that share a repo:
 2. **An application framework** — Query, Router, API Client, SSG, RemoteData, UI
    primitives (the "Features" below). The original seed; stable.
 
+Hydrogen also ships the native **[ORBITAL design-system preset](docs/guide/orbital.md)**:
+typed foundations, the canonical self-hosted fonts and monotile assets, and the
+first brand/core/type/surface component families. It lives under
+`Hydrogen.Orbital.*`, deliberately separate from the DOM-identical Radix Themes
+port.
+
 **Status:** breadth is complete (every primitive ported + compiling); behavioral
 parity is mid-verification and explicitly tracked — see
 [`src/Hydrogen/Radix/DEPTH-AUDIT.md`](src/Hydrogen/Radix/DEPTH-AUDIT.md),
@@ -140,6 +146,7 @@ contract and **[`CLAUDE.md`](CLAUDE.md)** for build/test/verification.
 | `Hydrogen.Radix.Foundation.*` | Color, Style, Portal, Dom, Envelope |
 | `Hydrogen.Radix.*` | 32 primitives: Dialog, AlertDialog, Popover, Tooltip, HoverCard, DropdownMenu, ContextMenu, Menubar, Select, Tabs, Accordion, Collapsible, RadioGroup, Checkbox, Switch, Toggle, ToggleGroup, Toolbar, Slider, ScrollArea, NavigationMenu, Toast, Progress, Avatar, Form, OneTimePasswordField, PasswordToggleField, Label, Separator, AspectRatio, AccessibleIcon, VisuallyHidden |
 | `Hydrogen.Themes.*` | the radix-themes preset (`rt-*` classes) over the primitives |
+| `Hydrogen.Orbital.*` | the ORBITAL preset: typed tokens, brand, core, typography, and surfaces |
 
 Verified against the real upstream React render through three CI-gated oracles
 (DOM-identical / ARIA-tree / WAI-ARIA-APG keyboard) in

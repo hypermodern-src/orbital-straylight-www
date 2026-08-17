@@ -1,0 +1,25 @@
+@import url('orbital/hydrogen.css');
+
+.orbital-reference{min-height:100vh;position:relative;isolation:isolate}
+.orbital-reference .reference-bar{
+  height:54px;padding:0 var(--gutter);display:flex;align-items:center;
+  justify-content:space-between;border-bottom:1px solid var(--line-glass);
+  background:var(--surface-glass);backdrop-filter:blur(28px) saturate(1.3);
+  position:sticky;top:0;z-index:10
+}
+.reference-theme{font-size:var(--size-micro);letter-spacing:var(--track-label);text-transform:uppercase;color:var(--text-muted)}
+.reference-main{max-width:1180px;margin:0 auto;padding:var(--space-section) var(--gutter) 6rem;position:relative;z-index:1}
+.reference-hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:var(--space-7);align-items:center;padding:var(--space-7) 0 var(--space-section)}
+.reference-copy{display:flex;flex-direction:column;align-items:flex-start;gap:var(--space-5)}
+.reference-copy .orbital-body{max-width:56ch;font-size:1rem;line-height:1.8}
+.reference-actions,.reference-row{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+.reference-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
+.reference-stack{display:flex;flex-direction:column;gap:var(--space-5)}
+.reference-progress{max-width:420px}
+.reference-paper{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:var(--space-7);align-items:start}
+.reference-paper .orbital-prose p+p{margin-top:1rem}
+@media(max-width:900px){
+  .reference-hero,.reference-paper{grid-template-columns:minmax(0,1fr)}
+  .reference-grid{grid-template-columns:minmax(0,1fr)}
+  .reference-theme{display:none}
+}

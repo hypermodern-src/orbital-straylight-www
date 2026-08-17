@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, rmSync } from "node:fs";
+import { copyFileSync, cpSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -22,6 +22,13 @@ const examples = {
     module: "ThemesInteractive.Main",
     output: "testing/playwright/.themes-interactive-dist",
     stylesheet: "themes.css"
+  },
+  orbital: {
+    directory: "examples/orbital",
+    module: "Orbital.Main",
+    output: "testing/playwright/.orbital-dist",
+    stylesheet: "orbital-reference.css",
+    assets: "assets/orbital"
   }
 };
 
@@ -63,4 +70,7 @@ if (result.status !== 0) process.exit(result.status ?? 1);
 
 copyFileSync(join(source, "index.html"), join(output, "index.html"));
 copyFileSync(join(source, example.stylesheet), join(output, "style.css"));
+if (example.assets) {
+  cpSync(resolve(root, example.assets), join(output, "orbital"), { recursive: true });
+}
 console.log(`hydrogen: bundled ${name} with Spago -> ${output}`);
