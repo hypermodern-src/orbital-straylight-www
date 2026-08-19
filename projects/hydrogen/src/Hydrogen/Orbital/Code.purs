@@ -1,5 +1,5 @@
--- | A dependency-free source viewer. Syntax remains source text; path, line
--- | count, sticky gutter, selection state, and overflow are structural.
+-- | A dependency-free source viewer with Hydrogen's native lexical syntax
+-- | colour, sticky gutter, selection state, and overflow behaviour.
 module Hydrogen.Orbital.Code
   ( CodeViewerInput
   , defaultCodeViewer
@@ -15,6 +15,7 @@ import Data.String.Pattern (Pattern(..))
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Hydrogen.Orbital.Foundation (classNames)
+import Hydrogen.Orbital.Syntax (highlightLine, syntaxClass)
 
 type CodeViewerInput i =
   { path :: String
@@ -75,5 +76,8 @@ codeViewer o =
           ] <> o.lineAttrs lineNumber
         )
         [ HH.span [ HP.class_ (HH.ClassName "orbital-code-line-number"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text (show lineNumber) ]
-        , HH.code [ HP.class_ (HH.ClassName "orbital-code-source") ] [ HH.text (if source == "" then " " else source) ]
+        , HH.code [ HP.class_ (HH.ClassName "orbital-code-source") ]
+            (map renderToken (highlightLine o.language source))
         ]
+  renderToken value =
+    HH.span [ HP.class_ (HH.ClassName (syntaxClass value.kind)) ] [ HH.text value.text ]

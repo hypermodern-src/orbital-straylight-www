@@ -122,6 +122,16 @@ html[data-theme='onosendai'] .badge2.is-error{color:hsl(2,64%,72%)}
   color:var(--text-body);text-align:right;user-select:none;font-variant-numeric:tabular-nums
 }
 .orbital-code-source{display:table-cell;padding:0 1.1rem;white-space:pre;color:var(--text-strong)}
+.orbital-syntax-comment{color:var(--text-body);font-style:italic}
+.orbital-syntax-keyword{color:var(--text-accent);font-weight:600}
+.orbital-syntax-type{color:color-mix(in srgb,var(--interactive) 76%,var(--text-strong))}
+.orbital-syntax-string{color:hsl(31,48%,38%)}
+.orbital-syntax-number{color:hsl(257,30%,47%)}
+.orbital-syntax-operator{color:var(--interactive)}
+.orbital-syntax-punctuation{color:var(--text-body)}
+html[data-theme='onosendai'] .orbital-syntax-comment{color:var(--text-body)}
+html[data-theme='onosendai'] .orbital-syntax-string{color:hsl(38,58%,68%)}
+html[data-theme='onosendai'] .orbital-syntax-number{color:hsl(266,54%,76%)}
 
 @media(max-width:600px){
   .orbital-nav{padding:0 var(--space-4)}

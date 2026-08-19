@@ -1,10 +1,29 @@
+-- | Typed, public Forgejo API boundary. The application deliberately uses
+-- | Forgejo's own resource model rather than translating it into GitHub terms.
 module Forge.Forgejo
   ( Repository
-  , SourceEntry
-  , TreeListing
+  , ContentEntry
+  , Branch
+  , Tag
+  , Commit
+  , Label
+  , Issue
+  , PullRequest
+  , Release
   , listRepositories
-  , listSource
-  , readSource
+  , listContents
+  , listBranches
+  , listTags
+  , listCommits
+  , listIssues
+  , listPullRequests
+  , listReleases
+  , readRaw
+  , rawUrl
+  , encodeComponent
+  , decodeComponent
+  , encodePath
+  , decodePath
   ) where
 
 import Prelude
@@ -12,10 +31,10 @@ import Prelude
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AX
 import Data.Argonaut.Decode (class DecodeJson, decodeJson, printJsonDecodeError)
-import Data.Array as Array
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
 import Data.String as String
+import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
 import Effect.Aff (Aff)
 
@@ -28,6 +47,11 @@ type Repository =
   , language :: String
   , sizeKiB :: Int
   , openIssues :: Int
+  , openPulls :: Int
+  , releaseCount :: Int
+  , stars :: Int
+  , forks :: Int
+  , watchers :: Int
   , topics :: Array String
   , license :: Maybe String
   , htmlUrl :: String
@@ -36,20 +60,86 @@ type Repository =
   , archived :: Boolean
   }
 
-type SourceEntry =
-  { path :: String
-  , size :: Int
-  }
-
-type TreeListing =
-  { files :: Array SourceEntry
-  , totalCount :: Int
-  , truncated :: Boolean
-  }
-
-type LicenseWire =
+type ContentEntry =
   { name :: String
+  , path :: String
+  , kind :: String
+  , size :: Int
+  , sha :: String
+  , lastCommitSha :: Maybe String
+  , lastCommitWhen :: Maybe String
+  , downloadUrl :: Maybe String
+  , htmlUrl :: String
   }
+
+type Branch =
+  { name :: String
+  , sha :: String
+  , message :: String
+  , author :: String
+  , updatedAt :: String
+  , protected :: Boolean
+  }
+
+type Tag =
+  { name :: String
+  , message :: String
+  , sha :: String
+  , createdAt :: String
+  , zipUrl :: String
+  , tarUrl :: String
+  }
+
+type Commit =
+  { sha :: String
+  , shortSha :: String
+  , message :: String
+  , author :: String
+  , createdAt :: String
+  , htmlUrl :: String
+  }
+
+type Label =
+  { name :: String
+  , color :: String
+  }
+
+type Issue =
+  { number :: Int
+  , title :: String
+  , state :: String
+  , htmlUrl :: String
+  , createdAt :: String
+  , updatedAt :: String
+  , comments :: Int
+  , author :: String
+  , labels :: Array Label
+  }
+
+type PullRequest =
+  { number :: Int
+  , title :: String
+  , state :: String
+  , htmlUrl :: String
+  , createdAt :: String
+  , updatedAt :: String
+  , author :: String
+  , labels :: Array Label
+  }
+
+type Release =
+  { tagName :: String
+  , name :: String
+  , body :: String
+  , draft :: Boolean
+  , prerelease :: Boolean
+  , createdAt :: String
+  , htmlUrl :: String
+  , tarUrl :: String
+  , zipUrl :: String
+  }
+
+type LicenseWire = { name :: String }
 
 newtype RepositoryWire = RepositoryWire
   { name :: String
@@ -60,6 +150,11 @@ newtype RepositoryWire = RepositoryWire
   , language :: String
   , size :: Int
   , open_issues_count :: Int
+  , open_pr_counter :: Int
+  , release_counter :: Int
+  , stars_count :: Int
+  , forks_count :: Int
+  , watchers_count :: Int
   , topics :: Array String
   , license :: Maybe LicenseWire
   , html_url :: String
@@ -70,67 +165,186 @@ newtype RepositoryWire = RepositoryWire
 
 derive newtype instance decodeRepositoryWire :: DecodeJson RepositoryWire
 
-newtype TreeEntryWire = TreeEntryWire
-  { path :: String
+newtype ContentEntryWire = ContentEntryWire
+  { name :: String
+  , path :: String
   , type :: String
   , size :: Int
+  , sha :: String
+  , last_commit_sha :: Maybe String
+  , last_commit_when :: Maybe String
+  , download_url :: Maybe String
+  , html_url :: String
   }
 
-derive newtype instance decodeTreeEntryWire :: DecodeJson TreeEntryWire
+derive newtype instance decodeContentEntryWire :: DecodeJson ContentEntryWire
 
-newtype TreeWire = TreeWire
-  { tree :: Array TreeEntryWire
-  , total_count :: Int
-  , truncated :: Boolean
+newtype SignatureWire = SignatureWire
+  { name :: String
+  , username :: String
   }
 
-derive newtype instance decodeTreeWire :: DecodeJson TreeWire
+derive newtype instance decodeSignatureWire :: DecodeJson SignatureWire
+
+newtype BranchCommitWire = BranchCommitWire
+  { id :: String
+  , message :: String
+  , author :: SignatureWire
+  , timestamp :: String
+  }
+
+derive newtype instance decodeBranchCommitWire :: DecodeJson BranchCommitWire
+
+newtype BranchWire = BranchWire
+  { name :: String
+  , commit :: BranchCommitWire
+  , protected :: Boolean
+  }
+
+derive newtype instance decodeBranchWire :: DecodeJson BranchWire
+
+newtype TagCommitWire = TagCommitWire
+  { sha :: String
+  , created :: String
+  }
+
+derive newtype instance decodeTagCommitWire :: DecodeJson TagCommitWire
+
+newtype TagWire = TagWire
+  { name :: String
+  , message :: String
+  , commit :: TagCommitWire
+  , zipball_url :: String
+  , tarball_url :: String
+  }
+
+derive newtype instance decodeTagWire :: DecodeJson TagWire
+
+newtype CommitAuthorWire = CommitAuthorWire
+  { name :: String
+  , date :: String
+  }
+
+derive newtype instance decodeCommitAuthorWire :: DecodeJson CommitAuthorWire
+
+newtype CommitPayloadWire = CommitPayloadWire
+  { message :: String
+  , author :: CommitAuthorWire
+  }
+
+derive newtype instance decodeCommitPayloadWire :: DecodeJson CommitPayloadWire
+
+newtype CommitWire = CommitWire
+  { sha :: String
+  , html_url :: String
+  , commit :: CommitPayloadWire
+  }
+
+derive newtype instance decodeCommitWire :: DecodeJson CommitWire
+
+newtype UserWire = UserWire { login :: String }
+
+derive newtype instance decodeUserWire :: DecodeJson UserWire
+
+newtype LabelWire = LabelWire
+  { name :: String
+  , color :: String
+  }
+
+derive newtype instance decodeLabelWire :: DecodeJson LabelWire
+
+newtype IssueWire = IssueWire
+  { number :: Int
+  , title :: String
+  , state :: String
+  , html_url :: String
+  , created_at :: String
+  , updated_at :: String
+  , comments :: Int
+  , user :: UserWire
+  , labels :: Array LabelWire
+  }
+
+derive newtype instance decodeIssueWire :: DecodeJson IssueWire
+
+newtype PullRequestWire = PullRequestWire
+  { number :: Int
+  , title :: String
+  , state :: String
+  , html_url :: String
+  , created_at :: String
+  , updated_at :: String
+  , user :: UserWire
+  , labels :: Array LabelWire
+  }
+
+derive newtype instance decodePullRequestWire :: DecodeJson PullRequestWire
+
+newtype ReleaseWire = ReleaseWire
+  { tag_name :: String
+  , name :: String
+  , body :: String
+  , draft :: Boolean
+  , prerelease :: Boolean
+  , created_at :: String
+  , html_url :: String
+  , tarball_url :: String
+  , zipball_url :: String
+  }
+
+derive newtype instance decodeReleaseWire :: DecodeJson ReleaseWire
 
 apiBase :: String
 apiBase = "https://git.s4.gl/api/v1"
 
+repositoryBase :: Repository -> String
+repositoryBase repository = apiBase <> "/repos/straylight/" <> encodeComponent repository.name
+
 listRepositories :: Aff (Either String (Array Repository))
-listRepositories = do
-  result <- getJson (apiBase <> "/orgs/straylight/repos?limit=50")
-  pure case result of
-    Left error -> Left error
-    Right repositories -> Right (map fromRepositoryWire repositories)
+listRepositories = map (map (map fromRepositoryWire)) $ getJson (apiBase <> "/orgs/straylight/repos?limit=50")
 
-listSource :: Repository -> Aff (Either String TreeListing)
-listSource repository = do
-  let
-    path =
-      "/repos/straylight/" <> encodeComponent repository.name
-        <> "/git/trees/" <> encodeComponent repository.defaultBranch
-        <> "?recursive=true&per_page=1000"
-  result <- getJson (apiBase <> path)
-  pure case result of
-    Left error -> Left error
-    Right (TreeWire response) ->
-      let
-        files = response.tree
-          # Array.mapMaybe fromTreeEntryWire
-          # Array.filter isReadableSource
-          # Array.sortBy (\left right -> compare left.path right.path)
-          # Array.take 400
-      in
-        Right
-          { files
-          , totalCount: response.total_count
-          , truncated: response.truncated || Array.length files == 400
-          }
+listContents :: Repository -> String -> String -> Aff (Either String (Array ContentEntry))
+listContents repository ref path =
+  let suffix = if path == "" then "" else "/" <> encodePath path
+  in map (map (map fromContentEntryWire)) $ getJson
+      (repositoryBase repository <> "/contents" <> suffix <> "?ref=" <> encodeComponent ref)
 
-readSource :: Repository -> SourceEntry -> Aff (Either String String)
-readSource repository entry = do
-  let
-    url = apiBase
-      <> "/repos/straylight/" <> encodeComponent repository.name
-      <> "/raw/" <> encodePath entry.path
-      <> "?ref=" <> encodeComponent repository.defaultBranch
-  result <- AX.get ResponseFormat.string url
+listBranches :: Repository -> Aff (Either String (Array Branch))
+listBranches repository = map (map (map fromBranchWire)) $ getJson
+  (repositoryBase repository <> "/branches?limit=100")
+
+listTags :: Repository -> Aff (Either String (Array Tag))
+listTags repository = map (map (map fromTagWire)) $ getJson
+  (repositoryBase repository <> "/tags?limit=100")
+
+listCommits :: Repository -> String -> String -> Aff (Either String (Array Commit))
+listCommits repository ref path =
+  let pathQuery = if path == "" then "" else "&path=" <> encodeComponent path
+  in map (map (map fromCommitWire)) $ getJson
+      (repositoryBase repository <> "/commits?sha=" <> encodeComponent ref <> pathQuery <> "&limit=50")
+
+listIssues :: Repository -> Aff (Either String (Array Issue))
+listIssues repository = map (map (map fromIssueWire)) $ getJson
+  (repositoryBase repository <> "/issues?state=all&limit=50")
+
+listPullRequests :: Repository -> Aff (Either String (Array PullRequest))
+listPullRequests repository = map (map (map fromPullRequestWire)) $ getJson
+  (repositoryBase repository <> "/pulls?state=all&limit=50")
+
+listReleases :: Repository -> Aff (Either String (Array Release))
+listReleases repository = map (map (map fromReleaseWire)) $ getJson
+  (repositoryBase repository <> "/releases?limit=50")
+
+readRaw :: Repository -> String -> String -> Aff (Either String String)
+readRaw repository ref path = do
+  result <- AX.get ResponseFormat.string (rawUrl repository ref path)
   pure case result of
     Left error -> Left (AX.printError error)
     Right response -> Right response.body
+
+rawUrl :: Repository -> String -> String -> String
+rawUrl repository ref path =
+  repositoryBase repository <> "/raw/" <> encodePath path <> "?ref=" <> encodeComponent ref
 
 getJson :: forall a. DecodeJson a => String -> Aff (Either String a)
 getJson url = do
@@ -151,6 +365,11 @@ fromRepositoryWire (RepositoryWire repository) =
   , language: repository.language
   , sizeKiB: repository.size
   , openIssues: repository.open_issues_count
+  , openPulls: repository.open_pr_counter
+  , releaseCount: repository.release_counter
+  , stars: repository.stars_count
+  , forks: repository.forks_count
+  , watchers: repository.watchers_count
   , topics: repository.topics
   , license: map _.name repository.license
   , htmlUrl: repository.html_url
@@ -159,43 +378,105 @@ fromRepositoryWire (RepositoryWire repository) =
   , archived: repository.archived
   }
 
-fromTreeEntryWire :: TreeEntryWire -> Maybe SourceEntry
-fromTreeEntryWire (TreeEntryWire entry)
-  | entry.type == "blob" = Just { path: entry.path, size: entry.size }
-  | otherwise = Nothing
+fromContentEntryWire :: ContentEntryWire -> ContentEntry
+fromContentEntryWire (ContentEntryWire entry) =
+  { name: entry.name
+  , path: entry.path
+  , kind: entry.type
+  , size: entry.size
+  , sha: entry.sha
+  , lastCommitSha: entry.last_commit_sha
+  , lastCommitWhen: entry.last_commit_when
+  , downloadUrl: entry.download_url
+  , htmlUrl: entry.html_url
+  }
 
-isReadableSource :: SourceEntry -> Boolean
-isReadableSource entry =
-  entry.size <= 300000
-    && (Array.elem (String.toLower entry.path) readableNames || Array.any hasSuffix readableSuffixes)
-  where
-  hasSuffix suffix = case String.stripSuffix (Pattern suffix) (String.toLower entry.path) of
-    Just _ -> true
-    Nothing -> false
+fromBranchWire :: BranchWire -> Branch
+fromBranchWire (BranchWire branch) = case branch.commit of
+  BranchCommitWire commit -> case commit.author of
+    SignatureWire author ->
+      { name: branch.name
+      , sha: commit.id
+      , message: firstLine commit.message
+      , author: if author.username == "" then author.name else author.username
+      , updatedAt: commit.timestamp
+      , protected: branch.protected
+      }
 
-readableNames :: Array String
-readableNames =
-  [ ".env.example"
-  , ".gitignore"
-  , ".gitmodules"
-  , ".ignore"
-  , "dockerfile"
-  , "justfile"
-  , "license"
-  , "makefile"
-  ]
+fromTagWire :: TagWire -> Tag
+fromTagWire (TagWire tag) = case tag.commit of
+  TagCommitWire commit ->
+    { name: tag.name
+    , message: firstLine tag.message
+    , sha: commit.sha
+    , createdAt: commit.created
+    , zipUrl: tag.zipball_url
+    , tarUrl: tag.tarball_url
+    }
 
-readableSuffixes :: Array String
-readableSuffixes =
-  [ ".c", ".cc", ".conf", ".cpp", ".css", ".cxx"
-  , ".dhall", ".el", ".elm", ".graphql", ".h", ".hpp", ".hs"
-  , ".html", ".java", ".js", ".json", ".jsx", ".lean", ".lock"
-  , ".lua", ".md", ".mdx", ".mjs", ".nix", ".org", ".proto"
-  , ".purs", ".py", ".rb", ".rs", ".scss", ".sh", ".sql", ".svg"
-  , ".tex", ".toml", ".ts", ".tsx", ".txt", ".typ", ".xml", ".yaml", ".yml"
-  ]
+fromCommitWire :: CommitWire -> Commit
+fromCommitWire (CommitWire value) = case value.commit of
+  CommitPayloadWire commit -> case commit.author of
+    CommitAuthorWire author ->
+      { sha: value.sha
+      , shortSha: String.take 7 value.sha
+      , message: firstLine commit.message
+      , author: author.name
+      , createdAt: author.date
+      , htmlUrl: value.html_url
+      }
+
+fromLabelWire :: LabelWire -> Label
+fromLabelWire (LabelWire label) = { name: label.name, color: label.color }
+
+fromIssueWire :: IssueWire -> Issue
+fromIssueWire (IssueWire issue) = case issue.user of
+  UserWire user ->
+    { number: issue.number
+    , title: issue.title
+    , state: issue.state
+    , htmlUrl: issue.html_url
+    , createdAt: issue.created_at
+    , updatedAt: issue.updated_at
+    , comments: issue.comments
+    , author: user.login
+    , labels: map fromLabelWire issue.labels
+    }
+
+fromPullRequestWire :: PullRequestWire -> PullRequest
+fromPullRequestWire (PullRequestWire pull) = case pull.user of
+  UserWire user ->
+    { number: pull.number
+    , title: pull.title
+    , state: pull.state
+    , htmlUrl: pull.html_url
+    , createdAt: pull.created_at
+    , updatedAt: pull.updated_at
+    , author: user.login
+    , labels: map fromLabelWire pull.labels
+    }
+
+fromReleaseWire :: ReleaseWire -> Release
+fromReleaseWire (ReleaseWire release) =
+  { tagName: release.tag_name
+  , name: release.name
+  , body: release.body
+  , draft: release.draft
+  , prerelease: release.prerelease
+  , createdAt: release.created_at
+  , htmlUrl: release.html_url
+  , tarUrl: release.tarball_url
+  , zipUrl: release.zipball_url
+  }
+
+firstLine :: String -> String
+firstLine = SCU.takeWhile (_ /= '\n')
 
 encodePath :: String -> String
 encodePath = String.joinWith "/" <<< map encodeComponent <<< String.split (Pattern "/")
 
+decodePath :: String -> String
+decodePath = String.joinWith "/" <<< map decodeComponent <<< String.split (Pattern "/")
+
 foreign import encodeComponent :: String -> String
+foreign import decodeComponent :: String -> String

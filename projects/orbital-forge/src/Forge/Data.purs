@@ -62,6 +62,11 @@ type Project =
   , license :: String
   , sizeKiB :: Int
   , openIssues :: Int
+  , openPulls :: Int
+  , releaseCount :: Int
+  , stars :: Int
+  , forks :: Int
+  , watchers :: Int
   , defaultBranch :: String
   , archived :: Boolean
   , htmlUrl :: String
@@ -91,6 +96,11 @@ fromRepository repository =
     , license: fromMaybe "Unspecified" repository.license
     , sizeKiB: repository.sizeKiB
     , openIssues: repository.openIssues
+    , openPulls: repository.openPulls
+    , releaseCount: repository.releaseCount
+    , stars: repository.stars
+    , forks: repository.forks
+    , watchers: repository.watchers
     , defaultBranch: repository.defaultBranch
     , archived: repository.archived
     , htmlUrl: repository.htmlUrl
