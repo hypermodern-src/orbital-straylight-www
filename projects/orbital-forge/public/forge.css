@@ -1,6 +1,6 @@
 :root{
-  --forge-max:1180px;
-  --forge-tree:240px;
+  --forge-gutter:clamp(1rem,2vw,2.25rem);
+  --forge-tree:clamp(220px,18vw,300px);
 }
 
 body{overflow:hidden}
@@ -8,7 +8,7 @@ button{font-family:var(--font-ui)}
 .forge-app{position:relative;z-index:1}
 .forge-scroll{flex:1;min-width:0;min-height:0;overflow-y:auto;scrollbar-gutter:stable}
 .forge-scroll.is-source{display:flex;overflow:hidden}
-.forge-wrap{width:100%;max-width:var(--forge-max);margin:0 auto;padding:0 var(--gutter) 5rem}
+.forge-wrap{width:100%;max-width:none;margin:0;padding:0 var(--forge-gutter) 5rem}
 .forge-scroll.is-source .forge-wrap{display:flex;min-height:0;padding-bottom:1rem}
 .forge-project-page.is-source{display:flex;min-width:0;min-height:0;flex:1;flex-direction:column}
 .forge-project-page.is-source .forge-tab-panel{display:flex;min-height:0;flex:1;padding-top:1rem}
