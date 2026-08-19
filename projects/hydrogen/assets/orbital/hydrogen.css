@@ -108,7 +108,7 @@ html[data-theme='onosendai'] .badge2.is-error{color:hsl(2,64%,72%)}
 .orbital-tab:hover{color:var(--text-strong)}
 .orbital-tab[data-state='active']{color:var(--interactive);border-bottom-color:var(--interactive)}
 .orbital-tab:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
-.orbital-tab-count{margin-left:.4rem;color:var(--text-faint);font-weight:500}
+.orbital-tab-count{margin-left:.4rem;color:var(--text-body);font-weight:500}
 
 /* Native source lines for Hydrogen.Orbital.Code. */
 .orbital-code-viewer{display:flex;min-width:0;min-height:0;flex-direction:column}
@@ -119,9 +119,9 @@ html[data-theme='onosendai'] .badge2.is-error{color:hsl(2,64%,72%)}
 .orbital-code-line-number{
   position:sticky;left:0;display:table-cell;width:1%;padding:0 .8rem 0 1rem;
   border-right:1px solid var(--line-faint);background:var(--surface-code);
-  color:var(--code-gutter);text-align:right;user-select:none;font-variant-numeric:tabular-nums
+  color:var(--text-body);text-align:right;user-select:none;font-variant-numeric:tabular-nums
 }
-.orbital-code-source{display:table-cell;padding:0 1.1rem;white-space:pre;color:var(--code-fg)}
+.orbital-code-source{display:table-cell;padding:0 1.1rem;white-space:pre;color:var(--text-strong)}
 
 @media(max-width:600px){
   .orbital-nav{padding:0 var(--space-4)}

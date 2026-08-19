@@ -6,8 +6,12 @@
         "core": {
           "dependencies": [
             "aff",
+            "affjax",
+            "affjax-web",
+            "argonaut-codecs",
             "arrays",
             "effect",
+            "either",
             "foldable-traversable",
             "halogen",
             "hydrogen",

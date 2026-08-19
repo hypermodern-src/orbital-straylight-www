@@ -54,6 +54,7 @@ codeViewer o =
     , HH.div
         [ HP.class_ (HH.ClassName "cv-scroll")
         , HP.tabIndex 0
+        , HP.attr (HH.AttrName "role") "region"
         , HP.attr (HH.AttrName "aria-label") ("Source code: " <> o.path)
         ]
         [ HH.div [ HP.class_ (HH.ClassName "orbital-code-lines") ]

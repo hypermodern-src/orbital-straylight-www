@@ -48,7 +48,8 @@ if (process.argv.includes("--vercel")) {
   rmSync(output, { recursive: true, force: true });
   mkdirSync(join(output, "static"), { recursive: true });
   for (const entry of readdirSync(dist)) cpSync(join(dist, entry), join(output, "static", entry), { recursive: true });
-  writeFileSync(join(output, "config.json"), '{ "version": 3 }\n', "utf8");
+  const config = { version: 3 };
+  writeFileSync(join(output, "config.json"), `${JSON.stringify(config, null, 2)}\n`, "utf8");
   console.log(`orbital-forge: Vercel output -> ${output}`);
 }
 

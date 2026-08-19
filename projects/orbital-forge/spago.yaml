@@ -2,7 +2,11 @@ package:
   name: orbital-forge
   dependencies:
     - aff
+    - affjax
+    - affjax-web
+    - argonaut-codecs
     - arrays
+    - either
     - effect
     - foldable-traversable
     - halogen
