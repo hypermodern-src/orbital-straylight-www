@@ -421,9 +421,6 @@ newtype ReleaseWire = ReleaseWire
 
 derive newtype instance decodeReleaseWire :: DecodeJson ReleaseWire
 
-apiBase :: String
-apiBase = "https://git.s4.gl/api/v1"
-
 repositoryBase :: Repository -> String
 repositoryBase repository = apiBase <> "/repos/straylight/" <> encodeComponent repository.name
 
@@ -669,3 +666,4 @@ decodePath = String.joinWith "/" <<< map decodeComponent <<< String.split (Patte
 
 foreign import encodeComponent :: String -> String
 foreign import decodeComponent :: String -> String
+foreign import apiBase :: String

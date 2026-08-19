@@ -1,0 +1,61 @@
+cabal-version: 3.0
+name: orbital-forge-backend
+version: 0.1.0.0
+synopsis: Typed backend boundary for ORBITAL // FORGE
+category: Web
+build-type: Simple
+
+common warnings
+  default-language: GHC2021
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Wincomplete-uni-patterns
+    -Wincomplete-record-updates
+    -Wmissing-export-lists
+    -Widentities
+    -Wredundant-constraints
+    -Wpartial-fields
+
+library
+  import: warnings
+  hs-source-dirs: src
+  exposed-modules:
+    Orbital.Forge.Application
+    Orbital.Forge.Backend
+    Orbital.Forge.Backend.Forgejo
+  build-depends:
+    aeson,
+    base >=4.18 && <5,
+    bytestring,
+    case-insensitive,
+    http-client,
+    http-types,
+    text,
+    wai,
+    wai-app-static
+
+executable orbital-forge-backend
+  import: warnings
+  hs-source-dirs: app
+  main-is: Main.hs
+  build-depends:
+    base,
+    bytestring,
+    directory,
+    http-client,
+    http-client-tls,
+    orbital-forge-backend,
+    text,
+    warp
+
+test-suite orbital-forge-backend-test
+  import: warnings
+  type: exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is: Spec.hs
+  build-depends:
+    base,
+    bytestring,
+    orbital-forge-backend,
+    text

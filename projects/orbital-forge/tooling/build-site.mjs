@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -44,6 +44,22 @@ for (const file of ["index.html", "forge.js", "forge.css", "orbital/hydrogen.css
 }
 
 if (process.argv.includes("--vercel")) {
+  const apiBase = process.env.ORBITAL_FORGE_API_BASE
+    ?? "https://git.s4.gl/orbital-forge/api/forge/v1";
+  const parsedApiBase = new URL(apiBase);
+  if (parsedApiBase.protocol !== "https:") {
+    throw new Error("orbital-forge: the deployed API base must use HTTPS");
+  }
+  const indexPath = join(dist, "index.html");
+  const index = readFileSync(indexPath, "utf8");
+  writeFileSync(
+    indexPath,
+    index.replace(
+      '<meta name="orbital-forge-api" content="/api/forge/v1">',
+      `<meta name="orbital-forge-api" content="${parsedApiBase.href.replace(/\/$/, "")}">`,
+    ),
+    "utf8",
+  );
   const output = join(root, ".vercel", "output");
   rmSync(output, { recursive: true, force: true });
   mkdirSync(join(output, "static"), { recursive: true });
