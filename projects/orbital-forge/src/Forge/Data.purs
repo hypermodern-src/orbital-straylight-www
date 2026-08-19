@@ -7,6 +7,7 @@ module Forge.Data
   , Publication
   , fromRepository
   , sourceLanguage
+  , languageColor
   ) where
 
 import Prelude

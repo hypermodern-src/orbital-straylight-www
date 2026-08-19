@@ -29,3 +29,5 @@ export const copyText = (value) => () => {
   try { document.execCommand("copy"); } catch (_) {}
   node.remove();
 };
+
+export const currentUrl = () => window.location.href;

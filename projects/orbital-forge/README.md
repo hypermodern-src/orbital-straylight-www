@@ -6,11 +6,16 @@ navigation, repository, and syntax-highlighted code-viewer primitives.
 
 Repository metadata, directory and blob views, branches, tags, commits, issues,
 pull requests, releases, clone URLs, and source files come from the public
-`straylight` organization on `git.s4.gl`. Repository READMEs are parsed and
-rendered locally. The browser calls Forgejo directly over the tailnet using
-public, read-only GETs. Forgejo's reverse proxy allows only the Orbital Forge
-origins and local development; no Forgejo credential is shipped to the client
-and cross-origin credentials are not enabled.
+`straylight` organization on `git.s4.gl`. The complete read surface includes a
+recursive go-to-file palette, language-byte breakdowns, path history, immutable
+permalinks, commit verification and stats, changed-file navigation, native
+highlighted unified diffs, and patch downloads. Repository READMEs are parsed
+and rendered locally.
+
+The browser calls Forgejo directly over the tailnet using public, read-only
+GETs. Forgejo's reverse proxy allows only the Orbital Forge origins and local
+development; no Forgejo credential is shipped to the client and cross-origin
+credentials are not enabled.
 
 ```console
 npm ci

@@ -6,6 +6,12 @@ module Forge.Forgejo
   , Branch
   , Tag
   , Commit
+  , CommitDetail
+  , CommitFile
+  , CommitStats
+  , TreeEntry
+  , TreeListing
+  , LanguageStat
   , Label
   , Issue
   , PullRequest
@@ -15,6 +21,11 @@ module Forge.Forgejo
   , listBranches
   , listTags
   , listCommits
+  , listTree
+  , listLanguages
+  , readCommit
+  , readCommitDiff
+  , commitPatchUrl
   , listIssues
   , listPullRequests
   , listReleases
@@ -31,12 +42,15 @@ import Prelude
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AX
 import Data.Argonaut.Decode (class DecodeJson, decodeJson, printJsonDecodeError)
+import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe)
 import Data.String as String
 import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
+import Foreign.Object as Object
 
 type Repository =
   { name :: String
@@ -97,6 +111,49 @@ type Commit =
   , author :: String
   , createdAt :: String
   , htmlUrl :: String
+  }
+
+type CommitStats =
+  { additions :: Int
+  , deletions :: Int
+  , total :: Int
+  }
+
+type CommitFile =
+  { path :: String
+  , status :: String
+  }
+
+type CommitDetail =
+  { sha :: String
+  , shortSha :: String
+  , message :: String
+  , author :: String
+  , committer :: String
+  , createdAt :: String
+  , htmlUrl :: String
+  , parents :: Array String
+  , files :: Array CommitFile
+  , stats :: CommitStats
+  , verified :: Boolean
+  , verificationReason :: String
+  }
+
+type TreeEntry =
+  { path :: String
+  , kind :: String
+  , size :: Int
+  }
+
+type TreeListing =
+  { entries :: Array TreeEntry
+  , totalCount :: Int
+  , truncated :: Boolean
+  }
+
+type LanguageStat =
+  { name :: String
+  , bytes :: Int
   }
 
 type Label =
@@ -242,6 +299,73 @@ newtype CommitWire = CommitWire
 
 derive newtype instance decodeCommitWire :: DecodeJson CommitWire
 
+newtype CommitVerificationWire = CommitVerificationWire
+  { verified :: Boolean
+  , reason :: String
+  }
+
+derive newtype instance decodeCommitVerificationWire :: DecodeJson CommitVerificationWire
+
+newtype CommitDetailPayloadWire = CommitDetailPayloadWire
+  { message :: String
+  , author :: CommitAuthorWire
+  , committer :: CommitAuthorWire
+  , verification :: CommitVerificationWire
+  }
+
+derive newtype instance decodeCommitDetailPayloadWire :: DecodeJson CommitDetailPayloadWire
+
+newtype CommitParentWire = CommitParentWire { sha :: String }
+
+derive newtype instance decodeCommitParentWire :: DecodeJson CommitParentWire
+
+newtype CommitFileWire = CommitFileWire
+  { filename :: String
+  , status :: String
+  }
+
+derive newtype instance decodeCommitFileWire :: DecodeJson CommitFileWire
+
+newtype CommitStatsWire = CommitStatsWire
+  { additions :: Int
+  , deletions :: Int
+  , total :: Int
+  }
+
+derive newtype instance decodeCommitStatsWire :: DecodeJson CommitStatsWire
+
+newtype CommitDetailWire = CommitDetailWire
+  { sha :: String
+  , html_url :: String
+  , created :: String
+  , commit :: CommitDetailPayloadWire
+  , parents :: Array CommitParentWire
+  , files :: Array CommitFileWire
+  , stats :: CommitStatsWire
+  }
+
+derive newtype instance decodeCommitDetailWire :: DecodeJson CommitDetailWire
+
+newtype TreeEntryWire = TreeEntryWire
+  { path :: String
+  , type :: String
+  , size :: Int
+  }
+
+derive newtype instance decodeTreeEntryWire :: DecodeJson TreeEntryWire
+
+newtype TreeWire = TreeWire
+  { tree :: Array TreeEntryWire
+  , total_count :: Int
+  , truncated :: Boolean
+  }
+
+derive newtype instance decodeTreeWire :: DecodeJson TreeWire
+
+newtype LanguageStatisticsWire = LanguageStatisticsWire (Object.Object Int)
+
+derive newtype instance decodeLanguageStatisticsWire :: DecodeJson LanguageStatisticsWire
+
 newtype UserWire = UserWire { login :: String }
 
 derive newtype instance decodeUserWire :: DecodeJson UserWire
@@ -323,6 +447,26 @@ listCommits repository ref path =
   in map (map (map fromCommitWire)) $ getJson
       (repositoryBase repository <> "/commits?sha=" <> encodeComponent ref <> pathQuery <> "&limit=50")
 
+listTree :: Repository -> String -> Aff (Either String TreeListing)
+listTree repository ref = map (map fromTreeWire) $ getJson
+  (repositoryBase repository <> "/git/trees/" <> encodeComponent ref <> "?recursive=true&per_page=1000")
+
+listLanguages :: Repository -> Aff (Either String (Array LanguageStat))
+listLanguages repository = map (map fromLanguageStatisticsWire) $ getJson
+  (repositoryBase repository <> "/languages")
+
+readCommit :: Repository -> String -> Aff (Either String CommitDetail)
+readCommit repository sha = map (map fromCommitDetailWire) $ getJson
+  (repositoryBase repository <> "/git/commits/" <> encodeComponent sha <> "?stat=true&files=true&verification=true")
+
+readCommitDiff :: Repository -> String -> Aff (Either String String)
+readCommitDiff repository sha = getText
+  (repositoryBase repository <> "/git/commits/" <> encodeComponent sha <> ".diff")
+
+commitPatchUrl :: Repository -> String -> String
+commitPatchUrl repository sha =
+  repositoryBase repository <> "/git/commits/" <> encodeComponent sha <> ".patch"
+
 listIssues :: Repository -> Aff (Either String (Array Issue))
 listIssues repository = map (map (map fromIssueWire)) $ getJson
   (repositoryBase repository <> "/issues?state=all&limit=50")
@@ -337,7 +481,11 @@ listReleases repository = map (map (map fromReleaseWire)) $ getJson
 
 readRaw :: Repository -> String -> String -> Aff (Either String String)
 readRaw repository ref path = do
-  result <- AX.get ResponseFormat.string (rawUrl repository ref path)
+  getText (rawUrl repository ref path)
+
+getText :: String -> Aff (Either String String)
+getText url = do
+  result <- AX.get ResponseFormat.string url
   pure case result of
     Left error -> Left (AX.printError error)
     Right response -> Right response.body
@@ -425,6 +573,37 @@ fromCommitWire (CommitWire value) = case value.commit of
       , createdAt: author.date
       , htmlUrl: value.html_url
       }
+
+fromCommitDetailWire :: CommitDetailWire -> CommitDetail
+fromCommitDetailWire (CommitDetailWire value) = case value.commit, value.stats of
+  CommitDetailPayloadWire commit, CommitStatsWire stats -> case commit.author, commit.committer, commit.verification of
+    CommitAuthorWire author, CommitAuthorWire committer, CommitVerificationWire verification ->
+      { sha: value.sha
+      , shortSha: String.take 7 value.sha
+      , message: commit.message
+      , author: author.name
+      , committer: committer.name
+      , createdAt: value.created
+      , htmlUrl: value.html_url
+      , parents: map (\(CommitParentWire parent) -> parent.sha) value.parents
+      , files: map (\(CommitFileWire file) -> { path: file.filename, status: file.status }) value.files
+      , stats: { additions: stats.additions, deletions: stats.deletions, total: stats.total }
+      , verified: verification.verified
+      , verificationReason: verification.reason
+      }
+
+fromTreeWire :: TreeWire -> TreeListing
+fromTreeWire (TreeWire tree) =
+  { entries: map (\(TreeEntryWire entry) -> { path: entry.path, kind: entry.type, size: entry.size }) tree.tree
+  , totalCount: tree.total_count
+  , truncated: tree.truncated
+  }
+
+fromLanguageStatisticsWire :: LanguageStatisticsWire -> Array LanguageStat
+fromLanguageStatisticsWire (LanguageStatisticsWire statistics) =
+  (Object.toUnfoldable statistics :: Array (Tuple String Int))
+    # map (\(Tuple name bytes) -> { name, bytes })
+    # Array.sortBy (\left right -> compare right.bytes left.bytes)
 
 fromLabelWire :: LabelWire -> Label
 fromLabelWire (LabelWire label) = { name: label.name, color: label.color }

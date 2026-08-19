@@ -8,11 +8,12 @@ import Data.Foldable (foldl)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String as String
+import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
-import Forge.Data (Project, Publication, fromRepository, sourceLanguage)
+import Forge.Data (Project, Publication, fromRepository, languageColor, sourceLanguage)
 import Forge.Forgejo as Forgejo
 import Forge.Markdown (MarkdownBlock(..), parseMarkdown)
 import Halogen as H
@@ -40,11 +41,16 @@ foreign import setHash :: String -> Effect Unit
 foreign import currentTheme :: Effect Boolean
 foreign import applyTheme :: Boolean -> Effect Unit
 foreign import copyText :: String -> Effect Unit
+foreign import currentUrl :: Effect String
 
 data RepoView
   = CodeView String String
   | BlobView String String
   | CommitsView String
+  | CommitView String String
+  | FileHistoryView String String
+  | RefsView String
+  | SearchView String
   | IssuesView
   | PullsView
   | ReleasesView
@@ -81,16 +87,22 @@ type State =
   , repositoryContext :: Maybe String
   , branches :: RemoteData String (Array Forgejo.Branch)
   , tags :: RemoteData String (Array Forgejo.Tag)
+  , languages :: RemoteData String (Array Forgejo.LanguageStat)
   , contents :: RemoteData String (Array Forgejo.ContentEntry)
   , latestCommit :: RemoteData String (Maybe Forgejo.Commit)
   , readme :: RemoteData String (Maybe Readme)
   , source :: RemoteData String SourceFile
   , commits :: RemoteData String (Array Forgejo.Commit)
+  , commitDetail :: RemoteData String Forgejo.CommitDetail
+  , commitDiff :: RemoteData String String
+  , searchIndex :: RemoteData String Forgejo.TreeListing
+  , searchQuery :: String
   , issues :: RemoteData String (Array Forgejo.Issue)
   , pulls :: RemoteData String (Array Forgejo.PullRequest)
   , releases :: RemoteData String (Array Forgejo.Release)
   , cloneProtocol :: CloneProtocol
   , copied :: Boolean
+  , copiedLink :: Boolean
   , dark :: Boolean
   }
 
@@ -102,6 +114,8 @@ data Action
   | SelectRef String
   | SelectProtocol CloneProtocol
   | CopyClone
+  | CopyPermalink
+  | UpdateSearch String
   | ToggleTheme
   | RetryRepositories
   | RetryRoute
@@ -124,16 +138,22 @@ component =
         , repositoryContext: Nothing
         , branches: NotAsked
         , tags: NotAsked
+        , languages: NotAsked
         , contents: NotAsked
         , latestCommit: NotAsked
         , readme: NotAsked
         , source: NotAsked
         , commits: NotAsked
+        , commitDetail: NotAsked
+        , commitDiff: NotAsked
+        , searchIndex: NotAsked
+        , searchQuery: ""
         , issues: NotAsked
         , pulls: NotAsked
         , releases: NotAsked
         , cloneProtocol: OrbCli
         , copied: false
+        , copiedLink: false
         , dark: false
         }
     , render
@@ -155,10 +175,10 @@ handleAction = case _ of
   HashChanged -> do
     hash <- liftEffect currentHash
     let route = parseHash hash
-    H.modify_ _ { route = route, copied = false }
+    H.modify_ _ { route = route, copied = false, copiedLink = false }
     loadRoute route
   Navigate route -> do
-    H.modify_ _ { route = route, copied = false }
+    H.modify_ _ { route = route, copied = false, copiedLink = false }
     liftEffect $ setHash (routeHash route)
     loadRoute route
   SelectTab tab -> do
@@ -178,6 +198,9 @@ handleAction = case _ of
       RepoRoute slug (CodeView _ path) -> handleAction (Navigate (RepoRoute slug (CodeView ref path)))
       RepoRoute slug (BlobView _ path) -> handleAction (Navigate (RepoRoute slug (BlobView ref path)))
       RepoRoute slug (CommitsView _) -> handleAction (Navigate (RepoRoute slug (CommitsView ref)))
+      RepoRoute slug (FileHistoryView _ path) -> handleAction (Navigate (RepoRoute slug (FileHistoryView ref path)))
+      RepoRoute slug (RefsView _) -> handleAction (Navigate (RepoRoute slug (RefsView ref)))
+      RepoRoute slug (SearchView _) -> handleAction (Navigate (RepoRoute slug (SearchView ref)))
       _ -> pure unit
   SelectProtocol protocol -> H.modify_ _ { cloneProtocol = protocol, copied = false }
   CopyClone -> do
@@ -187,6 +210,12 @@ handleAction = case _ of
       Just project -> do
         liftEffect $ copyText (cloneCommand state.cloneProtocol project)
         H.modify_ _ { copied = true }
+  CopyPermalink -> do
+    state <- H.get
+    url <- liftEffect currentUrl
+    liftEffect $ copyText (permalinkUrl state url)
+    H.modify_ _ { copiedLink = true }
+  UpdateSearch query -> H.modify_ _ { searchQuery = query }
   ToggleTheme -> do
     state <- H.get
     let dark = not state.dark
@@ -224,6 +253,10 @@ loadRoute = case _ of
           CodeView requestedRef path -> loadDirectory project (resolveRef project requestedRef) path
           BlobView requestedRef path -> loadBlob project (resolveRef project requestedRef) path
           CommitsView requestedRef -> loadCommitHistory project (resolveRef project requestedRef)
+          CommitView _ sha -> loadCommitDetail project sha
+          FileHistoryView requestedRef path -> loadFileHistory project (resolveRef project requestedRef) path
+          RefsView _ -> pure unit
+          SearchView requestedRef -> loadSearchIndex project (resolveRef project requestedRef)
           IssuesView -> loadIssues project
           PullsView -> loadPulls project
           ReleasesView -> loadReleases project
@@ -237,11 +270,16 @@ loadRepositoryChrome project = do
     { repositoryContext = Just project.slug
     , branches = Loading
     , tags = Loading
+    , languages = Loading
     , contents = NotAsked
     , latestCommit = NotAsked
     , readme = NotAsked
     , source = NotAsked
     , commits = NotAsked
+    , commitDetail = NotAsked
+    , commitDiff = NotAsked
+    , searchIndex = NotAsked
+    , searchQuery = ""
     , issues = NotAsked
     , pulls = NotAsked
     , releases = NotAsked
@@ -250,6 +288,8 @@ loadRepositoryChrome project = do
   H.modify_ _ { branches = eitherRemote branchResult }
   tagResult <- H.liftAff $ Forgejo.listTags project.repository
   H.modify_ _ { tags = eitherRemote tagResult }
+  languageResult <- H.liftAff $ Forgejo.listLanguages project.repository
+  H.modify_ _ { languages = eitherRemote languageResult }
 
 loadDirectory :: forall o. Project -> String -> String -> H.HalogenM State Action () o Aff Unit
 loadDirectory project ref path = do
@@ -293,6 +333,26 @@ loadCommitHistory project ref = do
   H.modify_ _ { commits = Loading }
   result <- H.liftAff $ Forgejo.listCommits project.repository ref ""
   H.modify_ _ { commits = eitherRemote result }
+
+loadFileHistory :: forall o. Project -> String -> String -> H.HalogenM State Action () o Aff Unit
+loadFileHistory project ref path = do
+  H.modify_ _ { commits = Loading }
+  result <- H.liftAff $ Forgejo.listCommits project.repository ref path
+  H.modify_ _ { commits = eitherRemote result }
+
+loadCommitDetail :: forall o. Project -> String -> H.HalogenM State Action () o Aff Unit
+loadCommitDetail project sha = do
+  H.modify_ _ { commitDetail = Loading, commitDiff = Loading }
+  detailResult <- H.liftAff $ Forgejo.readCommit project.repository sha
+  H.modify_ _ { commitDetail = eitherRemote detailResult }
+  diffResult <- H.liftAff $ Forgejo.readCommitDiff project.repository sha
+  H.modify_ _ { commitDiff = eitherRemote diffResult }
+
+loadSearchIndex :: forall o. Project -> String -> H.HalogenM State Action () o Aff Unit
+loadSearchIndex project ref = do
+  H.modify_ _ { searchIndex = Loading }
+  result <- H.liftAff $ Forgejo.listTree project.repository ref
+  H.modify_ _ { searchIndex = eitherRemote result }
 
 loadIssues :: forall o. Project -> H.HalogenM State Action () o Aff Unit
 loadIssues project = do
@@ -491,6 +551,10 @@ renderProject state project view =
             CodeView requestedRef path -> renderDirectory state project (resolveRef project requestedRef) path
             BlobView requestedRef path -> renderBlob state project (resolveRef project requestedRef) path
             CommitsView requestedRef -> renderCommits state project (resolveRef project requestedRef)
+            CommitView requestedRef sha -> renderCommitDetail state project (resolveRef project requestedRef) sha
+            FileHistoryView requestedRef path -> renderFileHistory state project (resolveRef project requestedRef) path
+            RefsView requestedRef -> renderRefs state project (resolveRef project requestedRef)
+            SearchView requestedRef -> renderSearch state project (resolveRef project requestedRef)
             IssuesView -> renderIssues state project
             PullsView -> renderPulls state project
             ReleasesView -> renderReleases state project
@@ -513,22 +577,36 @@ renderRepoToolbar state project ref =
             (refOptions state project ref)
         ]
     , HH.div [ HP.class_ (HH.ClassName "forge-ref-counts") ]
-        [ HH.span_ [ HH.b_ [ HH.text (remoteLength state.branches) ], HH.text " branches" ]
-        , HH.span_ [ HH.b_ [ HH.text (remoteLength state.tags) ], HH.text " tags" ]
+        [ internalLink (RepoRoute project.slug (RefsView ref)) [ HH.b_ [ HH.text (remoteLength state.branches) ], HH.text " branches" ]
+        , internalLink (RepoRoute project.slug (RefsView ref)) [ HH.b_ [ HH.text (remoteLength state.tags) ], HH.text " tags" ]
         ]
     , HH.div [ HP.class_ (HH.ClassName "forge-toolbar-spacer") ] []
+    , internalLinkClass "forge-small-button" (RepoRoute project.slug (SearchView ref)) [ HH.text "Go to file /" ]
     , HH.a [ HP.href project.htmlUrl, HP.target "_blank", HP.rel "noreferrer", HP.class_ (HH.ClassName "forge-small-button") ] [ HH.text "Forgejo ↗" ]
     ]
 
 refOptions :: forall w. State -> Project -> String -> Array (HH.HTML w Action)
-refOptions state project ref = branchOptions <> tagOptions
+refOptions state project ref = detachedOption <> branchOptions <> tagOptions
   where
+  detachedOption
+    | knownRef = []
+    | otherwise =
+        [ HH.option [ HP.value ref, HP.selected true ]
+            [ HH.text (if ref == "" then project.defaultBranch else String.take 12 ref) ]
+        ]
+  knownRef = branchKnown || tagKnown
+  branchKnown = case state.branches of
+    Success branches -> Array.any (\branch -> branch.name == ref) branches
+    _ -> false
+  tagKnown = case state.tags of
+    Success tags -> Array.any (\tag -> tag.name == ref) tags
+    _ -> false
   branchOptions = case state.branches of
     Success branches ->
       [ HH.optgroup [ HP.attr (HH.AttrName "label") "Branches" ]
           (map (\branch -> HH.option [ HP.value branch.name, HP.selected (branch.name == ref) ] [ HH.text branch.name ]) branches)
       ]
-    _ -> [ HH.option [ HP.value ref ] [ HH.text (if ref == "" then project.defaultBranch else ref) ] ]
+    _ -> []
   tagOptions = case state.tags of
     Success tags | not (Array.null tags) ->
       [ HH.optgroup [ HP.attr (HH.AttrName "label") "Tags" ]
@@ -547,11 +625,12 @@ renderDirectory state project ref path =
         Failure error -> renderFailure "Could not read this directory" error RetryRoute
         Success entries ->
           HH.div_
-            [ renderLatestCommit state.latestCommit
+            [ renderLatestCommit project ref state.latestCommit
             , HH.nav [ HP.class_ (HH.ClassName "forge-content-table"), HP.attr (HH.AttrName "aria-label") "Repository contents" ]
                 (parentEntry project ref path <> map (renderContentEntry project ref) entries)
             ]
     , renderClone state project
+    , if path == "" then renderLanguages state.languages else HH.text ""
     , renderReadme state.readme
     ]
 
@@ -573,10 +652,10 @@ renderPathCrumbs project ref path blob =
         else HH.a [ HP.href (routeHash route), HE.onClick (const (Navigate route)) ] [ HH.text part ]
       ]
 
-renderLatestCommit :: forall w. RemoteData String (Maybe Forgejo.Commit) -> HH.HTML w Action
-renderLatestCommit = case _ of
+renderLatestCommit :: forall w. Project -> String -> RemoteData String (Maybe Forgejo.Commit) -> HH.HTML w Action
+renderLatestCommit project ref = case _ of
   Success (Just commit) ->
-    HH.a [ HP.href commit.htmlUrl, HP.target "_blank", HP.rel "noreferrer", HP.class_ (HH.ClassName "forge-latest-commit") ]
+    internalLinkClass "forge-latest-commit" (RepoRoute project.slug (CommitView ref commit.sha))
       [ HH.span [ HP.class_ (HH.ClassName "forge-commit-author") ] [ HH.text commit.author ]
       , HH.span [ HP.class_ (HH.ClassName "forge-commit-message") ] [ HH.text commit.message ]
       , HH.code_ [ HH.text commit.shortSha ]
@@ -650,6 +729,43 @@ renderReadme = case _ of
   Loading -> HH.div [ HP.class_ (HH.ClassName "forge-readme-loading") ] [ HH.text "Rendering README…" ]
   _ -> HH.text ""
 
+renderLanguages :: forall w. RemoteData String (Array Forgejo.LanguageStat) -> HH.HTML w Action
+renderLanguages = case _ of
+  Success languages | not (Array.null languages) ->
+    let total = foldl (\sum language -> sum + language.bytes) 0 languages
+    in HH.section [ HP.class_ (HH.ClassName "forge-language-panel"), HP.attr (HH.AttrName "aria-label") "Repository languages" ]
+        [ HH.div [ HP.class_ (HH.ClassName "forge-language-total") ]
+            [ HH.span_ [ HH.text "Languages" ]
+            , HH.span_ [ HH.text (formatBytes (toNumber total) <> " indexed") ]
+            ]
+        , HH.div [ HP.class_ (HH.ClassName "forge-language-breakdown") ]
+            (map (renderLanguageSegment total) languages)
+        , HH.div [ HP.class_ (HH.ClassName "forge-language-legend") ]
+            (map (renderLanguageLegend total) languages)
+        ]
+  _ -> HH.text ""
+
+renderLanguageSegment :: forall w. Int -> Forgejo.LanguageStat -> HH.HTML w Action
+renderLanguageSegment total language =
+  HH.i
+    [ HP.style ("width:" <> show (languagePercent total language.bytes) <> "%;background:" <> languageColor language.name)
+    , HP.title (language.name <> " " <> show (languagePercent total language.bytes) <> "%")
+    ]
+    []
+
+renderLanguageLegend :: forall w. Int -> Forgejo.LanguageStat -> HH.HTML w Action
+renderLanguageLegend total language =
+  HH.span_
+    [ HH.i [ HP.style ("background:" <> languageColor language.name), HP.attr (HH.AttrName "aria-hidden") "true" ] []
+    , HH.b_ [ HH.text language.name ]
+    , HH.text (show (languagePercent total language.bytes) <> "%")
+    ]
+
+languagePercent :: Int -> Int -> Int
+languagePercent total bytes
+  | total <= 0 = 0
+  | otherwise = (bytes * 100) / total
+
 renderMarkdownBlock :: forall w. MarkdownBlock -> HH.HTML w Action
 renderMarkdownBlock = case _ of
   Heading level value -> case level of
@@ -661,7 +777,13 @@ renderMarkdownBlock = case _ of
   BulletList values -> HH.ul [ HP.class_ (HH.ClassName "forge-bullet-list") ] (map (\value -> HH.li_ [ HH.text value ]) values)
   OrderedList values -> HH.ol [ HP.class_ (HH.ClassName "forge-ordered-list") ] (map (\value -> HH.li_ [ HH.text value ]) values)
   Quote value -> HH.blockquote_ [ HH.text value ]
-  CodeFence language value -> HH.pre [ HP.class_ (HH.ClassName "forge-code-block"), HP.attr (HH.AttrName "data-language") language ] [ HH.code_ [ HH.text value ] ]
+  CodeFence language value -> HH.pre
+    [ HP.class_ (HH.ClassName "forge-code-block")
+    , HP.attr (HH.AttrName "data-language") language
+    , HP.attr (HH.AttrName "aria-label") (if language == "" then "Code block" else language <> " code block")
+    , HP.tabIndex 0
+    ]
+    [ HH.code_ [ HH.text value ] ]
   Rule -> HH.hr_
 
 renderBlob :: forall w. State -> Project -> String -> String -> HH.HTML w Action
@@ -669,9 +791,16 @@ renderBlob state project ref path =
   HH.div [ HP.class_ (HH.ClassName "forge-blob") ]
     [ renderRepoToolbar state project ref
     , renderPathCrumbs project ref path true
-    , renderLatestCommit state.latestCommit
+    , renderLatestCommit project ref state.latestCommit
     , HH.div [ HP.class_ (HH.ClassName "forge-blob-actions") ]
-        [ HH.a [ HP.href (Forgejo.rawUrl project.repository ref path), HP.target "_blank", HP.rel "noreferrer" ] [ HH.text "Raw" ]
+        [ internalLink (RepoRoute project.slug (FileHistoryView ref path)) [ HH.text "History" ]
+        , HH.button
+            [ HP.type_ HP.ButtonButton
+            , HP.class_ (HH.ClassName (if state.copiedLink then "is-done" else ""))
+            , HE.onClick (const CopyPermalink)
+            ]
+            [ HH.text (if state.copiedLink then "Link copied" else "Permalink") ]
+        , HH.a [ HP.href (Forgejo.rawUrl project.repository ref path), HP.target "_blank", HP.rel "noreferrer" ] [ HH.text "Raw" ]
         , HH.a [ HP.href (Forgejo.rawUrl project.repository ref path), HP.attr (HH.AttrName "download") (pathBase path) ] [ HH.text "Download" ]
         , HH.a [ HP.href (project.htmlUrl <> "/src/branch/" <> Forgejo.encodeComponent ref <> "/" <> Forgejo.encodePath path), HP.target "_blank", HP.rel "noreferrer" ] [ HH.text "View in Forgejo ↗" ]
         ]
@@ -691,18 +820,182 @@ renderCommits :: forall w. State -> Project -> String -> HH.HTML w Action
 renderCommits state project ref =
   HH.div_
     [ renderRepoToolbar state project ref
-    , remoteList state.commits "Reading commit history" "No commits found on this ref." (map renderCommit)
+    , renderSectionHead "Commit history" ("Latest commits on " <> ref) (project.htmlUrl <> "/commits/branch/" <> Forgejo.encodeComponent ref) "Open history in Forgejo ↗"
+    , remoteList state.commits "Reading commit history" "No commits found on this ref." (map (renderCommitRow project ref))
+    ]
+
+renderFileHistory :: forall w. State -> Project -> String -> String -> HH.HTML w Action
+renderFileHistory state project ref path =
+  HH.div_
+    [ renderRepoToolbar state project ref
+    , renderPathCrumbs project ref path true
+    , renderSectionHead "File history" path (project.htmlUrl <> "/commits/branch/" <> Forgejo.encodeComponent ref <> "/" <> Forgejo.encodePath path) "Open in Forgejo ↗"
+    , remoteList state.commits "Reading file history" "No commits found for this path." (map (renderCommitRow project ref))
+    ]
+
+renderCommitRow :: forall w. Project -> String -> Forgejo.Commit -> HH.HTML w Action
+renderCommitRow project ref commit =
+  internalLinkClass "forge-event-row" (RepoRoute project.slug (CommitView ref commit.sha))
+    [ HH.span [ HP.class_ (HH.ClassName "forge-event-mark is-commit"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "◇" ]
+    , HH.div [ HP.class_ (HH.ClassName "forge-event-main") ]
+        [ HH.h3_ [ HH.text commit.message ]
+        , HH.p_ [ HH.text (commit.author <> " committed on " <> shortDate commit.createdAt) ]
+        ]
+    , HH.code_ [ HH.text commit.shortSha ]
+    ]
+
+renderCommitDetail :: forall w. State -> Project -> String -> String -> HH.HTML w Action
+renderCommitDetail state project ref sha =
+  HH.div [ HP.class_ (HH.ClassName "forge-commit-detail") ]
+    [ HH.div [ HP.class_ (HH.ClassName "forge-detail-back") ]
+        [ internalLink (RepoRoute project.slug (CommitsView ref)) [ HH.text "← Commit history" ] ]
+    , case state.commitDetail of
+        NotAsked -> renderLoading "Reading commit"
+        Loading -> renderLoading "Reading commit"
+        Failure error -> renderFailure "Could not read commit" error RetryRoute
+        Success detail -> renderCommitSummary project ref detail
+    , renderCommitDiff sha state.commitDiff
+    ]
+
+renderCommitSummary :: forall w. Project -> String -> Forgejo.CommitDetail -> HH.HTML w Action
+renderCommitSummary project ref detail =
+  HH.article [ HP.class_ (HH.ClassName "forge-commit-card") ]
+    [ HH.header_
+        [ HH.h2_ [ HH.text (firstLine detail.message) ]
+        , HH.div [ HP.class_ (HH.ClassName "forge-commit-byline") ]
+            [ HH.b_ [ HH.text detail.author ]
+            , HH.text (" committed " <> shortDate detail.createdAt)
+            , HH.span
+                [ HP.class_ (HH.ClassName (if detail.verified then "forge-verification is-verified" else "forge-verification"))
+                , HP.title detail.verificationReason
+                ]
+                [ HH.text (if detail.verified then "Verified" else "Unverified") ]
+            ]
+        ]
+    , HH.pre [ HP.class_ (HH.ClassName "forge-commit-message-full") ] [ HH.text detail.message ]
+    , HH.div [ HP.class_ (HH.ClassName "forge-commit-identifiers") ]
+        ( [ HH.span_ [ HH.text "Commit" ], HH.code_ [ HH.text detail.sha ] ]
+            <> Array.concatMap renderParent detail.parents
+        )
+    , HH.div [ HP.class_ (HH.ClassName "forge-diff-stats") ]
+        [ HH.b_ [ HH.text (show detail.stats.total <> " changed lines") ]
+        , HH.span [ HP.class_ (HH.ClassName "is-addition") ] [ HH.text ("+" <> show detail.stats.additions) ]
+        , HH.span [ HP.class_ (HH.ClassName "is-deletion") ] [ HH.text ("−" <> show detail.stats.deletions) ]
+        , HH.span_ [ HH.text (show (Array.length detail.files) <> " files") ]
+        , HH.a [ HP.href (Forgejo.commitPatchUrl project.repository detail.sha), HP.attr (HH.AttrName "download") (detail.shortSha <> ".patch") ] [ HH.text "Patch ↓" ]
+        , HH.a [ HP.href detail.htmlUrl, HP.target "_blank", HP.rel "noreferrer" ] [ HH.text "Forgejo ↗" ]
+        ]
+    , HH.div [ HP.class_ (HH.ClassName "forge-changed-files") ] (map renderFile detail.files)
     ]
   where
-  renderCommit commit =
-    HH.a [ HP.href commit.htmlUrl, HP.target "_blank", HP.rel "noreferrer", HP.class_ (HH.ClassName "forge-event-row") ]
-      [ HH.span [ HP.class_ (HH.ClassName "forge-event-mark is-commit"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "◇" ]
-      , HH.div [ HP.class_ (HH.ClassName "forge-event-main") ]
-          [ HH.h3_ [ HH.text commit.message ]
-          , HH.p_ [ HH.text (commit.author <> " committed on " <> shortDate commit.createdAt) ]
-          ]
-      , HH.code_ [ HH.text commit.shortSha ]
+  renderParent parent =
+    [ HH.span_ [ HH.text "Parent" ]
+    , internalLinkClass "forge-parent-sha" (RepoRoute project.slug (CommitView ref parent)) [ HH.text (String.take 7 parent) ]
+    ]
+  renderFile file
+    | file.status == "deleted" = HH.div [ HP.class_ (HH.ClassName "forge-changed-file") ] (fileParts file)
+    | otherwise = internalLinkClass "forge-changed-file" (RepoRoute project.slug (BlobView detail.sha file.path)) (fileParts file)
+  fileParts file =
+    [ HH.span [ HP.class_ (HH.ClassName ("forge-file-status is-" <> file.status)) ] [ HH.text (String.take 1 (String.toUpper file.status)) ]
+    , HH.span_ [ HH.text file.path ]
+    , HH.span [ HP.class_ (HH.ClassName "forge-changed-arrow"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "→" ]
+    ]
+
+renderCommitDiff :: forall w. String -> RemoteData String String -> HH.HTML w Action
+renderCommitDiff sha = case _ of
+  NotAsked -> HH.text ""
+  Loading -> renderLoading "Reading unified diff"
+  Failure error -> renderFailure "Could not read unified diff" error RetryRoute
+  Success diff ->
+    HH.section [ HP.class_ (HH.ClassName "forge-diff-view") ]
+      [ HH.header_ [ HH.h2_ [ HH.text "Unified diff" ], HH.span_ [ HH.text (String.take 7 sha) ] ]
+      , codeViewer (defaultCodeViewer { path = String.take 7 sha <> ".diff", language = "diff", code = diff, class_ = "forge-diff-code" })
       ]
+
+renderRefs :: forall w. State -> Project -> String -> HH.HTML w Action
+renderRefs state project ref =
+  HH.div_
+    [ renderRepoToolbar state project ref
+    , HH.div [ HP.class_ (HH.ClassName "forge-refs-grid") ]
+        [ renderBranchList state.branches
+        , renderTagList state.tags
+        ]
+    ]
+  where
+  renderBranchList remote = HH.section_
+    [ HH.header [ HP.class_ (HH.ClassName "forge-list-title") ] [ HH.h2_ [ HH.text "Branches" ], HH.span_ [ HH.text (remoteLength remote) ] ]
+    , case remote of
+        Success branches | Array.null branches -> renderEmpty "No branches found."
+        Success branches -> HH.div [ HP.class_ (HH.ClassName "forge-ref-list") ] (map renderBranch branches)
+        Failure error -> renderFailure "Could not read branches" error RetryRoute
+        _ -> renderLoading "Reading branches"
+    ]
+  renderBranch branch =
+    internalLinkClass "forge-ref-row" (RepoRoute project.slug (CodeView branch.name ""))
+      [ HH.span [ HP.class_ (HH.ClassName "forge-ref-symbol"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "⑂" ]
+      , HH.div_ [ HH.h3_ [ HH.text branch.name ], HH.p_ [ HH.text (branch.message <> " · " <> branch.author <> " · " <> shortDate branch.updatedAt) ] ]
+      , if branch.protected then HH.span [ HP.class_ (HH.ClassName "forge-ref-badge") ] [ HH.text "Protected" ] else HH.text ""
+      , HH.code_ [ HH.text (String.take 7 branch.sha) ]
+      ]
+  renderTagList remote = HH.section_
+    [ HH.header [ HP.class_ (HH.ClassName "forge-list-title") ] [ HH.h2_ [ HH.text "Tags" ], HH.span_ [ HH.text (remoteLength remote) ] ]
+    , case remote of
+        Success tags | Array.null tags -> renderEmpty "No tags have been published."
+        Success tags -> HH.div [ HP.class_ (HH.ClassName "forge-ref-list") ] (map renderTag tags)
+        Failure error -> renderFailure "Could not read tags" error RetryRoute
+        _ -> renderLoading "Reading tags"
+    ]
+  renderTag tag =
+    HH.div [ HP.class_ (HH.ClassName "forge-ref-row") ]
+      [ HH.span [ HP.class_ (HH.ClassName "forge-ref-symbol"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "◇" ]
+      , HH.div_
+          [ HH.h3_ [ internalLink (RepoRoute project.slug (CodeView tag.name "")) [ HH.text tag.name ] ]
+          , HH.p_ [ HH.text ((if tag.message == "" then "Tagged commit" else tag.message) <> " · " <> shortDate tag.createdAt) ]
+          ]
+      , HH.div [ HP.class_ (HH.ClassName "forge-tag-downloads") ] [ HH.a [ HP.href tag.tarUrl ] [ HH.text "tar" ], HH.a [ HP.href tag.zipUrl ] [ HH.text "zip" ] ]
+      , HH.code_ [ HH.text (String.take 7 tag.sha) ]
+      ]
+
+renderSearch :: forall w. State -> Project -> String -> HH.HTML w Action
+renderSearch state project ref =
+  HH.div [ HP.class_ (HH.ClassName "forge-search-page") ]
+    [ renderRepoToolbar state project ref
+    , HH.header [ HP.class_ (HH.ClassName "forge-search-head") ]
+        [ HH.div_ [ HH.h2_ [ HH.text "Go to file" ], HH.p_ [ HH.text ("Search every path on " <> ref <> ".") ] ]
+        , HH.span_ [ HH.text (searchIndexMeta state.searchIndex) ]
+        ]
+    , HH.div [ HP.class_ (HH.ClassName "forge-search-input") ]
+        [ HH.span [ HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "/" ]
+        , HH.input
+            [ HP.type_ HP.InputSearch
+            , HP.placeholder "Type a file or directory path…"
+            , HP.value state.searchQuery
+            , HP.autofocus true
+            , HP.attr (HH.AttrName "aria-label") "Search repository paths"
+            , HE.onValueInput UpdateSearch
+            ]
+        , HH.kbd_ [ HH.text (show (Array.length (searchResults state.searchQuery state.searchIndex)) <> " matches") ]
+        ]
+    , case state.searchIndex of
+        NotAsked -> renderLoading "Indexing repository tree"
+        Loading -> renderLoading "Indexing repository tree"
+        Failure error -> renderFailure "Could not index repository" error RetryRoute
+        Success _ | String.trim state.searchQuery == "" -> renderEmpty "Start typing to find a path."
+        Success _ | Array.null (searchResults state.searchQuery state.searchIndex) -> renderEmpty "No paths match that query."
+        Success _ -> HH.nav [ HP.class_ (HH.ClassName "forge-search-results"), HP.attr (HH.AttrName "aria-label") "Matching repository paths" ]
+          (map (renderSearchResult project ref) (searchResults state.searchQuery state.searchIndex))
+    ]
+
+renderSearchResult :: forall w. Project -> String -> Forgejo.TreeEntry -> HH.HTML w Action
+renderSearchResult project ref entry =
+  internalLinkClass "forge-search-result" route
+    [ HH.span [ HP.class_ (HH.ClassName (if entry.kind == "tree" then "forge-content-icon is-dir" else "forge-content-icon is-file")), HP.attr (HH.AttrName "aria-hidden") "true" ] []
+    , HH.span_ [ HH.text entry.path ]
+    , HH.span_ [ HH.text (if entry.kind == "tree" then "directory" else formatBytes (toNumber entry.size)) ]
+    , HH.span [ HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "→" ]
+    ]
+  where
+  route = if entry.kind == "tree" then RepoRoute project.slug (CodeView ref entry.path) else RepoRoute project.slug (BlobView ref entry.path)
 
 renderIssues :: forall w. State -> Project -> HH.HTML w Action
 renderIssues state project =
@@ -855,6 +1148,10 @@ activeTab = case _ of
   CodeView _ _ -> CodeTab
   BlobView _ _ -> CodeTab
   CommitsView _ -> CommitsTab
+  CommitView _ _ -> CommitsTab
+  FileHistoryView _ _ -> CodeTab
+  RefsView _ -> CodeTab
+  SearchView _ -> CodeTab
   IssuesView -> IssuesTab
   PullsView -> PullsTab
   ReleasesView -> ReleasesTab
@@ -865,6 +1162,10 @@ activeRef project = case _ of
   RepoRoute _ (CodeView ref _) -> resolveRef project ref
   RepoRoute _ (BlobView ref _) -> resolveRef project ref
   RepoRoute _ (CommitsView ref) -> resolveRef project ref
+  RepoRoute _ (CommitView ref _) -> resolveRef project ref
+  RepoRoute _ (FileHistoryView ref _) -> resolveRef project ref
+  RepoRoute _ (RefsView ref) -> resolveRef project ref
+  RepoRoute _ (SearchView ref) -> resolveRef project ref
   _ -> project.defaultBranch
 
 resolveRef :: Project -> String -> String
@@ -883,6 +1184,25 @@ remoteLength :: forall a. RemoteData String (Array a) -> String
 remoteLength = case _ of
   Success values -> show (Array.length values)
   _ -> "—"
+
+searchResults :: String -> RemoteData String Forgejo.TreeListing -> Array Forgejo.TreeEntry
+searchResults query remote
+  | String.trim query == "" = []
+  | otherwise = case remote of
+  Success listing -> listing.entries
+    # Array.filter (\entry -> String.contains (Pattern (String.toLower (String.trim query))) (String.toLower entry.path))
+    # Array.sortBy (\left right -> compare (String.length left.path) (String.length right.path) <> compare left.path right.path)
+    # Array.take 100
+  _ -> []
+
+searchIndexMeta :: RemoteData String Forgejo.TreeListing -> String
+searchIndexMeta = case _ of
+  Success listing -> show listing.totalCount <> " entries" <> if listing.truncated then " · truncated" else ""
+  Loading -> "Indexing…"
+  _ -> ""
+
+firstLine :: String -> String
+firstLine = SCU.takeWhile (_ /= '\n')
 
 shortDate :: String -> String
 shortDate = String.take 10
@@ -915,6 +1235,21 @@ cloneCommand protocol project = case protocol of
   Https -> project.clone.https
   Ssh -> project.clone.ssh
 
+permalinkUrl :: State -> String -> String
+permalinkUrl state current = case state.route, state.latestCommit of
+  RepoRoute slug (BlobView _ path), Success (Just commit) ->
+    base <> routeHash (RepoRoute slug (BlobView commit.sha path))
+  _, _ -> current
+  where
+  base = fromMaybe current (Array.head (String.split (Pattern "#") current))
+
+internalLink :: forall w. Route -> Array (HH.HTML w Action) -> HH.HTML w Action
+internalLink route = HH.a [ HP.href (routeHash route), HE.onClick (const (Navigate route)) ]
+
+internalLinkClass :: forall w. String -> Route -> Array (HH.HTML w Action) -> HH.HTML w Action
+internalLinkClass className route =
+  HH.a [ HP.href (routeHash route), HP.class_ (HH.ClassName className), HE.onClick (const (Navigate route)) ]
+
 routeHash :: Route -> String
 routeHash = case _ of
   ForgeHome -> "#/"
@@ -922,6 +1257,10 @@ routeHash = case _ of
   RepoRoute slug (CodeView ref path) -> repoPath slug "tree" ref path
   RepoRoute slug (BlobView ref path) -> repoPath slug "blob" ref path
   RepoRoute slug (CommitsView ref) -> "#/p/" <> Forgejo.encodeComponent slug <> "/commits/" <> Forgejo.encodeComponent ref
+  RepoRoute slug (CommitView ref sha) -> "#/p/" <> Forgejo.encodeComponent slug <> "/commit/" <> Forgejo.encodeComponent ref <> "/" <> Forgejo.encodeComponent sha
+  RepoRoute slug (FileHistoryView ref path) -> repoPath slug "history" ref path
+  RepoRoute slug (RefsView ref) -> "#/p/" <> Forgejo.encodeComponent slug <> "/refs/" <> Forgejo.encodeComponent ref
+  RepoRoute slug (SearchView ref) -> "#/p/" <> Forgejo.encodeComponent slug <> "/search/" <> Forgejo.encodeComponent ref
   RepoRoute slug IssuesView -> "#/p/" <> Forgejo.encodeComponent slug <> "/issues"
   RepoRoute slug PullsView -> "#/p/" <> Forgejo.encodeComponent slug <> "/pulls"
   RepoRoute slug ReleasesView -> "#/p/" <> Forgejo.encodeComponent slug <> "/releases"
@@ -943,6 +1282,10 @@ parseHash hash = fromMaybe ForgeHome do
     Just "tree" -> CodeView (decodePart 2 parts) (decodeTail 3 parts)
     Just "blob" -> BlobView (decodePart 2 parts) (decodeTail 3 parts)
     Just "commits" -> CommitsView (decodePart 2 parts)
+    Just "commit" -> CommitView (decodePart 2 parts) (decodePart 3 parts)
+    Just "history" -> FileHistoryView (decodePart 2 parts) (decodeTail 3 parts)
+    Just "refs" -> RefsView (decodePart 2 parts)
+    Just "search" -> SearchView (decodePart 2 parts)
     Just "issues" -> IssuesView
     Just "pulls" -> PullsView
     Just "releases" -> ReleasesView

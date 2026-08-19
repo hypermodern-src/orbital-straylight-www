@@ -3,6 +3,8 @@ module Test.Orbital (suite) where
 
 import Prelude
 
+import Data.Array as Array
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Hydrogen.Orbital.Foundation
   ( Appearance(..)
@@ -24,6 +26,7 @@ import Hydrogen.Orbital.Foundation
   , surfaceName
   , toneClass
   )
+import Hydrogen.Orbital.Syntax (SyntaxKind(..), highlightLine)
 import Hydrogen.Test.Assert (assertEqual, section)
 
 suite :: Effect Unit
@@ -53,3 +56,13 @@ suite = do
     assertEqual "prose is the serif exception" "var(--font-prose)" (fontVar Prose)
     assertEqual "section rhythm" "var(--space-section)" (spaceVar SpaceSection)
     assertEqual "panel radius" "var(--radius-md)" (radiusVar PanelRadius)
+
+  section "Orbital — native syntax" do
+    let purs = highlightLine "purescript" "module Forge where -- typed source"
+    assertEqual "PureScript keyword" (Just Keyword) (map _.kind (purs Array.!! 0))
+    assertEqual "PureScript line comment" (Just Comment) (map _.kind (Array.last purs))
+    let javascript = highlightLine "javascript" "const answer = 42;"
+    assertEqual "JavaScript keyword" (Just Keyword) (map _.kind (javascript Array.!! 0))
+    assertEqual "number literal" true (Array.any (\value -> value.kind == NumberLiteral && value.text == "42") javascript)
+    assertEqual "diff addition" (Just DiffAdded) (map _.kind ((highlightLine "diff" "+new source") Array.!! 0))
+    assertEqual "diff hunk" (Just DiffMeta) (map _.kind ((highlightLine "diff" "@@ -1 +1 @@") Array.!! 0))

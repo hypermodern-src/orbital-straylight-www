@@ -24,6 +24,9 @@ data SyntaxKind
   | NumberLiteral
   | Operator
   | Punctuation
+  | DiffAdded
+  | DiffRemoved
+  | DiffMeta
 
 derive instance eqSyntaxKind :: Eq SyntaxKind
 
@@ -45,9 +48,25 @@ syntaxClass = case _ of
   NumberLiteral -> "orbital-syntax-number"
   Operator -> "orbital-syntax-operator"
   Punctuation -> "orbital-syntax-punctuation"
+  DiffAdded -> "orbital-syntax-diff-added"
+  DiffRemoved -> "orbital-syntax-diff-removed"
+  DiffMeta -> "orbital-syntax-diff-meta"
 
 highlightLine :: String -> String -> Array SyntaxToken
-highlightLine language = coalesce <<< lexLine (String.toLower language)
+highlightLine language source
+  | String.toLower language == "diff" = [ token (diffKind source) (if source == "" then " " else source) ]
+  | otherwise = coalesce (lexLine (String.toLower language) source)
+
+diffKind :: String -> SyntaxKind
+diffKind source
+  | String.take 2 source == "@@" = DiffMeta
+  | String.take 4 source == "diff" = DiffMeta
+  | String.take 5 source == "index" = DiffMeta
+  | String.take 3 source == "+++" = DiffMeta
+  | String.take 3 source == "---" = DiffMeta
+  | String.take 1 source == "+" = DiffAdded
+  | String.take 1 source == "-" = DiffRemoved
+  | otherwise = Plain
 
 lexLine :: String -> String -> Array SyntaxToken
 lexLine language source

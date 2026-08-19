@@ -21,14 +21,18 @@ GitHub-specific concepts are explicitly out of scope.
 
 ## Milestone 2 — complete read surface
 
-- [ ] Branch and tag index/detail pages
-- [ ] Commit detail, changed-file diff, patch, and signature status
-- [ ] File history, blame, permalinks, and line-range links
+- [x] Branch and tag index with ref-aware source and archive routes
+- [x] Commit detail, changed-file list, unified diff, patch, and signature status
+- [x] File history and immutable commit permalinks
+- [x] Recursive go-to-file path index
+- [ ] Branch/tag detail metadata, comparison, and deletion state
+- [ ] Blame and line-range links
 - [ ] Repository code search
 - [ ] Issue detail, comments, labels, milestones, and attachments
 - [ ] Pull request conversation, commits, changed files, reviews, and checks
 - [ ] Release assets, signatures, source archives, and downloads
-- [ ] Activity, contributors, watchers, stars, forks, licenses, and language data
+- [x] Repository watchers, stars, forks, licenses, and language data
+- [ ] Activity and contributor data
 - [ ] Wiki, packages, actions, projects, and repository-specific feature gates
 
 ## Milestone 3 — contributor surface

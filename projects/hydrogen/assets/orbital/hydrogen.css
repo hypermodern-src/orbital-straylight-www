@@ -129,9 +129,14 @@ html[data-theme='onosendai'] .badge2.is-error{color:hsl(2,64%,72%)}
 .orbital-syntax-number{color:hsl(257,30%,47%)}
 .orbital-syntax-operator{color:var(--interactive)}
 .orbital-syntax-punctuation{color:var(--text-body)}
+.orbital-syntax-diff-added{color:hsl(150,48%,31%)}
+.orbital-syntax-diff-removed{color:hsl(2,53%,43%)}
+.orbital-syntax-diff-meta{color:var(--text-accent);font-weight:600}
 html[data-theme='onosendai'] .orbital-syntax-comment{color:var(--text-body)}
 html[data-theme='onosendai'] .orbital-syntax-string{color:hsl(38,58%,68%)}
 html[data-theme='onosendai'] .orbital-syntax-number{color:hsl(266,54%,76%)}
+html[data-theme='onosendai'] .orbital-syntax-diff-added{color:hsl(150,52%,68%)}
+html[data-theme='onosendai'] .orbital-syntax-diff-removed{color:hsl(2,64%,72%)}
 
 @media(max-width:600px){
   .orbital-nav{padding:0 var(--space-4)}

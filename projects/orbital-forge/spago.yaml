@@ -5,6 +5,7 @@ package:
     - affjax
     - affjax-web
     - argonaut-codecs
+    - foreign-object
     - arrays
     - either
     - effect
@@ -15,6 +16,7 @@ package:
     - maybe
     - prelude
     - strings
+    - tuples
     - web-dom
     - web-events
     - web-html
