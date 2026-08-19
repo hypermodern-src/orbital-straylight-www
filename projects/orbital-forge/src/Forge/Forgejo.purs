@@ -25,6 +25,7 @@ module Forge.Forgejo
   , listLanguages
   , readCommit
   , readCommitDiff
+  , readBlobUrl
   , commitPatchUrl
   , listIssues
   , listPullRequests
@@ -50,7 +51,9 @@ import Data.String.CodeUnits as SCU
 import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import Foreign.Object as Object
+import Web.File.Url as FileURL
 
 type Repository =
   { name :: String
@@ -462,6 +465,13 @@ readCommit repository sha = map (map fromCommitDetailWire) $ getJson
 readCommitDiff :: Repository -> String -> Aff (Either String String)
 readCommitDiff repository sha = getText
   (repositoryBase repository <> "/git/commits/" <> encodeComponent sha <> ".diff")
+
+readBlobUrl :: Repository -> String -> String -> Aff (Either String String)
+readBlobUrl repository ref path = do
+  result <- AX.get ResponseFormat.blob (rawUrl repository ref path)
+  case result of
+    Left error -> pure (Left (AX.printError error))
+    Right response -> Right <$> liftEffect (FileURL.createObjectURL response.body)
 
 commitPatchUrl :: Repository -> String -> String
 commitPatchUrl repository sha =

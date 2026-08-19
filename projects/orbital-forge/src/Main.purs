@@ -31,6 +31,7 @@ import Hydrogen.Orbital.Navigation as Nav
 import Hydrogen.Orbital.Shell (defaultAppShell, appShell)
 import Web.DOM.ParentNode (QuerySelector(..), querySelector)
 import Web.Event.Event (EventType(..))
+import Web.File.Url as FileURL
 import Web.HTML (window)
 import Web.HTML.HTMLDocument as HTMLDocument
 import Web.HTML.HTMLElement as HTMLElement
@@ -70,6 +71,17 @@ data CloneProtocol = OrbCli | Https | Ssh
 
 derive instance eqCloneProtocol :: Eq CloneProtocol
 
+data BlobKind
+  = SourceBlob
+  | MarkdownBlob
+  | SvgBlob
+  | ImageBlob
+  | PdfBlob
+  | AudioBlob
+  | VideoBlob
+
+derive instance eqBlobKind :: Eq BlobKind
+
 type Readme =
   { path :: String
   , source :: String
@@ -92,6 +104,7 @@ type State =
   , latestCommit :: RemoteData String (Maybe Forgejo.Commit)
   , readme :: RemoteData String (Maybe Readme)
   , source :: RemoteData String SourceFile
+  , assetUrl :: RemoteData String String
   , commits :: RemoteData String (Array Forgejo.Commit)
   , commitDetail :: RemoteData String Forgejo.CommitDetail
   , commitDiff :: RemoteData String String
@@ -103,6 +116,7 @@ type State =
   , cloneProtocol :: CloneProtocol
   , copied :: Boolean
   , copiedLink :: Boolean
+  , blobPreview :: Boolean
   , dark :: Boolean
   }
 
@@ -115,6 +129,7 @@ data Action
   | SelectProtocol CloneProtocol
   | CopyClone
   | CopyPermalink
+  | SetBlobPreview Boolean
   | UpdateSearch String
   | ToggleTheme
   | RetryRepositories
@@ -143,6 +158,7 @@ component =
         , latestCommit: NotAsked
         , readme: NotAsked
         , source: NotAsked
+        , assetUrl: NotAsked
         , commits: NotAsked
         , commitDetail: NotAsked
         , commitDiff: NotAsked
@@ -154,6 +170,7 @@ component =
         , cloneProtocol: OrbCli
         , copied: false
         , copiedLink: false
+        , blobPreview: true
         , dark: false
         }
     , render
@@ -173,14 +190,15 @@ handleAction = case _ of
     void $ H.subscribe $ eventListener (EventType "hashchange") (Window.toEventTarget win) (const (Just HashChanged))
     loadRepositories
   HashChanged -> do
+    releaseAssetUrl
     hash <- liftEffect currentHash
     let route = parseHash hash
-    H.modify_ _ { route = route, copied = false, copiedLink = false }
+    H.modify_ _ { route = route, copied = false, copiedLink = false, blobPreview = true }
     loadRoute route
   Navigate route -> do
-    H.modify_ _ { route = route, copied = false, copiedLink = false }
+    releaseAssetUrl
+    H.modify_ _ { route = route, copied = false, copiedLink = false, blobPreview = true }
     liftEffect $ setHash (routeHash route)
-    loadRoute route
   SelectTab tab -> do
     state <- H.get
     case projectForRoute state state.route of
@@ -215,6 +233,7 @@ handleAction = case _ of
     url <- liftEffect currentUrl
     liftEffect $ copyText (permalinkUrl state url)
     H.modify_ _ { copiedLink = true }
+  SetBlobPreview preview -> H.modify_ _ { blobPreview = preview }
   UpdateSearch query -> H.modify_ _ { searchQuery = query }
   ToggleTheme -> do
     state <- H.get
@@ -275,6 +294,7 @@ loadRepositoryChrome project = do
     , latestCommit = NotAsked
     , readme = NotAsked
     , source = NotAsked
+    , assetUrl = NotAsked
     , commits = NotAsked
     , commitDetail = NotAsked
     , commitDiff = NotAsked
@@ -319,12 +339,24 @@ loadDirectory project ref path = do
 
 loadBlob :: forall o. Project -> String -> String -> H.HalogenM State Action () o Aff Unit
 loadBlob project ref path = do
-  H.modify_ _ { source = Loading, latestCommit = Loading, contents = NotAsked, readme = NotAsked }
-  result <- H.liftAff $ Forgejo.readRaw project.repository ref path
-  H.modify_ _ { source = case result of
-    Left error -> Failure error
-    Right code -> Success { path, language: sourceLanguage path, code }
-  }
+  let kind = blobKind path
+  H.modify_ _
+    { source = if blobHasSource kind then Loading else NotAsked
+    , assetUrl = if kind == PdfBlob then Loading else NotAsked
+    , latestCommit = Loading
+    , contents = NotAsked
+    , readme = NotAsked
+    , blobPreview = true
+    }
+  when (blobHasSource kind) do
+    result <- H.liftAff $ Forgejo.readRaw project.repository ref path
+    H.modify_ _ { source = case result of
+      Left error -> Failure error
+      Right code -> Success { path, language: sourceLanguage path, code }
+    }
+  when (kind == PdfBlob) do
+    result <- H.liftAff $ Forgejo.readBlobUrl project.repository ref path
+    H.modify_ _ { assetUrl = eitherRemote result }
   commitResult <- H.liftAff $ Forgejo.listCommits project.repository ref path
   H.modify_ _ { latestCommit = map Array.head (eitherRemote commitResult) }
 
@@ -788,12 +820,15 @@ renderMarkdownBlock = case _ of
 
 renderBlob :: forall w. State -> Project -> String -> String -> HH.HTML w Action
 renderBlob state project ref path =
+  let kind = blobKind path
+  in
   HH.div [ HP.class_ (HH.ClassName "forge-blob") ]
     [ renderRepoToolbar state project ref
     , renderPathCrumbs project ref path true
     , renderLatestCommit project ref state.latestCommit
     , HH.div [ HP.class_ (HH.ClassName "forge-blob-actions") ]
-        [ internalLink (RepoRoute project.slug (FileHistoryView ref path)) [ HH.text "History" ]
+        [ renderBlobModeSwitch state kind
+        , internalLink (RepoRoute project.slug (FileHistoryView ref path)) [ HH.text "History" ]
         , HH.button
             [ HP.type_ HP.ButtonButton
             , HP.class_ (HH.ClassName (if state.copiedLink then "is-done" else ""))
@@ -804,8 +839,82 @@ renderBlob state project ref path =
         , HH.a [ HP.href (Forgejo.rawUrl project.repository ref path), HP.attr (HH.AttrName "download") (pathBase path) ] [ HH.text "Download" ]
         , HH.a [ HP.href (project.htmlUrl <> "/src/branch/" <> Forgejo.encodeComponent ref <> "/" <> Forgejo.encodePath path), HP.target "_blank", HP.rel "noreferrer" ] [ HH.text "View in Forgejo ↗" ]
         ]
-    , HH.div [ HP.class_ (HH.ClassName "forge-viewer") ] [ renderViewer state.source ]
+    , renderBlobViewer state project ref path kind
     ]
+
+renderBlobModeSwitch :: forall w. State -> BlobKind -> HH.HTML w Action
+renderBlobModeSwitch state kind =
+  if blobHasPreview kind && blobHasSource kind then
+    let
+      modeButton preview label = HH.button
+        [ HP.type_ HP.ButtonButton
+        , HP.attr (HH.AttrName "data-state") (if state.blobPreview == preview then "active" else "inactive")
+        , HE.onClick (const (SetBlobPreview preview))
+        ]
+        [ HH.text label ]
+    in
+      HH.div [ HP.class_ (HH.ClassName "forge-blob-modes"), HP.attr (HH.AttrName "aria-label") "Blob display mode" ]
+        [ modeButton true "Preview"
+        , modeButton false "Source"
+        ]
+  else HH.text ""
+
+renderBlobViewer :: forall w. State -> Project -> String -> String -> BlobKind -> HH.HTML w Action
+renderBlobViewer state project ref path kind
+  | blobHasPreview kind && state.blobPreview = renderAssetPreview kind path (Forgejo.rawUrl project.repository ref path) state.source state.assetUrl
+  | otherwise = HH.div [ HP.class_ (HH.ClassName "forge-viewer") ] [ renderViewer state.source ]
+
+renderAssetPreview :: forall w. BlobKind -> String -> String -> RemoteData String SourceFile -> RemoteData String String -> HH.HTML w Action
+renderAssetPreview kind path raw source assetUrl =
+  HH.div [ HP.class_ (HH.ClassName ("forge-viewer is-asset " <> assetClass kind)) ] case kind of
+    SvgBlob -> [ renderImage raw path ]
+    ImageBlob -> [ renderImage raw path ]
+    PdfBlob -> [ renderDocument assetUrl ]
+    AudioBlob ->
+      [ HH.div [ HP.class_ (HH.ClassName "forge-media-preview") ]
+          [ HH.div [ HP.class_ (HH.ClassName "forge-media-mark"), HP.attr (HH.AttrName "aria-hidden") "true" ] [ HH.text "♫" ]
+          , HH.h2_ [ HH.text (pathBase path) ]
+          , HH.audio [ HP.src raw, HP.controls true ] [ HH.text "Your browser cannot play this audio file." ]
+          ]
+      ]
+    VideoBlob ->
+      [ HH.video [ HP.src raw, HP.controls true, HP.class_ (HH.ClassName "forge-video-preview") ]
+          [ HH.text "Your browser cannot play this video file." ]
+      ]
+    MarkdownBlob -> [ renderMarkdownAsset source ]
+    SourceBlob -> [ renderViewer source ]
+  where
+  renderDocument = case _ of
+    Success url -> HH.iframe
+      [ HP.src url
+      , HP.title ("PDF preview of " <> pathBase path)
+      , HP.class_ (HH.ClassName "forge-document-preview")
+      ]
+    Loading -> renderLoading "Preparing PDF preview"
+    Failure error -> renderFailure "Could not prepare PDF preview" error RetryRoute
+    NotAsked -> renderEmpty "No PDF preview is available."
+  renderImage url value = HH.a
+    [ HP.href url
+    , HP.target "_blank"
+    , HP.rel "noreferrer"
+    , HP.class_ (HH.ClassName "forge-image-preview")
+    , HP.title "Open original asset"
+    ]
+    [ HH.img
+        [ HP.src url
+        , HP.alt ("Rendered preview of " <> pathBase value)
+        , HP.attr (HH.AttrName "loading") "eager"
+        ]
+    ]
+
+renderMarkdownAsset :: forall w. RemoteData String SourceFile -> HH.HTML w Action
+renderMarkdownAsset = case _ of
+  Success source ->
+    HH.article [ HP.class_ (HH.ClassName "forge-markdown-preview forge-readme") ]
+      (map renderMarkdownBlock (parseMarkdown source.code))
+  Loading -> renderLoading "Rendering Markdown"
+  Failure error -> renderFailure "Could not render Markdown" error RetryRoute
+  NotAsked -> renderEmpty "No Markdown source is available."
 
 renderViewer :: forall w. RemoteData String SourceFile -> HH.HTML w Action
 renderViewer = case _ of
@@ -1243,6 +1352,14 @@ permalinkUrl state current = case state.route, state.latestCommit of
   where
   base = fromMaybe current (Array.head (String.split (Pattern "#") current))
 
+releaseAssetUrl :: forall o. H.HalogenM State Action () o Aff Unit
+releaseAssetUrl = do
+  state <- H.get
+  case state.assetUrl of
+    Success url -> liftEffect (FileURL.revokeObjectURL url)
+    _ -> pure unit
+  H.modify_ _ { assetUrl = NotAsked }
+
 internalLink :: forall w. Route -> Array (HH.HTML w Action) -> HH.HTML w Action
 internalLink route = HH.a [ HP.href (routeHash route), HE.onClick (const (Navigate route)) ]
 
@@ -1306,6 +1423,40 @@ isBlobRoute _ = false
 isBlob :: RepoView -> Boolean
 isBlob (BlobView _ _) = true
 isBlob _ = false
+
+blobKind :: String -> BlobKind
+blobKind path =
+  let
+    lower = String.toLower path
+    has suffix = case String.stripSuffix (Pattern suffix) lower of
+      Just _ -> true
+      Nothing -> false
+    hasAny = Array.any has
+  in
+    if has ".svg" || has ".svgz" then SvgBlob
+    else if hasAny [ ".md", ".markdown", ".mdx" ] then MarkdownBlob
+    else if hasAny [ ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".bmp", ".ico", ".tif", ".tiff" ] then ImageBlob
+    else if has ".pdf" then PdfBlob
+    else if hasAny [ ".mp3", ".wav", ".ogg", ".oga", ".flac", ".m4a", ".aac", ".opus" ] then AudioBlob
+    else if hasAny [ ".mp4", ".webm", ".ogv", ".mov", ".m4v" ] then VideoBlob
+    else SourceBlob
+
+blobHasPreview :: BlobKind -> Boolean
+blobHasPreview SourceBlob = false
+blobHasPreview _ = true
+
+blobHasSource :: BlobKind -> Boolean
+blobHasSource kind = Array.elem kind [ SourceBlob, MarkdownBlob, SvgBlob ]
+
+assetClass :: BlobKind -> String
+assetClass = case _ of
+  SvgBlob -> "is-image is-svg"
+  ImageBlob -> "is-image"
+  PdfBlob -> "is-document"
+  AudioBlob -> "is-audio"
+  VideoBlob -> "is-video"
+  MarkdownBlob -> "is-markdown"
+  SourceBlob -> "is-source"
 
 pathParts :: String -> Array String
 pathParts = Array.filter (_ /= "") <<< String.split (Pattern "/")

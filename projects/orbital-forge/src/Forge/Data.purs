@@ -196,6 +196,7 @@ sourceLanguage path =
     if has ".css" then "css"
     else if has ".hs" then "haskell"
     else if has ".html" then "html"
+    else if has ".svg" then "html"
     else if has ".js" || has ".mjs" then "javascript"
     else if has ".json" then "json"
     else if has ".lean" then "lean"

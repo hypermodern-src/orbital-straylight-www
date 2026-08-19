@@ -12,6 +12,7 @@ GitHub-specific concepts are explicitly out of scope.
 - [x] Branch and tag ref selection
 - [x] Clone URLs and source archive links
 - [x] Native syntax-highlighted source with raw and download actions
+- [x] Rendered SVG, image, Markdown, PDF, audio, and video blob previews
 - [x] Locally rendered repository READMEs
 - [x] Commit history and path-local latest commit
 - [x] Issue, pull request, and release indexes with empty/error/loading states
