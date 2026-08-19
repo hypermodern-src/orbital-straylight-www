@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#fafbfd">
+    <meta name="description" content="Orbital Forge — consequential source and the papers that explain it.">
+    <title>Orbital // Forge</title>
+    <link rel="icon" href="favicon.svg">
+    <link rel="stylesheet" href="orbital/hydrogen.css">
+    <link rel="stylesheet" href="forge.css">
+    <script>
+      try {
+        if (localStorage.getItem('orbital-theme') === 'onosendai' ||
+            (!localStorage.getItem('orbital-theme') && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.dataset.theme = 'onosendai';
+        }
+      } catch (_) {}
+    </script>
+  </head>
+  <body class="grain">
+    <div id="app"></div>
+    <script src="forge.js"></script>
+  </body>
+</html>

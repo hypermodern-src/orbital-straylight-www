@@ -34,6 +34,7 @@
    WCAG AA in both token sets. Decorative hairlines remain faint. */
 .tag,.progress-head,.statband .k,.pull cite{color:var(--ink-m)}
 .metarow .my{color:var(--accent)}
+.cv-meta{color:var(--ink-m)}
 .term-bar .tt{color:hsla(var(--hue),20%,99%,.62)}
 .term .cm{color:hsla(var(--hue),18%,92%,.62)}
 .badge2.is-warn{color:hsl(38,58%,32%)}
@@ -48,8 +49,91 @@ html[data-theme='onosendai'] .badge2.is-error{color:hsl(2,64%,72%)}
   opacity:.4;cursor:not-allowed;pointer-events:none
 }
 
+/* Viewport application chrome. The shell, not the document, owns overflow. */
+.orbital-app-shell{
+  height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;background:var(--surface-page)
+}
+.orbital-app-shell-header{min-width:0;min-height:0}
+.orbital-app-shell-main{display:flex;min-width:0;min-height:0;overflow:hidden}
+.orbital-app-shell-status{
+  height:30px;display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;overflow:hidden;padding:0 var(--space-4);border-top:1px solid var(--line-faint);
+  background:color-mix(in srgb,var(--surface-raised) 90%,transparent);
+  font-size:var(--size-micro);font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text-body);white-space:nowrap
+}
+.orbital-app-shell-status-left,.orbital-app-shell-status-right{
+  min-width:0;display:flex;align-items:center;gap:var(--space-4);overflow:hidden;text-overflow:ellipsis
+}
+
+/* Federated navigation, breadcrumbs, and tabs. */
+.orbital-nav{
+  height:54px;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+  padding:0 var(--gutter);border-bottom:1px solid var(--line-faint);
+  background:color-mix(in srgb,var(--surface-raised) 90%,transparent);
+  backdrop-filter:blur(28px) saturate(1.3)
+}
+.orbital-nav-brand,.orbital-nav-links{display:flex;align-items:center;min-width:0}
+.orbital-nav-links{gap:1.5rem;overflow-x:auto;scrollbar-width:none}
+.orbital-nav-links::-webkit-scrollbar{display:none}
+.orbital-nav-link{
+  position:relative;flex:none;font-size:var(--size-label);font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--text-body);outline:none;
+  transition:color var(--dur-ui)
+}
+.orbital-nav-link::after{
+  content:'';position:absolute;inset:auto 0 -3px;height:1px;background:var(--interactive);
+  transform:scaleX(0);transform-origin:right;transition:transform var(--dur-ui) var(--ease)
+}
+.orbital-nav-link:hover,.orbital-nav-link[data-state='active']{color:var(--interactive)}
+.orbital-nav-link:hover::after,.orbital-nav-link[data-state='active']::after{transform:scaleX(1);transform-origin:left}
+.orbital-nav-link:focus-visible{outline:2px solid var(--focus-ring);outline-offset:4px}
+.orbital-nav-divider{width:1px;height:13px;flex:none;background:var(--line)}
+.orbital-breadcrumbs{
+  display:flex;align-items:center;flex-wrap:wrap;gap:.6rem;font-size:var(--size-label);
+  font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-body)
+}
+.orbital-breadcrumb-item{display:inline-flex;align-items:center;gap:.6rem}
+.orbital-breadcrumbs a:hover{color:var(--interactive)}
+.orbital-breadcrumb-current{color:var(--text-strong)}
+.orbital-breadcrumb-separator{color:var(--text-faint)}
+.orbital-tabs{display:flex;gap:.3rem;border-bottom:1px solid var(--line-faint)}
+.orbital-tab{
+  margin-bottom:-1px;padding:.7rem 1rem;border:0;border-bottom:2px solid transparent;
+  background:none;font:600 var(--size-label)/1 var(--font-ui);letter-spacing:var(--track-label);
+  text-transform:uppercase;color:var(--text-body);cursor:pointer;outline:none;
+  transition:color var(--dur-ui),border-color var(--dur-ui)
+}
+.orbital-tab:hover{color:var(--text-strong)}
+.orbital-tab[data-state='active']{color:var(--interactive);border-bottom-color:var(--interactive)}
+.orbital-tab:focus-visible{outline:2px solid var(--focus-ring);outline-offset:-2px}
+.orbital-tab-count{margin-left:.4rem;color:var(--text-faint);font-weight:500}
+
+/* Native source lines for Hydrogen.Orbital.Code. */
+.orbital-code-viewer{display:flex;min-width:0;min-height:0;flex-direction:column}
+.orbital-code-viewer .cv-scroll{min-height:0;max-height:100%;flex:1}
+.orbital-code-lines{display:table;min-width:100%;padding:var(--space-3) 0;font-size:.78rem;line-height:1.7}
+.orbital-code-line{display:table-row;position:relative}
+.orbital-code-line[data-state='selected']{background:color-mix(in srgb,var(--interactive) 9%,transparent);box-shadow:inset 2px 0 var(--interactive)}
+.orbital-code-line-number{
+  position:sticky;left:0;display:table-cell;width:1%;padding:0 .8rem 0 1rem;
+  border-right:1px solid var(--line-faint);background:var(--surface-code);
+  color:var(--code-gutter);text-align:right;user-select:none;font-variant-numeric:tabular-nums
+}
+.orbital-code-source{display:table-cell;padding:0 1.1rem;white-space:pre;color:var(--code-fg)}
+
+@media(max-width:600px){
+  .orbital-nav{padding:0 var(--space-4)}
+  .orbital-nav-brand .brand span:last-child{font-size:0}
+  .orbital-nav-links{gap:.9rem}
+  .orbital-nav-link{letter-spacing:.1em}
+  .orbital-app-shell-status{padding-inline:var(--space-3)}
+}
+
 @media(prefers-reduced-motion:reduce){
-  .btn,.link-cta,.glass,.orbital-lift,.orbital-sweep::before{transition:none}
+  .btn,.link-cta,.glass,.orbital-lift,.orbital-sweep::before,
+  .orbital-nav-link,.orbital-nav-link::after,.orbital-tab{transition:none}
   .statusdot-dot.is-pulse::after,.progress-track.is-indeterminate .progress-bar,
   .spinner,.skeleton,.term .cur{animation:none}
 }

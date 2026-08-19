@@ -35,3 +35,15 @@ path = "projects/web-middleware"
 kind = "library"
 source = "monorepo://projects/web-middleware"
 vercel = []
+
+[projects.orbital-cms]
+path = "projects/orbital-cms"
+kind = "service"
+source = "monorepo://projects/orbital-cms"
+vercel = []
+
+[projects.orbital-forge]
+path = "projects/orbital-forge"
+kind = "application"
+source = "monorepo://projects/orbital-forge"
+vercel = ["orbital-forge"]

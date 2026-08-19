@@ -1,0 +1,23 @@
+package:
+  name: orbital-forge
+  dependencies:
+    - aff
+    - arrays
+    - effect
+    - foldable-traversable
+    - halogen
+    - hydrogen
+    - integers
+    - maybe
+    - prelude
+    - strings
+    - web-dom
+    - web-events
+    - web-html
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../hydrogen
