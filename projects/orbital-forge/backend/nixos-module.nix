@@ -14,7 +14,7 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = self.packages.${pkgs.system}.backend;
+      default = self.packages.${pkgs.stdenv.hostPlatform.system}.backend;
       defaultText = lib.literalExpression "orbital-forge.packages.\${pkgs.system}.backend";
       description = "Backend package to run.";
     };
@@ -50,7 +50,7 @@ in
     };
 
     environmentFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
+      type = lib.types.nullOr lib.types.str;
       default = null;
       description = "Optional credential file containing FORGEJO_TOKEN.";
     };
