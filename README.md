@@ -31,6 +31,8 @@ second build definition.
 | `orbital-web-jw` | Orbital product marketing Hydrogen SSG | `orbital-web-jw` |
 | `web-middleware` | Language-neutral HTTP policy contract with a Haskell/WAI adapter | — |
 | `orbital-cms` | PostgreSQL publishing core and delivery API for articles and papers | — |
+| `orbital-forge` | PureScript forge UI with a replaceable Haskell backend | `orbital-forge` |
+| `ponce-speedway` | Bilingual zero-dependency PONCE International Speedway SSG | `ponce-speedway` |
 
 The old `reinit-dx-website` Next.js wrapper remains outside the monorepo while
 it serves production. It is deployment history, not the canonical application.
@@ -47,6 +49,8 @@ Run one project's native check:
 ./scripts/check orbital-web-jw
 ./scripts/check web-middleware
 ./scripts/check orbital-cms
+./scripts/check orbital-forge
+./scripts/check ponce-speedway
 ```
 
 Run every check:

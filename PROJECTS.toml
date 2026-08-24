@@ -47,3 +47,9 @@ path = "projects/orbital-forge"
 kind = "application"
 source = "monorepo://projects/orbital-forge"
 vercel = ["orbital-forge"]
+
+[projects.ponce-speedway]
+path = "projects/ponce-speedway"
+kind = "application"
+source = "monorepo://projects/ponce-speedway"
+vercel = ["ponce-speedway"]

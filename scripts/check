@@ -35,6 +35,17 @@ check_orbital_cms() {
   nix flake check --accept-flake-config "$repo_root/projects/orbital-cms"
 }
 
+check_orbital_forge() {
+  nix flake check --accept-flake-config "$repo_root/projects/orbital-forge"
+}
+
+check_ponce_speedway() {
+  (
+    cd "$repo_root/projects/ponce-speedway"
+    npm run check
+  )
+}
+
 check_one() {
   case "$1" in
     hydrogen) check_hydrogen ;;
@@ -44,6 +55,8 @@ check_one() {
     orbital-web-jw) check_orbital_web_jw ;;
     web-middleware) check_web_middleware ;;
     orbital-cms) check_orbital_cms ;;
+    orbital-forge) check_orbital_forge ;;
+    ponce-speedway) check_ponce_speedway ;;
     *)
       printf 'unknown project: %s\n' "$1" >&2
       exit 2
@@ -63,4 +76,6 @@ else
   check_one orbital-web-jw
   check_one web-middleware
   check_one orbital-cms
+  check_one orbital-forge
+  check_one ponce-speedway
 fi
