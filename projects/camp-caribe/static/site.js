@@ -1,0 +1,138 @@
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+  var body = document.body;
+  var header = document.querySelector("[data-site-header]");
+  var menuToggle = document.querySelector("[data-menu-toggle]");
+  var navigation = document.querySelector("[data-primary-nav]");
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function setMenu(open) {
+    body.classList.toggle("menu-open", open);
+    if (menuToggle) menuToggle.setAttribute("aria-expanded", String(open));
+  }
+
+  if (menuToggle && navigation) {
+    menuToggle.addEventListener("click", function () {
+      setMenu(!body.classList.contains("menu-open"));
+    });
+
+    navigation.addEventListener("click", function (event) {
+      if (event.target.closest("a")) setMenu(false);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") setMenu(false);
+    });
+  }
+
+  function updateHeader() {
+    if (header) header.classList.toggle("is-scrolled", window.scrollY > 28);
+  }
+
+  updateHeader();
+  window.addEventListener("scroll", updateHeader, { passive: true });
+
+  var revealItems = Array.prototype.slice.call(document.querySelectorAll("[data-reveal]"));
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    revealItems.forEach(function (item) { item.classList.add("is-visible"); });
+  } else {
+    var revealObserver = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -8%", threshold: 0.08 });
+
+    revealItems.forEach(function (item) { revealObserver.observe(item); });
+    root.classList.add("js");
+  }
+
+  var lightbox = document.getElementById("gallery-lightbox");
+  var lightboxImage = lightbox && lightbox.querySelector("[data-lightbox-image]");
+  var lightboxCaption = lightbox && lightbox.querySelector("[data-lightbox-caption]");
+  var lightboxClose = lightbox && lightbox.querySelector("[data-lightbox-close]");
+
+  function closeLightbox() {
+    if (!lightbox || !lightbox.open) return;
+    lightbox.close();
+    body.classList.remove("lightbox-open");
+  }
+
+  document.querySelectorAll("[data-lightbox-src]").forEach(function (trigger) {
+    trigger.addEventListener("click", function () {
+      if (!lightbox || !lightboxImage || !lightboxCaption || !lightbox.showModal) return;
+      lightboxImage.src = trigger.getAttribute("data-lightbox-src") || "";
+      lightboxImage.alt = trigger.getAttribute("data-lightbox-alt") || "";
+      lightboxCaption.textContent = trigger.getAttribute("data-lightbox-alt") || "";
+      lightbox.showModal();
+      body.classList.add("lightbox-open");
+    });
+  });
+
+  if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
+  if (lightbox) {
+    lightbox.addEventListener("click", function (event) {
+      if (event.target === lightbox) closeLightbox();
+    });
+    lightbox.addEventListener("close", function () {
+      body.classList.remove("lightbox-open");
+    });
+  }
+
+  var briefingForm = document.getElementById("briefing-form");
+  if (briefingForm) {
+    briefingForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!briefingForm.reportValidity()) return;
+
+      var data = new FormData(briefingForm);
+      var spanish = briefingForm.getAttribute("data-language") === "es";
+      var recipient = briefingForm.getAttribute("data-recipient") || "";
+      var labels = spanish
+        ? {
+            name: "Nombre",
+            organization: "Organización",
+            email: "Correo",
+            phone: "Teléfono",
+            size: "Tamaño del grupo",
+            dates: "Fechas",
+            purpose: "Propósito",
+            message: "Detalles"
+          }
+        : {
+            name: "Name",
+            organization: "Organization",
+            email: "Email",
+            phone: "Phone",
+            size: "Group size",
+            dates: "Dates",
+            purpose: "Purpose",
+            message: "Details"
+          };
+
+      var name = String(data.get("name") || "");
+      var subject = spanish
+        ? "Consulta privada de Camp Caribe — " + name
+        : "Camp Caribe private briefing — " + name;
+      var lines = [
+        labels.name + ": " + name,
+        labels.organization + ": " + String(data.get("organization") || "—"),
+        labels.email + ": " + String(data.get("email") || ""),
+        labels.phone + ": " + String(data.get("phone") || "—"),
+        labels.size + ": " + String(data.get("group-size") || ""),
+        labels.dates + ": " + String(data.get("dates") || ""),
+        labels.purpose + ": " + String(data.get("purpose") || ""),
+        "",
+        labels.message + ":",
+        String(data.get("message") || "—")
+      ];
+
+      window.location.href = "mailto:" + recipient
+        + "?subject=" + encodeURIComponent(subject)
+        + "&body=" + encodeURIComponent(lines.join("\n"));
+    });
+  }
+})();

@@ -1,0 +1,25 @@
+package:
+  name: camp-caribe
+  dependencies:
+    - argonaut-codecs
+    - argonaut-core
+    - arrays
+    - console
+    - effect
+    - either
+    - exceptions
+    - foldable-traversable
+    - halogen
+    - hydrogen
+    - integers
+    - maybe
+    - numbers
+    - prelude
+    - strings
+
+workspace:
+  packageSet:
+    registry: 73.2.0
+  extraPackages:
+    hydrogen:
+      path: ../hydrogen

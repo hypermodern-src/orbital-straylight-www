@@ -43,6 +43,10 @@ check_ponce_speedway() {
   nix flake check --accept-flake-config "$repo_root/projects/ponce-speedway"
 }
 
+check_camp_caribe() {
+  nix flake check --accept-flake-config "$repo_root/projects/camp-caribe"
+}
+
 check_one() {
   case "$1" in
     hydrogen) check_hydrogen ;;
@@ -54,6 +58,7 @@ check_one() {
     orbital-cms) check_orbital_cms ;;
     orbital-forge) check_orbital_forge ;;
     ponce-speedway) check_ponce_speedway ;;
+    camp-caribe) check_camp_caribe ;;
     *)
       printf 'unknown project: %s\n' "$1" >&2
       exit 2
@@ -75,4 +80,5 @@ else
   check_one orbital-cms
   check_one orbital-forge
   check_one ponce-speedway
+  check_one camp-caribe
 fi
