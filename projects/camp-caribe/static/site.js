@@ -118,20 +118,20 @@
       var labels = spanish
         ? {
             name: "Nombre",
-            organization: "Organización",
+            organization: "Pareja o planificador",
             email: "Correo",
             phone: "Teléfono",
-            size: "Tamaño del grupo",
+            size: "Cantidad de invitados",
             dates: "Fechas",
             purpose: "Propósito",
             message: "Detalles"
           }
         : {
             name: "Name",
-            organization: "Organization",
+            organization: "Partner or planner",
             email: "Email",
             phone: "Phone",
-            size: "Group size",
+            size: "Guest count",
             dates: "Dates",
             purpose: "Purpose",
             message: "Details"
@@ -139,8 +139,8 @@
 
       var name = String(data.get("name") || "");
       var subject = spanish
-        ? "Consulta privada de Camp Caribe — " + name
-        : "Camp Caribe private briefing — " + name;
+        ? "Consulta de evento en Camp Caribe — " + name
+        : "Camp Caribe event inquiry — " + name;
       var lines = [
         labels.name + ": " + name,
         labels.organization + ": " + String(data.get("organization") || "—"),

@@ -10,8 +10,8 @@
       "es": "Juana Díaz, Puerto Rico"
     },
     "description": {
-      "en": "A private, exclusive-use coastal campus in Juana Díaz, Puerto Rico for training, retreats, productions, and large gatherings.",
-      "es": "Un campus costero privado y de uso exclusivo en Juana Díaz, Puerto Rico para adiestramientos, retiros, producciones y grupos grandes."
+      "en": "A private, exclusive-use waterfront venue in Juana Díaz, Puerto Rico for weddings, retreats, celebrations, and unforgettable gatherings.",
+      "es": "Un recinto privado frente al mar y de uso exclusivo en Juana Díaz, Puerto Rico para bodas, retiros, celebraciones y encuentros inolvidables."
     }
   },
   "nav": [
@@ -23,329 +23,329 @@
     {
       "key": "venue",
       "slug": { "en": "venue", "es": "es/recinto" },
-      "label": { "en": "The venue", "es": "El recinto" }
+      "label": { "en": "The place", "es": "El lugar" }
     },
     {
       "key": "missions",
-      "slug": { "en": "missions", "es": "es/usos" },
-      "label": { "en": "Ways to use it", "es": "Usos" }
+      "slug": { "en": "celebrate", "es": "es/celebrar" },
+      "label": { "en": "Celebrate", "es": "Celebrar" }
     },
     {
       "key": "gallery",
       "slug": { "en": "gallery", "es": "es/galeria" },
-      "label": { "en": "Field notes", "es": "Bitácora" }
+      "label": { "en": "The coast", "es": "La costa" }
     },
     {
       "key": "contact",
       "slug": { "en": "contact", "es": "es/contacto" },
-      "label": { "en": "Plan a stay", "es": "Planifique" }
+      "label": { "en": "Plan your date", "es": "Planifique" }
     }
   ],
   "pages": [
     {
       "key": "home",
       "slug": { "en": "", "es": "es" },
-      "title": { "en": "Private coastal campus", "es": "Campus costero privado" },
+      "title": { "en": "Private waterfront celebrations", "es": "Celebraciones privadas frente al mar" },
       "description": {
-        "en": "Camp Caribe is a private, exclusive-use coastal campus for large groups in Juana Díaz, Puerto Rico.",
-        "es": "Camp Caribe es un campus costero privado y de uso exclusivo para grupos grandes en Juana Díaz, Puerto Rico."
+        "en": "Camp Caribe is a private waterfront venue for weddings, retreats, and celebrations in Juana Díaz, Puerto Rico.",
+        "es": "Camp Caribe es un recinto privado frente al mar para bodas, retiros y celebraciones en Juana Díaz, Puerto Rico."
       }
     },
     {
       "key": "venue",
       "slug": { "en": "venue", "es": "es/recinto" },
-      "title": { "en": "The venue", "es": "El recinto" },
+      "title": { "en": "The place", "es": "El lugar" },
       "description": {
-        "en": "Explore Camp Caribe's oceanfront grounds, lodging, halls, training areas, and dedicated helicopter landing zone.",
-        "es": "Explore los terrenos frente al mar, alojamientos, salones, áreas de adiestramiento y helipuerto de Camp Caribe."
+        "en": "Explore Camp Caribe's waterfront grounds, gathering halls, overnight accommodations, and flexible celebration spaces.",
+        "es": "Explore los terrenos frente al mar, salones, alojamientos y espacios flexibles para celebraciones de Camp Caribe."
       }
     },
     {
       "key": "missions",
-      "slug": { "en": "missions", "es": "es/usos" },
-      "title": { "en": "Ways to use Camp Caribe", "es": "Usos de Camp Caribe" },
+      "slug": { "en": "celebrate", "es": "es/celebrar" },
+      "title": { "en": "Celebrate at Camp Caribe", "es": "Celebre en Camp Caribe" },
       "description": {
-        "en": "A flexible private venue for field training, leadership retreats, productions, faith groups, and private events.",
-        "es": "Un recinto privado y flexible para adiestramiento, retiros de liderazgo, producciones, grupos de fe y eventos privados."
+        "en": "A private Caribbean setting for weddings, milestone weekends, reunions, retreats, and creative gatherings.",
+        "es": "Un escenario privado en el Caribe para bodas, fines de semana especiales, reuniones, retiros y encuentros creativos."
       }
     },
     {
       "key": "gallery",
       "slug": { "en": "gallery", "es": "es/galeria" },
-      "title": { "en": "Field notes", "es": "Bitácora visual" },
+      "title": { "en": "The coast", "es": "La costa" },
       "description": {
-        "en": "Real photographs and footage from Camp Caribe's campus and shoreline in Juana Díaz.",
-        "es": "Fotografías y videos reales del campus y la costa de Camp Caribe en Juana Díaz."
+        "en": "See the water, light, palms, gathering spaces, and real grounds of Camp Caribe in Juana Díaz.",
+        "es": "Vea el mar, la luz, las palmas, los espacios y los terrenos reales de Camp Caribe en Juana Díaz."
       }
     },
     {
       "key": "contact",
       "slug": { "en": "contact", "es": "es/contacto" },
-      "title": { "en": "Plan a stay", "es": "Planifique su estadía" },
+      "title": { "en": "Plan your date", "es": "Planifique su fecha" },
       "description": {
-        "en": "Start a private Camp Caribe venue briefing for your group, production, retreat, or training operation.",
-        "es": "Comience una consulta privada para su grupo, producción, retiro u operación de adiestramiento en Camp Caribe."
+        "en": "Ask about dates and begin planning a wedding, retreat, reunion, or private gathering at Camp Caribe.",
+        "es": "Consulte fechas y comience a planificar una boda, retiro, reunión o celebración privada en Camp Caribe."
       }
     }
   ],
   "facts": [
     {
       "value": "500+",
-      "label": { "en": "group capacity", "es": "personas de capacidad" }
+      "label": { "en": "guests across the grounds", "es": "invitados en la propiedad" }
     },
     {
       "value": "01",
-      "label": { "en": "group on property", "es": "grupo en la propiedad" }
+      "label": { "en": "celebration at a time", "es": "celebración a la vez" }
     },
     {
       "value": "365",
-      "label": { "en": "days available", "es": "días disponible" }
+      "label": { "en": "days of Caribbean light", "es": "días de luz caribeña" }
     },
     {
       "value": "SEA",
-      "label": { "en": "at the edge of campus", "es": "al borde del campus" }
+      "label": { "en": "at the edge of it all", "es": "al borde de todo" }
     }
   ],
   "home": {
     "hero": {
       "eyebrow": {
-        "en": "18.05° N · Juana Díaz · Puerto Rico",
-        "es": "18.05° N · Juana Díaz · Puerto Rico"
+        "en": "Private waterfront venue · Puerto Rico",
+        "es": "Recinto privado frente al mar · Puerto Rico"
       },
-      "title": { "en": "The coast is yours.", "es": "La costa es suya." },
+      "title": { "en": "Meet us by the water.", "es": "Nos vemos junto al mar." },
       "deck": {
-        "en": "A private Caribbean campus for groups that need room to work, gather, train, and reset—without sharing the grounds.",
-        "es": "Un campus privado en el Caribe para grupos que necesitan espacio para trabajar, reunirse, adiestrarse y reconectar—sin compartir los terrenos."
+        "en": "A whole Caribbean property for weddings, long-table dinners, retreats, and the kind of weekends people talk about for years.",
+        "es": "Una propiedad completa en el Caribe para bodas, cenas largas, retiros y fines de semana que se recuerdan por años."
       },
-      "primary": { "en": "Request a private briefing", "es": "Solicite una consulta privada" },
-      "secondary": { "en": "See the grounds", "es": "Conozca los terrenos" }
+      "primary": { "en": "Ask about your date", "es": "Consulte su fecha" },
+      "secondary": { "en": "Explore the place", "es": "Explore el lugar" }
     },
     "intro": {
-      "eyebrow": { "en": "Exclusive by design", "es": "Exclusivo por diseño" },
-      "title": { "en": "One property. No crossover.", "es": "Una propiedad. Sin interferencias." },
+      "eyebrow": { "en": "All yours for the occasion", "es": "Todo suyo para la ocasión" },
+      "title": { "en": "Your people. Your pace. Your place.", "es": "Su gente. Su ritmo. Su lugar." },
       "body": {
-        "en": "Camp Caribe is reserved as a whole. The sleeping quarters, gathering halls, open grounds, shoreline, and operational spaces belong to your group for the length of the booking. That single decision changes the pace of everything: teams can focus, schedules can flex, and the campus can become exactly what the work requires.",
-        "es": "Camp Caribe se reserva en su totalidad. Los alojamientos, salones, terrenos abiertos, costa y espacios operacionales pertenecen a su grupo durante toda la estadía. Esa sola decisión cambia el ritmo de todo: los equipos se concentran, los itinerarios se adaptan y el campus se convierte en lo que el trabajo requiera."
+        "en": "Camp Caribe is reserved as a whole. The shoreline, gathering halls, overnight spaces, and open grounds belong to your guests for the length of the booking. There are no strangers at the next table and no second event waiting in the wings—just the freedom to let the day unfold naturally.",
+        "es": "Camp Caribe se reserva en su totalidad. La costa, los salones, los alojamientos y los terrenos abiertos pertenecen a sus invitados durante la estadía. No hay extraños en la mesa de al lado ni otro evento esperando turno—solo la libertad de dejar que el día fluya a su ritmo."
       }
     },
     "statement": {
-      "eyebrow": { "en": "A different kind of venue", "es": "Un recinto diferente" },
+      "eyebrow": { "en": "A little wild. Completely yours.", "es": "Un poco salvaje. Completamente suyo." },
       "title": {
-        "en": "Built to hold a full operation. Quiet enough to hear the water.",
-        "es": "Preparado para una operación completa. Tranquilo para escuchar el mar."
+        "en": "Dress it up. Keep it barefoot. The sea does the rest.",
+        "es": "Vístalo de gala. Déjelo descalzo. El mar hace el resto."
       },
       "body": {
-        "en": "The campus sits between Puerto Rico's southern mountains and the Caribbean Sea. It is practical, contained, and unpolished in the right ways—a place made for use, not display.",
-        "es": "El campus se encuentra entre las montañas del sur de Puerto Rico y el mar Caribe. Es práctico, contenido y auténtico—un lugar hecho para usarse, no para aparentar."
+        "en": "This is not a polished ballroom dropped beside a beach. It is an honest stretch of Puerto Rico's south coast: black sand, palms, open sky, generous grounds, and room for a creative team to make something singular.",
+        "es": "Esto no es un salón pulido colocado junto a una playa. Es un tramo auténtico de la costa sur de Puerto Rico: arena negra, palmas, cielo abierto, terrenos amplios y espacio para crear algo único."
       }
     },
-    "capabilitiesEyebrow": { "en": "Four ways in", "es": "Cuatro posibilidades" },
-    "capabilitiesTitle": { "en": "Make the campus your own", "es": "Haga suyo el campus" },
+    "capabilitiesEyebrow": { "en": "Reasons to gather", "es": "Razones para reunirse" },
+    "capabilitiesTitle": { "en": "A coast for your kind of celebration", "es": "Una costa para su manera de celebrar" },
     "capabilities": [
       {
         "index": "01",
-        "title": { "en": "Field operations", "es": "Operaciones de campo" },
+        "title": { "en": "Weddings by the water", "es": "Bodas junto al mar" },
         "body": {
-          "en": "Open terrain, controlled access, group lodging, and an on-site helicopter landing zone for coordinated training and field work.",
-          "es": "Terreno abierto, acceso controlado, alojamiento grupal y helipuerto en el lugar para adiestramientos y trabajo de campo coordinado."
+          "en": "A shoreline ceremony, dinner under the open sky, and an entire private property for the people who matter most.",
+          "es": "Una ceremonia junto al mar, cena bajo el cielo abierto y una propiedad privada completa para las personas que más importan."
         },
-        "image": "training-grounds.avif",
-        "alt": { "en": "Open training grounds at Camp Caribe", "es": "Terrenos abiertos de adiestramiento en Camp Caribe" }
+        "image": "shoreline-golden-hour.avif",
+        "alt": { "en": "Golden light over the Camp Caribe shoreline", "es": "Luz dorada sobre la costa de Camp Caribe" }
       },
       {
         "index": "02",
-        "title": { "en": "Leadership off-sites", "es": "Retiros de liderazgo" },
+        "title": { "en": "Milestone weekends", "es": "Fines de semana especiales" },
         "body": {
-          "en": "A complete change of context for teams that need privacy, sustained time together, and space beyond a conference room.",
-          "es": "Un cambio total de contexto para equipos que necesitan privacidad, tiempo continuo juntos y espacio más allá de una sala de conferencias."
+          "en": "Birthdays, anniversaries, and reunions get more than an evening: room for a whole weekend to find its own rhythm.",
+          "es": "Cumpleaños, aniversarios y reuniones reciben más que una noche: espacio para que todo un fin de semana encuentre su ritmo."
         },
-        "image": "shoreline-golden-hour.avif",
-        "alt": { "en": "Golden hour on the Camp Caribe shoreline", "es": "Atardecer en la costa de Camp Caribe" }
+        "image": "oceanfront-grounds.avif",
+        "alt": { "en": "Open grounds beside the Caribbean Sea", "es": "Terrenos abiertos junto al mar Caribe" }
       },
       {
         "index": "03",
-        "title": { "en": "Production base", "es": "Base de producción" },
+        "title": { "en": "Retreats that breathe", "es": "Retiros con espacio para respirar" },
         "body": {
-          "en": "Multiple structures, broad exterior locations, controlled movement, and a cinematic south-coast horizon in one footprint.",
-          "es": "Múltiples estructuras, amplias locaciones exteriores, movimiento controlado y un horizonte cinematográfico en una sola propiedad."
+          "en": "Wellness, creative, and leadership groups can move from focused time indoors to salt air and an empty horizon.",
+          "es": "Grupos de bienestar, creatividad y liderazgo pueden pasar de momentos enfocados en interiores al aire salado y un horizonte abierto."
         },
-        "image": "campus-from-tower.avif",
-        "alt": { "en": "Camp Caribe campus viewed from its tower", "es": "Campus de Camp Caribe visto desde la torre" }
+        "image": "shoreline-purple-twilight.avif",
+        "alt": { "en": "Low sun and palms along the black-sand shore", "es": "Sol bajo y palmas junto a la costa de arena negra" }
       },
       {
         "index": "04",
-        "title": { "en": "Large gatherings", "es": "Encuentros grandes" },
+        "title": { "en": "Big, beautiful gatherings", "es": "Encuentros grandes y memorables" },
         "body": {
-          "en": "Retreats, worship, reunions, and private events gain something rare: an entire campus where the gathering can set its own rhythm.",
-          "es": "Retiros, cultos, reuniones y eventos privados obtienen algo poco común: un campus entero donde el grupo marca su propio ritmo."
+          "en": "Community celebrations, faith gatherings, and family reunions have halls, lawns, lodging, and the coast in one connected setting.",
+          "es": "Celebraciones comunitarias, encuentros de fe y reuniones familiares tienen salones, terrenos, alojamiento y costa en un solo lugar."
         },
         "image": "main-hall-grounds.avif",
         "alt": { "en": "Main hall and gathering grounds", "es": "Salón principal y terrenos para reuniones" }
       }
     ],
-    "locationEyebrow": { "en": "South coast logistics", "es": "Logística en la costa sur" },
-    "locationTitle": { "en": "Close to what matters. Apart from everything else.", "es": "Cerca de lo esencial. Aparte de todo lo demás." },
+    "locationEyebrow": { "en": "Easy to reach. Hard to forget.", "es": "Fácil de llegar. Difícil de olvidar." },
+    "locationTitle": { "en": "The feeling of away, without going far.", "es": "La sensación de escapar, sin ir demasiado lejos." },
     "locationBody": {
-      "en": "Camp Caribe sits in Juana Díaz, across from Fort Allen and within practical reach of Ponce, Mercedita Airport, hospitals, freight routes, and San Juan's international connections.",
-      "es": "Camp Caribe está en Juana Díaz, frente a Fort Allen y con acceso práctico a Ponce, el Aeropuerto Mercedita, hospitales, rutas de carga y las conexiones internacionales de San Juan."
+      "en": "Camp Caribe sits in Juana Díaz on Puerto Rico's south coast, within practical reach of Ponce, Mercedita Airport, hotels, vendors, hospitals, and the island's international connections.",
+      "es": "Camp Caribe está en Juana Díaz, en la costa sur de Puerto Rico, con acceso práctico a Ponce, el Aeropuerto Mercedita, hoteles, proveedores, hospitales y las conexiones internacionales de la isla."
     }
   },
   "venue": {
     "eyebrow": { "en": "The whole place", "es": "La propiedad completa" },
-    "title": { "en": "A campus with room to change shape.", "es": "Un campus que se adapta." },
+    "title": { "en": "Space for the whole story.", "es": "Espacio para toda la historia." },
     "deck": {
-      "en": "From the black-sand shoreline to the assembly halls, Camp Caribe gives one group a complete working environment.",
-      "es": "Desde la costa de arena negra hasta los salones de asamblea, Camp Caribe ofrece a un solo grupo un entorno de trabajo completo."
+      "en": "From first-look quiet to the last song of the night, the shoreline, halls, lawns, and overnight spaces stay connected—and exclusively yours.",
+      "es": "Desde la calma del primer encuentro hasta la última canción, la costa, los salones, los terrenos y los alojamientos permanecen conectados—y exclusivamente suyos."
     },
-    "introTitle": { "en": "Everything inside one perimeter", "es": "Todo dentro de un mismo perímetro" },
+    "introTitle": { "en": "One setting, many moments", "es": "Un lugar, muchos momentos" },
     "introBody": {
       "en": [
-        "The property combines broad exterior grounds, multiple low-rise buildings, group lodging, interior halls, direct coastal access, and a dedicated helicopter landing zone.",
-        "It is a working campus rather than a conventional resort. Spaces are straightforward and flexible, ready to be configured around an operation, program, production, or gathering."
+        "The property brings together broad lawns, direct Caribbean shoreline, flexible interior halls, low-rise buildings, and simple group accommodations across one private footprint.",
+        "Camp Caribe is a character-rich blank canvas rather than a conventional resort. Bring the planner, caterer, flowers, music, and imagination; the coast and the space are already here."
       ],
       "es": [
-        "La propiedad combina amplios terrenos exteriores, múltiples edificios, alojamiento grupal, salones interiores, acceso directo a la costa y un helipuerto dedicado.",
-        "Es un campus de trabajo, no un resort convencional. Los espacios son sencillos y flexibles, listos para configurarse alrededor de una operación, programa, producción o encuentro."
+        "La propiedad reúne terrenos amplios, acceso directo al Caribe, salones interiores flexibles, edificios bajos y alojamiento sencillo para grupos dentro de un entorno privado.",
+        "Camp Caribe es un lienzo con carácter, no un resort convencional. Traiga su planificador, catering, flores, música e imaginación; la costa y el espacio ya están aquí."
       ]
     },
-    "spacesEyebrow": { "en": "Campus inventory", "es": "Inventario del campus" },
-    "spacesTitle": { "en": "The spaces you can put to work", "es": "Espacios listos para usarse" },
+    "spacesEyebrow": { "en": "The setting", "es": "El escenario" },
+    "spacesTitle": { "en": "Every part can play a part", "es": "Cada espacio puede ser parte de su historia" },
     "spaces": [
       {
         "index": "01",
-        "title": { "en": "Oceanfront grounds", "es": "Terrenos frente al mar" },
-        "body": { "en": "Open coastal terrain with immediate access to the Caribbean shoreline.", "es": "Terreno costero abierto con acceso inmediato a la orilla del mar Caribe." },
+        "title": { "en": "The water's edge", "es": "A la orilla del mar" },
+        "body": { "en": "Open coastal ground for ceremonies, cocktail hours, portraits, and quiet morning walks.", "es": "Terreno costero abierto para ceremonias, cócteles, retratos y caminatas tranquilas por la mañana." },
         "image": "oceanfront-grounds.avif",
         "alt": { "en": "Oceanfront grounds at Camp Caribe", "es": "Terrenos frente al mar en Camp Caribe" }
       },
       {
         "index": "02",
-        "title": { "en": "Campus & facilities", "es": "Campus e instalaciones" },
-        "body": { "en": "Multiple buildings connected by walkways and broad exterior staging areas.", "es": "Múltiples edificios conectados por caminos y amplias áreas exteriores." },
-        "image": "campus-entrance.avif",
-        "alt": { "en": "Camp Caribe campus entrance and facilities", "es": "Entrada e instalaciones de Camp Caribe" }
+        "title": { "en": "Open-air grounds", "es": "Terrenos al aire libre" },
+        "body": { "en": "Broad lawns and connected outdoor spaces for dining, music, games, and gathering under the sky.", "es": "Amplios terrenos y espacios exteriores conectados para cenar, escuchar música, jugar y reunirse bajo el cielo." },
+        "image": "parade-grounds.avif",
+        "alt": { "en": "Open grounds at Camp Caribe", "es": "Terrenos abiertos en Camp Caribe" }
       },
       {
         "index": "03",
-        "title": { "en": "Group lodging", "es": "Alojamiento grupal" },
-        "body": { "en": "Barracks-style accommodations for extended, large-group stays.", "es": "Alojamiento tipo barraca para estadías prolongadas de grupos grandes." },
+        "title": { "en": "Stay together", "es": "Hospédense juntos" },
+        "body": { "en": "Simple group accommodations keep the closest people nearby across a full celebration weekend.", "es": "Alojamiento sencillo para grupos mantiene cerca a las personas más importantes durante todo el fin de semana." },
         "image": "lodging-row.avif",
         "alt": { "en": "Palm-lined lodging row", "es": "Área de alojamiento rodeada de palmas" }
       },
       {
         "index": "04",
-        "title": { "en": "Assembly hall", "es": "Salón de asamblea" },
-        "body": { "en": "A large, open interior for briefings, meals, workshops, and group programming.", "es": "Un interior amplio para orientaciones, comidas, talleres y programación grupal." },
+        "title": { "en": "The gathering hall", "es": "El salón principal" },
+        "body": { "en": "A large, flexible interior for dinner, dancing, workshops, or a beautiful weather-proof plan B.", "es": "Un interior amplio y flexible para cenas, baile, talleres o un hermoso plan B bajo techo." },
         "image": "assembly-hall.avif",
         "alt": { "en": "Assembly hall interior", "es": "Interior del salón de asamblea" }
       },
       {
         "index": "05",
-        "title": { "en": "Meeting spaces", "es": "Espacios de reunión" },
-        "body": { "en": "Flexible rooms for planning, classroom work, breakout groups, and production support.", "es": "Salones flexibles para planificación, clases, grupos pequeños y apoyo de producción." },
+        "title": { "en": "Rooms behind the scenes", "es": "Salones tras bastidores" },
+        "body": { "en": "Flexible rooms for getting ready, planning, vendor support, intimate meals, and smaller group moments.", "es": "Salones flexibles para prepararse, planificar, apoyar proveedores, compartir comidas íntimas y reunirse en grupos pequeños." },
         "image": "meeting-room.avif",
         "alt": { "en": "Flexible meeting room", "es": "Salón flexible para reuniones" }
       },
       {
         "index": "06",
-        "title": { "en": "Landing zone", "es": "Zona de aterrizaje" },
-        "body": { "en": "A dedicated on-property helicopter landing zone for approved operations.", "es": "Un helipuerto dedicado dentro de la propiedad para operaciones autorizadas." },
-        "image": "hlz-on-pad.avif",
-        "alt": { "en": "Helicopter on the Camp Caribe landing pad", "es": "Helicóptero en el helipuerto de Camp Caribe" }
+        "title": { "en": "A cinematic horizon", "es": "Un horizonte cinematográfico" },
+        "body": { "en": "Black sand, palms, southern light, and an uninterrupted horizon give photographers something extraordinary all day long.", "es": "Arena negra, palmas, luz del sur y un horizonte abierto ofrecen a los fotógrafos algo extraordinario durante todo el día." },
+        "image": "shoreline-purple-twilight.avif",
+        "alt": { "en": "Purple twilight across the Camp Caribe shoreline", "es": "Crepúsculo violeta sobre la costa de Camp Caribe" }
       }
     ],
-    "operationsEyebrow": { "en": "Operational position", "es": "Ubicación operacional" },
-    "operationsTitle": { "en": "Connected to the island", "es": "Conectado con la isla" },
+    "operationsEyebrow": { "en": "Good to know", "es": "Información útil" },
+    "operationsTitle": { "en": "The romance, with the practical pieces nearby", "es": "El encanto, con lo práctico al alcance" },
     "operations": [
       {
-        "title": { "en": "Across from Fort Allen", "es": "Frente a Fort Allen" },
-        "body": { "en": "Adjacent to an active military installation.", "es": "Junto a una instalación militar activa." }
+        "title": { "en": "The property is private", "es": "La propiedad es privada" },
+        "body": { "en": "One booking has the grounds, halls, and shoreline without another event crossing through.", "es": "Una sola reservación disfruta los terrenos, salones y costa sin que otro evento interrumpa." }
       },
       {
-        "title": { "en": "Minutes from Ponce and PSE", "es": "A minutos de Ponce y PSE" },
-        "body": { "en": "Practical access to the city, Mercedita Airport, services, and supply routes.", "es": "Acceso práctico a la ciudad, el Aeropuerto Mercedita, servicios y rutas de abasto." }
+        "title": { "en": "Near Ponce and PSE", "es": "Cerca de Ponce y PSE" },
+        "body": { "en": "Practical access to the city, Mercedita Airport, hotels, restaurants, and event vendors.", "es": "Acceso práctico a la ciudad, el Aeropuerto Mercedita, hoteles, restaurantes y proveedores de eventos." }
       },
       {
-        "title": { "en": "Medical support nearby", "es": "Apoyo médico cercano" },
-        "body": { "en": "Multiple major hospitals are within the surrounding Ponce region.", "es": "Varios hospitales principales se encuentran en la región de Ponce." }
+        "title": { "en": "Support is close", "es": "El apoyo está cerca" },
+        "body": { "en": "Major hospitals, services, supplies, and additional accommodations are available throughout the Ponce region.", "es": "Hospitales, servicios, suministros y alojamiento adicional están disponibles en toda la región de Ponce." }
       },
       {
-        "title": { "en": "Direct coastal conditions", "es": "Condiciones costeras directas" },
-        "body": { "en": "Sea air and a steady Caribbean breeze move across the campus.", "es": "El aire del mar y la brisa constante del Caribe recorren el campus." }
+        "title": { "en": "It has an unusual edge", "es": "Tiene un carácter singular" },
+        "body": { "en": "The property's past and on-site landing capability give it a character no conventional venue can manufacture.", "es": "La historia de la propiedad y su capacidad de aterrizaje le dan un carácter que ningún recinto convencional puede fabricar." }
       }
     ]
   },
   "missions": {
-    "eyebrow": { "en": "Ways to use it", "es": "Formas de usarlo" },
-    "title": { "en": "Bring the work. Shape the place.", "es": "Traiga el trabajo. Adapte el lugar." },
+    "eyebrow": { "en": "Celebrate your way", "es": "Celebre a su manera" },
+    "title": { "en": "No ballroom rules. No borrowed view.", "es": "Sin reglas de salón. Sin vistas prestadas." },
     "deck": {
-      "en": "Camp Caribe is deliberately broad in what it can hold. The common requirement is simple: one group needs the property to itself.",
-      "es": "Camp Caribe fue diseñado para recibir usos muy distintos. El requisito común es sencillo: un solo grupo necesita la propiedad completa."
+      "en": "Camp Caribe gives you the coast, the grounds, and the freedom to make the occasion feel like the people at the center of it.",
+      "es": "Camp Caribe le ofrece la costa, los terrenos y la libertad de hacer que la ocasión se sienta como las personas en el centro de ella."
     },
-    "introTitle": { "en": "A venue without a fixed script", "es": "Un recinto sin libreto fijo" },
+    "introTitle": { "en": "Bring the vision. Let the place loosen its tie.", "es": "Traiga la visión. Deje que el lugar se quite la corbata." },
     "introBody": {
-      "en": "The same grounds can support a field exercise, a leadership week, a production base, or a gathering of hundreds. Lodging and working spaces stay close, movement stays contained, and the coast changes the atmosphere without changing the mission.",
-      "es": "Los mismos terrenos pueden apoyar un ejercicio de campo, una semana de liderazgo, una base de producción o un encuentro de cientos. El alojamiento y los espacios de trabajo permanecen cerca, el movimiento se mantiene contenido y la costa cambia el ambiente sin distraer de la misión."
+      "en": "Use the shoreline for vows, the lawn for cocktails, the hall for dinner, and the next morning for coffee beside the water. Or turn the whole thing around. Camp Caribe works best when a creative team treats the property as one connected canvas.",
+      "es": "Use la costa para los votos, el terreno para cócteles, el salón para la cena y la mañana siguiente para café junto al mar. O cambie todo el orden. Camp Caribe funciona mejor cuando un equipo creativo trata la propiedad como un solo lienzo conectado."
     },
     "uses": [
       {
         "index": "01",
-        "title": { "en": "Joint training", "es": "Adiestramiento conjunto" },
-        "body": { "en": "Controlled access, broad terrain, lodging, briefing space, and coastal conditions for coordinated exercises.", "es": "Acceso controlado, terreno amplio, alojamiento, espacios de orientación y condiciones costeras para ejercicios coordinados." },
-        "image": "parade-grounds.avif",
-        "alt": { "en": "Open parade grounds", "es": "Amplios terrenos de formación" }
+        "title": { "en": "Weddings", "es": "Bodas" },
+        "body": { "en": "Build a full wedding weekend around the water: welcome dinner, ceremony, reception, portraits, and an unhurried morning after.", "es": "Construya un fin de semana de boda junto al mar: cena de bienvenida, ceremonia, recepción, retratos y una mañana tranquila después." },
+        "image": "shoreline-sunset-red.avif",
+        "alt": { "en": "Warm sunset over the Caribbean shoreline", "es": "Atardecer cálido sobre la costa caribeña" }
       },
       {
         "index": "02",
-        "title": { "en": "Law enforcement", "es": "Agencias del orden público" },
-        "body": { "en": "A private footprint for scenario work, multi-day instruction, and interagency coordination.", "es": "Una propiedad privada para escenarios, instrucción de varios días y coordinación interagencial." },
-        "image": "secured-campus.avif",
-        "alt": { "en": "Secured Camp Caribe campus", "es": "Campus asegurado de Camp Caribe" }
+        "title": { "en": "Milestones", "es": "Momentos especiales" },
+        "body": { "en": "Anniversaries, birthdays, graduations, and big life moments deserve more room than a restaurant reservation.", "es": "Aniversarios, cumpleaños, graduaciones y grandes momentos merecen más espacio que una reservación en un restaurante." },
+        "image": "shoreline-golden-hour.avif",
+        "alt": { "en": "Golden hour beside the water", "es": "Hora dorada junto al mar" }
       },
       {
         "index": "03",
-        "title": { "en": "Film & production", "es": "Cine y producción" },
-        "body": { "en": "A self-contained base with varied exteriors, practical interiors, crew space, and a singular shoreline.", "es": "Una base autocontenida con exteriores variados, interiores prácticos, espacio para equipos y una costa singular." },
-        "image": "barracks-building.avif",
-        "alt": { "en": "Barracks building and palms", "es": "Edificio de barracas y palmas" }
+        "title": { "en": "Family reunions", "es": "Reuniones familiares" },
+        "body": { "en": "Keep generations together with broad grounds, simple lodging, shared meals, and enough space for everyone to find their own corner.", "es": "Reúna generaciones con terrenos amplios, alojamiento sencillo, comidas compartidas y espacio para que todos encuentren su rincón." },
+        "image": "main-hall-grounds.avif",
+        "alt": { "en": "Main gathering hall and open grounds", "es": "Salón principal y terrenos abiertos" }
       },
       {
         "index": "04",
-        "title": { "en": "Corporate retreats", "es": "Retiros corporativos" },
-        "body": { "en": "Privacy and uninterrupted time for leadership teams, workshops, planning, and team development.", "es": "Privacidad y tiempo sin interrupciones para equipos de liderazgo, talleres, planificación y desarrollo de equipos." },
-        "image": "shoreline-palms-midday.avif",
-        "alt": { "en": "Palms along the Camp Caribe coast", "es": "Palmas en la costa de Camp Caribe" }
+        "title": { "en": "Retreats & wellness", "es": "Retiros y bienestar" },
+        "body": { "en": "Create a private rhythm of movement, conversation, shared food, focused sessions, and genuine time beside the sea.", "es": "Cree un ritmo privado de movimiento, conversación, comida compartida, sesiones enfocadas y tiempo genuino junto al mar." },
+        "image": "shoreline-purple-twilight.avif",
+        "alt": { "en": "Low sun and palms along the Camp Caribe coast", "es": "Sol bajo y palmas en la costa de Camp Caribe" }
       },
       {
         "index": "05",
-        "title": { "en": "Faith gatherings", "es": "Encuentros de fe" },
-        "body": { "en": "A complete campus for worship, service, reflection, youth programs, and community.", "es": "Un campus completo para culto, servicio, reflexión, programas juveniles y comunidad." },
+        "title": { "en": "Community & faith", "es": "Comunidad y fe" },
+        "body": { "en": "A complete setting for worship, service, reflection, youth weekends, community meals, and time together outdoors.", "es": "Un entorno completo para culto, servicio, reflexión, fines de semana juveniles, comidas comunitarias y tiempo juntos al aire libre." },
         "image": "activity-hall.avif",
         "alt": { "en": "Large activity hall", "es": "Amplio salón de actividades" }
       },
       {
         "index": "06",
-        "title": { "en": "Private events", "es": "Eventos privados" },
-        "body": { "en": "Celebrations and reunions with the freedom to use the grounds, halls, and shoreline as one connected setting.", "es": "Celebraciones y reuniones con la libertad de usar los terrenos, salones y costa como un solo escenario conectado." },
-        "image": "shoreline-sunset-red.avif",
-        "alt": { "en": "Red sunset from the shoreline", "es": "Atardecer rojo visto desde la costa" }
+        "title": { "en": "Creative gatherings", "es": "Encuentros creativos" },
+        "body": { "en": "Editorial shoots, intimate performances, workshops, and productions get varied spaces and a horizon that carries the frame.", "es": "Sesiones editoriales, presentaciones íntimas, talleres y producciones reciben espacios variados y un horizonte que sostiene la imagen." },
+        "image": "shoreline-palms-midday.avif",
+        "alt": { "en": "A fiery sky over the south-coast bay", "es": "Un cielo encendido sobre la bahía de la costa sur" }
       }
     ],
-    "closingTitle": { "en": "If it needs the whole place, start here.", "es": "Si necesita el lugar completo, comience aquí." },
+    "closingTitle": { "en": "If you can picture it here, start with a date.", "es": "Si puede imaginarlo aquí, comience con una fecha." },
     "closingBody": {
-      "en": "Tell us the group size, dates, and what the property needs to do. We will take the conversation from there.",
-      "es": "Cuéntenos el tamaño del grupo, las fechas y lo que la propiedad debe hacer. Nosotros continuamos la conversación."
+      "en": "Tell us the occasion, guest count, preferred dates, and the atmosphere you have in mind. We will answer with the practical details.",
+      "es": "Cuéntenos la ocasión, cantidad de invitados, fechas preferidas y el ambiente que imagina. Le responderemos con los detalles prácticos."
     }
   },
   "gallery": {
-    "eyebrow": { "en": "Field notes", "es": "Bitácora visual" },
-    "title": { "en": "This is the place as it is.", "es": "Este es el lugar tal como es." },
+    "eyebrow": { "en": "Water, light, room", "es": "Mar, luz, espacio" },
+    "title": { "en": "Come for the coast. Stay for the feeling.", "es": "Venga por la costa. Quédese por la sensación." },
     "deck": {
-      "en": "Real footage and photographs from the grounds—working buildings, open terrain, black sand, palms, aircraft, and the changing south-coast light.",
-      "es": "Videos y fotografías reales de la propiedad—edificios en uso, terreno abierto, arena negra, palmas, aeronaves y la luz cambiante de la costa sur."
+      "en": "Real footage and photographs from Camp Caribe—black sand, palms, wide-open grounds, flexible spaces, and the changing light of Puerto Rico's south coast.",
+      "es": "Videos y fotografías reales de Camp Caribe—arena negra, palmas, terrenos amplios, espacios flexibles y la luz cambiante de la costa sur de Puerto Rico."
     },
-    "videoEyebrow": { "en": "Motion studies", "es": "Vistas en movimiento" },
-    "videoTitle": { "en": "Four views through the campus", "es": "Cuatro recorridos por el campus" },
+    "videoEyebrow": { "en": "See how it moves", "es": "Véalo en movimiento" },
+    "videoTitle": { "en": "Three ways into the place", "es": "Tres maneras de conocer el lugar" },
     "videos": [
       {
         "title": { "en": "Oceanside grounds", "es": "Terrenos frente al mar" },
@@ -361,77 +361,65 @@
         "title": { "en": "Inside the facilities", "es": "Dentro de las instalaciones" },
         "source": "facilities-vertical.mp4",
         "poster": "assembly-hall.avif"
-      },
-      {
-        "title": { "en": "Helicopter landing zone", "es": "Zona de aterrizaje" },
-        "source": "helicopter-landing-zone.mp4",
-        "poster": "hlz-on-pad.avif"
       }
     ],
-    "photoEyebrow": { "en": "The property", "es": "La propiedad" },
-    "photoTitle": { "en": "From first light to last call", "es": "Desde la primera luz hasta el anochecer" },
+    "photoEyebrow": { "en": "A full day on the south coast", "es": "Un día completo en la costa sur" },
+    "photoTitle": { "en": "Morning salt air. One last song.", "es": "Aire salado por la mañana. Una última canción." },
     "photos": [
-      { "image": "aerial-overview.avif", "label": { "en": "Aerial overview", "es": "Vista aérea" } },
-      { "image": "oceanfront-grounds.avif", "label": { "en": "Oceanfront grounds", "es": "Terrenos frente al mar" } },
-      { "image": "campus-entrance.avif", "label": { "en": "Campus entrance", "es": "Entrada del campus" } },
-      { "image": "campus-from-tower.avif", "label": { "en": "Campus from the tower", "es": "Campus desde la torre" } },
-      { "image": "main-hall-grounds.avif", "label": { "en": "Main hall & grounds", "es": "Salón principal y terrenos" } },
-      { "image": "parade-grounds.avif", "label": { "en": "Open parade grounds", "es": "Terrenos de formación" } },
-      { "image": "barracks-building.avif", "label": { "en": "Barracks building", "es": "Edificio de barracas" } },
-      { "image": "lodging-row.avif", "label": { "en": "Lodging row", "es": "Área de alojamiento" } },
-      { "image": "training-grounds.avif", "label": { "en": "Training grounds", "es": "Terrenos de adiestramiento" } },
-      { "image": "barracks-palms.avif", "label": { "en": "Barracks & palms", "es": "Barracas y palmas" } },
-      { "image": "assembly-hall.avif", "label": { "en": "Assembly hall", "es": "Salón de asamblea" } },
-      { "image": "meeting-room.avif", "label": { "en": "Meeting room", "es": "Sala de reuniones" } },
-      { "image": "activity-hall.avif", "label": { "en": "Activity hall", "es": "Salón de actividades" } },
-      { "image": "shoreline-sunset-red.avif", "label": { "en": "Caribbean sunset", "es": "Atardecer caribeño" } },
-      { "image": "shoreline-dusk-wind-farm.avif", "label": { "en": "Dusk across the bay", "es": "Anochecer sobre la bahía" } },
-      { "image": "shoreline-golden-hour.avif", "label": { "en": "Golden hour", "es": "Hora dorada" } },
-      { "image": "shoreline-purple-twilight.avif", "label": { "en": "Purple twilight", "es": "Crepúsculo violeta" } },
-      { "image": "shoreline-palms-midday.avif", "label": { "en": "Palms & ocean breeze", "es": "Palmas y brisa del mar" } },
       { "image": "shoreline-morning-black-sand.avif", "label": { "en": "Morning on black sand", "es": "Mañana sobre arena negra" } },
-      { "image": "patrol-boat-dusk.avif", "label": { "en": "Patrol boat at dusk", "es": "Patrullera al anochecer" } },
-      { "image": "wind-turbines-fiery-sky.avif", "label": { "en": "Wind turbines, fiery sky", "es": "Turbinas bajo un cielo encendido" } },
+      { "image": "shoreline-palms-midday.avif", "label": { "en": "Fire over the bay", "es": "Cielo encendido sobre la bahía" } },
+      { "image": "oceanfront-grounds.avif", "label": { "en": "The water's edge", "es": "A la orilla del mar" } },
+      { "image": "shoreline-golden-hour.avif", "label": { "en": "Golden hour", "es": "Hora dorada" } },
+      { "image": "shoreline-sunset-red.avif", "label": { "en": "Caribbean sunset", "es": "Atardecer caribeño" } },
+      { "image": "shoreline-purple-twilight.avif", "label": { "en": "Palms at low sun", "es": "Palmas bajo el sol" } },
+      { "image": "shoreline-dusk-wind-farm.avif", "label": { "en": "Dusk across the bay", "es": "Anochecer sobre la bahía" } },
       { "image": "wind-farm-golden-sunset.avif", "label": { "en": "Wind farm at sunset", "es": "Parque eólico al atardecer" } },
       { "image": "sun-clouds.avif", "label": { "en": "Sun behind the clouds", "es": "Sol detrás de las nubes" } },
-      { "image": "hlz-oceanside.avif", "label": { "en": "Oceanside landing zone", "es": "Helipuerto frente al mar" } },
-      { "image": "hlz-on-pad.avif", "label": { "en": "Aircraft on the pad", "es": "Aeronave en la plataforma" } },
-      { "image": "helicopter-grounds.avif", "label": { "en": "Helicopter on grounds", "es": "Helicóptero en los terrenos" } },
-      { "image": "chinook.avif", "label": { "en": "Chinook approach", "es": "Aproximación de Chinook" } },
-      { "image": "national-guard-helicopter.avif", "label": { "en": "Puerto Rico National Guard", "es": "Guardia Nacional de Puerto Rico" } }
+      { "image": "aerial-overview.avif", "label": { "en": "The whole property", "es": "La propiedad completa" } },
+      { "image": "campus-from-tower.avif", "label": { "en": "A view across the grounds", "es": "Vista de los terrenos" } },
+      { "image": "main-hall-grounds.avif", "label": { "en": "Main hall & lawn", "es": "Salón principal y terreno" } },
+      { "image": "parade-grounds.avif", "label": { "en": "Room under the sky", "es": "Espacio bajo el cielo" } },
+      { "image": "barracks-palms.avif", "label": { "en": "Palms through the property", "es": "Palmas en la propiedad" } },
+      { "image": "lodging-row.avif", "label": { "en": "Group accommodations", "es": "Alojamiento para grupos" } },
+      { "image": "assembly-hall.avif", "label": { "en": "The gathering hall", "es": "El salón principal" } },
+      { "image": "meeting-room.avif", "label": { "en": "A room to make your own", "es": "Un salón para hacerlo suyo" } },
+      { "image": "activity-hall.avif", "label": { "en": "Space to gather", "es": "Espacio para reunirse" } },
+      { "image": "campus-entrance.avif", "label": { "en": "Welcome to Camp Caribe", "es": "Bienvenidos a Camp Caribe" } },
+      { "image": "hlz-oceanside.avif", "label": { "en": "The property's unexpected side", "es": "El lado inesperado de la propiedad" } },
+      { "image": "helicopter-grounds.avif", "label": { "en": "An unforgettable arrival", "es": "Una llegada inolvidable" } }
     ]
   },
   "contact": {
-    "eyebrow": { "en": "Private briefing", "es": "Consulta privada" },
-    "title": { "en": "Tell us what the campus needs to do.", "es": "Díganos lo que el campus debe hacer." },
+    "eyebrow": { "en": "Begin with a date", "es": "Comience con una fecha" },
+    "title": { "en": "Tell us what you want to celebrate.", "es": "Cuéntenos qué desea celebrar." },
     "deck": {
-      "en": "Start with the group, the dates, and the purpose. We will answer with the practical details.",
-      "es": "Comience con el grupo, las fechas y el propósito. Le responderemos con los detalles prácticos."
+      "en": "Share the occasion, the people, and the feeling you have in mind. We will answer with availability and the practical details.",
+      "es": "Comparta la ocasión, las personas y el ambiente que imagina. Le responderemos con disponibilidad y los detalles prácticos."
     },
-    "directTitle": { "en": "Talk to the property", "es": "Hable con la propiedad" },
+    "directTitle": { "en": "Talk to Camp Caribe", "es": "Hable con Camp Caribe" },
     "directBody": {
-      "en": "For availability, site requirements, and private venue briefings, call or write directly.",
-      "es": "Para disponibilidad, requisitos del lugar y consultas privadas, llame o escriba directamente."
+      "en": "For availability, walkthroughs, vendor questions, and private venue details, call or write directly.",
+      "es": "Para disponibilidad, visitas, preguntas de proveedores y detalles del lugar, llame o escriba directamente."
     },
-    "formTitle": { "en": "Build the first brief", "es": "Prepare la consulta inicial" },
+    "formTitle": { "en": "Start the conversation", "es": "Comience la conversación" },
     "formBody": {
       "en": "This form opens a prepared email in your mail application. No information is stored on this site.",
       "es": "Este formulario abre un correo preparado en su aplicación de email. Este sitio no almacena su información."
     },
     "fields": {
       "name": { "en": "Your name", "es": "Su nombre" },
-      "organization": { "en": "Organization", "es": "Organización" },
+      "organization": { "en": "Partner or planner", "es": "Pareja o planificador" },
       "email": { "en": "Email", "es": "Correo electrónico" },
       "phone": { "en": "Phone", "es": "Teléfono" },
-      "groupSize": { "en": "Estimated group size", "es": "Tamaño estimado del grupo" },
+      "groupSize": { "en": "Estimated guest count", "es": "Cantidad estimada de invitados" },
       "dates": { "en": "Preferred dates", "es": "Fechas preferidas" },
       "purpose": { "en": "What are you planning?", "es": "¿Qué está planificando?" },
       "message": { "en": "What should we know?", "es": "¿Qué debemos saber?" },
-      "submit": { "en": "Open private briefing email", "es": "Abrir correo de consulta privada" }
+      "submit": { "en": "Open inquiry email", "es": "Abrir correo de consulta" }
     },
     "purposeOptions": {
-      "en": [ "Select one", "Training or field operation", "Corporate retreat", "Film or production", "Faith gathering", "Private event", "Other" ],
-      "es": [ "Seleccione una", "Adiestramiento u operación de campo", "Retiro corporativo", "Cine o producción", "Encuentro de fe", "Evento privado", "Otro" ]
+      "en": [ "Select one", "Wedding", "Milestone celebration", "Family reunion", "Retreat or wellness", "Community or faith gathering", "Creative production", "Other" ],
+      "es": [ "Seleccione una", "Boda", "Celebración especial", "Reunión familiar", "Retiro o bienestar", "Encuentro comunitario o de fe", "Producción creativa", "Otro" ]
     },
     "arrivalTitle": { "en": "Arrive on the south coast", "es": "Llegue a la costa sur" },
     "arrivalBody": {
@@ -440,10 +428,10 @@
     }
   },
   "footer": {
-    "tagline": { "en": "Where the work meets the Caribbean.", "es": "Donde el trabajo se encuentra con el Caribe." },
+    "tagline": { "en": "Where your people meet the Caribbean.", "es": "Donde su gente se encuentra con el Caribe." },
     "summary": {
-      "en": "A private, exclusive-use coastal campus for groups in Juana Díaz, Puerto Rico.",
-      "es": "Un campus costero privado y de uso exclusivo para grupos en Juana Díaz, Puerto Rico."
+      "en": "A private, exclusive-use waterfront venue for celebrations and gatherings in Juana Díaz, Puerto Rico.",
+      "es": "Un recinto privado frente al mar y de uso exclusivo para celebraciones y encuentros en Juana Díaz, Puerto Rico."
     },
     "rights": { "en": "All rights reserved.", "es": "Todos los derechos reservados." }
   }

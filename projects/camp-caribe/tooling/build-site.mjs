@@ -57,12 +57,12 @@ for (const [file, loader] of [["style.css", "css"], ["site.js", "js"]]) {
 const requiredRoutes = [
   "index.html",
   "venue/index.html",
-  "missions/index.html",
+  "celebrate/index.html",
   "gallery/index.html",
   "contact/index.html",
   "es/index.html",
   "es/recinto/index.html",
-  "es/usos/index.html",
+  "es/celebrar/index.html",
   "es/galeria/index.html",
   "es/contacto/index.html",
 ];

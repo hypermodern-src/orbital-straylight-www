@@ -57,7 +57,7 @@ documentConfig siteData language =
   SSG.defaultDocConfig
     { lang = languageCode language
     , siteName = siteData.site.name
-    , themeColor = Just "#071e2b"
+    , themeColor = Just "#0a5552"
     , favicon = Just "/favicon.svg"
     , stylesheets = [ "/style.css" ]
     , scripts = [ "/site.js" ]
@@ -77,7 +77,7 @@ pageMeta siteData language page =
     { title
     , description: localized language page.description
     , path: siteData.site.canonical <> path
-    , ogImage: Just (siteData.site.canonical <> "/images/hero-aerial.webp")
+    , ogImage: Just (siteData.site.canonical <> "/images/shoreline-morning-black-sand.avif")
     , canonicalUrl: Just (siteData.site.canonical <> path)
     }
 
@@ -167,7 +167,7 @@ navigation siteData language page =
               [ HH.div
                   [ className "nav-intro" ]
                   [ HH.span_ [ HH.text "CAMP / CARIBE" ]
-                  , HH.p_ [ HH.text (if language == English then "One group. The whole coast." else "Un grupo. Toda la costa.") ]
+                  , HH.p_ [ HH.text (if language == English then "Your people. Your whole coast." else "Su gente. Toda su costa.") ]
                   ]
               , HH.div
                   [ className "nav-links" ]
@@ -184,7 +184,7 @@ navigation siteData language page =
                       [ HP.href contactHref
                       , className "button button-small button-sun"
                       ]
-                      [ HH.span_ [ HH.text (if language == English then "Plan a stay" else "Planifique") ]
+                      [ HH.span_ [ HH.text (if language == English then "Plan your date" else "Planifique su fecha") ]
                       , HH.span [ className "button-arrow", attribute "aria-hidden" "true" ] [ HH.text "↗" ]
                       ]
                   ]
@@ -227,7 +227,7 @@ homeView siteData language =
       [ className "section section-intro"
       , attribute "data-reveal" ""
       ]
-      [ HH.div [ className "section-rule" ] [ HH.text "00 / THE PREMISE" ]
+      [ HH.div [ className "section-rule" ] [ HH.text (if language == English then "00 / THE FEELING" else "00 / LA SENSACIÓN") ]
       , HH.div [ className "intro-heading" ]
           [ eyebrow (localized language siteData.home.intro.eyebrow)
           , HH.h2_ [ HH.text (localized language siteData.home.intro.title) ]
@@ -235,15 +235,15 @@ homeView siteData language =
       , HH.div [ className "intro-copy" ]
           [ HH.p_ [ HH.text (localized language siteData.home.intro.body) ]
           , textLink (routeFor language siteData.nav "venue")
-              (if language == English then "Walk the property" else "Recorra la propiedad")
+              (if language == English then "See the whole place" else "Conozca todo el lugar")
           ]
       , HH.figure [ className "intro-art" ]
-          [ image "/images/shoreline-morning-black-sand.avif"
-              (if language == English then "Black-sand shoreline at Camp Caribe" else "Costa de arena negra en Camp Caribe")
+          [ image "/images/aerial-overview.avif"
+              (if language == English then "Aerial view of Camp Caribe beside the Caribbean Sea" else "Vista aérea de Camp Caribe junto al mar Caribe")
               "lazy"
           , HH.figcaption_
               [ HH.span_ [ HH.text "18.05° N" ]
-              , HH.span_ [ HH.text (if language == English then "Black sand / Caribbean Sea" else "Arena negra / Mar Caribe") ]
+              , HH.span_ [ HH.text (if language == English then "One property / Caribbean Sea" else "Una propiedad / Mar Caribe") ]
               ]
           ]
       ]
@@ -252,13 +252,13 @@ homeView siteData language =
       , attribute "data-reveal" ""
       ]
       [ HH.div [ className "statement-media" ]
-          [ image "/images/shoreline-sunset-red.avif"
-              (if language == English then "Sunset at the Camp Caribe shoreline" else "Atardecer en la costa de Camp Caribe")
+          [ image "/images/shoreline-golden-hour.avif"
+              (if language == English then "Golden hour at the Camp Caribe shoreline" else "Hora dorada en la costa de Camp Caribe")
               "lazy"
-          , HH.span [ className "statement-coordinate" ] [ HH.text "SOUTH COAST / 18:42" ]
+          , HH.span [ className "statement-coordinate" ] [ HH.text "GOLDEN HOUR / SOUTH COAST" ]
           ]
       , HH.div [ className "statement-copy" ]
-          [ HH.span [ className "statement-index", attribute "aria-hidden" "true" ] [ HH.text "CC—01" ]
+          [ HH.span [ className "statement-index", attribute "aria-hidden" "true" ] [ HH.text "BY THE SEA" ]
           , eyebrow (localized language siteData.home.statement.eyebrow)
           , HH.h2_ [ HH.text (localized language siteData.home.statement.title) ]
           , HH.p_ [ HH.text (localized language siteData.home.statement.body) ]
@@ -288,7 +288,7 @@ homeView siteData language =
               (localized language siteData.home.locationTitle)
           , HH.p_ [ HH.text (localized language siteData.home.locationBody) ]
           , textLink (routeFor language siteData.nav "contact")
-              (if language == English then "Start a private briefing" else "Comience una consulta privada")
+              (if language == English then "Ask about your date" else "Consulte su fecha")
           ]
       ]
   , callout siteData language
@@ -302,18 +302,13 @@ homeHero siteData language =
         [ className "hero-picture" ]
         [ element "source"
             [ attribute "media" "(max-width: 700px)"
-            , attribute "srcset" "/images/hero-aerial-mobile.webp"
-            , attribute "type" "image/webp"
-            ]
-            []
-        , element "source"
-            [ attribute "srcset" "/images/hero-aerial.webp"
-            , attribute "type" "image/webp"
+            , attribute "srcset" "/images/hero-events-mobile.avif"
+            , attribute "type" "image/avif"
             ]
             []
         , HH.img
-            [ HP.src "/images/aerial-overview.avif"
-            , HP.alt (if language == English then "Aerial view of Camp Caribe and the Caribbean coast" else "Vista aérea de Camp Caribe y la costa del mar Caribe")
+            [ HP.src "/images/shoreline-morning-black-sand.avif"
+            , HP.alt (if language == English then "Morning along Camp Caribe's black-sand Caribbean shoreline" else "Mañana en la costa caribeña de arena negra de Camp Caribe")
             , attribute "loading" "eager"
             , attribute "decoding" "async"
             , attribute "fetchpriority" "high"
@@ -347,9 +342,9 @@ homeHero siteData language =
             ]
         ]
     , HH.div [ className "hero-register", attribute "aria-hidden" "true" ]
-        [ HH.span_ [ HH.text (if language == English then "PRIVATE COASTAL CAMPUS" else "CAMPUS COSTERO PRIVADO") ]
+        [ HH.span_ [ HH.text (if language == English then "PRIVATE WATERFRONT VENUE" else "RECINTO PRIVADO FRENTE AL MAR") ]
         , HH.span [ className "hero-scroll" ]
-            [ HH.text (if language == English then "Enter the property" else "Entre a la propiedad")
+            [ HH.text (if language == English then "Follow the water" else "Siga el mar")
             , HH.span_ [ HH.text "↓" ]
             ]
         ]
@@ -359,8 +354,8 @@ heroTitle :: forall w i. Language -> HH.HTML w i
 heroTitle language =
   HH.h1
     [ className "hero-title" ]
-    [ HH.span_ [ HH.text (if language == English then "The coast" else "La costa") ]
-    , element "em" [] [ HH.text (if language == English then "is yours." else "es suya.") ]
+    [ HH.span_ [ HH.text (if language == English then "Meet us" else "Nos vemos") ]
+    , element "em" [] [ HH.text (if language == English then "by the water." else "junto al mar.") ]
     ]
 
 factsView :: forall w i. Array Fact -> Language -> HH.HTML w i
@@ -370,8 +365,8 @@ factsView facts language =
     , attribute "aria-label" (if language == English then "Venue facts" else "Datos del recinto")
     ]
     [ HH.div [ className "fact-intro" ]
-        [ HH.span_ [ HH.text (if language == English then "PROPERTY / AT A GLANCE" else "PROPIEDAD / EN RESUMEN") ]
-        , HH.p_ [ HH.text (if language == English then "A complete operating environment at the edge of the Caribbean." else "Un entorno operacional completo al borde del Caribe.") ]
+        [ HH.span_ [ HH.text (if language == English then "THE PLACE / AT A GLANCE" else "EL LUGAR / EN RESUMEN") ]
+        , HH.p_ [ HH.text (if language == English then "A whole private property with the Caribbean at its edge." else "Una propiedad privada completa con el Caribe a sus pies.") ]
         ]
     , HH.div [ className "fact-grid" ] (mapWithIndex (factView language) facts)
     ]
@@ -390,26 +385,26 @@ venueView siteData language =
   [ pageHero "01" (localized language siteData.venue.eyebrow)
       (localized language siteData.venue.title)
       (localized language siteData.venue.deck)
-      "/images/campus-from-tower.avif"
-      (if language == English then "Camp Caribe campus from the tower" else "Campus de Camp Caribe desde la torre")
+      "/images/oceanfront-grounds.avif"
+      (if language == English then "Camp Caribe's open grounds beside the Caribbean Sea" else "Terrenos abiertos de Camp Caribe junto al mar Caribe")
   , HH.section
       [ className "section prose-section"
       , attribute "data-reveal" ""
       ]
-      [ HH.div [ className "section-rule" ] [ HH.text "01 / OVERVIEW" ]
+      [ HH.div [ className "section-rule" ] [ HH.text (if language == English then "01 / THE BIG PICTURE" else "01 / LA VISIÓN GENERAL") ]
       , HH.h2_ [ HH.text (localized language siteData.venue.introTitle) ]
       , HH.div [ className "prose-columns" ]
           (map (\paragraph -> HH.p_ [ HH.text paragraph ]) (localized language siteData.venue.introBody))
       ]
   , HH.section
       [ className "section spaces-section" ]
-      [ sectionHeading "02 / INVENTORY" (localized language siteData.venue.spacesEyebrow)
+      [ sectionHeading (if language == English then "02 / THE SPACES" else "02 / LOS ESPACIOS") (localized language siteData.venue.spacesEyebrow)
           (localized language siteData.venue.spacesTitle)
       , HH.div [ className "space-list" ] (map (spaceView language) siteData.venue.spaces)
       ]
   , HH.section
       [ className "section operations-section" ]
-      [ sectionHeading "03 / POSITION" (localized language siteData.venue.operationsEyebrow)
+      [ sectionHeading (if language == English then "03 / THE DETAILS" else "03 / LOS DETALLES") (localized language siteData.venue.operationsEyebrow)
           (localized language siteData.venue.operationsTitle)
       , HH.div [ className "operation-grid" ] (mapWithIndex (operationView language) siteData.venue.operations)
       ]
@@ -447,13 +442,13 @@ missionsView siteData language =
   [ pageHero "02" (localized language siteData.missions.eyebrow)
       (localized language siteData.missions.title)
       (localized language siteData.missions.deck)
-      "/images/parade-grounds.avif"
-      (if language == English then "Open grounds at Camp Caribe" else "Terrenos abiertos de Camp Caribe")
+      "/images/shoreline-sunset-red.avif"
+      (if language == English then "A warm Caribbean sunset at Camp Caribe" else "Un cálido atardecer caribeño en Camp Caribe")
   , HH.section
       [ className "section prose-section compact"
       , attribute "data-reveal" ""
       ]
-      [ HH.div [ className "section-rule" ] [ HH.text "01 / FORMAT" ]
+      [ HH.div [ className "section-rule" ] [ HH.text (if language == English then "01 / YOUR WAY" else "01 / A SU MANERA") ]
       , HH.h2_ [ HH.text (localized language siteData.missions.introTitle) ]
       , HH.p [ className "prose-lead" ] [ HH.text (localized language siteData.missions.introBody) ]
       ]
@@ -471,7 +466,7 @@ missionsView siteData language =
           [ HP.href (routeFor language siteData.nav "contact")
           , className "button button-ink"
           ]
-          [ HH.text (if language == English then "Request the property brief" else "Solicite la ficha de la propiedad") ]
+          [ HH.text (if language == English then "Ask about your date" else "Consulte su fecha") ]
       ]
   ]
 
@@ -495,17 +490,17 @@ galleryView siteData language =
   [ pageHero "03" (localized language siteData.gallery.eyebrow)
       (localized language siteData.gallery.title)
       (localized language siteData.gallery.deck)
-      "/images/shoreline-sunset-red.avif"
-      (if language == English then "Caribbean sunset from Camp Caribe" else "Atardecer caribeño desde Camp Caribe")
+      "/images/shoreline-palms-midday.avif"
+      (if language == English then "A fiery sunset across the south-coast bay" else "Un atardecer encendido sobre la bahía de la costa sur")
   , HH.section
       [ className "section video-section" ]
-      [ sectionHeading "01 / MOTION" (localized language siteData.gallery.videoEyebrow)
+      [ sectionHeading (if language == English then "01 / IN MOTION" else "01 / EN MOVIMIENTO") (localized language siteData.gallery.videoEyebrow)
           (localized language siteData.gallery.videoTitle)
       , HH.div [ className "video-grid" ] (map (videoView language) siteData.gallery.videos)
       ]
   , HH.section
       [ className "section photo-section" ]
-      [ sectionHeading "02 / STILLS" (localized language siteData.gallery.photoEyebrow)
+      [ sectionHeading (if language == English then "02 / IN THE LIGHT" else "02 / BAJO LA LUZ") (localized language siteData.gallery.photoEyebrow)
           (localized language siteData.gallery.photoTitle)
       , HH.div [ className "photo-grid" ] (mapWithIndex (photoView language) siteData.gallery.photos)
       ]
@@ -553,15 +548,15 @@ contactView siteData language =
   [ pageHero "04" (localized language siteData.contact.eyebrow)
       (localized language siteData.contact.title)
       (localized language siteData.contact.deck)
-      "/images/campus-entrance.avif"
-      (if language == English then "Camp Caribe entrance and campus" else "Entrada y campus de Camp Caribe")
+      "/images/shoreline-golden-hour.avif"
+      (if language == English then "Golden light on the Camp Caribe shoreline" else "Luz dorada en la costa de Camp Caribe")
   , HH.section
       [ className "section contact-section" ]
       [ HH.div
           [ className "direct-contact"
           , attribute "data-reveal" ""
           ]
-          [ HH.span [ className "section-rule" ] [ HH.text "01 / DIRECT" ]
+          [ HH.span [ className "section-rule" ] [ HH.text (if language == English then "01 / SAY HELLO" else "01 / SALÚDENOS") ]
           , HH.h2_ [ HH.text (localized language siteData.contact.directTitle) ]
           , HH.p_ [ HH.text (localized language siteData.contact.directBody) ]
           , HH.div [ className "contact-methods" ]
@@ -590,7 +585,7 @@ briefingForm siteData language =
     , attribute "data-reveal" ""
     ]
     [ HH.div [ className "briefing-heading" ]
-        [ HH.span [ className "section-rule" ] [ HH.text "02 / BRIEF" ]
+        [ HH.span [ className "section-rule" ] [ HH.text (if language == English then "02 / YOUR PLANS" else "02 / SUS PLANES") ]
         , HH.h2_ [ HH.text (localized language siteData.contact.formTitle) ]
         , HH.p_ [ HH.text (localized language siteData.contact.formBody) ]
         ]
@@ -668,7 +663,7 @@ pageHero index label title deck source alt =
   HH.section
     [ className "page-hero" ]
     [ HH.div [ className "page-hero-content" ]
-        [ HH.span [ className "page-index" ] [ HH.text ("CC—" <> index) ]
+        [ HH.span [ className "page-index" ] [ HH.text ("COAST — " <> index) ]
         , eyebrow label
         , HH.h1_ [ HH.text title ]
         , HH.p_ [ HH.text deck ]
@@ -679,7 +674,7 @@ pageHero index label title deck source alt =
         ]
     , HH.div [ className "page-hero-media" ]
         [ image source alt "eager"
-        , HH.span [ className "page-hero-caption" ] [ HH.text (index <> " / CAMP CARIBE") ]
+        , HH.span [ className "page-hero-caption" ] [ HH.text (index <> " / BY THE CARIBBEAN") ]
         ]
     , HH.div [ className "page-hero-grid", attribute "aria-hidden" "true" ] []
     ]
@@ -746,19 +741,19 @@ callout siteData language =
     , attribute "data-reveal" ""
     ]
     [ HH.div [ className "callout-orbit", attribute "aria-hidden" "true" ]
-        [ HH.span_ [ HH.text "18" ]
-        , HH.span_ [ HH.text "N" ]
+        [ HH.span_ [ HH.text "SEA" ]
+        , HH.span_ [ HH.text "∞" ]
         ]
-    , HH.div [ className "callout-register", attribute "aria-hidden" "true" ] [ HH.text "CC / 18.05 N / 66.51 W" ]
+    , HH.div [ className "callout-register", attribute "aria-hidden" "true" ] [ HH.text "JUANA DÍAZ / PUERTO RICO / CARIBBEAN SEA" ]
     , HH.div [ className "callout-copy" ]
-        [ eyebrow (if language == English then "Your dates. Your people. Your coast." else "Sus fechas. Su gente. Su costa.")
-        , HH.h2_ [ HH.text (if language == English then "Make the first call." else "Comience la conversación.") ]
+        [ eyebrow (if language == English then "One date. One coast. All your people." else "Una fecha. Una costa. Toda su gente.")
+        , HH.h2_ [ HH.text (if language == English then "Hold the date." else "Reserve la fecha.") ]
         ]
     , HH.a
         [ HP.href (routeFor language siteData.nav "contact")
         , className "button button-ink"
         ]
-        [ HH.span_ [ HH.text (if language == English then "Request a private briefing" else "Solicite una consulta privada") ]
+        [ HH.span_ [ HH.text (if language == English then "Ask about your date" else "Consulte su fecha") ]
         , HH.span [ className "button-arrow", attribute "aria-hidden" "true" ] [ HH.text "↗" ]
         ]
     ]

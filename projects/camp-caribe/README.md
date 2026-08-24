@@ -41,8 +41,12 @@ clarity, dynamic range, exposure, and tonal balance while preserving the actual
 campus geometry and contents. `static/images/aerial-overview.jpg` retains the
 unaltered source image alongside it. Documentary stills are delivered as AVIF;
 the recovered JPEG originals remain preserved in the V1 repository history.
+The events home page uses the real black-sand shoreline as its hero, with a
+smaller responsive AVIF derivative for mobile delivery.
 
 Instrument Serif and DM Sans are self-hosted under the SIL Open Font License;
-license texts live with the font files. The visual system pairs Caribbean
-modernist color and cinematic documentary imagery with an editorial serif and
-precise field-note typography.
+license texts live with the font files. The civilian events direction pairs a
+classic deep-teal and sun-washed-sand palette with soft architectural arches,
+editorial serif typography, and an honest water-first sequence of the property.
+The more operational Caribbean-modernist V2 remains frozen at
+`camp-caribe-v2.vercel.app` while this concept is reviewed independently.
