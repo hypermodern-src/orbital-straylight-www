@@ -33,7 +33,7 @@ second build definition.
 | `orbital-cms` | PostgreSQL publishing core and delivery API for articles and papers | — |
 | `orbital-forge` | PureScript forge UI with a replaceable Haskell backend | `orbital-forge` |
 | `ponce-speedway` | Bilingual zero-dependency PONCE International Speedway SSG | `ponce-speedway` |
-| `camp-caribe` | Bilingual Hydrogen SSG for the Camp Caribe private coastal campus | preview pending |
+| `camp-caribe` | Bilingual Hydrogen SSG for the Camp Caribe private coastal campus | `camp-caribe` |
 
 The old `reinit-dx-website` Next.js wrapper remains outside the monorepo while
 it serves production. It is deployment history, not the canonical application.
