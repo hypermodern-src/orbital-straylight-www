@@ -1,0 +1,521 @@
+/* Take 03 — Heritage Coast: composed Caribbean hospitality and old-world restraint. */
+
+:root {
+  --ink: #173f36;
+  --ink-rich: #0d2d27;
+  --ink-soft: #496a55;
+  --sea: #4f7668;
+  --sea-light: #b7c5ad;
+  --shell: #eadcbe;
+  --paper: #f8f0dd;
+  --sun: #c49a53;
+  --sun-bright: #d7b574;
+  --coral: #a94f3d;
+  --white: #fffaf0;
+  --line-ink: rgba(23, 63, 54, 0.25);
+}
+
+body {
+  background: var(--paper);
+}
+
+::selection {
+  background: var(--coral);
+  color: var(--white);
+}
+
+.site-header,
+.site-header.is-scrolled,
+.menu-open .site-header {
+  height: 86px;
+  border-bottom: 1px solid var(--line-ink);
+  background: rgba(248, 240, 221, 0.97);
+  color: var(--ink);
+  backdrop-filter: blur(16px);
+}
+
+.site-header::before {
+  display: none;
+}
+
+.brand img {
+  filter: none;
+}
+
+.header-location,
+.page-hero-register {
+  border-color: var(--line-ink);
+}
+
+.header-location-name,
+.nav-links a,
+.language-link {
+  color: rgba(23, 63, 54, 0.7);
+}
+
+.nav-links a:hover,
+.nav-links a.is-active,
+.language-link:hover {
+  color: var(--ink-rich);
+}
+
+.nav-links a::after,
+.header-progress span {
+  background: var(--coral);
+}
+
+.location-dot {
+  background: var(--coral);
+}
+
+.button,
+.button-arrow {
+  border-radius: 0;
+}
+
+.button-sun {
+  background: var(--coral);
+  color: var(--white);
+}
+
+.button-sun:hover {
+  background: #8f3f31;
+}
+
+.home-hero {
+  padding-top: 86px;
+  background: var(--shell);
+  color: var(--ink-rich);
+}
+
+.hero-picture {
+  inset: 86px 0 0 45%;
+}
+
+.hero-picture img {
+  filter: saturate(0.72) sepia(0.08) contrast(0.98);
+}
+
+.hero-overlay {
+  inset: 86px 0 0 45%;
+  background:
+    linear-gradient(90deg, rgba(234, 220, 190, 0.58), transparent 28%),
+    linear-gradient(0deg, rgba(13, 45, 39, 0.34), transparent 48%);
+}
+
+.hero-grid,
+.hero-sun {
+  display: none;
+}
+
+.hero-content {
+  min-height: calc(100svh - 86px);
+  padding: 118px 0 88px;
+  grid-template-columns: minmax(0, 0.82fr) minmax(340px, 0.58fr);
+  align-items: center;
+  gap: clamp(36px, 7vw, 120px);
+}
+
+.hero-title {
+  max-width: 720px;
+  font-size: clamp(4.8rem, 8.2vw, 9.2rem);
+  line-height: 0.82;
+}
+
+.hero-title em {
+  margin: 0.12em 0 0 0.16em;
+  color: var(--coral);
+}
+
+.hero-brief {
+  padding: 58px 38px;
+  border: 1px solid var(--ink-rich);
+  border-radius: 0;
+  outline: 1px solid rgba(248, 240, 221, 0.9);
+  outline-offset: -9px;
+  background: rgba(248, 240, 221, 0.94);
+  box-shadow: 0 28px 75px rgba(13, 45, 39, 0.22);
+}
+
+.hero-deck {
+  font-size: 1.45rem;
+  line-height: 1.45;
+}
+
+.hero-actions .button-ghost {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.hero-register {
+  color: rgba(255, 250, 240, 0.82);
+}
+
+.fact-band,
+.fact {
+  background: var(--paper);
+  color: var(--ink-rich);
+}
+
+.fact-band {
+  border-top: 1px solid var(--line-ink);
+  border-bottom: 1px solid var(--line-ink);
+}
+
+.fact-intro,
+.fact-grid {
+  border-color: var(--line-ink);
+}
+
+.fact-grid {
+  background: var(--line-ink);
+}
+
+.fact-intro span,
+.fact-index {
+  color: var(--coral);
+}
+
+.fact-intro p,
+.fact > span:last-child {
+  color: var(--ink);
+}
+
+.fact strong {
+  color: var(--ink-rich);
+}
+
+.section-intro {
+  grid-template-columns: minmax(100px, 0.4fr) minmax(0, 1.4fr) minmax(280px, 0.7fr);
+}
+
+.intro-heading h2,
+.section-heading h2,
+.prose-section h2,
+.location-copy h2,
+.briefing-heading h2,
+.direct-contact h2,
+.statement-copy h2,
+.capability-copy h3,
+.space-copy h3,
+.operation-card h3,
+.use-copy h2,
+.closing-panel h2,
+.callout-copy h2,
+.page-hero-content h1 {
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+.intro-art::before {
+  top: -18px;
+  right: -18px;
+  border: 1px solid var(--coral);
+  border-radius: 0;
+  background: transparent;
+}
+
+.intro-art img {
+  padding: 12px;
+  border: 1px solid var(--line-ink);
+  border-radius: 0;
+  background: var(--paper);
+}
+
+.statement {
+  min-height: 760px;
+  background: var(--coral);
+  color: var(--white);
+}
+
+.statement-media {
+  margin: 42px 0 42px 42px;
+  min-height: 650px;
+  border: 1px solid rgba(255, 250, 240, 0.5);
+}
+
+.statement-index {
+  color: var(--sun-bright);
+  font-style: normal;
+  opacity: 0.8;
+}
+
+.statement-copy > p:last-child {
+  color: rgba(255, 250, 240, 0.82);
+}
+
+.section-heading {
+  padding-bottom: 34px;
+  border-bottom: 1px solid var(--line-ink);
+}
+
+.capability-media,
+.space-media,
+.use-card,
+.video-card video,
+.photo-card img {
+  border-radius: 0;
+}
+
+.capability-media,
+.space-media {
+  padding: 10px;
+  border: 1px solid var(--line-ink);
+  background: var(--paper);
+}
+
+.capability-copy,
+.space-copy {
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.location-section {
+  background: var(--paper);
+  color: var(--ink-rich);
+}
+
+.location-image {
+  margin: 42px 0 42px 42px;
+  min-height: 680px;
+  border: 1px solid var(--line-ink);
+}
+
+.location-image::after {
+  display: none;
+}
+
+.location-image img {
+  filter: saturate(0.7) sepia(0.06);
+}
+
+.location-crosshair {
+  display: none;
+}
+
+.location-copy .section-rule {
+  border-color: var(--line-ink);
+  color: var(--coral);
+}
+
+.location-copy > p {
+  color: rgba(23, 63, 54, 0.78);
+}
+
+.callout {
+  min-height: 560px;
+  background: var(--ink-rich);
+  color: var(--white);
+}
+
+.callout-orbit {
+  border-color: rgba(196, 154, 83, 0.5);
+}
+
+.callout-orbit::before,
+.callout-orbit::after {
+  border-color: rgba(196, 154, 83, 0.28);
+}
+
+.callout-orbit span:first-child {
+  color: var(--sun);
+}
+
+.callout .button-ink {
+  background: var(--coral);
+}
+
+.page-hero {
+  padding-top: 86px;
+  background: var(--shell);
+  color: var(--ink-rich);
+}
+
+.page-hero-content {
+  padding-top: clamp(145px, 16vh, 220px);
+}
+
+.page-index {
+  color: var(--coral);
+}
+
+.page-hero-content > p:last-of-type,
+.page-hero-register {
+  color: rgba(23, 63, 54, 0.74);
+}
+
+.page-hero-media {
+  min-height: calc(100svh - 86px);
+  margin: 42px 42px 42px 0;
+  border: 1px solid var(--line-ink);
+  border-radius: 0;
+}
+
+.page-hero-media img {
+  padding: 10px;
+  background: var(--paper);
+  filter: saturate(0.72) sepia(0.06);
+}
+
+.page-hero-media::after,
+.page-hero-grid {
+  display: none;
+}
+
+.page-hero-caption {
+  right: 20px;
+  bottom: 20px;
+}
+
+.operations-section,
+.direct-contact {
+  background: var(--ink-rich);
+}
+
+.operation-card {
+  border-radius: 0;
+}
+
+.use-card {
+  border: 1px solid var(--line-ink);
+  background: var(--paper);
+}
+
+.use-media {
+  margin: 10px 10px 0;
+}
+
+.closing-panel {
+  background: var(--coral);
+  color: var(--white);
+}
+
+.photo-card img,
+.video-card video {
+  padding: 8px;
+  border: 1px solid var(--line-ink);
+  background: var(--paper);
+  filter: saturate(0.76) sepia(0.04);
+}
+
+.briefing-panel {
+  background: var(--paper);
+}
+
+.site-footer {
+  background: var(--ink-rich);
+}
+
+.footer-wordmark em {
+  color: var(--sun);
+}
+
+@media (max-width: 960px) {
+  .primary-nav {
+    background: var(--paper);
+    color: var(--ink-rich);
+  }
+
+  .nav-intro,
+  .nav-links a {
+    border-color: var(--line-ink);
+  }
+
+  .nav-links a {
+    color: var(--ink-rich);
+  }
+
+  .home-hero {
+    padding-top: 76px;
+  }
+
+  .hero-picture,
+  .hero-overlay {
+    inset: 76px 0 0 32%;
+  }
+
+  .hero-content {
+    min-height: calc(100svh - 76px);
+  }
+
+  .statement-media,
+  .location-image {
+    margin: 24px;
+  }
+
+  .page-hero {
+    padding-top: 76px;
+  }
+
+  .page-hero-media {
+    margin: 0 24px 24px;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header,
+  .site-header.is-scrolled,
+  .menu-open .site-header {
+    height: 68px;
+  }
+
+  .home-hero {
+    padding-top: 68px;
+    color: var(--white);
+  }
+
+  .hero-picture,
+  .hero-overlay {
+    inset: 68px 0 0;
+  }
+
+  .hero-overlay {
+    background: linear-gradient(0deg, rgba(13, 45, 39, 0.94), rgba(13, 45, 39, 0.08) 72%);
+  }
+
+  .hero-content {
+    min-height: calc(100svh - 68px);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: 18px;
+  }
+
+  .hero-title-block {
+    padding: 22px;
+    background: rgba(234, 220, 190, 0.94);
+    color: var(--ink-rich);
+  }
+
+  .hero-title {
+    font-size: clamp(4.2rem, 19vw, 6.2rem);
+  }
+
+  .hero-title em {
+    color: var(--coral);
+  }
+
+  .hero-brief {
+    position: relative;
+    width: 100%;
+    padding: 30px 24px;
+  }
+
+  .hero-register {
+    color: rgba(255, 250, 240, 0.8);
+  }
+
+  .statement-media,
+  .location-image {
+    margin: 16px;
+  }
+
+  .page-hero {
+    padding-top: 68px;
+  }
+
+  .page-hero-media {
+    margin: 0 16px 16px;
+  }
+}

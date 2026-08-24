@@ -16,6 +16,18 @@ npm run serve
 `.vercel/output/`. `nix run` executes the same strict Spago check through the
 pinned Nix toolchain.
 
+The default build is the Tidal events concept. Three additional art directions
+use the same typed content and component tree:
+
+```bash
+CAMP_CONCEPT=salt npm run build:vercel
+CAMP_CONCEPT=heritage npm run build:vercel
+CAMP_CONCEPT=black-sand npm run build:vercel
+```
+
+Each concept is delivered as a separate immutable Vercel preview. Concept CSS
+is layered after the shared responsive and accessible component system.
+
 ## Structure
 
 ```text

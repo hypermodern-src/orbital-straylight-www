@@ -1316,6 +1316,11 @@ address {
   gap: 90px 32px;
 }
 
+.space-row,
+.space-copy {
+  min-width: 0;
+}
+
 .space-row:nth-child(even) {
   margin-top: 140px;
 }

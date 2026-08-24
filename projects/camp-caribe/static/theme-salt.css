@@ -1,0 +1,427 @@
+/* Take 02 — Salt & Sun: high-energy, graphic Caribbean celebration. */
+
+:root {
+  --ink: #182967;
+  --ink-rich: #101b4b;
+  --ink-soft: #2a55a7;
+  --sea: #236fbd;
+  --sea-light: #8bd8e2;
+  --shell: #fff0ca;
+  --paper: #fff9e9;
+  --sun: #ffbd1f;
+  --sun-bright: #ffd45c;
+  --coral: #ef5b45;
+  --white: #fffdf3;
+  --line-ink: rgba(24, 41, 103, 0.24);
+}
+
+body {
+  background: var(--shell);
+}
+
+html,
+body,
+.camp-site {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--sun);
+  color: var(--ink-rich);
+}
+
+:focus-visible {
+  outline-color: var(--sun);
+}
+
+.site-header.is-scrolled,
+.menu-open .site-header {
+  background: rgba(16, 27, 75, 0.95);
+}
+
+.brand img {
+  filter: brightness(0) invert(1) drop-shadow(0 4px 16px rgba(16, 27, 75, 0.2));
+}
+
+.location-dot,
+.header-progress span {
+  background: var(--sun);
+}
+
+.button {
+  border-radius: 7px;
+}
+
+.button-arrow {
+  border-radius: 5px;
+}
+
+.button-sun {
+  background: var(--sun);
+}
+
+.home-hero {
+  background: var(--ink-rich);
+}
+
+.hero-picture img {
+  animation: none;
+  transform: none;
+  filter: saturate(1.08) contrast(1.08);
+}
+
+.hero-overlay {
+  background:
+    linear-gradient(90deg, rgba(16, 27, 75, 0.92) 0%, rgba(24, 41, 103, 0.58) 42%, rgba(24, 41, 103, 0.02) 75%),
+    linear-gradient(0deg, rgba(16, 27, 75, 0.88), transparent 55%);
+}
+
+.hero-grid {
+  border-color: rgba(255, 253, 243, 0.16);
+  background-image: repeating-linear-gradient(135deg, transparent 0 70px, rgba(255, 255, 255, 0.06) 70px 71px);
+}
+
+.hero-sun {
+  top: 14%;
+  right: 7%;
+  border: 0;
+  border-radius: 0;
+  background: var(--sun);
+  box-shadow: 20px 20px 0 var(--coral);
+  opacity: 0.9;
+  transform: rotate(8deg);
+}
+
+.hero-sun::before,
+.hero-sun::after {
+  display: none;
+}
+
+.hero-content {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.55fr);
+  gap: clamp(36px, 6vw, 100px);
+}
+
+.hero-title {
+  max-width: 1050px;
+  font-family: var(--sans);
+  font-size: clamp(4.8rem, 9.3vw, 10.5rem);
+  font-weight: 700;
+  letter-spacing: -0.075em;
+  line-height: 0.78;
+  text-transform: uppercase;
+}
+
+.hero-title em {
+  margin: 0.08em 0 0 0.14em;
+  color: var(--sun);
+  font-family: var(--serif);
+  font-weight: 400;
+  text-transform: none;
+}
+
+.hero-brief {
+  padding: 30px;
+  border: 3px solid var(--ink-rich);
+  border-radius: 0;
+  background: var(--sun);
+  box-shadow: 15px 15px 0 var(--coral);
+  transform: rotate(-2deg);
+}
+
+.hero-deck {
+  font-family: var(--sans);
+  font-size: 1.08rem;
+  font-weight: 600;
+}
+
+.hero-brief .button-sun {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.hero-brief .button-ghost {
+  border-color: var(--ink);
+}
+
+.fact-band,
+.fact {
+  background: var(--sun);
+  color: var(--ink-rich);
+}
+
+.fact-band {
+  border-bottom: 3px solid var(--ink-rich);
+}
+
+.fact-intro,
+.fact-grid {
+  border-color: var(--ink-rich);
+}
+
+.fact-grid {
+  background: var(--ink-rich);
+}
+
+.fact-intro span,
+.fact-index,
+.fact-intro p,
+.fact > span:last-child {
+  color: var(--ink-rich);
+}
+
+.fact strong {
+  font-family: var(--sans);
+  font-weight: 700;
+}
+
+.intro-heading h2,
+.section-heading h2,
+.prose-section h2,
+.location-copy h2,
+.briefing-heading h2,
+.direct-contact h2,
+.statement-copy h2,
+.capability-copy h3,
+.space-copy h3,
+.operation-card h3,
+.use-copy h2,
+.closing-panel h2,
+.callout-copy h2,
+.page-hero-content h1 {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+}
+
+.intro-art::before {
+  border-radius: 0;
+  background: var(--coral);
+  transform: rotate(4deg);
+}
+
+.intro-art img {
+  border: 3px solid var(--ink-rich);
+  border-radius: 0;
+  box-shadow: 14px 14px 0 var(--sea-light);
+  transform: rotate(-1deg);
+}
+
+.statement {
+  background: var(--coral);
+  color: var(--white);
+}
+
+.statement-media {
+  clip-path: polygon(0 0, 92% 0, 100% 100%, 0 100%);
+}
+
+.statement-index {
+  color: var(--sun);
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 700;
+  opacity: 1;
+}
+
+.capability-media,
+.space-media,
+.use-card,
+.video-card video,
+.photo-card img {
+  border-radius: 26px;
+}
+
+.capability-card:nth-child(odd),
+.space-row:nth-child(odd) {
+  transform: rotate(-0.7deg);
+}
+
+.capability-card:nth-child(even),
+.space-row:nth-child(even) {
+  transform: rotate(0.7deg);
+}
+
+.capability-copy h3,
+.space-copy h3,
+.use-copy h2 {
+  color: var(--ink-rich);
+}
+
+.location-section,
+.operations-section,
+.direct-contact {
+  background: var(--sea);
+}
+
+.location-image::after {
+  border-color: var(--sea);
+  border-radius: 0;
+}
+
+.location-crosshair {
+  display: none;
+}
+
+.callout {
+  background: var(--sun);
+}
+
+.callout-orbit {
+  border: 0;
+  border-radius: 0;
+  background: repeating-linear-gradient(135deg, rgba(24, 41, 103, 0.12) 0 12px, transparent 12px 28px);
+  transform: translateY(-50%) rotate(8deg);
+}
+
+.callout-orbit::before,
+.callout-orbit::after {
+  display: none;
+}
+
+.callout-orbit span:first-child {
+  color: var(--ink-rich);
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.page-hero {
+  background: var(--ink-rich);
+}
+
+.page-hero-media {
+  border-radius: 0;
+  clip-path: polygon(9% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.page-hero-content h1 {
+  text-transform: uppercase;
+}
+
+.page-index,
+.space-index,
+.use-index,
+.photo-number {
+  color: var(--coral);
+}
+
+.operation-grid {
+  gap: 18px;
+  border: 0;
+}
+
+.operation-card {
+  border: 2px solid rgba(255, 253, 243, 0.55);
+  border-radius: 22px;
+}
+
+.use-card {
+  border: 2px solid var(--ink-rich);
+  box-shadow: 10px 10px 0 var(--sea-light);
+}
+
+.closing-panel {
+  background: var(--coral);
+  color: var(--white);
+}
+
+.closing-panel .button-ink {
+  background: var(--sun);
+  color: var(--ink-rich);
+}
+
+.direct-contact .section-rule,
+.contact-methods span,
+.footer-label {
+  color: var(--sun);
+}
+
+.site-footer {
+  background: var(--ink-rich);
+}
+
+.footer-wordmark {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.085em;
+  text-transform: uppercase;
+}
+
+.footer-wordmark em {
+  color: var(--sun);
+  font-family: var(--serif);
+  font-weight: 400;
+  text-transform: none;
+}
+
+@media (max-width: 960px) {
+  .primary-nav {
+    background: var(--ink-rich);
+  }
+
+  .hero-brief {
+    transform: rotate(-1deg);
+  }
+
+  .page-hero-media {
+    clip-path: polygon(0 7%, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@media (max-width: 700px) {
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+  }
+
+  .hero-title-block,
+  .hero-brief {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .hero-title {
+    font-size: clamp(3.8rem, 17vw, 5.6rem);
+    line-height: 0.8;
+  }
+
+  .hero-brief {
+    padding: 24px;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .hero-sun {
+    right: 2%;
+    width: 30vw;
+  }
+
+  .callout-orbit {
+    right: 0;
+    width: 80vw;
+    transform: translateY(-50%);
+  }
+
+  .intro-art img,
+  .capability-card:nth-child(n),
+  .space-row:nth-child(n) {
+    transform: none;
+  }
+
+  .space-copy h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .statement-media {
+    clip-path: none;
+  }
+
+  .page-hero-media {
+    clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 100%);
+  }
+}
