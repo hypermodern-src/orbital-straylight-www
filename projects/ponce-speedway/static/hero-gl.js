@@ -1,5 +1,5 @@
 /* PONCE International Speedway — WebGL hero.
- * Perspective flyover of a stylized 12-turn seaside circuit at dusk:
+ * Perspective flyover of the 11-turn seaside circuit at dusk:
  * glowing track ribbon, car light-pulses lapping it, sun on the horizon.
  * Raw WebGL1, zero dependencies. Falls back to the CSS hero image. */
 
@@ -22,11 +22,11 @@
   hero.classList.add('gl-on');
 
   // ---------------------------------------------------------------- track
-  // Control polygon for a closed 12-turn circuit (plane coordinates), then
+  // Control polygon for a closed 11-turn circuit (plane coordinates), then
   // Catmull-Rom resampled to N points baked into a shader uniform array.
   var N = 96;
   // Centerline waypoints digitized from the official circuit map (1939x1080 px,
-  // clockwise from start/finish). Shared verbatim with build.js.
+  // clockwise from start/finish). Shared with src/Ponce/Track.purs.
   var RAW = [
     [1030, 905], [1300, 905], [1560, 905], [1820, 900], [1885, 893],
     [1908, 860], [1885, 828], [1820, 822], [1500, 800], [1150, 763],

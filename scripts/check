@@ -40,10 +40,7 @@ check_orbital_forge() {
 }
 
 check_ponce_speedway() {
-  (
-    cd "$repo_root/projects/ponce-speedway"
-    npm run check
-  )
+  nix flake check --accept-flake-config "$repo_root/projects/ponce-speedway"
 }
 
 check_one() {
