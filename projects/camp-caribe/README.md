@@ -39,7 +39,10 @@ document the property.
 derived from the recovered aerial photograph. The edit was constrained to
 clarity, dynamic range, exposure, and tonal balance while preserving the actual
 campus geometry and contents. `static/images/aerial-overview.jpg` retains the
-unaltered source image alongside it.
+unaltered source image alongside it. Documentary stills are delivered as AVIF;
+the recovered JPEG originals remain preserved in the V1 repository history.
 
-Bebas Neue and DM Sans are self-hosted under the SIL Open Font License; license
-texts live with the font files.
+Instrument Serif and DM Sans are self-hosted under the SIL Open Font License;
+license texts live with the font files. The visual system pairs Caribbean
+modernist color and cinematic documentary imagery with an editorial serif and
+precise field-note typography.

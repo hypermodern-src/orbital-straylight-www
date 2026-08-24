@@ -149,7 +149,7 @@
           "en": "Open terrain, controlled access, group lodging, and an on-site helicopter landing zone for coordinated training and field work.",
           "es": "Terreno abierto, acceso controlado, alojamiento grupal y helipuerto en el lugar para adiestramientos y trabajo de campo coordinado."
         },
-        "image": "training-grounds.jpg",
+        "image": "training-grounds.avif",
         "alt": { "en": "Open training grounds at Camp Caribe", "es": "Terrenos abiertos de adiestramiento en Camp Caribe" }
       },
       {
@@ -159,7 +159,7 @@
           "en": "A complete change of context for teams that need privacy, sustained time together, and space beyond a conference room.",
           "es": "Un cambio total de contexto para equipos que necesitan privacidad, tiempo continuo juntos y espacio más allá de una sala de conferencias."
         },
-        "image": "shoreline-golden-hour.jpg",
+        "image": "shoreline-golden-hour.avif",
         "alt": { "en": "Golden hour on the Camp Caribe shoreline", "es": "Atardecer en la costa de Camp Caribe" }
       },
       {
@@ -169,7 +169,7 @@
           "en": "Multiple structures, broad exterior locations, controlled movement, and a cinematic south-coast horizon in one footprint.",
           "es": "Múltiples estructuras, amplias locaciones exteriores, movimiento controlado y un horizonte cinematográfico en una sola propiedad."
         },
-        "image": "campus-from-tower.jpg",
+        "image": "campus-from-tower.avif",
         "alt": { "en": "Camp Caribe campus viewed from its tower", "es": "Campus de Camp Caribe visto desde la torre" }
       },
       {
@@ -179,7 +179,7 @@
           "en": "Retreats, worship, reunions, and private events gain something rare: an entire campus where the gathering can set its own rhythm.",
           "es": "Retiros, cultos, reuniones y eventos privados obtienen algo poco común: un campus entero donde el grupo marca su propio ritmo."
         },
-        "image": "main-hall-grounds.jpg",
+        "image": "main-hall-grounds.avif",
         "alt": { "en": "Main hall and gathering grounds", "es": "Salón principal y terrenos para reuniones" }
       }
     ],
@@ -215,42 +215,42 @@
         "index": "01",
         "title": { "en": "Oceanfront grounds", "es": "Terrenos frente al mar" },
         "body": { "en": "Open coastal terrain with immediate access to the Caribbean shoreline.", "es": "Terreno costero abierto con acceso inmediato a la orilla del mar Caribe." },
-        "image": "oceanfront-grounds.jpg",
+        "image": "oceanfront-grounds.avif",
         "alt": { "en": "Oceanfront grounds at Camp Caribe", "es": "Terrenos frente al mar en Camp Caribe" }
       },
       {
         "index": "02",
         "title": { "en": "Campus & facilities", "es": "Campus e instalaciones" },
         "body": { "en": "Multiple buildings connected by walkways and broad exterior staging areas.", "es": "Múltiples edificios conectados por caminos y amplias áreas exteriores." },
-        "image": "campus-entrance.jpg",
+        "image": "campus-entrance.avif",
         "alt": { "en": "Camp Caribe campus entrance and facilities", "es": "Entrada e instalaciones de Camp Caribe" }
       },
       {
         "index": "03",
         "title": { "en": "Group lodging", "es": "Alojamiento grupal" },
         "body": { "en": "Barracks-style accommodations for extended, large-group stays.", "es": "Alojamiento tipo barraca para estadías prolongadas de grupos grandes." },
-        "image": "lodging-row.jpg",
+        "image": "lodging-row.avif",
         "alt": { "en": "Palm-lined lodging row", "es": "Área de alojamiento rodeada de palmas" }
       },
       {
         "index": "04",
         "title": { "en": "Assembly hall", "es": "Salón de asamblea" },
         "body": { "en": "A large, open interior for briefings, meals, workshops, and group programming.", "es": "Un interior amplio para orientaciones, comidas, talleres y programación grupal." },
-        "image": "assembly-hall.jpg",
+        "image": "assembly-hall.avif",
         "alt": { "en": "Assembly hall interior", "es": "Interior del salón de asamblea" }
       },
       {
         "index": "05",
         "title": { "en": "Meeting spaces", "es": "Espacios de reunión" },
         "body": { "en": "Flexible rooms for planning, classroom work, breakout groups, and production support.", "es": "Salones flexibles para planificación, clases, grupos pequeños y apoyo de producción." },
-        "image": "meeting-room.jpg",
+        "image": "meeting-room.avif",
         "alt": { "en": "Flexible meeting room", "es": "Salón flexible para reuniones" }
       },
       {
         "index": "06",
         "title": { "en": "Landing zone", "es": "Zona de aterrizaje" },
         "body": { "en": "A dedicated on-property helicopter landing zone for approved operations.", "es": "Un helipuerto dedicado dentro de la propiedad para operaciones autorizadas." },
-        "image": "hlz-on-pad.jpg",
+        "image": "hlz-on-pad.avif",
         "alt": { "en": "Helicopter on the Camp Caribe landing pad", "es": "Helicóptero en el helipuerto de Camp Caribe" }
       }
     ],
@@ -292,42 +292,42 @@
         "index": "01",
         "title": { "en": "Joint training", "es": "Adiestramiento conjunto" },
         "body": { "en": "Controlled access, broad terrain, lodging, briefing space, and coastal conditions for coordinated exercises.", "es": "Acceso controlado, terreno amplio, alojamiento, espacios de orientación y condiciones costeras para ejercicios coordinados." },
-        "image": "parade-grounds.jpg",
+        "image": "parade-grounds.avif",
         "alt": { "en": "Open parade grounds", "es": "Amplios terrenos de formación" }
       },
       {
         "index": "02",
         "title": { "en": "Law enforcement", "es": "Agencias del orden público" },
         "body": { "en": "A private footprint for scenario work, multi-day instruction, and interagency coordination.", "es": "Una propiedad privada para escenarios, instrucción de varios días y coordinación interagencial." },
-        "image": "secured-campus.jpg",
+        "image": "secured-campus.avif",
         "alt": { "en": "Secured Camp Caribe campus", "es": "Campus asegurado de Camp Caribe" }
       },
       {
         "index": "03",
         "title": { "en": "Film & production", "es": "Cine y producción" },
         "body": { "en": "A self-contained base with varied exteriors, practical interiors, crew space, and a singular shoreline.", "es": "Una base autocontenida con exteriores variados, interiores prácticos, espacio para equipos y una costa singular." },
-        "image": "barracks-building.jpg",
+        "image": "barracks-building.avif",
         "alt": { "en": "Barracks building and palms", "es": "Edificio de barracas y palmas" }
       },
       {
         "index": "04",
         "title": { "en": "Corporate retreats", "es": "Retiros corporativos" },
         "body": { "en": "Privacy and uninterrupted time for leadership teams, workshops, planning, and team development.", "es": "Privacidad y tiempo sin interrupciones para equipos de liderazgo, talleres, planificación y desarrollo de equipos." },
-        "image": "shoreline-palms-midday.jpg",
+        "image": "shoreline-palms-midday.avif",
         "alt": { "en": "Palms along the Camp Caribe coast", "es": "Palmas en la costa de Camp Caribe" }
       },
       {
         "index": "05",
         "title": { "en": "Faith gatherings", "es": "Encuentros de fe" },
         "body": { "en": "A complete campus for worship, service, reflection, youth programs, and community.", "es": "Un campus completo para culto, servicio, reflexión, programas juveniles y comunidad." },
-        "image": "activity-hall.jpg",
+        "image": "activity-hall.avif",
         "alt": { "en": "Large activity hall", "es": "Amplio salón de actividades" }
       },
       {
         "index": "06",
         "title": { "en": "Private events", "es": "Eventos privados" },
         "body": { "en": "Celebrations and reunions with the freedom to use the grounds, halls, and shoreline as one connected setting.", "es": "Celebraciones y reuniones con la libertad de usar los terrenos, salones y costa como un solo escenario conectado." },
-        "image": "shoreline-sunset-red.jpg",
+        "image": "shoreline-sunset-red.avif",
         "alt": { "en": "Red sunset from the shoreline", "es": "Atardecer rojo visto desde la costa" }
       }
     ],
@@ -350,55 +350,55 @@
       {
         "title": { "en": "Oceanside grounds", "es": "Terrenos frente al mar" },
         "source": "oceanside-grounds.mp4",
-        "poster": "oceanfront-grounds.jpg"
+        "poster": "oceanfront-grounds.avif"
       },
       {
         "title": { "en": "Campus overview", "es": "Vista general del campus" },
         "source": "campus-overview.mp4",
-        "poster": "campus-from-tower.jpg"
+        "poster": "campus-from-tower.avif"
       },
       {
         "title": { "en": "Inside the facilities", "es": "Dentro de las instalaciones" },
         "source": "facilities-vertical.mp4",
-        "poster": "assembly-hall.jpg"
+        "poster": "assembly-hall.avif"
       },
       {
         "title": { "en": "Helicopter landing zone", "es": "Zona de aterrizaje" },
         "source": "helicopter-landing-zone.mp4",
-        "poster": "hlz-on-pad.jpg"
+        "poster": "hlz-on-pad.avif"
       }
     ],
     "photoEyebrow": { "en": "The property", "es": "La propiedad" },
     "photoTitle": { "en": "From first light to last call", "es": "Desde la primera luz hasta el anochecer" },
     "photos": [
-      { "image": "aerial-overview.jpg", "label": { "en": "Aerial overview", "es": "Vista aérea" } },
-      { "image": "oceanfront-grounds.jpg", "label": { "en": "Oceanfront grounds", "es": "Terrenos frente al mar" } },
-      { "image": "campus-entrance.jpg", "label": { "en": "Campus entrance", "es": "Entrada del campus" } },
-      { "image": "campus-from-tower.jpg", "label": { "en": "Campus from the tower", "es": "Campus desde la torre" } },
-      { "image": "main-hall-grounds.jpg", "label": { "en": "Main hall & grounds", "es": "Salón principal y terrenos" } },
-      { "image": "parade-grounds.jpg", "label": { "en": "Open parade grounds", "es": "Terrenos de formación" } },
-      { "image": "barracks-building.jpg", "label": { "en": "Barracks building", "es": "Edificio de barracas" } },
-      { "image": "lodging-row.jpg", "label": { "en": "Lodging row", "es": "Área de alojamiento" } },
-      { "image": "training-grounds.jpg", "label": { "en": "Training grounds", "es": "Terrenos de adiestramiento" } },
-      { "image": "barracks-palms.jpg", "label": { "en": "Barracks & palms", "es": "Barracas y palmas" } },
-      { "image": "assembly-hall.jpg", "label": { "en": "Assembly hall", "es": "Salón de asamblea" } },
-      { "image": "meeting-room.jpg", "label": { "en": "Meeting room", "es": "Sala de reuniones" } },
-      { "image": "activity-hall.jpg", "label": { "en": "Activity hall", "es": "Salón de actividades" } },
-      { "image": "shoreline-sunset-red.jpg", "label": { "en": "Caribbean sunset", "es": "Atardecer caribeño" } },
-      { "image": "shoreline-dusk-wind-farm.jpg", "label": { "en": "Dusk across the bay", "es": "Anochecer sobre la bahía" } },
-      { "image": "shoreline-golden-hour.jpg", "label": { "en": "Golden hour", "es": "Hora dorada" } },
-      { "image": "shoreline-purple-twilight.jpg", "label": { "en": "Purple twilight", "es": "Crepúsculo violeta" } },
-      { "image": "shoreline-palms-midday.jpg", "label": { "en": "Palms & ocean breeze", "es": "Palmas y brisa del mar" } },
-      { "image": "shoreline-morning-black-sand.jpg", "label": { "en": "Morning on black sand", "es": "Mañana sobre arena negra" } },
-      { "image": "patrol-boat-dusk.jpg", "label": { "en": "Patrol boat at dusk", "es": "Patrullera al anochecer" } },
-      { "image": "wind-turbines-fiery-sky.jpg", "label": { "en": "Wind turbines, fiery sky", "es": "Turbinas bajo un cielo encendido" } },
-      { "image": "wind-farm-golden-sunset.jpg", "label": { "en": "Wind farm at sunset", "es": "Parque eólico al atardecer" } },
-      { "image": "sun-clouds.jpg", "label": { "en": "Sun behind the clouds", "es": "Sol detrás de las nubes" } },
-      { "image": "hlz-oceanside.jpg", "label": { "en": "Oceanside landing zone", "es": "Helipuerto frente al mar" } },
-      { "image": "hlz-on-pad.jpg", "label": { "en": "Aircraft on the pad", "es": "Aeronave en la plataforma" } },
-      { "image": "helicopter-grounds.jpg", "label": { "en": "Helicopter on grounds", "es": "Helicóptero en los terrenos" } },
-      { "image": "chinook.jpg", "label": { "en": "Chinook approach", "es": "Aproximación de Chinook" } },
-      { "image": "national-guard-helicopter.jpg", "label": { "en": "Puerto Rico National Guard", "es": "Guardia Nacional de Puerto Rico" } }
+      { "image": "aerial-overview.avif", "label": { "en": "Aerial overview", "es": "Vista aérea" } },
+      { "image": "oceanfront-grounds.avif", "label": { "en": "Oceanfront grounds", "es": "Terrenos frente al mar" } },
+      { "image": "campus-entrance.avif", "label": { "en": "Campus entrance", "es": "Entrada del campus" } },
+      { "image": "campus-from-tower.avif", "label": { "en": "Campus from the tower", "es": "Campus desde la torre" } },
+      { "image": "main-hall-grounds.avif", "label": { "en": "Main hall & grounds", "es": "Salón principal y terrenos" } },
+      { "image": "parade-grounds.avif", "label": { "en": "Open parade grounds", "es": "Terrenos de formación" } },
+      { "image": "barracks-building.avif", "label": { "en": "Barracks building", "es": "Edificio de barracas" } },
+      { "image": "lodging-row.avif", "label": { "en": "Lodging row", "es": "Área de alojamiento" } },
+      { "image": "training-grounds.avif", "label": { "en": "Training grounds", "es": "Terrenos de adiestramiento" } },
+      { "image": "barracks-palms.avif", "label": { "en": "Barracks & palms", "es": "Barracas y palmas" } },
+      { "image": "assembly-hall.avif", "label": { "en": "Assembly hall", "es": "Salón de asamblea" } },
+      { "image": "meeting-room.avif", "label": { "en": "Meeting room", "es": "Sala de reuniones" } },
+      { "image": "activity-hall.avif", "label": { "en": "Activity hall", "es": "Salón de actividades" } },
+      { "image": "shoreline-sunset-red.avif", "label": { "en": "Caribbean sunset", "es": "Atardecer caribeño" } },
+      { "image": "shoreline-dusk-wind-farm.avif", "label": { "en": "Dusk across the bay", "es": "Anochecer sobre la bahía" } },
+      { "image": "shoreline-golden-hour.avif", "label": { "en": "Golden hour", "es": "Hora dorada" } },
+      { "image": "shoreline-purple-twilight.avif", "label": { "en": "Purple twilight", "es": "Crepúsculo violeta" } },
+      { "image": "shoreline-palms-midday.avif", "label": { "en": "Palms & ocean breeze", "es": "Palmas y brisa del mar" } },
+      { "image": "shoreline-morning-black-sand.avif", "label": { "en": "Morning on black sand", "es": "Mañana sobre arena negra" } },
+      { "image": "patrol-boat-dusk.avif", "label": { "en": "Patrol boat at dusk", "es": "Patrullera al anochecer" } },
+      { "image": "wind-turbines-fiery-sky.avif", "label": { "en": "Wind turbines, fiery sky", "es": "Turbinas bajo un cielo encendido" } },
+      { "image": "wind-farm-golden-sunset.avif", "label": { "en": "Wind farm at sunset", "es": "Parque eólico al atardecer" } },
+      { "image": "sun-clouds.avif", "label": { "en": "Sun behind the clouds", "es": "Sol detrás de las nubes" } },
+      { "image": "hlz-oceanside.avif", "label": { "en": "Oceanside landing zone", "es": "Helipuerto frente al mar" } },
+      { "image": "hlz-on-pad.avif", "label": { "en": "Aircraft on the pad", "es": "Aeronave en la plataforma" } },
+      { "image": "helicopter-grounds.avif", "label": { "en": "Helicopter on grounds", "es": "Helicóptero en los terrenos" } },
+      { "image": "chinook.avif", "label": { "en": "Chinook approach", "es": "Aproximación de Chinook" } },
+      { "image": "national-guard-helicopter.avif", "label": { "en": "Puerto Rico National Guard", "es": "Guardia Nacional de Puerto Rico" } }
     ]
   },
   "contact": {

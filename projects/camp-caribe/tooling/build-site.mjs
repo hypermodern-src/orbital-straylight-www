@@ -1,7 +1,8 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { transformSync } from "esbuild";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const build = join(root, ".build");
@@ -41,6 +42,16 @@ run(process.execPath, [
 
 for (const entry of readdirSync(join(root, "static"))) {
   cpSync(join(root, "static", entry), join(dist, entry), { recursive: true });
+}
+
+for (const [file, loader] of [["style.css", "css"], ["site.js", "js"]]) {
+  const output = join(dist, file);
+  const transformed = transformSync(readFileSync(output, "utf8"), {
+    loader,
+    minify: true,
+    target: "es2020",
+  });
+  writeFileSync(output, transformed.code);
 }
 
 const requiredRoutes = [
