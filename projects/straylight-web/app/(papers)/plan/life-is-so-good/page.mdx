@@ -1,0 +1,191 @@
+
+
+# Life Is So Good I Can Taste It In My Spit
+
+*Oct 25, 2026*
+
+> *"Don't think about all those things you fear. Just be glad to be here."*
+> — FC Kahuna, *Hayling*
+
+> *"Life is so fucking good I can taste it in my spit."*
+> — XXXX, *Layer Cake*
+
+---
+
+Someday they won't leave reliable software builds to startups. Not when they realize how much money is in it. Not millions, mate. Fucking billions. The infrastructure layer of modern civilization is being assembled by people who wing it, who treat delivery dates as aspirational, who confuse motion for progress. There is an ocean of capital sitting on the sidelines waiting for someone to prove that a software team can keep its word the way a Swiss watch keeps time. But until that day, make hay while the sun shines.
+
+We ship by making and keeping promises. Every process decision in this document serves one outcome: when we say something will be done, it is done. Not approximately. Not with caveats. Not "it's mostly there, we just need to sort out the edge cases." Done. The customer got what they paid for, on the day they were told, without having to participate in our uncertainty.
+
+This isn't a methodology. There's no acronym. Nobody is going to sell you a certification course on it. We track work in a place where it can be owned, decomposed, and found later. We estimate honestly, build in margin so we never miss on the side that costs someone else money, and we keep Slack from eating the workday alive. That's it. The discipline is small. The consistency is the hard part.
+
+Ben Horowitz wrote that the hard thing about hard things isn't the strategy or the vision. It's the psychology. It's looking at the thing you promised and knowing you might not hit it, and deciding whether to tell the truth or buy yourself another week of comfortable silence. Everything in this document is designed to make telling the truth the path of least resistance. To make the honest number easier to say than the optimistic one. To build enough margin into the system that a miss doesn't require a lie to cover.
+
+> *"When I was born the world was a far simpler place. It was all just cops and robbers."*
+>
+> *"I'm not a gangster, just a businessman. And my commodity happens to be cocaine."*
+>
+> *"What was true then is true now. Have a plan. Stick to it."*
+> — XXXX, *Layer Cake*
+
+---
+
+## Where Work Lives
+
+All work lives in one of two places: the task tool and the code review surface. Not Slack. Not a Google Doc buried six folders deep. Not someone's head. Not the memory of a conversation that happened in a hallway three weeks ago. Linear.
+
+Why Linear specifically: it is durable, searchable, and has an unambiguous chain of custody. Every issue is owned by someone. That ownership can change eight times an hour, and each change is recorded, timestamped, and attributable. Artifacts attach to tickets. Decisions live next to the things they decided. When you look back in three months and ask "why did we do it this way," you don't have to find the person who remembers. You open the ticket. The answer is sitting there, attached to the issue, next to the pull request, in the comment thread.
+
+The unit of work is a master task with subtasks. Tag things so they're findable. That's the whole system. It could be Bugzilla. It could be a well-maintained spreadsheet and a lot of discipline. The tool is irrelevant. The discipline is: what needs doing, who's doing it, what's it blocked on, is it done. Four questions. If you can answer those four questions for any piece of work in under thirty seconds, your system is functioning. If you can't, you don't have a system. You have a vibe.
+
+No burndown charts. No velocity dashboards. No sprint analytics. Those are for teams that already move through Abbottabad without waking up the military base across the street. We are not that team yet. We are learning to walk in a straight line. The advanced instrumentation comes after the fundamentals are unconscious. You don't put a turbocharger on a lawnmower engine and call it a race car. You build the engine first. Then you tune it. Then, maybe, after many seasons of honest calibration, you earn the right to measure yourself against something other than your own past performance.
+
+> *"It is only very very stupid people who think the law is stupid."*
+>
+> *"It is vital that we work to a few golden rules."*
+>
+> *"Avoid, like the plague, the end user."*
+> — XXXX, *Layer Cake*
+
+---
+
+## Slack
+
+Slack is not a company to be taken lightly. Only very stupid people think Keith Adams is stupid.
+
+Slack is engagement-optimized by PhDs with machine learning models trained on billions of interactions. It is adversarial software. Its business does well when everyone is interrupt-driven twenty-four hours a day, when every notification is a tiny slot-machine pull, when the fear of missing something keeps your thumb hovering over the app icon at eleven PM. We are not going to win a fight against a product team whose entire compensation structure is aligned with defeating our focus. So we don't fight. We walk away.
+
+Three channels. That's the whole deployment.
+
+**#incident-response.** Only the on-call engineer starts new threads. A bot cross-posts incident tickets from Linear, read-only, tagging nobody but the person on rotation. You can watch. You can learn. You cannot pile on. You cannot "just quickly chime in" with a suggestion. The incident has an owner. The owner is doing the work. Your job is to be available if the owner escalates. Everything else is noise, and noise in an incident channel is how people die.
+
+**#general.** You're out sick. The all-hands is in an hour. The office fridge is being cleaned Friday. The building's fire alarm test is Tuesday at 9 AM. That's it. If it wouldn't be appropriate to announce over a PA system, it doesn't go in #general.
+
+**#memes.** Be human. Post the thing. This is the social layer and it has a container so it can't metastasize into work. The highest paid employee in the history of employment once ran a set of ablations on the outcome lift of teams that memed every pull request. Call it twenty to forty percent on any outcome you care to measure. This is for real. Laughter is a bonding mechanism. It is how primates signal safety. A team that laughs together stays together, and a team that stays together builds trust, and trust is the substrate that makes honest estimation possible.
+
+Everything else is deleted. Not archived. Not moved to a "maybe later" channel that becomes a graveyard. Deleted. If you want to say something about a piece of work, say it on the ticket. The same words go to the same place. The difference is that the ticket has an owner, a history, and a future. The Slack message has a dopamine hit and a search result you'll never find again. Six months from now, nobody will remember which channel the conversation happened in. They will remember which ticket it's attached to.
+
+This will be hard. Slack is where every war story in this company happened. It's where the 2 AM "I think I fixed it" became a legend. It's where someone posted a screenshot of the production graph going vertical and everyone lost their minds. But the war stories aren't going away — the venue is. Put it in Linear. It's faster. The keyboard shortcuts are better. And you can see an ocean of tickets marked done accumulating behind you, which is a healthier hit than the react emoji you got in four seconds from someone who was probably in the bathroom anyway.
+
+The transition will hurt for exactly one sprint. People will feel phantom limb syndrome. They'll open Slack out of muscle memory and see three channels and feel a cold emptiness where the noise used to be. Then, around week three, someone will write code for four uninterrupted hours and look up and realize the afternoon happened. And they'll tell someone else. And the culture will shift. Not because we forced it. Because deep work feels better than interruption, and the body knows the difference.
+
+> *"England. Typical. Even drug dealers don't work weekends."*
+> — Eddie Temple, *Layer Cake*
+>
+> *"Always remember that one day all this drug monkey business will be legal."*
+>
+> *"It's like zen. Only not as subtle."*
+> — XXXX, *Layer Cake*
+
+---
+
+## The Coefficient
+
+Every team has a number. It's the thing you multiply an engineer's estimate by to get the real time. That's the whole science of project management. Not OKRs. Not story points. Not planning poker. A single multiplier that converts optimism into reality.
+
+A team in chaos runs 3–5x. A tight team runs 2x. I have never seen a crack squad of glory-days Xooglers who know each other's spouses run tighter than 1.5x. 1.5 is the impossible dream. It's not achievable and it shouldn't be — it's the irreducible tax on being a species that's optimistic about its own capabilities. If we didn't have that optimism sitting below the prefrontal cortex, we'd never start anything hard, like getting out of bed, like writing the first line of a system that doesn't exist yet, like telling a customer "yes, we can build that" when you're only seventy percent sure you can.
+
+Start at 2x. An engineer says three weeks, we plan for six. That's the default until reality teaches us otherwise. Not because we think they're wrong. Because they're human, and humans are systematically bad at predicting how long novel work will take, and the specific thing we're about to build has never been built before by this specific person in this specific context with these specific dependencies.
+
+We calibrate with ten fingers. Look at the last ten comparable commitments. If two or more exceeded the planning coefficient, increase it. If none exceeded it for several windows, consider decreasing it. One miss? Keep it. One miss is noise. Two misses is a signal. Three misses is a trend and you're a fool to ignore it.
+
+No decimals in the planning layer. No individual scorecards. No punishing engineers for getting better at estimating. The coefficient is a team property. It belongs to the system, not to the person. When the coefficient goes up, it doesn't mean someone failed. It means the system learned something about itself. When it goes down, it doesn't mean someone got faster. It means the work became more predictable, the dependencies became more stable, the team's shared mental model of the codebase became more accurate.
+
+You need to be able to do this mid-sentence in front of an investor without breaking eye contact. 2 times 3 weeks is 6 weeks. You can say that while you're still talking. You can say it while reaching for your coffee. 1.93 times 3 weeks is a pause and a glance at the ceiling, and the investor just watched you not know your own business.
+
+This is why we use round numbers. Not because we're lazy. Because the system has to run on the hardware it's deployed on, and that hardware is a human brain under social pressure with no access to a spreadsheet. You earn 93.27% after many Bayesian updates, after seasons of calibration, after the team has shipped enough together that the variance narrows. Until then, 90% parses easy and the 3.27% you left on the table is the margin that absorbs the shit you didn't predict. The dependency that was undocumented. The integration test that passes locally and fails in CI. The afternoon the database decides to be slow for no reason anyone can diagnose.
+
+Get the sign bit right. Everything else is rounding error.
+
+> *"The art of good business is being a good middleman."*
+>
+> *"Never be too greedy."*
+> — XXXX, *Layer Cake*
+
+---
+
+## Hit Rate
+
+We aim to hit 90% of our internal commitments on schedule. Not 100%.
+
+Not because we're required to miss one in ten. Because if we consistently hit every ambitious internal deadline over a meaningful sample, we should ask whether we're leaving capacity on the table. Whether the coefficient has become a comfort blanket. Whether we've optimized for the feeling of hitting deadlines rather than the reality of shipping as much as we're capable of.
+
+An engineer who consistently finishes in less than two-thirds of their estimated time might be sandbagging. Or they might be improving, working on unusually predictable tasks, or estimating conservatively because the organization taught them to fear missing. That's a conversation, not a conviction. You sit down with them. You ask what's happening. You listen. Maybe they need harder problems. Maybe they need permission to be honest. Maybe they've figured something out about the codebase that the rest of the team hasn't, and their estimates are actually *more* accurate than everyone else's.
+
+The coefficient tells us how well we estimate. The hit rate tells us how well our plans survive contact with reality. They are two different instruments measuring two different things, and confusing them is how you end up with a team that hits its numbers while building nothing.
+
+Internal commitments are measured against the coefficient-adjusted plan. Raw engineering estimates are retained separately so we can measure and recalibrate the coefficient independently. We don't move the denominator after the fact. A miss is a miss against the plan we actually made, not the plan we wish we'd made.
+
+The 10% miss is information, not a quota. When an internal commitment doesn't land, we ask what happened — not to blame, but to learn. The dependency was more complex than expected. The API turned out to be undocumented. The person who understood the legacy integration got sick. Whatever it was, that's the frontier showing us where it actually is. The miss is the map updating. The miss is the system saying *here, right here, this is where our model of reality diverged from reality itself.*
+
+We do this so we hit 100% of our commitments to customers. No short counts, no second chances. The internal 90% exists to protect the external 100%. The slack in the internal system is the shock absorber that keeps the customer's experience smooth. They don't feel the potholes because we built the suspension to handle them.
+
+> *"Opera tonight. The Damnation of Faust. Man sells his soul to the devil. All ends in tears. These arrangements usually do."*
+> — Eddie Temple, *Layer Cake*
+>
+> *"Don't take this personally. It's business."*
+> — XXXX, *Layer Cake*
+
+---
+
+## Stacked Redundancies
+
+An internal miss should be boring. A customer-visible miss should require several things to go wrong simultaneously. Not one. Several. Independent, unrelated things, each of which would have to fail on its own.
+
+We don't accomplish that by putting an enormous arbitrary buffer on every ticket. That's not engineering. That's superstition. We accomplish it the way reliable systems are built: multiple independent layers of protection, each designed to catch what the previous layer missed. Each one assuming the one before it might fail.
+
+**First, the estimate.** The engineer gives the honest number. The one that feels true in their gut when they look at the ticket and think about what they actually know versus what they assume. We apply the coefficient. That absorbs ordinary optimism, interruptions, integration surprises, and the fact that nobody has ever written software exactly like the software they're about to write. The first layer catches the most common failure: the belief that this time will be different.
+
+**Second, the schedule.** The internal deadline is earlier than the external commitment. Not by a ceremonial three days. By enough time to do something useful when the internal deadline is missed. A buffer that cannot accommodate a recovery action is not a buffer. It's wishful thinking wearing a hard hat. If the internal deadline is Friday and the customer promise is Monday, you have two days. Not enough to rebuild. Enough to decide. Enough to pick the fallback. Enough to communicate internally and execute the alternative without panic.
+
+**Third, the scope.** We know the smallest thing that satisfies the customer's actual requirement. The irreducible core. The thing that, if everything else fell away, still delivers the outcome they paid for. Everything else is negotiable. If the ambitious implementation falls behind, we can ship the simpler one. We don't quietly redefine done. We preserve the promise and change the means. The customer asked for a door that opens when you press a button. They didn't ask for the button to be brushed aluminum with haptic feedback. Ship the door. Polish the button later.
+
+**Fourth, the implementation.** For critical paths, we maintain alternatives. A known-good version that worked last sprint. A less elegant algorithm that's slower but proven. A manual operation that can bridge the gap while the automated version is being fixed. A second engineer who understands the system well enough to step in if the first gets hit by a bus. Redundancy is not two people writing the same thing in parallel for no reason. It's ensuring that the failure of one approach doesn't imply the failure of the outcome. It's the difference between a single point of failure and a system that degrades gracefully.
+
+**Fifth, the release.** Code complete is not customer delivered. The last five percent of a software project has a remarkable ability to consume the other ninety-five percent. Integration tests that pass in staging and fail in production. Configuration drift. DNS propagation. The load balancer deciding today is the day it starts dropping connections. We leave room for testing, integration, deployment, observation, and rollback. The release path gets its own margin because the act of shipping is itself a risk event, not just the conclusion of one.
+
+**Sixth, the customer boundary.** We don't promise the internal plan. We promise an externally observable outcome, with enough margin and enough alternatives that the customer doesn't have to participate in our uncertainty. They don't know about the coefficient. They don't know about the internal deadline. They don't know that the ambitious implementation failed and we shipped the fallback. They know that on the day we said, the thing they paid for appeared. That's it. That's the whole relationship.
+
+We don't conceal changes to what the customer bought. We conceal nothing material. If the fallback changes performance, security, reliability, or contractual characteristics, the customer hears about it. What we absorb is the cost of delivering the same promise by a different route. We own the uncertainty; we don't transfer it by quietly changing the deal.
+
+These layers must be genuinely independent. Five buffers that all assume the same engineer is available, the same dependency behaves, and the same deployment succeeds are one buffer wearing five hats. Independence means that the failure modes don't correlate. If the engineer gets sick, the fallback implementation doesn't require that engineer. If the dependency changes, the scope reduction doesn't depend on that dependency. If the deployment fails, the manual operation doesn't require the deployment pipeline.
+
+Consider an engineer who estimates two weeks. We plan for four. The customer commitment is at week six, two weeks after our internal target. We have a known-good fallback that a different engineer can deploy.
+
+At the end of week four, the ambitious implementation isn't ready. Internally, that's a miss. We investigate, learn, and decide whether recovery is plausible. We still have two weeks, a smaller implementation, and a release path we've already exercised. The miss consumed margin, not customer trust. The system worked. The miss was boring.
+
+The customer receives what we promised on the day we promised it. They don't need to know that our preferred implementation failed. They bought an outcome, not a front-row seat to our engineering process. They don't owe us their anxiety. We don't export our uncertainty. We absorb it. That's what the margin is for. That's what the layers are for. That's the job.
+
+> *"If you have to kill someone, never ever tell a living soul."*
+> — Gene, *Layer Cake*
+>
+> *"A Roman general once said, 'If you want peace, plan for war.'"*
+> — XXXX, *Layer Cake*
+
+---
+
+## No Short Counts
+
+We make the magnitude calculation loose and easy so the direction is right one hundred percent of the time. We always trade some precision for under-promising and over-delivering. The precision is internal. The direction is external. The customer sees the direction. The team lives in the precision.
+
+No short counts. No second chances.
+
+The person who quotes a round number and beats it every single time looks conservative in any given quarter and infallible over a year. The investor stops asking probing questions because we've never been wrong in the direction that costs them money. The customer stops negotiating delivery dates because our dates hold. The team stops padding their estimates because they know the margin is already built in and they don't need to protect themselves from a system that will punish honesty.
+
+This is the compounding effect of reliability. It's not just that the customer trusts you on the next delivery. It's that the trust lowers the transaction cost of every future interaction. Fewer status meetings. Fewer "just checking in" emails. Fewer defensive CCs. The customer says "we need X by Q2" and you say "yes" and that's the end of the conversation. No follow-up. No renegotiation. No contingency planning on their side. They just go do their job because you said you'd do yours.
+
+You either delivered what you said or you didn't. Not "close enough." Not "adjusted for factors." Not "technically the spec was ambiguous." The round number, the loose magnitude, the deliberate margin — all of it exists so that the answer to "did you deliver" is always yes. Binary. No ambiguity. No negotiation. Yes.
+
+And when the answer is yes, every single time, for long enough, something shifts. The market starts to notice. Customers start to refer other customers. Not because the product is the most feature-rich. Because the company keeps its word. In a world full of software teams that treat delivery dates as opening bids in a negotiation, being the team that simply *does what it said* is a competitive moat wider than any feature set.
+
+That's the billion-dollar insight. Not a better algorithm. Not a cleverer architecture. Just: we said Tuesday, and it was Tuesday. Every time. For years. Until the market realizes that reliability is scarcer than brilliance, and pays accordingly.
+
+> *"Everyone wants to walk through a door marked 'private'. Therefore, have a good reason to be affluent."*
+> — XXXX, *Layer Cake*
+>
+> *"You're born, you take shit. Get out in the world, you take more shit. Climb a little higher, take less shit. Welcome to the layer cake, son."*
+> — Eddie Temple, *Layer Cake*
+>
+> *"My name? If you knew that, you'd be as clever as me."*
+> — XXXX, *Layer Cake*
+
+---
