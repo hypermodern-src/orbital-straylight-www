@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd projects/straylight-web && bun install",
+  "buildCommand": "cd projects/straylight-web && bun run build",
+  "outputDirectory": "projects/straylight-web/.next",
+  "framework": "nextjs"
+}
