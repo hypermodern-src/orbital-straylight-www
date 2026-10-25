@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "bun run build:purs && next build",
+    "vercel-build": "next build",
     "build:purs": "cd purescript && node ../node_modules/spago/bin/bundle.js bundle --bundle-type app --platform browser --minify --outfile ../public/straylight.js --strict",
     "start": "next start",
     "lint": "eslint ."
